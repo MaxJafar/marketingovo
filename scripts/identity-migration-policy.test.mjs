@@ -76,6 +76,45 @@ test("a reasoned compatibility owner passes only with its pinned contents", asyn
   );
 });
 
+test("a pinned exception cannot move elsewhere in the same file", async () => {
+  const path = "packages/core/src/env.ts";
+  const lines = (await repositorySource(path)).split("\n");
+  const oldEnvironmentName = `${"GOLEM"}SEO_`;
+  const originalLine = lines.findIndex((line) =>
+    line.includes(oldEnvironmentName),
+  );
+  const destinationLine = lines.findIndex(
+    (line, index) => index > originalLine + 2 && line.trim() === "",
+  );
+  assert.notEqual(originalLine, -1);
+  assert.notEqual(destinationLine, -1);
+  [lines[originalLine], lines[destinationLine]] = [
+    lines[destinationLine],
+    lines[originalLine],
+  ];
+
+  assert.equal(
+    validateTextSource(path, lines.join("\n"), baseline)[0]?.rule,
+    "identity-baseline-mismatch",
+  );
+});
+
+test("identity rules cover relevant implementation text surfaces", () => {
+  const oldDisplayName = `${"Golem"} SEO`;
+  for (const path of [
+    "packages/example/README.md",
+    "apps/example/index.html",
+    "scripts/example.sh",
+    "plugins/example/NOTICE.txt",
+  ]) {
+    assert.equal(
+      validateTextSource(path, oldDisplayName)[0]?.rule,
+      "legacy-product-identity",
+      path,
+    );
+  }
+});
+
 test("legacy protocol headers remain confined to their pinned compatibility owner", async () => {
   const oldHeader = `x-${"golem"}-client`;
   const source = `const legacyHeader = ${JSON.stringify(oldHeader)};\n`;

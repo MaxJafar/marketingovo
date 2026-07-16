@@ -1,27 +1,34 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFile, stat, writeFile } from "node:fs/promises";
-import { extname, resolve } from "node:path";
+import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { PRIVATE_WORKSPACE_IDENTITIES } from "./npm-release-policy.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const IDENTITY_BASELINE_PATH = "scripts/identity-migration-baseline.json";
-const BASELINE_SCHEMA_VERSION = 1;
+const BASELINE_SCHEMA_VERSION = 2;
 const BASELINE_FINGERPRINT_ALGORITHM =
-  "sha256(rule,path,matched-line-content)-multiset-v1";
+  "sha256(rule,path,line,column,previous-line,matched-line,next-line)-multiset-v2";
 
-const SOURCE_EXTENSIONS = new Set([
-  ".cjs",
-  ".js",
-  ".json",
-  ".mjs",
-  ".rs",
-  ".toml",
-  ".ts",
-  ".tsx",
-  ".yaml",
-  ".yml",
+const IDENTITY_TEXT_ROOTS = Object.freeze([
+  ".github/",
+  "adapters/",
+  "apps/",
+  "benchmarks/",
+  "e2e/",
+  "migrations/",
+  "packages/",
+  "plugins/",
+  "scripts/",
+]);
+const IDENTITY_ROOT_TEXT_FILES = new Set([
+  "package.json",
+  "pnpm-lock.yaml",
+  "pnpm-workspace.yaml",
+  "tsconfig.base.json",
+  "tsconfig.json",
+  "turbo.json",
 ]);
 
 export const IDENTITY_ALLOWLIST = Object.freeze([
@@ -526,6 +533,75 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
     reason:
       "Tests prove the old executable alias warns and points users to the canonical agentseo command.",
   },
+  {
+    rule: "golemworkers-coupling",
+    path: ".github/pull_request_template.md",
+    reason:
+      "Repository contribution links remain frozen until the human repository-ownership and public-release gate approves replacements.",
+  },
+  ...["legacy-product-identity", "legacy-agent-contract"].map((rule) => ({
+    rule,
+    path: "adapters/openclaw/README.md",
+    reason:
+      "OpenClaw documentation remains part of the Stage 3 atomic agent-surface migration rather than this foundation slice.",
+  })),
+  {
+    rule: "legacy-package-scope",
+    path: "apps/dashboard/README.md",
+    reason:
+      "Dashboard development documentation migrates with the Stage 3 UI package and generated assets rather than independently.",
+  },
+  ...[
+    "apps/desktop/README.md",
+    "apps/desktop/shell/index.html",
+    "apps/desktop/src-tauri/Cargo.lock",
+    "apps/desktop/src-tauri/windows/fragments/background-startup.wxs",
+    "packages/credential-broker-native/Cargo.lock",
+    "scripts/verify-windows-installer-lifecycle.ps1",
+  ].map((path) => ({
+    rule: "legacy-product-identity",
+    path,
+    reason:
+      "Legacy desktop packaging, installer, and service identities remain frozen behind the separate human-controlled release gate.",
+  })),
+  ...[
+    "legacy-package-scope",
+    "golemworkers-coupling",
+    "legacy-agent-contract",
+  ].map((rule) => ({
+    rule,
+    path: "apps/docs/",
+    reason:
+      "Documentation identity and hosted or agent-surface references migrate atomically in the separately owned Stage 3 documentation slice.",
+  })),
+  {
+    rule: "legacy-product-identity",
+    path: "benchmarks/README.md",
+    reason:
+      "Benchmark documentation retains the exact legacy environment fixture used to measure compatibility behavior.",
+  },
+  ...["legacy-product-identity", "legacy-package-scope"].map((rule) => ({
+    rule,
+    path: "migrations/legacy-v0/README.md",
+    reason:
+      "The immutable legacy migration fixture documents old package input that remains accepted only for tested import compatibility.",
+  })),
+  ...[
+    "legacy-product-identity",
+    "golemworkers-coupling",
+    "legacy-agent-contract",
+  ].map((rule) => ({
+    rule,
+    path: "plugins/codex/golem-seo/skills/seo-marketer/SKILL.md",
+    reason:
+      "The Codex skill remains part of the Stage 3 atomic agent-surface migration and cannot be renamed independently.",
+  })),
+  ...["legacy-product-identity", "legacy-package-scope"].map((rule) => ({
+    rule,
+    path: "packages/credential-broker-native/README.md",
+    reason:
+      "Native broker documentation retains the legacy credential package reference until its separately owned migration is complete.",
+  })),
 ]);
 
 const TEXT_RULES = Object.freeze([
@@ -641,18 +717,45 @@ function lineNumber(source, index) {
   return source.slice(0, index).split("\n").length;
 }
 
-function matchedLineContent(source, index) {
+function lineContext(source, index) {
   const lineStart = source.lastIndexOf("\n", Math.max(0, index - 1)) + 1;
   const nextLine = source.indexOf("\n", index);
   const lineEnd = nextLine === -1 ? source.length : nextLine;
-  return source.slice(lineStart, lineEnd).replace(/\r$/u, "");
+  const previousLineEnd = Math.max(0, lineStart - 1);
+  const previousLineStart =
+    source.lastIndexOf("\n", Math.max(0, previousLineEnd - 1)) + 1;
+  const followingLineStart = nextLine === -1 ? source.length : nextLine + 1;
+  const followingLineEnd = source.indexOf("\n", followingLineStart);
+  return {
+    line: lineNumber(source, index),
+    column: index - lineStart + 1,
+    previous: source
+      .slice(previousLineStart, previousLineEnd)
+      .replace(/\r$/u, ""),
+    matched: source.slice(lineStart, lineEnd).replace(/\r$/u, ""),
+    next: source
+      .slice(
+        followingLineStart,
+        followingLineEnd === -1 ? source.length : followingLineEnd,
+      )
+      .replace(/\r$/u, ""),
+  };
+}
+
+function isIdentityTextSurface(path) {
+  const filename = path.slice(path.lastIndexOf("/") + 1);
+  if (filename === "LICENSE" || filename === "NOTICE") return false;
+  return (
+    IDENTITY_ROOT_TEXT_FILES.has(path) ||
+    IDENTITY_TEXT_ROOTS.some((prefix) => path.startsWith(prefix))
+  );
 }
 
 function scanTextSource(path, source, allowlist = IDENTITY_ALLOWLIST) {
   const unauthorized = [];
   const groups = new Map();
   for (const rule of TEXT_RULES) {
-    if (rule.sourceOnly && !SOURCE_EXTENSIONS.has(extname(path))) continue;
+    if (rule.sourceOnly && !isIdentityTextSurface(path)) continue;
     for (const match of source.matchAll(rule.pattern)) {
       const index = match.index ?? 0;
       const authorization = allowlistEntry(rule.id, path, allowlist);
@@ -674,8 +777,17 @@ function scanTextSource(path, source, allowlist = IDENTITY_ALLOWLIST) {
         authorization,
         occurrenceHashes: [],
       };
+      const context = lineContext(source, index);
       group.occurrenceHashes.push(
-        sha256(rule.id, path, match[0], matchedLineContent(source, index)),
+        sha256(
+          rule.id,
+          path,
+          context.line,
+          context.column,
+          context.previous,
+          context.matched,
+          context.next,
+        ),
       );
       groups.set(id, group);
     }

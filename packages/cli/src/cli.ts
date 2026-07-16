@@ -50,6 +50,7 @@ import {
   resolveCliConnectionOptions,
   resolveCliDataDirectory,
 } from "./compatibility.js";
+import { renderCliHelp } from "./cli-help.js";
 
 const VERSION = "0.11.0-alpha.0";
 
@@ -1001,52 +1002,7 @@ function service(args: ParsedArgs): void {
 }
 
 function help(): void {
-  process.stdout.write(`AGENTseo ${VERSION}\n\n`);
-  process.stdout.write("Usage:\n");
-  process.stdout.write(
-    "  agentseo serve [--port 3210] [--data-dir PATH] [--credential-broker PATH] [--master-password-file PATH]\n",
-  );
-  process.stdout.write(
-    "  agentseo project list|create|show|export|import|delete\n",
-  );
-  process.stdout.write(
-    "  agentseo audit <project-id> [--render static|js] [--collect-vitals]\n",
-  );
-  process.stdout.write(
-    "  agentseo run list|show|compare|links|replay|watch|cancel|issues\n",
-  );
-  process.stdout.write(
-    "  agentseo issue list <project-id> [--status STATE] [--severity LEVEL] [--search TEXT] | review <project-id> <fingerprint> <open|ignored|false-positive> [--reason-file PATH]\n",
-  );
-  process.stdout.write(
-    "  agentseo context show <project-id> | update <project-id> --profile-file PATH --change-summary-file PATH | append <project-id> <kind> --title-file PATH --detail-file PATH [--source-run ID]\n",
-  );
-  process.stdout.write(
-    "  agentseo integration list | test <provider> [--project ID] | remove <provider>\n",
-  );
-  process.stdout.write("  agentseo extraction templates\n");
-  process.stdout.write("  agentseo migrate <legacy-project-directory>\n");
-  process.stdout.write("  agentseo backup <destination.db>\n");
-  process.stdout.write(
-    "  agentseo restore <backup.db> --confirm [--expected-sha256 HASH]\n",
-  );
-  process.stdout.write(
-    "  agentseo service install --credential-broker PATH [--chromium-executable PATH] [--browser-directory PATH] [--google-desktop-client-id ID] | status | uninstall\n",
-  );
-  process.stdout.write("  agentseo doctor\n");
-  process.stdout.write("\nConnection options:\n");
-  process.stdout.write(
-    "  --data-dir PATH             Data root (AGENTSEO_DATA_DIR)\n",
-  );
-  process.stdout.write(
-    "  --service-token-file PATH   Service token file (AGENTSEO_SERVICE_TOKEN_FILE)\n",
-  );
-  process.stdout.write(
-    "  --api-url URL               Loopback API URL (AGENTSEO_API_URL)\n",
-  );
-  process.stdout.write(
-    "  --port PORT                 Port for the default API URL only (default: 3210)\n",
-  );
+  process.stdout.write(renderCliHelp(VERSION));
 }
 
 async function main(): Promise<void> {
