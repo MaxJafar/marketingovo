@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture with a duplicate DOM identifier</title>
+    <meta
+      name="description"
+      content="This fixture deliberately repeats one DOM identifier for deterministic validation."
+    />
+    <link rel="canonical" href="{{ORIGIN}}/duplicate-id" />
+  </head>
+  <body>
+    <main>
+      <h1>Duplicate DOM identifier fixture</h1>
+      <section id="repeated-marker"><p>{{COPY}}</p></section>
+      <aside id="repeated-marker">Second use of the same identifier.</aside>
+      <a href="/">Benchmark index</a>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,1 @@
+function e(r){if(!r)return null;try{const t=new URL(r);return t.protocol!=="http:"&&t.protocol!=="https:"?null:t.hostname.replace(/^\[|\]$/gu,"").toLowerCase().replace(/\.$/u,"")}catch{return null}}export{e};

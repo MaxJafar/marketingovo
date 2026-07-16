@@ -1,0 +1,24 @@
+name: Product RFC
+description: Propose a material contract, workflow or architecture change.
+title: "[RFC]: "
+labels: [rfc, discussion]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      {
+        label: Problem,
+        description: Which user and verified outcome are blocked?,
+      }
+    validations: { required: true }
+  - type: textarea
+    id: proposal
+    attributes: { label: Proposal }
+    validations: { required: true }
+  - type: textarea
+    id: alternatives
+    attributes: { label: Alternatives considered }
+  - type: textarea
+    id: contracts
+    attributes: { label: Contract, security and migration impact }
+    validations: { required: true }

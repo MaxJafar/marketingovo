@@ -1,0 +1,5 @@
+site/.vitepress/cache
+site/.vitepress/dist
+dist
+node_modules
+*.tsbuildinfo

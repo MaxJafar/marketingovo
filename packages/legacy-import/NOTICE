@@ -1,0 +1,15 @@
+Golem SEO Community Edition
+Copyright 2026 GolemWorkers
+
+This product is source-available under the Elastic License 2.0. It is not an
+Open Source Initiative approved open-source product.
+
+The Elastic License 2.0 does not grant permission to use the Golem SEO,
+GolemWorkers, or related names, logos, trade dress, or marks. See TRADEMARKS.md.
+
+Golem SEO on Golem Workers is a separate proprietary commercial product. The
+Community Edition does not contain dormant commercial implementations or a
+license-key bypass for that service. See COMMERCIAL.md.
+
+Third-party notices are generated for each release from the dependency lockfile
+and are distributed with release artifacts.

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "golem-seo": {
+      "command": "node",
+      "args": ["./dist/golem-seo-mcp.mjs"],
+      "cwd": "."
+    }
+  }
+}

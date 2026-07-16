@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+    <DirectoryRef Id="INSTALLDIR">
+      <Component Id="GolemSeoBackgroundStartup" Guid="A39553B8-3D10-4CF7-A74E-5574BD3B1941" Win64="yes">
+        <RegistryKey
+          Root="HKCU"
+          Key="Software\Microsoft\Windows\CurrentVersion\Run"
+          Action="createAndRemoveOnUninstall"
+        >
+          <RegistryValue
+            Name="Golem SEO"
+            Type="string"
+            Value="&quot;[#Path]&quot; --background"
+            KeyPath="yes"
+          />
+        </RegistryKey>
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+</Wix>

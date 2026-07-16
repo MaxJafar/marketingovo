@@ -1,0 +1,47 @@
+name: Bug report
+description: Report reproducible incorrect behavior without including credentials or private site data.
+title: "[Bug]: "
+labels: [bug, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: Never paste tokens, cookies, API keys, private URLs, or raw production reports.
+  - type: input
+    id: version
+    attributes: { label: Version, placeholder: 0.11.0-alpha.0 }
+    validations: { required: true }
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      options:
+        [
+          Dashboard,
+          CLI,
+          REST API,
+          MCP,
+          Codex,
+          OpenClaw,
+          Crawler,
+          Integration,
+          Installer,
+        ]
+    validations: { required: true }
+  - type: textarea
+    id: behavior
+    attributes:
+      {
+        label: What happened?,
+        description: Include sanitized steps and the expected result.,
+      }
+    validations: { required: true }
+  - type: textarea
+    id: diagnostics
+    attributes: { label: Sanitized diagnostics, render: shell }
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed credentials, private URLs and customer data.
+          required: true

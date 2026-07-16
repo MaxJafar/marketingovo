@@ -1,0 +1,26 @@
+{
+  "name": "@golem-seo/docs",
+  "version": "0.11.0-alpha.0",
+  "private": true,
+  "description": "Product documentation for Golem SEO Community Edition",
+  "license": "Elastic-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev site --host 127.0.0.1 --port 4320",
+    "build": "vitepress build site --outDir dist",
+    "preview": "vitepress preview site --outDir dist --host 127.0.0.1 --port 4320",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "node scripts/validate.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "search-insights": "^2.17.3",
+    "typescript": "^5.9.2",
+    "vite": "^6.1.0",
+    "vitepress": "^1.6.4"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  }
+}

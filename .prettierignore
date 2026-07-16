@@ -1,0 +1,27 @@
+node_modules/
+.pnpm-store/
+.turbo/
+coverage/
+dist/
+target/
+artifacts/
+output/
+playwright-report/
+test-results/
+
+# Generated or copied distribution inputs.
+apps/desktop/src-tauri/gen/
+apps/desktop/src-tauri/runtime/
+apps/desktop/src-tauri/binaries/
+packages/cli/dashboard/
+packages/credential-broker-native/target/
+
+# Native installer and platform resource XML is validated by its platform
+# toolchain and dedicated release-policy checks; Prettier has no XML parser.
+apps/desktop/src-tauri/**/*.wxs
+apps/desktop/src-tauri/icons/android/**/*.xml
+
+# Package manager and quarantined legacy snapshots are source-controlled in
+# their producer's canonical format, not rewritten by Prettier.
+pnpm-lock.yaml
+migrations/legacy-v0/

@@ -1,0 +1,34 @@
+name: Integration request
+description: Propose a data source or workflow connector.
+title: "[Integration]: "
+labels: [integration, needs-triage]
+body:
+  - type: input
+    id: provider
+    attributes: { label: Provider, placeholder: Bing Webmaster Tools }
+    validations: { required: true }
+  - type: textarea
+    id: decision
+    attributes:
+      {
+        label: Marketer decision enabled,
+        description: What action becomes more reliable with this data?,
+      }
+    validations: { required: true }
+  - type: textarea
+    id: auth
+    attributes:
+      {
+        label: Authentication and scopes,
+        description: Link official API and OAuth documentation.,
+      }
+    validations: { required: true }
+  - type: textarea
+    id: limits
+    attributes: { label: Rate limits, quotas and retention }
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I can help implement or test this connector.

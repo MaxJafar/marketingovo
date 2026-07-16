@@ -1,0 +1,95 @@
+{
+  "name": "community-synthetic-v2",
+  "version": 2,
+  "expectedInstances": [
+    { "ruleId": "title-missing", "path": "/untitled", "priority": "High" },
+    { "ruleId": "h1-missing", "path": "/no-h1", "priority": "High" },
+    { "ruleId": "image-alt-missing", "path": "/image", "priority": "Medium" },
+    {
+      "ruleId": "image-dimensions-missing",
+      "path": "/image",
+      "priority": "Medium"
+    },
+    {
+      "ruleId": "title-duplicate",
+      "path": "/duplicate-a",
+      "priority": "Medium"
+    },
+    {
+      "ruleId": "title-duplicate",
+      "path": "/duplicate-b",
+      "priority": "Medium"
+    },
+    {
+      "ruleId": "meta-description-duplicate",
+      "path": "/duplicate-a",
+      "priority": "Low"
+    },
+    {
+      "ruleId": "meta-description-duplicate",
+      "path": "/duplicate-b",
+      "priority": "Low"
+    },
+    {
+      "ruleId": "meta-description-missing",
+      "path": "/missing-meta",
+      "priority": "Medium"
+    },
+    {
+      "ruleId": "title-over-60-chars",
+      "path": "/long-title",
+      "priority": "Low"
+    },
+    {
+      "ruleId": "meta-description-over-155-chars",
+      "path": "/long-description",
+      "priority": "Low"
+    },
+    { "ruleId": "h1-multiple", "path": "/multiple-h1", "priority": "Medium" },
+    {
+      "ruleId": "canonical-missing",
+      "path": "/no-canonical",
+      "priority": "Low"
+    },
+    { "ruleId": "noindex", "path": "/noindex", "priority": "High" },
+    {
+      "ruleId": "viewport-missing-or-empty",
+      "path": "/no-viewport",
+      "priority": "High"
+    },
+    {
+      "ruleId": "duplicate-dom-id",
+      "path": "/duplicate-id",
+      "priority": "Low"
+    },
+    {
+      "ruleId": "jsonld-parse-error",
+      "path": "/bad-jsonld",
+      "priority": "Medium"
+    },
+    { "ruleId": "content-very-thin", "path": "/very-thin", "priority": "High" },
+    { "ruleId": "content-very-thin", "path": "/soft-404", "priority": "High" },
+    { "ruleId": "soft-404", "path": "/soft-404", "priority": "High" },
+    {
+      "ruleId": "picture-img-fallback-missing",
+      "path": "/picture-no-fallback",
+      "priority": "Medium"
+    },
+    {
+      "ruleId": "canonical-broken",
+      "path": "/canonical-broken",
+      "priority": "Medium"
+    },
+    { "ruleId": "internal-4xx", "path": "/missing", "priority": "High" },
+    { "ruleId": "internal-5xx", "path": "/server-error", "priority": "High" },
+    { "ruleId": "internal-link-to-broken", "path": "/", "priority": "High" },
+    { "ruleId": "internal-link-to-redirect", "path": "/", "priority": "Medium" }
+  ],
+  "controlPaths": ["/healthy-a", "/healthy-b"],
+  "minimumLabeledInstances": 26,
+  "minimumControlPaths": 2,
+  "minimumRecall": 0.95,
+  "maximumHighSeverityFalsePositiveRate": 0.05,
+  "baselineElapsedMs": 500,
+  "maximumRegressionPercent": 20
+}

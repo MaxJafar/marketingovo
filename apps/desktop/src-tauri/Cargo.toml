@@ -1,0 +1,32 @@
+[package]
+name = "golem-seo-desktop"
+version = "0.11.0-alpha.0"
+description = "Golem SEO Community Edition desktop launcher"
+authors = ["GolemWorkers"]
+edition = "2021"
+license = "Elastic-2.0"
+default-run = "golem-seo-desktop"
+
+[lib]
+name = "golem_seo_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-single-instance = "2"
+tauri-plugin-shell = "2"
+tauri-plugin-updater = "2"
+serde_json = "1"
+url = "2"
+base64 = "0.22"
+minisign-verify = "0.2.5"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

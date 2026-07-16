@@ -1,0 +1,65 @@
+{
+  "name": "@golem-seo/cli",
+  "version": "0.11.0-alpha.0",
+  "description": "CLI and local service launcher for Golem SEO Community Edition",
+  "license": "Elastic-2.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "provenance": true
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "golem-seo": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "dashboard",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-dashboard.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "dev": "tsx src/cli.ts serve"
+  },
+  "dependencies": {
+    "@golem-seo/contracts": "workspace:*",
+    "@golem-seo/credentials": "workspace:*",
+    "@golem-seo/legacy-import": "workspace:*",
+    "@golem-seo/runtime": "workspace:*",
+    "@golem-seo/sdk": "workspace:*",
+    "@golem-seo/server": "workspace:*",
+    "@golem-seo/storage-sqlite": "workspace:*"
+  },
+  "devDependencies": {
+    "@golem-seo/dashboard": "workspace:*",
+    "@types/node": "^24.3.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GolemWorkers/golem-seo.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://golemworkers.com/seo",
+  "bugs": {
+    "url": "https://github.com/GolemWorkers/golem-seo/issues"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  }
+}

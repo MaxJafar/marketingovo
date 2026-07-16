@@ -1,0 +1,58 @@
+{
+  "name": "@golem-seo/sdk",
+  "version": "0.11.0-alpha.0",
+  "description": "Typed client for the Golem SEO local REST API",
+  "license": "Elastic-2.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "provenance": true
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "generate": "node scripts/generate-openapi-types.mjs",
+    "generate:check": "node scripts/generate-openapi-types.mjs --check",
+    "build": "pnpm generate:check && tsc -p tsconfig.json",
+    "typecheck": "pnpm generate:check && tsc -p tsconfig.json --noEmit",
+    "lint": "pnpm generate:check && tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@golem-seo/contracts": "workspace:*",
+    "openapi-fetch": "0.17.0"
+  },
+  "devDependencies": {
+    "@golem-seo/server": "workspace:*",
+    "@types/node": "^24.3.0",
+    "openapi-typescript": "7.13.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GolemWorkers/golem-seo.git",
+    "directory": "packages/sdk"
+  },
+  "homepage": "https://golemworkers.com/seo",
+  "bugs": {
+    "url": "https://github.com/GolemWorkers/golem-seo/issues"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  }
+}

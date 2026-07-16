@@ -1,0 +1,152 @@
+name: Community quality gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: community-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.15.0
+      - name: Enable the pinned package manager
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.34.5 --activate
+      - name: Install from the single lockfile
+        run: pnpm install --frozen-lockfile
+      - name: Build, lint, typecheck, test and validate public surfaces
+        env:
+          GOLEMSEO_NPM_INSTALL_SMOKE: "1"
+        run: pnpm check
+      - name: Reject high and critical dependency advisories
+        run: pnpm audit:dependencies
+      - name: Enforce dependency license policy
+        run: pnpm validate:licenses
+      - name: Generate the release SBOM
+        run: pnpm sbom
+      - uses: actions/upload-artifact@v7
+        with:
+          name: community-sbom
+          path: artifacts/golem-seo.cdx.json
+          if-no-files-found: error
+          retention-days: 14
+
+  credential-broker:
+    name: Native credential broker (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, windows-2025, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check native credential broker
+        run: cargo check --locked --manifest-path packages/credential-broker-native/Cargo.toml
+
+  browser-e2e:
+    name: Community real-browser E2E
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.15.0
+      - name: Enable the pinned package manager
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.34.5 --activate
+      - name: Install from the single lockfile
+        run: pnpm install --frozen-lockfile
+      - name: Build the Community daemon and dashboard
+        run: pnpm build
+      - name: Install the pinned Chromium runtime
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Exercise bootstrap, onboarding, audit history and actions
+        run: pnpm test:e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: community-playwright-failure
+          path: output/playwright/
+          if-no-files-found: warn
+          retention-days: 14
+
+  rust-quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - name: Enforce native formatting
+        run: cargo fmt --all --manifest-path packages/credential-broker-native/Cargo.toml -- --check
+      - name: Enforce native lints
+        run: cargo clippy --locked --all-targets --manifest-path packages/credential-broker-native/Cargo.toml -- -D warnings
+
+  rust-advisory-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      checks: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Audit the credential broker dependency graph
+        uses: rustsec/audit-check@v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: packages/credential-broker-native
+      - name: Audit the Tauri desktop dependency graph
+        uses: rustsec/audit-check@v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: apps/desktop/src-tauri
+
+  desktop-native:
+    runs-on: macos-14
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.15.0
+      - name: Assemble the native desktop inputs
+        env:
+          GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID: ci-public-desktop.apps.googleusercontent.com
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.34.5 --activate
+          pnpm install --frozen-lockfile
+          pnpm build
+          node scripts/prepare-desktop-runtime.mjs --target aarch64-apple-darwin --require-google-client-id
+          cargo build --locked --release --manifest-path packages/credential-broker-native/Cargo.toml
+          node scripts/copy-native-broker.mjs
+          node scripts/verify-desktop-runtime.mjs --target aarch64-apple-darwin --require-broker --require-google-client-id --launch-browser
+      - name: Check the Tauri desktop shell
+        run: cargo check --locked --manifest-path apps/desktop/src-tauri/Cargo.toml
+
+  dependency-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_VERSION: 8.30.1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

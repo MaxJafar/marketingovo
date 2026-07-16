@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Golem SEO",
+  "version": "0.11.0-alpha.0",
+  "identifier": "com.golemworkers.golem-seo",
+  "build": {
+    "frontendDist": "../shell"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": "default-src 'self'; connect-src 'self' http://127.0.0.1:3210; img-src 'self' data:; style-src 'self'; script-src 'self'; object-src 'none'; frame-ancestors 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": true,
+    "targets": "all",
+    "category": "DeveloperTool",
+    "publisher": "GolemWorkers",
+    "homepage": "https://golemworkers.com/seo",
+    "copyright": "Copyright 2026 GolemWorkers",
+    "license": "Elastic-2.0",
+    "licenseFile": "../../../LICENSE",
+    "shortDescription": "Local-first SEO operations system",
+    "longDescription": "Turn crawl, Search Console, GA4, performance and SERP evidence into verified SEO actions.",
+    "externalBin": ["binaries/golem-seo-node"],
+    "resources": ["runtime/**/*"],
+    "macOS": { "minimumSystemVersion": "13.0" },
+    "windows": {
+      "wix": {
+        "language": "en-US",
+        "fragmentPaths": ["./windows/fragments/background-startup.wxs"],
+        "componentRefs": ["GolemSeoBackgroundStartup"]
+      }
+    },
+    "linux": { "appimage": { "bundleMediaFramework": false } }
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/GolemWorkers/golem-seo/releases/latest/download/latest.json"
+      ],
+      "windows": { "installMode": "passive" },
+      "pubkey": "__GOLEM_SEO_UPDATER_PUBLIC_KEY__"
+    }
+  }
+}

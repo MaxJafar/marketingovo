@@ -1,0 +1,72 @@
+{
+  "name": "@golem-seo/openclaw",
+  "version": "0.11.0-alpha.0",
+  "description": "Official OpenClaw tool adapter for Golem SEO Community Edition",
+  "license": "Elastic-2.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "provenance": true
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "openclaw.plugin.json",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "node scripts/validate.mjs"
+  },
+  "dependencies": {
+    "@golem-seo/contracts": "workspace:*",
+    "@golem-seo/sdk": "workspace:*",
+    "typebox": "1.1.39"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "esbuild": "^0.25.9",
+    "typescript": "^5.9.2"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.5.17"
+  },
+  "peerDependenciesMeta": {
+    "openclaw": {
+      "optional": true
+    }
+  },
+  "openclaw": {
+    "extensions": [
+      "./dist/index.js"
+    ],
+    "compat": {
+      "pluginApi": ">=2026.5.17",
+      "minGatewayVersion": "2026.5.17"
+    },
+    "build": {
+      "openclawVersion": "2026.5.17",
+      "pluginSdkVersion": "2026.5.17"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GolemWorkers/golem-seo.git",
+    "directory": "adapters/openclaw"
+  },
+  "homepage": "https://golemworkers.com/seo",
+  "bugs": {
+    "url": "https://github.com/GolemWorkers/golem-seo/issues"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  }
+}

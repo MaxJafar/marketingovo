@@ -1,0 +1,59 @@
+{
+  "name": "@golem-seo/contracts",
+  "version": "0.11.0-alpha.0",
+  "description": "Runtime-validated public contracts for Golem SEO Community Edition",
+  "license": "Elastic-2.0",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "provenance": true
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./project-bundle": {
+      "types": "./dist/project-bundle.d.ts",
+      "default": "./dist/project-bundle.js"
+    },
+    "./agent-tools": {
+      "types": "./dist/agent-tools.d.ts",
+      "default": "./dist/agent-tools.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@sinclair/typebox": "^0.34.41"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GolemWorkers/golem-seo.git",
+    "directory": "packages/contracts"
+  },
+  "homepage": "https://golemworkers.com/seo",
+  "bugs": {
+    "url": "https://github.com/GolemWorkers/golem-seo/issues"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

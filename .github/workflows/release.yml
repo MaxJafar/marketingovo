@@ -1,0 +1,449 @@
+name: Verified native release
+
+concurrency:
+  group: verified-release-${{ github.ref }}
+  cancel-in-progress: false
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+  checks: write
+  issues: write
+  security-events: write
+
+jobs:
+  prepare-release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Create the draft release before matrix builds
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            gh release edit "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --draft --title "Golem SEO ${GITHUB_REF_NAME}" --notes "Platform-verified installers, signed updater artifacts, reproducible npm packages, checksums, SBOM and provenance. Golem SEO Community Edition is source-available under Elastic License 2.0. See the attached verification records."
+          else
+            gh release create "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --draft --verify-tag --title "Golem SEO ${GITHUB_REF_NAME}" --notes "Platform-verified installers, signed updater artifacts, reproducible npm packages, checksums, SBOM and provenance. Golem SEO Community Edition is source-available under Elastic License 2.0. See the attached verification records."
+          fi
+
+  release-approval:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: prepare-release
+    runs-on: ubuntu-24.04
+    environment: public-release
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.15.0
+          package-manager-cache: false
+      - name: Validate tag and public-release acceptance
+        run: node scripts/validate-public-release-approval.mjs --tag "${GITHUB_REF_NAME}"
+
+  source-evidence:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: release-approval
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+          queries: security-extended
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.15.0
+      - name: Enable the pinned package manager
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.34.5 --activate
+      - name: Install from the exact tagged lockfile
+        run: pnpm install --frozen-lockfile
+      - name: Verify the tagged source, live advisories and SBOM
+        env:
+          GOLEMSEO_NPM_INSTALL_SMOKE: "1"
+        run: |
+          pnpm check
+          pnpm audit:dependencies
+          pnpm sbom
+      - name: Install the pinned Chromium runtime
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Exercise the packaged Community workflow in a real browser
+        run: pnpm test:e2e
+      - name: Audit the credential broker dependency graph
+        uses: rustsec/audit-check@v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: packages/credential-broker-native
+      - name: Audit the Tauri desktop dependency graph
+        uses: rustsec/audit-check@v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: apps/desktop/src-tauri
+      - name: Scan the tagged history for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_VERSION: 8.30.1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: github/codeql-action/analyze@v4
+      - name: Retain the exact-tag SBOM
+        uses: actions/upload-artifact@v7
+        with:
+          name: exact-tag-community-sbom
+          path: artifacts/golem-seo.cdx.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Retain browser evidence on failure
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: exact-tag-playwright-failure
+          path: output/playwright/
+          if-no-files-found: warn
+          retention-days: 30
+
+  native:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [release-approval, source-evidence]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            target: aarch64-apple-darwin
+            bundles: dmg
+          - os: macos-13
+            target: x86_64-apple-darwin
+            bundles: dmg
+          - os: windows-2025
+            target: x86_64-pc-windows-msvc
+            bundles: msi
+          - os: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+            bundles: appimage,deb
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.15.0
+      - name: Fail closed on incomplete macOS signing configuration
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          TAURI_UPDATER_PUBLIC_KEY: ${{ secrets.TAURI_UPDATER_PUBLIC_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: node scripts/validate-release-environment.mjs --target ${{ matrix.target }}
+      - name: Fail closed on incomplete Windows signing configuration
+        if: runner.os == 'Windows'
+        shell: bash
+        env:
+          TAURI_UPDATER_PUBLIC_KEY: ${{ secrets.TAURI_UPDATER_PUBLIC_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: node scripts/validate-release-environment.mjs --target ${{ matrix.target }}
+      - name: Fail closed on incomplete Linux updater signing configuration
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          TAURI_UPDATER_PUBLIC_KEY: ${{ secrets.TAURI_UPDATER_PUBLIC_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: node scripts/validate-release-environment.mjs --target ${{ matrix.target }}
+      - name: Install Linux desktop prerequisites
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y dbus-user-session libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf xvfb
+      - name: Install and verify Community
+        shell: bash
+        env:
+          GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID: ${{ vars.GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID }}
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.34.5 --activate
+          pnpm install --frozen-lockfile
+          pnpm check
+          pnpm sbom
+          node scripts/prepare-desktop-runtime.mjs --target ${{ matrix.target }} --require-google-client-id
+      - name: Build the native credential broker
+        shell: bash
+        run: |
+          cargo build --locked --release --manifest-path packages/credential-broker-native/Cargo.toml
+          node scripts/copy-native-broker.mjs
+          node scripts/verify-desktop-runtime.mjs --target ${{ matrix.target }} --require-broker --require-google-client-id --launch-browser
+      - name: Import the Windows code-signing certificate
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_CERTIFICATE_BASE64)) { throw "WINDOWS_CERTIFICATE is required" }
+          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_CERTIFICATE_PASSWORD)) { throw "WINDOWS_CERTIFICATE_PASSWORD is required" }
+          $pfxPath = Join-Path $env:RUNNER_TEMP "golem-seo-signing.pfx"
+          try {
+            [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE_BASE64))
+            $password = ConvertTo-SecureString $env:WINDOWS_CERTIFICATE_PASSWORD -AsPlainText -Force
+            $imported = @(Import-PfxCertificate -FilePath $pfxPath -CertStoreLocation Cert:\CurrentUser\My -Password $password)
+            $codeSigning = @($imported | Where-Object {
+              $_.HasPrivateKey -and
+              $_.NotBefore -le [DateTime]::UtcNow -and
+              $_.NotAfter -gt [DateTime]::UtcNow -and
+              @($_.EnhancedKeyUsageList | Where-Object { $_.ObjectId.Value -eq "1.3.6.1.5.5.7.3.3" }).Count -gt 0
+            })
+            if ($codeSigning.Count -ne 1) { throw "PFX must contain exactly one current code-signing certificate with a private key" }
+            "GOLEMSEO_WINDOWS_CERTIFICATE_THUMBPRINT=$($codeSigning[0].Thumbprint)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          }
+          finally {
+            if (Test-Path -LiteralPath $pfxPath) { Remove-Item -LiteralPath $pfxPath -Force }
+          }
+      - name: Configure signed updates
+        shell: bash
+        env:
+          TAURI_UPDATER_PUBLIC_KEY: ${{ secrets.TAURI_UPDATER_PUBLIC_KEY }}
+        run: node scripts/configure-desktop-release.mjs
+      - name: Build macOS installers locally
+        if: runner.os == 'macOS'
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          projectPath: apps/desktop
+          args: --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
+      - name: Build Windows and Linux installers locally
+        if: runner.os != 'macOS'
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          projectPath: apps/desktop
+          args: --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
+      - name: Sign the Linux deb for verified package-upgrade evidence
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          shopt -s nullglob
+          deb_files=(apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/deb/*.deb)
+          if [[ ${#deb_files[@]} -ne 1 ]]; then
+            echo "Expected exactly one deb to sign, found ${#deb_files[@]}" >&2
+            exit 1
+          fi
+          pnpm --dir apps/desktop exec tauri signer sign "${deb_files[0]}"
+          test -s "${deb_files[0]}.sig"
+      - name: Resolve the verified installer-upgrade baseline
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GOLEMSEO_UPGRADE_BASELINE_TAG: ${{ vars.GOLEMSEO_UPGRADE_BASELINE_TAG }}
+          TAURI_UPDATER_PUBLIC_KEY: ${{ secrets.TAURI_UPDATER_PUBLIC_KEY }}
+        run: |
+          node scripts/prepare-upgrade-baseline.mjs \
+            --target "${{ matrix.target }}" \
+            --current-tag "${GITHUB_REF_NAME}" \
+            --output "artifacts/upgrade-baseline-${{ matrix.target }}.json"
+      - name: Verify Windows install, login startup, service health and uninstall
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $msiFiles = @(Get-ChildItem -LiteralPath "apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/msi" -Filter "*.msi" -File)
+          if ($msiFiles.Count -ne 1) { throw "Expected exactly one MSI, found $($msiFiles.Count)" }
+          ./scripts/verify-windows-installer-lifecycle.ps1 `
+            -MsiPath $msiFiles[0].FullName `
+            -BaselinePath "artifacts/upgrade-baseline-${{ matrix.target }}.json" `
+            -EvidencePath "artifacts/windows-installer-lifecycle-${{ matrix.target }}.json" `
+            -Target "${{ matrix.target }}"
+      - name: Verify macOS install, background service, upgrade and uninstall
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          shopt -s nullglob
+          dmg_files=(apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg)
+          if [[ ${#dmg_files[@]} -ne 1 ]]; then
+            echo "Expected exactly one DMG, found ${#dmg_files[@]}" >&2
+            exit 1
+          fi
+          node scripts/verify-unix-installer-lifecycle.mjs \
+            --target "${{ matrix.target }}" \
+            --installer "${dmg_files[0]}" \
+            --baseline "artifacts/upgrade-baseline-${{ matrix.target }}.json" \
+            --evidence "artifacts/macos-installer-lifecycle-${{ matrix.target }}.json"
+      - name: Verify Linux package, background service, upgrade, uninstall and AppImage
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          sudo loginctl enable-linger "${USER}"
+          sudo systemctl start "user@$(id -u).service"
+          export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+          export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+          systemctl --user daemon-reload
+          shopt -s nullglob
+          deb_files=(apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/deb/*.deb)
+          appimage_files=(apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/appimage/*.AppImage)
+          if [[ ${#deb_files[@]} -ne 1 || ${#appimage_files[@]} -ne 1 ]]; then
+            echo "Expected one deb and one AppImage, found ${#deb_files[@]} and ${#appimage_files[@]}" >&2
+            exit 1
+          fi
+          node scripts/verify-unix-installer-lifecycle.mjs \
+            --target "${{ matrix.target }}" \
+            --installer "${deb_files[0]}" \
+            --appimage "${appimage_files[0]}" \
+            --baseline "artifacts/upgrade-baseline-${{ matrix.target }}.json" \
+            --evidence "artifacts/linux-installer-lifecycle-${{ matrix.target }}.json"
+      - name: Verify macOS signing, notarization and updater artifacts
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          TAURI_UPDATER_PUBLIC_KEY: ${{ secrets.TAURI_UPDATER_PUBLIC_KEY }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: node scripts/verify-release-artifacts.mjs --target ${{ matrix.target }}
+      - name: Verify Windows or Linux release artifacts
+        if: runner.os != 'macOS'
+        shell: bash
+        env:
+          TAURI_UPDATER_PUBLIC_KEY: ${{ secrets.TAURI_UPDATER_PUBLIC_KEY }}
+        run: node scripts/verify-release-artifacts.mjs --target ${{ matrix.target }}
+      - name: Generate checksums and release metadata
+        shell: bash
+        run: node scripts/create-release-manifest.mjs --target ${{ matrix.target }}
+      - name: Retain verified updater inputs for the static channel manifest
+        uses: actions/upload-artifact@v7
+        with:
+          name: verified-updater-${{ matrix.target }}
+          path: artifacts/updater-${{ matrix.target }}/*
+          if-no-files-found: error
+          retention-days: 7
+      - name: Attest installer provenance
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle/**/*
+            artifacts/release-${{ matrix.target }}/*
+      - name: Upload only verified release payloads
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.ref_name }}" artifacts/release-${{ matrix.target }}/* --clobber
+
+  publish-npm:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [release-approval, native]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    environment: npm-production
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.15.0
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - name: Install, verify and pack the tagged source
+        env:
+          GOLEMSEO_NPM_INSTALL_SMOKE: "1"
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.34.5 --activate
+          pnpm install --frozen-lockfile
+          pnpm check
+          pnpm npm:prepare-release --tag "${GITHUB_REF_NAME}"
+      - name: Install an OIDC-capable npm CLI
+        run: npm install --global npm@11.18.0
+      - name: Publish topologically and verify npm provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm npm:publish-release
+      - name: Attest the exact npm tarballs
+        uses: actions/attest@v4
+        with:
+          subject-path: artifacts/npm-release/*.tgz
+      - name: Attach npm tarballs and publication evidence to the draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${GITHUB_REF_NAME}" artifacts/npm-release/* --clobber
+
+  publish-updater-metadata:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [release-approval, native, publish-npm]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.15.0
+          package-manager-cache: false
+      - name: Download only the updater bytes verified by every native runner
+        uses: actions/download-artifact@v8
+        with:
+          pattern: verified-updater-*
+          path: artifacts/updater-inputs
+          merge-multiple: true
+      - name: Build the fail-closed Tauri static update manifest
+        run: |
+          node scripts/create-updater-metadata.mjs \
+            --assets artifacts/updater-inputs \
+            --output artifacts/updater-channel/latest.json \
+            --repository "${GITHUB_REPOSITORY}" \
+            --tag "${GITHUB_REF_NAME}"
+      - name: Attest the exact updater channel metadata
+        uses: actions/attest@v4
+        with:
+          subject-path: artifacts/updater-channel/latest.json
+      - name: Attach updater metadata to the still-draft release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${GITHUB_REF_NAME}" artifacts/updater-channel/latest.json --clobber
+
+  finalize-release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: publish-updater-metadata
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Publish only after every native and npm gate succeeds
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if [[ "$version" == *-* ]]; then
+            gh release edit "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --draft=false --prerelease --latest=false
+          else
+            gh release edit "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --draft=false --prerelease=false --latest
+          fi

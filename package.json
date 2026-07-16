@@ -1,0 +1,58 @@
+{
+  "name": "golem-seo-workspace",
+  "version": "0.11.0-alpha.0",
+  "private": true,
+  "description": "Golem SEO Community Edition monorepo",
+  "license": "Elastic-2.0",
+  "packageManager": "pnpm@10.34.5",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "pnpm": {
+    "overrides": {
+      "vite": "6.4.3"
+    }
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "test": "turbo run test --concurrency=2 -- --maxWorkers=2",
+    "test:e2e": "playwright test --config=playwright.config.ts",
+    "test:core": "pnpm --filter @golem-seo/core test",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "validate:no-containers": "node scripts/validate-no-containers.mjs",
+    "validate:contracts": "node scripts/validate-contracts.mjs",
+    "validate:plugins": "node scripts/validate-plugins.mjs",
+    "validate:licenses": "node scripts/validate-licenses.mjs",
+    "audit:dependencies": "node scripts/audit-dependencies.mjs",
+    "sbom": "node scripts/generate-sbom.mjs",
+    "pack:smoke": "node scripts/package-smoke.mjs",
+    "benchmark": "node --test benchmarks/corpus-metrics.test.mjs && node benchmarks/run.mjs",
+    "desktop:prepare": "node scripts/prepare-desktop-runtime.mjs",
+    "desktop:verify": "node scripts/verify-desktop-runtime.mjs",
+    "desktop:configure-release": "node scripts/configure-desktop-release.mjs",
+    "release:preflight": "node scripts/validate-release-environment.mjs",
+    "release:verify": "node scripts/verify-release-artifacts.mjs",
+    "release:test": "node --test scripts/release-policy.test.mjs scripts/updater-metadata-policy.test.mjs",
+    "release:manifest": "node scripts/create-release-manifest.mjs",
+    "release:updater-metadata": "node scripts/create-updater-metadata.mjs",
+    "npm:prepare-release": "node scripts/prepare-npm-release.mjs",
+    "npm:publish-release": "node scripts/publish-npm-release.mjs",
+    "npm:release-test": "node --test scripts/npm-release-policy.test.mjs scripts/public-release-policy.test.mjs",
+    "check": "pnpm format:check && pnpm validate:no-containers && pnpm build && pnpm lint && pnpm typecheck && pnpm test && pnpm release:test && pnpm npm:release-test && pnpm benchmark && pnpm validate:contracts && pnpm validate:plugins && pnpm validate:licenses && pnpm pack:smoke",
+    "golem-seo": "node packages/cli/dist/cli.js",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "@types/node": "^24.3.0",
+    "axe-core": "4.12.1",
+    "prettier": "^3.6.2",
+    "turbo": "^2.5.6",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

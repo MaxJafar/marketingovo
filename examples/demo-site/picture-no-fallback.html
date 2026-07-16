@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture with a picture missing its image fallback</title>
+    <meta
+      name="description"
+      content="This fixture deliberately omits the image fallback inside one picture element."
+    />
+    <link rel="canonical" href="{{ORIGIN}}/picture-no-fallback" />
+  </head>
+  <body>
+    <main>
+      <h1>Picture fallback fixture</h1>
+      <picture><source srcset="/pixel.svg" type="image/svg+xml" /></picture>
+      <p>{{COPY}}</p>
+      <a href="/">Benchmark index</a>
+    </main>
+  </body>
+</html>

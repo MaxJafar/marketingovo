@@ -1,0 +1,41 @@
+{
+  "rules": [
+    {
+      "id": "footer-legal",
+      "name": "Footer legal link present on every page",
+      "category": "Compliance",
+      "priority": "Medium",
+      "match": "css-exists",
+      "selector": "footer a[href*='/legal']",
+      "fix": "Add a link to /legal-notice/ in the page footer."
+    },
+    {
+      "id": "cookie-policy",
+      "name": "Cookie policy link in footer",
+      "category": "Compliance",
+      "priority": "High",
+      "match": "contains",
+      "value": "Cookie Policy",
+      "fix": "Add a 'Cookie Policy' link to the page footer."
+    },
+    {
+      "id": "ga4-installed",
+      "name": "GA4 measurement ID present in source",
+      "category": "Analytics",
+      "priority": "Low",
+      "match": "regex",
+      "pattern": "G-[A-Z0-9]{10}",
+      "fix": "Install the GA4 gtag snippet if analytics is required for this site."
+    },
+    {
+      "id": "no-debug-banner",
+      "name": "No debug banner on production pages",
+      "category": "Quality",
+      "priority": "High",
+      "match": "css-exists",
+      "selector": ".debug-banner, #debug",
+      "expect": "absent",
+      "fix": "Remove the debug banner before deploying to production."
+    }
+  ]
+}

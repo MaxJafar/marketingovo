@@ -1,0 +1,22 @@
+{
+  "name": "@golem-seo/desktop",
+  "version": "0.11.0-alpha.0",
+  "private": true,
+  "description": "Tauri 2 desktop launcher for Golem SEO Community Edition",
+  "license": "Elastic-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/validate.mjs",
+    "typecheck": "node scripts/validate.mjs",
+    "lint": "node scripts/validate.mjs",
+    "test": "node scripts/validate.mjs",
+    "native:dev": "tauri dev",
+    "native:build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.8.4"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  }
+}

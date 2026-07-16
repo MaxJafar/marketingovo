@@ -1,0 +1,54 @@
+# Dependencies and generated output
+node_modules/
+dist/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# Local Golem SEO state and artifacts
+.golem-seo/
+*.golemseo
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+audits.json
+schedule.json
+token.json
+tokens.json
+credentials.json
+*.pem
+*.key
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+custom-rules.json
+
+# Installer output
+target/
+src-tauri/target/
+apps/desktop/src-tauri/binaries/
+apps/desktop/src-tauri/runtime/
+*.dmg
+*.msi
+*.AppImage
+*.deb
+artifacts/
+
+# Test and editor artifacts
+playwright-report/
+test-results/
+output/playwright/
+.nyc_output/
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Legacy untracked local companion
+dashboard-backend/
