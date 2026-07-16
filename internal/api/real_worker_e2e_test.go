@@ -25,6 +25,10 @@ func TestRealPythonWorkerThroughHTTPAndGoAuthority(t *testing.T) {
 	if err != nil {
 		t.Skipf("pinned uv runtime is not provisioned: %v", err)
 	}
+	uv, err = filepath.EvalSymlinks(uv)
+	if err != nil {
+		t.Fatal(err)
+	}
 	uv, err = filepath.Abs(uv)
 	if err != nil {
 		t.Fatal(err)
