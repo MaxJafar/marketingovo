@@ -680,30 +680,146 @@ The Python worker owns one parser used for preview and analysis. Go does not
 implement a second semantic CSV parser, and the browser does not determine
 validity.
 
-The Protobuf envelope adds fields/messages with new tag numbers only:
+The additive Protobuf schema is frozen below. This ADR change is the normative
+contract only; it does not change `worker.proto`, generated bindings, or runtime
+dispatch.
 
-```text
-ValidateImport
-  request_id
-  input_path                 generated private path
-  input_sha256
-  input_schema_id
-  validated_at
+| Parent                         | Field                      | Protobuf type            | Tag |
+| ------------------------------ | -------------------------- | ------------------------ | --: |
+| `WorkerEnvelope.oneof message` | `validate_import`          | `ValidateImport`         |  14 |
+| `WorkerEnvelope.oneof message` | `import_validation_result` | `ImportValidationResult` |  15 |
+| `StartAnalysis`                | `import_context`           | `ImportContext`          |  13 |
 
-ImportValidationResult
-  request_id
-  valid
-  input summary
-  file policy summary
-  target summaries
-  diagnostics (bounded and sanitized)
+The complete new message and enum definitions are:
 
-StartAnalysis.import_context
-  dataset_id
-  validated_at
-  input_parser_version
-  metric_catalog_version
+```proto
+message ValidateImport {
+  string request_id = 1;
+  string input_path = 2;
+  string input_sha256 = 3;
+  string input_schema_id = 4;
+  string validated_at = 5;
+}
+
+message ImportValidationResult {
+  string request_id = 1;
+  bool valid = 2;
+  ImportInputSummary input = 3;
+  ImportFilePolicySummary file_policy = 4;
+  optional string platform = 5;
+  repeated ImportTargetSummary targets = 6;
+  repeated ImportDiagnostic diagnostics = 7;
+  bool diagnostics_truncated = 8;
+}
+
+message ImportInputSummary {
+  string schema_id = 1;
+  string sha256 = 2;
+  uint64 size_bytes = 3;
+  optional uint64 row_count = 4;
+}
+
+message ImportFilePolicySummary {
+  optional string target_scope = 1;
+  optional string data_class = 2;
+  optional string permitted_purpose = 3;
+  optional uint32 retention_days = 4;
+  optional string rights_state = 5;
+}
+
+message ImportTargetSummary {
+  string target_id = 1;
+  string target_name = 2;
+  uint64 row_count = 3;
+  map<string, ImportMetricAvailability> metric_availability = 4;
+}
+
+enum ImportMetricAvailability {
+  IMPORT_METRIC_AVAILABILITY_UNSPECIFIED = 0;
+  IMPORT_METRIC_AVAILABILITY_MISSING = 1;
+  IMPORT_METRIC_AVAILABILITY_INSUFFICIENT = 2;
+  IMPORT_METRIC_AVAILABILITY_CONTRADICTORY = 3;
+  IMPORT_METRIC_AVAILABILITY_AVAILABLE = 4;
+}
+
+message ImportDiagnostic {
+  ImportDiagnosticSeverity severity = 1;
+  string code = 2;
+  optional uint32 record_number = 3;
+  optional string column = 4;
+  string message = 5;
+}
+
+enum ImportDiagnosticSeverity {
+  IMPORT_DIAGNOSTIC_SEVERITY_UNSPECIFIED = 0;
+  IMPORT_DIAGNOSTIC_SEVERITY_ERROR = 1;
+  IMPORT_DIAGNOSTIC_SEVERITY_WARNING = 2;
+}
+
+message ImportContext {
+  string dataset_id = 1;
+  string validated_at = 2;
+  string input_parser_version = 3;
+  string metric_catalog_version = 4;
+}
 ```
+
+`validated_at` in both messages is the same authority-supplied instant encoded
+as canonical ASCII UTC RFC 3339 at whole-second precision:
+`YYYY-MM-DDTHH:MM:SSZ`. Offsets, fractional seconds, leap-second spelling, and
+an empty value are invalid. This encoding decision applies only to these new
+fields; it does not reinterpret existing worker timestamp strings or the CSV
+timestamp grammar.
+
+`ImportInputSummary.row_count` is absent when parsing cannot determine a count;
+zero means a successfully counted header-only file, which is still invalid under
+the file rules. `ValidateImport.input_path` is only the generated private path
+described above, `input_sha256` is exactly 64 lowercase hexadecimal characters,
+and `input_schema_id` is the exact CSV schema ID. `ImportFilePolicySummary`
+fields are present only when the worker can determine one coherent file-level
+value. The worker does not receive or echo the human attestation: Go adds the
+Go-owned `attestation_version` to the API preview after correlating and
+validating this result. `platform` is present only when one coherent platform is
+determined. For `valid: true`, `input`, `file_policy`, and `platform` are
+present, all required nested fields are populated, and `targets` contains 2–5
+entries ordered by ascending bytewise `target_id`.
+
+Each target's `metric_availability` map contains exactly these four keys and no
+others: `followers.delta`, `public-engagement-by-followers.median`,
+`posting-cadence`, and `content-format-mix`. Every value is one of the four
+nonzero enum states above; `UNSPECIFIED`, a missing key, and an extra key are
+protocol errors. The Go API projects the enum values to the existing lowercase
+strings `missing`, `insufficient`, `contradictory`, and `available`. Protobuf map
+ordering has no meaning. The enum-valued map rejects unbounded string states
+while preserving the versioned metric IDs; optional scalar presence prevents an
+unknown count or policy value from becoming a fabricated zero or empty value.
+
+An absent diagnostic `record_number` or `column` becomes JSON `null`; a present
+record number is the physical record number defined above, and a present column
+is the exact CSV header. `UNSPECIFIED` severity is invalid. Diagnostics retain
+the existing 100-item bound, ordering, fixed-message, and sanitization rules. Go
+projects `ERROR` and `WARNING` to the lowercase API strings `error` and
+`warning`.
+
+Compatibility and reservation rules are:
+
+- Existing `WorkerEnvelope` tags 10–13 and `StartAnalysis` tags 1–12 are
+  unchanged. The new tag assignments above are additive, and
+  `protocol_version` remains `1`.
+- Existing fixture compare/research requests omit `import_context`. Imported
+  analysis requires it. Neither new envelope arm may be sent until both Go and
+  Python use generated bindings containing this schema; an unknown arm must
+  fail closed rather than fall back to analysis.
+- Field types, field numbers, oneof numbers, enum names, and enum numeric values
+  are permanent compatibility identifiers. A future removal must reserve both
+  the deleted field name and number in its message (or the enum name and numeric
+  value); neither may be reused. This addendum pre-reserves no speculative tag
+  ranges. Future additions require unused numbers outside Protobuf's reserved
+  19,000–19,999 range and a reviewed additive contract change.
+- `request_id` is the sole preview correlation key. Import validation never
+  uses `run_id`, and the result carries no `dataset_id`, `state`,
+  `retention_until`, or API schema version; Go assigns those only after its
+  authority checks and durable commit.
 
 The expected versions are:
 
@@ -727,25 +843,30 @@ The current project stages cannot be executed literally because ZIL-158 consumes
 messages owned by the later ZIL-159 lane. The protocol seam is therefore a
 required, bounded pre-Stage-2 slice of ZIL-159:
 
-1. After this ADR merges and while ZIL-158 remains parked, Barbara lands only
-   the additive `ValidateImport`, `ImportValidationResult`, and
-   `StartAnalysis.import_context` definitions in
-   `contracts/proto/golem/intel/v1/worker.proto` plus mechanically regenerated
+1. This contract-only addendum receives independent exact-head review and
+   merges without changing `worker.proto`, generated bindings, callers, or
+   worker behavior.
+2. Barbara then copies the field, type, tag, enum, presence, and timestamp
+   decisions above verbatim into
+   `contracts/proto/golem/intel/v1/worker.proto` and runs
+   `pnpm contracts:generate`. The only generated files allowed to change are
    `gen/go/golem/intel/v1/worker.pb.go`,
    `gen/python/golem/intel/v1/worker_pb2.py`, and
-   `gen/typescript/golem/intel/v1/worker_pb.ts`. `pnpm contracts:lint`, Buf
-   lint, generation-diff, and existing protocol tests must pass. No caller or
-   worker dispatch behavior is enabled in this seam.
-2. The exact seam commit is merged. Only then may Wade start ZIL-158. Wade
+   `gen/typescript/golem/intel/v1/worker_pb.ts`; they are mechanical output and
+   are never hand-edited. That seam PR contains exactly the Proto source and
+   those three generated bindings. `pnpm contracts:lint`, Buf lint,
+   generation-diff, and existing protocol tests must pass. No caller or worker
+   dispatch behavior is enabled in this seam.
+3. The exact seam commit is merged. Only then may Wade start ZIL-158. Wade
    changes `workers/intelligence/**`, import fixture cases, and metric docs to
    implement Python dispatch, parsing, canonicalization, availability, and
    report v2 against the committed generated Python binding. Wade does not edit
    Proto or `gen/**`.
-3. After Wade's worker protocol tests pass against that seam, Barbara resumes
+4. After Wade's worker protocol tests pass against that seam, Barbara resumes
    the rest of ZIL-159: Go preview invocation and authority validation,
    persistence, OpenAPI, SDK, CLI, and MCP. Barbara does not edit Python worker
    behavior.
-4. Futaba starts only after the generated API/SDK contract from the completed
+5. Futaba starts only after the generated API/SDK contract from the completed
    ZIL-159 lane merges.
 
 The parent coordinator must schedule the protocol-seam slice before promoting
