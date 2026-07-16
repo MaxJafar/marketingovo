@@ -1,0 +1,10 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "adapters/*"
+  - "plugins/codex/*"
+
+onlyBuiltDependencies:
+  - esbuild
+  - playwright
+

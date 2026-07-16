@@ -1,0 +1,12 @@
+- main [ref=e3]:
+  - region [ref=e4]:
+    - generic [ref=e5]: G
+    - paragraph [ref=e6]: LOCAL INTELLIGENCE RUNTIME
+    - heading "Open the command center" [level=1] [ref=e7]
+    - paragraph [ref=e8]: Paste the token printed by golem-inteld. It stays in this tab's memory and is never written to browser storage.
+    - generic [ref=e9]:
+      - generic [ref=e10]: Local service token
+      - textbox "Local service token" [ref=e11]:
+        - /placeholder: gintel_…
+      - button "Enter workspace" [disabled] [ref=e12]
+    - paragraph [ref=e13]: Loopback only · bearer protected · evidence stays local

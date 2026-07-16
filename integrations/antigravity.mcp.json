@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "golem-intel": {
+      "command": "node",
+      "args": ["/absolute/path/to/golem-intel-main/packages/mcp/dist/stdio.js"],
+      "env": { "GOLEM_INTEL_API_URL": "http://127.0.0.1:7465" }
+    }
+  }
+}
+

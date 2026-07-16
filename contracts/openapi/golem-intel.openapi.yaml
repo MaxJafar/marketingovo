@@ -1,0 +1,613 @@
+openapi: 3.1.0
+info:
+  title: Golem Intel Local API
+  version: 0.1.0-alpha.0
+  description: >-
+    Evidence-first API for local competitive research. Mutating operations are
+    asynchronous and return a durable run identifier.
+  license:
+    name: Elastic License 2.0
+    identifier: Elastic-2.0
+servers:
+  - url: http://127.0.0.1:7465
+security:
+  - bearerAuth: []
+  - sessionCookie: []
+paths:
+  /v1/health:
+    get:
+      operationId: healthGet
+      security: []
+      responses:
+        "200":
+          description: Service health
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+  /v1/session/bootstrap:
+    post:
+      operationId: sessionBootstrap
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionBootstrapRequest"
+      responses:
+        "200":
+          description: One-time dashboard ticket exchanged for an HttpOnly session
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Session" }
+        "401": { $ref: "#/components/responses/Problem" }
+  /v1/session:
+    get:
+      operationId: sessionGet
+      security:
+        - sessionCookie: []
+      responses:
+        "200":
+          description: Current dashboard session and CSRF token
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Session" }
+        "401": { $ref: "#/components/responses/Problem" }
+  /v1/comparisons:
+    post:
+      operationId: comparisonStart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ComparisonStartRequest"
+      responses:
+        "202":
+          description: Comparison accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Run"
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+  /v1/research:
+    post:
+      operationId: researchStart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResearchStartRequest"
+      responses:
+        "202":
+          description: Research accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Run"
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+  /v1/runs:
+    get:
+      operationId: runList
+      parameters:
+        - in: query
+          name: project_id
+          schema: { type: string }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+      responses:
+        "200":
+          description: Recent runs
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Run" }
+  /v1/runs/{runId}:
+    get:
+      operationId: runGet
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "200":
+          description: Durable run state
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RunDetail" }
+        "404": { $ref: "#/components/responses/Problem" }
+  /v1/runs/{runId}/events:
+    get:
+      operationId: runEventsStream
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+        - in: header
+          name: Last-Event-ID
+          schema: { type: string }
+      responses:
+        "200":
+          description: Ordered run event stream
+          content:
+            text/event-stream:
+              schema: { type: string }
+  /v1/runs/{runId}/cancel:
+    post:
+      operationId: runCancel
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                reason: { type: string, maxLength: 500 }
+      responses:
+        "202":
+          description: Cancellation requested
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Run" }
+        "409": { $ref: "#/components/responses/Problem" }
+  /v1/runs/{runId}/replay:
+    post:
+      operationId: runReplay
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "202":
+          description: Replay accepted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Run" }
+        "409": { $ref: "#/components/responses/Problem" }
+  /v1/runs/{runId}/report:
+    get:
+      operationId: reportGet
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "200":
+          description: Cited comparison report
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ComparisonReport" }
+        "404": { $ref: "#/components/responses/Problem" }
+  /v1/search:
+    get:
+      operationId: searchGet
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema: { type: string, minLength: 2, maxLength: 200 }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        "200":
+          description: Evidence-backed local search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SearchResult" }
+  /v1/entities/{entityId}:
+    get:
+      operationId: entityGet
+      parameters:
+        - in: path
+          name: entityId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Entity header and observed identifiers
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Entity" }
+        "404": { $ref: "#/components/responses/Problem" }
+  /v1/monitoring/status:
+    get:
+      operationId: monitoringStatusGet
+      responses:
+        "200":
+          description: Runtime and connector health
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MonitoringStatus" }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque-local-token
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: golem_intel_session
+  parameters:
+    RunId:
+      in: path
+      name: runId
+      required: true
+      schema: { type: string, minLength: 1 }
+  responses:
+    Problem:
+      description: RFC 9457 problem detail
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+  schemas:
+    Health:
+      type: object
+      additionalProperties: false
+      required: [status, version, database, worker]
+      properties:
+        status: { enum: [ok, degraded] }
+        version: { type: string }
+        database: { enum: [available, unavailable] }
+        worker: { enum: [available, unavailable] }
+    SessionBootstrapRequest:
+      type: object
+      additionalProperties: false
+      required: [token]
+      properties:
+        token:
+          type: string
+          minLength: 43
+          maxLength: 43
+          pattern: "^[A-Za-z0-9_-]{43}$"
+    Session:
+      type: object
+      additionalProperties: false
+      required: [csrf, expires_at]
+      properties:
+        csrf: { type: string, minLength: 32 }
+        expires_at: { type: string, format: date-time }
+    Problem:
+      type: object
+      additionalProperties: true
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri-reference }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string, format: uri-reference }
+        code: { type: string }
+    ComparisonStartRequest:
+      type: object
+      additionalProperties: false
+      required: [project_id, target_ids]
+      properties:
+        project_id: { type: string, minLength: 1, maxLength: 100 }
+        target_ids:
+          type: array
+          minItems: 2
+          maxItems: 50
+          uniqueItems: true
+          items: { type: string, minLength: 1, maxLength: 100 }
+        connector_ids:
+          type: array
+          maxItems: 20
+          uniqueItems: true
+          items: { type: string }
+          default: [fixture.competitive-pulse]
+        goal: { type: string, maxLength: 1000 }
+        simulate:
+          enum: [none, source_failure, corrupt_artifact, slow]
+          default: none
+    ResearchStartRequest:
+      type: object
+      additionalProperties: false
+      required: [project_id, question, target_ids]
+      properties:
+        project_id: { type: string, minLength: 1, maxLength: 100 }
+        question: { type: string, minLength: 3, maxLength: 2000 }
+        target_ids:
+          type: array
+          minItems: 1
+          maxItems: 50
+          uniqueItems: true
+          items: { type: string, minLength: 1, maxLength: 100 }
+        source_budget: { type: integer, minimum: 1, maximum: 100, default: 20 }
+    RunStatus:
+      enum: [queued, running, succeeded, partial, failed, cancelled]
+    RunFields:
+      type: object
+      required:
+        [id, project_id, workflow, status, created_at, updated_at, progress]
+      properties:
+        id: { type: string }
+        project_id: { type: string }
+        workflow: { enum: [compare, research] }
+        status: { $ref: "#/components/schemas/RunStatus" }
+        progress: { type: number, minimum: 0, maximum: 1 }
+        stage: { type: string }
+        created_at: { type: string, format: date-time }
+        started_at: { type: [string, "null"], format: date-time }
+        completed_at: { type: [string, "null"], format: date-time }
+        updated_at: { type: string, format: date-time }
+        replay_of: { type: [string, "null"] }
+        error_code: { type: [string, "null"] }
+        error_message: { type: [string, "null"] }
+        report_available: { type: boolean, default: false }
+        worker_version: { type: string, minLength: 1 }
+        model_version: { type: string, minLength: 1 }
+        connector_version: { type: string, minLength: 1 }
+        parser_version: { type: string, minLength: 1 }
+        input_sha256: { type: string, pattern: "^[a-f0-9]{64}$" }
+        input_schema_id: { type: string, minLength: 1 }
+        input_size_bytes: { type: integer, minimum: 1 }
+    Run:
+      description: >-
+        Durable run header. Provenance and immutable-input fields appear after
+        the corresponding snapshot or successful derivation has been recorded.
+      allOf:
+        - $ref: "#/components/schemas/RunFields"
+      unevaluatedProperties: false
+    RunDetail:
+      description: Durable run header with its ordered events and committed artifacts.
+      allOf:
+        - $ref: "#/components/schemas/RunFields"
+        - type: object
+          required: [events, artifacts]
+          properties:
+            events:
+              type: array
+              items: { $ref: "#/components/schemas/RunEvent" }
+            artifacts:
+              type: array
+              items: { $ref: "#/components/schemas/Artifact" }
+      unevaluatedProperties: false
+    RunEvent:
+      type: object
+      additionalProperties: false
+      required:
+        [id, run_id, sequence, stage, level, message, progress, recorded_at]
+      properties:
+        id: { type: string }
+        run_id: { type: string }
+        sequence: { type: integer, minimum: 1 }
+        stage: { type: string }
+        level: { enum: [debug, info, warning, error] }
+        message: { type: string }
+        progress: { type: number, minimum: 0, maximum: 1 }
+        recorded_at: { type: string, format: date-time }
+    Artifact:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          id,
+          run_id,
+          kind,
+          relative_path,
+          media_type,
+          sha256,
+          size_bytes,
+          schema_id,
+          data_class,
+        ]
+      properties:
+        id: { type: string }
+        run_id: { type: string }
+        kind: { enum: [arrow, parquet, report, raw, manifest] }
+        relative_path: { type: string }
+        media_type: { type: string }
+        sha256: { type: string, pattern: "^[a-f0-9]{64}$" }
+        size_bytes: { type: integer, minimum: 0 }
+        row_count: { type: integer, minimum: 0 }
+        schema_id: { type: string }
+        data_class:
+          { enum: [public, first_party, licensed_business_contact, restricted] }
+    Citation:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          observation_id,
+          entity_id,
+          source_url,
+          observed_at,
+          connector_version,
+          confidence,
+        ]
+      properties:
+        observation_id: { type: string }
+        entity_id: { type: string }
+        source_url: { type: string, format: uri-reference }
+        native_id: { type: string }
+        observed_at: { type: string, format: date-time }
+        connector_version: { type: string }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+    MetricDefinition:
+      type: object
+      additionalProperties: false
+      required: [id, version, label, numerator, denominator, period]
+      properties:
+        id: { type: string }
+        version: { type: string }
+        label: { type: string }
+        numerator: { type: string }
+        denominator: { type: string }
+        period: { type: string }
+    TargetFinding:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          entity_id,
+          entity_name,
+          follower_delta,
+          median_engagement_rate,
+          posting_cadence_per_week,
+          content_format_mix,
+          confidence,
+          citations,
+        ]
+      properties:
+        entity_id: { type: string }
+        entity_name: { type: string }
+        follower_delta: { type: number }
+        median_engagement_rate: { type: number }
+        posting_cadence_per_week: { type: number }
+        content_format_mix:
+          type: object
+          additionalProperties:
+            type: number
+            minimum: 0
+            maximum: 1
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        warnings:
+          type: array
+          items: { type: string }
+        citations:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/Citation" }
+    Derivation:
+      type: object
+      additionalProperties: false
+      required:
+        [worker_version, model_version, connector_version, parser_version]
+      properties:
+        worker_version: { type: string, minLength: 1 }
+        model_version: { type: string, minLength: 1 }
+        connector_version: { type: string, minLength: 1 }
+        parser_version: { type: string, minLength: 1 }
+    ComparisonReport:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          schema_version,
+          run_id,
+          workflow,
+          research_plan,
+          derivation,
+          generated_at,
+          title,
+          summary,
+          targets,
+          metric_definitions,
+          contradictions,
+          limitations,
+        ]
+      properties:
+        schema_version: { const: "golem.comparison-report.v1" }
+        run_id: { type: string }
+        workflow: { enum: [compare, research] }
+        research_question:
+          type: [string, "null"]
+          maxLength: 2000
+        source_budget:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 100
+        research_plan:
+          type: array
+          minItems: 1
+          items: { type: string, minLength: 1 }
+        derivation: { $ref: "#/components/schemas/Derivation" }
+        generated_at: { type: string, format: date-time }
+        title: { type: string }
+        summary: { type: string }
+        targets:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/TargetFinding" }
+        metric_definitions:
+          type: array
+          items: { $ref: "#/components/schemas/MetricDefinition" }
+        contradictions:
+          type: array
+          items: { type: string }
+        limitations:
+          type: array
+          items: { type: string }
+      allOf:
+        - if:
+            required: [workflow]
+            properties:
+              workflow: { const: research }
+          then:
+            required: [research_question, source_budget]
+            properties:
+              research_question: { type: string, minLength: 3, maxLength: 2000 }
+              source_budget: { type: integer, minimum: 1, maximum: 100 }
+              research_plan: { type: array, minItems: 1 }
+          else:
+            properties:
+              research_question: { type: "null" }
+              source_budget: { type: "null" }
+    SearchResult:
+      type: object
+      additionalProperties: false
+      required: [kind, id, label, excerpt, confidence]
+      properties:
+        kind: { enum: [entity, report, claim, observation] }
+        id: { type: string }
+        label: { type: string }
+        excerpt: { type: string }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        run_id: { type: [string, "null"] }
+    Entity:
+      type: object
+      additionalProperties: false
+      required:
+        [id, type, display_name, resolution_state, identifiers, updated_at]
+      properties:
+        id: { type: string }
+        type:
+          {
+            enum:
+              [
+                organization,
+                brand,
+                creator,
+                professional_profile,
+                social_account,
+              ],
+          }
+        display_name: { type: string }
+        resolution_state: { enum: [observed, candidate, confirmed, rejected] }
+        identifiers:
+          type: array
+          items:
+            type: object
+            required: [scheme, value, source]
+            properties:
+              scheme: { type: string }
+              value: { type: string }
+              source: { type: string }
+        updated_at: { type: string, format: date-time }
+    MonitoringStatus:
+      type: object
+      additionalProperties: false
+      required: [daemon, worker, queued_runs, running_runs, connectors]
+      properties:
+        daemon: { enum: [available, unavailable] }
+        worker: { enum: [available, unavailable] }
+        queued_runs: { type: integer, minimum: 0 }
+        running_runs: { type: integer, minimum: 0 }
+        connectors:
+          type: array
+          items:
+            type: object
+            required: [id, status, acquisition_mode, cost_state]
+            properties:
+              id: { type: string }
+              status: { enum: [available, unavailable, degraded] }
+              acquisition_mode: { type: string }
+              cost_state:
+                { enum: [free, provider_reported, not_reported, not_requested] }

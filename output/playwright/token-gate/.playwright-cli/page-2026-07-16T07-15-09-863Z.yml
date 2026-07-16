@@ -1,0 +1,91 @@
+- generic [ref=f3e14]:
+  - complementary [ref=f3e15]:
+    - generic [ref=f3e16]:
+      - generic [ref=f3e17]: G
+      - generic [ref=f3e18]:
+        - strong [ref=f3e19]: Golem Intel
+        - generic [ref=f3e20]: Community · local
+    - navigation "Intelligence workspaces" [ref=f3e21]:
+      - list [ref=f3e22]:
+        - listitem [ref=f3e23]:
+          - generic [ref=f3e24]:
+            - generic [ref=f3e25]: Briefing
+            - generic [ref=f3e26]: soon
+        - listitem [ref=f3e27]:
+          - link "Research" [ref=f3e28] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=f3e30]:
+          - generic [ref=f3e31]:
+            - generic [ref=f3e32]: Companies & Brands
+            - generic [ref=f3e33]: soon
+        - listitem [ref=f3e34]:
+          - generic [ref=f3e35]:
+            - generic [ref=f3e36]: Creators
+            - generic [ref=f3e37]: soon
+        - listitem [ref=f3e38]:
+          - generic [ref=f3e39]:
+            - generic [ref=f3e40]: Compare
+            - generic [ref=f3e41]: soon
+        - listitem [ref=f3e42]:
+          - generic [ref=f3e43]:
+            - generic [ref=f3e44]: Trends
+            - generic [ref=f3e45]: soon
+        - listitem [ref=f3e46]:
+          - generic [ref=f3e47]:
+            - generic [ref=f3e48]: Graph
+            - generic [ref=f3e49]: soon
+        - listitem [ref=f3e50]:
+          - generic [ref=f3e51]:
+            - generic [ref=f3e52]: Watchlists & Alerts
+            - generic [ref=f3e53]: soon
+        - listitem [ref=f3e54]:
+          - generic [ref=f3e55]:
+            - generic [ref=f3e56]: Datasets & Evidence
+            - generic [ref=f3e57]: soon
+        - listitem [ref=f3e58]:
+          - generic [ref=f3e59]:
+            - generic [ref=f3e60]: Reports & Runs
+            - generic [ref=f3e61]: soon
+        - listitem [ref=f3e62]:
+          - generic [ref=f3e63]:
+            - generic [ref=f3e64]: Sources
+            - generic [ref=f3e65]: soon
+        - listitem [ref=f3e66]:
+          - generic [ref=f3e67]:
+            - generic [ref=f3e68]: Governance
+            - generic [ref=f3e69]: soon
+        - listitem [ref=f3e70]:
+          - generic [ref=f3e71]:
+            - generic [ref=f3e72]: System Health
+            - generic [ref=f3e73]: soon
+    - generic [ref=f3e76]:
+      - text: Policy gate active
+      - generic [ref=f3e77]: public · authorized · licensed
+  - main [ref=f3e78]:
+    - generic [ref=f3e79]:
+      - generic [ref=f3e80]:
+        - generic [ref=f3e81]:
+          - paragraph [ref=f3e82]: COMPETITIVE PULSE / RESEARCH
+          - heading "Trace the claim. Challenge the conclusion." [level=1] [ref=f3e83]
+          - paragraph [ref=f3e84]: One replayable investigation from collection policy to cited evidence.
+        - generic [ref=f3e87]:
+          - text: Local runtime
+          - generic [ref=f3e88]: Go · Python · Arrow
+      - region [ref=f3e89]:
+        - generic [ref=f3e90]:
+          - generic [ref=f3e91]:
+            - generic [ref=f3e92]: "01"
+            - generic [ref=f3e93]:
+              - heading "Competitive comparison" [level=2] [ref=f3e94]
+              - paragraph [ref=f3e95]: Three synthetic brands · YouTube-style public observations · zero live spend
+          - generic [ref=f3e96]:
+            - generic [ref=f3e97]: Failure mode
+            - combobox "Failure mode" [ref=f3e98]:
+              - option "Normal run" [selected]
+              - option "Slow / cancellable"
+              - option "Source failure"
+              - option "Corrupt artifact"
+            - button "Start research" [ref=f3e99] [cursor=pointer]
+      - generic [ref=f3e100]:
+        - heading "No active investigation" [level=2] [ref=f3e105]
+        - paragraph [ref=f3e106]: Start the golden comparison to exercise the complete local pipeline.

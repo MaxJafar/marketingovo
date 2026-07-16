@@ -1,0 +1,67 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Golem Intel",
+  "version": "0.1.0-alpha.0",
+  "identifier": "com.golemworkers.golem-intel",
+  "build": {
+    "frontendDist": "../shell"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "label": "main",
+        "title": "Golem Intel — Starting",
+        "url": "index.html",
+        "width": 1440,
+        "height": 920,
+        "minWidth": 1024,
+        "minHeight": 700,
+        "center": true,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; connect-src 'none'; font-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; frame-ancestors 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": true,
+    "targets": "all",
+    "category": "DeveloperTool",
+    "publisher": "GolemWorkers",
+    "homepage": "https://golemworkers.com/intel",
+    "copyright": "Copyright 2026 GolemWorkers",
+    "license": "Elastic-2.0",
+    "licenseFile": "../../../LICENSE",
+    "icon": ["icons/icon.png"],
+    "shortDescription": "Evidence-first competitive and creator intelligence",
+    "longDescription": "A local-first research command center with cited evidence, replayable runs and agent integrations.",
+    "resources": ["runtime/**/*"],
+    "macOS": {
+      "minimumSystemVersion": "13.0"
+    },
+    "windows": {
+      "wix": {
+        "language": "en-US"
+      }
+    },
+    "linux": {
+      "appimage": {
+        "bundleMediaFramework": false
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/GolemWorkers/golem-intel/releases/latest/download/latest.json"
+      ],
+      "pubkey": "__GOLEM_INTEL_UPDATER_PUBLIC_KEY__",
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}

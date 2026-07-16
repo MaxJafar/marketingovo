@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "golem-intel": {
+      "command": "node",
+      "args": ["./dist/golem-intel-mcp.mjs"],
+      "cwd": "."
+    }
+  }
+}
+

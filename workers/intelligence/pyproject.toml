@@ -1,0 +1,48 @@
+[project]
+name = "golem-intel-worker"
+version = "0.1.0"
+description = "Bounded, deterministic intelligence worker for Golem Intel"
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+license = { text = "Elastic-2.0" }
+dependencies = [
+  "duckdb==1.3.2",
+  "networkx==3.5",
+  "polars==1.31.0",
+  "protobuf==7.35.1",
+  "pyarrow==20.0.0",
+  "pydantic==2.11.7",
+  "pytz==2025.2",
+]
+
+[project.scripts]
+golem-intel-worker = "golem_intel_worker.cli:main"
+
+[dependency-groups]
+dev = [
+  "hypothesis==6.135.32",
+  "pytest==8.4.1",
+  "ruff==0.12.4",
+]
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/golem_intel_worker"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-config --strict-markers"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "RUF", "S"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S603"]

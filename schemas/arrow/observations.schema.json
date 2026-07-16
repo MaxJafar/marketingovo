@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "golem://arrow/observations/v1",
+  "title": "Golem Intel observation Arrow schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_id", "fields"],
+  "properties": {
+    "schema_id": { "const": "golem.observations.v1" },
+    "fields": {
+      "type": "array",
+      "prefixItems": [
+        { "const": { "name": "observation_id", "type": "utf8", "nullable": false } },
+        { "const": { "name": "entity_id", "type": "utf8", "nullable": false } },
+        { "const": { "name": "entity_name", "type": "utf8", "nullable": false } },
+        { "const": { "name": "platform", "type": "utf8", "nullable": false } },
+        { "const": { "name": "content_id", "type": "utf8", "nullable": true } },
+        { "const": { "name": "dimension", "type": "utf8", "nullable": true } },
+        { "const": { "name": "metric", "type": "utf8", "nullable": false } },
+        { "const": { "name": "metric_definition_version", "type": "utf8", "nullable": false } },
+        { "const": { "name": "numerator", "type": "float64", "nullable": true } },
+        { "const": { "name": "denominator", "type": "float64", "nullable": true } },
+        { "const": { "name": "value", "type": "float64", "nullable": false } },
+        { "const": { "name": "unit", "type": "utf8", "nullable": false } },
+        { "const": { "name": "published_at", "type": "timestamp[us,UTC]", "nullable": true } },
+        { "const": { "name": "observed_at", "type": "timestamp[us,UTC]", "nullable": false } },
+        { "const": { "name": "recorded_at", "type": "timestamp[us,UTC]", "nullable": false } },
+        { "const": { "name": "valid_from", "type": "timestamp[us,UTC]", "nullable": false } },
+        { "const": { "name": "valid_to", "type": "timestamp[us,UTC]", "nullable": true } },
+        { "const": { "name": "source_url", "type": "utf8", "nullable": false } },
+        { "const": { "name": "native_id", "type": "utf8", "nullable": false } },
+        { "const": { "name": "connector_version", "type": "utf8", "nullable": false } },
+        { "const": { "name": "classification", "type": "utf8", "nullable": false } },
+        { "const": { "name": "confidence", "type": "float64", "nullable": false } },
+        { "const": { "name": "artifact_hash", "type": "utf8", "nullable": false } },
+        { "const": { "name": "extraction_pointer", "type": "utf8", "nullable": false } },
+        { "const": { "name": "freshness_seconds", "type": "int64", "nullable": false } },
+        { "const": { "name": "availability", "type": "utf8", "nullable": false } },
+        { "const": { "name": "coverage", "type": "float64", "nullable": false } },
+        { "const": { "name": "acquisition_mode", "type": "utf8", "nullable": false } },
+        { "const": { "name": "data_class", "type": "utf8", "nullable": false } },
+        { "const": { "name": "permitted_purpose", "type": "utf8", "nullable": false } },
+        { "const": { "name": "retention_until", "type": "timestamp[us,UTC]", "nullable": false } },
+        { "const": { "name": "rights_state", "type": "utf8", "nullable": false } }
+      ],
+      "minItems": 32,
+      "maxItems": 32
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "@golem-intel/sdk",
+  "version": "0.1.0-alpha.0",
+  "description": "Generated-contract client for the Golem Intel local API",
+  "license": "Elastic-2.0",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./node": "./dist/node.js",
+    "./generated": "./dist/generated/openapi.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
+

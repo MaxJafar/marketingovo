@@ -1,0 +1,43 @@
+{
+  "id": "golem-intel",
+  "name": "Golem Intel",
+  "description": "Evidence-backed competitive research through six safe workflow-level tools.",
+  "version": "0.1.0-alpha.0",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "serverUrl": {
+        "type": "string",
+        "default": "http://127.0.0.1:7465",
+        "description": "Golem Intel loopback API URL."
+      },
+      "tokenFile": {
+        "type": "string",
+        "description": "Path to the local service-token file."
+      },
+      "timeoutMs": {
+        "type": "number",
+        "minimum": 1000,
+        "maximum": 120000,
+        "default": 30000
+      }
+    }
+  },
+  "activation": { "onStartup": true },
+  "contracts": {
+    "tools": [
+      "golem_intel_research_start",
+      "golem_intel_compare_start",
+      "golem_intel_run_get",
+      "golem_intel_search",
+      "golem_intel_entity_get",
+      "golem_intel_monitoring_status"
+    ]
+  },
+  "toolMetadata": {
+    "golem_intel_research_start": { "optional": true },
+    "golem_intel_compare_start": { "optional": true }
+  }
+}
+

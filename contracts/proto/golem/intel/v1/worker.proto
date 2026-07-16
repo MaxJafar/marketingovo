@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package golem.intel.v1;
+
+option go_package = "github.com/GolemWorkers/golem-intel/gen/go/golem/intel/v1;intelv1";
+
+// WorkerEnvelope is a length-delimited control message. Bulk evidence never
+// travels inside Protobuf; it moves through hash-addressed Arrow spool files.
+message WorkerEnvelope {
+  uint32 protocol_version = 1;
+  oneof message {
+    StartAnalysis start_analysis = 10;
+    CancelAnalysis cancel_analysis = 11;
+    WorkerEvent worker_event = 12;
+    AnalysisResult analysis_result = 13;
+  }
+}
+
+message StartAnalysis {
+  string run_id = 1;
+  string project_id = 2;
+  string workspace_path = 3;
+  string input_path = 4;
+  string input_sha256 = 5;
+  string input_schema_id = 6;
+  string output_directory = 7;
+  repeated string target_ids = 8;
+  map<string, string> options = 9;
+  AnalysisWorkflow workflow = 10;
+  string research_question = 11;
+  uint32 source_budget = 12;
+}
+
+enum AnalysisWorkflow {
+  ANALYSIS_WORKFLOW_UNSPECIFIED = 0;
+  ANALYSIS_WORKFLOW_COMPARE = 1;
+  ANALYSIS_WORKFLOW_RESEARCH = 2;
+}
+
+message CancelAnalysis {
+  string run_id = 1;
+  string reason = 2;
+}
+
+message WorkerEvent {
+  string run_id = 1;
+  uint64 sequence = 2;
+  string stage = 3;
+  string level = 4;
+  string message = 5;
+  double progress = 6;
+  string recorded_at = 7;
+}
+
+message ArtifactDescriptor {
+  string relative_path = 1;
+  string media_type = 2;
+  string sha256 = 3;
+  uint64 size_bytes = 4;
+  uint64 row_count = 5;
+  string schema_id = 6;
+  string minimum_observed_at = 7;
+  string maximum_observed_at = 8;
+  string data_class = 9;
+}
+
+message AnalysisResult {
+  string run_id = 1;
+  bool succeeded = 2;
+  string error_code = 3;
+  string error_message = 4;
+  repeated ArtifactDescriptor artifacts = 5;
+  string report_relative_path = 6;
+  string report_sha256 = 7;
+  string model_version = 8;
+  string worker_version = 9;
+}

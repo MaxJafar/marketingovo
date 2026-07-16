@@ -1,0 +1,19 @@
+{
+  "name": "@golem-intel/codex-plugin",
+  "version": "0.1.0-alpha.0",
+  "private": true,
+  "description": "Installable Codex bundle for Golem Intel",
+  "license": "Elastic-2.0",
+  "type": "module",
+  "files": [".codex-plugin", ".mcp.json", "dist", "skills"],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "node --check scripts/build.mjs && node --check scripts/validate.mjs",
+    "lint": "node --check scripts/build.mjs && node --check scripts/validate.mjs",
+    "test": "node scripts/validate.mjs"
+  },
+  "dependencies": { "@golem-intel/mcp": "workspace:*" },
+  "devDependencies": { "esbuild": "^0.25.9" },
+  "engines": { "node": ">=24 <25" }
+}
+

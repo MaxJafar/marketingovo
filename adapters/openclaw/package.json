@@ -1,0 +1,41 @@
+{
+  "name": "@golem-intel/openclaw",
+  "version": "0.1.0-alpha.0",
+  "description": "OpenClaw adapter for Golem Intel workflow-level tools",
+  "license": "Elastic-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "openclaw.plugin.json",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "node scripts/validate.mjs && vitest run"
+  },
+  "dependencies": {
+    "@golem-intel/contracts": "workspace:*",
+    "@golem-intel/sdk": "workspace:*",
+    "typebox": "1.1.39"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.5.17"
+  },
+  "peerDependenciesMeta": {
+    "openclaw": {
+      "optional": true
+    }
+  }
+}

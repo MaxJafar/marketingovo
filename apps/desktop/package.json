@@ -1,0 +1,16 @@
+{
+  "name": "@golem-intel/desktop",
+  "version": "0.1.0-alpha.0",
+  "private": true,
+  "description": "Restricted Tauri 2 shell for the Golem Intel local runtime",
+  "license": "Elastic-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/validate.mjs",
+    "lint": "node scripts/validate.mjs",
+    "test": "node scripts/validate.mjs",
+    "typecheck": "node scripts/validate.mjs",
+    "native:check": "cargo check --manifest-path src-tauri/Cargo.toml",
+    "native:test": "cargo test --manifest-path src-tauri/Cargo.toml"
+  }
+}

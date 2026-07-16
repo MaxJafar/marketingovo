@@ -1,0 +1,57 @@
+{
+  "schema_version": "golem.comparison-report.v1",
+  "run_id": "run_sample_02",
+  "workflow": "research",
+  "research_question": "How did the monitored public engagement signals change?",
+  "source_budget": 4,
+  "research_plan": [
+    "Use the committed fixture snapshot as one bounded source.",
+    "Preserve contradictory observations and cite each material finding."
+  ],
+  "derivation": {
+    "worker_version": "golem-intel-worker@0.1.0-alpha.0",
+    "model_version": "competitive-pulse-baseline@0.1.0",
+    "connector_version": "fixture.competitive-pulse@1",
+    "parser_version": "golem-intel-parser@0.1.0-alpha.0"
+  },
+  "generated_at": "2026-07-16T08:00:03Z",
+  "title": "Research dossier: monitored public engagement signals",
+  "summary": "The dossier used one of four permitted source slots and does not imply uncollected coverage.",
+  "targets": [
+    {
+      "entity_id": "orbit-coffee",
+      "entity_name": "Orbit Coffee",
+      "follower_delta": 240,
+      "median_engagement_rate": 0.02673,
+      "posting_cadence_per_week": 1,
+      "content_format_mix": {
+        "image": 1
+      },
+      "confidence": 0.9,
+      "warnings": [],
+      "citations": [
+        {
+          "observation_id": "obs_orbit_engagement_01",
+          "entity_id": "orbit-coffee",
+          "source_url": "https://social.example.invalid/orbit-coffee",
+          "native_id": "engagement-01",
+          "observed_at": "2026-06-01T00:00:00Z",
+          "connector_version": "fixture.competitive-pulse@1",
+          "confidence": 1
+        }
+      ]
+    }
+  ],
+  "metric_definitions": [
+    {
+      "id": "engagement-rate",
+      "version": "v1",
+      "label": "Median engagement rate",
+      "numerator": "source-declared public engagements",
+      "denominator": "source-declared public views",
+      "period": "per content observation"
+    }
+  ],
+  "contradictions": [],
+  "limitations": ["The contract sample contains synthetic evidence only."]
+}
