@@ -2,7 +2,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { ExtractionRule } from "@golem-seo/contracts";
+import type { ExtractionRule } from "@agentseoapp/contracts";
 import { ExtractionRulesError, GolemLocalRuntime } from "./index.js";
 
 const rule = (

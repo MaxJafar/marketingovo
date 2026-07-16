@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { GolemSeoClient } from "@golem-seo/sdk";
+import { GolemSeoClient } from "@agentseoapp/sdk";
 
 export interface LocalServiceResolution<T> {
   dashboardUrl: string;

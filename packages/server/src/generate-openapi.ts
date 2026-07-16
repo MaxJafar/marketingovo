@@ -1,7 +1,7 @@
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { GolemLocalRuntime } from "@golem-seo/runtime";
+import { AgentSeoLocalRuntime } from "@agentseoapp/runtime";
 import { createLocalServer } from "./index.js";
 
 function sortValue(value: unknown): unknown {
@@ -14,8 +14,9 @@ function sortValue(value: unknown): unknown {
   );
 }
 
-const runtime = new GolemLocalRuntime({
-  dataDir: mkdtempSync(join(tmpdir(), "golem-seo-openapi-")),
+const runtime = new AgentSeoLocalRuntime({
+  // This is an ephemeral generator path, not a persisted-data migration.
+  dataDir: mkdtempSync(join(tmpdir(), "agentseo-openapi-")),
   version: "0.11.0-alpha.0",
 });
 const server = await createLocalServer({ runtime, port: 3210 });

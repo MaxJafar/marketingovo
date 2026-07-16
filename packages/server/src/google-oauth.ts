@@ -5,8 +5,8 @@ import {
   exchangeGoogleAuthorizationCode,
   GoogleOAuthError,
   isGoogleOAuthProvider,
-} from "@golem-seo/integrations";
-import type { GolemLocalRuntime } from "@golem-seo/runtime";
+} from "@agentseoapp/integrations";
+import type { AgentSeoLocalRuntime } from "@agentseoapp/runtime";
 
 export interface GoogleOAuthStartResponse {
   provider: string;
@@ -29,7 +29,7 @@ export class OAuthBrokerProblem extends Error {
 }
 
 export interface GoogleDesktopOAuthBrokerOptions {
-  runtime: GolemLocalRuntime;
+  runtime: AgentSeoLocalRuntime;
   clientId?: string;
   fetchImpl?: typeof fetch;
   transactionTtlMs?: number;
@@ -47,7 +47,7 @@ function writeProblem(
   });
   response.end(
     JSON.stringify({
-      type: `https://golemworkers.com/problems/${problem.code.replaceAll("_", "-")}`,
+      type: `urn:agentseo:problem:${problem.code.replaceAll("_", "-")}`,
       title: problem.title,
       status: problem.status,
       detail: problem.message,
@@ -66,7 +66,7 @@ function writeSuccess(response: ServerResponse, provider: string): void {
     "referrer-policy": "no-referrer",
   });
   response.end(
-    `<!doctype html><meta charset="utf-8"><title>Golem SEO connected</title><style>body{font:16px system-ui;margin:3rem;max-width:42rem}h1{font-size:1.5rem}</style><h1>Google connected</h1><p>${provider === "google-search-console" ? "Search Console" : "Google Analytics 4"} is connected. You can close this window.</p>`,
+    `<!doctype html><meta charset="utf-8"><title>AGENTseo connected</title><style>body{font:16px system-ui;margin:3rem;max-width:42rem}h1{font-size:1.5rem}</style><h1>Google connected</h1><p>${provider === "google-search-console" ? "Search Console" : "Google Analytics 4"} is connected. You can close this window.</p>`,
   );
 }
 
@@ -101,7 +101,7 @@ function callbackProblem(error: unknown): OAuthBrokerProblem {
 }
 
 export class GoogleDesktopOAuthBroker {
-  private readonly runtime: GolemLocalRuntime;
+  private readonly runtime: AgentSeoLocalRuntime;
   private readonly clientId: string | undefined;
   private readonly fetchImpl: typeof fetch | undefined;
   private readonly transactionTtlMs: number;
@@ -126,7 +126,7 @@ export class GoogleDesktopOAuthBroker {
         503,
         "google_oauth_not_configured",
         "Google OAuth is not configured",
-        "Set GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID or pass googleDesktopClientId to the local server.",
+        "Set AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID or pass googleDesktopClientId to the local server. The legacy GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID and GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID names remain migration aliases.",
       );
     }
     if (!isGoogleOAuthProvider(provider)) {

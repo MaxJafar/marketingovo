@@ -5,7 +5,7 @@ import type {
   LeafModuleRegistry,
   Workflow,
   WorkflowRegistry,
-} from "@golem-seo/contracts";
+} from "@agentseoapp/contracts";
 
 export const runtimeWorkflowIds = [
   "audit",

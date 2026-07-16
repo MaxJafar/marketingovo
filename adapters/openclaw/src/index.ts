@@ -15,8 +15,8 @@ import {
   type AgentKeywordResearchStartInput,
   type AgentMonitoringStatusInput,
   type AgentRunGetInput,
-} from "@golem-seo/contracts/agent-tools";
-import { GolemSeoClient } from "@golem-seo/sdk";
+} from "@agentseoapp/contracts/agent-tools";
+import { GolemSeoClient } from "@agentseoapp/sdk";
 
 const toOpenClawInputSchema = <Value>(schema: unknown) =>
   Type.Unsafe<Value>(schema as TSchema);

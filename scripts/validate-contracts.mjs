@@ -108,8 +108,6 @@ const requiredOperations = [
   ["delete", "/api/v1/schedules/{id}"],
   ["post", "/api/v1/export"],
   ["post", "/api/v1/import"],
-  ["post", "/api/v1/golemworkers/device/start"],
-  ["post", "/api/v1/golemworkers/import"],
 ];
 
 function operation(method, path) {
@@ -120,6 +118,14 @@ function operation(method, path) {
 
 for (const [method, path] of requiredOperations) operation(method, path);
 
+assert.deepEqual(
+  Object.keys(openapi.paths ?? {}).filter((path) =>
+    path.startsWith("/api/v1/golemworkers/"),
+  ),
+  [],
+  "OpenAPI must not expose legacy hosted GolemWorkers routes",
+);
+
 assert.ok(
   openapi.components?.securitySchemes?.localServiceToken,
   "OpenAPI is missing local service-token authentication",
@@ -128,10 +134,14 @@ assert.ok(
   openapi.components?.securitySchemes?.localSession,
   "OpenAPI is missing the HttpOnly local-session scheme",
 );
+assert.ok(
+  openapi.components?.securitySchemes?.legacyLocalSession,
+  "OpenAPI is missing the deprecated 1.x local-session compatibility scheme",
+);
 assert.deepEqual(
   openapi.security,
-  [{ localServiceToken: [] }, { localSession: [] }],
-  "OpenAPI must require either the local token or local session by default",
+  [{ localServiceToken: [] }, { localSession: [] }, { legacyLocalSession: [] }],
+  "OpenAPI must require the local token, canonical local session, or deprecated 1.x session alias by default",
 );
 
 const publicOperations = [
@@ -230,11 +240,6 @@ assert.equal(
 assert.ok(
   extractionPreview.responses?.["422"],
   "Extraction preview must document unsafe rule and target rejection",
-);
-
-assert.ok(
-  operation("post", "/api/v1/golemworkers/device/start").responses?.["202"],
-  "Device linking must document its asynchronous 202 state",
 );
 
 const eventContent = operation("get", "/api/v1/runs/{id}/events").responses?.[

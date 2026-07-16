@@ -74,7 +74,7 @@ describe("reportToHtml", () => {
     expect(html).toContain("priority-high");
     expect(html).toContain("priority-medium");
     expect(html).toContain("priority-low");
-    expect(html).toContain("Golem SEO Community Edition");
+    expect(html).toContain("AGENTseo Community Edition");
     expect(html).toContain("Crawl evidence only");
     expect(html).not.toContain("GolemSEO v0.2");
   });

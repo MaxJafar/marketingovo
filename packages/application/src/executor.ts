@@ -6,7 +6,7 @@ import type {
   ModuleStatus,
   Requirement,
   SeoModule,
-} from "@golem-seo/contracts";
+} from "@agentseoapp/contracts";
 
 export interface NodeExecutionResult {
   nodeId: string;

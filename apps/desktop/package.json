@@ -1,8 +1,8 @@
 {
-  "name": "@golem-seo/desktop",
+  "name": "@agentseoapp/desktop",
   "version": "0.11.0-alpha.0",
   "private": true,
-  "description": "Tauri 2 desktop launcher for Golem SEO Community Edition",
+  "description": "Tauri 2 desktop launcher for AGENTseo",
   "license": "Elastic-2.0",
   "type": "module",
   "scripts": {
@@ -11,7 +11,8 @@
     "lint": "node scripts/validate.mjs",
     "test": "node scripts/validate.mjs",
     "native:dev": "tauri dev",
-    "native:build": "tauri build"
+    "native:build": "tauri build",
+    "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.8.4"

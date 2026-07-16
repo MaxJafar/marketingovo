@@ -10,12 +10,12 @@ import type {
   RunComparisonLinkSnapshot,
   RunComparisonPageChange,
   Severity,
-} from "@golem-seo/contracts";
+} from "@agentseoapp/contracts";
 import type {
   StoredPageLinkEdge,
   StoredPageRecord,
   StoredRunLinkGraphSnapshot,
-} from "@golem-seo/storage-sqlite";
+} from "@agentseoapp/storage-sqlite";
 
 export interface RunMetricRecord {
   runId: string | null;

@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
-import type { StartRunInput } from "@golem-seo/contracts";
+import type { StartRunInput } from "@agentseoapp/contracts";
 import type {
   ClaimedSchedule,
   DurableJob,
   GolemDatabase,
-} from "@golem-seo/storage-sqlite";
+} from "@agentseoapp/storage-sqlite";
 import { nextCronOccurrence } from "./cron.js";
 
 export type DurableJobHandler = (

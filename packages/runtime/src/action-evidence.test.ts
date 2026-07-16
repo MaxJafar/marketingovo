@@ -2,8 +2,8 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { Action, IssueInstance } from "@golem-seo/contracts";
-import type { Report } from "@golem-seo/core";
+import type { Action, IssueInstance } from "@agentseoapp/contracts";
+import type { Report } from "@agentseoapp/core";
 import { ActionEvidenceCursorError, GolemLocalRuntime } from "./index.js";
 
 const observedAt = "2026-07-15T10:00:00.000Z";

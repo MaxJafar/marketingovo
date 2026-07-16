@@ -5,7 +5,7 @@ import type {
   LeafModuleRegistry,
   Requirement,
   SeoModule,
-} from "@golem-seo/contracts";
+} from "@agentseoapp/contracts";
 import {
   executePlan,
   executionStatus,

@@ -2,7 +2,7 @@ import { existsSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { Report as EngineReport } from "@golem-seo/core";
+import type { Report as EngineReport } from "@agentseoapp/core";
 import { GolemLocalRuntime } from "./index.js";
 
 const generatedAt = "2026-07-15T12:00:00.000Z";

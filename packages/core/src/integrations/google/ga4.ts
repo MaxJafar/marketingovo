@@ -3,7 +3,7 @@
 // (caller checks `isConfigured` first).
 
 import type { GoogleAccessTokenManager } from "./oauth.js";
-import { safeGoogleAnalyticsFetch } from "@golem-seo/integrations";
+import { safeGoogleAnalyticsFetch } from "@agentseoapp/integrations";
 
 const API = "https://analyticsdata.googleapis.com/v1beta";
 const MAX_PAGE_ROWS = 100_000;
@@ -86,7 +86,7 @@ export class Ga4Client {
       const body = {
         dateRanges: [{ startDate: opts.startDate, endDate: opts.endDate }],
         dimensions: [{ name: "pagePath" }],
-        // Golem SEO's GA4 metrics are explicitly organic. Filtering at the
+        // AGENTseo's GA4 metrics are explicitly organic. Filtering at the
         // provider boundary prevents sessions and key events from paid,
         // direct, referral, and other channels being mislabeled downstream.
         dimensionFilter: {

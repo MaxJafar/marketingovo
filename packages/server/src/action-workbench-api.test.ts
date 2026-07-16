@@ -6,8 +6,8 @@ import type {
   Action,
   ActionService,
   IssueInstance,
-} from "@golem-seo/contracts";
-import { GolemLocalRuntime } from "@golem-seo/runtime";
+} from "@agentseoapp/contracts";
+import { GolemLocalRuntime } from "@agentseoapp/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 const HOST = "127.0.0.1:3210";

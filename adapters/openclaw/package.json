@@ -1,13 +1,8 @@
 {
-  "name": "@golem-seo/openclaw",
+  "name": "@agentseoapp/openclaw",
   "version": "0.11.0-alpha.0",
-  "description": "Official OpenClaw tool adapter for Golem SEO Community Edition",
+  "description": "Official OpenClaw tool adapter for AGENTseo",
   "license": "Elastic-2.0",
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/",
-    "provenance": true
-  },
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
@@ -24,11 +19,12 @@
     "build": "node scripts/build.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "test": "node scripts/validate.mjs"
+    "test": "node scripts/validate.mjs",
+    "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
   },
   "dependencies": {
-    "@golem-seo/contracts": "workspace:*",
-    "@golem-seo/sdk": "workspace:*",
+    "@agentseoapp/contracts": "workspace:*",
+    "@agentseoapp/sdk": "workspace:*",
     "typebox": "1.1.39"
   },
   "devDependencies": {
@@ -57,16 +53,8 @@
       "pluginSdkVersion": "2026.5.17"
     }
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/GolemWorkers/golem-seo.git",
-    "directory": "adapters/openclaw"
-  },
-  "homepage": "https://golemworkers.com/seo",
-  "bugs": {
-    "url": "https://github.com/GolemWorkers/golem-seo/issues"
-  },
   "engines": {
     "node": ">=24 <25"
-  }
+  },
+  "private": true
 }

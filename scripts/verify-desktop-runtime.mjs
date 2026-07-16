@@ -80,7 +80,7 @@ await assertExecutable(chromiumExecutable);
 // signed.
 const deployedChromiumResolver = resolve(
   runtimeRoot,
-  "app/node_modules/.pnpm/node_modules/@golem-seo/core/dist/chromium-runtime.js",
+  "app/node_modules/.pnpm/node_modules/@agentseoapp/core/dist/chromium-runtime.js",
 );
 await access(deployedChromiumResolver);
 process.env.GOLEMSEO_CHROME_PATH = chromiumExecutable;

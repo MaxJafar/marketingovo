@@ -1,13 +1,8 @@
 {
-  "name": "@golem-seo/storage-sqlite",
+  "name": "@agentseoapp/storage-sqlite",
   "version": "0.11.0-alpha.0",
-  "description": "Single-writer SQLite storage and durable jobs for Golem SEO",
+  "description": "Single-writer SQLite storage and durable jobs for AGENTseo",
   "license": "Elastic-2.0",
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/",
-    "provenance": true
-  },
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
@@ -26,26 +21,19 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
   },
   "dependencies": {
-    "@golem-seo/contracts": "workspace:*"
+    "@agentseoapp/contracts": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/GolemWorkers/golem-seo.git",
-    "directory": "packages/storage-sqlite"
-  },
-  "homepage": "https://golemworkers.com/seo",
-  "bugs": {
-    "url": "https://github.com/GolemWorkers/golem-seo/issues"
-  },
   "engines": {
     "node": ">=24"
-  }
+  },
+  "private": true
 }

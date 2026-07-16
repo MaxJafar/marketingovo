@@ -1,8 +1,8 @@
 {
-  "name": "golem-seo-workspace",
+  "name": "agentseo-workspace",
   "version": "0.11.0-alpha.0",
   "private": true,
-  "description": "Golem SEO Community Edition monorepo",
+  "description": "AGENTseo monorepo",
   "license": "Elastic-2.0",
   "packageManager": "pnpm@10.34.5",
   "engines": {
@@ -18,7 +18,7 @@
     "dev": "turbo run dev --parallel",
     "test": "turbo run test --concurrency=2 -- --maxWorkers=2",
     "test:e2e": "playwright test --config=playwright.config.ts",
-    "test:core": "pnpm --filter @golem-seo/core test",
+    "test:core": "pnpm --filter @agentseoapp/core test",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "format": "prettier --write .",
@@ -39,12 +39,15 @@
     "release:test": "node --test scripts/release-policy.test.mjs scripts/updater-metadata-policy.test.mjs",
     "release:manifest": "node scripts/create-release-manifest.mjs",
     "release:updater-metadata": "node scripts/create-updater-metadata.mjs",
-    "npm:prepare-release": "node scripts/prepare-npm-release.mjs",
-    "npm:publish-release": "node scripts/publish-npm-release.mjs",
+    "npm:prepare-release": "node scripts/npm-publication-disabled.mjs npm:prepare-release",
+    "npm:publish-release": "node scripts/npm-publication-disabled.mjs npm:publish-release",
     "npm:release-test": "node --test scripts/npm-release-policy.test.mjs scripts/public-release-policy.test.mjs",
-    "check": "pnpm format:check && pnpm validate:no-containers && pnpm build && pnpm lint && pnpm typecheck && pnpm test && pnpm release:test && pnpm npm:release-test && pnpm benchmark && pnpm validate:contracts && pnpm validate:plugins && pnpm validate:licenses && pnpm pack:smoke",
-    "golem-seo": "node packages/cli/dist/cli.js",
-    "clean": "turbo run clean"
+    "prepublishOnly": "node scripts/npm-publication-disabled.mjs direct-package-publish",
+    "identity:check": "node scripts/identity-migration-policy.mjs",
+    "identity:test": "node --test scripts/identity-migration-policy.test.mjs",
+    "check": "pnpm format:check && pnpm validate:no-containers && pnpm identity:check && pnpm identity:test && pnpm build && pnpm lint && pnpm typecheck && pnpm test && pnpm release:test && pnpm npm:release-test && pnpm benchmark && pnpm validate:contracts && pnpm validate:plugins && pnpm validate:licenses && pnpm pack:smoke",
+    "clean": "turbo run clean",
+    "agentseo": "node packages/cli/dist/cli.js"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1",

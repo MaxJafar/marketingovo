@@ -16,21 +16,21 @@ import { fileURLToPath } from "node:url";
 import type {
   ProjectContextJournalKind,
   ProjectContextProfile,
-} from "@golem-seo/contracts";
+} from "@agentseoapp/contracts";
 import {
   EncryptedFileCredentialStore,
   LockedCredentialStore,
   NativeBrokerCredentialStore,
-} from "@golem-seo/credentials";
-import { importLegacyData } from "@golem-seo/legacy-import";
-import { GolemLocalRuntime, defaultDataDirectory } from "@golem-seo/runtime";
-import { GolemSeoClient } from "@golem-seo/sdk";
-import { createLocalServer, type LocalServer } from "@golem-seo/server";
+} from "@agentseoapp/credentials";
+import { importLegacyData } from "@agentseoapp/legacy-import";
+import { GolemLocalRuntime, defaultDataDirectory } from "@agentseoapp/runtime";
+import { GolemSeoClient } from "@agentseoapp/sdk";
+import { createLocalServer, type LocalServer } from "@agentseoapp/server";
 import {
   createDatabaseBackup,
   GolemDatabase,
   restoreDatabaseBackup,
-} from "@golem-seo/storage-sqlite";
+} from "@agentseoapp/storage-sqlite";
 import {
   findExistingDashboard,
   issueDashboardUrl,
@@ -45,6 +45,11 @@ import {
   WINDOWS_TASK_NAME,
   type ServicePlatform,
 } from "./service-definition.js";
+import {
+  readCompatibleEnvironmentVariable,
+  resolveCliConnectionOptions,
+  resolveCliDataDirectory,
+} from "./compatibility.js";
 
 const VERSION = "0.11.0-alpha.0";
 
@@ -79,8 +84,21 @@ function parseArgs(argv: string[]): ParsedArgs {
 }
 
 function dataDirectory(flags: Map<string, string | boolean>): string {
-  const value = flags.get("data-dir");
-  return typeof value === "string" ? resolve(value) : defaultDataDirectory();
+  return resolveCliDataDirectory({
+    flags,
+    environment: process.env,
+    currentWorkingDirectory: process.cwd(),
+    defaultDataDirectory: defaultDataDirectory(),
+  });
+}
+
+function connectionOptions(flags: Map<string, string | boolean>) {
+  return resolveCliConnectionOptions({
+    flags,
+    environment: process.env,
+    currentWorkingDirectory: process.cwd(),
+    defaultDataDirectory: defaultDataDirectory(),
+  });
 }
 
 function dashboardDirectory(): string | undefined {
@@ -149,14 +167,14 @@ function desktopRuntimeFlags(
 
 function applyDesktopRuntimeFlags(options: DesktopRuntimeFlags): void {
   if (options.chromiumExecutable) {
-    process.env.GOLEMSEO_CHROME_PATH = options.chromiumExecutable;
+    process.env.AGENTSEO_CHROME_PATH = options.chromiumExecutable;
   }
   if (options.browserDirectory) {
     process.env.PLAYWRIGHT_BROWSERS_PATH = options.browserDirectory;
     process.env.PLAYWRIGHT_SKIP_BROWSER_GC = "1";
   }
   if (options.googleDesktopClientId) {
-    process.env.GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID =
+    process.env.AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID =
       options.googleDesktopClientId;
   }
 }
@@ -166,7 +184,10 @@ function vaultFor(root: string, flags: Map<string, string | boolean>) {
   const brokerPath =
     typeof brokerFlag === "string"
       ? resolve(brokerFlag)
-      : process.env.GOLEM_SEO_CREDENTIAL_BROKER?.trim();
+      : readCompatibleEnvironmentVariable("AGENTSEO_CREDENTIAL_BROKER", [
+          "GOLEMSEO_CREDENTIAL_BROKER",
+          "GOLEM_SEO_CREDENTIAL_BROKER",
+        ]);
   if (brokerPath) {
     if (!existsSync(brokerPath))
       throw new Error(`Native credential broker not found: ${brokerPath}`);
@@ -176,10 +197,13 @@ function vaultFor(root: string, flags: Map<string, string | boolean>) {
   const password =
     typeof passwordFile === "string"
       ? readFileSync(resolve(passwordFile), "utf8").trim()
-      : process.env.GOLEM_SEO_MASTER_PASSWORD?.trim();
+      : readCompatibleEnvironmentVariable("AGENTSEO_MASTER_PASSWORD", [
+          "GOLEMSEO_MASTER_PASSWORD",
+          "GOLEM_SEO_MASTER_PASSWORD",
+        ]);
   if (!password) {
     process.stderr.write(
-      "Warning: credential vault is locked. Restart with --credential-broker, --master-password-file, or GOLEM_SEO_MASTER_PASSWORD before connecting integrations.\n",
+      "Warning: credential vault is locked. Restart with --credential-broker, --master-password-file, or AGENTSEO_MASTER_PASSWORD before connecting integrations.\n",
     );
     return new LockedCredentialStore();
   }
@@ -199,7 +223,7 @@ async function serve(args: ParsedArgs): Promise<void> {
     activePort: number,
     reused: boolean,
   ): void => {
-    process.stdout.write(`Golem SEO ${VERSION}\n`);
+    process.stdout.write(`AGENTseo ${VERSION}\n`);
     process.stdout.write(`Service: ${reused ? "reused" : "started"}\n`);
     process.stdout.write(`Dashboard: ${dashboardUrl}\n`);
     process.stdout.write(`API: http://127.0.0.1:${activePort}/api/v1\n`);
@@ -225,7 +249,7 @@ async function serve(args: ParsedArgs): Promise<void> {
     });
     if (!ownerDashboard) {
       throw new Error(
-        `This data directory is owned by Golem SEO PID ${leaseAttempt.owner.pid} on port ${ownerPort}, but its authenticated API is not ready`,
+        `This data directory is owned by AGENTseo PID ${leaseAttempt.owner.pid} on port ${ownerPort}, but its authenticated API is not ready`,
       );
     }
     printResolution(ownerDashboard, ownerPort, true);
@@ -284,13 +308,11 @@ async function serve(args: ParsedArgs): Promise<void> {
 }
 
 async function clientFor(
-  root: string,
   flags: Map<string, string | boolean>,
 ): Promise<GolemSeoClient> {
-  const portValue = flags.get("port");
-  const port = typeof portValue === "string" ? Number(portValue) : 3210;
-  return GolemSeoClient.fromTokenFile(join(root, "service-token"), {
-    baseUrl: `http://127.0.0.1:${port}/api/v1`,
+  const connection = connectionOptions(flags);
+  return GolemSeoClient.fromTokenFile(connection.serviceTokenFile, {
+    baseUrl: connection.apiUrl,
   });
 }
 
@@ -300,23 +322,23 @@ function json(value: unknown): void {
 
 async function project(args: ParsedArgs): Promise<void> {
   const [subcommand = "list", ...rest] = args.rest;
-  const client = await clientFor(dataDirectory(args.flags), args.flags);
+  const client = await clientFor(args.flags);
   if (subcommand === "list") return json(await client.projects.list());
   if (subcommand === "create") {
     const [name, canonicalUrl] = rest;
     if (!name || !canonicalUrl)
-      throw new Error("usage: golem-seo project create <name> <https-url>");
+      throw new Error("usage: agentseo project create <name> <https-url>");
     return json(await client.projects.create({ name, canonicalUrl }));
   }
   if (subcommand === "show") {
-    if (!rest[0]) throw new Error("usage: golem-seo project show <project-id>");
+    if (!rest[0]) throw new Error("usage: agentseo project show <project-id>");
     return json(await client.projects.overview(rest[0]));
   }
   if (subcommand === "export") {
     const [projectId, output] = rest;
     if (!projectId || !output)
       throw new Error(
-        "usage: golem-seo project export <project-id> <output.golemseo>",
+        "usage: agentseo project export <project-id> <output.golemseo>",
       );
     const destination = resolve(output);
     if (!destination.endsWith(".golemseo"))
@@ -328,7 +350,7 @@ async function project(args: ParsedArgs): Promise<void> {
   if (subcommand === "import") {
     const source = rest[0];
     if (!source)
-      throw new Error("usage: golem-seo project import <project.golemseo>");
+      throw new Error("usage: agentseo project import <project.golemseo>");
     const path = resolve(source);
     if (!path.endsWith(".golemseo"))
       throw new Error("The import filename must end in .golemseo");
@@ -340,7 +362,7 @@ async function project(args: ParsedArgs): Promise<void> {
     const projectId = rest[0];
     if (!projectId) {
       throw new Error(
-        "usage: golem-seo project delete <project-id> --confirm-name-file PATH",
+        "usage: agentseo project delete <project-id> --confirm-name-file PATH",
       );
     }
     const confirmation = readBoundedInputFile(
@@ -361,8 +383,8 @@ async function project(args: ParsedArgs): Promise<void> {
 async function audit(args: ParsedArgs): Promise<void> {
   const projectId = args.rest[0];
   if (!projectId)
-    throw new Error("usage: golem-seo audit <project-id> [--render static|js]");
-  const client = await clientFor(dataDirectory(args.flags), args.flags);
+    throw new Error("usage: agentseo audit <project-id> [--render static|js]");
+  const client = await clientFor(args.flags);
   const render = args.flags.get("render");
   const run = await client.runs.start(
     {
@@ -380,7 +402,7 @@ async function audit(args: ParsedArgs): Promise<void> {
 
 async function runCommand(args: ParsedArgs): Promise<void> {
   const [subcommand = "list", id] = args.rest;
-  const client = await clientFor(dataDirectory(args.flags), args.flags);
+  const client = await clientFor(args.flags);
   if (subcommand === "list")
     return json(
       await client.runs.list(
@@ -389,13 +411,13 @@ async function runCommand(args: ParsedArgs): Promise<void> {
           : undefined,
       ),
     );
-  if (!id) throw new Error(`usage: golem-seo run ${subcommand} <run-id>`);
+  if (!id) throw new Error(`usage: agentseo run ${subcommand} <run-id>`);
   if (subcommand === "show") return json(await client.runs.get(id));
   if (subcommand === "compare") {
     const baselineRunId = optionalStringFlag(args.flags, "baseline");
     if (!baselineRunId) {
       throw new Error(
-        "usage: golem-seo run compare <current-run-id> --baseline <baseline-run-id>",
+        "usage: agentseo run compare <current-run-id> --baseline <baseline-run-id>",
       );
     }
     return json(await client.runs.compare(id, baselineRunId));
@@ -404,7 +426,7 @@ async function runCommand(args: ParsedArgs): Promise<void> {
     const pageUrl = optionalStringFlag(args.flags, "url");
     if (!pageUrl) {
       throw new Error(
-        "usage: golem-seo run links <run-id> --url <https-url> [--direction inlinks|outlinks] [--limit N] [--offset N] [--search TEXT]",
+        "usage: agentseo run links <run-id> --url <https-url> [--direction inlinks|outlinks] [--limit N] [--offset N] [--search TEXT]",
       );
     }
     let parsedPageUrl: URL;
@@ -462,10 +484,10 @@ async function issueCommand(args: ParsedArgs): Promise<void> {
   const [subcommand = "list", projectId, fingerprint, decision] = args.rest;
   if (!projectId) {
     throw new Error(
-      "usage: golem-seo issue list <project-id> | issue review <project-id> <fingerprint> <open|ignored|false-positive>",
+      "usage: agentseo issue list <project-id> | issue review <project-id> <fingerprint> <open|ignored|false-positive>",
     );
   }
-  const client = await clientFor(dataDirectory(args.flags), args.flags);
+  const client = await clientFor(args.flags);
   if (subcommand === "list") {
     const limitValue = optionalStringFlag(args.flags, "limit");
     const offsetValue = optionalStringFlag(args.flags, "offset");
@@ -520,7 +542,7 @@ async function issueCommand(args: ParsedArgs): Promise<void> {
   if (subcommand === "review") {
     if (!fingerprint || !decision)
       throw new Error(
-        "usage: golem-seo issue review <project-id> <fingerprint> <open|ignored|false-positive> [--reason-file PATH]",
+        "usage: agentseo issue review <project-id> <fingerprint> <open|ignored|false-positive> [--reason-file PATH]",
       );
     if (!/^[a-f0-9]{16,128}$/iu.test(fingerprint))
       throw new Error("The issue fingerprint is invalid");
@@ -580,10 +602,10 @@ async function contextCommand(args: ParsedArgs): Promise<void> {
   const [subcommand = "show", projectId, kindValue] = args.rest;
   if (!projectId) {
     throw new Error(
-      "usage: golem-seo context show <project-id> | update <project-id> --profile-file PATH --change-summary-file PATH | append <project-id> <observation|decision|constraint|experiment> --title-file PATH --detail-file PATH [--source-run ID]",
+      "usage: agentseo context show <project-id> | update <project-id> --profile-file PATH --change-summary-file PATH | append <project-id> <observation|decision|constraint|experiment> --title-file PATH --detail-file PATH [--source-run ID]",
     );
   }
-  const client = await clientFor(dataDirectory(args.flags), args.flags);
+  const client = await clientFor(args.flags);
   if (subcommand === "show") return json(await client.context.get(projectId));
   if (subcommand === "update") {
     const rawProfile = readBoundedInputFile(args.flags, "profile-file", 65_536);
@@ -652,10 +674,10 @@ async function contextCommand(args: ParsedArgs): Promise<void> {
 
 async function integration(args: ParsedArgs): Promise<void> {
   const [subcommand = "list", provider] = args.rest;
-  const client = await clientFor(dataDirectory(args.flags), args.flags);
+  const client = await clientFor(args.flags);
   if (subcommand === "list") return json(await client.integrations.list());
   if (!provider)
-    throw new Error(`usage: golem-seo integration ${subcommand} <provider>`);
+    throw new Error(`usage: agentseo integration ${subcommand} <provider>`);
   if (subcommand === "test") {
     const project = args.flags.get("project");
     return json(
@@ -677,14 +699,15 @@ async function integration(args: ParsedArgs): Promise<void> {
 async function extractionCommand(args: ParsedArgs): Promise<void> {
   const [subcommand = "templates"] = args.rest;
   if (subcommand !== "templates") {
-    throw new Error("usage: golem-seo extraction templates");
+    throw new Error("usage: agentseo extraction templates");
   }
-  const client = await clientFor(dataDirectory(args.flags), args.flags);
+  const client = await clientFor(args.flags);
   return json(await client.extractionRules.templates());
 }
 
 async function doctor(args: ParsedArgs): Promise<void> {
-  const root = dataDirectory(args.flags);
+  const connection = connectionOptions(args.flags);
+  const root = connection.dataDirectory;
   const checks: Array<{ name: string; ok: boolean; detail: string }> = [];
   checks.push({
     name: "Node.js",
@@ -694,8 +717,8 @@ async function doctor(args: ParsedArgs): Promise<void> {
   checks.push({ name: "Data directory", ok: existsSync(root), detail: root });
   checks.push({
     name: "Service token",
-    ok: existsSync(join(root, "service-token")),
-    detail: join(root, "service-token"),
+    ok: existsSync(connection.serviceTokenFile),
+    detail: connection.serviceTokenFile,
   });
   checks.push({
     name: "Dashboard assets",
@@ -703,7 +726,7 @@ async function doctor(args: ParsedArgs): Promise<void> {
     detail: dashboardDirectory() ?? "missing",
   });
   try {
-    const client = await clientFor(root, args.flags);
+    const client = await clientFor(args.flags);
     const health = await client.health();
     checks.push({
       name: "Local API",
@@ -725,7 +748,7 @@ async function migrate(args: ParsedArgs): Promise<void> {
   const source = args.rest[0];
   if (!source) {
     throw new Error(
-      "usage: golem-seo migrate <legacy-project-directory> [--data-dir PATH] [--master-password-file PATH]",
+      "usage: agentseo migrate <legacy-project-directory> [--data-dir PATH] [--master-password-file PATH]",
     );
   }
   const destination = dataDirectory(args.flags);
@@ -738,7 +761,10 @@ async function migrate(args: ParsedArgs): Promise<void> {
   const password =
     typeof passwordFile === "string"
       ? readFileSync(resolve(passwordFile), "utf8").trim()
-      : process.env.GOLEM_SEO_MASTER_PASSWORD?.trim();
+      : readCompatibleEnvironmentVariable("AGENTSEO_MASTER_PASSWORD", [
+          "GOLEMSEO_MASTER_PASSWORD",
+          "GOLEM_SEO_MASTER_PASSWORD",
+        ]);
   const credentialStore = password
     ? new EncryptedFileCredentialStore(
         join(destination, "vault.json"),
@@ -763,7 +789,7 @@ function offlineLease(args: ParsedArgs) {
   const attempt = acquireDataDirectoryDaemonLease(root, 3210);
   if (attempt.status === "held") {
     throw new Error(
-      `Stop Golem SEO before this operation; PID ${attempt.owner.pid} owns the data directory`,
+      `Stop AGENTseo before this operation; PID ${attempt.owner.pid} owns the data directory`,
     );
   }
   return attempt.lease;
@@ -773,13 +799,13 @@ async function backupCommand(args: ParsedArgs): Promise<void> {
   const destination = args.rest[0];
   if (!destination) {
     throw new Error(
-      "usage: golem-seo backup <destination.db> [--data-dir PATH]",
+      "usage: agentseo backup <destination.db> [--data-dir PATH]",
     );
   }
   const root = dataDirectory(args.flags);
   const databasePath = join(root, "golem-seo.db");
   if (!existsSync(databasePath)) {
-    throw new Error("No Golem SEO database exists in this data directory");
+    throw new Error("No AGENTseo database exists in this data directory");
   }
   const lease = offlineLease(args);
   let database: GolemDatabase | undefined;
@@ -796,12 +822,12 @@ async function restoreCommand(args: ParsedArgs): Promise<void> {
   const source = args.rest[0];
   if (!source) {
     throw new Error(
-      "usage: golem-seo restore <backup.db> --confirm [--expected-sha256 HASH] [--data-dir PATH]",
+      "usage: agentseo restore <backup.db> --confirm [--expected-sha256 HASH] [--data-dir PATH]",
     );
   }
   if (!args.flags.has("confirm")) {
     throw new Error(
-      "Restore replaces the active local database. Re-run with --confirm after stopping Golem SEO.",
+      "Restore replaces the active local database. Re-run with --confirm after stopping AGENTseo.",
     );
   }
   const expected = args.flags.get("expected-sha256");
@@ -855,10 +881,13 @@ function backgroundServiceBroker(args: ParsedArgs): string {
   const configured =
     typeof flag === "string"
       ? flag
-      : process.env.GOLEM_SEO_CREDENTIAL_BROKER?.trim();
+      : readCompatibleEnvironmentVariable("AGENTSEO_CREDENTIAL_BROKER", [
+          "GOLEMSEO_CREDENTIAL_BROKER",
+          "GOLEM_SEO_CREDENTIAL_BROKER",
+        ]);
   if (!configured) {
     throw new Error(
-      "service install requires --credential-broker PATH (or GOLEM_SEO_CREDENTIAL_BROKER); master passwords are never written to service definitions",
+      "service install requires --credential-broker PATH (or AGENTSEO_CREDENTIAL_BROKER); master passwords are never written to service definitions",
     );
   }
   return validateCredentialBrokerPath(resolve(configured));
@@ -972,39 +1001,52 @@ function service(args: ParsedArgs): void {
 }
 
 function help(): void {
-  process.stdout.write(`Golem SEO ${VERSION}\n\n`);
+  process.stdout.write(`AGENTseo ${VERSION}\n\n`);
   process.stdout.write("Usage:\n");
   process.stdout.write(
-    "  golem-seo serve [--port 3210] [--data-dir PATH] [--credential-broker PATH] [--master-password-file PATH]\n",
+    "  agentseo serve [--port 3210] [--data-dir PATH] [--credential-broker PATH] [--master-password-file PATH]\n",
   );
   process.stdout.write(
-    "  golem-seo project list|create|show|export|import|delete\n",
+    "  agentseo project list|create|show|export|import|delete\n",
   );
   process.stdout.write(
-    "  golem-seo audit <project-id> [--render static|js] [--collect-vitals]\n",
+    "  agentseo audit <project-id> [--render static|js] [--collect-vitals]\n",
   );
   process.stdout.write(
-    "  golem-seo run list|show|compare|links|replay|watch|cancel|issues\n",
+    "  agentseo run list|show|compare|links|replay|watch|cancel|issues\n",
   );
   process.stdout.write(
-    "  golem-seo issue list <project-id> [--status STATE] [--severity LEVEL] [--search TEXT] | review <project-id> <fingerprint> <open|ignored|false-positive> [--reason-file PATH]\n",
+    "  agentseo issue list <project-id> [--status STATE] [--severity LEVEL] [--search TEXT] | review <project-id> <fingerprint> <open|ignored|false-positive> [--reason-file PATH]\n",
   );
   process.stdout.write(
-    "  golem-seo context show <project-id> | update <project-id> --profile-file PATH --change-summary-file PATH | append <project-id> <kind> --title-file PATH --detail-file PATH [--source-run ID]\n",
+    "  agentseo context show <project-id> | update <project-id> --profile-file PATH --change-summary-file PATH | append <project-id> <kind> --title-file PATH --detail-file PATH [--source-run ID]\n",
   );
   process.stdout.write(
-    "  golem-seo integration list | test <provider> [--project ID] | remove <provider>\n",
+    "  agentseo integration list | test <provider> [--project ID] | remove <provider>\n",
   );
-  process.stdout.write("  golem-seo extraction templates\n");
-  process.stdout.write("  golem-seo migrate <legacy-project-directory>\n");
-  process.stdout.write("  golem-seo backup <destination.db>\n");
+  process.stdout.write("  agentseo extraction templates\n");
+  process.stdout.write("  agentseo migrate <legacy-project-directory>\n");
+  process.stdout.write("  agentseo backup <destination.db>\n");
   process.stdout.write(
-    "  golem-seo restore <backup.db> --confirm [--expected-sha256 HASH]\n",
+    "  agentseo restore <backup.db> --confirm [--expected-sha256 HASH]\n",
   );
   process.stdout.write(
-    "  golem-seo service install --credential-broker PATH [--chromium-executable PATH] [--browser-directory PATH] [--google-desktop-client-id ID] | status | uninstall\n",
+    "  agentseo service install --credential-broker PATH [--chromium-executable PATH] [--browser-directory PATH] [--google-desktop-client-id ID] | status | uninstall\n",
   );
-  process.stdout.write("  golem-seo doctor\n");
+  process.stdout.write("  agentseo doctor\n");
+  process.stdout.write("\nConnection options:\n");
+  process.stdout.write(
+    "  --data-dir PATH             Data root (AGENTSEO_DATA_DIR)\n",
+  );
+  process.stdout.write(
+    "  --service-token-file PATH   Service token file (AGENTSEO_SERVICE_TOKEN_FILE)\n",
+  );
+  process.stdout.write(
+    "  --api-url URL               Loopback API URL (AGENTSEO_API_URL)\n",
+  );
+  process.stdout.write(
+    "  --port PORT                 Port for the default API URL only (default: 3210)\n",
+  );
 }
 
 async function main(): Promise<void> {
@@ -1055,7 +1097,7 @@ async function main(): Promise<void> {
 
 main().catch((error) => {
   process.stderr.write(
-    `golem-seo: ${error instanceof Error ? error.message : String(error)}\n`,
+    `agentseo: ${error instanceof Error ? error.message : String(error)}\n`,
   );
   process.exitCode = 1;
 });

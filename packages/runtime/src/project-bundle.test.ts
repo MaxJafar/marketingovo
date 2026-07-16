@@ -3,11 +3,11 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { Action, IssueInstance } from "@golem-seo/contracts";
+import type { Action, IssueInstance } from "@agentseoapp/contracts";
 import {
   GOLEMSEO_PROJECT_BUNDLE_LIMITS,
   type GolemSeoProjectBundleV2,
-} from "@golem-seo/contracts/project-bundle";
+} from "@agentseoapp/contracts/project-bundle";
 import { GolemLocalRuntime, ProjectBundleError } from "./index.js";
 
 const hash = (value: string | Uint8Array): string =>

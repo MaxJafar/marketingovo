@@ -282,23 +282,23 @@ export function applyExtraction(
 }
 
 export function loadExtractors(): ExtractorRule[] {
-  // Inline: SCREAMINGCLAW_EXTRACTORS = JSON array of rules.
-  const raw = envStr("GOLEMSEO_EXTRACTORS", "SCREAMINGCLAW_EXTRACTORS", "");
+  // Inline: AGENTSEO_EXTRACTORS = JSON array of rules.
+  const raw = envStr("AGENTSEO_EXTRACTORS", "SCREAMINGCLAW_EXTRACTORS", "");
   if (!raw) return [];
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch (err) {
     throw new Error(
-      `SCREAMINGCLAW_EXTRACTORS: invalid JSON: ${(err as Error).message}`,
+      `AGENTSEO_EXTRACTORS: invalid JSON: ${(err as Error).message}`,
     );
   }
   if (!Array.isArray(parsed)) {
-    throw new Error("SCREAMINGCLAW_EXTRACTORS: expected JSON array");
+    throw new Error("AGENTSEO_EXTRACTORS: expected JSON array");
   }
   if (parsed.length > EXTRACTION_LIMITS.maxRules) {
     throw new Error(
-      `SCREAMINGCLAW_EXTRACTORS: at most ${EXTRACTION_LIMITS.maxRules} rules are allowed`,
+      `AGENTSEO_EXTRACTORS: at most ${EXTRACTION_LIMITS.maxRules} rules are allowed`,
     );
   }
   const out: ExtractorRule[] = [];
@@ -333,7 +333,7 @@ export function loadExtractors(): ExtractorRule[] {
         const validation = validateCustomRuleRegex(re);
         if (!validation.safe) {
           throw new Error(
-            `SCREAMINGCLAW_EXTRACTORS: unsafe regex for ${label}: ${validation.message}`,
+            `AGENTSEO_EXTRACTORS: unsafe regex for ${label}: ${validation.message}`,
           );
         }
         rule.regex = re;

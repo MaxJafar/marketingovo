@@ -1,5 +1,5 @@
 // Lighthouse integration. Wraps the `lighthouse` npm package so
-// GolemSEO can attach a 0-100 score per category (performance,
+// AGENTseo can attach a 0-100 score per category (performance,
 // accessibility, best-practices, SEO) to any URL.
 //
 // Why not just call `lighthouse` directly?
@@ -59,7 +59,7 @@ let loadAttempted = false;
 let loadOk = false;
 
 /**
- * Load the lighthouse + chrome-launcher modules. The GolemSEO
+ * Load the lighthouse + chrome-launcher modules. The AGENTseo
  * build emits ESM, so we use dynamic `import()` rather than
  * `require()`. The deps are also listed in package.json as
  * `optionalDependencies` so a missing Lighthouse install is

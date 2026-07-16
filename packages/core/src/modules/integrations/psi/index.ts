@@ -126,7 +126,7 @@ function formatScores(r: PsiReport): string {
 }
 
 /**
- * Turn a PSI report into the same issue shape the rest of golem-seo
+ * Turn a PSI report into the same issue shape the rest of agentseo
  * uses. Thresholds:
  *   - performance < 50 → "critical" issue
  *   - performance < 90 → "warning"

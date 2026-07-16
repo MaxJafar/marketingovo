@@ -27,7 +27,7 @@ import {
   selectMatchedControlCohort,
   validateWorkflowOutput,
   workflowById,
-} from "@golem-seo/application";
+} from "@agentseoapp/application";
 import {
   AppendProjectContextJournalInputSchema,
   BUILT_IN_EXTRACTION_RULE_TEMPLATE_CATALOG,
@@ -37,12 +37,13 @@ import {
   ProjectContextProfileSchema,
   SitemapEvidenceSchema,
   UpdateExtractionRulesInputSchema,
-} from "@golem-seo/contracts";
+} from "@agentseoapp/contracts";
 import type {
   Action,
   ActionCheckpoint,
   ActionEvidenceWorkspace,
   ActionOutcomeObservation,
+  AgentSeoRuntime,
   AppendProjectContextJournalInput,
   Capabilities,
   CreateProjectInput,
@@ -51,7 +52,6 @@ import type {
   ExtractionRule,
   ExtractionRuleTemplateCatalog,
   ExtractionRuleWorkspace,
-  GolemSeoRuntime,
   Integration,
   IssueInstance,
   IssueReviewListOptions,
@@ -79,7 +79,7 @@ import type {
   UpdateExtractionRulesInput,
   UpdateIssueAdjudicationInput,
   UpdateProjectContextInput,
-} from "@golem-seo/contracts";
+} from "@agentseoapp/contracts";
 import {
   GOLEMSEO_PROJECT_BUNDLE_LIMITS,
   GolemSeoProjectBundleV2Schema,
@@ -90,45 +90,46 @@ import {
   type ProjectBundlePage,
   type ProjectBundleRunConfiguration,
   type ProjectImportResult,
-} from "@golem-seo/contracts/project-bundle";
+} from "@agentseoapp/contracts/project-bundle";
 import type {
   CredentialRef,
   CredentialStore,
   StoredOAuthCredential,
-} from "@golem-seo/credentials";
+} from "@agentseoapp/credentials";
 import {
   decodeOAuthCredential,
   encodeOAuthCredential,
   MemoryCredentialStore,
   oauthCredentialRef,
-} from "@golem-seo/credentials";
+} from "@agentseoapp/credentials";
 import type {
   ConnectorHealth,
   ConnectorId,
   GoogleOAuthTokenSet,
-} from "@golem-seo/integrations";
+} from "@agentseoapp/integrations";
 import {
   checkConnectorHealth,
   connectorManifests,
   getConnectorManifest,
   refreshGoogleOAuthToken,
   validateConnectorConfiguration,
-} from "@golem-seo/integrations";
+} from "@agentseoapp/integrations";
 import {
   GolemDatabase,
   type PagePerformanceRecord,
   type PerformanceWindowRecord,
   type QueryPerformanceRecord,
   type StoredPageRecord,
-} from "@golem-seo/storage-sqlite";
+} from "@agentseoapp/storage-sqlite";
 import {
   redactSecrets,
   type PerformancePeriodSummary,
   type Report as EngineReport,
   validateExtractorRules,
-} from "@golem-seo/core";
-import { validateCustomRuleRegex } from "@golem-seo/core/custom-rule-regex";
+} from "@agentseoapp/core";
+import { validateCustomRuleRegex } from "@agentseoapp/core/custom-rule-regex";
 import { nextCronOccurrence } from "./cron.js";
+import { resolveGoogleDesktopClientId } from "./google-oauth-env.js";
 import {
   DurableJobWorker,
   DurableScheduler,
@@ -137,6 +138,7 @@ import {
 import { summarizePageIndexability } from "./indexability.js";
 import { buildAuditComparison } from "./audit-comparison.js";
 export { nextCronOccurrence };
+export { resolveGoogleDesktopClientId } from "./google-oauth-env.js";
 export {
   DurableJobWorker,
   DurableScheduler,
@@ -2138,12 +2140,13 @@ function buildSitemapEvidence(report: EngineReport): SitemapEvidence {
 
 async function createPdf(report: EngineReport): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
+  pdf.setTitle("AGENTseo audit");
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
   const page = pdf.addPage([595, 842]);
   let y = 790;
   const safe = (value: string): string => value.replace(/[^\x20-\x7E]/g, "?");
-  page.drawText("Golem SEO audit", {
+  page.drawText("AGENTseo audit", {
     x: 48,
     y,
     size: 22,
@@ -2188,7 +2191,7 @@ async function createPdf(report: EngineReport): Promise<Uint8Array> {
   return pdf.save();
 }
 
-export class GolemLocalRuntime implements GolemSeoRuntime {
+export class AgentSeoLocalRuntime implements AgentSeoRuntime {
   readonly dataDir: string;
   readonly database: GolemDatabase;
   readonly credentialStore: CredentialStore;
@@ -3650,10 +3653,9 @@ export class GolemLocalRuntime implements GolemSeoRuntime {
         "openclaw",
       ],
       hosted: {
-        available: true,
-        url: "https://golemworkers.com/seo",
-        message:
-          "Unlock always-on monitoring, teams, managed integrations and AI execution on Golem Workers.",
+        available: false,
+        url: "urn:agentseo:hosted-unavailable",
+        message: "AGENTseo is local-first; no hosted service is configured.",
       },
     }),
   };
@@ -3674,10 +3676,9 @@ export class GolemLocalRuntime implements GolemSeoRuntime {
       options.credentialStore ?? new MemoryCredentialStore();
     this.engine = options.engine;
     this.version = options.version ?? "0.11.0-alpha.0";
-    this.googleDesktopClientId =
-      options.googleDesktopClientId?.trim() ||
-      process.env.GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID?.trim() ||
-      process.env.GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID?.trim();
+    this.googleDesktopClientId = resolveGoogleDesktopClientId(
+      options.googleDesktopClientId,
+    );
     this.oauthFetch = options.oauthFetch;
     this.integrationFetch = options.integrationFetch;
     this.database.recoverInterruptedRuns();
@@ -3747,7 +3748,7 @@ export class GolemLocalRuntime implements GolemSeoRuntime {
   private async loadEngine(): Promise<EngineModule> {
     if (!this.engine)
       this.engine =
-        (await import("@golem-seo/core")) as unknown as EngineModule;
+        (await import("@agentseoapp/core")) as unknown as EngineModule;
     return this.engine;
   }
 
@@ -5945,3 +5946,10 @@ export class GolemLocalRuntime implements GolemSeoRuntime {
     this.database.close();
   }
 }
+
+/**
+ * @deprecated Use {@link AgentSeoLocalRuntime}. This is an exact constructor
+ * alias, retained through 1.x so migrated consumers keep both runtime and type
+ * compatibility without creating a second implementation.
+ */
+export { AgentSeoLocalRuntime as GolemLocalRuntime };

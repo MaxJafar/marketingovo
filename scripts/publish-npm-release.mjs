@@ -4,11 +4,14 @@ import { resolve } from "node:path";
 import {
   NPM_REGISTRY,
   SOURCE_REPOSITORY,
+  assertNpmPublicationDisabled,
   assertSourceTag,
   readNpmReleaseWorkspace,
   tarballHashes,
   validateNpmReleaseManifest,
 } from "./npm-release-policy.mjs";
+
+assertNpmPublicationDisabled("direct npm publication");
 
 const root = resolve(import.meta.dirname, "..");
 const releaseRoot = resolve(root, "artifacts/npm-release");

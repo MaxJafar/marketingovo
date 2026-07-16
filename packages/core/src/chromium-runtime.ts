@@ -3,7 +3,7 @@ import { envStr } from "./env.js";
 
 /**
  * Resolve the exact Chromium executable shared by JS crawling and Lighthouse.
- * Desktop builds always set GOLEMSEO_CHROME_PATH to the lockfile-matched
+ * Desktop builds always set AGENTSEO_CHROME_PATH to the lockfile-matched
  * packaged browser. The npm route can fall back to Playwright's own cache.
  */
 export async function resolveChromiumExecutablePath(
@@ -11,7 +11,7 @@ export async function resolveChromiumExecutablePath(
 ): Promise<string | undefined> {
   const configuredPath =
     explicitPath?.trim() ||
-    envStr("GOLEMSEO_CHROME_PATH", "SCREAMINGCLAW_CHROME_PATH", "").trim();
+    envStr("AGENTSEO_CHROME_PATH", "SCREAMINGCLAW_CHROME_PATH", "").trim();
   if (configuredPath) {
     if (!existsSync(configuredPath)) {
       throw new Error(

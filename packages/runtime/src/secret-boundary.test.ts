@@ -1,10 +1,11 @@
 import { existsSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { PDFDocument } from "pdf-lib";
 import { describe, expect, it, vi } from "vitest";
-import { EncryptedFileCredentialStore } from "@golem-seo/credentials";
-import { ConsoleLogger, type Report as EngineReport } from "@golem-seo/core";
-import { createDatabaseBackup } from "@golem-seo/storage-sqlite";
+import { EncryptedFileCredentialStore } from "@agentseoapp/credentials";
+import { ConsoleLogger, type Report as EngineReport } from "@agentseoapp/core";
+import { createDatabaseBackup } from "@agentseoapp/storage-sqlite";
 import { GolemLocalRuntime } from "./index.js";
 
 const CANARY = "psi-runtime-canary-Z9y8X7w6V5u4";
@@ -184,6 +185,10 @@ describe("runtime secret serialization boundary", () => {
           const bytes = await runtime.reports.get(started.id, format);
           expect(bytes).not.toBeNull();
           expect(Buffer.from(bytes!).includes(Buffer.from(CANARY))).toBe(false);
+          if (format === "pdf") {
+            const pdf = await PDFDocument.load(bytes!);
+            expect(pdf.getTitle()).toBe("AGENTseo audit");
+          }
         }
 
         const bundle = await runtime.exportProject(project.id);

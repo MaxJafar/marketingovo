@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { GolemLocalRuntime } from "@golem-seo/runtime";
+import { GolemLocalRuntime } from "@agentseoapp/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 const HOST = "127.0.0.1:3210";
@@ -69,7 +69,7 @@ describe("local API end-to-end", () => {
       engine: {
         crawl: async () => ({ report, runId: "engine-run" }),
         reportToJson: (value) => JSON.stringify(value),
-        reportToHtml: () => "<!doctype html><title>Golem SEO report</title>",
+        reportToHtml: () => "<!doctype html><title>AGENTseo report</title>",
         reportToCsv: () => "url,status\nhttps://example.com/,200\n",
       },
     });
@@ -167,7 +167,7 @@ describe("local API end-to-end", () => {
       expect(artifact.statusCode).toBe(200);
       expect(artifact.headers["content-type"]).toContain(mediaType);
       expect(artifact.headers["content-disposition"]).toBe(
-        `attachment; filename=\"golem-seo-${runId}.${format}\"`,
+        `attachment; filename=\"agentseo-${runId}.${format}\"`,
       );
       expect(artifact.rawPayload.byteLength).toBeGreaterThan(20);
       expect(artifact.rawPayload.includes(Buffer.from(ENGINE_CANARY))).toBe(
@@ -253,5 +253,10 @@ describe("local API end-to-end", () => {
     expect(response.headers["content-type"]).toContain(
       "application/problem+json",
     );
+    expect(response.json()).toMatchObject({
+      type: "urn:agentseo:problem:invalid-host",
+      status: 421,
+      code: "invalid_host",
+    });
   });
 });

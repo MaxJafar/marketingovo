@@ -2,7 +2,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { IssueInstance, Severity } from "@golem-seo/contracts";
+import type { IssueInstance, Severity } from "@agentseoapp/contracts";
 import { GolemLocalRuntime } from "./index.js";
 
 const observedAt = "2026-07-16T09:00:00.000Z";

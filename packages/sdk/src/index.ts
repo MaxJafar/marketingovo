@@ -39,11 +39,11 @@ import type {
   UpdateExtractionRulesInput,
   UpdateIssueAdjudicationInput,
   UpdateProjectContextInput,
-} from "@golem-seo/contracts";
+} from "@agentseoapp/contracts";
 import type {
   GolemSeoProjectBundleV2,
   ProjectImportResult,
-} from "@golem-seo/contracts/project-bundle";
+} from "@agentseoapp/contracts/project-bundle";
 import {
   DEFAULT_LOCAL_API_BASE_URL,
   validateLocalApiBaseUrl,

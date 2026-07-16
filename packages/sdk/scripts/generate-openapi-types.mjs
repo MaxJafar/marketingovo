@@ -22,7 +22,7 @@ if (checkOnly) {
   const current = await readFile(output, "utf8").catch(() => "");
   if (current !== generated) {
     throw new Error(
-      "Generated SDK types are stale. Run pnpm --filter @golem-seo/sdk generate after rebuilding @golem-seo/server.",
+      "Generated SDK types are stale. Run pnpm --filter @agentseoapp/sdk generate after rebuilding @agentseoapp/server.",
     );
   }
   process.stdout.write(

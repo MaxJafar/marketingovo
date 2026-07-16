@@ -1,5 +1,5 @@
 {
-  "name": "@golem-seo/dashboard",
+  "name": "@agentseoapp/dashboard",
   "version": "0.11.0-alpha.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,8 @@
     "typecheck": "tsc -b --pretty false",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "tsc -b --pretty false"
+    "lint": "tsc -b --pretty false",
+    "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.66.0",

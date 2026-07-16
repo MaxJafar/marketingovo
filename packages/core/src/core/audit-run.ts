@@ -1,4 +1,4 @@
-// AuditRun: the persistent record of a single `golem-seo audit <url>`
+// AuditRun: the persistent record of a single `agentseo audit <url>`
 // (or any other) workflow run. Stores what was requested, when, what
 // modules ran, what they reported, and the final status.
 //

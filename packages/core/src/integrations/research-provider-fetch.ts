@@ -1,4 +1,4 @@
-import { createSafeProviderFetch } from "@golem-seo/integrations";
+import { createSafeProviderFetch } from "@agentseoapp/integrations";
 
 /**
  * Exact-host, DNS/address-pinned transport for keyword research providers.

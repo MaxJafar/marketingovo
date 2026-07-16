@@ -1,6 +1,6 @@
 // Crawl configuration. Everything is loaded from env (not argv) so
 // secrets and URLs do not appear in `ps`. Operators can drop a JSON
-// file at `GOLEMSEO_CONFIG=/path/to/config.json` (legacy
+// file at `AGENTSEO_CONFIG=/path/to/config.json` (legacy
 // `SCREAMINGCLAW_CONFIG` is also honored) for richer configuration
 // (basic auth, cookies, link follow rules).
 //
@@ -41,16 +41,16 @@ const DEFAULT: CrawlConfig = {
 function fromEnv(): CrawlConfig {
   const cfg: CrawlConfig = { ...DEFAULT };
   if (
-    envBool("GOLEMSEO_FOLLOW_NOFOLLOW", "SCREAMINGCLAW_FOLLOW_NOFOLLOW", false)
+    envBool("AGENTSEO_FOLLOW_NOFOLLOW", "SCREAMINGCLAW_FOLLOW_NOFOLLOW", false)
   )
     cfg.followNofollow = true;
   if (
-    envBool("GOLEMSEO_FOLLOW_EXTERNAL", "SCREAMINGCLAW_FOLLOW_EXTERNAL", false)
+    envBool("AGENTSEO_FOLLOW_EXTERNAL", "SCREAMINGCLAW_FOLLOW_EXTERNAL", false)
   )
     cfg.followExternal = true;
-  cfg.maxDepth = envInt("GOLEMSEO_MAX_DEPTH", "SCREAMINGCLAW_MAX_DEPTH", 0, 50);
+  cfg.maxDepth = envInt("AGENTSEO_MAX_DEPTH", "SCREAMINGCLAW_MAX_DEPTH", 0, 50);
   const basicAuth = envStr(
-    "GOLEMSEO_BASIC_AUTH",
+    "AGENTSEO_BASIC_AUTH",
     "SCREAMINGCLAW_BASIC_AUTH",
     "",
   );
@@ -63,7 +63,7 @@ function fromEnv(): CrawlConfig {
       };
     }
   }
-  const cookies = envStr("GOLEMSEO_COOKIES", "SCREAMINGCLAW_COOKIES", "");
+  const cookies = envStr("AGENTSEO_COOKIES", "SCREAMINGCLAW_COOKIES", "");
   if (cookies) {
     // Format: "name1=value1; name2=value2" (browser-style)
     for (const pair of cookies.split(";")) {
@@ -75,7 +75,7 @@ function fromEnv(): CrawlConfig {
     }
   }
   cfg.userAgentSuffix = envStr(
-    "GOLEMSEO_UA_SUFFIX",
+    "AGENTSEO_UA_SUFFIX",
     "SCREAMINGCLAW_UA_SUFFIX",
     "",
   );
@@ -89,10 +89,10 @@ function fromFile(path: string): CrawlConfig {
   try {
     parsed = JSON.parse(raw);
   } catch (err) {
-    throw new Error(`GOLEMSEO_CONFIG: invalid JSON: ${(err as Error).message}`);
+    throw new Error(`AGENTSEO_CONFIG: invalid JSON: ${(err as Error).message}`);
   }
   if (!parsed || typeof parsed !== "object") {
-    throw new Error("GOLEMSEO_CONFIG: expected object");
+    throw new Error("AGENTSEO_CONFIG: expected object");
   }
   const o = parsed as Record<string, unknown>;
   const base = fromEnv();
@@ -131,7 +131,7 @@ function fromFile(path: string): CrawlConfig {
 }
 
 export function loadCrawlConfig(): CrawlConfig {
-  const path = envStr("GOLEMSEO_CONFIG", "SCREAMINGCLAW_CONFIG", "");
+  const path = envStr("AGENTSEO_CONFIG", "SCREAMINGCLAW_CONFIG", "");
   if (path) return fromFile(path);
   return fromEnv();
 }

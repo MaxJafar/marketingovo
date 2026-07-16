@@ -1,12 +1,14 @@
 // Limit configuration. All values are loaded from env with safe defaults.
 // Never read these from argv so URLs and secrets don't leak into `ps`.
 //
-// Env var naming: primary is `GOLEMSEO_*`. The historical `SCREAMINGCLAW_*`
+// Env var naming: primary is `AGENTSEO_*`. The historical `SCREAMINGCLAW_*`
 // names are still honored as a fallback (see src/env.ts) so existing
-// scripts and the golem-seo-dashboard backend keep working without
+// scripts and the agentseo-dashboard backend keep working without
 // changes. A one-time deprecation warning is logged per legacy name.
 
 import { envBool, envInt, envStr } from "../env.js";
+
+export const AGENTSEO_DEFAULT_USER_AGENT = "AGENTseo/0.11.0-alpha.0";
 
 export interface Limits {
   maxUrls: number;
@@ -51,13 +53,13 @@ export function validateMaxUrls(value: number): number {
 }
 
 function readEnvRenderMode(): "static" | "js" {
-  const raw = envStr("GOLEMSEO_RENDER", "SCREAMINGCLAW_RENDER", "static");
+  const raw = envStr("AGENTSEO_RENDER", "SCREAMINGCLAW_RENDER", "static");
   return raw === "js" ? "js" : "static";
 }
 
 function readEnvHeaders(): Record<string, string> {
   // Format: "Key1: Value1|Key2: Value2". Empty -> no custom headers.
-  const raw = envStr("GOLEMSEO_HEADERS", "SCREAMINGCLAW_HEADERS", "");
+  const raw = envStr("AGENTSEO_HEADERS", "SCREAMINGCLAW_HEADERS", "");
   if (!raw) return {};
   const out: Record<string, string> = {};
   for (const pair of raw.split("|")) {
@@ -73,66 +75,66 @@ function readEnvHeaders(): Record<string, string> {
 export function loadLimits(): Limits {
   return {
     maxUrls: envInt(
-      "GOLEMSEO_MAX_URLS",
+      "AGENTSEO_MAX_URLS",
       "SCREAMINGCLAW_MAX_URLS",
       500,
       MAX_URLS_CONFIGURATION_BOUNDARY,
     ),
     maxRuntimeMs: envInt(
-      "GOLEMSEO_MAX_RUNTIME_MS",
+      "AGENTSEO_MAX_RUNTIME_MS",
       "SCREAMINGCLAW_MAX_RUNTIME_MS",
       300_000,
       HARD_MAX_RUNTIME_MS,
     ),
     maxConcurrency: envInt(
-      "GOLEMSEO_MAX_CONCURRENCY",
+      "AGENTSEO_MAX_CONCURRENCY",
       "SCREAMINGCLAW_MAX_CONCURRENCY",
       4,
       HARD_MAX_CONCURRENCY,
     ),
     requestsPerSecond: envInt(
-      "GOLEMSEO_REQUESTS_PER_SECOND",
+      "AGENTSEO_REQUESTS_PER_SECOND",
       "SCREAMINGCLAW_REQUESTS_PER_SECOND",
       5,
       HARD_MAX_RPS,
     ),
     requestTimeoutMs: envInt(
-      "GOLEMSEO_REQUEST_TIMEOUT_MS",
+      "AGENTSEO_REQUEST_TIMEOUT_MS",
       "SCREAMINGCLAW_REQUEST_TIMEOUT_MS",
       15_000,
       HARD_TIMEOUT_MS,
     ),
     maxBodyBytes: envInt(
-      "GOLEMSEO_MAX_BODY_BYTES",
+      "AGENTSEO_MAX_BODY_BYTES",
       "SCREAMINGCLAW_MAX_BODY_BYTES",
       5 * 1024 * 1024,
       HARD_MAX_BODY_BYTES,
     ),
     maxRedirects: envInt(
-      "GOLEMSEO_MAX_REDIRECTS",
+      "AGENTSEO_MAX_REDIRECTS",
       "SCREAMINGCLAW_MAX_REDIRECTS",
       5,
       HARD_MAX_REDIRECTS,
     ),
     userAgent: envStr(
-      "GOLEMSEO_USER_AGENT",
+      "AGENTSEO_USER_AGENT",
       "SCREAMINGCLAW_USER_AGENT",
-      "GolemSEO/0.11 (+https://golemworkers.com/seo)",
+      AGENTSEO_DEFAULT_USER_AGENT,
     ),
     allowPrivate: envBool(
-      "GOLEMSEO_ALLOW_PRIVATE",
+      "AGENTSEO_ALLOW_PRIVATE",
       "SCREAMINGCLAW_ALLOW_PRIVATE",
       false,
     ),
     ignoreRobots: envBool(
-      "GOLEMSEO_IGNORE_ROBOTS",
+      "AGENTSEO_IGNORE_ROBOTS",
       "SCREAMINGCLAW_IGNORE_ROBOTS",
       false,
     ),
     renderMode: readEnvRenderMode(),
     customHeaders: readEnvHeaders(),
     keepRawHtml: envBool(
-      "GOLEMSEO_KEEP_HTML",
+      "AGENTSEO_KEEP_HTML",
       "SCREAMINGCLAW_KEEP_HTML",
       false,
     ),

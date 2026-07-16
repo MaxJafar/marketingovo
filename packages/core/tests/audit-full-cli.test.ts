@@ -75,11 +75,11 @@ function runCli(
   });
 }
 
-describe("CLI: golem-seo audit (Sprint 4 smoke)", () => {
+describe("CLI: agentseo audit (Sprint 4 smoke)", () => {
   it("prints usage to stderr when called without a url", async () => {
     const r = await runCli(["audit"]);
     expect(r.exitCode).toBe(2);
-    expect(r.stderr).toMatch(/usage: golem-seo audit <url>/);
+    expect(r.stderr).toMatch(/usage: agentseo audit <url>/);
   });
 
   it("runs a real audit on the fixture, returns JSON, persists AuditRun", async () => {

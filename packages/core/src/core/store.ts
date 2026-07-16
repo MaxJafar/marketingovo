@@ -105,7 +105,7 @@ export class ProjectStore {
       dbPath = legacyPath;
       // eslint-disable-next-line no-console
       console.warn(
-        `[golem-seo] using legacy store file ${legacyPath}; it will be migrated to ${newPath} on next write.`,
+        `[agentseo] using legacy store file ${legacyPath}; it will be migrated to ${newPath} on next write.`,
       );
     }
     const db = new DatabaseSync(dbPath);

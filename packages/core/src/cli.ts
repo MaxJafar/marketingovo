@@ -1,21 +1,21 @@
 #!/usr/bin/env node
-// CLI for GolemSEO. Configuration is read from env (see limits.ts)
+// CLI for AGENTseo. Configuration is read from env (see limits.ts)
 // so URLs do not appear in `ps`. The start URL is the single positional
 // argument.
 //
 // Usage:
-//   GOLEMSEO_MAX_URLS=200 golem-seo https://example.com/
-//   GOLEMSEO_OUTPUT=html golem-seo https://example.com/ > report.html
-//   GOLEMSEO_OUTPUT=csv golem-seo https://example.com/ > report.csv
-//   GOLEMSEO_SCHEDULE=1 golem-seo --schedule-start
+//   AGENTSEO_MAX_URLS=200 agentseo https://example.com/
+//   AGENTSEO_OUTPUT=html agentseo https://example.com/ > report.html
+//   AGENTSEO_OUTPUT=csv agentseo https://example.com/ > report.csv
+//   AGENTSEO_SCHEDULE=1 agentseo --schedule-start
 //
 // Environment:
-//   GOLEMSEO_RENDER=js|static        (default: static)
-//   GOLEMSEO_OUTPUT=md|html|csv|json (default: md)
-//   GOLEMSEO_COLLECT_VITALS=1        (default: 0; needs --render js)
-//   GOLEMSEO_MAX_URLS, etc.          (see limits.ts)
-//   GOLEMSEO_PROJECT_ROOT=<path>     (default: cwd)
-//   GOLEMSEO_SCHEDULE=1              (run scheduler instead of single crawl)
+//   AGENTSEO_RENDER=js|static        (default: static)
+//   AGENTSEO_OUTPUT=md|html|csv|json (default: md)
+//   AGENTSEO_COLLECT_VITALS=1        (default: 0; needs --render js)
+//   AGENTSEO_MAX_URLS, etc.          (see limits.ts)
+//   AGENTSEO_PROJECT_ROOT=<path>     (default: cwd)
+//   AGENTSEO_SCHEDULE=1              (run scheduler instead of single crawl)
 //
 // Legacy SCREAMINGCLAW_* names are still honored (see src/env.ts).
 
@@ -63,39 +63,39 @@ import type { AuditRun } from "./core/audit-run.js";
 
 function projectRoot(): string {
   return resolve(
-    envStr("GOLEMSEO_PROJECT_ROOT", "SCREAMINGCLAW_PROJECT_ROOT", "."),
+    envStr("AGENTSEO_PROJECT_ROOT", "SCREAMINGCLAW_PROJECT_ROOT", "."),
   );
 }
 
-// Detect custom-rules.json early so we can flip GOLEMSEO_KEEP_HTML
+// Detect custom-rules.json early so we can flip AGENTSEO_KEEP_HTML
 // before the limits are loaded by the orchestrator. This avoids
 // re-parsing the body just to evaluate css-exists rules.
 function detectKeepHtml(): void {
-  if (envBool("GOLEMSEO_KEEP_HTML", "SCREAMINGCLAW_KEEP_HTML", false)) return; // operator override
+  if (envBool("AGENTSEO_KEEP_HTML", "SCREAMINGCLAW_KEEP_HTML", false)) return; // operator override
   const path = join(projectRoot(), "custom-rules.json");
   if (existsSync(path)) {
-    process.env["GOLEMSEO_KEEP_HTML"] = "1";
+    process.env["AGENTSEO_KEEP_HTML"] = "1";
   }
 }
 
 async function runOnce(startUrl: string): Promise<CrawlOutcome> {
   detectKeepHtml();
   const mode =
-    envStr("GOLEMSEO_RENDER", "SCREAMINGCLAW_RENDER", "static") === "js"
+    envStr("AGENTSEO_RENDER", "SCREAMINGCLAW_RENDER", "static") === "js"
       ? "js"
       : "static";
   const collectVitals = envBool(
-    "GOLEMSEO_COLLECT_VITALS",
+    "AGENTSEO_COLLECT_VITALS",
     "SCREAMINGCLAW_COLLECT_VITALS",
     false,
   );
   const gscSiteUrl =
-    envStr("GOLEMSEO_GSC_SITE", "SCREAMINGCLAW_GSC_SITE", "") || undefined;
+    envStr("AGENTSEO_GSC_SITE", "SCREAMINGCLAW_GSC_SITE", "") || undefined;
   const ga4PropertyId =
-    envStr("GOLEMSEO_GA4_PROPERTY", "SCREAMINGCLAW_GA4_PROPERTY", "") ||
+    envStr("AGENTSEO_GA4_PROPERTY", "SCREAMINGCLAW_GA4_PROPERTY", "") ||
     undefined;
   const lighthouseMode = envStr(
-    "GOLEMSEO_LIGHTHOUSE",
+    "AGENTSEO_LIGHTHOUSE",
     "SCREAMINGCLAW_LIGHTHOUSE",
     "off",
   ) as "off" | "home" | "sample" | "all";
@@ -112,7 +112,7 @@ async function runOnce(startUrl: string): Promise<CrawlOutcome> {
 
 function emitReport(outcome: CrawlOutcome): void {
   const fmt = envStr(
-    "GOLEMSEO_OUTPUT",
+    "AGENTSEO_OUTPUT",
     "SCREAMINGCLAW_OUTPUT",
     "md",
   ).toLowerCase();
@@ -131,14 +131,14 @@ function emitReport(outcome: CrawlOutcome): void {
       break;
     default:
       process.stderr.write(
-        `unknown GOLEMSEO_OUTPUT=${fmt}; expected one of md|html|csv|json. Falling back to md.\n`,
+        `unknown AGENTSEO_OUTPUT=${fmt}; expected one of md|html|csv|json. Falling back to md.\n`,
       );
       process.stdout.write(reportToMarkdown(outcome.report));
       break;
   }
 }
 
-// --- T-027: module subcommand (`golem-seo <module-id>`, `golem-seo list-modules`) ---
+// --- T-027: module subcommand (`agentseo <module-id>`, `agentseo list-modules`) ---
 
 /**
  * Path to the modules directory. Resolved relative to this file's
@@ -216,7 +216,7 @@ async function parseModuleArgs(
       }
     } else {
       // Bare positional — treat as a URL for backwards-compat with
-      // `golem-seo <module-id> <url>` for modules that take a URL.
+      // `agentseo <module-id> <url>` for modules that take a URL.
       if (!input["url"] && /^https?:\/\//i.test(a)) {
         input["url"] = a;
       } else if (!input["startUrl"] && /^https?:\/\//i.test(a)) {
@@ -260,7 +260,7 @@ async function runListModules(): Promise<void> {
     process.exit(1);
   }
   const fmt = envStr(
-    "GOLEMSEO_OUTPUT",
+    "AGENTSEO_OUTPUT",
     "SCREAMINGCLAW_OUTPUT",
     "table",
   ).toLowerCase();
@@ -304,7 +304,7 @@ async function runModuleInvocation(
   if (!mod) {
     process.stderr.write(`unknown module: ${moduleId}\n`);
     process.stderr.write(
-      `run \`golem-seo list-modules\` to see available modules.\n`,
+      `run \`agentseo list-modules\` to see available modules.\n`,
     );
     process.exit(2);
   }
@@ -344,7 +344,7 @@ async function runModuleInvocation(
   const output: ModuleOutput = await mod.invoke(input, ctx);
 
   const fmt = envStr(
-    "GOLEMSEO_OUTPUT",
+    "AGENTSEO_OUTPUT",
     "SCREAMINGCLAW_OUTPUT",
     "json",
   ).toLowerCase();
@@ -373,7 +373,7 @@ async function runAudit(args: string[]): Promise<void> {
   const url = args.find((a) => !a.startsWith("--"));
   if (!url) {
     process.stderr.write(
-      "usage: golem-seo audit <url> [--modules <ids>] [--max-passes 3] [--max-runtime 600000] [--notes <text>]\n",
+      "usage: agentseo audit <url> [--modules <ids>] [--max-passes 3] [--max-runtime 600000] [--notes <text>]\n",
     );
     process.exit(2);
   }
@@ -413,7 +413,7 @@ async function runAudit(args: string[]): Promise<void> {
   // Env-var fallbacks.
   if (input.maxPasses === undefined) {
     const envMax = envInt(
-      "GOLEMSEO_AUDIT_MAX_PASSES",
+      "AGENTSEO_AUDIT_MAX_PASSES",
       "SCREAMINGCLAW_AUDIT_MAX_PASSES",
       1,
     );
@@ -421,7 +421,7 @@ async function runAudit(args: string[]): Promise<void> {
   }
   if (input.maxRuntimeMs === undefined) {
     const envRt = envInt(
-      "GOLEMSEO_AUDIT_MAX_RUNTIME_MS",
+      "AGENTSEO_AUDIT_MAX_RUNTIME_MS",
       "SCREAMINGCLAW_AUDIT_MAX_RUNTIME_MS",
       600_000,
     );
@@ -441,7 +441,7 @@ async function runAudit(args: string[]): Promise<void> {
   );
 
   const fmt = envStr(
-    "GOLEMSEO_OUTPUT",
+    "AGENTSEO_OUTPUT",
     "SCREAMINGCLAW_OUTPUT",
     "json",
   ).toLowerCase();
@@ -453,7 +453,7 @@ async function runAudit(args: string[]): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Sprint 11: `golem-seo watch <url>` — long-running monitor loop.
+// Sprint 11: `agentseo watch <url>` — long-running monitor loop.
 // ---------------------------------------------------------------------------
 
 /**
@@ -534,7 +534,7 @@ async function runWatch(args: string[]): Promise<void> {
   const url = args.find((a) => !a.startsWith("--"));
   if (!url) {
     process.stderr.write(
-      "usage: golem-seo watch <url> [--interval 24h] [--threshold 5] [--modules <ids>] [--max-passes 1] [--max-runtime 60000] [--channels stdout,webhook,telegram] [--once]\n",
+      "usage: agentseo watch <url> [--interval 24h] [--threshold 5] [--modules <ids>] [--max-passes 1] [--max-runtime 60000] [--channels stdout,webhook,telegram] [--once]\n",
     );
     process.exit(2);
   }
@@ -583,13 +583,13 @@ async function runWatch(args: string[]): Promise<void> {
   const { runComposer } = await import("./core/composer.js");
 
   process.stderr.write(
-    `[golem-seo] watch started url=${url} interval=${intervalMs}ms threshold=${threshold} channels=${channels.join(",")}\n`,
+    `[agentseo] watch started url=${url} interval=${intervalMs}ms threshold=${threshold} channels=${channels.join(",")}\n`,
   );
 
   const stop = new AbortController();
   process.on("SIGINT", () => {
     process.stderr.write(
-      "[golem-seo] SIGINT received, exiting after current cycle\n",
+      "[agentseo] SIGINT received, exiting after current cycle\n",
     );
     stop.abort();
   });
@@ -609,7 +609,7 @@ async function runWatch(args: string[]): Promise<void> {
     cycle += 1;
     const cycleStart = Date.now();
     process.stderr.write(
-      `[golem-seo] watch cycle ${cycle} starting at ${new Date().toISOString()}\n`,
+      `[agentseo] watch cycle ${cycle} starting at ${new Date().toISOString()}\n`,
     );
 
     const auditResult = await runComposer({
@@ -681,14 +681,14 @@ async function runWatch(args: string[]): Promise<void> {
         auditResult.status === "partial") &&
       (delta.regressionScore >= threshold || delta.newIssues.length > 0);
     process.stderr.write(
-      `[golem-seo] cycle ${cycle} complete: ${issueCount} issues, regressionScore=${delta.regressionScore}, notify=${shouldNotify}\n`,
+      `[agentseo] cycle ${cycle} complete: ${issueCount} issues, regressionScore=${delta.regressionScore}, notify=${shouldNotify}\n`,
     );
     if (shouldNotify) {
       const payload = deltaToNotification(delta, url);
       const results = await notify(payload, { channels });
       for (const r of results) {
         process.stderr.write(
-          `[golem-seo] notify ${r.channel}: ${r.ok ? "ok" : "FAILED"} (${r.durationMs}ms${r.error ? `, ${r.error}` : ""})\n`,
+          `[agentseo] notify ${r.channel}: ${r.ok ? "ok" : "FAILED"} (${r.durationMs}ms${r.error ? `, ${r.error}` : ""})\n`,
         );
       }
     }
@@ -699,7 +699,7 @@ async function runWatch(args: string[]): Promise<void> {
     if (intervalMs <= 0) break;
 
     process.stderr.write(
-      `[golem-seo] cycle ${cycle} done in ${Date.now() - cycleStart}ms, sleeping ${intervalMs}ms\n`,
+      `[agentseo] cycle ${cycle} done in ${Date.now() - cycleStart}ms, sleeping ${intervalMs}ms\n`,
     );
     await new Promise<void>((resolveP) => {
       const t = setTimeout(resolveP, intervalMs);
@@ -709,7 +709,7 @@ async function runWatch(args: string[]): Promise<void> {
       });
     });
   }
-  process.stderr.write("[golem-seo] watch exited cleanly\n");
+  process.stderr.write("[agentseo] watch exited cleanly\n");
 }
 
 async function main(): Promise<void> {
@@ -717,13 +717,13 @@ async function main(): Promise<void> {
   const isScheduleStart = args.includes("--schedule-start");
   const startUrl = args.find((a) => !a.startsWith("--"));
 
-  // T-027: `golem-seo list-modules`
+  // T-027: `agentseo list-modules`
   if (args[0] === "list-modules") {
     await runListModules();
     return;
   }
 
-  // T-038: `golem-seo audit <url> [--modules <ids>] [--max-passes 3]
+  // T-038: `agentseo audit <url> [--modules <ids>] [--max-passes 3]
   // [--max-runtime 600000] [--notes <text>]` — the operator's
   // one-liner for "tell me everything you can about this site."
   // Dispatches to the audit-full workflow. Runs BEFORE the generic
@@ -735,7 +735,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  // Sprint 11: `golem-seo watch <url> [--interval <ms|24h|30m>]
+  // Sprint 11: `agentseo watch <url> [--interval <ms|24h|30m>]
   // [--threshold 5] [--channels stdout,webhook,telegram]`
   // [--max-passes 1] [--modules <ids>]`
   // Long-running loop: audit → diff vs previous → notify if
@@ -748,7 +748,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  // T-027: `golem-seo <module-id> [args...]` — dispatch to a module
+  // T-027: `agentseo <module-id> [args...]` — dispatch to a module
   // if the first positional arg matches a known module id. Done
   // before the URL-or-? check so the existing single-crawl flow
   // (URL as first arg) keeps working unchanged.
@@ -762,7 +762,7 @@ async function main(): Promise<void> {
   }
 
   if (
-    envBool("GOLEMSEO_SCHEDULE", "SCREAMINGCLAW_SCHEDULE", false) ||
+    envBool("AGENTSEO_SCHEDULE", "SCREAMINGCLAW_SCHEDULE", false) ||
     isScheduleStart
   ) {
     const root = projectRoot();
@@ -793,18 +793,18 @@ async function main(): Promise<void> {
       startUrl,
       intervalMinutes: 1440,
       renderMode:
-        envStr("GOLEMSEO_RENDER", "SCREAMINGCLAW_RENDER", "static") === "js"
+        envStr("AGENTSEO_RENDER", "SCREAMINGCLAW_RENDER", "static") === "js"
           ? "js"
           : "static",
       collectVitals: envBool(
-        "GOLEMSEO_COLLECT_VITALS",
+        "AGENTSEO_COLLECT_VITALS",
         "SCREAMINGCLAW_COLLECT_VITALS",
         false,
       ),
       limits: {
-        maxUrls: envInt("GOLEMSEO_MAX_URLS", "SCREAMINGCLAW_MAX_URLS", 200),
+        maxUrls: envInt("AGENTSEO_MAX_URLS", "SCREAMINGCLAW_MAX_URLS", 200),
         maxRuntimeMs: envInt(
-          "GOLEMSEO_MAX_RUNTIME_MS",
+          "AGENTSEO_MAX_RUNTIME_MS",
           "SCREAMINGCLAW_MAX_RUNTIME_MS",
           60_000,
         ),
@@ -832,11 +832,11 @@ async function main(): Promise<void> {
   if (!startUrl) {
     process.stderr.write(
       "usage:\n" +
-        "  golem-seo <startUrl>                       # run a single crawl\n" +
-        "  golem-seo --compare <url1> <url2> [url3]   # compare N sites side by side\n" +
-        "  golem-seo --schedule-add <startUrl>        # add a job to schedule.json\n" +
-        "  golem-seo --schedule-start                 # start the scheduler (foreground)\n" +
-        "  golem-seo --schedule-run <startUrl>        # run a single scheduled job once\n",
+        "  agentseo <startUrl>                       # run a single crawl\n" +
+        "  agentseo --compare <url1> <url2> [url3]   # compare N sites side by side\n" +
+        "  agentseo --schedule-add <startUrl>        # add a job to schedule.json\n" +
+        "  agentseo --schedule-start                 # start the scheduler (foreground)\n" +
+        "  agentseo --schedule-run <startUrl>        # run a single scheduled job once\n",
     );
     process.exit(2);
   }
@@ -854,24 +854,24 @@ async function main(): Promise<void> {
       targetUrl: target!,
       referenceUrls: refs,
       topN: envInt(
-        "GOLEMSEO_CONTENT_GAP_TOPN",
+        "AGENTSEO_CONTENT_GAP_TOPN",
         "SCREAMINGCLAW_CONTENT_GAP_TOPN",
         20,
       ),
       timeoutMs: 30_000,
       maxBodyBytes: 2_621_440,
       allowPrivate: envBool(
-        "GOLEMSEO_ALLOW_PRIVATE",
+        "AGENTSEO_ALLOW_PRIVATE",
         "SCREAMINGCLAW_ALLOW_PRIVATE",
         false,
       ),
       renderMode:
-        envStr("GOLEMSEO_RENDER", "SCREAMINGCLAW_RENDER", "static") === "js"
+        envStr("AGENTSEO_RENDER", "SCREAMINGCLAW_RENDER", "static") === "js"
           ? "js"
           : "static",
     });
     const fmt = envStr(
-      "GOLEMSEO_OUTPUT",
+      "AGENTSEO_OUTPUT",
       "SCREAMINGCLAW_OUTPUT",
       "md",
     ).toLowerCase();
@@ -889,17 +889,17 @@ async function main(): Promise<void> {
     const compareOpts: CompareOptions = {
       urls,
       renderMode:
-        envStr("GOLEMSEO_RENDER", "SCREAMINGCLAW_RENDER", "static") === "js"
+        envStr("AGENTSEO_RENDER", "SCREAMINGCLAW_RENDER", "static") === "js"
           ? "js"
           : "static",
-      maxUrls: envInt("GOLEMSEO_MAX_URLS", "SCREAMINGCLAW_MAX_URLS", 30),
+      maxUrls: envInt("AGENTSEO_MAX_URLS", "SCREAMINGCLAW_MAX_URLS", 30),
       maxRuntimeMs: envInt(
-        "GOLEMSEO_MAX_RUNTIME_MS",
+        "AGENTSEO_MAX_RUNTIME_MS",
         "SCREAMINGCLAW_MAX_RUNTIME_MS",
         60_000,
       ),
       lighthouse: envStr(
-        "GOLEMSEO_LIGHTHOUSE",
+        "AGENTSEO_LIGHTHOUSE",
         "SCREAMINGCLAW_LIGHTHOUSE",
         "off",
       ) as "off" | "home" | "sample" | "all",
@@ -907,7 +907,7 @@ async function main(): Promise<void> {
     };
     const result = await compareSites(compareOpts);
     const fmt = envStr(
-      "GOLEMSEO_OUTPUT",
+      "AGENTSEO_OUTPUT",
       "SCREAMINGCLAW_OUTPUT",
       "html",
     ).toLowerCase();

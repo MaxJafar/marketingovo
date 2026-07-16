@@ -14,8 +14,8 @@ import { describe, expect, it } from "vitest";
 import {
   MemoryCredentialStore,
   type CredentialRef,
-} from "@golem-seo/credentials";
-import { GolemDatabase } from "@golem-seo/storage-sqlite";
+} from "@agentseoapp/credentials";
+import { GolemDatabase } from "@agentseoapp/storage-sqlite";
 import { discoverLegacyData, importLegacyData } from "./index.js";
 
 const GSC_SECRET = "gsc-refresh-never-leak";

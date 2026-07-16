@@ -7,13 +7,13 @@
 //      "no config" default.
 //
 //   2. webhook: HTTP POST. POST the payload as JSON to a
-//      configured URL. Configured via GOLEMSEO_WEBHOOK_URL env
+//      configured URL. Configured via AGENTSEO_WEBHOOK_URL env
 //      or per-call url param. Headers optional. Best for Slack
 //      incoming webhooks, n8n, Make.com, custom backends.
 //
 //   3. telegram: Telegram Bot API. Sends a message via
 //      sendMessage to the configured chat_id. Configured via
-//      GOLEMSEO_TELEGRAM_BOT_TOKEN + GOLEMSEO_TELEGRAM_CHAT_ID.
+//      AGENTSEO_TELEGRAM_BOT_TOKEN + AGENTSEO_TELEGRAM_CHAT_ID.
 //
 // All channels are independent best-effort. A failure in one
 // doesn't affect the others. Results are returned per-channel
@@ -21,6 +21,7 @@
 
 import { createHmac, randomUUID } from "node:crypto";
 import { resolveSafeAddresses } from "../core/safe-url.js";
+import { envStr } from "../env.js";
 
 export type NotifyChannel = "stdout" | "webhook" | "telegram";
 
@@ -44,13 +45,13 @@ export interface NotificationPayload {
 
 export interface NotifyOptions {
   channels?: readonly NotifyChannel[];
-  /** Webhook URL (otherwise: GOLEMSEO_WEBHOOK_URL env). */
+  /** Webhook URL (otherwise: AGENTSEO_WEBHOOK_URL env). */
   webhookUrl?: string;
-  /** Telegram bot token (otherwise: GOLEMSEO_TELEGRAM_BOT_TOKEN env). */
+  /** Telegram bot token (otherwise: AGENTSEO_TELEGRAM_BOT_TOKEN env). */
   telegramBotToken?: string;
-  /** Telegram chat id (otherwise: GOLEMSEO_TELEGRAM_CHAT_ID env). */
+  /** Telegram chat id (otherwise: AGENTSEO_TELEGRAM_CHAT_ID env). */
   telegramChatId?: string;
-  /** Optional HMAC secret (otherwise: GOLEMSEO_WEBHOOK_SECRET env). */
+  /** Optional HMAC secret (otherwise: AGENTSEO_WEBHOOK_SECRET env). */
   webhookSecret?: string;
   /** Override host validation (tests only). */
   webhookHostValidator?: (hostname: string) => Promise<void>;
@@ -107,13 +108,15 @@ async function dispatchOne(
           durationMs: Date.now() - started,
         };
       case "webhook": {
-        const url = opts.webhookUrl ?? process.env.GOLEMSEO_WEBHOOK_URL ?? "";
+        const url =
+          opts.webhookUrl ??
+          envStr("AGENTSEO_WEBHOOK_URL", "SCREAMINGCLAW_WEBHOOK_URL", "");
         if (!url) {
           return {
             channel,
             ok: false,
             error:
-              "no webhook URL (set GOLEMSEO_WEBHOOK_URL or pass webhookUrl)",
+              "no webhook URL (set AGENTSEO_WEBHOOK_URL or pass webhookUrl)",
             durationMs: Date.now() - started,
           };
         }
@@ -122,23 +125,36 @@ async function dispatchOne(
           url,
           opts.timeoutMs ?? 5_000,
           opts.fetchImpl,
-          opts.webhookSecret ?? process.env.GOLEMSEO_WEBHOOK_SECRET ?? "",
+          opts.webhookSecret ??
+            envStr(
+              "AGENTSEO_WEBHOOK_SECRET",
+              "SCREAMINGCLAW_WEBHOOK_SECRET",
+              "",
+            ),
           opts.webhookHostValidator,
         );
       }
       case "telegram": {
         const token =
           opts.telegramBotToken ??
-          process.env.GOLEMSEO_TELEGRAM_BOT_TOKEN ??
-          "";
+          envStr(
+            "AGENTSEO_TELEGRAM_BOT_TOKEN",
+            "SCREAMINGCLAW_TELEGRAM_BOT_TOKEN",
+            "",
+          );
         const chatId =
-          opts.telegramChatId ?? process.env.GOLEMSEO_TELEGRAM_CHAT_ID ?? "";
+          opts.telegramChatId ??
+          envStr(
+            "AGENTSEO_TELEGRAM_CHAT_ID",
+            "SCREAMINGCLAW_TELEGRAM_CHAT_ID",
+            "",
+          );
         if (!token || !chatId) {
           return {
             channel,
             ok: false,
             error:
-              "missing GOLEMSEO_TELEGRAM_BOT_TOKEN or GOLEMSEO_TELEGRAM_CHAT_ID",
+              "missing AGENTSEO_TELEGRAM_BOT_TOKEN or AGENTSEO_TELEGRAM_CHAT_ID",
             durationMs: Date.now() - started,
           };
         }
@@ -216,14 +232,21 @@ async function postWebhook(
 
     const body = JSON.stringify(payload);
     const timestamp = Math.floor(Date.now() / 1000).toString();
+    const eventId = randomUUID();
     const headers: Record<string, string> = {
       "content-type": "application/json",
-      "x-golemseo-event-id": randomUUID(),
+      "x-agentseo-event-id": eventId,
+      "x-agentseo-timestamp": timestamp,
+      // These headers are a deliberate 1.x webhook compatibility boundary.
+      // Mirror canonical values exactly so legacy verifiers never observe a
+      // different event identity or signed timestamp during migration.
+      "x-golemseo-event-id": eventId,
       "x-golemseo-timestamp": timestamp,
     };
     if (secret) {
-      headers["x-golemseo-signature"] =
-        `sha256=${createHmac("sha256", secret).update(`${timestamp}.${body}`).digest("hex")}`;
+      const signature = `sha256=${createHmac("sha256", secret).update(`${timestamp}.${body}`).digest("hex")}`;
+      headers["x-agentseo-signature"] = signature;
+      headers["x-golemseo-signature"] = signature;
     }
     if (fetchImpl) {
       const res = await fetchImpl(parsed.toString(), {
