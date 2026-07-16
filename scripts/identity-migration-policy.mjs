@@ -935,6 +935,26 @@ async function validateCanonicalIdentity(repositoryRoot) {
     });
   }
 
+  const desktopPreparePath = "scripts/prepare-desktop-runtime.mjs";
+  const desktopPrepare = await readFile(
+    resolve(repositoryRoot, desktopPreparePath),
+    "utf8",
+  );
+  if (
+    !/["']--filter["']\s*,\s*["']agentseo["']\s*,\s*["']--fail-if-no-match["']/u.test(
+      desktopPrepare,
+    ) ||
+    desktopPrepare.includes("@agentseoapp/cli")
+  ) {
+    violations.push({
+      rule: "canonical-cli-identity",
+      path: desktopPreparePath,
+      line: 1,
+      match:
+        "desktop runtime deployment must fail closed while selecting the unscoped agentseo CLI package",
+    });
+  }
+
   const cliPath = "packages/cli/src/cli.ts";
   const cli = await readFile(resolve(repositoryRoot, cliPath), "utf8");
   const cliVersion = cli.match(/const VERSION\s*=\s*["']([^"']+)["']/u)?.[1];

@@ -56,7 +56,8 @@ const deployed = spawnSync(
   [
     "--config.strict-peer-dependencies=false",
     "--filter",
-    "@agentseoapp/cli",
+    "agentseo",
+    "--fail-if-no-match",
     "--prod",
     "deploy",
     "--legacy",
