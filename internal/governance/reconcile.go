@@ -19,6 +19,9 @@ import (
 func validateEvidenceSemantics(descriptors []domain.ArtifactDescriptor, allowLegacy bool, kindCounts map[string]int,
 	canonical map[string][]domain.Observation, report domain.ComparisonReport, provenance domain.Provenance) ([]domain.Observation, domain.Provenance, error) {
 	var canonicalRows []domain.Observation
+	if err := validateReportProjection(report); err != nil {
+		return nil, provenance, err
+	}
 	if allowLegacy {
 		if len(descriptors) != 2 || kindCounts["raw"] != 1 || kindCounts["report"] != 1 {
 			return nil, provenance, fmt.Errorf("%w: legacy fixture evidence requires exactly raw + report", ErrArtifactMismatch)
@@ -68,12 +71,8 @@ func LoadCommittedEvidence(dataRoot, runID string, maximum int64) (CommitResult,
 	if maximum <= 0 {
 		maximum = DefaultMaximumArtifactBytes
 	}
-	root, err := filepath.Abs(dataRoot)
+	evidenceDir, err := committedEvidenceDirectory(dataRoot, runID)
 	if err != nil {
-		return CommitResult{}, err
-	}
-	evidenceDir := filepath.Join(root, "runs", runID, "evidence")
-	if err := requireContained(root, evidenceDir); err != nil {
 		return CommitResult{}, err
 	}
 	manifestPath := filepath.Join(evidenceDir, "evidence-manifest.json")
@@ -166,9 +165,47 @@ func LoadCommittedEvidence(dataRoot, runID string, maximum int64) (CommitResult,
 	manifestID, _ := domain.NewID("artifact")
 	artifacts = append(artifacts, domain.Artifact{ID: manifestID, RunID: runID, Kind: "manifest",
 		RelativePath: filepath.ToSlash(filepath.Join("runs", runID, "evidence", "evidence-manifest.json")),
-		MediaType: "application/json", SHA256: hex.EncodeToString(manifestHash[:]), SizeBytes: int64(len(manifestBytes)),
+		MediaType:    "application/json", SHA256: hex.EncodeToString(manifestHash[:]), SizeBytes: int64(len(manifestBytes)),
 		SchemaID: "golem.evidence-manifest.v1", DataClass: mostRestrictiveDataClass(manifest.Artifacts), CreatedAt: manifest.CommittedAt})
 	return CommitResult{Artifacts: artifacts, Manifest: manifest, EvidenceDir: evidenceDir, Observations: rows, Report: report}, nil
+}
+
+// committedEvidenceDirectory resolves a recovery path one component at a
+// time. A manifest is only authority if its directory chain is made of real
+// directories under the caller's data root; otherwise a symlink could make a
+// previously committed run read or publish data from outside that root.
+func committedEvidenceDirectory(dataRoot, runID string) (string, error) {
+	root, err := filepath.Abs(dataRoot)
+	if err != nil {
+		return "", err
+	}
+	root, err = filepath.EvalSymlinks(root)
+	if err != nil {
+		return "", fmt.Errorf("resolve committed evidence root: %w", err)
+	}
+	rootInfo, err := os.Lstat(root)
+	if err != nil || !rootInfo.IsDir() || rootInfo.Mode()&os.ModeSymlink != 0 {
+		return "", fmt.Errorf("%w: committed evidence root is not a real directory", ErrUnsafePath)
+	}
+	cleanRunID, err := CleanRelativePath(runID)
+	if err != nil || cleanRunID != runID || filepath.Base(runID) != runID {
+		return "", fmt.Errorf("%w: committed evidence run identifier is unsafe", ErrUnsafePath)
+	}
+	path := root
+	for _, component := range []string{"runs", runID, "evidence"} {
+		path = filepath.Join(path, component)
+		if err := requireContained(root, path); err != nil {
+			return "", err
+		}
+		info, err := os.Lstat(path)
+		if err != nil || !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
+			if err != nil && !errors.Is(err, os.ErrNotExist) {
+				return "", fmt.Errorf("inspect committed evidence directory: %w", err)
+			}
+			return "", fmt.Errorf("%w: committed evidence directory is unavailable or unsafe", ErrUnsafePath)
+		}
+	}
+	return path, nil
 }
 
 func committedArtifactKind(item ManifestArtifactItem) (string, error) {
@@ -186,10 +223,17 @@ func committedArtifactKind(item ManifestArtifactItem) (string, error) {
 	}
 }
 
-type byteReader struct{ payload []byte; offset int }
+type byteReader struct {
+	payload []byte
+	offset  int
+}
 
 func bytesReader(payload []byte) *byteReader { return &byteReader{payload: payload} }
 func (reader *byteReader) Read(output []byte) (int, error) {
-	if reader.offset >= len(reader.payload) { return 0, io.EOF }
-	n := copy(output, reader.payload[reader.offset:]); reader.offset += n; return n, nil
+	if reader.offset >= len(reader.payload) {
+		return 0, io.EOF
+	}
+	n := copy(output, reader.payload[reader.offset:])
+	reader.offset += n
+	return n, nil
 }

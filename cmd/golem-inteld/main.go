@@ -17,6 +17,7 @@ import (
 
 	"github.com/GolemWorkers/golem-intel/internal/api"
 	"github.com/GolemWorkers/golem-intel/internal/connectors"
+	"github.com/GolemWorkers/golem-intel/internal/daemonlock"
 	"github.com/GolemWorkers/golem-intel/internal/domain"
 	"github.com/GolemWorkers/golem-intel/internal/jobs"
 	"github.com/GolemWorkers/golem-intel/internal/policy"
@@ -66,6 +67,11 @@ func run(arguments []string) error {
 	if err != nil {
 		return err
 	}
+	ownership, err := daemonlock.Acquire(root)
+	if err != nil {
+		return err
+	}
+	defer ownership.Close()
 	workerProject, err := verifyWorkerProject(*pythonWorker)
 	if err != nil {
 		return err

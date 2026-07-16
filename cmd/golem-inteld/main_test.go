@@ -1,12 +1,14 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/GolemWorkers/golem-intel/internal/api"
+	"github.com/GolemWorkers/golem-intel/internal/daemonlock"
 )
 
 func TestReadBootstrapTokenExactBoundedInput(t *testing.T) {
@@ -54,5 +56,17 @@ func TestVerifyAbsoluteExecutablePathRejectsRelativeAndSymlink(t *testing.T) {
 func TestLegacyBootstrapArgvFlagIsRejected(t *testing.T) {
 	if err := run([]string{"serve", "--dashboard-bootstrap-token", "secret"}); err == nil {
 		t.Fatal("legacy plaintext bootstrap argv flag was accepted")
+	}
+}
+
+func TestDaemonRunRejectsAnOwnedDataRoot(t *testing.T) {
+	root := t.TempDir()
+	owner, err := daemonlock.Acquire(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer owner.Close()
+	if err := run([]string{"serve", "--data-dir", root}); !errors.Is(err, daemonlock.ErrAlreadyRunning) {
+		t.Fatalf("duplicate daemon root error = %v, want ErrAlreadyRunning", err)
 	}
 }

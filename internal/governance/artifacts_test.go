@@ -99,6 +99,20 @@ func TestCommitEvidenceRejectsSymlink(t *testing.T) {
 	}
 }
 
+func TestLoadCommittedEvidenceRejectsSymlinkedRunDirectory(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "runs"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	outside := t.TempDir()
+	if err := os.Symlink(outside, filepath.Join(root, "runs", "run-escape")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+	if _, err := LoadCommittedEvidence(root, "run-escape", 1024); !errors.Is(err, ErrUnsafePath) {
+		t.Fatalf("symlinked committed evidence returned %v, want ErrUnsafePath", err)
+	}
+}
+
 func TestCommitEvidenceRejectsUndeclaredWorkerOutput(t *testing.T) {
 	root := t.TempDir()
 	stage := filepath.Join(root, "spool")

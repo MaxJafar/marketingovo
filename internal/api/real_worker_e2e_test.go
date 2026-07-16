@@ -25,6 +25,10 @@ func TestRealPythonWorkerThroughHTTPAndGoAuthority(t *testing.T) {
 	if err != nil {
 		t.Skipf("pinned uv runtime is not provisioned: %v", err)
 	}
+	uv, err = filepath.EvalSymlinks(uv)
+	if err != nil {
+		t.Fatal(err)
+	}
 	uv, err = filepath.Abs(uv)
 	if err != nil {
 		t.Fatal(err)
@@ -71,7 +75,7 @@ func TestRealPythonWorkerThroughHTTPAndGoAuthority(t *testing.T) {
 	if err := client.Do(context.Background(), http.MethodPost, "/v1/comparisons", comparisonBody(), &run); err != nil {
 		t.Fatal(err)
 	}
-	detail := waitAPIRun(t, client, run.ID)
+	detail := waitRealWorkerRun(t, client, run.ID)
 	if detail.Status != domain.RunSucceeded {
 		code, message := "", ""
 		if detail.ErrorCode != nil {
@@ -94,4 +98,18 @@ func TestRealPythonWorkerThroughHTTPAndGoAuthority(t *testing.T) {
 			t.Fatalf("real worker omitted %s artifact: %+v", kind, detail.Artifacts)
 		}
 	}
+}
+
+func waitRealWorkerRun(t *testing.T, client *Client, runID string) domain.RunDetail {
+	t.Helper()
+	deadline := time.Now().Add(60 * time.Second)
+	for time.Now().Before(deadline) {
+		var detail domain.RunDetail
+		if err := client.Do(context.Background(), http.MethodGet, "/v1/runs/"+runID, nil, &detail); err == nil && detail.Status.Terminal() {
+			return detail
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	t.Fatalf("real worker run %s did not become terminal", runID)
+	return domain.RunDetail{}
 }

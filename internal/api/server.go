@@ -311,7 +311,17 @@ func (server *Server) replayRun(writer http.ResponseWriter, request *http.Reques
 }
 
 func (server *Server) report(writer http.ResponseWriter, request *http.Request) {
-	artifact, err := server.store.ReportArtifact(request.Context(), request.PathValue("runId"))
+	runID := request.PathValue("runId")
+	run, err := server.store.GetRun(request.Context(), runID)
+	if err != nil {
+		writeMappedError(writer, request, err)
+		return
+	}
+	if !run.ReportAvailable {
+		writeMappedError(writer, request, storage.ErrNotFound)
+		return
+	}
+	artifact, err := server.store.ReportArtifact(request.Context(), runID)
 	if err != nil {
 		writeMappedError(writer, request, err)
 		return
