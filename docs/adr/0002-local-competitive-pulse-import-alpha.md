@@ -113,7 +113,8 @@ The following are invariants, not implementation suggestions:
    explicit state; they are never zero-filled or silently adjudicated.
 7. Every non-null report metric names the exact canonical observation IDs used
    to calculate it, and every named ID resolves to complete source provenance.
-8. Cancelled, failed, deleted, or expired runs expose no report.
+8. Cancelled or failed runs and manually deleted or retention-expired lineages
+   expose no report.
 9. Replay never reopens the analyst's original file and never silently upgrades
    the input, parser, or metric contract.
 10. Import validation and analysis perform no non-loopback network request.
@@ -283,40 +284,91 @@ and rule names, never the rejected cell value.
 
 ## CSV columns
 
-| Column              | Required value and validation                                                                                                                                                                           |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `schema_version`    | Exact constant `golem.competitive-pulse-import.v1`.                                                                                                                                                     |
-| `observation_id`    | 1–128 ASCII characters matching `^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`; unique in the file.                                                                                                              |
-| `target_id`         | 1–64 lowercase ASCII characters matching `^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$`. The file contains 2–5 distinct brand/organization IDs; natural-person targets are out of scope.                      |
-| `target_name`       | 1–200 Unicode scalar values; one exact NFC brand/organization name per `target_id`. No entity resolution or name-based merge occurs.                                                                    |
-| `platform`          | 1–64 lowercase ASCII characters matching `^[a-z0-9][a-z0-9._-]{0,63}$`; exactly one platform across the file.                                                                                           |
-| `metric`            | One of `followers`, `content_published`, or `engagement_rate`.                                                                                                                                          |
-| `value`             | Metric-specific. Followers use an integer from 0 through 9,007,199,254,740,991; content uses exactly `1`; engagement leaves it empty and the rate is calculated from its two counts.                    |
-| `numerator`         | Empty except for engagement; engagement requires an integer from 0 through 9,007,199,254,740,991 representing public likes plus public comments.                                                        |
-| `denominator`       | Empty except for engagement; engagement requires an integer from 1 through 9,007,199,254,740,991 representing the paired public follower count.                                                         |
-| `content_id`        | Empty for followers; otherwise 1–256 characters matching the observation-ID alphabet. Exactly one content row and at most one engagement row exist per `(target_id, content_id)`.                       |
-| `content_format`    | Empty for followers; otherwise one of `video`, `short`, `image`, `carousel`, `text`, `live`, `audio`, or `unknown`. It must agree for a content/engagement pair.                                        |
-| `published_at`      | Empty for followers; otherwise a UTC timestamp and no later than `observed_at`. It must agree for a content/engagement pair.                                                                            |
-| `observed_at`       | Required UTC timestamp: `YYYY-MM-DDTHH:MM:SS[.ffffff]Z`. Offsets, timezone-free values, and more than six fractional digits are rejected.                                                               |
-| `recorded_at`       | Same timestamp grammar; must be at or after `observed_at` and no later than the authority validation time plus five minutes.                                                                            |
-| `source_url`        | Absolute HTTPS URL, at most 2,048 characters, with a host and no userinfo. Credential-like query keys are forbidden. The URL is stored and rendered as an inert citation; it is never fetched by a run. |
-| `native_id`         | 1–256 NFC characters identifying the source record. It need not be globally unique.                                                                                                                     |
-| `confidence`        | Required plain decimal in `[0,1]` with at most six fractional digits. It is the importer's stated source/extraction confidence, not a probability that a business claim is true. No default exists.     |
-| `coverage`          | Required plain decimal in `(0,1]` with at most six fractional digits. It is the stated coverage of this observation. No default exists.                                                                 |
-| `data_class`        | Exact constant `public`.                                                                                                                                                                                |
-| `permitted_purpose` | Exact constant `competitive_research`.                                                                                                                                                                  |
-| `retention_days`    | Integer 1–365, identical on every row. The authority derives one absolute deadline from the successful validation time.                                                                                 |
-| `rights_state`      | Exact constant `permitted`. This is a recorded user attestation, not independent proof of source terms.                                                                                                 |
+| Column              | Required value and validation                                                                                                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `schema_version`    | Exact constant `golem.competitive-pulse-import.v1`.                                                                                                                                                 |
+| `observation_id`    | 1–128 ASCII characters matching `^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`; unique in the file.                                                                                                          |
+| `target_id`         | 1–64 lowercase ASCII characters matching `^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$`. The file contains 2–5 distinct brand/organization IDs; natural-person targets are out of scope.                  |
+| `target_name`       | 1–200 Unicode scalar values; one exact NFC brand/organization name per `target_id`. No entity resolution or name-based merge occurs.                                                                |
+| `platform`          | 1–64 lowercase ASCII characters matching `^[a-z0-9][a-z0-9._-]{0,63}$`; exactly one platform across the file.                                                                                       |
+| `metric`            | One of `followers`, `content_published`, or `engagement_rate`.                                                                                                                                      |
+| `value`             | Metric-specific. Followers use an integer from 0 through 9,007,199,254,740,991; content uses exactly `1`; engagement leaves it empty and the rate is calculated from its two counts.                |
+| `numerator`         | Empty except for engagement; engagement requires an integer from 0 through 9,007,199,254,740,991 representing public likes plus public comments.                                                    |
+| `denominator`       | Empty except for engagement; engagement requires an integer from 1 through 9,007,199,254,740,991 representing the paired public follower count.                                                     |
+| `content_id`        | Empty for followers; otherwise 1–256 characters matching the observation-ID alphabet. Exactly one content row and at most one engagement row exist per `(target_id, content_id)`.                   |
+| `content_format`    | Empty for followers; otherwise one of `video`, `short`, `image`, `carousel`, `text`, `live`, `audio`, or `unknown`. It must agree for a content/engagement pair.                                    |
+| `published_at`      | Empty for followers; otherwise a UTC timestamp and no later than `observed_at`. It must agree for a content/engagement pair.                                                                        |
+| `observed_at`       | Required UTC timestamp: `YYYY-MM-DDTHH:MM:SS[.ffffff]Z`. Offsets, timezone-free values, and more than six fractional digits are rejected.                                                           |
+| `recorded_at`       | Same timestamp grammar; must be at or after `observed_at` and no later than the authority validation time plus five minutes.                                                                        |
+| `source_url`        | A 1–2,048 byte ASCII citation satisfying the complete `source-reference.v1` policy below. It is stored exactly, rendered as inert text, and never fetched or opened by the product.                 |
+| `native_id`         | 1–256 NFC characters identifying the source record. It need not be globally unique.                                                                                                                 |
+| `confidence`        | Required plain decimal in `[0,1]` with at most six fractional digits. It is the importer's stated source/extraction confidence, not a probability that a business claim is true. No default exists. |
+| `coverage`          | Required plain decimal in `(0,1]` with at most six fractional digits. It is the stated coverage of this observation. No default exists.                                                             |
+| `data_class`        | Exact constant `public`.                                                                                                                                                                            |
+| `permitted_purpose` | Exact constant `competitive_research`.                                                                                                                                                              |
+| `retention_days`    | Integer 1–365, identical on every row. The authority derives one absolute deadline from the successful validation time.                                                                             |
+| `rights_state`      | Exact constant `permitted`. This is a recorded user attestation, not independent proof of source terms.                                                                                             |
 
 Numeric cells use ASCII digits and an optional decimal point only. Exponents,
 signs, thousands separators, `NaN`, infinity, booleans, `NULL`, `N/A`, and
 locale-specific forms are rejected.
 
-The forbidden URL query-key comparison is case-insensitive after percent
-decoding and includes `access_token`, `api_key`, `apikey`, `auth`,
-`authorization`, `key`, `password`, `secret`, `sig`, `signature`, and `token`.
-URL fragments are allowed but remain inert. Internationalized hosts must be
-supplied in their ASCII IDNA form.
+### Source-reference policy
+
+`source-reference.v1` is the single acceptance, authority-revalidation, and UI
+policy. Python applies it during preview. Go applies the same ordered rules to
+every canonical/report citation before authority commit and also requires the
+emitted string to equal the accepted canonical row byte-for-byte. The dashboard
+does not implement a third URL validator: it renders that validated string as
+escaped text under the fixed non-navigation rule.
+
+A source URL is valid only when all of these conditions hold:
+
+1. The cell is 1–2,048 ASCII bytes, has no raw whitespace or backslash, and is
+   syntactically exactly one URI. Every percent escape is two hexadecimal
+   digits. Percent-decoding the path exactly once must produce valid UTF-8 with
+   no U+0000–U+001F or U+007F–U+009F control, whitespace, or backslash.
+2. The literal prefix is lowercase `https://`. Every other scheme, mixed-case
+   spelling, scheme-relative reference, and relative reference is rejected.
+3. The authority has no userinfo. Any username, password, or bare `@` before
+   the first path separator is rejected.
+4. The host is an ASCII IDNA DNS name with at least two non-empty labels, no
+   trailing dot, and labels matching
+   `^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$`. IP literals of every
+   class, IPv6 zone identifiers, `localhost`, and names ending in
+   `.localhost`, `.local`, or `.home.arpa` are rejected. Reserved `.invalid`,
+   `.test`, and `.example` names remain valid inert citations for sanitized
+   fixtures.
+5. An explicit port, query, or fragment is forbidden. V1 therefore accepts no
+   URL userinfo, signed/query credential, tracking query, or fragment token and
+   does not rely on a heuristic secret-key list.
+
+The stored `source_url` is the exact accepted ASCII string. The conformance
+fixture's derived `source_host` is the parsed host lowercased without
+normalization of the path; it is a validator expectation, not a 33rd canonical
+field or a value the dashboard must derive.
+
+Each invalid cell emits exactly one source-URL diagnostic: the first matching
+rule in this precedence order is
+`source_url_invalid`, `source_url_control_character`, `source_url_scheme`,
+`source_url_credentials`, `source_url_host_forbidden`,
+`source_url_port_forbidden`, `source_url_query_forbidden`, then
+`source_url_fragment_forbidden`. Generic free-text rules still run before this
+policy, so a raw C0/C1 character is `field_control_character`; the source URL
+code covers a percent-encoded control.
+
+Every accepted source reference has `clickable: false` in this alpha. The
+dashboard must not render an anchor, call a browser-open API, prefetch, resolve,
+or probe it. It may offer an explicit copy action for the exact escaped string.
+Consequently a DNS name that later resolves to loopback, private, or link-local
+space is still never a product navigation target. No DNS lookup is performed to
+classify it. A future clickable-citation feature requires a new policy version
+and security review; `noopener,noreferrer` alone is not sufficient.
+
+The normative cross-language cases are
+[`source-url-policy.json`](../../fixtures/competitive-pulse-import-v1/source-url-policy.json).
+Python, Go, SDK, and dashboard tests consume that file; no lane may add a local
+acceptance or clickability exception.
 
 ### Metric-specific row invariants
 
@@ -352,9 +404,9 @@ populations independent of engagement availability.
   stable order `(target_id, observed_at, observation_id)`; out-of-order input is
   neither rejected nor rewritten in the raw snapshot.
 - Differing follower values at the same target/timestamp from distinct source
-  records are retained as contradictory evidence. Preview emits a warning and
-  the affected output metric becomes `contradictory` unless two unambiguous
-  boundary timestamps remain. No row is deleted or selected by source order.
+  records are retained as contradictory evidence. Preview and reports apply the
+  exact follower-state algorithm below; no row is deleted or selected by
+  source order.
 - A syntactically and semantically valid dataset may have missing metrics.
   Comparison start requires at least one output metric that is available for
   every selected target; otherwise it fails before creating a run.
@@ -390,59 +442,76 @@ column order, severity (`error` before `warning`), and code. The response sets
 no `dataset_id`, and immediate private-temp cleanup. Warnings do not prevent a
 dataset.
 
-| Code                           | Severity / scope        | Trigger                                                                                  |
-| ------------------------------ | ----------------------- | ---------------------------------------------------------------------------------------- |
-| `import_attestation_required`  | HTTP error              | Required human attestation header is absent or not the exact v1 value.                   |
-| `unsupported_media_type`       | HTTP error              | Content-Type is not exact CSV UTF-8.                                                     |
-| `unsupported_content_encoding` | HTTP error              | Body is compressed or otherwise encoded.                                                 |
-| `input_empty`                  | HTTP error              | Zero body bytes.                                                                         |
-| `input_too_large`              | HTTP error              | Raw bytes exceed 8,388,608 or data records exceed 10,000.                                |
-| `input_read_failed`            | HTTP error              | The daemon cannot finish the private streamed copy; no diagnostic echoes the cause path. |
-| `invalid_utf8`                 | error / file            | Invalid UTF-8.                                                                           |
-| `utf8_bom_forbidden`           | error / file            | A UTF-8 BOM is present.                                                                  |
-| `csv_syntax`                   | error / record          | Invalid quoting, delimiter, or trailing characters.                                      |
-| `csv_embedded_newline`         | error / record          | CR or LF occurs inside a quoted field.                                                   |
-| `csv_empty_record`             | error / record          | A blank record occurs before EOF.                                                        |
-| `csv_record_too_large`         | error / record          | Encoded record exceeds 65,536 bytes.                                                     |
-| `csv_header_missing`           | error / file            | No complete header exists.                                                               |
-| `csv_duplicate_header`         | error / header          | A header name repeats.                                                                   |
-| `csv_missing_column`           | error / header          | A required v1 column is absent.                                                          |
-| `csv_unknown_column`           | error / header          | A non-v1 column is present.                                                              |
-| `csv_column_order`             | error / header          | The 22 names are not in the frozen order.                                                |
-| `field_required`               | error / cell            | A conditionally required cell is empty.                                                  |
-| `field_must_be_empty`          | error / cell            | A metric requires the cell to be null.                                                   |
-| `field_whitespace`             | error / cell            | A value has surrounding whitespace.                                                      |
-| `field_control_character`      | error / cell            | A decoded value contains a forbidden control.                                            |
-| `field_formula_prefix`         | error / cell            | A free-text value begins with a spreadsheet formula prefix.                              |
-| `field_too_large`              | error / cell            | A decoded value exceeds its column limit.                                                |
-| `field_format`                 | error / cell            | An ID, numeric, or NFC grammar is invalid.                                               |
-| `field_out_of_range`           | error / cell            | A numeric value is outside its documented interval.                                      |
-| `field_enum`                   | error / cell            | A value is not in its documented closed set.                                             |
-| `timestamp_format`             | error / cell            | Timestamp grammar or UTC requirement fails.                                              |
-| `timestamp_order`              | error / row             | Published/observed/recorded ordering fails.                                              |
-| `timestamp_in_future`          | error / row             | `recorded_at` exceeds validation time by more than five minutes.                         |
-| `source_url_invalid`           | error / cell            | URL is not a bounded absolute HTTPS citation.                                            |
-| `source_url_credentials`       | error / cell            | URL contains userinfo.                                                                   |
-| `source_url_secret_query`      | error / cell            | URL contains a forbidden credential-like query key.                                      |
-| `schema_version_unsupported`   | error / cell            | Row schema ID is not the exact v1 constant.                                              |
-| `metric_field_combination`     | error / row             | Metric-specific required/empty/value rules fail.                                         |
-| `content_reference_missing`    | error / row             | Engagement has no matching content record.                                               |
-| `content_reference_mismatch`   | error / row             | Engagement content format or published time disagrees with its content record.           |
-| `policy_data_class_forbidden`  | error / cell            | Data class is not `public`.                                                              |
-| `policy_purpose_forbidden`     | error / cell            | Purpose is not `competitive_research`.                                                   |
-| `policy_rights_forbidden`      | error / cell            | Rights state is not `permitted`.                                                         |
-| `policy_value_conflict`        | error / file            | File-scoped platform, policy, or retention value changes between rows.                   |
-| `duplicate_observation_id`     | error / row             | Observation ID appeared earlier.                                                         |
-| `duplicate_observation`        | error / row             | Exact observation fingerprint appeared earlier.                                          |
-| `duplicate_content_metric`     | error / row             | A target/content pair repeats a content or engagement metric.                            |
-| `target_count_out_of_range`    | error / file            | Distinct target count is outside 2–5.                                                    |
-| `target_name_conflict`         | error / row             | One target ID maps to multiple names.                                                    |
-| `platform_count_out_of_range`  | error / file            | More or fewer than one platform exists.                                                  |
-| `observation_value_conflict`   | warning / records       | Distinct follower source records disagree at one target/timestamp. Rows are retained.    |
-| `metric_missing`               | warning / target metric | No evidence exists for an output metric.                                                 |
-| `metric_insufficient`          | warning / target metric | Evidence exists but does not meet the metric's minimum population.                       |
-| `short_cadence_window`         | warning / target metric | Observation span is under seven days and the fixed seven-day denominator is used.        |
-| `partial_metric_coverage`      | warning / target metric | Contradictory or ineligible rows reduce the declared population.                         |
+The two size limits have deliberately different owners and channels. Go alone
+enforces the 8,388,608-byte transport cap and returns HTTP 413 Problem
+`input_too_large`. Go does not count CSV records. After recognizing 10,000
+complete data records, the worker treats the first byte that begins data record
+10,001 as the terminal semantic condition. It returns HTTP 200 with
+`valid: false`, `row_count: 10001`, `diagnostics_truncated: false`, and exactly
+one `csv_record_limit_exceeded` error at physical `record_number: 10002` with
+`column: null`; it does not inspect later records. The fixed message is
+`The CSV contains more than 10000 data records.` No dataset is committed.
+
+| Code                            | Severity / scope        | Trigger                                                                                  |
+| ------------------------------- | ----------------------- | ---------------------------------------------------------------------------------------- |
+| `import_attestation_required`   | HTTP error              | Required human attestation header is absent or not the exact v1 value.                   |
+| `unsupported_media_type`        | HTTP error              | Content-Type is not exact CSV UTF-8.                                                     |
+| `unsupported_content_encoding`  | HTTP error              | Body is compressed or otherwise encoded.                                                 |
+| `input_empty`                   | HTTP error              | Zero body bytes.                                                                         |
+| `input_too_large`               | HTTP error              | Raw bytes exceed 8,388,608; Go returns HTTP 413 before semantic preview.                 |
+| `input_read_failed`             | HTTP error              | The daemon cannot finish the private streamed copy; no diagnostic echoes the cause path. |
+| `invalid_utf8`                  | error / file            | Invalid UTF-8.                                                                           |
+| `utf8_bom_forbidden`            | error / file            | A UTF-8 BOM is present.                                                                  |
+| `csv_syntax`                    | error / record          | Invalid quoting, delimiter, or trailing characters.                                      |
+| `csv_embedded_newline`          | error / record          | CR or LF occurs inside a quoted field.                                                   |
+| `csv_empty_record`              | error / record          | A blank record occurs before EOF.                                                        |
+| `csv_record_too_large`          | error / record          | Encoded record exceeds 65,536 bytes.                                                     |
+| `csv_record_limit_exceeded`     | error / record          | Worker encounters data record 10,001; preview stops with the frozen result above.        |
+| `csv_header_missing`            | error / file            | No complete header exists.                                                               |
+| `csv_duplicate_header`          | error / header          | A header name repeats.                                                                   |
+| `csv_missing_column`            | error / header          | A required v1 column is absent.                                                          |
+| `csv_unknown_column`            | error / header          | A non-v1 column is present.                                                              |
+| `csv_column_order`              | error / header          | The 22 names are not in the frozen order.                                                |
+| `field_required`                | error / cell            | A conditionally required cell is empty.                                                  |
+| `field_must_be_empty`           | error / cell            | A metric requires the cell to be null.                                                   |
+| `field_whitespace`              | error / cell            | A value has surrounding whitespace.                                                      |
+| `field_control_character`       | error / cell            | A decoded value contains a forbidden control.                                            |
+| `field_formula_prefix`          | error / cell            | A free-text value begins with a spreadsheet formula prefix.                              |
+| `field_too_large`               | error / cell            | A decoded value exceeds its column limit.                                                |
+| `field_format`                  | error / cell            | An ID, numeric, or NFC grammar is invalid.                                               |
+| `field_out_of_range`            | error / cell            | A numeric value is outside its documented interval.                                      |
+| `field_enum`                    | error / cell            | A value is not in its documented closed set.                                             |
+| `timestamp_format`              | error / cell            | Timestamp grammar or UTC requirement fails.                                              |
+| `timestamp_order`               | error / row             | Published/observed/recorded ordering fails.                                              |
+| `timestamp_in_future`           | error / row             | `recorded_at` exceeds validation time by more than five minutes.                         |
+| `source_url_invalid`            | error / cell            | URL length, ASCII, URI, or percent-escape grammar is invalid.                            |
+| `source_url_control_character`  | error / cell            | Percent-decoded path contains a control, whitespace, or backslash.                       |
+| `source_url_scheme`             | error / cell            | Literal scheme prefix is not lowercase `https://`.                                       |
+| `source_url_credentials`        | error / cell            | Authority contains userinfo or a bare authority `@`.                                     |
+| `source_url_host_forbidden`     | error / cell            | Host is not the permitted multi-label DNS form or is a forbidden local/special host.     |
+| `source_url_port_forbidden`     | error / cell            | Authority contains an explicit port.                                                     |
+| `source_url_query_forbidden`    | error / cell            | URL contains a query, including an empty query.                                          |
+| `source_url_fragment_forbidden` | error / cell            | URL contains a fragment, including an empty fragment.                                    |
+| `schema_version_unsupported`    | error / cell            | Row schema ID is not the exact v1 constant.                                              |
+| `metric_field_combination`      | error / row             | Metric-specific required/empty/value rules fail.                                         |
+| `content_reference_missing`     | error / row             | Engagement has no matching content record.                                               |
+| `content_reference_mismatch`    | error / row             | Engagement content format or published time disagrees with its content record.           |
+| `policy_data_class_forbidden`   | error / cell            | Data class is not `public`.                                                              |
+| `policy_purpose_forbidden`      | error / cell            | Purpose is not `competitive_research`.                                                   |
+| `policy_rights_forbidden`       | error / cell            | Rights state is not `permitted`.                                                         |
+| `policy_value_conflict`         | error / file            | File-scoped platform, policy, or retention value changes between rows.                   |
+| `duplicate_observation_id`      | error / row             | Observation ID appeared earlier.                                                         |
+| `duplicate_observation`         | error / row             | Exact observation fingerprint appeared earlier.                                          |
+| `duplicate_content_metric`      | error / row             | A target/content pair repeats a content or engagement metric.                            |
+| `target_count_out_of_range`     | error / file            | Distinct target count is outside 2–5.                                                    |
+| `target_name_conflict`          | error / row             | One target ID maps to multiple names.                                                    |
+| `platform_count_out_of_range`   | error / file            | More or fewer than one platform exists.                                                  |
+| `observation_value_conflict`    | warning / records       | Distinct follower source records disagree at one target/timestamp. Rows are retained.    |
+| `metric_missing`                | warning / target metric | No evidence exists for an output metric.                                                 |
+| `metric_insufficient`           | warning / target metric | Evidence exists but does not meet the metric's minimum population.                       |
+| `metric_contradictory`          | warning / target metric | A follower conflict exists and fewer than two unambiguous timestamps remain.             |
+| `short_cadence_window`          | warning / target metric | Observation span is under seven days and the fixed seven-day denominator is used.        |
+| `partial_metric_coverage`       | warning / target metric | Contradictory or ineligible rows reduce the declared population.                         |
 
 API state errors (`dataset_not_found`, `dataset_expired`, `dataset_deleting`,
 `dataset_deleted`, `dataset_retention_too_short`, `target_selection_invalid`,
@@ -450,18 +519,18 @@ API state errors (`dataset_not_found`, `dataset_expired`, `dataset_deleting`,
 `replay_version_unavailable`) use the existing RFC 9457-style Problem response
 and are not CSV diagnostics.
 
-| Problem code                  | HTTP | Trigger                                                                      |
-| ----------------------------- | ---: | ---------------------------------------------------------------------------- |
-| `dataset_not_found`           |  404 | The authenticated local store has no matching dataset tombstone or live row. |
-| `dataset_expired`             |  410 | The dataset crossed its retention deadline.                                  |
-| `dataset_deleting`            |  409 | Start/replay races with an in-progress deletion.                             |
-| `dataset_deleted`             |  410 | Dataset content was manually or automatically deleted.                       |
-| `dataset_retention_too_short` |  409 | Fewer than 15 minutes remain before expiry.                                  |
-| `target_selection_invalid`    |  422 | Selection is not 2–5 unique, grammar-valid IDs.                              |
-| `target_not_in_dataset`       |  422 | At least one selected target is absent; detail does not echo the ID.         |
-| `no_comparable_metric`        |  422 | No output metric is available for every selected target.                     |
-| `input_snapshot_corrupt`      |  500 | Authority hash/size verification of its private snapshot fails.              |
-| `replay_version_unavailable`  |  409 | The exact recorded CSV parser or metric catalog cannot run.                  |
+| Problem code                  | HTTP | Trigger                                                                            |
+| ----------------------------- | ---: | ---------------------------------------------------------------------------------- |
+| `dataset_not_found`           |  404 | The authenticated local store has no matching dataset tombstone or live row.       |
+| `dataset_expired`             |  410 | Deadline has passed, or deletion is gated/deleted with reason `retention_expired`. |
+| `dataset_deleting`            |  409 | Manual deletion gate committed and cleanup is in progress.                         |
+| `dataset_deleted`             |  410 | Manual deletion completed and only a content-free tombstone remains.               |
+| `dataset_retention_too_short` |  409 | Fewer than 15 minutes remain before expiry.                                        |
+| `target_selection_invalid`    |  422 | Selection is not 2–5 unique, grammar-valid IDs.                                    |
+| `target_not_in_dataset`       |  422 | At least one selected target is absent; detail does not echo the ID.               |
+| `no_comparable_metric`        |  422 | No output metric is available for every selected target.                           |
+| `input_snapshot_corrupt`      |  500 | Authority hash/size verification of its private snapshot fails.                    |
+| `replay_version_unavailable`  |  409 | The exact recorded CSV parser or metric catalog cannot run.                        |
 
 ## Exact canonical observation mapping
 
@@ -570,9 +639,9 @@ state and never returns the raw bytes, private path, or full source URLs.
 
 `DELETE /v1/datasets/{datasetId}` is human-only API/CLI functionality and
 returns HTTP 202 with the affected dataset and run IDs. It transitions the
-dataset to `deleting` and cascades to every run derived from that dataset,
-including replays. It is idempotent for an already deleting/deleted dataset.
-MCP does not project either endpoint.
+dataset through the atomic deletion gate below and cascades to every run derived
+from that dataset, including replays. It is idempotent for an already
+deleting/deleted dataset. MCP does not project either endpoint.
 
 Every successful upload creates a new dataset ID, even when its content hash
 matches another dataset. The private blob may be content-deduplicated, but
@@ -652,6 +721,38 @@ attestation, retention clock, and target selection, and it revalidates the
 worker's eventual Arrow, Parquet, report, provenance, rights, purpose,
 retention, extraction pointers, and citations before publication.
 
+### Mandatory protocol merge sequence
+
+The current project stages cannot be executed literally because ZIL-158 consumes
+messages owned by the later ZIL-159 lane. The protocol seam is therefore a
+required, bounded pre-Stage-2 slice of ZIL-159:
+
+1. After this ADR merges and while ZIL-158 remains parked, Barbara lands only
+   the additive `ValidateImport`, `ImportValidationResult`, and
+   `StartAnalysis.import_context` definitions in
+   `contracts/proto/golem/intel/v1/worker.proto` plus mechanically regenerated
+   `gen/go/golem/intel/v1/worker.pb.go`,
+   `gen/python/golem/intel/v1/worker_pb2.py`, and
+   `gen/typescript/golem/intel/v1/worker_pb.ts`. `pnpm contracts:lint`, Buf
+   lint, generation-diff, and existing protocol tests must pass. No caller or
+   worker dispatch behavior is enabled in this seam.
+2. The exact seam commit is merged. Only then may Wade start ZIL-158. Wade
+   changes `workers/intelligence/**`, import fixture cases, and metric docs to
+   implement Python dispatch, parsing, canonicalization, availability, and
+   report v2 against the committed generated Python binding. Wade does not edit
+   Proto or `gen/**`.
+3. After Wade's worker protocol tests pass against that seam, Barbara resumes
+   the rest of ZIL-159: Go preview invocation and authority validation,
+   persistence, OpenAPI, SDK, CLI, and MCP. Barbara does not edit Python worker
+   behavior.
+4. Futaba starts only after the generated API/SDK contract from the completed
+   ZIL-159 lane merges.
+
+The parent coordinator must schedule the protocol-seam slice before promoting
+the existing Stage-2 ZIL-158 issue; the numeric stage label does not override
+this merge barrier. A change to a seam message after step 1 returns to Barbara
+and blocks Wade rather than being patched concurrently in worker code.
+
 ## Dataset and run state machines
 
 ### Dataset state
@@ -661,13 +762,37 @@ receiving (private temporary state)
   ├─ transport/validation error ─> removed (no durable row)
   └─ valid + fsync + atomic move ─> ready
 
-ready ── retention deadline ─> expired
-ready ── delete request ─────> deleting ─> deleted
-expired ────────────────────────────────> deleted cleanup
+ready ── manual delete gate ───────> deleting(reason=manual) ───────────> deleted
+ready ── retention deadline gate ──> deleting(reason=retention_expired) ─> deleted
 ```
 
-Only `ready`, `deleting`, `deleted`, and `expired` are durable/public states.
-No comparison or replay may start from the last three.
+Only `ready`, `deleting`, and `deleted` are durable/public states. `expired` is
+not a competing state: it is the externally visible condition derived from the
+deadline and the durable `retention_expired` deletion reason. No comparison or
+replay may start unless the dataset is `ready` and has at least 15 minutes
+remaining.
+
+Manual deletion and expiry use one linearizable deletion gate. In one SQLite
+write transaction the daemon conditionally changes `ready` to `deleting`, sets
+the immutable reason/request time, inserts or resumes one durable deletion job,
+and changes every already-derived run's `data_state` to `deleting`. Start and
+replay transactions read the same dataset row and require `ready`, so SQLite
+serialization gives only two outcomes: a start commits first and its new run is
+included by the gate, or the gate commits first and the start creates no run.
+There is no interval in which a new start can escape an accepted delete/expiry.
+
+Any API transaction that observes `now >= retention_until` first creates or
+resumes the same `retention_expired` gate before returning
+`dataset_expired`; it never exposes a stale `ready` dataset while waiting for
+the periodic sweeper.
+
+After the gate commits, the daemon cancels queued runs, requests cancellation
+of running runs, and drains them to a durable terminal status. Authority commit
+also requires dataset and run data state `ready` in its final transaction, so a
+late worker result cannot publish after the gate. Only after every derived run
+is terminal and no commit holds the transaction may cleanup remove content and
+write the final content-free tombstones. Crash recovery resumes the durable
+deletion job at its recorded phase and never moves a dataset back to `ready`.
 
 ### Run state
 
@@ -711,11 +836,11 @@ Replay is a new derivation, not a promise of byte-identical artifacts:
   must be deterministic for the same supported versions. Run ID and commit time
   may make artifact bytes differ.
 
-Replay fails before queueing when the dataset is expired/deleted/deleting, the
-snapshot is missing/corrupt, retention has fewer than 15 minutes remaining, or
-the exact recorded parser/metric contract is unavailable. It must not silently
-fall back to a newer parser, recollect, ask for the original path, or reuse an
-old report as a new result.
+Replay fails before queueing when the dataset is deleting/deleted, its deadline
+has passed, the snapshot is missing/corrupt, retention has fewer than 15 minutes
+remaining, or the exact recorded parser/metric contract is unavailable. It must
+not silently fall back to a newer parser, recollect, ask for the original path,
+or reuse an old report as a new result.
 
 ## Metric and missingness contract
 
@@ -732,12 +857,37 @@ definitions remain the contracts in the Competitive Pulse catalog.
 ### Observed follower change
 
 - Population: permitted `followers.v1` rows for the target and file platform.
-- At a timestamp, agreeing corroborating values count as one point and all
-  source rows remain citations.
-- Conflicting values at a boundary timestamp are excluded as a contradiction;
-  if fewer than two distinct unambiguous timestamps remain, status is
-  `contradictory` or `insufficient` and value is null.
-- Value: last unambiguous count minus first unambiguous count.
+- Group rows by exact `observed_at`. A group is unambiguous when its set of
+  integer values has cardinality one; one or more agreeing source rows become
+  one point and every agreeing row remains a citation. A group with two or more
+  distinct values is conflicting; every row remains evidence for one
+  `observation_value_conflict`, and the entire group is excluded from the
+  numeric calculation.
+- Let `R` be the number of qualifying follower rows, `U` the number of distinct
+  unambiguous timestamps, and `C` the number of conflicting timestamps. The
+  availability state is exactly:
+
+  | Condition                 | Availability    | Value and evidence                                                                                                  |
+  | ------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------- |
+  | `R = 0`                   | `missing`       | null; empty metric evidence IDs                                                                                     |
+  | `R > 0`, `U < 2`, `C = 0` | `insufficient`  | null; all qualifying follower IDs explain the unmet two-timestamp minimum                                           |
+  | `U < 2`, `C > 0`          | `contradictory` | null; all qualifying follower IDs plus the per-timestamp contradiction objects explain the unresolved boundary      |
+  | `U >= 2`                  | `available`     | last unambiguous value minus first unambiguous value; metric IDs are all rows at those two boundary timestamps only |
+
+- Preview emits `metric_missing` for `R = 0`, `metric_insufficient` for
+  `R > 0, U < 2, C = 0`, and `metric_contradictory` for `U < 2, C > 0`. It
+  emits one `observation_value_conflict` per conflicting timestamp. For
+  `U >= 2, C > 0`, it emits `partial_metric_coverage` instead of
+  `metric_contradictory`.
+- When `U >= 2` and `C > 0`, the metric remains `available` but includes
+  `partial_metric_coverage`; each conflicting group and its rows remains in the
+  report contradiction list/evidence dictionary. Interior unambiguous points
+  are quality candidates but are not calculation citations.
+- Preview target summaries, `no_comparable_metric`, report availability and
+  cross-target eligibility all use this table. Only `available` counts as a
+  common metric. Go recomputation groups canonical follower rows by the same
+  exact timestamp/value rules and rejects any report whose state, boundaries,
+  value, metric evidence IDs, or contradiction IDs differ.
 - It is never described as customer retention, churn, revenue, loyalty, or
   business performance.
 
@@ -850,22 +1000,41 @@ same bytes creates a separately attested deadline.
 
 The daemon checks deadlines before start, before worker invocation, and during
 authority commit. A local sweeper runs after startup reconciliation and at
-least every 15 minutes. At expiry it prevents new starts, marks the dataset
-`expired`, and performs the same cascade as manual deletion:
+least every 15 minutes. The same durable job handles manual and expiry cleanup
+in these ordered phases:
 
-1. reject/cancel non-terminal work and wait for the durable terminal decision;
-2. mark the dataset and all derived runs `deleting` transactionally;
-3. remove committed reports, Arrow/Parquet/manifests, private spools, search
-   documents, run-entity links, and the input blob when no live dataset refers
-   to it;
-4. clear request JSON, target summaries, hashes, paths, diagnostics, events, and
-   provenance that could reveal imported content; and
-5. mark content-free dataset/run tombstones `deleted`, with reason and time.
+1. **Gate (one SQLite transaction):** conditionally move the dataset from
+   `ready` to `deleting`, record immutable reason `manual` or
+   `retention_expired`, record the request/deadline time, insert the deletion
+   job at phase `gated`, and set every derived run's `data_state` to `deleting`.
+   This transaction is the linearization point and commits before cancellation
+   or file deletion begins.
+2. **Cancel and drain:** transactionally cancel queued runs, request cooperative
+   cancellation of running workers, and prevent any late evidence commit with
+   the authority's `data_state = ready` predicate. A worker that misses the
+   two-second cancellation checkpoint is terminated by the existing bounded
+   worker shutdown and persisted terminal before cleanup continues.
+3. **Remove content:** after every derived run is terminal and no authority
+   commit is active, idempotently remove committed reports,
+   Arrow/Parquet/manifests, private spools, search documents, run-entity links,
+   and the input blob when no other non-deleted dataset references it.
+4. **Scrub and tombstone (one SQLite transaction):** clear request JSON, target
+   summaries, hashes, paths, diagnostics, events, and provenance that could
+   reveal imported content; set dataset/run data state to `deleted`; preserve
+   only opaque IDs, deletion reason/time, and the 30-day tombstone expiry; and
+   mark the deletion job complete.
+
+Every phase transition is durable and monotonic. Startup reconciliation resumes
+the first incomplete phase. Repeating DELETE or the expiry sweep never creates
+a second job, repeats cancellation events, or reopens access. Until the final
+phase completes, the gate remains effective even if content removal fails.
 
 Content-free tombstones are retained for 30 days so a client sees deletion
-rather than a misleading not-found response, then removed. Deletion recovery is
-idempotent across crashes. Report, search, entity projection, and replay APIs
-return 410 for a deleted/expired lineage and cannot recreate it.
+rather than a misleading not-found response, then removed. Report, search,
+entity projection, and replay APIs return 410 for a deleted or
+retention-expired lineage and cannot recreate it. A manually deleting lineage
+returns 409 until its tombstone is complete; a retention-expired lineage returns
+410 from the gate onward.
 
 SQLite uses foreign keys, secure-delete behavior where supported, a WAL
 checkpoint after cascade, and normal file removal. The product does not claim
@@ -884,9 +1053,8 @@ must be visible in privacy documentation and the deletion confirmation.
 - CSV bytes and raw cells do not enter logs, diagnostics, browser storage,
   telemetry, or exception text.
 - Imported URLs are never fetched by preview, analysis, report validation,
-  search indexing, or replay. An explicit user click after the run is outside
-  collection; the dashboard displays the destination host and opens HTTPS only
-  with `noopener,noreferrer`.
+  search indexing, or replay. They remain escaped, non-clickable text under
+  `source-reference.v1`; an explicit copy does not cause navigation.
 - The parser never evaluates formulas, expands archives, resolves paths, loads
   plugins, detects encodings, or invokes a shell.
 - Person/contact fields have no place in v1. `data_class` is fixed to public;
@@ -947,7 +1115,7 @@ Network time is irrelevant because the workflow is offline.
 | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Committed 18-row / 5,569-byte golden CSV     | Preview p95 ≤ 750 ms and terminal cited report p95 ≤ 5 s over 10 sequential warm runs                                                              |
 | Generated 10,000-row input at or below 8 MiB | Preview ≤ 3 s, terminal report ≤ 30 s, and combined daemon+worker peak RSS increase ≤ 512 MiB                                                      |
-| Oversize byte or row boundary                | Rejected before durable dataset creation; memory remains bounded and no raw bytes appear in output                                                 |
+| Oversize byte or row boundary                | Byte overflow is HTTP 413 `input_too_large`; row 10,001 is HTTP 200 invalid preview with `csv_record_limit_exceeded`; neither creates a dataset    |
 | Cancellation                                 | Queued cancellation is terminal immediately; running worker observes cancellation and reaches terminal state within 2 s at a documented checkpoint |
 | Egress                                       | Zero non-loopback DNS, TCP, or UDP attempt during preview, analysis, cancellation, and replay                                                      |
 
@@ -982,8 +1150,9 @@ contract change stops the lane and returns to Reed as a new ADR amendment rather
 than being improvised in two implementations.
 
 Bertram Gilfoyle's Stage 1 startup-recovery work may touch `internal/storage`
-and `internal/jobs` before Barbara starts. ZIL-159 begins only after that work
-and this ADR merge, so the two owners do not concurrently edit those subsystems.
+and `internal/jobs` before Barbara starts. The ZIL-159 protocol-seam slice begins
+only after that work and this ADR merge; its remaining daemon work resumes after
+Wade's worker slice, so the owners do not concurrently edit those subsystems.
 
 The AGENTintel independence program is also separate and staged. ZIL-175 owns
 the identity/compatibility ADR; its later core and public-surface migrations
