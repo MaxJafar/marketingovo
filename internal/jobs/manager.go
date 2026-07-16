@@ -25,6 +25,18 @@ import (
 
 const maximumFixtureBytes int64 = 128 << 20
 
+const (
+	recoveryEvidenceCorruptCode    = "recovery_evidence_corrupt"
+	recoveryEvidencePathCode       = "recovery_evidence_path_violation"
+	recoveryEvidenceTooLargeCode   = "recovery_evidence_too_large"
+	recoveryProjectionMismatchCode = "recovery_projection_mismatch"
+
+	recoveryEvidenceCorruptMessage    = "Recovered evidence failed integrity validation"
+	recoveryEvidencePathMessage       = "Recovered evidence violated filesystem safety policy"
+	recoveryEvidenceTooLargeMessage   = "Recovered evidence exceeds the configured safety limit"
+	recoveryProjectionMismatchMessage = "Recovered evidence does not support its derived projections"
+)
+
 type Config struct {
 	Store        *storage.Store
 	DataRoot     string
@@ -99,13 +111,20 @@ func (manager *Manager) Start(parent context.Context) error {
 	if manager.started {
 		return fmt.Errorf("jobs manager already started")
 	}
-	for _, path := range []string{manager.dataRoot, filepath.Join(manager.dataRoot, "spool"), filepath.Join(manager.dataRoot, "runs")} {
-		if err := os.MkdirAll(path, 0o700); err != nil {
-			return fmt.Errorf("create jobs directory: %w", err)
-		}
-		if err := os.Chmod(path, 0o700); err != nil {
-			return fmt.Errorf("harden jobs directory: %w", err)
-		}
+	if err := parent.Err(); err != nil {
+		return err
+	}
+	if err := manager.prepareStartupDirectories(); err != nil {
+		return err
+	}
+	if err := manager.cleanupOrphanedSpools(); err != nil {
+		return err
+	}
+	if err := manager.reconcileRecoveredRuns(parent); err != nil {
+		return err
+	}
+	if err := parent.Err(); err != nil {
+		return err
 	}
 	manager.ctx, manager.cancel = context.WithCancel(parent)
 	manager.started = true
@@ -210,6 +229,176 @@ func (manager *Manager) signal() {
 	select {
 	case manager.notify <- struct{}{}:
 	default:
+	}
+}
+
+func (manager *Manager) prepareStartupDirectories() error {
+	for _, path := range []string{manager.dataRoot, filepath.Join(manager.dataRoot, "spool"), filepath.Join(manager.dataRoot, "runs")} {
+		if err := ensurePrivateDirectory(path); err != nil {
+			return fmt.Errorf("prepare jobs directory: %w", err)
+		}
+	}
+	return nil
+}
+
+func ensurePrivateDirectory(path string) error {
+	info, err := os.Lstat(path)
+	if errors.Is(err, os.ErrNotExist) {
+		if err := os.Mkdir(path, 0o700); err != nil && !errors.Is(err, os.ErrExist) {
+			return err
+		}
+		info, err = os.Lstat(path)
+	}
+	if err != nil {
+		return err
+	}
+	if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
+		return fmt.Errorf("directory must be a real non-symlink directory")
+	}
+	if err := os.Chmod(path, 0o700); err != nil {
+		return err
+	}
+	return nil
+}
+
+// cleanupOrphanedSpools only removes direct job-* directories beneath the
+// private spool root. ReadDir and Lstat inspect entries without following
+// links; symlinks are deliberately left alone rather than treated as a tree
+// to traverse. Committed evidence is under runs/, never spool/.
+func (manager *Manager) cleanupOrphanedSpools() error {
+	spool := filepath.Join(manager.dataRoot, "spool")
+	entries, err := os.ReadDir(spool)
+	if err != nil {
+		return fmt.Errorf("read private spool: %w", err)
+	}
+	for _, entry := range entries {
+		if !strings.HasPrefix(entry.Name(), "job-") || entry.Type()&os.ModeSymlink != 0 {
+			continue
+		}
+		if !entry.Type().IsDir() {
+			entryInfo, err := entry.Info()
+			if err != nil {
+				return fmt.Errorf("inspect private spool entry: %w", err)
+			}
+			if !entryInfo.IsDir() || entryInfo.Mode()&os.ModeSymlink != 0 {
+				continue
+			}
+		}
+		path := filepath.Join(spool, entry.Name())
+		info, err := os.Lstat(path)
+		if errors.Is(err, os.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return fmt.Errorf("inspect orphaned private spool: %w", err)
+		}
+		if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
+			continue
+		}
+		if err := os.RemoveAll(path); err != nil {
+			return fmt.Errorf("remove orphaned private spool: %w", err)
+		}
+	}
+	return nil
+}
+
+// reconcileRecoveredRuns repairs only evidence that was atomically published
+// before the prior process lost its SQLite completion transaction. It runs
+// synchronously before worker loops can claim missing-evidence retries.
+func (manager *Manager) reconcileRecoveredRuns(ctx context.Context) error {
+	runs, err := manager.store.ListRecoveredRuns(ctx)
+	if err != nil {
+		return fmt.Errorf("list recovered runs: %w", err)
+	}
+	for _, run := range runs {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		present, err := manager.committedEvidencePresent(run.ID)
+		if err != nil {
+			if markErr := manager.markRecoveredFailure(ctx, run.ID, err); markErr != nil {
+				return markErr
+			}
+			continue
+		}
+		if !present {
+			// No published evidence means the durable request may safely follow
+			// the existing idempotent worker retry path.
+			continue
+		}
+		commit, err := governance.LoadCommittedEvidence(manager.dataRoot, run.ID, governance.DefaultMaximumArtifactBytes)
+		if err != nil {
+			if markErr := manager.markRecoveredFailure(ctx, run.ID, err); markErr != nil {
+				return markErr
+			}
+			continue
+		}
+		entities, documents := deriveCanonicalProjections(run.ID, commit.Observations, commit.Report)
+		if err := manager.store.CompleteRecoveredRun(ctx, run.ID, commit.Artifacts, entities, documents, commit.Manifest.Provenance); err != nil {
+			if errors.Is(err, storage.ErrConflict) && manager.recoveredRunNoLongerPending(ctx, run.ID) {
+				continue
+			}
+			return fmt.Errorf("complete recovered run %s: %w", run.ID, err)
+		}
+	}
+	return nil
+}
+
+func (manager *Manager) committedEvidencePresent(runID string) (bool, error) {
+	clean, err := governance.CleanRelativePath(runID)
+	if err != nil || clean != runID || filepath.Base(runID) != runID {
+		return false, fmt.Errorf("%w: recovered run identifier is unsafe", governance.ErrUnsafePath)
+	}
+	runsPath := filepath.Join(manager.dataRoot, "runs")
+	runsInfo, err := os.Lstat(runsPath)
+	if err != nil || !runsInfo.IsDir() || runsInfo.Mode()&os.ModeSymlink != 0 {
+		return false, fmt.Errorf("%w: recovered runs directory is unavailable or unsafe", governance.ErrUnsafePath)
+	}
+	runPath := filepath.Join(runsPath, runID)
+	runInfo, err := os.Lstat(runPath)
+	if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+	if err != nil || !runInfo.IsDir() || runInfo.Mode()&os.ModeSymlink != 0 {
+		return false, fmt.Errorf("%w: recovered run directory is unavailable or unsafe", governance.ErrUnsafePath)
+	}
+	evidencePath := filepath.Join(runPath, "evidence")
+	evidenceInfo, err := os.Lstat(evidencePath)
+	if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+	if err != nil || !evidenceInfo.IsDir() || evidenceInfo.Mode()&os.ModeSymlink != 0 {
+		return false, fmt.Errorf("%w: recovered evidence directory is unavailable or unsafe", governance.ErrUnsafePath)
+	}
+	return true, nil
+}
+
+func (manager *Manager) markRecoveredFailure(ctx context.Context, runID string, cause error) error {
+	code, message := recoveredFailure(cause)
+	if err := manager.store.MarkRecoveredFailed(ctx, runID, code, message); err != nil {
+		if errors.Is(err, storage.ErrConflict) && manager.recoveredRunNoLongerPending(ctx, runID) {
+			return nil
+		}
+		return fmt.Errorf("mark recovered run %s failed: %w", runID, err)
+	}
+	return nil
+}
+
+func (manager *Manager) recoveredRunNoLongerPending(ctx context.Context, runID string) bool {
+	run, err := manager.store.GetRun(ctx, runID)
+	return err == nil && (run.Status.Terminal() || run.CancelRequested)
+}
+
+func recoveredFailure(err error) (string, string) {
+	switch {
+	case errors.Is(err, governance.ErrProjectionMismatch):
+		return recoveryProjectionMismatchCode, recoveryProjectionMismatchMessage
+	case errors.Is(err, governance.ErrUnsafePath):
+		return recoveryEvidencePathCode, recoveryEvidencePathMessage
+	case errors.Is(err, governance.ErrArtifactTooLarge):
+		return recoveryEvidenceTooLargeCode, recoveryEvidenceTooLargeMessage
+	default:
+		return recoveryEvidenceCorruptCode, recoveryEvidenceCorruptMessage
 	}
 }
 
@@ -375,7 +564,9 @@ func deriveCanonicalProjections(runID string, observations []domain.Observation,
 		entity := byEntity[observation.EntityID]
 		if entity.ID == "" {
 			entity = domain.Entity{ID: observation.EntityID, Type: "social_account", DisplayName: observation.EntityName,
-				ResolutionState: "observed", UpdatedAt: time.Now().UTC()}
+				ResolutionState: "observed", UpdatedAt: observation.ObservedAt}
+		} else if observation.ObservedAt.After(entity.UpdatedAt) {
+			entity.UpdatedAt = observation.ObservedAt
 		}
 		identifier := domain.Identifier{Scheme: observation.Platform, Value: observation.NativeID, Source: observation.SourceURL}
 		duplicate := false
@@ -389,6 +580,18 @@ func deriveCanonicalProjections(runID string, observations []domain.Observation,
 			entity.Identifiers = append(entity.Identifiers, identifier)
 		}
 		byEntity[observation.EntityID] = entity
+	}
+	// A legacy raw fixture does not carry decoded canonical rows through the
+	// existing governance return value. Its validated report still supplies the
+	// entity identities needed for safe recovered search projections. Production
+	// evidence reaches this path with observations and therefore retains richer
+	// identifiers above.
+	for _, target := range report.Targets {
+		if _, present := byEntity[target.EntityID]; present {
+			continue
+		}
+		byEntity[target.EntityID] = domain.Entity{ID: target.EntityID, Type: "social_account", DisplayName: target.EntityName,
+			ResolutionState: "observed", UpdatedAt: report.GeneratedAt}
 	}
 	entities := make([]domain.Entity, 0, len(byEntity))
 	for _, entity := range byEntity {

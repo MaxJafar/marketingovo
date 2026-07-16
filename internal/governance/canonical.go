@@ -328,6 +328,9 @@ func canonicalConnectorVersion(rows []domain.Observation) string {
 }
 
 func validateReportCitations(report domain.ComparisonReport, rows []domain.Observation) error {
+	if err := validateReportProjection(report); err != nil {
+		return err
+	}
 	byID := make(map[string]domain.Observation, len(rows))
 	for _, row := range rows {
 		byID[row.ObservationID] = row
@@ -338,6 +341,31 @@ func validateReportCitations(report domain.ComparisonReport, rows []domain.Obser
 			if !present || citation.EntityID != row.EntityID || citation.SourceURL != row.SourceURL || citation.NativeID != row.NativeID ||
 				!citation.ObservedAt.Equal(row.ObservedAt) || citation.ConnectorVersion != row.ConnectorVersion || math.Abs(citation.Confidence-row.Confidence) > 1e-12 {
 				return fmt.Errorf("%w: report citation %q does not exactly match canonical evidence", ErrArtifactMismatch, citation.ObservationID)
+			}
+			if target.EntityName != "" && target.EntityName != row.EntityName {
+				return fmt.Errorf("%w: %w: report target %q names %q but evidence names %q", ErrArtifactMismatch, ErrProjectionMismatch, target.EntityID, target.EntityName, row.EntityName)
+			}
+		}
+	}
+	return nil
+}
+
+// validateReportProjection checks the report fields used to derive entities
+// and search documents. It intentionally does not require a target ID here:
+// readReportJSON owns that complete report-schema check, while the focused
+// citation tests exercise this helper with partial reports.
+func validateReportProjection(report domain.ComparisonReport) error {
+	seen := make(map[string]struct{}, len(report.Targets))
+	for _, target := range report.Targets {
+		if target.EntityID != "" {
+			if _, duplicate := seen[target.EntityID]; duplicate {
+				return fmt.Errorf("%w: %w: duplicate report target entity %q", ErrArtifactMismatch, ErrProjectionMismatch, target.EntityID)
+			}
+			seen[target.EntityID] = struct{}{}
+		}
+		for _, citation := range target.Citations {
+			if target.EntityID != "" && citation.EntityID != target.EntityID {
+				return fmt.Errorf("%w: %w: report target %q cites entity %q", ErrArtifactMismatch, ErrProjectionMismatch, target.EntityID, citation.EntityID)
 			}
 		}
 	}

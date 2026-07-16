@@ -1,6 +1,7 @@
 package governance
 
 import (
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -64,6 +65,10 @@ func TestCanonicalFilesAndReportCitationsMustAgree(t *testing.T) {
 	report.Targets[0].Citations[0].NativeID = row.NativeID
 	if err := validateReportCitations(report, []domain.Observation{row}); err != nil {
 		t.Fatalf("exact citation rejected: %v", err)
+	}
+	report.Targets[0].EntityID = "different-entity"
+	if err := validateReportCitations(report, []domain.Observation{row}); !errors.Is(err, ErrProjectionMismatch) {
+		t.Fatalf("projection mismatch error = %v, want ErrProjectionMismatch", err)
 	}
 }
 

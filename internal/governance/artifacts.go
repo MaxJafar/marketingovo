@@ -38,6 +38,11 @@ var (
 	ErrUnsafePath       = errors.New("unsafe artifact path")
 	ErrArtifactMismatch = errors.New("artifact integrity mismatch")
 	ErrArtifactTooLarge = errors.New("artifact exceeds size limit")
+	// ErrProjectionMismatch identifies a report whose claimed entity
+	// projections disagree with the evidence it cites. It is also an artifact
+	// mismatch so callers that only need the broad integrity category remain
+	// compatible.
+	ErrProjectionMismatch = errors.New("artifact projection mismatch")
 )
 
 type EvidenceManifest struct {

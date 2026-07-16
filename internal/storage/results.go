@@ -121,6 +121,18 @@ func (store *Store) MarkRecoveredFailed(ctx context.Context, runID, code, messag
 	}
 	defer transaction.Rollback()
 	now := time.Now().UTC()
+	// A recovered run normally has no SQLite projections because its original
+	// completion transaction never committed. Clear any anomalous leftovers as
+	// well, so a failed recovery can never expose a stale report or search hit.
+	for _, statement := range []string{
+		"DELETE FROM artifacts WHERE run_id=?",
+		"DELETE FROM run_entities WHERE run_id=?",
+		"DELETE FROM search_documents WHERE run_id=?",
+	} {
+		if _, err := transaction.ExecContext(ctx, statement, runID); err != nil {
+			return err
+		}
+	}
 	result, err := transaction.ExecContext(ctx, `UPDATE runs SET status='failed',stage='recovery_failed',progress=1,
 completed_at=?,updated_at=?,error_code=?,error_message=?,report_available=0
 WHERE id=? AND status='queued' AND stage='recovered'`, formatTime(now), formatTime(now), code, message, runID)
