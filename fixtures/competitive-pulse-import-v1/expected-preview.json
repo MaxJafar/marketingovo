@@ -1,0 +1,60 @@
+{
+  "schema_version": "golem.import-preview.v1",
+  "valid": true,
+  "dataset_id": "dataset_00000000000000000000000001",
+  "state": "ready",
+  "validated_at": "2026-07-16T12:00:00Z",
+  "retention_until": "2026-10-14T12:00:00Z",
+  "input": {
+    "schema_id": "golem.competitive-pulse-import.v1",
+    "sha256": "0f1ed3ee80ef1009b21a58f7e551fb75fdc2826f7b5c959c340adf20814bf8bd",
+    "size_bytes": 5569,
+    "row_count": 18
+  },
+  "policy": {
+    "attestation_version": "public-permitted-brand-competitive-research.v1",
+    "target_scope": "brand",
+    "data_class": "public",
+    "permitted_purpose": "competitive_research",
+    "retention_days": 90,
+    "rights_state": "permitted"
+  },
+  "platform": "youtube",
+  "targets": [
+    {
+      "target_id": "northstar-labs",
+      "target_name": "Northstar Labs",
+      "row_count": 6,
+      "metric_availability": {
+        "followers.delta": "available",
+        "public-engagement-by-followers.median": "available",
+        "posting-cadence": "available",
+        "content-format-mix": "available"
+      }
+    },
+    {
+      "target_id": "orbit-coffee",
+      "target_name": "Orbit Coffee",
+      "row_count": 6,
+      "metric_availability": {
+        "followers.delta": "available",
+        "public-engagement-by-followers.median": "available",
+        "posting-cadence": "available",
+        "content-format-mix": "available"
+      }
+    },
+    {
+      "target_id": "vertex-studio",
+      "target_name": "Vertex Studio",
+      "row_count": 6,
+      "metric_availability": {
+        "followers.delta": "available",
+        "public-engagement-by-followers.median": "available",
+        "posting-cadence": "available",
+        "content-format-mix": "available"
+      }
+    }
+  ],
+  "diagnostics": [],
+  "diagnostics_truncated": false
+}
