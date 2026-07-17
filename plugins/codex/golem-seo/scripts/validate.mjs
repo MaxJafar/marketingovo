@@ -31,8 +31,7 @@ const server = mcp.mcpServers?.agentseo;
 if (!server) throw new Error("Codex MCP server entry is missing");
 if (
   server.command !== "node" ||
-  JSON.stringify(server.args) !==
-    JSON.stringify(["./dist/agentseo-mcp.mjs"]) ||
+  JSON.stringify(server.args) !== JSON.stringify(["./dist/agentseo-mcp.mjs"]) ||
   server.cwd !== "."
 ) {
   throw new Error(

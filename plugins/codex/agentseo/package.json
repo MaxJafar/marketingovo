@@ -5,7 +5,12 @@
   "description": "Installable Codex bundle for AGENTseo",
   "license": "Elastic-2.0",
   "type": "module",
-  "files": [".codex-plugin", ".mcp.json", "dist"],
+  "files": [
+    ".codex-plugin",
+    ".mcp.json",
+    "dist",
+    "skills"
+  ],
   "scripts": {
     "build": "node scripts/build.mjs",
     "typecheck": "node --check scripts/build.mjs && node --check scripts/validate.mjs && node --check dist/agentseo-mcp.mjs",
@@ -13,7 +18,13 @@
     "test": "node scripts/validate.mjs",
     "prepublishOnly": "node ../../../scripts/npm-publication-disabled.mjs direct-package-publish"
   },
-  "dependencies": { "@agentseoapp/mcp": "workspace:*" },
-  "devDependencies": { "esbuild": "^0.25.9" },
-  "engines": { "node": ">=24 <25" }
+  "dependencies": {
+    "@agentseoapp/mcp": "workspace:*"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.9"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  }
 }

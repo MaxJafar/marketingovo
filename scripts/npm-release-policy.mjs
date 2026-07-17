@@ -44,7 +44,8 @@ export const PRIVATE_WORKSPACE_IDENTITIES = Object.freeze({
   "packages/sdk": "@agentseoapp/sdk",
   "packages/server": "@agentseoapp/server",
   "packages/storage-sqlite": "@agentseoapp/storage-sqlite",
-  "plugins/codex/golem-seo": "@agentseoapp/codex-plugin",
+  "plugins/codex/agentseo": "@agentseoapp/codex-plugin",
+  "plugins/codex/golem-seo": "@agentseoapp/codex-plugin-legacy",
 });
 
 const DEPENDENCY_FIELDS = Object.freeze([

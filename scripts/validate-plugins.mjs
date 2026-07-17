@@ -33,6 +33,7 @@ const codex = JSON.parse(
 );
 assert.equal(codex.name, "agentseo");
 assert.equal(codex.license, "Elastic-2.0");
+assert.equal(codex.skills, "./skills/");
 
 const mcp = JSON.parse(
   await readFile(resolve(root, "plugins/codex/agentseo/.mcp.json"), "utf8"),

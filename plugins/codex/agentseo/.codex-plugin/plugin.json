@@ -5,6 +5,7 @@
   "author": { "name": "AGENTseo" },
   "license": "Elastic-2.0",
   "keywords": ["seo", "marketing", "crawler", "search-console", "analytics"],
+  "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "AGENTseo",

@@ -23,7 +23,10 @@ import {
   NativeBrokerCredentialStore,
 } from "@agentseoapp/credentials";
 import { importLegacyData } from "@agentseoapp/legacy-import";
-import { AgentSeoLocalRuntime, defaultDataDirectory } from "@agentseoapp/runtime";
+import {
+  AgentSeoLocalRuntime,
+  defaultDataDirectory,
+} from "@agentseoapp/runtime";
 import { AgentSeoClient } from "@agentseoapp/sdk";
 import { createLocalServer, type LocalServer } from "@agentseoapp/server";
 import {
