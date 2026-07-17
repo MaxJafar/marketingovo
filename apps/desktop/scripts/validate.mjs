@@ -27,7 +27,7 @@ const startupFragmentPath = resolve(
   "src-tauri/windows/fragments/background-startup.wxs",
 );
 const startupFragment = await readFile(startupFragmentPath, "utf8");
-assert.equal(config.productName, "Golem SEO");
+assert.equal(config.productName, "AGENTseo");
 assert.equal(config.identifier, "com.golemworkers.golem-seo");
 assert.equal(config.bundle.active, true);
 assert.equal(config.bundle.createUpdaterArtifacts, true);

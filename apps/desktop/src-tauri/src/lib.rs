@@ -145,9 +145,9 @@ fn runtime_entry(app: &tauri::App) -> Result<PathBuf, Box<dyn std::error::Error>
 
 fn broker_entry(app: &tauri::App) -> Result<PathBuf, Box<dyn std::error::Error>> {
     let name = if cfg!(target_os = "windows") {
-        "golem-seo-credential-broker.exe"
+        "agentseo-credential-broker.exe"
     } else {
-        "golem-seo-credential-broker"
+        "agentseo-credential-broker"
     };
     Ok(app
         .path()
@@ -300,7 +300,7 @@ fn ensure_startup_window(handle: &tauri::AppHandle) -> Result<bool, String> {
         return Ok(false);
     }
     WebviewWindowBuilder::new(handle, "main", WebviewUrl::App("index.html".into()))
-        .title("Golem SEO — Starting")
+        .title("AGENTseo — Starting")
         .inner_size(1440.0, 920.0)
         .min_inner_size(1024.0, 700.0)
         .build()
@@ -327,7 +327,7 @@ fn activate_existing_instance(handle: &tauri::AppHandle, arguments: &[String]) {
     let created = match ensure_startup_window(handle) {
         Ok(created) => created,
         Err(error) => {
-            eprintln!("Golem SEO launcher: {error}");
+            eprintln!("AGENTseo launcher: {error}");
             return;
         }
     };
@@ -346,7 +346,7 @@ fn activate_existing_instance(handle: &tauri::AppHandle, arguments: &[String]) {
         set_startup_status(
             handle,
             "The existing instance is finishing its signed update check and local startup…",
-            "Golem SEO — Starting",
+            "AGENTseo — Starting",
         );
         return;
     }
@@ -354,7 +354,7 @@ fn activate_existing_instance(handle: &tauri::AppHandle, arguments: &[String]) {
         set_startup_status(
             handle,
             "The existing instance is still preparing the local runtime…",
-            "Golem SEO — Starting",
+            "AGENTseo — Starting",
         );
         return;
     };
@@ -381,11 +381,11 @@ fn activate_existing_instance(handle: &tauri::AppHandle, arguments: &[String]) {
         )
         .await
         {
-            eprintln!("Golem SEO launcher: {error}");
+            eprintln!("AGENTseo launcher: {error}");
             set_startup_status(
                 &activation_handle,
-                "The existing local service could not issue a new dashboard session. Run `golem-seo doctor` for diagnostics.",
-                "Golem SEO — Local service unavailable",
+                "The existing local service could not issue a new dashboard session. Run `agentseo doctor` for diagnostics.",
+                "AGENTseo — Local service unavailable",
             );
             activation_handle
                 .state::<DashboardLaunchInFlight>()
@@ -399,7 +399,7 @@ async fn check_and_install_signed_update(handle: &tauri::AppHandle) -> Result<()
     set_startup_status(
         handle,
         "Checking the signed release channel…",
-        "Golem SEO — Checking for updates",
+        "AGENTseo — Checking for updates",
     );
     let updater = handle
         .updater_builder()
@@ -413,8 +413,8 @@ async fn check_and_install_signed_update(handle: &tauri::AppHandle) -> Result<()
     else {
         set_startup_status(
             handle,
-            "Golem SEO is up to date. Starting the local service…",
-            "Golem SEO",
+            "AGENTseo is up to date. Starting the local service…",
+            "AGENTseo",
         );
         return Ok(());
     };
@@ -422,8 +422,8 @@ async fn check_and_install_signed_update(handle: &tauri::AppHandle) -> Result<()
     let version = update.version.clone();
     set_startup_status(
         handle,
-        &format!("Downloading signed Golem SEO {version}…"),
-        "Golem SEO — Installing update",
+        &format!("Downloading signed AGENTseo {version}…"),
+        "AGENTseo — Installing update",
     );
     let progress_handle = handle.clone();
     let finished_handle = handle.clone();
@@ -442,23 +442,23 @@ async fn check_and_install_signed_update(handle: &tauri::AppHandle) -> Result<()
                     .filter(|total| *total > 0)
                     .map(|total| {
                         format!(
-                            "Downloading signed Golem SEO {progress_version}… {}%",
+                            "Downloading signed AGENTseo {progress_version}… {}%",
                             downloaded.saturating_mul(100) / total
                         )
                     })
                     .unwrap_or_else(|| {
                         format!(
-                            "Downloading signed Golem SEO {progress_version}… {} MiB",
+                            "Downloading signed AGENTseo {progress_version}… {} MiB",
                             downloaded / (1024 * 1024)
                         )
                     });
-                set_startup_status(&progress_handle, &progress, "Golem SEO — Installing update");
+                set_startup_status(&progress_handle, &progress, "AGENTseo — Installing update");
             },
             move || {
                 set_startup_status(
                     &finished_handle,
                     "Download complete. Verifying the release signature…",
-                    "Golem SEO — Verifying update",
+                    "AGENTseo — Verifying update",
                 );
             },
         )
@@ -467,8 +467,8 @@ async fn check_and_install_signed_update(handle: &tauri::AppHandle) -> Result<()
 
     set_startup_status(
         handle,
-        &format!("Golem SEO {version} is installed. Restarting…"),
-        "Golem SEO — Restarting",
+        &format!("AGENTseo {version} is installed. Restarting…"),
+        "AGENTseo — Restarting",
     );
     handle.restart();
 }
@@ -515,7 +515,7 @@ async fn run_packaged_daemon(
                         window.navigate(url).is_ok()
                     } else {
                         WebviewWindowBuilder::new(&handle, "main", WebviewUrl::External(url))
-                            .title("Golem SEO")
+                            .title("AGENTseo")
                             .inner_size(1440.0, 920.0)
                             .min_inner_size(1024.0, 700.0)
                             .build()
@@ -523,7 +523,7 @@ async fn run_packaged_daemon(
                     };
                     if opened {
                         if let Some(window) = handle.get_webview_window("main") {
-                            let _ = window.set_title("Golem SEO");
+                            let _ = window.set_title("AGENTseo");
                         }
                         handle
                             .state::<DashboardReady>()
@@ -562,8 +562,8 @@ async fn run_packaged_daemon(
             .store(false, Ordering::Release);
         set_startup_status(
             &handle,
-            "The local service stopped before the dashboard became ready. Run `golem-seo doctor` for diagnostics.",
-            "Golem SEO — Local service unavailable",
+            "The local service stopped before the dashboard became ready. Run `agentseo doctor` for diagnostics.",
+            "AGENTseo — Local service unavailable",
         );
     }
     Ok(())
@@ -598,7 +598,7 @@ pub fn run() {
             let broker = broker_entry(app)?;
             let public_config = public_runtime_config(app)?;
             if !entry.is_file() {
-                return Err("bundled Golem SEO runtime is missing".into());
+                return Err("bundled AGENTseo runtime is missing".into());
             }
             if !broker.is_file() {
                 return Err("bundled native credential broker is missing".into());
@@ -624,11 +624,11 @@ pub fn run() {
             tauri::async_runtime::spawn(async move {
                 if check_updates {
                     if let Err(error) = check_and_install_signed_update(&handle).await {
-                        eprintln!("Golem SEO updater: {error}");
+                        eprintln!("AGENTseo updater: {error}");
                         set_startup_status(
                             &handle,
                             "The signed update channel is unavailable. Starting the installed version…",
-                            "Golem SEO",
+                            "AGENTseo",
                         );
                     }
                 }
@@ -639,7 +639,7 @@ pub fn run() {
                         .swap(false, Ordering::AcqRel);
                 if open_dashboard {
                     if let Err(error) = ensure_startup_window(&handle) {
-                        eprintln!("Golem SEO launcher: {error}");
+                        eprintln!("AGENTseo launcher: {error}");
                     }
                     handle
                         .state::<DashboardLaunchInFlight>()
@@ -664,18 +664,18 @@ pub fn run() {
                         .state::<DashboardLaunchInFlight>()
                         .0
                         .store(false, Ordering::Release);
-                    eprintln!("Golem SEO launcher: {error}");
+                    eprintln!("AGENTseo launcher: {error}");
                     set_startup_status(
                         &handle,
-                        "The packaged local service could not start. Run `golem-seo doctor` for diagnostics.",
-                        "Golem SEO — Local service unavailable",
+                        "The packaged local service could not start. Run `agentseo doctor` for diagnostics.",
+                        "AGENTseo — Local service unavailable",
                     );
                 }
             });
             Ok(())
         })
         .build(tauri::generate_context!())
-        .expect("Golem SEO desktop runtime failed");
+        .expect("AGENTseo desktop runtime failed");
     app.run(|handle, event| {
         if matches!(event, tauri::RunEvent::Exit) {
             handle.state::<OwnedRuntimeChildren>().kill_all();
@@ -698,7 +698,7 @@ mod tests {
     #[test]
     fn parses_a_dashboard_line_split_across_stdout_chunks() {
         let mut parser = DashboardOutputParser::default();
-        assert!(parser.push(b"Golem SEO\nDash").is_empty());
+        assert!(parser.push(b"AGENTseo\nDash").is_empty());
         assert_eq!(
             parser.push(
                 format!("board: http://127.0.0.1:3210/#token={TOKEN}\r\nAPI: local\n").as_bytes()
@@ -753,7 +753,7 @@ mod tests {
         let args = desktop_daemon_args(
             Path::new("/runtime/app/dist/cli.js"),
             Path::new("/user/data"),
-            Path::new("/runtime/broker/golem-seo-credential-broker"),
+            Path::new("/runtime/broker/agentseo-credential-broker"),
             &config,
         );
 
@@ -764,7 +764,7 @@ mod tests {
         assert!(args.windows(2).any(|pair| pair
             == [
                 "--credential-broker",
-                "/runtime/broker/golem-seo-credential-broker"
+                "/runtime/broker/agentseo-credential-broker"
             ]));
         assert!(args
             .windows(2)
@@ -792,9 +792,9 @@ mod tests {
 
     #[test]
     fn signed_updates_run_once_before_a_release_instance_starts() {
-        let normal = vec![OsString::from("golem-seo-desktop")];
+        let normal = vec![OsString::from("agentseo-desktop")];
         let disabled = vec![
-            OsString::from("golem-seo-desktop"),
+            OsString::from("agentseo-desktop"),
             OsString::from("--no-update"),
         ];
 
@@ -807,9 +807,9 @@ mod tests {
 
     #[test]
     fn a_second_background_launch_stays_headless_but_a_user_launch_activates() {
-        assert!(foreground_launch_requested(&["golem-seo-desktop".into()]));
+        assert!(foreground_launch_requested(&["agentseo-desktop".into()]));
         assert!(!foreground_launch_requested(&[
-            "golem-seo-desktop".into(),
+            "agentseo-desktop".into(),
             "--background".into(),
         ]));
     }

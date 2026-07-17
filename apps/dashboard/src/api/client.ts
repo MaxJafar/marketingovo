@@ -14,7 +14,7 @@ let csrfToken: string | null = null;
 let sessionPromise: Promise<void> | null = null;
 
 const API_UNAVAILABLE_MESSAGE =
-  "The Golem SEO API is unavailable. Check the local service and try again.";
+  "The AGENTseo API is unavailable. Check the local service and try again.";
 
 function bootstrapTokenFromFragment(): string | null {
   if (typeof window === "undefined") return null;
@@ -155,12 +155,12 @@ export async function apiRequest<T>(
   await ensureSession();
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
-  headers.set("X-Golem-Client", "dashboard");
+  headers.set("X-AGENTseo-Client", "dashboard");
   if (init.body && !headers.has("Content-Type"))
     headers.set("Content-Type", "application/json");
   const method = (init.method ?? "GET").toUpperCase();
   if (!["GET", "HEAD", "OPTIONS"].includes(method) && csrfToken)
-    headers.set("X-Golem-CSRF", csrfToken);
+    headers.set("X-AGENTseo-CSRF", csrfToken);
   if (
     method === "POST" &&
     requiresIdempotencyKey(path) &&
@@ -193,10 +193,10 @@ export async function apiDownload(
   await ensureSession();
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/vnd.golemseo.project+json");
-  headers.set("X-Golem-Client", "dashboard");
+  headers.set("X-AGENTseo-Client", "dashboard");
   const method = (init.method ?? "GET").toUpperCase();
   if (!["GET", "HEAD", "OPTIONS"].includes(method) && csrfToken) {
-    headers.set("X-Golem-CSRF", csrfToken);
+    headers.set("X-AGENTseo-CSRF", csrfToken);
   }
   if (init.body && !headers.has("Content-Type"))
     headers.set("Content-Type", "application/json");

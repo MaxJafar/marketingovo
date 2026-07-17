@@ -1,4 +1,4 @@
-# Golem SEO desktop shell
+# AGENTseo desktop shell
 
 This Tauri 2 shell starts the bundled Node 24 runtime sidecar, waits for the
 authenticated localhost dashboard URL, and opens it in a native webview. It
@@ -86,7 +86,7 @@ stapling, and Gatekeeper acceptance. Source contracts alone do not close the
 
 The separate npm CLI can install a launchd agent, systemd user unit, or a
 least-privilege Windows per-user Task Scheduler login task with
-`golem-seo service install --credential-broker /absolute/path/to/broker`. The
+`agentseo service install --credential-broker /absolute/path/to/broker`. The
 validated broker path is persisted as an argv element, while master passwords
-are never serialized into service definitions. Use `golem-seo service status`
-or `golem-seo service uninstall` for lifecycle control.
+are never serialized into service definitions. Use `agentseo service status`
+or `agentseo service uninstall` for lifecycle control.

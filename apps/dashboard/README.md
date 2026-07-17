@@ -1,13 +1,13 @@
-# Golem SEO Control Panel
+# AGENTseo Control Panel
 
-React 19 and Vite dashboard for the local Golem SEO daemon. The production
+React 19 and Vite dashboard for the local AGENTseo daemon. The production
 dashboard is served from the same `127.0.0.1:3210` origin as `/api/v1`, so CORS
 is neither required nor enabled.
 
 ```bash
 corepack enable
 pnpm install
-pnpm --filter @golem-seo/dashboard dev
+pnpm --filter @agentseo/dashboard dev
 ```
 
 The Vite server listens on `127.0.0.1:4318` and proxies `/api` to the local
@@ -16,7 +16,7 @@ origin so development mutations pass the same strict CSRF check used in the
 bundled product. Keep `VITE_API_BASE_URL` same-origin; the daemon intentionally
 does not enable CORS.
 
-The normal product entry point is `pnpm golem-seo serve`, which prints a
+The normal product entry point is `pnpm agentseo serve`, which prints a
 one-time dashboard URL. Its token exists only in the URL fragment, is exchanged
 for an HttpOnly SameSite session, and is immediately removed from the address
 bar. Mutations use an in-memory CSRF token. No credential, service token, or

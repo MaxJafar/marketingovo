@@ -64,7 +64,7 @@ const emptyPreferences: OnboardingPreferences = {
 };
 
 function preferencesKey(siteId: string): string {
-  return `golem-seo:onboarding:v1:${siteId}`;
+  return `agentseo:onboarding:v1:${siteId}`;
 }
 
 function readPreferences(siteId: string): OnboardingPreferences {

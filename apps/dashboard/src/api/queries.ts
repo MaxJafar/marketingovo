@@ -795,10 +795,10 @@ export function useImportProject() {
   return useMutation({
     mutationFn: async (file: File) => {
       if (file.size > 25 * 1024 * 1024) {
-        throw new Error("The .golemseo file must be 25 MiB or smaller.");
+        throw new Error("The .agentseo file must be 25 MiB or smaller.");
       }
-      if (!file.name.toLowerCase().endsWith(".golemseo")) {
-        throw new Error("Choose a file with the .golemseo extension.");
+      if (!file.name.toLowerCase().endsWith(".agentseo")) {
+        throw new Error("Choose a file with the .agentseo extension.");
       }
       return apiRequest<ProjectImportResult>("/import", {
         method: "POST",

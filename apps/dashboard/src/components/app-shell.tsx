@@ -170,7 +170,7 @@ export function AppShell() {
   }, []);
 
   useEffect(() => {
-    document.title = `${routeTitle} | Golem SEO`;
+    document.title = `${routeTitle} | AGENTseo`;
     setRouteAnnouncement(`${routeTitle} page loaded.`);
     if (previousPathnameRef.current !== pathname) {
       mainRef.current?.focus();
@@ -262,17 +262,17 @@ export function AppShell() {
             to="/"
             className="brand"
             onClick={() => closeMobileNavigation(false)}
-            aria-label="Golem SEO home"
+            aria-label="AGENTseo home"
           >
             <img
               className="brand-mark"
-              src="/golem-seo-icon.png"
+              src="/agentseo-icon.png"
               alt=""
               width="38"
               height="38"
             />
             <span>
-              <strong>Golem</strong>
+              <strong>AGENTseo</strong>
               <small>SEO control panel</small>
             </span>
           </Link>

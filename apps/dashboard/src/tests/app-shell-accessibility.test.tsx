@@ -99,7 +99,7 @@ describe("AppShell accessibility", () => {
     const setupLink = screen.getByRole("link", { name: /Setup guide/i });
     setupLink.focus();
     await user.tab();
-    expect(screen.getByRole("link", { name: "Golem SEO home" })).toHaveFocus();
+    expect(screen.getByRole("link", { name: "AGENTseo home" })).toHaveFocus();
 
     await user.keyboard("{Escape}");
     await waitFor(() => expect(menuButton).toHaveFocus());
@@ -112,7 +112,7 @@ describe("AppShell accessibility", () => {
     setMobileViewport(false);
     const view = render(<AppShell />);
 
-    expect(document.title).toBe("Overview | Golem SEO");
+    expect(document.title).toBe("Overview | AGENTseo");
     expect(screen.getByRole("link", { name: "Overview" })).toHaveAttribute(
       "aria-current",
       "page",
@@ -122,7 +122,7 @@ describe("AppShell accessibility", () => {
     view.rerender(<AppShell />);
 
     await waitFor(() => {
-      expect(document.title).toBe("Monitoring | Golem SEO");
+      expect(document.title).toBe("Monitoring | AGENTseo");
       expect(screen.getByText("Monitoring page loaded.")).toBeInTheDocument();
       expect(document.getElementById("main-content")).toHaveFocus();
     });

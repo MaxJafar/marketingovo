@@ -146,7 +146,7 @@ export function MonitoringPage() {
       <PageHeader
         eyebrow="Always-on assurance"
         title="Monitoring"
-        description="Schedule local audits and surface regressions before they become reporting surprises. Schedules run while the Golem SEO background service is active."
+        description="Schedule local audits and surface regressions before they become reporting surprises. Schedules run while the AGENTseo background service is active."
       />
       {mutationError ? (
         <InlineNotice tone="danger" title="Schedule change failed">

@@ -25,22 +25,6 @@ export function EditionCards() {
             Review integrations <Icon name="arrow" />
           </Link>
         </Card>
-        <Card className="edition-card edition-managed">
-          <span className="edition-tag">GolemWorkers</span>
-          <h3>Add managed execution</h3>
-          <p>
-            Get guided onboarding, implementation support, and a team that can
-            turn prioritized findings into shipped work.
-          </p>
-          <a
-            className="text-link"
-            href="https://golemworkers.com/seo"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Explore GolemWorkers <Icon name="external" />
-          </a>
-        </Card>
       </div>
     </section>
   );

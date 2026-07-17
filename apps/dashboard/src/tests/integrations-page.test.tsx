@@ -13,10 +13,6 @@ vi.mock("../context/site-context", () => ({
   useSite: () => ({ siteId: "project-1" }),
 }));
 
-vi.mock("../components/golemworkers-link-card", () => ({
-  GolemWorkersLinkCard: () => null,
-}));
-
 vi.mock("../api/queries", () => ({
   useIntegrations: () => ({
     data: {

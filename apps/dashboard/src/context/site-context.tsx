@@ -9,7 +9,7 @@ import type { ApiError } from "../api/client";
 import type { Site } from "../api/contracts";
 import { useSites } from "../api/queries";
 
-const STORAGE_KEY = "golem-seo:selected-site:v1";
+const STORAGE_KEY = "agentseo:selected-site:v1";
 
 interface SiteContextValue {
   sites: Site[];

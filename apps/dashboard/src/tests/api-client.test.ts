@@ -102,8 +102,8 @@ describe("apiRequest session flow", () => {
 
     const mutationInit = fetchMock.mock.calls[1]?.[1] as RequestInit;
     const headers = new Headers(mutationInit.headers);
-    expect(headers.get("X-Golem-CSRF")).toBe("csrf-bootstrap");
-    expect(headers.get("X-Golem-Client")).toBe("dashboard");
+    expect(headers.get("X-AGENTseo-CSRF")).toBe("csrf-bootstrap");
+    expect(headers.get("X-AGENTseo-Client")).toBe("dashboard");
     expect(headers.get("Idempotency-Key")).toMatch(/^[0-9a-f-]{36}$/i);
   });
 
@@ -130,7 +130,7 @@ describe("apiRequest session flow", () => {
 
     const request = fetchMock.mock.calls[1]?.[1] as RequestInit;
     const headers = new Headers(request.headers);
-    expect(headers.get("X-Golem-CSRF")).toBe("csrf-verification");
+    expect(headers.get("X-AGENTseo-CSRF")).toBe("csrf-verification");
     expect(headers.get("Idempotency-Key")).toMatch(/^[0-9a-f-]{36}$/i);
   });
 
@@ -159,7 +159,7 @@ describe("apiRequest session flow", () => {
 
     const request = fetchMock.mock.calls[1]?.[1] as RequestInit;
     const headers = new Headers(request.headers);
-    expect(headers.get("X-Golem-CSRF")).toBe("csrf-replay");
+    expect(headers.get("X-AGENTseo-CSRF")).toBe("csrf-replay");
     expect(headers.get("Idempotency-Key")).toMatch(/^[0-9a-f-]{36}$/i);
   });
 
@@ -254,7 +254,7 @@ describe("apiRequest session flow", () => {
         status: 0,
         code: "api_unavailable",
         message:
-          "The Golem SEO API is unavailable. Check the local service and try again.",
+          "The AGENTseo API is unavailable. Check the local service and try again.",
       }),
     );
   });
@@ -299,7 +299,7 @@ describe("apiRequest session flow", () => {
     const init = fetchMock.mock.calls[1]?.[1] as RequestInit;
     const headers = new Headers(init.headers);
     expect(headers.get("Accept")).toBe("application/vnd.golemseo.project+json");
-    expect(headers.get("X-Golem-CSRF")).toBe("csrf-export");
+    expect(headers.get("X-AGENTseo-CSRF")).toBe("csrf-export");
     expect(headers.get("Content-Type")).toBe("application/json");
   });
 });
