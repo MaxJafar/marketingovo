@@ -355,39 +355,9 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
   },
   {
     rule: "golemworkers-coupling",
-    path: "apps/dashboard/src/components/edition-cards.tsx",
-    reason:
-      "Known UI upsell removal belongs to the Stage 3 interface slice; the foundation slice must not make partial UI edits.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "apps/dashboard/src/components/golemworkers-link-card.tsx",
-    reason:
-      "Known hosted-link UI removal belongs to the Stage 3 interface slice and is tracked as an explicit migration blocker.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "apps/dashboard/src/pages/integrations.tsx",
-    reason:
-      "Known hosted-link UI composition belongs to the Stage 3 interface slice and cannot be removed independently here.",
-  },
-  {
-    rule: "golemworkers-coupling",
     path: "apps/dashboard/src/tests/api-client.test.ts",
     reason:
       "Existing hosted Problem Details fixture remains with its Stage 3 UI/API contract cleanup owner.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "apps/dashboard/src/tests/golemworkers-link-card.test.tsx",
-    reason:
-      "Tests document the hosted-link UI that Stage 3 removes atomically with its implementation.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "apps/dashboard/src/tests/integrations-page.test.tsx",
-    reason:
-      "Tests document the hosted-link UI composition that Stage 3 removes atomically.",
   },
   {
     rule: "golemworkers-coupling",
@@ -565,7 +535,6 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
   },
   ...[
     "apps/desktop/README.md",
-    "apps/desktop/shell/index.html",
     "apps/desktop/src-tauri/Cargo.lock",
     "apps/desktop/src-tauri/windows/fragments/background-startup.wxs",
     "packages/credential-broker-native/Cargo.lock",
