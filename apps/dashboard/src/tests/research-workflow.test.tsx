@@ -5,7 +5,7 @@ import type { GolemIntelClient } from "@golem-intel/sdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  researchStart: vi.fn(),
+  datasetsPreview: vi.fn(),
   comparisonStart: vi.fn(),
   runGet: vi.fn(),
 }));
@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("../api/client-context.js", () => ({
   useIntelClient: () =>
     ({
-      research: { start: mocks.researchStart },
+      datasets: { previewCompetitivePulse: mocks.datasetsPreview },
       comparisons: { start: mocks.comparisonStart },
       runs: {
         get: mocks.runGet,
@@ -34,13 +34,13 @@ afterEach(() => {
 });
 
 describe("Research workspace", () => {
-  it("starts a typed research workflow with the visible question and budget", async () => {
+  it("starts a synthetic demo workflow with the chosen failure mode", async () => {
     const user = userEvent.setup();
-    mocks.researchStart.mockResolvedValue({ id: "run-research" });
+    mocks.comparisonStart.mockResolvedValue({ id: "run-demo" });
     mocks.runGet.mockResolvedValue({
-      id: "run-research",
+      id: "run-demo",
       project_id: "competitive-pulse-demo",
-      workflow: "research",
+      workflow: "compare",
       status: "queued",
       progress: 0,
       stage: "queued",
@@ -59,24 +59,19 @@ describe("Research workspace", () => {
       </QueryClientProvider>,
     );
 
-    await user.selectOptions(screen.getByLabelText("Workflow"), "research");
-    const question = screen.getByLabelText("Question");
-    await user.clear(question);
-    await user.type(question, "What materially changed across these brands?");
-    const budget = screen.getByLabelText("Sources");
-    await user.clear(budget);
-    await user.type(budget, "7");
-    await user.click(screen.getByRole("button", { name: "Start research" }));
+    await user.selectOptions(screen.getByLabelText("Source"), "demo");
+    await user.selectOptions(screen.getByLabelText("Failure mode"), "slow");
+    await user.click(screen.getByRole("button", { name: "Start comparison" }));
 
     await waitFor(() =>
-      expect(mocks.researchStart).toHaveBeenCalledWith({
+      expect(mocks.comparisonStart).toHaveBeenCalledWith({
         project_id: "competitive-pulse-demo",
         target_ids: ["northstar-labs", "orbit-coffee", "vertex-studio"],
-        question: "What materially changed across these brands?",
-        source_budget: 7,
+        goal: "Compare public growth, engagement quality and content cadence.",
+        connector_ids: ["fixture.competitive-pulse"],
+        simulate: "slow",
       }),
     );
-    expect(mocks.comparisonStart).not.toHaveBeenCalled();
     queryClient.clear();
   });
 });
