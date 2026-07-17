@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ZodType } from "zod/v4";
-import type { GolemSeoClient } from "@agentseoapp/sdk";
-import { createGolemSeoMcpServer, PUBLIC_TOOL_NAMES } from "./index.js";
+import type { AgentSeoClient } from "@agentseoapp/sdk";
+import {
+  createAgentSeoMcpServer,
+  createGolemSeoMcpServer,
+  PUBLIC_TOOL_NAMES,
+} from "./index.js";
 
 type RegisteredTool = {
   inputSchema: ZodType;
@@ -21,7 +25,7 @@ type RegisteredResourceTemplate = {
 };
 
 function registeredTools(
-  server: Awaited<ReturnType<typeof createGolemSeoMcpServer>>,
+  server: Awaited<ReturnType<typeof createAgentSeoMcpServer>>,
 ): Record<string, RegisteredTool> {
   return (
     server as unknown as { _registeredTools: Record<string, RegisteredTool> }
@@ -29,7 +33,7 @@ function registeredTools(
 }
 
 function registeredResourceTemplates(
-  server: Awaited<ReturnType<typeof createGolemSeoMcpServer>>,
+  server: Awaited<ReturnType<typeof createAgentSeoMcpServer>>,
 ): Record<string, RegisteredResourceTemplate> {
   return (
     server as unknown as {
@@ -78,14 +82,18 @@ function stubClient(status: string, workflowId = "audit") {
         new TextEncoder().encode(JSON.stringify({ profile: { seed: "seo" } })),
       ),
     },
-  } as unknown as GolemSeoClient;
+  } as unknown as AgentSeoClient;
   return { client, issues };
 }
 
-describe("Golem SEO MCP public contract", () => {
+describe("AGENTseo MCP public contract", () => {
+  it("makes the canonical server factory primary while retaining its 1.x alias", () => {
+    expect(createGolemSeoMcpServer).toBe(createAgentSeoMcpServer);
+  });
+
   it("registers exactly the six approved workflow tools", async () => {
     const { client } = stubClient("running");
-    const server = await createGolemSeoMcpServer({ client });
+    const server = await createAgentSeoMcpServer({ client });
 
     expect(Object.keys(registeredTools(server))).toEqual([
       ...PUBLIC_TOOL_NAMES,
@@ -102,21 +110,21 @@ describe("Golem SEO MCP public contract", () => {
 
   it("exposes project context as a read-only resource without expanding the tool surface", async () => {
     const { client } = stubClient("running");
-    const server = await createGolemSeoMcpServer({ client });
+    const server = await createAgentSeoMcpServer({ client });
     const resources = registeredResourceTemplates(server);
 
     expect(Object.keys(registeredTools(server))).toEqual([
       ...PUBLIC_TOOL_NAMES,
     ]);
-    expect(resources["golem-seo-project-context"]).toBeDefined();
+    expect(resources["agentseo-project-context"]).toBeDefined();
 
-    const result = await resources["golem-seo-project-context"]!.readCallback(
-      new URL("golem-seo://projects/project-1/context"),
+    const result = await resources["agentseo-project-context"]!.readCallback(
+      new URL("agentseo://projects/project-1/context"),
       { id: "project-1" },
       {},
     );
     expect(result.contents[0]).toMatchObject({
-      uri: "golem-seo://projects/project-1/context",
+      uri: "agentseo://projects/project-1/context",
       mimeType: "application/json",
     });
     expect(JSON.parse(result.contents[0]!.text!)).toMatchObject({
@@ -129,7 +137,7 @@ describe("Golem SEO MCP public contract", () => {
 
   it("projects strict canonical JSON Schemas into MCP runtime validation", async () => {
     const { client } = stubClient("running");
-    const tools = registeredTools(await createGolemSeoMcpServer({ client }));
+    const tools = registeredTools(await createAgentSeoMcpServer({ client }));
 
     expect(
       tools.golem_seo_audit_start.inputSchema.parse({ project_id: "site-1" }),
@@ -173,7 +181,7 @@ describe("Golem SEO MCP public contract", () => {
 
   it("does not read issues while an asynchronous run is unfinished", async () => {
     const { client, issues } = stubClient("running");
-    const server = await createGolemSeoMcpServer({ client });
+    const server = await createAgentSeoMcpServer({ client });
 
     const result = await registeredTools(server).golem_seo_run_get.handler({
       run_id: "run-1",
@@ -191,7 +199,7 @@ describe("Golem SEO MCP public contract", () => {
     "returns canonical issues for a %s run",
     async (status) => {
       const { client, issues } = stubClient(status);
-      const server = await createGolemSeoMcpServer({ client });
+      const server = await createAgentSeoMcpServer({ client });
 
       const result = await registeredTools(server).golem_seo_run_get.handler({
         run_id: "run-1",
@@ -207,7 +215,7 @@ describe("Golem SEO MCP public contract", () => {
 
   it("returns persisted research output for a terminal research workflow", async () => {
     const { client } = stubClient("succeeded", "keyword-research");
-    const server = await createGolemSeoMcpServer({ client });
+    const server = await createAgentSeoMcpServer({ client });
 
     const result = await registeredTools(server).golem_seo_run_get.handler({
       run_id: "run-1",

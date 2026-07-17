@@ -23,8 +23,8 @@ import {
   NativeBrokerCredentialStore,
 } from "@agentseoapp/credentials";
 import { importLegacyData } from "@agentseoapp/legacy-import";
-import { GolemLocalRuntime, defaultDataDirectory } from "@agentseoapp/runtime";
-import { GolemSeoClient } from "@agentseoapp/sdk";
+import { AgentSeoLocalRuntime, defaultDataDirectory } from "@agentseoapp/runtime";
+import { AgentSeoClient } from "@agentseoapp/sdk";
 import { createLocalServer, type LocalServer } from "@agentseoapp/server";
 import {
   createDatabaseBackup,
@@ -263,7 +263,7 @@ async function serve(args: ParsedArgs): Promise<void> {
       findExisting: () => findExistingDashboard(root, port),
       waitForExisting: () => waitForExistingDashboard(root, port),
       start: async () => {
-        const runtime = new GolemLocalRuntime({
+        const runtime = new AgentSeoLocalRuntime({
           dataDir: root,
           credentialStore: vaultFor(root, args.flags),
           version: VERSION,
@@ -310,9 +310,9 @@ async function serve(args: ParsedArgs): Promise<void> {
 
 async function clientFor(
   flags: Map<string, string | boolean>,
-): Promise<GolemSeoClient> {
+): Promise<AgentSeoClient> {
   const connection = connectionOptions(flags);
-  return GolemSeoClient.fromTokenFile(connection.serviceTokenFile, {
+  return AgentSeoClient.fromTokenFile(connection.serviceTokenFile, {
     baseUrl: connection.apiUrl,
   });
 }

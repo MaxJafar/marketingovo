@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { GolemSeoClient } from "@agentseoapp/sdk";
+import { AgentSeoClient } from "@agentseoapp/sdk";
 
 export interface LocalServiceResolution<T> {
   dashboardUrl: string;
@@ -24,7 +24,7 @@ export async function issueDashboardUrl(
   port: number,
   fetchImpl: typeof globalThis.fetch = globalThis.fetch,
 ): Promise<string> {
-  const client = await GolemSeoClient.fromTokenFile(
+  const client = await AgentSeoClient.fromTokenFile(
     join(dataDirectory, "service-token"),
     {
       baseUrl: localApiBaseUrl(port),
@@ -120,7 +120,7 @@ export async function startOrReuseLocalService<T>(
     if (racedExisting)
       return { dashboardUrl: racedExisting, service: null, reused: true };
     throw new Error(
-      "The local API port is occupied by a service that could not authenticate as this Golem SEO workspace",
+      "The local API port is occupied by a service that could not authenticate as this AGENTseo workspace",
       { cause: error },
     );
   }

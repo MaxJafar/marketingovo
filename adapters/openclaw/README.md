@@ -1,6 +1,6 @@
-# Golem SEO for OpenClaw
+# AGENTseo for OpenClaw
 
-This native tool plugin connects OpenClaw to the existing Golem SEO local
+This native tool plugin connects OpenClaw to the AGENTseo local
 daemon. It does not start another runtime, own a database, or receive provider
 credentials. Configure only the loopback API URL and service-token file.
 

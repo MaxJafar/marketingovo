@@ -14,7 +14,8 @@
     }
   },
   "bin": {
-    "golem-seo-mcp": "./dist/stdio.js"
+    "agentseo-mcp": "./dist/stdio.js",
+    "golem-seo-mcp": "./dist/golem-seo-stdio.js"
   },
   "files": [
     "dist",

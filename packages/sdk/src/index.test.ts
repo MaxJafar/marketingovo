@@ -3,12 +3,19 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
+  AgentSeoClient,
+  createGeneratedAgentSeoClient,
   createGeneratedGolemSeoClient,
   GolemSeoClient,
   validateLocalApiBaseUrl,
 } from "./index.js";
 
 describe("local API trust boundary", () => {
+  it("makes canonical SDK exports primary while retaining exact legacy aliases", () => {
+    expect(GolemSeoClient).toBe(AgentSeoClient);
+    expect(createGeneratedGolemSeoClient).toBe(createGeneratedAgentSeoClient);
+  });
+
   it.each([1, 80, 3210, 65_535])(
     "accepts and canonicalizes explicit loopback port %i",
     (port) => {
@@ -40,7 +47,7 @@ describe("local API trust boundary", () => {
   it("rejects a token-file destination before reading or fetching", async () => {
     const fetchImpl = vi.fn<typeof fetch>();
     await expect(
-      GolemSeoClient.fromTokenFile("/path/that/must/not/be/read", {
+      AgentSeoClient.fromTokenFile("/path/that/must/not/be/read", {
         baseUrl: "https://attacker.test/api/v1",
         fetch: fetchImpl,
       }),
@@ -49,13 +56,13 @@ describe("local API trust boundary", () => {
   });
 
   it("sends a token only to the canonical IPv4 loopback API", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "golem-sdk-token-"));
+    const directory = await mkdtemp(join(tmpdir(), "agentseo-sdk-token-"));
     const tokenFile = join(directory, "service-token");
     await writeFile(tokenFile, "local-service-secret\n", { mode: 0o600 });
     const fetchImpl = vi.fn<typeof fetch>(async () =>
       Response.json({ status: "ok" }),
     );
-    const client = await GolemSeoClient.fromTokenFile(tokenFile, {
+    const client = await AgentSeoClient.fromTokenFile(tokenFile, {
       baseUrl: "http://127.0.0.1:3210/api/v1",
       fetch: fetchImpl,
     });

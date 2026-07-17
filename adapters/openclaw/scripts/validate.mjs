@@ -23,7 +23,7 @@ const expectedOptional = PUBLIC_AGENT_TOOL_CONTRACTS.filter(
   (contract) => contract.optional,
 ).map((contract) => contract.name);
 
-if (manifest.id !== "golem-seo")
+if (manifest.id !== "agentseo")
   throw new Error("OpenClaw manifest id is invalid");
 if (manifest.version !== packageJson.version)
   throw new Error("OpenClaw manifest and package versions differ");

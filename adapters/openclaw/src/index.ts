@@ -1,5 +1,5 @@
-import { homedir } from "node:os";
 import { join } from "node:path";
+import { homedir } from "node:os";
 import { defineToolPlugin } from "openclaw/plugin-sdk/tool-plugin";
 import { Type, type TSchema } from "typebox";
 import {
@@ -16,7 +16,7 @@ import {
   type AgentMonitoringStatusInput,
   type AgentRunGetInput,
 } from "@agentseoapp/contracts/agent-tools";
-import { GolemSeoClient } from "@agentseoapp/sdk";
+import { AgentSeoClient } from "@agentseoapp/sdk";
 
 const toOpenClawInputSchema = <Value>(schema: unknown) =>
   Type.Unsafe<Value>(schema as TSchema);
@@ -48,12 +48,12 @@ const configSchema = Type.Object(
     serverUrl: Type.Optional(
       Type.String({
         default: "http://127.0.0.1:3210/api/v1",
-        description: "Golem SEO loopback API URL.",
+        description: "AGENTseo loopback API URL.",
       }),
     ),
     tokenFile: Type.Optional(
       Type.String({
-        description: "Path to the local Golem SEO service-token file.",
+        description: "Path to the local AGENTseo service-token file.",
       }),
     ),
     timeoutMs: Type.Optional(
@@ -69,6 +69,8 @@ const configSchema = Type.Object(
 );
 
 function defaultTokenFile(): string {
+  // Keep the durable 1.x root readable until the storage migration owns the
+  // default-path cutover; the adapter's visible identity is AGENTseo.
   if (process.platform === "darwin")
     return join(
       homedir(),
@@ -91,20 +93,20 @@ function defaultTokenFile(): string {
 }
 
 type Config = { serverUrl?: string; tokenFile?: string; timeoutMs?: number };
-function client(config: Config): Promise<GolemSeoClient> {
+function client(config: Config): Promise<AgentSeoClient> {
   const tokenFile = config.tokenFile ?? defaultTokenFile();
   const serverUrl = config.serverUrl ?? "http://127.0.0.1:3210/api/v1";
   // Read the service token for every invocation so rotation or deletion takes
   // effect without restarting the OpenClaw Gateway.
-  return GolemSeoClient.fromTokenFile(tokenFile, {
+  return AgentSeoClient.fromTokenFile(tokenFile, {
     baseUrl: serverUrl,
     timeoutMs: config.timeoutMs,
   });
 }
 
 export default defineToolPlugin({
-  id: "golem-seo",
-  name: "Golem SEO",
+  id: "agentseo",
+  name: "AGENTseo",
   description:
     "Run local SEO audits, comparisons, keyword research, content plans, and monitoring through six workflow-level tools.",
   configSchema,

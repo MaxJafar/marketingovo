@@ -17,22 +17,22 @@ const mcp = JSON.parse(readFileSync(resolve(root, ".mcp.json"), "utf8"));
 const packageJson = JSON.parse(
   readFileSync(resolve(root, "package.json"), "utf8"),
 );
-const bundlePath = resolve(root, "dist/golem-seo-mcp.mjs");
+const bundlePath = resolve(root, "dist/agentseo-mcp.mjs");
 const skillPath = resolve(root, "skills/seo-marketer/SKILL.md");
 const expectedTools = [...PUBLIC_AGENT_TOOL_NAMES];
 
-if (manifest.name !== "golem-seo")
+if (manifest.name !== "golem-seo" || manifest.interface?.deprecated !== true)
   throw new Error("Codex plugin name must match its directory");
 if (manifest.version !== packageJson.version)
   throw new Error("Codex manifest and package versions differ");
 if (!manifest.skills || !manifest.mcpServers)
   throw new Error("Codex plugin must declare skills and MCP");
-const server = mcp.mcpServers?.["golem-seo"];
+const server = mcp.mcpServers?.agentseo;
 if (!server) throw new Error("Codex MCP server entry is missing");
 if (
   server.command !== "node" ||
   JSON.stringify(server.args) !==
-    JSON.stringify(["./dist/golem-seo-mcp.mjs"]) ||
+    JSON.stringify(["./dist/agentseo-mcp.mjs"]) ||
   server.cwd !== "."
 ) {
   throw new Error(

@@ -1,11 +1,13 @@
 ---
 name: seo-marketer
-description: Use Golem SEO to audit a site, prioritize verified SEO work, compare competitors, research keywords, build a content plan, or inspect monitoring. Trigger when the user asks what to fix, why organic performance changed, what to publish, how a site compares, or whether an SEO change was verified.
+description: Deprecated AGENTseo 1.x compatibility skill. Install the AGENTseo Codex plugin for new work; this alias remains available for existing integrations.
 ---
 
-# Golem SEO marketer
+# AGENTseo legacy marketer
 
-Use Golem SEO as an evidence system, not as a generic advice generator. The
+Use AGENTseo as an evidence system, not as a generic advice generator. This
+legacy plugin identifier is deprecated; use the `agentseo` plugin for new
+installs. The
 local service owns data and credentials. Never request, echo, infer, or pass API
 keys, OAuth values, cookies, or billing details through an agent tool.
 
@@ -60,9 +62,9 @@ Use goal-specific sequences when one run cannot answer the question:
   not proof of a fix unless the affected URL cohort was rechecked and the prior
   issue fingerprint disappeared.
 
-Find the intended project through the available `golem-seo://projects/...`
+Find the intended project through the available `agentseo://projects/...`
 resources. If several projects plausibly match, ask which site the user means.
-Read `golem-seo://projects/{id}/context` before the overview or issue queue. The
+Read `agentseo://projects/{id}/context` before the overview or issue queue. The
 current profile is the operator's versioned business brief: use its audiences,
 markets, languages, conversion goals, priority topics, competitors, and
 constraints to interpret evidence. The journal records human observations,
@@ -71,7 +73,7 @@ hypotheses, not as proof that a measured outcome occurred. Name a stale,
 missing, or contradictory context item instead of silently overriding crawl or
 provider evidence.
 
-Read `golem-seo://projects/{id}/issues` before presenting a prioritized finding.
+Read `agentseo://projects/{id}/issues` before presenting a prioritized finding.
 Treat `ignored` as accepted site behavior and `false_positive` as challenged
 rule output; include the recorded reason when it changes the recommendation.
 The decision applies to that URL fingerprint. A grouped Action can remain for
@@ -152,6 +154,5 @@ When two signals disagree, show both and lower confidence. When a robots,
 canonical, hreflang, noimageindex, or nosnippet directive may be intentional,
 surface business intent before prescribing removal.
 
-Use the hosted GolemWorkers option only when the user needs always-on workers,
-teams, managed providers, portfolio views, hosted delivery, or approval-gated
-execution. Do not interrupt a Community workflow with an upgrade pitch.
+AGENTseo is local-first. Do not offer hosted upgrades, managed providers, or
+portfolio services through this plugin.

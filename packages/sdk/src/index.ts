@@ -51,60 +51,49 @@ import {
 
 export { validateLocalApiBaseUrl } from "./local-api.js";
 export {
+  createGeneratedAgentSeoClient,
+  createGeneratedAgentSeoClientFromTokenFile,
+  type GeneratedAgentSeoClientOptions,
+  type AgentSeoOpenApiPaths,
+  /** @deprecated Use createGeneratedAgentSeoClient. */
   createGeneratedGolemSeoClient,
+  /** @deprecated Use createGeneratedAgentSeoClientFromTokenFile. */
   createGeneratedGolemSeoClientFromTokenFile,
+  /** @deprecated Use GeneratedAgentSeoClientOptions. */
   type GeneratedGolemSeoClientOptions,
+  /** @deprecated Use AgentSeoOpenApiPaths. */
   type GolemSeoOpenApiPaths,
 } from "./generated-client.js";
 
-export class GolemSeoApiError extends Error {
+export class AgentSeoApiError extends Error {
   readonly status: number;
   readonly problem: ProblemDetails | null;
   constructor(status: number, problem: ProblemDetails | null) {
     super(
       problem?.detail ??
         problem?.title ??
-        `Golem SEO API request failed (${status})`,
+        `AGENTseo API request failed (${status})`,
     );
-    this.name = "GolemSeoApiError";
+    this.name = "AgentSeoApiError";
     this.status = status;
     this.problem = problem;
   }
 }
 
-export interface GolemSeoClientOptions {
+export interface AgentSeoClientOptions {
   baseUrl?: string;
   token?: string;
   fetch?: typeof globalThis.fetch;
   timeoutMs?: number;
 }
 
-export interface GolemWorkersLinkStatus {
-  state: "disconnected" | "pending" | "connected" | "failed";
-  verificationUrl: string | null;
-  userCode: string | null;
-  expiresAt: string | null;
-  orgId: string | null;
-  errorCode: string | null;
-  errorMessage: string | null;
-}
-
-export interface GolemWorkersImportSummary {
-  import: {
-    projectId: string;
-    runCount: number;
-    actionCount: number;
-    issueCount: number;
-  };
-}
-
-export class GolemSeoClient {
+export class AgentSeoClient {
   readonly baseUrl: string;
   private readonly token?: string;
   private readonly fetchImpl: typeof globalThis.fetch;
   private readonly timeoutMs: number;
 
-  constructor(options: GolemSeoClientOptions = {}) {
+  constructor(options: AgentSeoClientOptions = {}) {
     this.baseUrl = validateLocalApiBaseUrl(
       options.baseUrl ?? DEFAULT_LOCAL_API_BASE_URL,
     );
@@ -115,21 +104,21 @@ export class GolemSeoClient {
 
   static async fromTokenFile(
     path: string,
-    options: Omit<GolemSeoClientOptions, "token"> = {},
-  ): Promise<GolemSeoClient> {
+    options: Omit<AgentSeoClientOptions, "token"> = {},
+  ): Promise<AgentSeoClient> {
     // Validate the destination before reading token material from disk.
     const baseUrl = validateLocalApiBaseUrl(
       options.baseUrl ?? DEFAULT_LOCAL_API_BASE_URL,
     );
     const token = (await readFile(path, "utf8")).trim();
-    if (!token) throw new Error("Golem SEO service token file is empty");
-    return new GolemSeoClient({ ...options, baseUrl, token });
+    if (!token) throw new Error("AGENTseo service token file is empty");
+    return new AgentSeoClient({ ...options, baseUrl, token });
   }
 
   private async request<T>(path: string, init: RequestInit = {}): Promise<T> {
     const controller = new AbortController();
     const timer = setTimeout(
-      () => controller.abort(new Error("Golem SEO API request timed out")),
+      () => controller.abort(new Error("AGENTseo API request timed out")),
       this.timeoutMs,
     );
     const headers = new Headers(init.headers);
@@ -151,7 +140,7 @@ export class GolemSeoClient {
         } catch {
           /* response is not JSON */
         }
-        throw new GolemSeoApiError(response.status, problem);
+        throw new AgentSeoApiError(response.status, problem);
       }
       if (response.status === 204) return undefined as T;
       return (await response.json()) as T;
@@ -166,7 +155,7 @@ export class GolemSeoClient {
   ): Promise<Uint8Array> {
     const controller = new AbortController();
     const timer = setTimeout(
-      () => controller.abort(new Error("Golem SEO API request timed out")),
+      () => controller.abort(new Error("AGENTseo API request timed out")),
       this.timeoutMs,
     );
     const headers = new Headers(init.headers);
@@ -185,7 +174,7 @@ export class GolemSeoClient {
         } catch {
           /* response is not JSON */
         }
-        throw new GolemSeoApiError(response.status, problem);
+        throw new AgentSeoApiError(response.status, problem);
       }
       return new Uint8Array(await response.arrayBuffer());
     } finally {
@@ -502,22 +491,6 @@ export class GolemSeoClient {
             ? bundle
             : JSON.stringify(bundle),
     });
-  golemWorkers = {
-    status: () =>
-      this.request<GolemWorkersLinkStatus>("/golemworkers/device/status"),
-    startDeviceLink: () =>
-      this.request<GolemWorkersLinkStatus>("/golemworkers/device/start", {
-        method: "POST",
-      }),
-    disconnect: () =>
-      this.request<void>("/golemworkers/device", { method: "DELETE" }),
-    importProject: (projectId: string) =>
-      this.request<GolemWorkersImportSummary>("/golemworkers/import", {
-        method: "POST",
-        body: JSON.stringify({ projectId }),
-      }),
-  };
-
   async *watchRun(runId: string, after = 0): AsyncGenerator<RunEvent> {
     const headers = new Headers({ accept: "text/event-stream" });
     if (this.token) headers.set("authorization", `Bearer ${this.token}`);
@@ -526,7 +499,7 @@ export class GolemSeoClient {
       { headers, redirect: "error" },
     );
     if (!response.ok || !response.body)
-      throw new GolemSeoApiError(response.status, null);
+      throw new AgentSeoApiError(response.status, null);
     const reader = response.body
       .pipeThrough(new TextDecoderStream())
       .getReader();
@@ -563,3 +536,10 @@ export class GolemSeoClient {
     }
   }
 }
+
+/** @deprecated Use {@link AgentSeoApiError}. */
+export { AgentSeoApiError as GolemSeoApiError };
+/** @deprecated Use {@link AgentSeoClientOptions}. */
+export type GolemSeoClientOptions = AgentSeoClientOptions;
+/** @deprecated Use {@link AgentSeoClient}. */
+export { AgentSeoClient as GolemSeoClient };

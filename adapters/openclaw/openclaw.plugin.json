@@ -1,6 +1,6 @@
 {
-  "id": "golem-seo",
-  "name": "Golem SEO",
+  "id": "agentseo",
+  "name": "AGENTseo",
   "description": "Run local SEO audits, comparisons, keyword research, content plans, and monitoring through six workflow-level tools.",
   "version": "0.11.0-alpha.0",
   "configSchema": {
@@ -10,11 +10,11 @@
       "serverUrl": {
         "type": "string",
         "default": "http://127.0.0.1:3210/api/v1",
-        "description": "Golem SEO loopback API URL."
+        "description": "AGENTseo loopback API URL."
       },
       "tokenFile": {
         "type": "string",
-        "description": "Path to the local Golem SEO service-token file."
+        "description": "Path to the local AGENTseo service-token file."
       },
       "timeoutMs": {
         "type": "number",

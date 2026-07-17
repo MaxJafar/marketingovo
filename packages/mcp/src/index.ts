@@ -17,7 +17,7 @@ import {
   type AgentMonitoringStatusInput,
   type AgentRunGetInput,
 } from "@agentseoapp/contracts/agent-tools";
-import { GolemSeoClient } from "@agentseoapp/sdk";
+import { AgentSeoClient } from "@agentseoapp/sdk";
 import { resolveMcpConnectionEnvironment } from "./compatibility.js";
 
 export const PUBLIC_TOOL_NAMES = PUBLIC_AGENT_TOOL_NAMES;
@@ -49,8 +49,8 @@ const monitoringStatusInputSchema =
     AgentMonitoringStatusTool.inputSchema,
   );
 
-export interface GolemSeoMcpOptions {
-  client?: GolemSeoClient;
+export interface AgentSeoMcpOptions {
+  client?: AgentSeoClient;
   baseUrl?: string;
   tokenFile?: string;
 }
@@ -59,7 +59,9 @@ const textResult = (value: unknown) => ({
   content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }],
 });
 
-function dataDirectory(): string {
+function defaultAgentSeoDataDirectory(): string {
+  // Preserve the persisted 1.x data root until the storage migration owns the
+  // default-path cutover. Connection environment variables remain canonical.
   if (process.platform === "darwin")
     return join(homedir(), "Library", "Application Support", "Golem SEO");
   if (process.platform === "win32")
@@ -73,21 +75,21 @@ function dataDirectory(): string {
   );
 }
 
-export async function createGolemSeoMcpServer(
-  options: GolemSeoMcpOptions = {},
+export async function createAgentSeoMcpServer(
+  options: AgentSeoMcpOptions = {},
 ): Promise<McpServer> {
   let client = options.client;
   if (!client) {
     const connectionEnvironment = resolveMcpConnectionEnvironment();
-    client = await GolemSeoClient.fromTokenFile(
+    client = await AgentSeoClient.fromTokenFile(
       options.tokenFile ??
         connectionEnvironment.tokenFile ??
-        join(dataDirectory(), "service-token"),
+        join(defaultAgentSeoDataDirectory(), "service-token"),
       { baseUrl: options.baseUrl ?? connectionEnvironment.baseUrl },
     );
   }
   const server = new McpServer(
-    { name: "golem-seo", version: "0.11.0-alpha.0" },
+    { name: "agentseo", version: "0.11.0-alpha.0" },
     {
       instructions:
         "Use start tools only after identifying the project and reading its context resource. Runs are asynchronous: call golem_seo_run_get until terminal, then summarize evidence, confidence, effort, and the five highest-value actions. Respect ignored and false-positive classifications exposed by the project issue-review resource. Never ask for or transmit credentials through tools.",
@@ -241,17 +243,17 @@ export async function createGolemSeoMcpServer(
   );
 
   server.registerResource(
-    "golem-seo-run",
-    new ResourceTemplate("golem-seo://runs/{id}", {
+    "agentseo-run",
+    new ResourceTemplate("agentseo://runs/{id}", {
       list: async () => ({
         resources: (await client.runs.list()).slice(0, 100).map((run) => ({
-          uri: `golem-seo://runs/${run.id}`,
+          uri: `agentseo://runs/${run.id}`,
           name: `${run.workflowId} — ${run.status}`,
         })),
       }),
     }),
     {
-      title: "Golem SEO run",
+      title: "AGENTseo run",
       description: "Canonical local run and issue state",
       mimeType: "application/json",
     },
@@ -274,10 +276,10 @@ export async function createGolemSeoMcpServer(
   );
 
   server.registerResource(
-    "golem-seo-run-report",
-    new ResourceTemplate("golem-seo://runs/{id}/report", { list: undefined }),
+    "agentseo-run-report",
+    new ResourceTemplate("agentseo://runs/{id}/report", { list: undefined }),
     {
-      title: "Golem SEO run report",
+      title: "AGENTseo run report",
       description: "Agent-ready run summary with top issues",
       mimeType: "application/json",
     },
@@ -301,17 +303,17 @@ export async function createGolemSeoMcpServer(
   );
 
   server.registerResource(
-    "golem-seo-project-overview",
-    new ResourceTemplate("golem-seo://projects/{id}/overview", {
+    "agentseo-project-overview",
+    new ResourceTemplate("agentseo://projects/{id}/overview", {
       list: async () => ({
         resources: (await client.projects.list()).map((project) => ({
-          uri: `golem-seo://projects/${project.id}/overview`,
+          uri: `agentseo://projects/${project.id}/overview`,
           name: project.name,
         })),
       }),
     }),
     {
-      title: "Golem SEO project overview",
+      title: "AGENTseo project overview",
       description: "Marketer overview and prioritized actions",
       mimeType: "application/json",
     },
@@ -331,17 +333,17 @@ export async function createGolemSeoMcpServer(
   );
 
   server.registerResource(
-    "golem-seo-project-issues",
-    new ResourceTemplate("golem-seo://projects/{id}/issues", {
+    "agentseo-project-issues",
+    new ResourceTemplate("agentseo://projects/{id}/issues", {
       list: async () => ({
         resources: (await client.projects.list()).map((project) => ({
-          uri: `golem-seo://projects/${project.id}/issues`,
+          uri: `agentseo://projects/${project.id}/issues`,
           name: `${project.name} — issue review`,
         })),
       }),
     }),
     {
-      title: "Golem SEO project issue review",
+      title: "AGENTseo project issue review",
       description:
         "Latest project findings with evidence, occurrence counts, and marketer adjudications",
       mimeType: "application/json",
@@ -362,17 +364,17 @@ export async function createGolemSeoMcpServer(
   );
 
   server.registerResource(
-    "golem-seo-project-context",
-    new ResourceTemplate("golem-seo://projects/{id}/context", {
+    "agentseo-project-context",
+    new ResourceTemplate("agentseo://projects/{id}/context", {
       list: async () => ({
         resources: (await client.projects.list()).map((project) => ({
-          uri: `golem-seo://projects/${project.id}/context`,
+          uri: `agentseo://projects/${project.id}/context`,
           name: `${project.name} — business and SEO context`,
         })),
       }),
     }),
     {
-      title: "Golem SEO project context",
+      title: "AGENTseo project context",
       description:
         "Versioned business profile and append-only marketer decision journal",
       mimeType: "application/json",
@@ -390,3 +392,12 @@ export async function createGolemSeoMcpServer(
 
   return server;
 }
+
+/**
+ * @deprecated Use {@link createAgentSeoMcpServer}. The public tool IDs remain
+ * unchanged through AGENTseo 1.x, but new integrations should use the
+ * canonical server factory and agentseo:// resources.
+ */
+export const createGolemSeoMcpServer = createAgentSeoMcpServer;
+/** @deprecated Use {@link AgentSeoMcpOptions}. */
+export type GolemSeoMcpOptions = AgentSeoMcpOptions;

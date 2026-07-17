@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
-import { createGolemSeoMcpServer } from "./index.js";
+import { createAgentSeoMcpServer } from "./index.js";
 
 async function main(): Promise<void> {
-  const server = await createGolemSeoMcpServer();
+  const server = await createAgentSeoMcpServer();
   const transport = new StdioServerTransport();
   process.once(
     "SIGINT",
@@ -14,7 +14,7 @@ async function main(): Promise<void> {
 
 main().catch((error) => {
   process.stderr.write(
-    `golem-seo-mcp: ${error instanceof Error ? error.message : String(error)}\n`,
+    `agentseo-mcp: ${error instanceof Error ? error.message : String(error)}\n`,
   );
   process.exitCode = 1;
 });

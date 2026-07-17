@@ -6,7 +6,7 @@ import {
   validateLocalApiBaseUrl,
 } from "./local-api.js";
 
-export interface GeneratedGolemSeoClientOptions {
+export interface GeneratedAgentSeoClientOptions {
   baseUrl?: string;
   token?: string;
   fetch?: typeof globalThis.fetch;
@@ -14,12 +14,12 @@ export interface GeneratedGolemSeoClientOptions {
 
 /**
  * Create the complete low-level client generated from the runtime OpenAPI
- * document. The ergonomic GolemSeoClient remains the recommended workflow
+ * document. The ergonomic AgentSeoClient remains the recommended workflow
  * surface; this client exposes every documented route without weakening the
  * localhost credential boundary.
  */
-export function createGeneratedGolemSeoClient(
-  options: GeneratedGolemSeoClientOptions = {},
+export function createGeneratedAgentSeoClient(
+  options: GeneratedAgentSeoClientOptions = {},
 ) {
   const apiBaseUrl = validateLocalApiBaseUrl(
     options.baseUrl ?? DEFAULT_LOCAL_API_BASE_URL,
@@ -38,7 +38,7 @@ export function createGeneratedGolemSeoClient(
       )
     ) {
       throw new Error(
-        "Generated Golem SEO client refused a non-local API destination",
+        "Generated AGENTseo client refused a non-local API destination",
       );
     }
     const headers = new Headers(request.headers);
@@ -56,16 +56,26 @@ export function createGeneratedGolemSeoClient(
   return createClient<paths>({ baseUrl: origin, fetch: guardedFetch });
 }
 
-export async function createGeneratedGolemSeoClientFromTokenFile(
+export async function createGeneratedAgentSeoClientFromTokenFile(
   path: string,
-  options: Omit<GeneratedGolemSeoClientOptions, "token"> = {},
+  options: Omit<GeneratedAgentSeoClientOptions, "token"> = {},
 ) {
   const baseUrl = validateLocalApiBaseUrl(
     options.baseUrl ?? DEFAULT_LOCAL_API_BASE_URL,
   );
   const token = (await readFile(path, "utf8")).trim();
-  if (!token) throw new Error("Golem SEO service token file is empty");
-  return createGeneratedGolemSeoClient({ ...options, baseUrl, token });
+  if (!token) throw new Error("AGENTseo service token file is empty");
+  return createGeneratedAgentSeoClient({ ...options, baseUrl, token });
 }
 
-export type GolemSeoOpenApiPaths = paths;
+export type AgentSeoOpenApiPaths = paths;
+
+/** @deprecated Use {@link GeneratedAgentSeoClientOptions}. */
+export type GeneratedGolemSeoClientOptions = GeneratedAgentSeoClientOptions;
+/** @deprecated Use {@link createGeneratedAgentSeoClient}. */
+export const createGeneratedGolemSeoClient = createGeneratedAgentSeoClient;
+/** @deprecated Use {@link createGeneratedAgentSeoClientFromTokenFile}. */
+export const createGeneratedGolemSeoClientFromTokenFile =
+  createGeneratedAgentSeoClientFromTokenFile;
+/** @deprecated Use {@link AgentSeoOpenApiPaths}. */
+export type GolemSeoOpenApiPaths = AgentSeoOpenApiPaths;

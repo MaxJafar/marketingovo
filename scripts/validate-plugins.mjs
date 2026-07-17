@@ -22,26 +22,33 @@ const openClaw = JSON.parse(
     "utf8",
   ),
 );
-assert.equal(openClaw.id, "golem-seo");
+assert.equal(openClaw.id, "agentseo");
 assert.deepEqual(openClaw.contracts?.tools, expectedTools);
 
 const codex = JSON.parse(
+  await readFile(
+    resolve(root, "plugins/codex/agentseo/.codex-plugin/plugin.json"),
+    "utf8",
+  ),
+);
+assert.equal(codex.name, "agentseo");
+assert.equal(codex.license, "Elastic-2.0");
+
+const mcp = JSON.parse(
+  await readFile(resolve(root, "plugins/codex/agentseo/.mcp.json"), "utf8"),
+);
+assert.ok(
+  mcp.mcpServers?.agentseo,
+  "Codex bundle must register its bundled MCP bridge",
+);
+const legacyCodex = JSON.parse(
   await readFile(
     resolve(root, "plugins/codex/golem-seo/.codex-plugin/plugin.json"),
     "utf8",
   ),
 );
-assert.equal(codex.name, "golem-seo");
-assert.equal(codex.license, "Elastic-2.0");
-assert.equal(codex.skills, "./skills/");
-
-const mcp = JSON.parse(
-  await readFile(resolve(root, "plugins/codex/golem-seo/.mcp.json"), "utf8"),
-);
-assert.ok(
-  mcp.mcpServers?.["golem-seo"],
-  "Codex bundle must register its bundled MCP bridge",
-);
+assert.equal(legacyCodex.name, "golem-seo");
+assert.equal(legacyCodex.interface?.deprecated, true);
 process.stdout.write(
-  "Validated Codex and OpenClaw manifests and the exact six-tool public surface.\n",
+  "Validated canonical Codex/OpenClaw manifests, the deprecated Codex alias, and the exact six-tool public surface.\n",
 );

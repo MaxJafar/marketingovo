@@ -1,33 +1,27 @@
 {
   "name": "golem-seo",
   "version": "0.11.0-alpha.0",
-  "description": "Turn local crawl, Search Console, GA4, performance, and SERP evidence into prioritized SEO actions.",
+  "description": "Deprecated 1.x compatibility plugin. Install AGENTseo for new Codex integrations.",
   "author": {
-    "name": "GolemWorkers",
-    "email": "hello@golemworkers.com",
-    "url": "https://golemworkers.com"
+    "name": "AGENTseo"
   },
-  "homepage": "https://golemworkers.com/seo",
-  "repository": "https://github.com/GolemWorkers/golem-seo",
   "license": "Elastic-2.0",
   "keywords": ["seo", "marketing", "crawler", "search-console", "analytics"],
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
-    "displayName": "Golem SEO",
-    "shortDescription": "Verified SEO actions from local evidence.",
-    "longDescription": "Connect Codex to Golem SEO Community Edition on localhost. Start audits, comparisons, keyword research, and content plans; inspect asynchronous runs and summarize evidence without exposing integration credentials.",
-    "developerName": "GolemWorkers",
+    "displayName": "AGENTseo legacy compatibility",
+    "shortDescription": "Deprecated alias; use the AGENTseo plugin for new installs.",
+    "longDescription": "This legacy identifier remains available through AGENTseo 1.x. Install AGENTseo for new local evidence-based workflows.",
+    "developerName": "AGENTseo",
     "category": "Productivity",
     "capabilities": ["Interactive", "Read", "Write"],
-    "websiteURL": "https://golemworkers.com/seo",
-    "privacyPolicyURL": "https://golemworkers.com/privacy",
-    "termsOfServiceURL": "https://golemworkers.com/terms",
     "defaultPrompt": [
       "Audit my site and rank the five actions that matter most.",
       "Compare my SEO health with these competitors.",
       "Build a content plan from these seed topics."
     ],
-    "brandColor": "#61E7B7"
+    "brandColor": "#61E7B7",
+    "deprecated": true
   }
 }
