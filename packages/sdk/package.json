@@ -33,11 +33,11 @@
   },
   "devDependencies": {
     "@agentseoapp/server": "workspace:*",
-    "@types/node": "^24.3.0",
+    "@types/node": "^26.1.1",
     "openapi-typescript": "7.13.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": ">=24 <25"

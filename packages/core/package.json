@@ -43,17 +43,17 @@
     "chrome-launcher": "^1.2.1",
     "google-trends-api": "^4.9.2",
     "lighthouse": "^13.3.0",
-    "linkedom": "^0.18.5",
+    "linkedom": "^0.18.13",
     "robots-parser": "^3.0.1",
-    "undici": "^7.16.0"
+    "undici": "^8.7.0"
   },
   "optionalDependencies": {
     "playwright": "1.61.1"
   },
   "devDependencies": {
-    "@types/node": "^24.3.0",
+    "@types/node": "^26.1.1",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.10"
   },
   "keywords": [
     "seo",
