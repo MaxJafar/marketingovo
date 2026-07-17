@@ -21,13 +21,26 @@ const terminalStatuses = new Set([
 export function ResearchPage(): React.JSX.Element {
   const client = useIntelClient();
   const queryClient = useQueryClient();
-  const [activeRunId, setActiveRunId] = useState<string>();
+  const [activeRunId, setActiveRunId] = useState<string | undefined>(() => {
+    return sessionStorage.getItem("activeRunId") ?? undefined;
+  });
   const [workflow, setWorkflow] = useState<"demo" | "import">("import");
   const [simulate, setSimulate] = useState<
     "none" | "source_failure" | "corrupt_artifact" | "slow"
   >("none");
   const [preview, setPreview] = useState<ImportPreview>();
   const [selectedTargets, setSelectedTargets] = useState<Set<string>>(new Set());
+  const [attested, setAttested] = useState(false);
+  const [previewConfirmed, setPreviewConfirmed] = useState(false);
+
+  // Keep sessionStorage in sync
+  if (activeRunId !== sessionStorage.getItem("activeRunId")) {
+    if (activeRunId) {
+      sessionStorage.setItem("activeRunId", activeRunId);
+    } else {
+      sessionStorage.removeItem("activeRunId");
+    }
+  }
 
   useRunEventStream(activeRunId);
 
@@ -36,6 +49,7 @@ export function ResearchPage(): React.JSX.Element {
     onSuccess: (data) => {
       setPreview(data);
       setSelectedTargets(new Set());
+      setPreviewConfirmed(false);
     },
   });
 
@@ -85,6 +99,11 @@ export function ResearchPage(): React.JSX.Element {
       queryClient.invalidateQueries({ queryKey: ["run", activeRunId] }),
   });
 
+  const replay = useMutation({
+    mutationFn: () => client.runs.replay(activeRunId!),
+    onSuccess: (run) => setActiveRunId(run.id),
+  });
+
   function submit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     start.mutate();
@@ -94,6 +113,7 @@ export function ResearchPage(): React.JSX.Element {
     const file = event.target.files?.[0];
     if (file) {
       setPreview(undefined);
+      setPreviewConfirmed(false);
       previewMutation.mutate(file);
     }
   }
@@ -117,7 +137,7 @@ export function ResearchPage(): React.JSX.Element {
   const isStartDisabled =
     start.isPending ||
     (workflow === "import" &&
-      (!preview?.valid || selectedTargets.size < 2 || selectedTargets.size > 5));
+      (!preview?.valid || selectedTargets.size < 2 || selectedTargets.size > 5 || !previewConfirmed));
 
   return (
     <div className="research-workspace">
@@ -190,13 +210,21 @@ export function ResearchPage(): React.JSX.Element {
               </>
             ) : (
               <>
+                <label style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "1rem" }}>
+                  <input
+                    type="checkbox"
+                    checked={attested}
+                    onChange={(e) => setAttested(e.target.checked)}
+                  />
+                  <span>I attest I have the right to process this data for competitive research</span>
+                </label>
                 <label htmlFor="csv-upload">Select CSV</label>
                 <input
                   id="csv-upload"
                   type="file"
                   accept=".csv"
                   onChange={handleFileChange}
-                  disabled={previewMutation.isPending}
+                  disabled={!attested || previewMutation.isPending}
                   required
                 />
               </>
@@ -262,6 +290,16 @@ export function ResearchPage(): React.JSX.Element {
                     </label>
                   ))}
                 </div>
+                {preview.valid && preview.targets.length >= 2 && preview.targets.length <= 5 && (
+                  <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "1.5rem", padding: "1rem", background: "var(--canvas)", border: "1px solid var(--line)", borderRadius: "0.5rem", cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={previewConfirmed}
+                      onChange={(e) => setPreviewConfirmed(e.target.checked)}
+                    />
+                    <strong>I confirm the validation results and selected targets for processing</strong>
+                  </label>
+                )}
               </div>
             )}
           </div>
@@ -310,6 +348,16 @@ export function ResearchPage(): React.JSX.Element {
               disabled={cancel.isPending}
             >
               Cancel run
+            </button>
+          )}
+          {terminalStatuses.has(run.status) && (
+            <button
+              className="primary-button floating-cancel"
+              type="button"
+              onClick={() => replay.mutate()}
+              disabled={replay.isPending}
+            >
+              Replay run
             </button>
           )}
         </div>
