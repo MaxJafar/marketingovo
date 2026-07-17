@@ -92,7 +92,7 @@ const agentTool = <const Contract extends AgentToolContract>(
 ): Contract => contract;
 
 export const AgentAuditStartTool = agentTool({
-  name: "golem_seo_audit_start",
+  name: "agentseo_audit_start",
   title: "Start SEO audit",
   description:
     "Start a static or JavaScript audit for an existing local project. Returns immediately with a run id.",
@@ -106,7 +106,7 @@ export const AgentAuditStartTool = agentTool({
 } as const);
 
 export const AgentRunGetTool = agentTool({
-  name: "golem_seo_run_get",
+  name: "agentseo_run_get",
   title: "Get SEO run",
   description:
     "Read current run state and, when finished, its canonical issues. Safe to replay.",
@@ -121,7 +121,7 @@ export const AgentRunGetTool = agentTool({
 } as const);
 
 export const AgentCompareStartTool = agentTool({
-  name: "golem_seo_compare_start",
+  name: "agentseo_compare_start",
   title: "Start competitor comparison",
   description:
     "Compare a project to one or more public competitor URLs using the same bounded crawl settings.",
@@ -135,7 +135,7 @@ export const AgentCompareStartTool = agentTool({
 } as const);
 
 export const AgentKeywordResearchStartTool = agentTool({
-  name: "golem_seo_keyword_research_start",
+  name: "agentseo_keyword_research_start",
   title: "Start keyword research",
   description:
     "Expand a seed across configured sources, classify intent, and evaluate momentum. Returns a run id.",
@@ -149,7 +149,7 @@ export const AgentKeywordResearchStartTool = agentTool({
 } as const);
 
 export const AgentContentPlanStartTool = agentTool({
-  name: "golem_seo_content_plan_start",
+  name: "agentseo_content_plan_start",
   title: "Start content plan",
   description:
     "Build keyword profiles and topic clusters for up to ten seed topics. Returns a run id.",
@@ -163,7 +163,7 @@ export const AgentContentPlanStartTool = agentTool({
 } as const);
 
 export const AgentMonitoringStatusTool = agentTool({
-  name: "golem_seo_monitoring_status",
+  name: "agentseo_monitoring_status",
   title: "Read monitoring status",
   description:
     "Read schedules, recent runs, and runtime health without changing configuration.",

@@ -51,7 +51,7 @@ if (!bundle.startsWith("#!/usr/bin/env node\n") || shebangCount !== 1)
 execFileSync(process.execPath, ["--check", bundlePath], { stdio: "pipe" });
 const bundledToolNames = [
   ...new Set(
-    [...bundle.matchAll(/"(golem_seo_[a-z_]+)"/g)].map((match) => match[1]),
+    [...bundle.matchAll(/"(agentseo_[a-z_]+)"/g)].map((match) => match[1]),
   ),
 ].sort();
 if (

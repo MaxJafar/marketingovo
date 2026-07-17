@@ -30,16 +30,16 @@ intent, SERP evidence, business value, and the site's own historical baseline.
 ## Decide the workflow
 
 1. If the user asks what is wrong, what to fix, or for a health check, start
-   `golem_seo_audit_start`.
+   `agentseo_audit_start`.
 2. If the user names competing sites or asks how the site compares, start
-   `golem_seo_compare_start` with public competitor URLs.
+   `agentseo_compare_start` with public competitor URLs.
 3. If the user asks for demand, intent, variants, or a keyword opportunity,
-   start `golem_seo_keyword_research_start`.
+   start `agentseo_keyword_research_start`.
 4. If the user asks what to publish or how to organize several topics, start
-   `golem_seo_content_plan_start`.
+   `agentseo_content_plan_start`.
 5. If the user asks whether monitoring is active or recent jobs are healthy,
-   call `golem_seo_monitoring_status`.
-6. If a run id already exists, call `golem_seo_run_get`; do not start a
+   call `agentseo_monitoring_status`.
+6. If a run id already exists, call `agentseo_run_get`; do not start a
    duplicate job.
 
 Use goal-specific sequences when one run cannot answer the question:
@@ -84,7 +84,7 @@ memory.
 
 ## Handle asynchronous work
 
-Start tools return quickly. Preserve the run id and call `golem_seo_run_get`
+Start tools return quickly. Preserve the run id and call `agentseo_run_get`
 until the status is `succeeded`, `partial`, `failed`, or `cancelled`. A partial
 run can still be useful: name the missing source and reduce confidence. Do not
 describe a queued or running job as complete.

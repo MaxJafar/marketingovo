@@ -99,12 +99,12 @@ describe("AGENTseo MCP public contract", () => {
       ...PUBLIC_TOOL_NAMES,
     ]);
     expect(PUBLIC_TOOL_NAMES).toEqual([
-      "golem_seo_audit_start",
-      "golem_seo_run_get",
-      "golem_seo_compare_start",
-      "golem_seo_keyword_research_start",
-      "golem_seo_content_plan_start",
-      "golem_seo_monitoring_status",
+      "agentseo_audit_start",
+      "agentseo_run_get",
+      "agentseo_compare_start",
+      "agentseo_keyword_research_start",
+      "agentseo_content_plan_start",
+      "agentseo_monitoring_status",
     ]);
   });
 
@@ -140,39 +140,39 @@ describe("AGENTseo MCP public contract", () => {
     const tools = registeredTools(await createAgentSeoMcpServer({ client }));
 
     expect(
-      tools.golem_seo_audit_start.inputSchema.parse({ project_id: "site-1" }),
+      tools.agentseo_audit_start.inputSchema.parse({ project_id: "site-1" }),
     ).toEqual({
       project_id: "site-1",
       render_mode: "static",
       collect_vitals: false,
     });
     expect(
-      tools.golem_seo_audit_start.inputSchema.safeParse({
+      tools.agentseo_audit_start.inputSchema.safeParse({
         project_id: "site-1",
         render_mode: "browser",
       }).success,
     ).toBe(false);
     expect(
-      tools.golem_seo_audit_start.inputSchema.safeParse({
+      tools.agentseo_audit_start.inputSchema.safeParse({
         project_id: "site-1",
         credential: "must-not-exist",
       }).success,
     ).toBe(false);
     expect(
-      tools.golem_seo_compare_start.inputSchema.safeParse({
+      tools.agentseo_compare_start.inputSchema.safeParse({
         project_id: "site-1",
         competitor_urls: ["ftp://example.com"],
       }).success,
     ).toBe(false);
     expect(
-      tools.golem_seo_compare_start.inputSchema.safeParse({
+      tools.agentseo_compare_start.inputSchema.safeParse({
         project_id: "site-1",
         competitor_urls: ["https://example.com"],
         max_urls: 1.5,
       }).success,
     ).toBe(false);
     expect(
-      tools.golem_seo_content_plan_start.inputSchema.safeParse({
+      tools.agentseo_content_plan_start.inputSchema.safeParse({
         project_id: "site-1",
         seeds: Array.from({ length: 11 }, (_, index) => `seed-${index}`),
       }).success,
@@ -183,7 +183,7 @@ describe("AGENTseo MCP public contract", () => {
     const { client, issues } = stubClient("running");
     const server = await createAgentSeoMcpServer({ client });
 
-    const result = await registeredTools(server).golem_seo_run_get.handler({
+    const result = await registeredTools(server).agentseo_run_get.handler({
       run_id: "run-1",
       include_issues: true,
     });
@@ -201,7 +201,7 @@ describe("AGENTseo MCP public contract", () => {
       const { client, issues } = stubClient(status);
       const server = await createAgentSeoMcpServer({ client });
 
-      const result = await registeredTools(server).golem_seo_run_get.handler({
+      const result = await registeredTools(server).agentseo_run_get.handler({
         run_id: "run-1",
         include_issues: true,
       });
@@ -217,7 +217,7 @@ describe("AGENTseo MCP public contract", () => {
     const { client } = stubClient("succeeded", "keyword-research");
     const server = await createAgentSeoMcpServer({ client });
 
-    const result = await registeredTools(server).golem_seo_run_get.handler({
+    const result = await registeredTools(server).agentseo_run_get.handler({
       run_id: "run-1",
       include_issues: true,
     });

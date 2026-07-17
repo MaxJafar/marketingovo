@@ -148,22 +148,15 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
       "The deterministic lockfile retains only the legacy plugin workspace directory path, while all package coordinates use frozen private identities.",
   },
   ...[
-    "adapters/openclaw/openclaw.plugin.json",
-    "adapters/openclaw/scripts/validate.mjs",
     "adapters/openclaw/src/index.ts",
     "packages/mcp/package.json",
     "packages/mcp/src/compatibility.test.ts",
     "packages/mcp/src/compatibility.ts",
     "packages/mcp/src/index.test.ts",
     "packages/mcp/src/index.ts",
-    "packages/mcp/src/stdio.ts",
     "packages/sdk/src/generated-client.ts",
     "packages/sdk/src/index.test.ts",
     "packages/sdk/src/index.ts",
-    "packages/sdk/src/local-api.ts",
-    "plugins/codex/golem-seo/.mcp.json",
-    "plugins/codex/golem-seo/package.json",
-    "plugins/codex/golem-seo/scripts/build.mjs",
     "plugins/codex/golem-seo/scripts/validate.mjs",
     "scripts/validate-plugins.mjs",
   ].map((path) => ({
@@ -178,7 +171,6 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
     "packages/cli/src/compatibility.test.ts",
     "packages/cli/src/compatibility.ts",
     "packages/cli/src/index.ts",
-    "packages/cli/src/local-service.ts",
     "packages/cli/src/service-definition.test.ts",
     "packages/cli/src/service-definition.ts",
   ].map((path) => ({
@@ -433,21 +425,9 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
   },
   {
     rule: "golemworkers-coupling",
-    path: "packages/sdk/src/index.ts",
-    reason:
-      "The hosted SDK surface is an explicit Stage 3 interface blocker and must migrate atomically with generated contracts.",
-  },
-  {
-    rule: "golemworkers-coupling",
     path: "packages/server/src/index.test.ts",
     reason:
       "A negative regression assertion intentionally names the removed hosted route to prove it is absent.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "plugins/codex/golem-seo/.codex-plugin/plugin.json",
-    reason:
-      "Legacy plugin publisher metadata belongs to the Stage 3 agent-surface migration and human release identity gate.",
   },
   {
     rule: "golemworkers-coupling",
@@ -486,22 +466,14 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
       "Installer verification retains the legacy launchd identifier until a dedicated service migration is implemented.",
   },
   ...[
-    "adapters/openclaw/openclaw.plugin.json",
-    "packages/contracts/src/agent-tools.test.ts",
-    "packages/contracts/src/agent-tools.ts",
     "packages/mcp/package.json",
-    "packages/mcp/src/index.test.ts",
-    "packages/mcp/src/index.ts",
-    "packages/mcp/src/stdio.ts",
-    "plugins/codex/golem-seo/.mcp.json",
-    "plugins/codex/golem-seo/package.json",
-    "plugins/codex/golem-seo/scripts/build.mjs",
-    "plugins/codex/golem-seo/scripts/validate.mjs",
+    "packages/mcp/src/compatibility.test.ts",
+    "packages/mcp/src/compatibility.ts",
   ].map((path) => ({
     rule: "legacy-agent-contract",
     path,
     reason:
-      "The exact-six MCP tool/resource contract remains unchanged until Stage 3 can migrate every agent surface atomically.",
+      "The deprecated golem-seo-mcp executable remains a tested compatibility entry point; the six public tool IDs are canonical AGENTseo names.",
   })),
   {
     rule: "legacy-cli-alias",
@@ -521,12 +493,6 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
     reason:
       "Repository contribution links remain frozen until the human repository-ownership and public-release gate approves replacements.",
   },
-  ...["legacy-product-identity", "legacy-agent-contract"].map((rule) => ({
-    rule,
-    path: "adapters/openclaw/README.md",
-    reason:
-      "OpenClaw documentation remains part of the Stage 3 atomic agent-surface migration rather than this foundation slice.",
-  })),
   {
     rule: "legacy-package-scope",
     path: "apps/dashboard/README.md",
@@ -566,16 +532,6 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
     path: "migrations/legacy-v0/README.md",
     reason:
       "The immutable legacy migration fixture documents old package input that remains accepted only for tested import compatibility.",
-  })),
-  ...[
-    "legacy-product-identity",
-    "golemworkers-coupling",
-    "legacy-agent-contract",
-  ].map((rule) => ({
-    rule,
-    path: "plugins/codex/golem-seo/skills/seo-marketer/SKILL.md",
-    reason:
-      "The Codex skill remains part of the Stage 3 atomic agent-surface migration and cannot be renamed independently.",
   })),
   ...["legacy-product-identity", "legacy-package-scope"].map((rule) => ({
     rule,

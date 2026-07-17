@@ -7,14 +7,19 @@ import {
 describe("public agent tool contracts", () => {
   it("keeps exactly six unique workflow-level tools", () => {
     expect(PUBLIC_AGENT_TOOL_NAMES).toEqual([
-      "golem_seo_audit_start",
-      "golem_seo_run_get",
-      "golem_seo_compare_start",
-      "golem_seo_keyword_research_start",
-      "golem_seo_content_plan_start",
-      "golem_seo_monitoring_status",
+      "agentseo_audit_start",
+      "agentseo_run_get",
+      "agentseo_compare_start",
+      "agentseo_keyword_research_start",
+      "agentseo_content_plan_start",
+      "agentseo_monitoring_status",
     ]);
     expect(new Set(PUBLIC_AGENT_TOOL_NAMES).size).toBe(6);
+    expect(
+      PUBLIC_AGENT_TOOL_NAMES.every((toolName) =>
+        toolName.startsWith("agentseo_"),
+      ),
+    ).toBe(true);
   });
 
   it("publishes strict schemas without credential-shaped inputs", () => {

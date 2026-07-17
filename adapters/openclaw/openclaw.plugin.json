@@ -33,18 +33,18 @@
   "activation": { "onStartup": true },
   "contracts": {
     "tools": [
-      "golem_seo_audit_start",
-      "golem_seo_run_get",
-      "golem_seo_compare_start",
-      "golem_seo_keyword_research_start",
-      "golem_seo_content_plan_start",
-      "golem_seo_monitoring_status"
+      "agentseo_audit_start",
+      "agentseo_run_get",
+      "agentseo_compare_start",
+      "agentseo_keyword_research_start",
+      "agentseo_content_plan_start",
+      "agentseo_monitoring_status"
     ]
   },
   "toolMetadata": {
-    "golem_seo_audit_start": { "optional": true },
-    "golem_seo_compare_start": { "optional": true },
-    "golem_seo_keyword_research_start": { "optional": true },
-    "golem_seo_content_plan_start": { "optional": true }
+    "agentseo_audit_start": { "optional": true },
+    "agentseo_compare_start": { "optional": true },
+    "agentseo_keyword_research_start": { "optional": true },
+    "agentseo_content_plan_start": { "optional": true }
   }
 }
