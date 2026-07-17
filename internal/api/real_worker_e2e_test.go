@@ -133,6 +133,14 @@ func TestRealPythonImportedCSVThroughHTTPAndGoAuthority(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	originalPath := filepath.Join(t.TempDir(), "analyst-selected.csv")
+	if err := os.WriteFile(originalPath, csv, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	upload, err := os.ReadFile(originalPath)
+	if err != nil {
+		t.Fatal(err)
+	}
 	dataRoot := filepath.Join(t.TempDir(), "private")
 	store, err := storage.Open(filepath.Join(dataRoot, "state.sqlite3"))
 	if err != nil {
@@ -155,7 +163,7 @@ func TestRealPythonImportedCSVThroughHTTPAndGoAuthority(t *testing.T) {
 	}
 	httpServer := httptest.NewServer(server.Handler())
 	t.Cleanup(func() { httpServer.Close(); cancel(); manager.Close(); store.Close() })
-	request, err := http.NewRequest(http.MethodPost, httpServer.URL+"/v1/datasets/competitive-pulse/preview", bytes.NewReader(csv))
+	request, err := http.NewRequest(http.MethodPost, httpServer.URL+"/v1/datasets/competitive-pulse/preview", bytes.NewReader(upload))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -176,6 +184,9 @@ func TestRealPythonImportedCSVThroughHTTPAndGoAuthority(t *testing.T) {
 	}
 	if !preview.Valid || preview.DatasetID == "" || preview.Policy == nil || preview.Policy.AttestationVersion != "public-permitted-brand-competitive-research.v1" {
 		t.Fatalf("unexpected import preview: %+v", preview)
+	}
+	if err := os.Remove(originalPath); err != nil {
+		t.Fatal(err)
 	}
 	client, err := NewClient(httpServer.URL, serviceToken, nil)
 	if err != nil {
@@ -199,6 +210,13 @@ func TestRealPythonImportedCSVThroughHTTPAndGoAuthority(t *testing.T) {
 	}
 	if detail.DatasetID != preview.DatasetID || detail.ConnectorVersion != "local.competitive-pulse-import@1.0.0" || detail.ParserVersion != domain.CompetitivePulseParserVersion {
 		t.Fatalf("import provenance was not authority-derived: %+v", detail.Run)
+	}
+	var replay domain.Run
+	if err := client.Do(context.Background(), http.MethodPost, "/v1/runs/"+run.ID+"/replay", nil, &replay); err != nil {
+		t.Fatal(err)
+	}
+	if replayDetail := waitRealWorkerRun(t, client, replay.ID); replayDetail.Status != domain.RunSucceeded || replayDetail.DatasetID != preview.DatasetID {
+		t.Fatalf("snapshot replay after deleting the original CSV failed: %+v", replayDetail.Run)
 	}
 }
 
