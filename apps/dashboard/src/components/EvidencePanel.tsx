@@ -1,8 +1,7 @@
 import type { ComparisonReport } from "@golem-intel/sdk";
-import type { components } from "@golem-intel/sdk/generated";
 
-type ImportComparisonReport = components["schemas"]["ImportComparisonReport"];
-type ComparisonReportV1 = components["schemas"]["ComparisonReportV1"];
+type ImportComparisonReport = Extract<ComparisonReport, { schema_version: "golem.comparison-report.v2" }>;
+type ComparisonReportV1 = Extract<ComparisonReport, { schema_version: "golem.comparison-report.v1" }>;
 
 interface EvidencePanelProps {
   report: ComparisonReport;
@@ -10,9 +9,9 @@ interface EvidencePanelProps {
 
 export function EvidencePanel({ report }: EvidencePanelProps): React.JSX.Element {
   if (report.schema_version === "golem.comparison-report.v2") {
-    return <EvidencePanelV2 report={report as unknown as ImportComparisonReport} />;
+    return <EvidencePanelV2 report={report} />;
   }
-  return <EvidencePanelV1 report={report as unknown as ComparisonReportV1} />;
+  return <EvidencePanelV1 report={report} />;
 }
 
 function EvidencePanelV2({ report }: { report: ImportComparisonReport }): React.JSX.Element {
@@ -78,13 +77,6 @@ function EvidencePanelV2({ report }: { report: ImportComparisonReport }): React.
       </dl>
       <div className="finding-list">
         {report.targets.map((target) => {
-          const citationIds = Array.from(
-            new Set(
-              (target.metrics || []).flatMap(
-                (m) => m.evidence_observation_ids || []
-              )
-            )
-          );
           return (
             <article className="finding" key={target.target_id}>
               <header>
@@ -95,7 +87,7 @@ function EvidencePanelV2({ report }: { report: ImportComparisonReport }): React.
               </header>
               <div className="metrics-summary" style={{ marginTop: "1rem" }}>
                 <strong>Metrics</strong>
-                <div className="metrics-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginTop: "0.5rem" }}>
+                <div className="metrics-grid" style={{ display: "grid", gridTemplateColumns: "1fr", gap: "1rem", marginTop: "0.5rem" }}>
                   {(target.metrics || []).map((metric) => {
                     const label = {
                       "followers.delta": "Follower delta",
@@ -111,11 +103,15 @@ function EvidencePanelV2({ report }: { report: ImportComparisonReport }): React.
                       } else if (metric.id === "posting-cadence") {
                         displayValue = `${Number(metric.value).toFixed(2)} / wk`;
                       } else if (metric.id === "content-format-mix") {
-                        displayValue = typeof metric.value === "object" && metric.value
-                          ? Object.entries(metric.value as Record<string, number>)
-                              .map(([k, v]) => `${k}: ${Math.round(Number(v) * 100)}%`)
-                              .join(", ")
-                          : String(metric.value);
+                        const mix = metric.value;
+                        if (typeof mix === "object" && mix !== null) {
+                          displayValue = Object.entries(mix)
+                            .filter(([, v]) => typeof v === "number")
+                            .map(([k, v]) => `${k}: ${Math.round(Number(v) * 100)}%`)
+                            .join(", ");
+                        } else {
+                          displayValue = String(mix);
+                        }
                       } else {
                         displayValue = String(metric.value);
                       }
@@ -129,6 +125,7 @@ function EvidencePanelV2({ report }: { report: ImportComparisonReport }): React.
                         <div style={{ fontWeight: "bold", fontSize: "0.9rem", color: metric.availability !== "available" ? "var(--danger)" : "inherit" }}>
                           {displayValue}
                         </div>
+                        
                         {metric.limitations && metric.limitations.length > 0 && (
                           <ul style={{ fontSize: "0.75rem", color: "var(--warning)", marginTop: "0.25rem", paddingLeft: "1rem" }}>
                             {metric.limitations.map((lim, idx) => (
@@ -136,9 +133,63 @@ function EvidencePanelV2({ report }: { report: ImportComparisonReport }): React.
                             ))}
                           </ul>
                         )}
-                        {metric.quality && (
-                          <div style={{ fontSize: "0.7rem", color: "var(--muted)", marginTop: "0.25rem" }}>
-                            Coverage: {metric.quality.included_count} / {metric.quality.candidate_count}
+                        
+                        <div style={{ fontSize: "0.7rem", color: "var(--muted)", marginTop: "0.5rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.25rem" }}>
+                          <div>Def: {metric.definition_version}</div>
+                          <div>Pop: {metric.population}</div>
+                          <div>Num: {metric.numerator}</div>
+                          <div>Denom: {metric.denominator}</div>
+                          {metric.period && (
+                            <div style={{ gridColumn: "span 2" }}>
+                              Period: {new Date(metric.period.start).toLocaleDateString()} - {new Date(metric.period.end).toLocaleDateString()}
+                            </div>
+                          )}
+                          {metric.quality && (
+                            <>
+                              <div style={{ gridColumn: "span 2", marginTop: "0.25rem", fontWeight: "bold" }}>Quality</div>
+                              <div>Included: {metric.quality.included_count} / {metric.quality.candidate_count}</div>
+                              <div>Excluded: {metric.quality.excluded_count}</div>
+                              {metric.quality.mean_input_coverage !== null && (
+                                <div>Mean Coverage: {(metric.quality.mean_input_coverage * 100).toFixed(1)}%</div>
+                              )}
+                              {metric.quality.mean_input_confidence !== null && (
+                                <div>Mean Confidence: {(metric.quality.mean_input_confidence * 100).toFixed(1)}%</div>
+                              )}
+                              {metric.quality.min_input_confidence !== null && (
+                                <div>Min Confidence: {(metric.quality.min_input_confidence * 100).toFixed(1)}%</div>
+                              )}
+                            </>
+                          )}
+                        </div>
+
+                        {metric.evidence_observation_ids && metric.evidence_observation_ids.length > 0 && (
+                          <div style={{ marginTop: "0.75rem" }}>
+                            <strong style={{ fontSize: "0.75rem" }}>Evidence</strong>
+                            <ul className="citation-list" style={{ marginTop: "0.25rem" }}>
+                              {metric.evidence_observation_ids.map((observationId) => {
+                                const obs = report.evidence[observationId];
+                                if (!obs) return null;
+                                return (
+                                  <li key={observationId}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                      <span style={{ fontFamily: "monospace", fontSize: "0.75rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "200px" }} title={obs.source_url}>
+                                        {obs.source_url}
+                                      </span>
+                                      <button 
+                                        onClick={() => navigator.clipboard.writeText(obs.source_url)}
+                                        aria-label="Copy source URL"
+                                        style={{ background: "none", border: "1px solid var(--border)", borderRadius: "0.25rem", cursor: "pointer", fontSize: "0.7rem", padding: "0.1rem 0.3rem" }}
+                                      >
+                                        Copy
+                                      </button>
+                                    </div>
+                                    <span style={{ fontSize: "0.7rem" }}>
+                                      Observed: {new Date(obs.observed_at).toLocaleDateString()}
+                                    </span>
+                                  </li>
+                                );
+                              })}
+                            </ul>
                           </div>
                         )}
                       </div>
@@ -146,36 +197,6 @@ function EvidencePanelV2({ report }: { report: ImportComparisonReport }): React.
                   })}
                 </div>
               </div>
-              {citationIds.length > 0 && (
-                <ul className="citation-list" style={{ marginTop: "1rem" }}>
-                  {citationIds.slice(0, 4).map((observationId) => {
-                    const obs = report.evidence[observationId];
-                    if (!obs) return null;
-                    const isWeb = obs.source_url && (obs.source_url.startsWith("http://") || obs.source_url.startsWith("https://"));
-                    
-                    const isImported = obs.connector_version.includes('import');
-                    const isFixture = obs.connector_version.includes('fixture');
-                    
-                    if (isWeb && !isImported && !isFixture) {
-                      return (
-                        <li key={observationId}>
-                          <a href={obs.source_url} target="_blank" rel="noreferrer">
-                            {obs.native_id || observationId}
-                          </a>
-                          <span>{new Date(obs.observed_at).toLocaleDateString()}</span>
-                        </li>
-                      );
-                    }
-                    
-                    return (
-                      <li key={observationId}>
-                        <span>{obs.native_id || observationId}</span>
-                        <span>{new Date(obs.observed_at).toLocaleDateString()}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
             </article>
           );
         })}
@@ -277,20 +298,27 @@ function EvidencePanelV1({ report }: { report: ComparisonReportV1 }): React.JSX.
               </div>
             </dl>
             <ul className="citation-list">
-              {target.citations.slice(0, 4).map((citation) => (
+              {target.citations.slice(0, 4).map((citation) => {
+                const isWeb = citation.source_url.startsWith("http://") || citation.source_url.startsWith("https://");
+                return (
                 <li key={citation.observation_id}>
-                  <a
-                    href={citation.source_url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {citation.native_id || citation.observation_id}
-                  </a>
+                  {isWeb ? (
+                    <a
+                      href={citation.source_url}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {citation.native_id || citation.observation_id}
+                    </a>
+                  ) : (
+                    <span>{citation.native_id || citation.observation_id}</span>
+                  )}
                   <span>
                     {new Date(citation.observed_at).toLocaleDateString()}
                   </span>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           </article>
         ))}

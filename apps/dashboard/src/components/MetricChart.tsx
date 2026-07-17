@@ -10,9 +10,6 @@ import {
 import { CanvasRenderer } from "echarts/renderers";
 import type { BarSeriesOption, ComposeOption } from "echarts";
 import type { ComparisonReport } from "@golem-intel/sdk";
-import type { components } from "@golem-intel/sdk/generated";
-
-type ImportComparisonReport = components["schemas"]["ImportComparisonReport"];
 
 echarts.use([BarChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
@@ -33,7 +30,7 @@ export function MetricChart({ report }: MetricChartProps): React.JSX.Element {
     const chart = echarts.init(element, undefined, { renderer: "canvas" });
 
     const chartData = report.schema_version === "golem.comparison-report.v2"
-      ? (report as unknown as ImportComparisonReport).targets.map((target) => {
+      ? report.targets.map((target) => {
           const metric = target.metrics.find((m) => m.id === "followers.delta");
           const val = typeof metric?.value === "number" ? metric.value : "-";
           return {
