@@ -28,6 +28,22 @@ export function MetricChart({ report }: MetricChartProps): React.JSX.Element {
     const element = chartRef.current;
     if (!element) return;
     const chart = echarts.init(element, undefined, { renderer: "canvas" });
+
+    const isV2 = report.schema_version === "golem.comparison-report.v2";
+    const chartData = isV2
+      ? (report as any).targets.map((target: any) => {
+          const metric = (target.metrics || []).find((m: any) => m.id === "followers.delta");
+          const val = typeof metric?.value === "number" ? metric.value : 0;
+          return {
+            name: target.target_name,
+            value: val,
+          };
+        })
+      : report.targets.map((target) => ({
+          name: target.entity_name,
+          value: target.follower_delta,
+        }));
+
     const option: ChartOption = {
       backgroundColor: "transparent",
       grid: { left: 8, right: 12, top: 24, bottom: 12, containLabel: true },
@@ -39,7 +55,7 @@ export function MetricChart({ report }: MetricChartProps): React.JSX.Element {
       },
       xAxis: {
         type: "category",
-        data: report.targets.map((target) => target.entity_name),
+        data: chartData.map((d: any) => d.name),
         axisLabel: { color: "#91a0b7" },
         axisLine: { lineStyle: { color: "#2b3547" } },
       },
@@ -53,10 +69,10 @@ export function MetricChart({ report }: MetricChartProps): React.JSX.Element {
       series: [
         {
           type: "bar",
-          data: report.targets.map((target) => ({
-            value: target.follower_delta,
+          data: chartData.map((d: any) => ({
+            value: d.value,
             itemStyle: {
-              color: target.follower_delta >= 0 ? "#61e7b7" : "#ff7f91",
+              color: d.value >= 0 ? "#61e7b7" : "#ff7f91",
               borderRadius: [5, 5, 0, 0],
             },
           })),
