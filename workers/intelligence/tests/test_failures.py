@@ -10,6 +10,7 @@ from pathlib import Path
 
 import pytest
 
+from golem_intel_worker.constants import FIXTURE_INPUT_SCHEMA_ID
 from golem_intel_worker.errors import WorkerError
 from golem_intel_worker.events import EventEmitter
 from golem_intel_worker.models import AnalysisRequest
@@ -25,6 +26,7 @@ def _request(
     simulate: str = "none",
 ) -> AnalysisRequest:
     return AnalysisRequest(
+        input_schema_id=FIXTURE_INPUT_SCHEMA_ID,
         run_id="failure-test",
         workspace_path=workspace,
         input_path=input_path,

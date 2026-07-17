@@ -8,6 +8,7 @@ import pyarrow.ipc as ipc
 import pyarrow.parquet as pq
 import pytest
 
+from golem_intel_worker.constants import FIXTURE_INPUT_SCHEMA_ID
 from golem_intel_worker.events import EventEmitter
 from golem_intel_worker.io import sha256_file
 from golem_intel_worker.models import AnalysisRequest
@@ -25,6 +26,7 @@ def _request(
     simulate: str = "none",
 ) -> AnalysisRequest:
     return AnalysisRequest(
+        input_schema_id=FIXTURE_INPUT_SCHEMA_ID,
         run_id="golden-run-001",
         project_id="test",
         workspace_path=workspace,

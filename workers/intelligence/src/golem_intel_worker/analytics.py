@@ -1,19 +1,35 @@
 from __future__ import annotations
 
-from collections import Counter
-from datetime import UTC
+from collections import Counter, defaultdict
+from datetime import UTC, datetime
 from typing import Any
 
 import duckdb
 import pyarrow as pa
 
-from .constants import MODEL_VERSION, PARSER_VERSION, WORKER_VERSION
+from .constants import (
+    CSV_CONNECTOR_VERSION,
+    CSV_INPUT_SCHEMA_ID,
+    CSV_PARSER_VERSION,
+    METRIC_CATALOG_VERSION,
+    MODEL_VERSION,
+    PARSER_VERSION,
+    WORKER_VERSION,
+)
 from .errors import WorkerError
 from .models import (
     Citation,
     ComparisonReport,
     Derivation,
+    ImportComparisonClaim,
+    ImportComparisonReport,
+    ImportContradiction,
+    ImportDatasetProvenance,
+    ImportMetricResult,
+    ImportTargetResult,
     MetricDefinition,
+    MetricPeriod,
+    MetricQuality,
     TargetFinding,
     iso_z,
 )
@@ -437,9 +453,7 @@ def build_report(
         )
 
     maximum_recorded = max(table.column("recorded_at").to_pylist())
-    connector_version = ",".join(
-        sorted(set(table.column("connector_version").to_pylist()))
-    )
+    connector_version = ",".join(sorted(set(table.column("connector_version").to_pylist())))
     evidence_summary = (
         f"Compared {len(findings)} targets across {table.num_rows} validated observations. "
         f"{follower_summary} {engagement_summary} These are descriptive public social metrics, "
@@ -470,9 +484,7 @@ def build_report(
         )
     if workflow == "research":
         title_question = (
-            research_question
-            if len(research_question) <= 120
-            else f"{research_question[:117]}..."
+            research_question if len(research_question) <= 120 else f"{research_question[:117]}..."
         )
         title = f"Research dossier: {title_question}"
         summary = f"Research question: {research_question} Evidence synthesis: {evidence_summary}"
@@ -519,4 +531,316 @@ def build_report(
         metric_definitions=_metric_definitions(follower_definitions, engagement_definitions),
         contradictions=sorted(set(contradictions)),
         limitations=limitations,
+    )
+
+
+def _metric_quality(rows: list[dict[str, Any]], included: int) -> MetricQuality:
+    if not rows:
+        return MetricQuality(candidate_count=0, included_count=0, excluded_count=0)
+    confidences = [float(row["confidence"]) for row in rows]
+    coverage = [float(row["coverage"]) for row in rows]
+    return MetricQuality(
+        candidate_count=len(rows),
+        included_count=included,
+        excluded_count=max(0, len(rows) - included),
+        min_input_confidence=_round(min(confidences)),
+        mean_input_confidence=_round(sum(confidences) / len(confidences)),
+        mean_input_coverage=_round(sum(coverage) / len(coverage)),
+    )
+
+
+def _period(rows: list[dict[str, Any]]) -> MetricPeriod | None:
+    if not rows:
+        return None
+    timestamps = [row["observed_at"] for row in rows]
+    return MetricPeriod(start=iso_z(min(timestamps)), end=iso_z(max(timestamps)))
+
+
+def _round_distribution(values: Counter[str]) -> dict[str, float]:
+    total = sum(values.values())
+    return {key: _round(count / total) for key, count in sorted(values.items())}
+
+
+def build_import_report(
+    table: pa.Table,
+    *,
+    run_id: str,
+    target_ids: list[str],
+    dataset_id: str,
+    input_sha256: str,
+    input_size_bytes: int,
+    validated_at: str,
+) -> ImportComparisonReport:
+    rows = table.to_pylist()
+    by_target: dict[str, list[dict[str, Any]]] = {
+        target_id: [row for row in rows if row["entity_id"] == target_id]
+        for target_id in sorted(target_ids)
+    }
+    target_results: list[ImportTargetResult] = []
+    contradictions: list[ImportContradiction] = []
+    evidence_ids: set[str] = set()
+
+    for target_id, target_rows in by_target.items():
+        name = sorted({str(row["entity_name"]) for row in target_rows})[0]
+        follower_rows = [row for row in target_rows if row["metric"] == "followers"]
+        follower_groups: dict[datetime, list[dict[str, Any]]] = defaultdict(list)
+        for row in follower_rows:
+            follower_groups[row["observed_at"]].append(row)
+        unambiguous: list[tuple[datetime, float, list[dict[str, Any]]]] = []
+        conflict_rows: list[dict[str, Any]] = []
+        for observed_at, group in sorted(follower_groups.items()):
+            values = {float(row["value"]) for row in group}
+            if len(values) == 1:
+                unambiguous.append((observed_at, next(iter(values)), group))
+            else:
+                group_ids = sorted(str(row["observation_id"]) for row in group)
+                conflict_rows.extend(group)
+                evidence_ids.update(group_ids)
+                contradictions.append(
+                    ImportContradiction(
+                        code="observation_value_conflict",
+                        target_id=target_id,
+                        observed_at=iso_z(observed_at),
+                        observation_ids=group_ids,
+                    )
+                )
+        follower_limitations = [
+            "Observed follower change is not customer retention, churn, revenue, "
+            "loyalty, or business performance."
+        ]
+        if len(unambiguous) >= 2:
+            first, last = unambiguous[0], unambiguous[-1]
+            follower_value: float | None = _round(last[1] - first[1])
+            follower_state = "available"
+            follower_evidence = sorted(
+                {str(row["observation_id"]) for row in [*first[2], *last[2]]}
+            )
+            if conflict_rows:
+                follower_limitations.append(
+                    "Conflicting follower timestamps were retained but excluded from "
+                    "the numeric boundary calculation."
+                )
+        elif follower_rows and conflict_rows:
+            follower_value = None
+            follower_state = "contradictory"
+            follower_evidence = sorted(str(row["observation_id"]) for row in follower_rows)
+        elif follower_rows:
+            follower_value = None
+            follower_state = "insufficient"
+            follower_evidence = sorted(str(row["observation_id"]) for row in follower_rows)
+        else:
+            follower_value = None
+            follower_state = "missing"
+            follower_evidence = []
+        evidence_ids.update(follower_evidence)
+        follower_metric = ImportMetricResult(
+            id="followers.delta",
+            availability=follower_state,
+            value=follower_value,
+            unit="followers",
+            population="Permitted followers.v1 observations grouped by exact observed_at.",
+            numerator="Last unambiguous follower count minus first unambiguous follower count.",
+            denominator="none",
+            period=_period(follower_rows),
+            quality=_metric_quality(
+                follower_rows,
+                sum(len(group) for _time, _value, group in unambiguous),
+            ),
+            evidence_observation_ids=follower_evidence,
+            limitations=follower_limitations,
+        )
+
+        engagement_rows = [row for row in target_rows if row["metric"] == "engagement_rate"]
+        engagement_ids = sorted(str(row["observation_id"]) for row in engagement_rows)
+        evidence_ids.update(engagement_ids)
+        rates = sorted(float(row["value"]) for row in engagement_rows)
+        if rates:
+            middle = len(rates) // 2
+            median = rates[middle] if len(rates) % 2 else (rates[middle - 1] + rates[middle]) / 2
+            engagement_state = "available"
+            engagement_value: float | None = _round(median)
+        else:
+            engagement_state = "missing"
+            engagement_value = None
+        engagement_metric = ImportMetricResult(
+            id="public-engagement-by-followers.median",
+            availability=engagement_state,
+            value=engagement_value,
+            unit="ratio",
+            population="One validated engagement row per distinct content ID.",
+            numerator=(
+                "Median of per-content public likes-plus-comments divided by paired followers."
+            ),
+            denominator="Paired positive public follower count for each content observation.",
+            period=_period(engagement_rows),
+            quality=_metric_quality(engagement_rows, len(engagement_rows)),
+            evidence_observation_ids=engagement_ids,
+            limitations=[
+                "Missing engagement rows are missing evidence and are never interpreted as zero."
+            ],
+        )
+
+        content_rows = [row for row in target_rows if row["metric"] == "content_published"]
+        content_rows.sort(key=lambda row: (str(row["content_id"]), str(row["observation_id"])))
+        content_ids = sorted(str(row["observation_id"]) for row in content_rows)
+        window_rows: list[dict[str, Any]] = []
+        if target_rows:
+            first_time = min(row["observed_at"] for row in target_rows)
+            last_time = max(row["observed_at"] for row in target_rows)
+            window_rows = [
+                row for row in target_rows if row["observed_at"] in {first_time, last_time}
+            ]
+        cadence_ids = sorted(
+            {
+                *(str(row["observation_id"]) for row in content_rows),
+                *(str(row["observation_id"]) for row in window_rows),
+            }
+        )
+        evidence_ids.update(cadence_ids)
+        evidence_ids.update(content_ids)
+        if content_rows:
+            span_seconds = max(
+                0.0,
+                (
+                    max(row["observed_at"] for row in target_rows)
+                    - min(row["observed_at"] for row in target_rows)
+                ).total_seconds(),
+            )
+            cadence_value: float | None = _round(
+                len(content_rows) / max(1.0, span_seconds / 604_800.0)
+            )
+            content_state = "available"
+            mix_value: dict[str, float] | None = _round_distribution(
+                Counter(str(row["dimension"]) for row in content_rows)
+            )
+            cadence_limitations = (
+                ["The observed span is under seven days; cadence uses the fixed one-week minimum."]
+                if span_seconds < 604_800
+                else []
+            )
+        else:
+            cadence_value = None
+            mix_value = None
+            content_state = "missing"
+            cadence_limitations = [
+                "No content observations exist; missing content is not zero activity."
+            ]
+        cadence_metric = ImportMetricResult(
+            id="posting-cadence",
+            availability=content_state,
+            value=cadence_value,
+            unit="posts_per_week",
+            population="Distinct validated content_published IDs.",
+            numerator="Distinct published content count.",
+            denominator="Target observation-coverage window in weeks, with a one-week minimum.",
+            period=_period(target_rows),
+            quality=_metric_quality(content_rows, len(content_rows)),
+            evidence_observation_ids=cadence_ids if content_rows else [],
+            limitations=cadence_limitations,
+        )
+        mix_metric = ImportMetricResult(
+            id="content-format-mix",
+            availability=content_state,
+            value=mix_value,
+            unit="distribution",
+            population="The distinct content_published rows used for posting cadence.",
+            numerator="Content records in each explicit format, including unknown.",
+            denominator="All distinct validated content records.",
+            period=_period(content_rows),
+            quality=_metric_quality(content_rows, len(content_rows)),
+            evidence_observation_ids=content_ids,
+            limitations=["Unknown formats remain an explicit unknown bucket."],
+        )
+        target_results.append(
+            ImportTargetResult(
+                target_id=target_id,
+                target_name=name,
+                metrics=[follower_metric, engagement_metric, cadence_metric, mix_metric],
+            )
+        )
+
+    comparisons: list[ImportComparisonClaim] = []
+    for metric_id in (
+        "followers.delta",
+        "public-engagement-by-followers.median",
+        "posting-cadence",
+    ):
+        results = [
+            next(metric for metric in target.metrics if metric.id == metric_id)
+            for target in target_results
+        ]
+        if not results or any(metric.availability != "available" for metric in results):
+            continue
+        numeric = [
+            float(metric.value) for metric in results if isinstance(metric.value, int | float)
+        ]
+        maximum = max(numeric)
+        leaders = [
+            target
+            for target, metric in zip(target_results, results, strict=True)
+            if metric.value == maximum
+        ]
+        if len(leaders) != 1:
+            continue
+        claim_evidence = sorted(
+            {item for metric in results for item in metric.evidence_observation_ids}
+        )
+        evidence_ids.update(claim_evidence)
+        comparisons.append(
+            ImportComparisonClaim(
+                metric_id=metric_id,
+                target_id=leaders[0].target_id,
+                compared_target_ids=[target.target_id for target in target_results],
+                evidence_observation_ids=claim_evidence,
+            )
+        )
+
+    rows_by_id = {str(row["observation_id"]): row for row in rows}
+    evidence = {
+        observation_id: {
+            key: (iso_z(value) if isinstance(value, datetime) else value)
+            for key, value in rows_by_id[observation_id].items()
+        }
+        for observation_id in sorted(evidence_ids)
+    }
+    retention_until = min(row["retention_until"] for row in rows)
+    platform = sorted({str(row["platform"]) for row in rows})[0]
+    summary = (
+        f"Compared {len(target_results)} targets using {len(comparisons)} fully "
+        "comparable scalar metric claims."
+    )
+    return ImportComparisonReport(
+        run_id=run_id,
+        generated_at=validated_at,
+        derivation=Derivation(
+            worker_version=WORKER_VERSION,
+            model_version=MODEL_VERSION,
+            connector_version=CSV_CONNECTOR_VERSION,
+            parser_version=CSV_PARSER_VERSION,
+        ),
+        dataset=ImportDatasetProvenance(
+            dataset_id=dataset_id,
+            input_sha256=input_sha256,
+            input_schema_id=CSV_INPUT_SCHEMA_ID,
+            input_size_bytes=input_size_bytes,
+            platform=platform,
+            validated_at=validated_at,
+            retention_until=iso_z(retention_until),
+            input_parser_version=CSV_PARSER_VERSION,
+            metric_catalog_version=METRIC_CATALOG_VERSION,
+        ),
+        summary=summary,
+        targets=target_results,
+        comparisons=comparisons,
+        evidence=evidence,
+        contradictions=sorted(
+            contradictions,
+            key=lambda item: (item.target_id, item.observed_at, item.observation_ids),
+        ),
+        limitations=[
+            "Missing evidence is never interpreted as zero.",
+            "The report is deterministic descriptive analysis and makes no causal, "
+            "revenue, customer-retention, or employment-performance inference.",
+            "Source references are inert citations and were not fetched or opened.",
+        ],
     )
