@@ -146,6 +146,9 @@ func (manager *Manager) Close() {
 }
 
 func (manager *Manager) StartComparison(ctx context.Context, request domain.ComparisonStartRequest) (domain.Run, error) {
+	if request.DatasetID != "" {
+		return manager.StartImportedComparison(ctx, request)
+	}
 	if err := policy.ValidateComparison(request); err != nil {
 		return domain.Run{}, err
 	}
@@ -464,7 +467,11 @@ func (manager *Manager) execute(run domain.Run) {
 		manager.fail(run.ID, "spool_unavailable", "Could not create a private worker temporary directory")
 		return
 	}
-	inputPath := filepath.Join(jobRoot, "input", "observations.ndjson")
+	inputName := "observations.ndjson"
+	if run.InputSchemaID == domain.CompetitivePulseImportSchema {
+		inputName = "competitive-pulse.csv"
+	}
+	inputPath := filepath.Join(jobRoot, "input", inputName)
 	inputSnapshot, err := manager.prepareInputSnapshot(run, inputPath)
 	if err != nil {
 		manager.fail(run.ID, connectors.ErrorCode(err), err.Error())
@@ -483,6 +490,23 @@ func (manager *Manager) execute(run domain.Run) {
 	if snapshot.Research != nil {
 		analysis.ResearchQuestion = snapshot.Research.Question
 		analysis.SourceBudget = uint32(snapshot.Research.SourceBudget)
+	}
+	if run.DatasetID != "" {
+		dataset, datasetErr := manager.store.GetDataset(ctx, run.DatasetID)
+		if datasetErr != nil || dataset.Preview.ValidatedAt == nil {
+			manager.fail(run.ID, "input_snapshot_invalid", "Imported dataset metadata is unavailable")
+			return
+		}
+		if dataset.Preview.State != domain.DatasetReady {
+			manager.fail(run.ID, "dataset_deleted", "Imported dataset was deleted before analysis started")
+			return
+		}
+		if dataset.Preview.RetentionUntil == nil || !dataset.Preview.RetentionUntil.After(time.Now().UTC()) {
+			manager.fail(run.ID, "dataset_expired", "Imported dataset retention expired before analysis started")
+			return
+		}
+		analysis.ImportContext = &connectors.ImportContext{DatasetID: run.DatasetID, ValidatedAt: *dataset.Preview.ValidatedAt,
+			InputParserVersion: dataset.InputParserVersion, MetricCatalogVersion: dataset.MetricCatalogVersion}
 	}
 	result, err := manager.worker.Analyze(ctx, analysis, func(event connectors.ProgressEvent) {
 		progressCtx, progressCancel := context.WithTimeout(context.Background(), 2*time.Second)
@@ -514,6 +538,10 @@ func (manager *Manager) execute(run domain.Run) {
 	}
 	if manager.worker.ID() == "python.intelligence.protocol.v1" {
 		provenance.ParserVersion = "golem-go-arrow-parquet.v1"
+	}
+	if run.DatasetID != "" {
+		provenance.ConnectorVersion = "local.competitive-pulse-import@1.0.0"
+		provenance.ParserVersion = domain.CompetitivePulseParserVersion
 	}
 	if err := manager.store.SetProvenance(context.Background(), run.ID, provenance); err != nil {
 		manager.fail(run.ID, "storage_commit_failed", "Worker provenance could not be recorded")
@@ -614,7 +642,7 @@ func deriveCanonicalProjections(runID string, observations []domain.Observation,
 func (manager *Manager) prepareInputSnapshot(run domain.Run, destinationPath string) (domain.InputSnapshot, error) {
 	const schemaID = "golem.fixture-observations.v1"
 	if run.InputSHA256 != "" {
-		if run.InputSchemaID != schemaID || run.InputRelativePath == "" || run.InputSizeBytes <= 0 {
+		if run.InputSchemaID == "" || run.InputRelativePath == "" || run.InputSizeBytes <= 0 {
 			return domain.InputSnapshot{}, &connectors.WorkerError{Code: "input_snapshot_invalid", Message: "replay input snapshot metadata is incomplete"}
 		}
 		clean, err := governance.CleanRelativePath(filepath.FromSlash(run.InputRelativePath))
@@ -631,7 +659,7 @@ func (manager *Manager) prepareInputSnapshot(run domain.Run, destinationPath str
 			_ = os.Remove(destinationPath)
 			return domain.InputSnapshot{}, &connectors.WorkerError{Code: "input_snapshot_corrupt", Message: "immutable replay input failed its recorded hash or size"}
 		}
-		return domain.InputSnapshot{RelativePath: run.InputRelativePath, SHA256: digest, SchemaID: schemaID, SizeBytes: info.Size()}, nil
+		return domain.InputSnapshot{RelativePath: run.InputRelativePath, SHA256: digest, SchemaID: run.InputSchemaID, SizeBytes: info.Size(), DatasetID: run.DatasetID}, nil
 	}
 	digest, err := snapshotFixture(manager.fixturePath, destinationPath)
 	if err != nil {

@@ -118,6 +118,28 @@ ALTER TABLE runs ADD COLUMN input_schema_id TEXT NOT NULL DEFAULT '';
 ALTER TABLE runs ADD COLUMN input_size_bytes INTEGER NOT NULL DEFAULT 0;
 `
 
+const schemaV3 = `
+ALTER TABLE runs ADD COLUMN dataset_id TEXT NOT NULL DEFAULT '';
+CREATE INDEX IF NOT EXISTS idx_runs_dataset ON runs(dataset_id, created_at DESC);
+CREATE TABLE IF NOT EXISTS datasets (
+  id TEXT PRIMARY KEY,
+  state TEXT NOT NULL CHECK(state IN ('ready','deleting','deleted')),
+  preview_json BLOB NOT NULL,
+  input_relative_path TEXT NOT NULL,
+  input_sha256 TEXT NOT NULL,
+  input_schema_id TEXT NOT NULL,
+  input_size_bytes INTEGER NOT NULL CHECK(input_size_bytes >= 0),
+  validated_at TEXT NOT NULL,
+  retention_until TEXT NOT NULL,
+  input_parser_version TEXT NOT NULL,
+  metric_catalog_version TEXT NOT NULL,
+  deletion_reason TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_datasets_state_retention ON datasets(state, retention_until);
+`
+
 func Open(path string) (*Store, error) {
 	if path == "" {
 		return nil, fmt.Errorf("database path is required")
@@ -181,6 +203,20 @@ func (store *Store) initialize(ctx context.Context) error {
 		}
 		if _, err := transaction.ExecContext(ctx,
 			"INSERT INTO schema_migrations(version,applied_at) VALUES(2,?)",
+			time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
+			return err
+		}
+	}
+	var migratedV3 int
+	if err := transaction.QueryRowContext(ctx, "SELECT COUNT(*) FROM schema_migrations WHERE version=3").Scan(&migratedV3); err != nil {
+		return err
+	}
+	if migratedV3 == 0 {
+		if _, err := transaction.ExecContext(ctx, schemaV3); err != nil {
+			return fmt.Errorf("apply schema v3: %w", err)
+		}
+		if _, err := transaction.ExecContext(ctx,
+			"INSERT INTO schema_migrations(version,applied_at) VALUES(3,?)",
 			time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
 			return err
 		}

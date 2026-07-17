@@ -68,6 +68,7 @@ export function createGolemIntelMcpToolHandlers(client: GolemIntelClient) {
     compareStart: async ({
       project_id,
       target_ids,
+      dataset_id,
       goal,
       connector_ids,
     }: CompareStartInput) =>
@@ -75,8 +76,11 @@ export function createGolemIntelMcpToolHandlers(client: GolemIntelClient) {
         await client.comparisons.start({
           project_id,
           target_ids,
+          ...(dataset_id ? { dataset_id } : {}),
           ...(goal ? { goal } : {}),
-          connector_ids: connector_ids ?? ["fixture.competitive-pulse"],
+          connector_ids: dataset_id
+            ? []
+            : (connector_ids ?? ["fixture.competitive-pulse"]),
           simulate: "none",
         }),
       ),

@@ -56,6 +56,7 @@ type Run struct {
 	InputSHA256       string          `json:"input_sha256,omitempty"`
 	InputSchemaID     string          `json:"input_schema_id,omitempty"`
 	InputSizeBytes    int64           `json:"input_size_bytes,omitempty"`
+	DatasetID         string          `json:"dataset_id,omitempty"`
 	RequestJSON       json.RawMessage `json:"-"`
 	InputRelativePath string          `json:"-"`
 	CancelRequested   bool            `json:"-"`
@@ -74,6 +75,7 @@ type InputSnapshot struct {
 	SHA256       string
 	SchemaID     string
 	SizeBytes    int64
+	DatasetID    string
 }
 
 type RunEvent struct {
@@ -237,6 +239,7 @@ type MonitoringStatus struct {
 type ComparisonStartRequest struct {
 	ProjectID    string   `json:"project_id"`
 	TargetIDs    []string `json:"target_ids"`
+	DatasetID    string   `json:"dataset_id,omitempty"`
 	ConnectorIDs []string `json:"connector_ids,omitempty"`
 	Goal         string   `json:"goal,omitempty"`
 	Simulate     string   `json:"simulate,omitempty"`

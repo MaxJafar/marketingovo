@@ -70,6 +70,8 @@ func run(arguments []string) error {
 		return printJSON(response)
 	case "compare":
 		return compareCommand(ctx, client, commandArgs)
+	case "import":
+		return importCommand(ctx, client, commandArgs)
 	case "research":
 		return researchCommand(ctx, client, commandArgs)
 	case "runs":
@@ -113,6 +115,7 @@ func (values *stringList) Set(value string) error {
 func compareCommand(ctx context.Context, client *api.Client, arguments []string) error {
 	flags := flag.NewFlagSet("compare", flag.ContinueOnError)
 	project := flags.String("project", "local", "project id")
+	dataset := flags.String("dataset", "", "opaque approved imported dataset id")
 	goal := flags.String("goal", "", "comparison goal")
 	simulate := flags.String("simulate", "none", "failure simulation")
 	wait := flags.Bool("wait", false, "wait for a terminal run")
@@ -125,7 +128,7 @@ func compareCommand(ctx context.Context, client *api.Client, arguments []string)
 	if flags.NArg() != 0 {
 		return fmt.Errorf("unexpected compare arguments: %v", flags.Args())
 	}
-	request := domain.ComparisonStartRequest{ProjectID: *project, TargetIDs: targets, ConnectorIDs: connectors, Goal: *goal, Simulate: *simulate}
+	request := domain.ComparisonStartRequest{ProjectID: *project, TargetIDs: targets, ConnectorIDs: connectors, DatasetID: *dataset, Goal: *goal, Simulate: *simulate}
 	var run domain.Run
 	if err := client.Do(ctx, http.MethodPost, "/v1/comparisons", request, &run); err != nil {
 		return err
@@ -134,6 +137,39 @@ func compareCommand(ctx context.Context, client *api.Client, arguments []string)
 		return waitAndPrint(ctx, client, run.ID)
 	}
 	return printJSON(run)
+}
+
+func importCommand(ctx context.Context, client *api.Client, arguments []string) error {
+	flags := flag.NewFlagSet("import", flag.ContinueOnError)
+	filePath := flags.String("file", "", "CSV file selected by the local user")
+	if err := flags.Parse(arguments); err != nil {
+		return err
+	}
+	if flags.NArg() != 0 || *filePath == "" {
+		return fmt.Errorf("usage: golem-intel import --file PATH")
+	}
+	info, err := os.Lstat(*filePath)
+	if err != nil {
+		return fmt.Errorf("inspect import file: %w", err)
+	}
+	if !info.Mode().IsRegular() || info.Mode()&os.ModeSymlink != 0 {
+		return fmt.Errorf("import file must be a regular non-symlink file")
+	}
+	file, err := os.Open(*filePath)
+	if err != nil {
+		return fmt.Errorf("open import file: %w", err)
+	}
+	defer file.Close()
+	opened, err := file.Stat()
+	if err != nil || !os.SameFile(info, opened) {
+		return fmt.Errorf("import file changed while opening")
+	}
+	var preview domain.ImportPreview
+	headers := http.Header{"X-Golem-Import-Attestation": []string{"public-permitted-brand-competitive-research.v1"}}
+	if err := client.DoBytes(ctx, http.MethodPost, "/v1/datasets/competitive-pulse/preview", "text/csv; charset=utf-8", file, headers, &preview); err != nil {
+		return err
+	}
+	return printJSON(preview)
 }
 
 func researchCommand(ctx context.Context, client *api.Client, arguments []string) error {
@@ -301,5 +337,5 @@ func printJSON(value any) error {
 }
 
 func usageError() error {
-	return fmt.Errorf("usage: golem-intel [--api URL] [--token-file PATH] COMMAND; commands: health, compare, research, runs, run, watch, cancel, replay, report, search, entity, monitoring, version")
+	return fmt.Errorf("usage: golem-intel [--api URL] [--token-file PATH] COMMAND; commands: health, import, compare, research, runs, run, watch, cancel, replay, report, search, entity, monitoring, version")
 }

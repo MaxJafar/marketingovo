@@ -163,6 +163,9 @@ func (runner *WorkerRunner) Analyze(ctx context.Context, request AnalysisRequest
 	}
 	if !receivedResult {
 		message := "Python protocol worker closed without AnalysisResult"
+		if waitErr != nil {
+			message += fmt.Sprintf(" (exit: %v)", waitErr)
+		}
 		if text := strings.TrimSpace(logs); text != "" {
 			message += ": " + text
 		}
@@ -183,6 +186,69 @@ func (runner *WorkerRunner) Analyze(ctx context.Context, request AnalysisRequest
 		return result, &WorkerError{Code: code, Message: result.ErrorMessage, Cause: waitErr}
 	}
 	return result, nil
+}
+
+// ValidateImport uses the same bounded, length-delimited worker boundary as
+// analysis, but returns a proposal only. The Go authority owns the body hash,
+// retention clock, durable dataset ID, and eventual publication decision.
+func (runner *WorkerRunner) ValidateImport(ctx context.Context, request ImportValidationRequest) (ImportValidationResult, error) {
+	if !runner.Available() {
+		return ImportValidationResult{}, &WorkerError{Code: "worker_unavailable", Message: "Python intelligence protocol worker is unavailable"}
+	}
+	if request.RequestID == "" || request.WorkspacePath == "" || request.InputPath == "" || len(request.InputSHA256) != 64 || request.InputSchemaID == "" || request.ValidatedAt.IsZero() {
+		return ImportValidationResult{}, &WorkerError{Code: "worker_protocol_error", Message: "import validation request is incomplete"}
+	}
+	commandName, arguments := runner.command()
+	command := exec.CommandContext(ctx, commandName, arguments...)
+	command.Dir = request.WorkspacePath
+	command.Env = minimalWorkerEnvironment(request.WorkspacePath, runner.ProjectDir)
+	command.WaitDelay = 2 * time.Second
+	stdin, err := command.StdinPipe()
+	if err != nil {
+		return ImportValidationResult{}, &WorkerError{Code: "worker_start_failed", Message: "open worker stdin", Cause: err}
+	}
+	stdout, err := command.StdoutPipe()
+	if err != nil {
+		return ImportValidationResult{}, &WorkerError{Code: "worker_start_failed", Message: "open worker stdout", Cause: err}
+	}
+	stderr, err := command.StderrPipe()
+	if err != nil {
+		return ImportValidationResult{}, &WorkerError{Code: "worker_start_failed", Message: "open worker stderr", Cause: err}
+	}
+	if err := command.Start(); err != nil {
+		return ImportValidationResult{}, &WorkerError{Code: "worker_start_failed", Message: "start Python protocol worker", Cause: err}
+	}
+	logDone := make(chan struct{}, 1)
+	go func() { _, _ = io.Copy(&boundedLog{maximum: maximumWorkerLogBytes}, stderr); logDone <- struct{}{} }()
+	envelope := &intelv1.WorkerEnvelope{ProtocolVersion: workerProtocolVersion,
+		Message: &intelv1.WorkerEnvelope_ValidateImport{ValidateImport: &intelv1.ValidateImport{
+			RequestId: request.RequestID, InputPath: request.InputPath, InputSha256: request.InputSHA256,
+			InputSchemaId: request.InputSchemaID, ValidatedAt: request.ValidatedAt.UTC().Truncate(time.Second).Format(time.RFC3339),
+		}}}
+	if err := writeProtocolEnvelope(stdin, envelope); err != nil {
+		_ = command.Process.Kill()
+		_ = command.Wait()
+		<-logDone
+		return ImportValidationResult{}, &WorkerError{Code: "worker_protocol_error", Message: "send ValidateImport", Cause: err}
+	}
+	_ = stdin.Close()
+	response, readErr := readProtocolEnvelope(bufio.NewReader(stdout))
+	waitErr := command.Wait()
+	<-logDone
+	if ctx.Err() != nil {
+		return ImportValidationResult{}, ctx.Err()
+	}
+	if readErr != nil || response == nil || response.ProtocolVersion != workerProtocolVersion {
+		return ImportValidationResult{}, &WorkerError{Code: "worker_protocol_error", Message: "read ImportValidationResult", Cause: readErr}
+	}
+	resultMessage, ok := response.Message.(*intelv1.WorkerEnvelope_ImportValidationResult)
+	if !ok || resultMessage.ImportValidationResult == nil {
+		return ImportValidationResult{}, &WorkerError{Code: "worker_protocol_error", Message: "worker returned an unexpected validation envelope", Cause: waitErr}
+	}
+	if waitErr != nil {
+		return ImportValidationResult{}, &WorkerError{Code: "worker_failed", Message: "Python validation worker exited unsuccessfully", Cause: waitErr}
+	}
+	return importValidationFromProto(request.RequestID, resultMessage.ImportValidationResult)
 }
 
 func (runner *WorkerRunner) command() (string, []string) {
@@ -294,16 +360,99 @@ func startAnalysisEnvelope(request AnalysisRequest) (*intelv1.WorkerEnvelope, er
 	default:
 		return nil, fmt.Errorf("analysis workflow is required")
 	}
+	start := &intelv1.StartAnalysis{
+		RunId: request.RunID, ProjectId: request.ProjectID, WorkspacePath: request.WorkspacePath,
+		InputPath: request.InputPath, InputSha256: request.InputSHA256, InputSchemaId: request.InputSchemaID,
+		OutputDirectory: request.OutputDir, TargetIds: append([]string(nil), request.TargetIDs...),
+		Options: cloneOptions(request.Options), Workflow: workflow,
+		ResearchQuestion: request.ResearchQuestion, SourceBudget: request.SourceBudget,
+	}
+	if request.ImportContext != nil {
+		context := request.ImportContext
+		if context.DatasetID == "" || context.ValidatedAt.IsZero() || context.InputParserVersion == "" || context.MetricCatalogVersion == "" {
+			return nil, fmt.Errorf("import analysis context is incomplete")
+		}
+		start.ImportContext = &intelv1.ImportContext{DatasetId: context.DatasetID,
+			ValidatedAt:        context.ValidatedAt.UTC().Truncate(time.Second).Format(time.RFC3339),
+			InputParserVersion: context.InputParserVersion, MetricCatalogVersion: context.MetricCatalogVersion}
+	}
 	return &intelv1.WorkerEnvelope{
 		ProtocolVersion: workerProtocolVersion,
-		Message: &intelv1.WorkerEnvelope_StartAnalysis{StartAnalysis: &intelv1.StartAnalysis{
-			RunId: request.RunID, ProjectId: request.ProjectID, WorkspacePath: request.WorkspacePath,
-			InputPath: request.InputPath, InputSha256: request.InputSHA256, InputSchemaId: request.InputSchemaID,
-			OutputDirectory: request.OutputDir, TargetIds: append([]string(nil), request.TargetIDs...),
-			Options: cloneOptions(request.Options), Workflow: workflow,
-			ResearchQuestion: request.ResearchQuestion, SourceBudget: request.SourceBudget,
-		}},
+		Message:         &intelv1.WorkerEnvelope_StartAnalysis{StartAnalysis: start},
 	}, nil
+}
+
+func importValidationFromProto(requestID string, result *intelv1.ImportValidationResult) (ImportValidationResult, error) {
+	if result.RequestId != requestID || result.Input == nil {
+		return ImportValidationResult{}, &WorkerError{Code: "worker_protocol_error", Message: "validation result does not match its request"}
+	}
+	converted := ImportValidationResult{RequestID: result.RequestId, Valid: result.Valid,
+		Input:                domain.ImportInputSummary{SchemaID: result.Input.SchemaId, SHA256: result.Input.Sha256, SizeBytes: int64(result.Input.SizeBytes)},
+		DiagnosticsTruncated: result.DiagnosticsTruncated, Targets: make([]domain.ImportTargetSummary, 0, len(result.Targets)),
+		Diagnostics: make([]domain.ImportDiagnostic, 0, len(result.Diagnostics))}
+	if result.Input.RowCount != nil {
+		if *result.Input.RowCount > math.MaxInt64 {
+			return ImportValidationResult{}, &WorkerError{Code: "worker_protocol_error", Message: "validation result row count is invalid"}
+		}
+		value := int64(*result.Input.RowCount)
+		converted.Input.RowCount = &value
+	}
+	if result.FilePolicy != nil {
+		policy := domain.ImportPolicySummary{TargetScope: valueOrEmpty(result.FilePolicy.TargetScope), DataClass: valueOrEmpty(result.FilePolicy.DataClass),
+			PermittedPurpose: valueOrEmpty(result.FilePolicy.PermittedPurpose), RightsState: valueOrEmpty(result.FilePolicy.RightsState)}
+		if result.FilePolicy.RetentionDays != nil {
+			policy.RetentionDays = int(*result.FilePolicy.RetentionDays)
+		}
+		converted.Policy = &policy
+	}
+	if result.Platform != nil {
+		value := *result.Platform
+		converted.Platform = &value
+	}
+	for _, target := range result.Targets {
+		if target == nil || target.RowCount > math.MaxInt64 {
+			return ImportValidationResult{}, &WorkerError{Code: "worker_protocol_error", Message: "validation result contains an invalid target"}
+		}
+		availability := make(map[string]string, len(target.MetricAvailability))
+		for metric, state := range target.MetricAvailability {
+			switch state {
+			case intelv1.ImportMetricAvailability_IMPORT_METRIC_AVAILABILITY_MISSING:
+				availability[metric] = "missing"
+			case intelv1.ImportMetricAvailability_IMPORT_METRIC_AVAILABILITY_INSUFFICIENT:
+				availability[metric] = "insufficient"
+			case intelv1.ImportMetricAvailability_IMPORT_METRIC_AVAILABILITY_CONTRADICTORY:
+				availability[metric] = "contradictory"
+			case intelv1.ImportMetricAvailability_IMPORT_METRIC_AVAILABILITY_AVAILABLE:
+				availability[metric] = "available"
+			default:
+				return ImportValidationResult{}, &WorkerError{Code: "worker_protocol_error", Message: "validation result contains an unspecified metric state"}
+			}
+		}
+		converted.Targets = append(converted.Targets, domain.ImportTargetSummary{TargetID: target.TargetId, TargetName: target.TargetName, RowCount: int64(target.RowCount), MetricAvailability: availability})
+	}
+	for _, item := range result.Diagnostics {
+		if item == nil {
+			return ImportValidationResult{}, &WorkerError{Code: "worker_protocol_error", Message: "validation result contains an empty diagnostic"}
+		}
+		severity := ""
+		switch item.Severity {
+		case intelv1.ImportDiagnosticSeverity_IMPORT_DIAGNOSTIC_SEVERITY_ERROR:
+			severity = "error"
+		case intelv1.ImportDiagnosticSeverity_IMPORT_DIAGNOSTIC_SEVERITY_WARNING:
+			severity = "warning"
+		default:
+			return ImportValidationResult{}, &WorkerError{Code: "worker_protocol_error", Message: "validation result contains an unspecified diagnostic severity"}
+		}
+		converted.Diagnostics = append(converted.Diagnostics, domain.ImportDiagnostic{Severity: severity, Code: item.Code, RecordNumber: item.RecordNumber, Column: item.Column, Message: item.Message})
+	}
+	return converted, nil
+}
+
+func valueOrEmpty(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
 }
 
 func cloneOptions(options map[string]string) map[string]string {

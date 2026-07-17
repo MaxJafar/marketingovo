@@ -14,12 +14,19 @@ import (
 const runColumns = `id,project_id,workflow,status,progress,stage,created_at,started_at,
 completed_at,updated_at,replay_of,error_code,error_message,report_available,request_json,
 cancel_requested,cancel_reason,worker_version,model_version,connector_version,parser_version,
-input_relative_path,input_sha256,input_schema_id,input_size_bytes`
+input_relative_path,input_sha256,input_schema_id,input_size_bytes,dataset_id`
+
+// dataset_id is deliberately stored separately from request_json so replay and
+// deletion gates can find imported descendants without parsing mutable JSON.
 
 type scanner interface{ Scan(...any) error }
 
 func (store *Store) CreateRun(ctx context.Context, projectID string, workflow domain.Workflow, requestJSON []byte, replayOf *string) (domain.Run, error) {
 	return store.createRun(ctx, projectID, workflow, requestJSON, replayOf, domain.InputSnapshot{})
+}
+
+func (store *Store) CreateRunWithSnapshot(ctx context.Context, projectID string, workflow domain.Workflow, requestJSON []byte, snapshot domain.InputSnapshot) (domain.Run, error) {
+	return store.createRun(ctx, projectID, workflow, requestJSON, nil, snapshot)
 }
 
 func (store *Store) createRun(ctx context.Context, projectID string, workflow domain.Workflow, requestJSON []byte, replayOf *string, snapshot domain.InputSnapshot) (domain.Run, error) {
@@ -38,9 +45,9 @@ func (store *Store) createRun(ctx context.Context, projectID string, workflow do
 	defer transaction.Rollback()
 	_, err = transaction.ExecContext(ctx, `INSERT INTO runs(
 id,project_id,workflow,status,progress,stage,created_at,updated_at,replay_of,request_json,
-input_relative_path,input_sha256,input_schema_id,input_size_bytes)
-VALUES(?,?,?,'queued',0,'queued',?,?,?,?,?,?,?,?)`, id, projectID, workflow, formatTime(now), formatTime(now), nullableString(replayOf), requestJSON,
-		snapshot.RelativePath, snapshot.SHA256, snapshot.SchemaID, snapshot.SizeBytes)
+input_relative_path,input_sha256,input_schema_id,input_size_bytes,dataset_id)
+VALUES(?,?,?,'queued',0,'queued',?,?,?,?,?,?,?,?,?)`, id, projectID, workflow, formatTime(now), formatTime(now), nullableString(replayOf), requestJSON,
+		snapshot.RelativePath, snapshot.SHA256, snapshot.SchemaID, snapshot.SizeBytes, snapshot.DatasetID)
 	if err != nil {
 		return domain.Run{}, fmt.Errorf("insert run: %w", err)
 	}
@@ -270,7 +277,7 @@ func (store *Store) ReplayRun(ctx context.Context, sourceID string) (domain.Run,
 	if !source.Status.Terminal() {
 		return domain.Run{}, ErrConflict
 	}
-	snapshot := domain.InputSnapshot{RelativePath: source.InputRelativePath, SHA256: source.InputSHA256, SchemaID: source.InputSchemaID, SizeBytes: source.InputSizeBytes}
+	snapshot := domain.InputSnapshot{RelativePath: source.InputRelativePath, SHA256: source.InputSHA256, SchemaID: source.InputSchemaID, SizeBytes: source.InputSizeBytes, DatasetID: source.DatasetID}
 	if snapshot.RelativePath == "" || snapshot.SHA256 == "" {
 		return domain.Run{}, fmt.Errorf("source run has no immutable input snapshot")
 	}
@@ -314,7 +321,7 @@ func scanRun(row scanner) (domain.Run, error) {
 		&completed, &updated, &replayOf, &errorCode, &errorMessage, &reportAvailable, &run.RequestJSON,
 		&cancelRequested, &run.CancelReason,
 		&run.WorkerVersion, &run.ModelVersion, &run.ConnectorVersion, &run.ParserVersion,
-		&run.InputRelativePath, &run.InputSHA256, &run.InputSchemaID, &run.InputSizeBytes,
+		&run.InputRelativePath, &run.InputSHA256, &run.InputSchemaID, &run.InputSizeBytes, &run.DatasetID,
 	); err != nil {
 		return domain.Run{}, err
 	}

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	intelv1 "github.com/GolemWorkers/golem-intel/gen/go/golem/intel/v1"
 	"github.com/GolemWorkers/golem-intel/internal/domain"
@@ -94,6 +95,15 @@ func TestStartAnalysisRequiresCoherentTypedWorkflow(t *testing.T) {
 	compare.ResearchQuestion = "smuggled"
 	if _, err := startAnalysisEnvelope(compare); err == nil {
 		t.Fatal("comparison with research controls was accepted")
+	}
+	imported := base
+	imported.InputSchemaID = domain.CompetitivePulseImportSchema
+	imported.Workflow = domain.WorkflowCompare
+	imported.ImportContext = &ImportContext{DatasetID: "dataset-1", ValidatedAt: time.Date(2026, 7, 17, 5, 0, 0, 0, time.UTC),
+		InputParserVersion: domain.CompetitivePulseParserVersion, MetricCatalogVersion: domain.CompetitivePulseMetricCatalog}
+	envelope, err = startAnalysisEnvelope(imported)
+	if err != nil || envelope.GetStartAnalysis().GetImportContext().GetDatasetId() != "dataset-1" || envelope.GetStartAnalysis().GetImportContext().GetValidatedAt() != "2026-07-17T05:00:00Z" {
+		t.Fatalf("import envelope = %v, %v", envelope, err)
 	}
 }
 

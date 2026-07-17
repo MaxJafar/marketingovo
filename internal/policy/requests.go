@@ -18,6 +18,9 @@ var (
 const FixtureConnectorID = "fixture.competitive-pulse"
 
 func ValidateComparison(request domain.ComparisonStartRequest) error {
+	if request.DatasetID != "" {
+		return ValidateImportedComparison(request)
+	}
 	if err := boundedText("project_id", request.ProjectID, 1, 100); err != nil {
 		return err
 	}
@@ -41,6 +44,25 @@ func ValidateComparison(request domain.ComparisonStartRequest) error {
 	}
 	if !slices.Contains([]string{"", "none", "source_failure", "corrupt_artifact", "slow"}, request.Simulate) {
 		return fmt.Errorf("%w: unsupported simulation", ErrInvalidRequest)
+	}
+	return nil
+}
+
+func ValidateImportedComparison(request domain.ComparisonStartRequest) error {
+	if err := boundedText("project_id", request.ProjectID, 1, 100); err != nil {
+		return err
+	}
+	if err := boundedText("dataset_id", request.DatasetID, 1, 200); err != nil {
+		return err
+	}
+	if err := uniqueTargets(request.TargetIDs, 2, 5); err != nil {
+		return err
+	}
+	if len(request.ConnectorIDs) != 0 || request.Simulate != "" && request.Simulate != "none" {
+		return fmt.Errorf("%w: imported comparisons cannot carry connector_ids or simulation", ErrInvalidRequest)
+	}
+	if len(request.Goal) > 1000 {
+		return fmt.Errorf("%w: goal exceeds 1000 characters", ErrInvalidRequest)
 	}
 	return nil
 }

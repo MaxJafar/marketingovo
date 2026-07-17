@@ -39,6 +39,7 @@ export interface ResearchStartInput {
 export interface CompareStartInput {
   project_id: string;
   target_ids: string[];
+  dataset_id?: string;
   goal?: string;
   connector_ids?: string[];
 }
@@ -89,7 +90,7 @@ export const AgentCompareStartTool: AgentTool<CompareStartInput> = {
   name: "golem_intel_compare_start",
   title: "Start competitive comparison",
   description:
-    "Compare two to fifty observed brands or creators through policy-approved sources and return a durable run id.",
+    "Compare approved fixture evidence or an opaque human-approved imported dataset and return a durable run id.",
   inputSchema: {
     type: "object",
     additionalProperties: false,
@@ -104,6 +105,7 @@ export const AgentCompareStartTool: AgentTool<CompareStartInput> = {
         items: { type: "string", minLength: 1, maxLength: 100 },
       },
       goal: { type: "string", maxLength: 1000 },
+      dataset_id: { type: "string", minLength: 1, maxLength: 200 },
       connector_ids: {
         type: "array",
         maxItems: 20,
@@ -189,4 +191,3 @@ export const PUBLIC_AGENT_TOOLS = [
 export const PUBLIC_AGENT_TOOL_NAMES = PUBLIC_AGENT_TOOLS.map(
   (tool) => tool.name,
 );
-

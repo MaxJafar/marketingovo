@@ -392,7 +392,8 @@ func validateArtifactMetadata(descriptor domain.ArtifactDescriptor) error {
 	if !present {
 		return fmt.Errorf("%w: unsupported artifact kind %q", ErrArtifactMismatch, descriptor.Kind)
 	}
-	if descriptor.MediaType != contract.mediaType || descriptor.SchemaID != contract.schemaID {
+	if descriptor.MediaType != contract.mediaType || (descriptor.SchemaID != contract.schemaID &&
+		!(descriptor.Kind == "report" && descriptor.SchemaID == "golem.comparison-report.v2")) {
 		return fmt.Errorf("%w: kind/media_type/schema_id combination is not allowlisted", ErrArtifactMismatch)
 	}
 	if descriptor.RowCount <= 0 || descriptor.RowCount > maximumArtifactRows {
@@ -493,12 +494,23 @@ func validateReportJSON(path, runID string, expectedRows int64) error {
 }
 
 func readReportJSON(path, runID string, expectedRows int64) (domain.ComparisonReport, error) {
-	file, err := os.Open(path)
+	payload, err := os.ReadFile(path)
 	if err != nil {
 		return domain.ComparisonReport{}, err
 	}
-	defer file.Close()
-	decoder := json.NewDecoder(io.LimitReader(file, DefaultMaximumArtifactBytes+1))
+	if int64(len(payload)) > DefaultMaximumArtifactBytes {
+		return domain.ComparisonReport{}, ErrArtifactTooLarge
+	}
+	var header struct {
+		SchemaVersion string `json:"schema_version"`
+	}
+	if err := json.Unmarshal(payload, &header); err != nil {
+		return domain.ComparisonReport{}, fmt.Errorf("%w: report JSON does not match its schema: %v", ErrArtifactMismatch, err)
+	}
+	if header.SchemaVersion == "golem.comparison-report.v2" {
+		return readImportReportJSON(payload, runID, expectedRows)
+	}
+	decoder := json.NewDecoder(bytes.NewReader(payload))
 	decoder.DisallowUnknownFields()
 	var report domain.ComparisonReport
 	if err := decoder.Decode(&report); err != nil {
@@ -541,6 +553,12 @@ func readReportJSON(path, runID string, expectedRows int64) (domain.ComparisonRe
 }
 
 func validateReportContext(report domain.ComparisonReport, provenance domain.Provenance) error {
+	if report.SchemaVersion == "golem.comparison-report.v2" {
+		if report.Workflow != domain.WorkflowCompare || report.Derivation != provenance {
+			return fmt.Errorf("%w: imported report workflow or derivation is invalid", ErrArtifactMismatch)
+		}
+		return nil
+	}
 	if report.Workflow != domain.WorkflowCompare && report.Workflow != domain.WorkflowResearch || report.ResearchPlan == nil || len(report.ResearchPlan) == 0 {
 		return fmt.Errorf("%w: report workflow or research_plan is missing", ErrArtifactMismatch)
 	}
