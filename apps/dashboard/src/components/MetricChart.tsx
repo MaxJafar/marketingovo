@@ -10,6 +10,9 @@ import {
 import { CanvasRenderer } from "echarts/renderers";
 import type { BarSeriesOption, ComposeOption } from "echarts";
 import type { ComparisonReport } from "@golem-intel/sdk";
+import type { components } from "@golem-intel/sdk/generated";
+
+type ImportComparisonReport = components["schemas"]["ImportComparisonReport"];
 
 echarts.use([BarChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
@@ -29,11 +32,10 @@ export function MetricChart({ report }: MetricChartProps): React.JSX.Element {
     if (!element) return;
     const chart = echarts.init(element, undefined, { renderer: "canvas" });
 
-    const isV2 = report.schema_version === "golem.comparison-report.v2";
-    const chartData = isV2
-      ? (report as any).targets.map((target: any) => {
-          const metric = (target.metrics || []).find((m: any) => m.id === "followers.delta");
-          const val = typeof metric?.value === "number" ? metric.value : 0;
+    const chartData = report.schema_version === "golem.comparison-report.v2"
+      ? (report as unknown as ImportComparisonReport).targets.map((target) => {
+          const metric = target.metrics.find((m) => m.id === "followers.delta");
+          const val = typeof metric?.value === "number" ? metric.value : "-";
           return {
             name: target.target_name,
             value: val,
@@ -55,7 +57,7 @@ export function MetricChart({ report }: MetricChartProps): React.JSX.Element {
       },
       xAxis: {
         type: "category",
-        data: chartData.map((d: any) => d.name),
+        data: chartData.map((d) => d.name),
         axisLabel: { color: "#91a0b7" },
         axisLine: { lineStyle: { color: "#2b3547" } },
       },
@@ -69,10 +71,10 @@ export function MetricChart({ report }: MetricChartProps): React.JSX.Element {
       series: [
         {
           type: "bar",
-          data: chartData.map((d: any) => ({
+          data: chartData.map((d) => ({
             value: d.value,
             itemStyle: {
-              color: d.value >= 0 ? "#61e7b7" : "#ff7f91",
+              color: typeof d.value === "number" && d.value >= 0 ? "#61e7b7" : "#ff7f91",
               borderRadius: [5, 5, 0, 0],
             },
           })),
@@ -110,4 +112,3 @@ export function MetricChart({ report }: MetricChartProps): React.JSX.Element {
     </section>
   );
 }
-
