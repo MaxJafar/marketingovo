@@ -187,6 +187,7 @@ export function ResearchPage(): React.JSX.Element {
                 setPreview(undefined);
                 setSelectedTargets(new Set());
                 setActiveRunId(undefined);
+                setPreviewConfirmed(false);
               }}
             >
               <option value="import">Custom CSV Import</option>

@@ -23,6 +23,9 @@ vi.mock("../api/client-context.js", () => ({
         replay: mocks.runReplay,
       },
     }) as unknown as GolemIntelClient,
+  dashboardFetch: function(this: any, ...args: Parameters<typeof fetch>) {
+    return fetch.apply(window, args);
+  },
 }));
 
 vi.mock("../api/use-run-event-stream.js", () => ({
@@ -141,9 +144,28 @@ describe("Research workspace", () => {
     await user.click(attestation);
     expect(confirmation).not.toBeChecked();
 
-    // Re-check both for submission
-    await user.click(attestation);
-    await user.click(confirmation);
+    // Workflow change invalidates preview confirmation
+    await user.selectOptions(screen.getByLabelText("Source"), "demo");
+    expect(screen.queryByLabelText(/I confirm the validation results/i)).not.toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText("Source"), "import");
+    
+    // Re-attest since we unchecked it earlier
+    await user.click(screen.getByRole("checkbox", { name: /attest/i }));
+    
+    // File input is reset on workflow change, need to re-upload to see confirmation
+    const file2 = new File(["test2"], "test2.csv", { type: "text/csv" });
+    await user.upload(screen.getByLabelText("Select CSV"), file2);
+    await waitFor(() => expect(screen.getByText("Dataset Reference")).toBeInTheDocument());
+    const t1New = screen.getByLabelText(/T1/i);
+    const t2New = screen.getByLabelText(/T2/i);
+    t1New.focus();
+    await user.keyboard(" ");
+    t2New.focus();
+    await user.keyboard(" ");
+    const confirmationNew = screen.getByLabelText(/I confirm the validation results/i);
+    await user.click(confirmationNew);
+
+    // Re-check for submission
 
     // Submit
     const submitBtn = screen.getByRole("button", { name: "Start comparison" });

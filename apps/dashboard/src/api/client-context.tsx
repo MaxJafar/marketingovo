@@ -3,6 +3,8 @@ import { GolemIntelClient } from "@golem-intel/sdk";
 
 const ClientContext = createContext<GolemIntelClient | null>(null);
 
+export const dashboardFetch = window.fetch.bind(window);
+
 interface IntelClientProviderProps extends PropsWithChildren {
   csrfToken: string;
 }
@@ -17,7 +19,7 @@ export function IntelClientProvider({
         baseUrl: import.meta.env.VITE_GOLEM_INTEL_API_URL ?? "",
         csrfToken,
         credentials: "same-origin",
-        fetch: window.fetch.bind(window),
+        fetch: dashboardFetch,
       }),
     [csrfToken],
   );

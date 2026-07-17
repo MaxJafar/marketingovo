@@ -8,7 +8,7 @@ import {
 } from "@golem-intel/sdk";
 import { queryClient } from "./query-client.js";
 import { AppRouter } from "./router.js";
-import { IntelClientProvider } from "../api/client-context.js";
+import { IntelClientProvider, dashboardFetch } from "../api/client-context.js";
 import { SessionHandshake } from "../components/SessionHandshake.js";
 import { TokenGate } from "../components/TokenGate.js";
 
@@ -31,7 +31,7 @@ let initialRestore: Promise<DashboardSession> | undefined;
 
 function exchangeTicket(ticket: string): Promise<DashboardSession> {
   if (activeExchange?.ticket === ticket) return activeExchange.promise;
-  const promise = bootstrapDashboardSession(ticket, { baseUrl: apiBaseUrl() });
+  const promise = bootstrapDashboardSession(ticket, { baseUrl: apiBaseUrl(), fetch: dashboardFetch });
   activeExchange = { ticket, promise };
   const clear = (): void => {
     if (activeExchange?.promise === promise) activeExchange = undefined;
@@ -44,6 +44,7 @@ function restoreSession(): Promise<DashboardSession> {
   initialRestore ??= new GolemIntelClient({
     baseUrl: apiBaseUrl(),
     credentials: "same-origin",
+    fetch: dashboardFetch,
   }).session.get();
   return initialRestore;
 }
