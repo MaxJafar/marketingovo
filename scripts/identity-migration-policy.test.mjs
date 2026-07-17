@@ -126,6 +126,16 @@ test("identity rules preserve top-level source config coverage", () => {
   );
 });
 
+test("identity rules reject legacy identity in tracked documentation", () => {
+  assert.deepEqual(
+    validateTextSource(
+      "docs/new-page.md",
+      "Golem SEO connects to GolemWorkers.\n",
+    ).map(({ rule }) => rule),
+    ["legacy-product-identity", "golemworkers-coupling"],
+  );
+});
+
 test("legacy protocol headers remain confined to their pinned compatibility owner", async () => {
   const oldHeader = `x-${"golem"}-client`;
   const source = `const legacyHeader = ${JSON.stringify(oldHeader)};\n`;

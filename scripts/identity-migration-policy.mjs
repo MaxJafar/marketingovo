@@ -28,6 +28,7 @@ const IDENTITY_TEXT_ROOTS = Object.freeze([
   "adapters/",
   "apps/",
   "benchmarks/",
+  "docs/",
   "e2e/",
   "migrations/",
   "packages/",
@@ -62,6 +63,55 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
     reason:
       "Documentation identity is owned by the staged documentation migration and must not be partially rewritten in foundation code.",
   },
+  ...Object.entries({
+    "docs/architecture.md": [
+      "legacy-product-identity",
+      "legacy-package-scope",
+    ],
+    "docs/desktop-release.md": [
+      "legacy-product-identity",
+      "golemworkers-coupling",
+    ],
+    "docs/editions.md": [
+      "legacy-product-identity",
+      "golemworkers-coupling",
+    ],
+    "docs/npm-release.md": [
+      "legacy-product-identity",
+      "golemworkers-coupling",
+    ],
+    "docs/project-context.md": [
+      "legacy-product-identity",
+      "legacy-agent-contract",
+    ],
+    "docs/quickstart.md": [
+      "legacy-product-identity",
+      "legacy-package-scope",
+      "golemworkers-coupling",
+    ],
+    "docs/reference-tool-reverse-engineering.md": [
+      "legacy-product-identity",
+      "golemworkers-coupling",
+      "legacy-agent-contract",
+    ],
+    "docs/release-status.md": [
+      "legacy-product-identity",
+      "legacy-package-scope",
+      "golemworkers-coupling",
+    ],
+    "docs/session-handoff-2026-07-16.md": [
+      "legacy-product-identity",
+      "legacy-package-scope",
+      "golemworkers-coupling",
+    ],
+  }).flatMap(([path, rules]) =>
+    rules.map((rule) => ({
+      rule,
+      path,
+      reason:
+        "This tracked historical document preserves exact migration evidence until its separately owned documentation migration is complete.",
+    })),
+  ),
   {
     rule: "legacy-product-identity",
     path: "packages/cli/dashboard/",
@@ -328,6 +378,12 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
     path: "scripts/identity-migration-policy.mjs",
     reason:
       "The sentinel must name the forbidden legacy coupling pattern and its reasoned exceptions in policy data.",
+  },
+  {
+    rule: "legacy-product-identity",
+    path: "scripts/identity-migration-policy.test.mjs",
+    reason:
+      "The sentinel regression test includes a literal forbidden product sample to prove tracked documentation is rejected.",
   },
   {
     rule: "golemworkers-coupling",
