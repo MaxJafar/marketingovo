@@ -57,6 +57,44 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Session" }
         "401": { $ref: "#/components/responses/Problem" }
+  /v1/datasets/competitive-pulse/preview:
+    post:
+      operationId: datasetPreview
+      requestBody:
+        required: true
+        content:
+          text/csv; charset=utf-8:
+            schema: { type: string, format: binary }
+      responses:
+        "200":
+          description: Completed semantic preview; valid input becomes a durable opaque dataset.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ImportPreview" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "413": { $ref: "#/components/responses/Problem" }
+        "415": { $ref: "#/components/responses/Problem" }
+  /v1/datasets/{datasetId}:
+    parameters:
+      - $ref: "#/components/parameters/DatasetId"
+    get:
+      operationId: datasetGet
+      responses:
+        "200":
+          description: Content-free imported dataset summary.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ImportPreview" }
+        "404": { $ref: "#/components/responses/Problem" }
+    delete:
+      operationId: datasetDelete
+      responses:
+        "202":
+          description: Dataset deletion gate accepted.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ImportPreview" }
+        "404": { $ref: "#/components/responses/Problem" }
   /v1/comparisons:
     post:
       operationId: comparisonStart
@@ -240,6 +278,11 @@ components:
       name: runId
       required: true
       schema: { type: string, minLength: 1 }
+    DatasetId:
+      in: path
+      name: datasetId
+      required: true
+      schema: { type: string, minLength: 1, maxLength: 200 }
   responses:
     Problem:
       description: RFC 9457 problem detail
@@ -302,6 +345,7 @@ components:
           uniqueItems: true
           items: { type: string }
           default: [fixture.competitive-pulse]
+        dataset_id: { type: string, minLength: 1, maxLength: 200 }
         goal: { type: string, maxLength: 1000 }
         simulate:
           enum: [none, source_failure, corrupt_artifact, slow]
@@ -320,6 +364,75 @@ components:
           uniqueItems: true
           items: { type: string, minLength: 1, maxLength: 100 }
         source_budget: { type: integer, minimum: 1, maximum: 100, default: 20 }
+    ImportInputSummary:
+      type: object
+      additionalProperties: false
+      required: [schema_id, sha256, size_bytes, row_count]
+      properties:
+        schema_id: { const: "golem.competitive-pulse-import.v1" }
+        sha256: { type: string, pattern: "^[a-f0-9]{64}$" }
+        size_bytes: { type: integer, minimum: 0, maximum: 8388608 }
+        row_count: { type: [integer, "null"], minimum: 0 }
+    ImportPolicySummary:
+      type: object
+      additionalProperties: false
+      required: [attestation_version, target_scope, data_class, permitted_purpose, retention_days, rights_state]
+      properties:
+        attestation_version: { const: "public-permitted-brand-competitive-research.v1" }
+        target_scope: { const: brand }
+        data_class: { const: public }
+        permitted_purpose: { const: competitive_research }
+        retention_days: { type: integer, minimum: 1, maximum: 365 }
+        rights_state: { const: permitted }
+    ImportTargetSummary:
+      type: object
+      additionalProperties: false
+      required: [target_id, target_name, row_count, metric_availability]
+      properties:
+        target_id: { type: string }
+        target_name: { type: string }
+        row_count: { type: integer, minimum: 1 }
+        metric_availability:
+          type: object
+          additionalProperties: false
+          required: [followers.delta, public-engagement-by-followers.median, posting-cadence, content-format-mix]
+          properties:
+            followers.delta: { enum: [missing, insufficient, contradictory, available] }
+            public-engagement-by-followers.median: { enum: [missing, insufficient, contradictory, available] }
+            posting-cadence: { enum: [missing, insufficient, contradictory, available] }
+            content-format-mix: { enum: [missing, insufficient, contradictory, available] }
+    ImportDiagnostic:
+      type: object
+      additionalProperties: false
+      required: [severity, code, record_number, column, message]
+      properties:
+        severity: { enum: [error, warning] }
+        code: { type: string }
+        record_number: { type: [integer, "null"], minimum: 1 }
+        column: { type: [string, "null"] }
+        message: { type: string }
+    ImportPreview:
+      type: object
+      additionalProperties: false
+      required: [schema_version, valid, input, targets, diagnostics, diagnostics_truncated]
+      properties:
+        schema_version: { const: "golem.import-preview.v1" }
+        valid: { type: boolean }
+        dataset_id: { type: string }
+        state: { enum: [ready, deleting, deleted] }
+        validated_at: { type: string, format: date-time }
+        retention_until: { type: string, format: date-time }
+        input: { $ref: "#/components/schemas/ImportInputSummary" }
+        policy: { $ref: "#/components/schemas/ImportPolicySummary" }
+        platform: { type: string }
+        targets:
+          type: array
+          items: { $ref: "#/components/schemas/ImportTargetSummary" }
+        diagnostics:
+          type: array
+          maxItems: 100
+          items: { $ref: "#/components/schemas/ImportDiagnostic" }
+        diagnostics_truncated: { type: boolean }
     RunStatus:
       enum: [queued, running, succeeded, partial, failed, cancelled]
     RunFields:
@@ -348,6 +461,7 @@ components:
         input_sha256: { type: string, pattern: "^[a-f0-9]{64}$" }
         input_schema_id: { type: string, minLength: 1 }
         input_size_bytes: { type: integer, minimum: 1 }
+        dataset_id: { type: string, minLength: 1 }
     Run:
       description: >-
         Durable run header. Provenance and immutable-input fields appear after
@@ -486,6 +600,10 @@ components:
         connector_version: { type: string, minLength: 1 }
         parser_version: { type: string, minLength: 1 }
     ComparisonReport:
+      oneOf:
+        - $ref: "#/components/schemas/ComparisonReportV1"
+        - $ref: "#/components/schemas/ImportComparisonReport"
+    ComparisonReportV1:
       type: object
       additionalProperties: false
       required:
@@ -550,6 +668,112 @@ components:
             properties:
               research_question: { type: "null" }
               source_budget: { type: "null" }
+    ImportComparisonReport:
+      type: object
+      additionalProperties: false
+      required: [schema_version, run_id, workflow, generated_at, derivation, dataset, summary, targets, comparisons, evidence, contradictions, limitations]
+      properties:
+        schema_version: { const: "golem.comparison-report.v2" }
+        run_id: { type: string }
+        workflow: { const: compare }
+        generated_at: { type: string, format: date-time }
+        derivation: { $ref: "#/components/schemas/Derivation" }
+        dataset:
+          type: object
+          additionalProperties: false
+          required: [dataset_id, input_sha256, input_schema_id, input_size_bytes, platform, validated_at, retention_until, input_parser_version, metric_catalog_version]
+          properties:
+            dataset_id: { type: string }
+            input_sha256: { type: string, pattern: "^[a-f0-9]{64}$" }
+            input_schema_id: { const: "golem.competitive-pulse-import.v1" }
+            input_size_bytes: { type: integer, minimum: 1 }
+            platform: { type: string }
+            validated_at: { type: string, format: date-time }
+            retention_until: { type: string, format: date-time }
+            input_parser_version: { const: "golem-python-competitive-pulse-csv@1.0.0" }
+            metric_catalog_version: { const: "competitive-pulse.v1" }
+        summary: { type: string, minLength: 1 }
+        targets:
+          type: array
+          minItems: 2
+          maxItems: 5
+          items:
+            type: object
+            additionalProperties: false
+            required: [target_id, target_name, metrics]
+            properties:
+              target_id: { type: string }
+              target_name: { type: string }
+              metrics:
+                type: array
+                minItems: 4
+                maxItems: 4
+                items:
+                  type: object
+                  additionalProperties: false
+                  required: [id, definition_version, availability, value, unit, population, numerator, denominator, period, quality, evidence_observation_ids, limitations]
+                  properties:
+                    id: { enum: [followers.delta, public-engagement-by-followers.median, posting-cadence, content-format-mix] }
+                    definition_version: { const: v1 }
+                    availability: { enum: [available, missing, insufficient, contradictory] }
+                    value: {}
+                    unit: { enum: [followers, ratio, posts_per_week, distribution] }
+                    population: { type: string }
+                    numerator: { type: string }
+                    denominator: { type: string }
+                    period:
+                      type: [object, "null"]
+                      required: [start, end]
+                      properties:
+                        start: { type: string, format: date-time }
+                        end: { type: string, format: date-time }
+                    quality:
+                      type: object
+                      additionalProperties: false
+                      required: [candidate_count, included_count, excluded_count, min_input_confidence, mean_input_confidence, mean_input_coverage]
+                      properties:
+                        candidate_count: { type: integer, minimum: 0 }
+                        included_count: { type: integer, minimum: 0 }
+                        excluded_count: { type: integer, minimum: 0 }
+                        min_input_confidence: { type: [number, "null"], minimum: 0, maximum: 1 }
+                        mean_input_confidence: { type: [number, "null"], minimum: 0, maximum: 1 }
+                        mean_input_coverage: { type: [number, "null"], minimum: 0, maximum: 1 }
+                    evidence_observation_ids:
+                      type: array
+                      items: { type: string }
+                    limitations:
+                      type: array
+                      items: { type: string }
+        comparisons:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [metric_id, definition_version, kind, target_id, compared_target_ids, evidence_observation_ids]
+            properties:
+              metric_id: { enum: [followers.delta, public-engagement-by-followers.median, posting-cadence] }
+              definition_version: { const: v1 }
+              kind: { const: leader }
+              target_id: { type: string }
+              compared_target_ids: { type: array, minItems: 2, items: { type: string } }
+              evidence_observation_ids: { type: array, items: { type: string } }
+        evidence:
+          type: object
+          additionalProperties: { type: object }
+        contradictions:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [code, target_id, observed_at, observation_ids]
+            properties:
+              code: { const: observation_value_conflict }
+              target_id: { type: string }
+              observed_at: { type: string, format: date-time }
+              observation_ids: { type: array, minItems: 2, items: { type: string } }
+        limitations:
+          type: array
+          items: { type: string }
     SearchResult:
       type: object
       additionalProperties: false

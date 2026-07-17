@@ -90,6 +90,9 @@ func NewServer(config ServerConfig) (*Server, error) {
 	mux.HandleFunc("GET /v1/health", server.health)
 	mux.HandleFunc("POST /v1/session/bootstrap", server.bootstrapSession)
 	mux.HandleFunc("GET /v1/session", server.getSession)
+	mux.HandleFunc("POST /v1/datasets/competitive-pulse/preview", server.previewDataset)
+	mux.HandleFunc("GET /v1/datasets/{datasetId}", server.getDataset)
+	mux.HandleFunc("DELETE /v1/datasets/{datasetId}", server.deleteDataset)
 	mux.HandleFunc("POST /v1/comparisons", server.startComparison)
 	mux.HandleFunc("POST /v1/research", server.startResearch)
 	mux.HandleFunc("GET /v1/runs", server.listRuns)
@@ -185,6 +188,53 @@ func (server *Server) startComparison(writer http.ResponseWriter, request *http.
 		return
 	}
 	writeJSON(writer, http.StatusAccepted, run)
+}
+
+func (server *Server) previewDataset(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Cache-Control", "no-store")
+	mediaType, parameters, err := mime.ParseMediaType(request.Header.Get("Content-Type"))
+	if err != nil || mediaType != "text/csv" || len(parameters) != 1 || parameters["charset"] != "utf-8" {
+		writeProblem(writer, request, http.StatusUnsupportedMediaType, "unsupported_media_type", "Content-Type must be text/csv; charset=utf-8")
+		return
+	}
+	if encoding := request.Header.Get("Content-Encoding"); encoding != "" && encoding != "identity" {
+		writeProblem(writer, request, http.StatusBadRequest, "unsupported_content_encoding", "Content-Encoding must be absent or identity")
+		return
+	}
+	if request.Header.Get("X-Golem-Import-Attestation") != "public-permitted-brand-competitive-research.v1" {
+		writeProblem(writer, request, http.StatusBadRequest, "import_attestation_required", "The required import attestation is missing or invalid")
+		return
+	}
+	if request.ContentLength > 8_388_608 {
+		writeProblem(writer, request, http.StatusRequestEntityTooLarge, "input_too_large", "The input exceeds the permitted byte limit")
+		return
+	}
+	preview, err := server.jobs.PreviewImport(request.Context(), request.Body, time.Now().UTC())
+	if err != nil {
+		writeMappedError(writer, request, err)
+		return
+	}
+	writeJSON(writer, http.StatusOK, preview)
+}
+
+func (server *Server) getDataset(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Cache-Control", "no-store")
+	preview, err := server.jobs.Dataset(request.Context(), request.PathValue("datasetId"))
+	if err != nil {
+		writeMappedError(writer, request, err)
+		return
+	}
+	writeJSON(writer, http.StatusOK, preview)
+}
+
+func (server *Server) deleteDataset(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Cache-Control", "no-store")
+	preview, err := server.jobs.DeleteDataset(request.Context(), request.PathValue("datasetId"))
+	if err != nil {
+		writeMappedError(writer, request, err)
+		return
+	}
+	writeJSON(writer, http.StatusAccepted, preview)
 }
 
 func (server *Server) startResearch(writer http.ResponseWriter, request *http.Request) {
@@ -407,6 +457,22 @@ func boundedQueryInteger(request *http.Request, name string, fallback, minimum, 
 }
 
 func writeMappedError(writer http.ResponseWriter, request *http.Request, err error) {
+	var importError *jobs.ImportError
+	if errors.As(err, &importError) {
+		switch importError.Code {
+		case "input_too_large":
+			writeProblem(writer, request, http.StatusRequestEntityTooLarge, importError.Code, "The input exceeds the permitted byte limit")
+		case "dataset_expired", "dataset_deleted":
+			writeProblem(writer, request, http.StatusGone, importError.Code, "The imported dataset is no longer available")
+		case "dataset_retention_too_short", "target_not_in_dataset", "no_comparable_metric":
+			writeProblem(writer, request, http.StatusConflict, importError.Code, "The imported dataset cannot start this comparison")
+		case "worker_unavailable", "input_read_failed":
+			writeProblem(writer, request, http.StatusInternalServerError, importError.Code, "The local import service could not complete the request")
+		default:
+			writeProblem(writer, request, http.StatusBadRequest, importError.Code, "The import request is invalid")
+		}
+		return
+	}
 	switch {
 	case errors.Is(err, storage.ErrNotFound):
 		writeProblem(writer, request, http.StatusNotFound, "not_found", "The requested resource does not exist")

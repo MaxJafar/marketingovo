@@ -55,8 +55,10 @@ func validateEvidenceSemantics(descriptors []domain.ArtifactDescriptor, allowLeg
 		if err := validateReportCitations(report, canonicalRows); err != nil {
 			return nil, provenance, err
 		}
-		provenance.ConnectorVersion = canonicalConnectorVersion(canonicalRows)
-		provenance.ParserVersion = CanonicalParserVersion
+		if report.SchemaVersion != "golem.comparison-report.v2" {
+			provenance.ConnectorVersion = canonicalConnectorVersion(canonicalRows)
+			provenance.ParserVersion = CanonicalParserVersion
+		}
 	}
 	if err := validateReportContext(report, provenance); err != nil {
 		return nil, provenance, err
@@ -216,7 +218,7 @@ func committedArtifactKind(item ManifestArtifactItem) (string, error) {
 		return "parquet", nil
 	case item.MediaType == "application/x-ndjson" && item.SchemaID == "golem.observations.v1":
 		return "raw", nil
-	case item.MediaType == "application/json" && item.SchemaID == "golem.comparison-report.v1":
+	case item.MediaType == "application/json" && (item.SchemaID == "golem.comparison-report.v1" || item.SchemaID == "golem.comparison-report.v2"):
 		return "report", nil
 	default:
 		return "", fmt.Errorf("%w: committed artifact contract is not allowlisted", ErrArtifactMismatch)

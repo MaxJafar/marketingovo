@@ -52,6 +52,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/datasets/competitive-pulse/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["datasetPreview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/datasets/{datasetId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                datasetId: components["parameters"]["DatasetId"];
+            };
+            cookie?: never;
+        };
+        get: operations["datasetGet"];
+        put?: never;
+        post?: never;
+        delete: operations["datasetDelete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/comparisons": {
         parameters: {
             query?: never;
@@ -270,6 +304,7 @@ export interface components {
              *     ]
              */
             connector_ids: string[];
+            dataset_id?: string;
             goal?: string;
             /**
              * @default none
@@ -283,6 +318,67 @@ export interface components {
             target_ids: string[];
             /** @default 20 */
             source_budget: number;
+        };
+        ImportInputSummary: {
+            /** @constant */
+            schema_id: "golem.competitive-pulse-import.v1";
+            sha256: string;
+            size_bytes: number;
+            row_count: number | null;
+        };
+        ImportPolicySummary: {
+            /** @constant */
+            attestation_version: "public-permitted-brand-competitive-research.v1";
+            /** @constant */
+            target_scope: "brand";
+            /** @constant */
+            data_class: "public";
+            /** @constant */
+            permitted_purpose: "competitive_research";
+            retention_days: number;
+            /** @constant */
+            rights_state: "permitted";
+        };
+        ImportTargetSummary: {
+            target_id: string;
+            target_name: string;
+            row_count: number;
+            metric_availability: {
+                /** @enum {unknown} */
+                "followers.delta": "missing" | "insufficient" | "contradictory" | "available";
+                /** @enum {unknown} */
+                "public-engagement-by-followers.median": "missing" | "insufficient" | "contradictory" | "available";
+                /** @enum {unknown} */
+                "posting-cadence": "missing" | "insufficient" | "contradictory" | "available";
+                /** @enum {unknown} */
+                "content-format-mix": "missing" | "insufficient" | "contradictory" | "available";
+            };
+        };
+        ImportDiagnostic: {
+            /** @enum {unknown} */
+            severity: "error" | "warning";
+            code: string;
+            record_number: number | null;
+            column: string | null;
+            message: string;
+        };
+        ImportPreview: {
+            /** @constant */
+            schema_version: "golem.import-preview.v1";
+            valid: boolean;
+            dataset_id?: string;
+            /** @enum {unknown} */
+            state?: "ready" | "deleting" | "deleted";
+            /** Format: date-time */
+            validated_at?: string;
+            /** Format: date-time */
+            retention_until?: string;
+            input: components["schemas"]["ImportInputSummary"];
+            policy?: components["schemas"]["ImportPolicySummary"];
+            platform?: string;
+            targets: components["schemas"]["ImportTargetSummary"][];
+            diagnostics: components["schemas"]["ImportDiagnostic"][];
+            diagnostics_truncated: boolean;
         };
         /** @enum {unknown} */
         RunStatus: "queued" | "running" | "succeeded" | "partial" | "failed" | "cancelled";
@@ -314,6 +410,7 @@ export interface components {
             input_sha256?: string;
             input_schema_id?: string;
             input_size_bytes?: number;
+            dataset_id?: string;
         };
         /** @description Durable run header. Provenance and immutable-input fields appear after the corresponding snapshot or successful derivation has been recorded. */
         Run: components["schemas"]["RunFields"];
@@ -386,7 +483,8 @@ export interface components {
             connector_version: string;
             parser_version: string;
         };
-        ComparisonReport: {
+        ComparisonReport: components["schemas"]["ComparisonReportV1"] | components["schemas"]["ImportComparisonReport"];
+        ComparisonReportV1: {
             /** @constant */
             schema_version: "golem.comparison-report.v1";
             run_id: string;
@@ -405,6 +503,90 @@ export interface components {
             contradictions: string[];
             limitations: string[];
         } & unknown;
+        ImportComparisonReport: {
+            /** @constant */
+            schema_version: "golem.comparison-report.v2";
+            run_id: string;
+            /** @constant */
+            workflow: "compare";
+            /** Format: date-time */
+            generated_at: string;
+            derivation: components["schemas"]["Derivation"];
+            dataset: {
+                dataset_id: string;
+                input_sha256: string;
+                /** @constant */
+                input_schema_id: "golem.competitive-pulse-import.v1";
+                input_size_bytes: number;
+                platform: string;
+                /** Format: date-time */
+                validated_at: string;
+                /** Format: date-time */
+                retention_until: string;
+                /** @constant */
+                input_parser_version: "golem-python-competitive-pulse-csv@1.0.0";
+                /** @constant */
+                metric_catalog_version: "competitive-pulse.v1";
+            };
+            summary: string;
+            targets: {
+                target_id: string;
+                target_name: string;
+                metrics: {
+                    /** @enum {unknown} */
+                    id: "followers.delta" | "public-engagement-by-followers.median" | "posting-cadence" | "content-format-mix";
+                    /** @constant */
+                    definition_version: "v1";
+                    /** @enum {unknown} */
+                    availability: "available" | "missing" | "insufficient" | "contradictory";
+                    value: unknown;
+                    /** @enum {unknown} */
+                    unit: "followers" | "ratio" | "posts_per_week" | "distribution";
+                    population: string;
+                    numerator: string;
+                    denominator: string;
+                    period: {
+                        /** Format: date-time */
+                        start: string;
+                        /** Format: date-time */
+                        end: string;
+                    } | null;
+                    quality: {
+                        candidate_count: number;
+                        included_count: number;
+                        excluded_count: number;
+                        min_input_confidence: number | null;
+                        mean_input_confidence: number | null;
+                        mean_input_coverage: number | null;
+                    };
+                    evidence_observation_ids: string[];
+                    limitations: string[];
+                }[];
+            }[];
+            comparisons: {
+                /** @enum {unknown} */
+                metric_id: "followers.delta" | "public-engagement-by-followers.median" | "posting-cadence";
+                /** @constant */
+                definition_version: "v1";
+                /** @constant */
+                kind: "leader";
+                target_id: string;
+                compared_target_ids: string[];
+                evidence_observation_ids: string[];
+            }[];
+            evidence: {
+                [key: string]: Record<string, never>;
+            };
+            contradictions: {
+                /** @constant */
+                code: "observation_value_conflict";
+                target_id: string;
+                /** Format: date-time */
+                observed_at: string;
+                observation_ids: string[];
+            }[];
+            limitations: string[];
+        };
         SearchResult: {
             /** @enum {unknown} */
             kind: "entity" | "report" | "claim" | "observation";
@@ -459,6 +641,7 @@ export interface components {
     };
     parameters: {
         RunId: string;
+        DatasetId: string;
     };
     requestBodies: never;
     headers: never;
@@ -531,6 +714,79 @@ export interface operations {
                 };
             };
             401: components["responses"]["Problem"];
+        };
+    };
+    datasetPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "text/csv; charset=utf-8": string;
+            };
+        };
+        responses: {
+            /** @description Completed semantic preview; valid input becomes a durable opaque dataset. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportPreview"];
+                };
+            };
+            400: components["responses"]["Problem"];
+            413: components["responses"]["Problem"];
+            415: components["responses"]["Problem"];
+        };
+    };
+    datasetGet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                datasetId: components["parameters"]["DatasetId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Content-free imported dataset summary. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportPreview"];
+                };
+            };
+            404: components["responses"]["Problem"];
+        };
+    };
+    datasetDelete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                datasetId: components["parameters"]["DatasetId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Dataset deletion gate accepted. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportPreview"];
+                };
+            };
+            404: components["responses"]["Problem"];
         };
     };
     comparisonStart: {

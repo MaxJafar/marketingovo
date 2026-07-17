@@ -9,6 +9,7 @@ export type ComparisonStartRequest =
   components["schemas"]["ComparisonStartRequest"];
 export type ResearchStartRequest =
   components["schemas"]["ResearchStartRequest"];
+export type ImportPreview = components["schemas"]["ImportPreview"];
 export type ComparisonReport = components["schemas"]["ComparisonReport"];
 export type SearchResult = components["schemas"]["SearchResult"];
 export type Entity = components["schemas"]["Entity"];
@@ -240,6 +241,28 @@ export class GolemIntelClient {
         method: "POST",
         body: JSON.stringify(input),
       }),
+  };
+
+  datasets = {
+    previewCompetitivePulse: (input: BodyInit): Promise<ImportPreview> =>
+      this.request<ImportPreview>("/v1/datasets/competitive-pulse/preview", {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/csv; charset=utf-8",
+          "X-Golem-Import-Attestation":
+            "public-permitted-brand-competitive-research.v1",
+        },
+        body: input,
+      }),
+    get: (datasetId: string): Promise<ImportPreview> =>
+      this.request<ImportPreview>(
+        `/v1/datasets/${encodeURIComponent(datasetId)}`,
+      ),
+    delete: (datasetId: string): Promise<ImportPreview> =>
+      this.request<ImportPreview>(
+        `/v1/datasets/${encodeURIComponent(datasetId)}`,
+        { method: "DELETE" },
+      ),
   };
 
   runs = {

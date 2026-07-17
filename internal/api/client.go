@@ -98,6 +98,45 @@ func (client *Client) Do(ctx context.Context, method, requestPath string, input,
 	return nil
 }
 
+// DoBytes submits caller-owned bytes without serializing a filename or local
+// path into the request. It is used by the human-controlled CLI import action.
+func (client *Client) DoBytes(ctx context.Context, method, requestPath, contentType string, body io.Reader, headers http.Header, output any) error {
+	reference, err := url.Parse(requestPath)
+	if err != nil || !strings.HasPrefix(reference.Path, "/v1/") {
+		return fmt.Errorf("invalid API request path %q", requestPath)
+	}
+	endpoint := client.baseURL.ResolveReference(reference)
+	request, err := http.NewRequestWithContext(ctx, method, endpoint.String(), body)
+	if err != nil {
+		return err
+	}
+	if contentType != "" {
+		request.Header.Set("Content-Type", contentType)
+	}
+	for key, values := range headers {
+		for _, value := range values {
+			request.Header.Add(key, value)
+		}
+	}
+	request.Header.Set("Authorization", "Bearer "+client.token)
+	response, err := client.httpClient.Do(request)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return decodeProblem(response)
+	}
+	if output == nil {
+		_, _ = io.Copy(io.Discard, io.LimitReader(response.Body, 1<<20))
+		return nil
+	}
+	if err := json.NewDecoder(io.LimitReader(response.Body, governanceResponseLimit)).Decode(output); err != nil {
+		return fmt.Errorf("decode API response: %w", err)
+	}
+	return nil
+}
+
 const governanceResponseLimit = 128 << 20
 
 func (client *Client) StreamEvents(ctx context.Context, runID string, after int64, consume func(domain.RunEvent) error) error {

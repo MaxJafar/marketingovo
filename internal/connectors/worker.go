@@ -3,6 +3,7 @@ package connectors
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/GolemWorkers/golem-intel/internal/domain"
 )
@@ -20,6 +21,34 @@ type AnalysisRequest struct {
 	ResearchQuestion string
 	SourceBudget     uint32
 	Options          map[string]string
+	ImportContext    *ImportContext
+}
+
+type ImportContext struct {
+	DatasetID            string
+	ValidatedAt          time.Time
+	InputParserVersion   string
+	MetricCatalogVersion string
+}
+
+type ImportValidationRequest struct {
+	RequestID     string
+	WorkspacePath string
+	InputPath     string
+	InputSHA256   string
+	InputSchemaID string
+	ValidatedAt   time.Time
+}
+
+type ImportValidationResult struct {
+	RequestID            string
+	Valid                bool
+	Input                domain.ImportInputSummary
+	Policy               *domain.ImportPolicySummary
+	Platform             *string
+	Targets              []domain.ImportTargetSummary
+	Diagnostics          []domain.ImportDiagnostic
+	DiagnosticsTruncated bool
 }
 
 type ProgressEvent struct {
