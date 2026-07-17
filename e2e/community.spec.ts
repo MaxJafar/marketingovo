@@ -369,9 +369,7 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
   );
 
   await page.goto(dashboardUrl, { waitUntil: "networkidle" });
-  await expect(
-    page.getByRole("link", { name: "AGENTseo home" }),
-  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "AGENTseo home" })).toBeVisible();
   await expect.poll(() => new URL(page.url()).hash).toBe("");
   await expectNoWcagViolations(page, "Empty local overview");
 
