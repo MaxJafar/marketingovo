@@ -6,7 +6,8 @@
 - Type: deterministic descriptive analytics; no trained parameters
 - Owner: Golem Intel Community
 - Inputs: validated `golem.observations.v1` evidence selected by target ID
-- Outputs: `golem.comparison-report.v1`
+- Outputs: `golem.comparison-report.v1` for the legacy fixture and
+  `golem.comparison-report.v2` for validated Competitive Pulse CSV v1 imports
 
 ## Intended use
 
@@ -20,6 +21,10 @@ an audience-authenticity classifier, forecasting system, or decision engine.
 
 - Follower change is `latest observed follower count - earliest observed
   follower count` within the selected platform and metric-definition version.
+  Imported rows are grouped by exact observation time. Conflicting timestamp
+  groups remain cited evidence but are excluded from numeric boundaries; fewer
+  than two unambiguous timestamps produces an explicit insufficient or
+  contradictory state.
 - Median engagement is calculated only within the selected platform and exact
   denominator-bearing metric-definition version. Values from different
   definitions are never pooled.
@@ -41,10 +46,12 @@ warning and contradiction; it does not silently aggregate the series.
 ## Provenance and training data
 
 There is no training data. Acceptance and calibration checks use the synthetic
-`fixtures/competitive-pulse` corpus, whose fictional `.invalid` URLs cannot
-contact live services. Runtime observations retain connector versions, source
-URLs, native IDs, timestamps, confidence, acquisition classification, purpose,
-and evidence IDs.
+`fixtures/competitive-pulse` corpus and the sanitized
+`fixtures/competitive-pulse-import-v1` golden CSV. Their fictional `.invalid`
+URLs are inert citations and are never resolved or opened. Runtime observations
+retain connector and parser versions, input hash, extraction record, source URL,
+native ID, timestamps, confidence, coverage, policy, retention, and evidence
+IDs.
 
 ## Evaluation and calibration
 
@@ -60,8 +67,10 @@ coverage indicator and is not calibrated as a probability of truth.
   performance.
 - Engagement values are only comparable when platform, numerator, denominator,
   period, and metric-definition version are equivalent.
-- Missing observations do not mean zero activity. The worker fails closed when
-  its required metrics are absent.
+- Missing observations do not mean zero activity. Legacy fixture analysis fails
+  when its required metrics are absent; imported reports publish explicit
+  missing, insufficient, or contradictory states with null values and scoped
+  evidence.
 - Source-reported counts may be delayed, rounded, deleted, revised, or incomplete.
 - This baseline must not be used for employment decisions, protected-trait
   inference, individual surveillance, deanonymization, credit, insurance, or

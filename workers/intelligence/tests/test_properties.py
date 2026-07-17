@@ -8,6 +8,7 @@ import pyarrow as pa
 from hypothesis import given
 from hypothesis import strategies as st
 
+from golem_intel_worker.constants import FIXTURE_INPUT_SCHEMA_ID
 from golem_intel_worker.normalize import normalize_table, parse_observations
 from golem_intel_worker.schema import OBSERVATION_SCHEMA
 
@@ -53,7 +54,7 @@ def test_normalization_is_stably_sorted_and_schema_exact(values: list[float]) ->
         )
     payload = ("\n".join(json.dumps(row) for row in rows) + "\n").encode()
     digest = hashlib.sha256(payload).hexdigest()
-    observations = parse_observations(payload, ["entity-one"], digest)
+    observations = parse_observations(payload, ["entity-one"], digest, FIXTURE_INPUT_SCHEMA_ID)
     table = normalize_table(observations)
     assert table.schema == OBSERVATION_SCHEMA
     observed_times = table.column("observed_at").to_pylist()

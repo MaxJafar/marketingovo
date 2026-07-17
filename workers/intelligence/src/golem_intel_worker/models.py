@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 from urllib.parse import parse_qsl, urlsplit
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -244,6 +244,109 @@ class ComparisonReport(BaseModel):
         return self
 
 
+MetricAvailability = Literal["available", "missing", "insufficient", "contradictory"]
+
+
+class MetricPeriod(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    start: str
+    end: str
+
+
+class MetricQuality(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    candidate_count: int = Field(ge=0)
+    included_count: int = Field(ge=0)
+    excluded_count: int = Field(ge=0)
+    min_input_confidence: float | None = Field(default=None, ge=0, le=1)
+    mean_input_confidence: float | None = Field(default=None, ge=0, le=1)
+    mean_input_coverage: float | None = Field(default=None, ge=0, le=1)
+
+
+class ImportMetricResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    definition_version: Literal["v1"] = "v1"
+    availability: MetricAvailability
+    value: float | dict[str, float] | None
+    unit: Literal["followers", "ratio", "posts_per_week", "distribution"]
+    population: str
+    numerator: str
+    denominator: str
+    period: MetricPeriod | None
+    quality: MetricQuality
+    evidence_observation_ids: list[str]
+    limitations: list[str] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def availability_matches_value(self) -> ImportMetricResult:
+        if (self.availability == "available") != (self.value is not None):
+            raise ValueError("only available metric results may contain a value")
+        return self
+
+
+class ImportTargetResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    target_id: str
+    target_name: str
+    metrics: list[ImportMetricResult] = Field(min_length=4, max_length=4)
+
+
+class ImportContradiction(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    code: Literal["observation_value_conflict"]
+    target_id: str
+    observed_at: str
+    observation_ids: list[str] = Field(min_length=2)
+
+
+class ImportComparisonClaim(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    metric_id: str
+    definition_version: Literal["v1"] = "v1"
+    kind: Literal["leader"] = "leader"
+    target_id: str
+    compared_target_ids: list[str]
+    evidence_observation_ids: list[str]
+
+
+class ImportDatasetProvenance(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    dataset_id: str
+    input_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    input_schema_id: Literal["golem.competitive-pulse-import.v1"]
+    input_size_bytes: int = Field(ge=0)
+    platform: str
+    validated_at: str
+    retention_until: str
+    input_parser_version: Literal["golem-python-competitive-pulse-csv@1.0.0"]
+    metric_catalog_version: Literal["competitive-pulse.v1"]
+
+
+class ImportComparisonReport(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: Literal["golem.comparison-report.v2"] = "golem.comparison-report.v2"
+    run_id: str
+    workflow: Literal["compare"] = "compare"
+    generated_at: str
+    derivation: Derivation
+    dataset: ImportDatasetProvenance
+    summary: str
+    targets: list[ImportTargetResult] = Field(min_length=2, max_length=5)
+    comparisons: list[ImportComparisonClaim]
+    evidence: dict[str, dict[str, Any]]
+    contradictions: list[ImportContradiction]
+    limitations: list[str]
+
+
 class ArtifactDescriptor(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -288,12 +391,17 @@ class AnalysisRequest(BaseModel):
     workspace_path: Path
     input_path: Path
     input_sha256: str = Field(pattern=r"^[a-fA-F0-9]{64}$")
+    input_schema_id: str
     output_directory: Path
     target_ids: list[str] = Field(min_length=1, max_length=50)
     workflow: Literal["compare", "research"] = "compare"
     research_question: str = Field(default="", max_length=2000)
     source_budget: int = Field(default=0, ge=0, le=100)
     simulate: Literal["none", "source_failure", "corrupt_artifact", "slow"] = "none"
+    dataset_id: str | None = None
+    validated_at: str | None = None
+    input_parser_version: str | None = None
+    metric_catalog_version: str | None = None
 
     @field_validator("target_ids")
     @classmethod
@@ -320,4 +428,18 @@ class AnalysisRequest(BaseModel):
             raise ValueError(
                 "research workflow requires a 3-2000 character question and source budget 1-100"
             )
+        if self.input_schema_id == "golem.competitive-pulse-import.v1":
+            if self.workflow != "compare":
+                raise ValueError("CSV imports support only the deterministic compare workflow")
+            if not all(
+                (
+                    self.dataset_id,
+                    self.validated_at,
+                    self.input_parser_version,
+                    self.metric_catalog_version,
+                )
+            ):
+                raise ValueError("CSV imports require complete import context")
+            if not 2 <= len(self.target_ids) <= 5:
+                raise ValueError("CSV imports require 2-5 selected targets")
         return self

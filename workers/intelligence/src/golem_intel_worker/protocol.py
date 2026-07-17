@@ -12,7 +12,13 @@ from typing import BinaryIO
 
 from pydantic import ValidationError
 
-from .constants import FIXTURE_INPUT_SCHEMA_ID, SIMULATION_MODES
+from .constants import (
+    CSV_INPUT_SCHEMA_ID,
+    CSV_PARSER_VERSION,
+    FIXTURE_INPUT_SCHEMA_ID,
+    METRIC_CATALOG_VERSION,
+    SIMULATION_MODES,
+)
 from .errors import WorkerError
 from .events import EventEmitter
 from .models import AnalysisRequest, AnalysisResult
@@ -109,11 +115,11 @@ def write_delimited(stream: BinaryIO, message: object, lock: threading.Lock | No
 
 
 def _analysis_request(start: object) -> AnalysisRequest:
-    if start.input_schema_id != FIXTURE_INPUT_SCHEMA_ID:
+    if start.input_schema_id not in (FIXTURE_INPUT_SCHEMA_ID, CSV_INPUT_SCHEMA_ID):
         raise WorkerError(
             "schema_mismatch",
             f"Unsupported input schema {start.input_schema_id!r}; "
-            f"expected {FIXTURE_INPUT_SCHEMA_ID}.",
+            f"expected {FIXTURE_INPUT_SCHEMA_ID} or {CSV_INPUT_SCHEMA_ID}.",
         )
     pb2 = load_worker_pb2()
     workflows = {
@@ -126,6 +132,36 @@ def _analysis_request(start: object) -> AnalysisRequest:
     simulate = start.options.get("simulate", "none")
     if simulate not in SIMULATION_MODES:
         raise WorkerError("invalid_arguments", f"Unsupported simulation mode {simulate!r}.")
+    import_values: dict[str, str | None] = {
+        "dataset_id": None,
+        "validated_at": None,
+        "input_parser_version": None,
+        "metric_catalog_version": None,
+    }
+    has_import_context = start.HasField("import_context")
+    if start.input_schema_id == CSV_INPUT_SCHEMA_ID:
+        if not has_import_context:
+            raise WorkerError("invalid_arguments", "CSV analysis requires import context.")
+        context = start.import_context
+        from .normalize import parse_authority_timestamp
+
+        parse_authority_timestamp(context.validated_at)
+        if context.input_parser_version != CSV_PARSER_VERSION:
+            raise WorkerError(
+                "replay_version_unavailable", "The requested CSV parser version is unavailable."
+            )
+        if context.metric_catalog_version != METRIC_CATALOG_VERSION:
+            raise WorkerError(
+                "replay_version_unavailable", "The requested metric catalog version is unavailable."
+            )
+        import_values = {
+            "dataset_id": context.dataset_id,
+            "validated_at": context.validated_at,
+            "input_parser_version": context.input_parser_version,
+            "metric_catalog_version": context.metric_catalog_version,
+        }
+    elif has_import_context:
+        raise WorkerError("invalid_arguments", "Fixture analysis must not include import context.")
     try:
         return AnalysisRequest(
             run_id=start.run_id,
@@ -133,12 +169,14 @@ def _analysis_request(start: object) -> AnalysisRequest:
             workspace_path=Path(start.workspace_path),
             input_path=Path(start.input_path),
             input_sha256=start.input_sha256,
+            input_schema_id=start.input_schema_id,
             output_directory=Path(start.output_directory),
             target_ids=list(start.target_ids),
             workflow=workflow,
             research_question=start.research_question,
             source_budget=start.source_budget,
             simulate=simulate,
+            **import_values,
         )
     except ValidationError as exc:
         raise WorkerError("invalid_arguments", f"Invalid StartAnalysis message: {exc}") from exc
@@ -223,8 +261,25 @@ def run_protocol(
                 "protocol_version_mismatch",
                 f"Unsupported worker protocol version {envelope.protocol_version}.",
             )
-        if envelope.WhichOneof("message") != "start_analysis":
-            raise WorkerError("protocol_message_invalid", "First message must be StartAnalysis.")
+        msg_type = envelope.WhichOneof("message")
+        if msg_type not in ("start_analysis", "validate_import"):
+            raise WorkerError(
+                "protocol_message_invalid", "First message must be StartAnalysis or ValidateImport."
+            )
+
+        if msg_type == "validate_import":
+            from .imports import validate_csv_import
+
+            result = validate_csv_import(envelope.validate_import, pb2)
+            write_delimited(
+                sink,
+                pb2.WorkerEnvelope(
+                    protocol_version=PROTOCOL_VERSION, import_validation_result=result
+                ),
+                write_lock,
+            )
+            return 0
+
         request = _analysis_request(envelope.start_analysis)
     except WorkerError:
         # Without a trusted run ID there is no valid AnalysisResult correlation.

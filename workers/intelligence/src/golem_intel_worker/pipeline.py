@@ -12,8 +12,14 @@ import pyarrow as pa
 import pyarrow.ipc as ipc
 import pyarrow.parquet as pq
 
-from .analytics import build_report
-from .constants import MODEL_VERSION, OBSERVATION_SCHEMA_ID, REPORT_SCHEMA_ID
+from .analytics import build_import_report, build_report
+from .constants import (
+    CSV_INPUT_SCHEMA_ID,
+    CSV_REPORT_SCHEMA_ID,
+    MODEL_VERSION,
+    OBSERVATION_SCHEMA_ID,
+    REPORT_SCHEMA_ID,
+)
 from .errors import WorkerCancelled, WorkerError
 from .events import EventEmitter
 from .io import (
@@ -25,7 +31,7 @@ from .io import (
     validate_input_file,
 )
 from .models import AnalysisRequest, AnalysisResult, ArtifactDescriptor, iso_z
-from .normalize import normalize_table, parse_observations
+from .normalize import normalize_table, parse_authority_timestamp, parse_observations
 
 _CANCELLED = threading.Event()
 CancellationProbe = Callable[[], None]
@@ -168,7 +174,18 @@ def run_analysis(
         _simulate_slow(emitter, cancellation_probe)
 
     emitter.emit("worker.normalizing", "Parsing and normalizing observations.", 0.25)
-    observations = parse_observations(payload, request.target_ids, request.input_sha256.lower())
+    authority_time = (
+        parse_authority_timestamp(request.validated_at)
+        if request.input_schema_id == CSV_INPUT_SCHEMA_ID and request.validated_at is not None
+        else None
+    )
+    observations = parse_observations(
+        payload,
+        request.target_ids,
+        request.input_sha256.lower(),
+        request.input_schema_id,
+        authority_time,
+    )
     table = normalize_table(observations)
     check_cancelled(cancellation_probe)
 
@@ -186,14 +203,28 @@ def run_analysis(
             ),
             0.45,
         )
-    report = build_report(
-        table,
-        request.run_id,
-        request.target_ids,
-        workflow=request.workflow,
-        research_question=request.research_question,
-        source_budget=request.source_budget,
-    )
+    if request.input_schema_id == CSV_INPUT_SCHEMA_ID:
+        assert request.dataset_id is not None and request.validated_at is not None
+        report = build_import_report(
+            table,
+            run_id=request.run_id,
+            target_ids=request.target_ids,
+            dataset_id=request.dataset_id,
+            input_sha256=request.input_sha256.lower(),
+            input_size_bytes=len(payload),
+            validated_at=request.validated_at,
+        )
+        report_schema_id = CSV_REPORT_SCHEMA_ID
+    else:
+        report = build_report(
+            table,
+            request.run_id,
+            request.target_ids,
+            workflow=request.workflow,
+            research_question=request.research_question,
+            source_budget=request.source_budget,
+        )
+        report_schema_id = REPORT_SCHEMA_ID
     check_cancelled(cancellation_probe)
 
     arrow_path = output_directory / "normalized.arrow"
@@ -232,7 +263,7 @@ def run_analysis(
             output_directory,
             "report.json",
             "application/json",
-            REPORT_SCHEMA_ID,
+            report_schema_id,
             data_class,
             row_count=len(report.targets),
             minimum_observed_at=minimum_observed_at,
