@@ -94,7 +94,7 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
     rule: "legacy-product-identity",
     path: "e2e/community.spec.ts",
     reason:
-      "End-to-end assertions cover persisted compatibility paths plus Stage 3 UI copy that must migrate atomically.",
+      "End-to-end coverage retains persisted compatibility paths and legacy bundle behavior only.",
   },
   {
     rule: "legacy-product-identity",
