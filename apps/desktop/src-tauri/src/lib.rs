@@ -145,9 +145,9 @@ fn runtime_entry(app: &tauri::App) -> Result<PathBuf, Box<dyn std::error::Error>
 
 fn broker_entry(app: &tauri::App) -> Result<PathBuf, Box<dyn std::error::Error>> {
     let name = if cfg!(target_os = "windows") {
-        "agentseo-credential-broker.exe"
+        "golem-seo-credential-broker.exe"
     } else {
-        "agentseo-credential-broker"
+        "golem-seo-credential-broker"
     };
     Ok(app
         .path()
@@ -753,7 +753,7 @@ mod tests {
         let args = desktop_daemon_args(
             Path::new("/runtime/app/dist/cli.js"),
             Path::new("/user/data"),
-            Path::new("/runtime/broker/agentseo-credential-broker"),
+            Path::new("/runtime/broker/golem-seo-credential-broker"),
             &config,
         );
 
@@ -764,7 +764,7 @@ mod tests {
         assert!(args.windows(2).any(|pair| pair
             == [
                 "--credential-broker",
-                "/runtime/broker/agentseo-credential-broker"
+                "/runtime/broker/golem-seo-credential-broker"
             ]));
         assert!(args
             .windows(2)

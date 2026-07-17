@@ -25,7 +25,16 @@ const SiteContext = createContext<SiteContextValue | null>(null);
 
 function readStoredSite(): string {
   try {
-    return window.localStorage.getItem(STORAGE_KEY) ?? "";
+    const modern = window.localStorage.getItem(STORAGE_KEY);
+    if (modern !== null) return modern;
+
+    const legacy = window.localStorage.getItem("golem-seo:selected-site:v1");
+    if (legacy !== null) {
+      window.localStorage.setItem(STORAGE_KEY, legacy);
+      window.localStorage.removeItem("golem-seo:selected-site:v1");
+      return legacy;
+    }
+    return "";
   } catch {
     return "";
   }

@@ -797,8 +797,14 @@ export function useImportProject() {
       if (file.size > 25 * 1024 * 1024) {
         throw new Error("The .agentseo file must be 25 MiB or smaller.");
       }
-      if (!file.name.toLowerCase().endsWith(".agentseo")) {
-        throw new Error("Choose a file with the .agentseo extension.");
+      const lowerName = file.name.toLowerCase();
+      if (
+        !lowerName.endsWith(".agentseo") &&
+        !lowerName.endsWith(".golemseo")
+      ) {
+        throw new Error(
+          "Choose a file with the .agentseo or .golemseo extension.",
+        );
       }
       return apiRequest<ProjectImportResult>("/import", {
         method: "POST",
