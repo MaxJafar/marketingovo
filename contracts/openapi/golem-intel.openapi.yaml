@@ -759,7 +759,7 @@ components:
               evidence_observation_ids: { type: array, items: { type: string } }
         evidence:
           type: object
-          additionalProperties: { type: object }
+          additionalProperties: { $ref: "#/components/schemas/ImportEvidenceEntry" }
         contradictions:
           type: array
           items:
@@ -774,6 +774,59 @@ components:
         limitations:
           type: array
           items: { type: string }
+    ImportEvidenceEntry:
+      type: object
+      additionalProperties: false
+      required:
+        [observation_id, entity_id, entity_name, platform, content_id, dimension,
+         metric, metric_definition_version, numerator, denominator, value, unit,
+         published_at, observed_at, recorded_at, valid_from, valid_to, source_url,
+         native_id, connector_version, classification, confidence, artifact_hash,
+         extraction_pointer, freshness_seconds, availability, coverage,
+         acquisition_mode, data_class, permitted_purpose, retention_until, rights_state]
+      properties:
+        observation_id: { type: string, minLength: 1 }
+        entity_id: { type: string, minLength: 1 }
+        entity_name: { type: string, minLength: 1 }
+        platform: { type: string, minLength: 1 }
+        content_id: { type: [string, "null"] }
+        dimension: { type: [string, "null"] }
+        metric: { type: string, minLength: 1 }
+        metric_definition_version: { type: string, minLength: 1 }
+        numerator: { type: [number, "null"] }
+        denominator: { type: [number, "null"] }
+        value: { type: number }
+        unit: { type: string, minLength: 1 }
+        published_at: { type: [string, "null"], format: date-time }
+        observed_at: { type: string, format: date-time }
+        recorded_at: { type: string, format: date-time }
+        valid_from: { type: string, format: date-time }
+        valid_to: { type: [string, "null"], format: date-time }
+        source_url:
+          type: string
+          minLength: 1
+          maxLength: 2048
+          format: uri-reference
+          description: Exact accepted source-reference.v1 citation. Render only as escaped inert text; never navigate, fetch, prefetch, resolve, or probe it.
+          x-golem-citation-policy:
+            version: source-reference.v1
+            rendering: escaped_inert_text
+            clickable: false
+            navigation: forbidden
+        native_id: { type: string, minLength: 1, maxLength: 256 }
+        connector_version: { type: string, minLength: 1 }
+        classification: { enum: [observed, derived, estimated, first_party] }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        artifact_hash: { type: string, pattern: "^[a-f0-9]{64}$" }
+        extraction_pointer: { type: string, minLength: 1 }
+        freshness_seconds: { type: integer, minimum: 0 }
+        availability: { enum: [available, unavailable, stale, failed] }
+        coverage: { type: number, minimum: 0, maximum: 1 }
+        acquisition_mode: { enum: [public_web, official_api, authorized_account, licensed_provider, user_import, fixture] }
+        data_class: { const: public }
+        permitted_purpose: { const: competitive_research }
+        retention_until: { type: string, format: date-time }
+        rights_state: { const: permitted }
     SearchResult:
       type: object
       additionalProperties: false

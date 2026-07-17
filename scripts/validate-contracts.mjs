@@ -211,6 +211,7 @@ function validateOpenAPISamples(document) {
   const validateRun = compile("Run");
   const validateRunDetail = compile("RunDetail");
   const validateReport = compile("ComparisonReport");
+  const validateImportEvidence = compile("ImportEvidenceEntry");
 
   assertValid(validateRunDetail, runDetail, "run-detail.succeeded.json");
   const run = structuredClone(runDetail);
@@ -224,6 +225,21 @@ function validateOpenAPISamples(document) {
   );
   assertValid(validateReport, compareReport, "report.compare.json");
   assertValid(validateReport, researchReport, "report.research.json");
+  assertValid(
+    validateImportEvidence,
+    {
+      observation_id: "obs-1", entity_id: "northstar-labs", entity_name: "Northstar Labs", platform: "youtube",
+      content_id: null, dimension: null, metric: "followers", metric_definition_version: "v1",
+      numerator: null, denominator: null, value: 100, unit: "followers", published_at: null,
+      observed_at: "2026-07-01T00:00:00Z", recorded_at: "2026-07-01T00:00:00Z",
+      valid_from: "2026-07-01T00:00:00Z", valid_to: null, source_url: "https://example.invalid/northstar",
+      native_id: "native-1", connector_version: "local.competitive-pulse-import@1.0.0", classification: "observed",
+      confidence: 1, artifact_hash: "a".repeat(64), extraction_pointer: "obs-1", freshness_seconds: 0,
+      availability: "available", coverage: 1, acquisition_mode: "user_import", data_class: "public",
+      permitted_purpose: "competitive_research", retention_until: "2026-10-01T00:00:00Z", rights_state: "permitted",
+    },
+    "typed imported evidence entry",
+  );
 
   assertInvalid(
     validateRunDetail,

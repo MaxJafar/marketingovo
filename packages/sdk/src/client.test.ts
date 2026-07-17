@@ -2,10 +2,58 @@ import { describe, expect, it, vi } from "vitest";
 import {
   GolemIntelClient,
   bootstrapDashboardSession,
+  importCitationPolicy,
   parseServerSentEvent,
 } from "./client.js";
+import type { ImportEvidenceEntry } from "./client.js";
 
 describe("GolemIntelClient", () => {
+  it("exposes complete inert imported evidence citations", () => {
+    const evidence: ImportEvidenceEntry = {
+      observation_id: "obs-1",
+      entity_id: "northstar-labs",
+      entity_name: "Northstar Labs",
+      platform: "youtube",
+      content_id: null,
+      dimension: null,
+      metric: "followers",
+      metric_definition_version: "v1",
+      numerator: null,
+      denominator: null,
+      value: 100,
+      unit: "followers",
+      published_at: null,
+      observed_at: "2026-07-01T00:00:00Z",
+      recorded_at: "2026-07-01T00:00:00Z",
+      valid_from: "2026-07-01T00:00:00Z",
+      valid_to: null,
+      source_url: "https://example.invalid/northstar",
+      native_id: "native-1",
+      connector_version: "local.competitive-pulse-import@1.0.0",
+      classification: "observed",
+      confidence: 1,
+      artifact_hash: "a".repeat(64),
+      extraction_pointer: "obs-1",
+      freshness_seconds: 0,
+      availability: "available",
+      coverage: 1,
+      acquisition_mode: "user_import",
+      data_class: "public",
+      permitted_purpose: "competitive_research",
+      retention_until: "2026-10-01T00:00:00Z",
+      rights_state: "permitted",
+    };
+    expect(evidence.source_url).toBe("https://example.invalid/northstar");
+    expect(evidence.native_id).toBe("native-1");
+    expect(evidence.observed_at).toBe("2026-07-01T00:00:00Z");
+    expect(importCitationPolicy).toEqual({
+      version: "source-reference.v1",
+      rendering: "escaped_inert_text",
+      clickable: false,
+      navigation: "forbidden",
+    });
+  });
+
   it("parses a typed SSE event", () => {
     expect(
       parseServerSentEvent(
