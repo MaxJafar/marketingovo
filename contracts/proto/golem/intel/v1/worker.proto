@@ -13,6 +13,8 @@ message WorkerEnvelope {
     CancelAnalysis cancel_analysis = 11;
     WorkerEvent worker_event = 12;
     AnalysisResult analysis_result = 13;
+    ValidateImport validate_import = 14;
+    ImportValidationResult import_validation_result = 15;
   }
 }
 
@@ -29,6 +31,77 @@ message StartAnalysis {
   AnalysisWorkflow workflow = 10;
   string research_question = 11;
   uint32 source_budget = 12;
+  ImportContext import_context = 13;
+}
+
+message ValidateImport {
+  string request_id = 1;
+  string input_path = 2;
+  string input_sha256 = 3;
+  string input_schema_id = 4;
+  string validated_at = 5;
+}
+
+message ImportValidationResult {
+  string request_id = 1;
+  bool valid = 2;
+  ImportInputSummary input = 3;
+  ImportFilePolicySummary file_policy = 4;
+  optional string platform = 5;
+  repeated ImportTargetSummary targets = 6;
+  repeated ImportDiagnostic diagnostics = 7;
+  bool diagnostics_truncated = 8;
+}
+
+message ImportInputSummary {
+  string schema_id = 1;
+  string sha256 = 2;
+  uint64 size_bytes = 3;
+  optional uint64 row_count = 4;
+}
+
+message ImportFilePolicySummary {
+  optional string target_scope = 1;
+  optional string data_class = 2;
+  optional string permitted_purpose = 3;
+  optional uint32 retention_days = 4;
+  optional string rights_state = 5;
+}
+
+message ImportTargetSummary {
+  string target_id = 1;
+  string target_name = 2;
+  uint64 row_count = 3;
+  map<string, ImportMetricAvailability> metric_availability = 4;
+}
+
+enum ImportMetricAvailability {
+  IMPORT_METRIC_AVAILABILITY_UNSPECIFIED = 0;
+  IMPORT_METRIC_AVAILABILITY_MISSING = 1;
+  IMPORT_METRIC_AVAILABILITY_INSUFFICIENT = 2;
+  IMPORT_METRIC_AVAILABILITY_CONTRADICTORY = 3;
+  IMPORT_METRIC_AVAILABILITY_AVAILABLE = 4;
+}
+
+message ImportDiagnostic {
+  ImportDiagnosticSeverity severity = 1;
+  string code = 2;
+  optional uint32 record_number = 3;
+  optional string column = 4;
+  string message = 5;
+}
+
+enum ImportDiagnosticSeverity {
+  IMPORT_DIAGNOSTIC_SEVERITY_UNSPECIFIED = 0;
+  IMPORT_DIAGNOSTIC_SEVERITY_ERROR = 1;
+  IMPORT_DIAGNOSTIC_SEVERITY_WARNING = 2;
+}
+
+message ImportContext {
+  string dataset_id = 1;
+  string validated_at = 2;
+  string input_parser_version = 3;
+  string metric_catalog_version = 4;
 }
 
 enum AnalysisWorkflow {
