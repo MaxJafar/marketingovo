@@ -21,6 +21,110 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type ImportMetricAvailability int32
+
+const (
+	ImportMetricAvailability_IMPORT_METRIC_AVAILABILITY_UNSPECIFIED   ImportMetricAvailability = 0
+	ImportMetricAvailability_IMPORT_METRIC_AVAILABILITY_MISSING       ImportMetricAvailability = 1
+	ImportMetricAvailability_IMPORT_METRIC_AVAILABILITY_INSUFFICIENT  ImportMetricAvailability = 2
+	ImportMetricAvailability_IMPORT_METRIC_AVAILABILITY_CONTRADICTORY ImportMetricAvailability = 3
+	ImportMetricAvailability_IMPORT_METRIC_AVAILABILITY_AVAILABLE     ImportMetricAvailability = 4
+)
+
+// Enum value maps for ImportMetricAvailability.
+var (
+	ImportMetricAvailability_name = map[int32]string{
+		0: "IMPORT_METRIC_AVAILABILITY_UNSPECIFIED",
+		1: "IMPORT_METRIC_AVAILABILITY_MISSING",
+		2: "IMPORT_METRIC_AVAILABILITY_INSUFFICIENT",
+		3: "IMPORT_METRIC_AVAILABILITY_CONTRADICTORY",
+		4: "IMPORT_METRIC_AVAILABILITY_AVAILABLE",
+	}
+	ImportMetricAvailability_value = map[string]int32{
+		"IMPORT_METRIC_AVAILABILITY_UNSPECIFIED":   0,
+		"IMPORT_METRIC_AVAILABILITY_MISSING":       1,
+		"IMPORT_METRIC_AVAILABILITY_INSUFFICIENT":  2,
+		"IMPORT_METRIC_AVAILABILITY_CONTRADICTORY": 3,
+		"IMPORT_METRIC_AVAILABILITY_AVAILABLE":     4,
+	}
+)
+
+func (x ImportMetricAvailability) Enum() *ImportMetricAvailability {
+	p := new(ImportMetricAvailability)
+	*p = x
+	return p
+}
+
+func (x ImportMetricAvailability) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ImportMetricAvailability) Descriptor() protoreflect.EnumDescriptor {
+	return file_golem_intel_v1_worker_proto_enumTypes[0].Descriptor()
+}
+
+func (ImportMetricAvailability) Type() protoreflect.EnumType {
+	return &file_golem_intel_v1_worker_proto_enumTypes[0]
+}
+
+func (x ImportMetricAvailability) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ImportMetricAvailability.Descriptor instead.
+func (ImportMetricAvailability) EnumDescriptor() ([]byte, []int) {
+	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{0}
+}
+
+type ImportDiagnosticSeverity int32
+
+const (
+	ImportDiagnosticSeverity_IMPORT_DIAGNOSTIC_SEVERITY_UNSPECIFIED ImportDiagnosticSeverity = 0
+	ImportDiagnosticSeverity_IMPORT_DIAGNOSTIC_SEVERITY_ERROR       ImportDiagnosticSeverity = 1
+	ImportDiagnosticSeverity_IMPORT_DIAGNOSTIC_SEVERITY_WARNING     ImportDiagnosticSeverity = 2
+)
+
+// Enum value maps for ImportDiagnosticSeverity.
+var (
+	ImportDiagnosticSeverity_name = map[int32]string{
+		0: "IMPORT_DIAGNOSTIC_SEVERITY_UNSPECIFIED",
+		1: "IMPORT_DIAGNOSTIC_SEVERITY_ERROR",
+		2: "IMPORT_DIAGNOSTIC_SEVERITY_WARNING",
+	}
+	ImportDiagnosticSeverity_value = map[string]int32{
+		"IMPORT_DIAGNOSTIC_SEVERITY_UNSPECIFIED": 0,
+		"IMPORT_DIAGNOSTIC_SEVERITY_ERROR":       1,
+		"IMPORT_DIAGNOSTIC_SEVERITY_WARNING":     2,
+	}
+)
+
+func (x ImportDiagnosticSeverity) Enum() *ImportDiagnosticSeverity {
+	p := new(ImportDiagnosticSeverity)
+	*p = x
+	return p
+}
+
+func (x ImportDiagnosticSeverity) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ImportDiagnosticSeverity) Descriptor() protoreflect.EnumDescriptor {
+	return file_golem_intel_v1_worker_proto_enumTypes[1].Descriptor()
+}
+
+func (ImportDiagnosticSeverity) Type() protoreflect.EnumType {
+	return &file_golem_intel_v1_worker_proto_enumTypes[1]
+}
+
+func (x ImportDiagnosticSeverity) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ImportDiagnosticSeverity.Descriptor instead.
+func (ImportDiagnosticSeverity) EnumDescriptor() ([]byte, []int) {
+	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{1}
+}
+
 type AnalysisWorkflow int32
 
 const (
@@ -54,11 +158,11 @@ func (x AnalysisWorkflow) String() string {
 }
 
 func (AnalysisWorkflow) Descriptor() protoreflect.EnumDescriptor {
-	return file_golem_intel_v1_worker_proto_enumTypes[0].Descriptor()
+	return file_golem_intel_v1_worker_proto_enumTypes[2].Descriptor()
 }
 
 func (AnalysisWorkflow) Type() protoreflect.EnumType {
-	return &file_golem_intel_v1_worker_proto_enumTypes[0]
+	return &file_golem_intel_v1_worker_proto_enumTypes[2]
 }
 
 func (x AnalysisWorkflow) Number() protoreflect.EnumNumber {
@@ -67,7 +171,7 @@ func (x AnalysisWorkflow) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use AnalysisWorkflow.Descriptor instead.
 func (AnalysisWorkflow) EnumDescriptor() ([]byte, []int) {
-	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{0}
+	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{2}
 }
 
 // WorkerEnvelope is a length-delimited control message. Bulk evidence never
@@ -81,6 +185,8 @@ type WorkerEnvelope struct {
 	//	*WorkerEnvelope_CancelAnalysis
 	//	*WorkerEnvelope_WorkerEvent
 	//	*WorkerEnvelope_AnalysisResult
+	//	*WorkerEnvelope_ValidateImport
+	//	*WorkerEnvelope_ImportValidationResult
 	Message       isWorkerEnvelope_Message `protobuf_oneof:"message"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -166,6 +272,24 @@ func (x *WorkerEnvelope) GetAnalysisResult() *AnalysisResult {
 	return nil
 }
 
+func (x *WorkerEnvelope) GetValidateImport() *ValidateImport {
+	if x != nil {
+		if x, ok := x.Message.(*WorkerEnvelope_ValidateImport); ok {
+			return x.ValidateImport
+		}
+	}
+	return nil
+}
+
+func (x *WorkerEnvelope) GetImportValidationResult() *ImportValidationResult {
+	if x != nil {
+		if x, ok := x.Message.(*WorkerEnvelope_ImportValidationResult); ok {
+			return x.ImportValidationResult
+		}
+	}
+	return nil
+}
+
 type isWorkerEnvelope_Message interface {
 	isWorkerEnvelope_Message()
 }
@@ -186,6 +310,14 @@ type WorkerEnvelope_AnalysisResult struct {
 	AnalysisResult *AnalysisResult `protobuf:"bytes,13,opt,name=analysis_result,json=analysisResult,proto3,oneof"`
 }
 
+type WorkerEnvelope_ValidateImport struct {
+	ValidateImport *ValidateImport `protobuf:"bytes,14,opt,name=validate_import,json=validateImport,proto3,oneof"`
+}
+
+type WorkerEnvelope_ImportValidationResult struct {
+	ImportValidationResult *ImportValidationResult `protobuf:"bytes,15,opt,name=import_validation_result,json=importValidationResult,proto3,oneof"`
+}
+
 func (*WorkerEnvelope_StartAnalysis) isWorkerEnvelope_Message() {}
 
 func (*WorkerEnvelope_CancelAnalysis) isWorkerEnvelope_Message() {}
@@ -193,6 +325,10 @@ func (*WorkerEnvelope_CancelAnalysis) isWorkerEnvelope_Message() {}
 func (*WorkerEnvelope_WorkerEvent) isWorkerEnvelope_Message() {}
 
 func (*WorkerEnvelope_AnalysisResult) isWorkerEnvelope_Message() {}
+
+func (*WorkerEnvelope_ValidateImport) isWorkerEnvelope_Message() {}
+
+func (*WorkerEnvelope_ImportValidationResult) isWorkerEnvelope_Message() {}
 
 type StartAnalysis struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
@@ -208,6 +344,7 @@ type StartAnalysis struct {
 	Workflow         AnalysisWorkflow       `protobuf:"varint,10,opt,name=workflow,proto3,enum=golem.intel.v1.AnalysisWorkflow" json:"workflow,omitempty"`
 	ResearchQuestion string                 `protobuf:"bytes,11,opt,name=research_question,json=researchQuestion,proto3" json:"research_question,omitempty"`
 	SourceBudget     uint32                 `protobuf:"varint,12,opt,name=source_budget,json=sourceBudget,proto3" json:"source_budget,omitempty"`
+	ImportContext    *ImportContext         `protobuf:"bytes,13,opt,name=import_context,json=importContext,proto3" json:"import_context,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -326,6 +463,545 @@ func (x *StartAnalysis) GetSourceBudget() uint32 {
 	return 0
 }
 
+func (x *StartAnalysis) GetImportContext() *ImportContext {
+	if x != nil {
+		return x.ImportContext
+	}
+	return nil
+}
+
+type ValidateImport struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RequestId     string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	InputPath     string                 `protobuf:"bytes,2,opt,name=input_path,json=inputPath,proto3" json:"input_path,omitempty"`
+	InputSha256   string                 `protobuf:"bytes,3,opt,name=input_sha256,json=inputSha256,proto3" json:"input_sha256,omitempty"`
+	InputSchemaId string                 `protobuf:"bytes,4,opt,name=input_schema_id,json=inputSchemaId,proto3" json:"input_schema_id,omitempty"`
+	ValidatedAt   string                 `protobuf:"bytes,5,opt,name=validated_at,json=validatedAt,proto3" json:"validated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ValidateImport) Reset() {
+	*x = ValidateImport{}
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidateImport) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidateImport) ProtoMessage() {}
+
+func (x *ValidateImport) ProtoReflect() protoreflect.Message {
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidateImport.ProtoReflect.Descriptor instead.
+func (*ValidateImport) Descriptor() ([]byte, []int) {
+	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ValidateImport) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *ValidateImport) GetInputPath() string {
+	if x != nil {
+		return x.InputPath
+	}
+	return ""
+}
+
+func (x *ValidateImport) GetInputSha256() string {
+	if x != nil {
+		return x.InputSha256
+	}
+	return ""
+}
+
+func (x *ValidateImport) GetInputSchemaId() string {
+	if x != nil {
+		return x.InputSchemaId
+	}
+	return ""
+}
+
+func (x *ValidateImport) GetValidatedAt() string {
+	if x != nil {
+		return x.ValidatedAt
+	}
+	return ""
+}
+
+type ImportValidationResult struct {
+	state                protoimpl.MessageState   `protogen:"open.v1"`
+	RequestId            string                   `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	Valid                bool                     `protobuf:"varint,2,opt,name=valid,proto3" json:"valid,omitempty"`
+	Input                *ImportInputSummary      `protobuf:"bytes,3,opt,name=input,proto3" json:"input,omitempty"`
+	FilePolicy           *ImportFilePolicySummary `protobuf:"bytes,4,opt,name=file_policy,json=filePolicy,proto3" json:"file_policy,omitempty"`
+	Platform             *string                  `protobuf:"bytes,5,opt,name=platform,proto3,oneof" json:"platform,omitempty"`
+	Targets              []*ImportTargetSummary   `protobuf:"bytes,6,rep,name=targets,proto3" json:"targets,omitempty"`
+	Diagnostics          []*ImportDiagnostic      `protobuf:"bytes,7,rep,name=diagnostics,proto3" json:"diagnostics,omitempty"`
+	DiagnosticsTruncated bool                     `protobuf:"varint,8,opt,name=diagnostics_truncated,json=diagnosticsTruncated,proto3" json:"diagnostics_truncated,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *ImportValidationResult) Reset() {
+	*x = ImportValidationResult{}
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ImportValidationResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ImportValidationResult) ProtoMessage() {}
+
+func (x *ImportValidationResult) ProtoReflect() protoreflect.Message {
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ImportValidationResult.ProtoReflect.Descriptor instead.
+func (*ImportValidationResult) Descriptor() ([]byte, []int) {
+	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ImportValidationResult) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *ImportValidationResult) GetValid() bool {
+	if x != nil {
+		return x.Valid
+	}
+	return false
+}
+
+func (x *ImportValidationResult) GetInput() *ImportInputSummary {
+	if x != nil {
+		return x.Input
+	}
+	return nil
+}
+
+func (x *ImportValidationResult) GetFilePolicy() *ImportFilePolicySummary {
+	if x != nil {
+		return x.FilePolicy
+	}
+	return nil
+}
+
+func (x *ImportValidationResult) GetPlatform() string {
+	if x != nil && x.Platform != nil {
+		return *x.Platform
+	}
+	return ""
+}
+
+func (x *ImportValidationResult) GetTargets() []*ImportTargetSummary {
+	if x != nil {
+		return x.Targets
+	}
+	return nil
+}
+
+func (x *ImportValidationResult) GetDiagnostics() []*ImportDiagnostic {
+	if x != nil {
+		return x.Diagnostics
+	}
+	return nil
+}
+
+func (x *ImportValidationResult) GetDiagnosticsTruncated() bool {
+	if x != nil {
+		return x.DiagnosticsTruncated
+	}
+	return false
+}
+
+type ImportInputSummary struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SchemaId      string                 `protobuf:"bytes,1,opt,name=schema_id,json=schemaId,proto3" json:"schema_id,omitempty"`
+	Sha256        string                 `protobuf:"bytes,2,opt,name=sha256,proto3" json:"sha256,omitempty"`
+	SizeBytes     uint64                 `protobuf:"varint,3,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
+	RowCount      *uint64                `protobuf:"varint,4,opt,name=row_count,json=rowCount,proto3,oneof" json:"row_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ImportInputSummary) Reset() {
+	*x = ImportInputSummary{}
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ImportInputSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ImportInputSummary) ProtoMessage() {}
+
+func (x *ImportInputSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ImportInputSummary.ProtoReflect.Descriptor instead.
+func (*ImportInputSummary) Descriptor() ([]byte, []int) {
+	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ImportInputSummary) GetSchemaId() string {
+	if x != nil {
+		return x.SchemaId
+	}
+	return ""
+}
+
+func (x *ImportInputSummary) GetSha256() string {
+	if x != nil {
+		return x.Sha256
+	}
+	return ""
+}
+
+func (x *ImportInputSummary) GetSizeBytes() uint64 {
+	if x != nil {
+		return x.SizeBytes
+	}
+	return 0
+}
+
+func (x *ImportInputSummary) GetRowCount() uint64 {
+	if x != nil && x.RowCount != nil {
+		return *x.RowCount
+	}
+	return 0
+}
+
+type ImportFilePolicySummary struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	TargetScope      *string                `protobuf:"bytes,1,opt,name=target_scope,json=targetScope,proto3,oneof" json:"target_scope,omitempty"`
+	DataClass        *string                `protobuf:"bytes,2,opt,name=data_class,json=dataClass,proto3,oneof" json:"data_class,omitempty"`
+	PermittedPurpose *string                `protobuf:"bytes,3,opt,name=permitted_purpose,json=permittedPurpose,proto3,oneof" json:"permitted_purpose,omitempty"`
+	RetentionDays    *uint32                `protobuf:"varint,4,opt,name=retention_days,json=retentionDays,proto3,oneof" json:"retention_days,omitempty"`
+	RightsState      *string                `protobuf:"bytes,5,opt,name=rights_state,json=rightsState,proto3,oneof" json:"rights_state,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *ImportFilePolicySummary) Reset() {
+	*x = ImportFilePolicySummary{}
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ImportFilePolicySummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ImportFilePolicySummary) ProtoMessage() {}
+
+func (x *ImportFilePolicySummary) ProtoReflect() protoreflect.Message {
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ImportFilePolicySummary.ProtoReflect.Descriptor instead.
+func (*ImportFilePolicySummary) Descriptor() ([]byte, []int) {
+	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ImportFilePolicySummary) GetTargetScope() string {
+	if x != nil && x.TargetScope != nil {
+		return *x.TargetScope
+	}
+	return ""
+}
+
+func (x *ImportFilePolicySummary) GetDataClass() string {
+	if x != nil && x.DataClass != nil {
+		return *x.DataClass
+	}
+	return ""
+}
+
+func (x *ImportFilePolicySummary) GetPermittedPurpose() string {
+	if x != nil && x.PermittedPurpose != nil {
+		return *x.PermittedPurpose
+	}
+	return ""
+}
+
+func (x *ImportFilePolicySummary) GetRetentionDays() uint32 {
+	if x != nil && x.RetentionDays != nil {
+		return *x.RetentionDays
+	}
+	return 0
+}
+
+func (x *ImportFilePolicySummary) GetRightsState() string {
+	if x != nil && x.RightsState != nil {
+		return *x.RightsState
+	}
+	return ""
+}
+
+type ImportTargetSummary struct {
+	state              protoimpl.MessageState              `protogen:"open.v1"`
+	TargetId           string                              `protobuf:"bytes,1,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
+	TargetName         string                              `protobuf:"bytes,2,opt,name=target_name,json=targetName,proto3" json:"target_name,omitempty"`
+	RowCount           uint64                              `protobuf:"varint,3,opt,name=row_count,json=rowCount,proto3" json:"row_count,omitempty"`
+	MetricAvailability map[string]ImportMetricAvailability `protobuf:"bytes,4,rep,name=metric_availability,json=metricAvailability,proto3" json:"metric_availability,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value,enum=golem.intel.v1.ImportMetricAvailability"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *ImportTargetSummary) Reset() {
+	*x = ImportTargetSummary{}
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ImportTargetSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ImportTargetSummary) ProtoMessage() {}
+
+func (x *ImportTargetSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ImportTargetSummary.ProtoReflect.Descriptor instead.
+func (*ImportTargetSummary) Descriptor() ([]byte, []int) {
+	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ImportTargetSummary) GetTargetId() string {
+	if x != nil {
+		return x.TargetId
+	}
+	return ""
+}
+
+func (x *ImportTargetSummary) GetTargetName() string {
+	if x != nil {
+		return x.TargetName
+	}
+	return ""
+}
+
+func (x *ImportTargetSummary) GetRowCount() uint64 {
+	if x != nil {
+		return x.RowCount
+	}
+	return 0
+}
+
+func (x *ImportTargetSummary) GetMetricAvailability() map[string]ImportMetricAvailability {
+	if x != nil {
+		return x.MetricAvailability
+	}
+	return nil
+}
+
+type ImportDiagnostic struct {
+	state         protoimpl.MessageState   `protogen:"open.v1"`
+	Severity      ImportDiagnosticSeverity `protobuf:"varint,1,opt,name=severity,proto3,enum=golem.intel.v1.ImportDiagnosticSeverity" json:"severity,omitempty"`
+	Code          string                   `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	RecordNumber  *uint32                  `protobuf:"varint,3,opt,name=record_number,json=recordNumber,proto3,oneof" json:"record_number,omitempty"`
+	Column        *string                  `protobuf:"bytes,4,opt,name=column,proto3,oneof" json:"column,omitempty"`
+	Message       string                   `protobuf:"bytes,5,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ImportDiagnostic) Reset() {
+	*x = ImportDiagnostic{}
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ImportDiagnostic) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ImportDiagnostic) ProtoMessage() {}
+
+func (x *ImportDiagnostic) ProtoReflect() protoreflect.Message {
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ImportDiagnostic.ProtoReflect.Descriptor instead.
+func (*ImportDiagnostic) Descriptor() ([]byte, []int) {
+	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ImportDiagnostic) GetSeverity() ImportDiagnosticSeverity {
+	if x != nil {
+		return x.Severity
+	}
+	return ImportDiagnosticSeverity_IMPORT_DIAGNOSTIC_SEVERITY_UNSPECIFIED
+}
+
+func (x *ImportDiagnostic) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *ImportDiagnostic) GetRecordNumber() uint32 {
+	if x != nil && x.RecordNumber != nil {
+		return *x.RecordNumber
+	}
+	return 0
+}
+
+func (x *ImportDiagnostic) GetColumn() string {
+	if x != nil && x.Column != nil {
+		return *x.Column
+	}
+	return ""
+}
+
+func (x *ImportDiagnostic) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type ImportContext struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	DatasetId            string                 `protobuf:"bytes,1,opt,name=dataset_id,json=datasetId,proto3" json:"dataset_id,omitempty"`
+	ValidatedAt          string                 `protobuf:"bytes,2,opt,name=validated_at,json=validatedAt,proto3" json:"validated_at,omitempty"`
+	InputParserVersion   string                 `protobuf:"bytes,3,opt,name=input_parser_version,json=inputParserVersion,proto3" json:"input_parser_version,omitempty"`
+	MetricCatalogVersion string                 `protobuf:"bytes,4,opt,name=metric_catalog_version,json=metricCatalogVersion,proto3" json:"metric_catalog_version,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *ImportContext) Reset() {
+	*x = ImportContext{}
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ImportContext) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ImportContext) ProtoMessage() {}
+
+func (x *ImportContext) ProtoReflect() protoreflect.Message {
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ImportContext.ProtoReflect.Descriptor instead.
+func (*ImportContext) Descriptor() ([]byte, []int) {
+	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ImportContext) GetDatasetId() string {
+	if x != nil {
+		return x.DatasetId
+	}
+	return ""
+}
+
+func (x *ImportContext) GetValidatedAt() string {
+	if x != nil {
+		return x.ValidatedAt
+	}
+	return ""
+}
+
+func (x *ImportContext) GetInputParserVersion() string {
+	if x != nil {
+		return x.InputParserVersion
+	}
+	return ""
+}
+
+func (x *ImportContext) GetMetricCatalogVersion() string {
+	if x != nil {
+		return x.MetricCatalogVersion
+	}
+	return ""
+}
+
 type CancelAnalysis struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RunId         string                 `protobuf:"bytes,1,opt,name=run_id,json=runId,proto3" json:"run_id,omitempty"`
@@ -336,7 +1012,7 @@ type CancelAnalysis struct {
 
 func (x *CancelAnalysis) Reset() {
 	*x = CancelAnalysis{}
-	mi := &file_golem_intel_v1_worker_proto_msgTypes[2]
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -348,7 +1024,7 @@ func (x *CancelAnalysis) String() string {
 func (*CancelAnalysis) ProtoMessage() {}
 
 func (x *CancelAnalysis) ProtoReflect() protoreflect.Message {
-	mi := &file_golem_intel_v1_worker_proto_msgTypes[2]
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -361,7 +1037,7 @@ func (x *CancelAnalysis) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelAnalysis.ProtoReflect.Descriptor instead.
 func (*CancelAnalysis) Descriptor() ([]byte, []int) {
-	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{2}
+	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *CancelAnalysis) GetRunId() string {
@@ -393,7 +1069,7 @@ type WorkerEvent struct {
 
 func (x *WorkerEvent) Reset() {
 	*x = WorkerEvent{}
-	mi := &file_golem_intel_v1_worker_proto_msgTypes[3]
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -405,7 +1081,7 @@ func (x *WorkerEvent) String() string {
 func (*WorkerEvent) ProtoMessage() {}
 
 func (x *WorkerEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_golem_intel_v1_worker_proto_msgTypes[3]
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -418,7 +1094,7 @@ func (x *WorkerEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorkerEvent.ProtoReflect.Descriptor instead.
 func (*WorkerEvent) Descriptor() ([]byte, []int) {
-	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{3}
+	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *WorkerEvent) GetRunId() string {
@@ -487,7 +1163,7 @@ type ArtifactDescriptor struct {
 
 func (x *ArtifactDescriptor) Reset() {
 	*x = ArtifactDescriptor{}
-	mi := &file_golem_intel_v1_worker_proto_msgTypes[4]
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -499,7 +1175,7 @@ func (x *ArtifactDescriptor) String() string {
 func (*ArtifactDescriptor) ProtoMessage() {}
 
 func (x *ArtifactDescriptor) ProtoReflect() protoreflect.Message {
-	mi := &file_golem_intel_v1_worker_proto_msgTypes[4]
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -512,7 +1188,7 @@ func (x *ArtifactDescriptor) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ArtifactDescriptor.ProtoReflect.Descriptor instead.
 func (*ArtifactDescriptor) Descriptor() ([]byte, []int) {
-	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{4}
+	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ArtifactDescriptor) GetRelativePath() string {
@@ -595,7 +1271,7 @@ type AnalysisResult struct {
 
 func (x *AnalysisResult) Reset() {
 	*x = AnalysisResult{}
-	mi := &file_golem_intel_v1_worker_proto_msgTypes[5]
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -607,7 +1283,7 @@ func (x *AnalysisResult) String() string {
 func (*AnalysisResult) ProtoMessage() {}
 
 func (x *AnalysisResult) ProtoReflect() protoreflect.Message {
-	mi := &file_golem_intel_v1_worker_proto_msgTypes[5]
+	mi := &file_golem_intel_v1_worker_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -620,7 +1296,7 @@ func (x *AnalysisResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AnalysisResult.ProtoReflect.Descriptor instead.
 func (*AnalysisResult) Descriptor() ([]byte, []int) {
-	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{5}
+	return file_golem_intel_v1_worker_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *AnalysisResult) GetRunId() string {
@@ -690,15 +1366,17 @@ var File_golem_intel_v1_worker_proto protoreflect.FileDescriptor
 
 const file_golem_intel_v1_worker_proto_rawDesc = "" +
 	"\n" +
-	"\x1bgolem/intel/v1/worker.proto\x12\x0egolem.intel.v1\"\xe6\x02\n" +
+	"\x1bgolem/intel/v1/worker.proto\x12\x0egolem.intel.v1\"\x95\x04\n" +
 	"\x0eWorkerEnvelope\x12)\n" +
 	"\x10protocol_version\x18\x01 \x01(\rR\x0fprotocolVersion\x12F\n" +
 	"\x0estart_analysis\x18\n" +
 	" \x01(\v2\x1d.golem.intel.v1.StartAnalysisH\x00R\rstartAnalysis\x12I\n" +
 	"\x0fcancel_analysis\x18\v \x01(\v2\x1e.golem.intel.v1.CancelAnalysisH\x00R\x0ecancelAnalysis\x12@\n" +
 	"\fworker_event\x18\f \x01(\v2\x1b.golem.intel.v1.WorkerEventH\x00R\vworkerEvent\x12I\n" +
-	"\x0fanalysis_result\x18\r \x01(\v2\x1e.golem.intel.v1.AnalysisResultH\x00R\x0eanalysisResultB\t\n" +
-	"\amessage\"\xb2\x04\n" +
+	"\x0fanalysis_result\x18\r \x01(\v2\x1e.golem.intel.v1.AnalysisResultH\x00R\x0eanalysisResult\x12I\n" +
+	"\x0fvalidate_import\x18\x0e \x01(\v2\x1e.golem.intel.v1.ValidateImportH\x00R\x0evalidateImport\x12b\n" +
+	"\x18import_validation_result\x18\x0f \x01(\v2&.golem.intel.v1.ImportValidationResultH\x00R\x16importValidationResultB\t\n" +
+	"\amessage\"\xf8\x04\n" +
 	"\rStartAnalysis\x12\x15\n" +
 	"\x06run_id\x18\x01 \x01(\tR\x05runId\x12\x1d\n" +
 	"\n" +
@@ -715,10 +1393,74 @@ const file_golem_intel_v1_worker_proto_rawDesc = "" +
 	"\bworkflow\x18\n" +
 	" \x01(\x0e2 .golem.intel.v1.AnalysisWorkflowR\bworkflow\x12+\n" +
 	"\x11research_question\x18\v \x01(\tR\x10researchQuestion\x12#\n" +
-	"\rsource_budget\x18\f \x01(\rR\fsourceBudget\x1a:\n" +
+	"\rsource_budget\x18\f \x01(\rR\fsourceBudget\x12D\n" +
+	"\x0eimport_context\x18\r \x01(\v2\x1d.golem.intel.v1.ImportContextR\rimportContext\x1a:\n" +
 	"\fOptionsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"?\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xbc\x01\n" +
+	"\x0eValidateImport\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x01 \x01(\tR\trequestId\x12\x1d\n" +
+	"\n" +
+	"input_path\x18\x02 \x01(\tR\tinputPath\x12!\n" +
+	"\finput_sha256\x18\x03 \x01(\tR\vinputSha256\x12&\n" +
+	"\x0finput_schema_id\x18\x04 \x01(\tR\rinputSchemaId\x12!\n" +
+	"\fvalidated_at\x18\x05 \x01(\tR\vvalidatedAt\"\xb7\x03\n" +
+	"\x16ImportValidationResult\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x01 \x01(\tR\trequestId\x12\x14\n" +
+	"\x05valid\x18\x02 \x01(\bR\x05valid\x128\n" +
+	"\x05input\x18\x03 \x01(\v2\".golem.intel.v1.ImportInputSummaryR\x05input\x12H\n" +
+	"\vfile_policy\x18\x04 \x01(\v2'.golem.intel.v1.ImportFilePolicySummaryR\n" +
+	"filePolicy\x12\x1f\n" +
+	"\bplatform\x18\x05 \x01(\tH\x00R\bplatform\x88\x01\x01\x12=\n" +
+	"\atargets\x18\x06 \x03(\v2#.golem.intel.v1.ImportTargetSummaryR\atargets\x12B\n" +
+	"\vdiagnostics\x18\a \x03(\v2 .golem.intel.v1.ImportDiagnosticR\vdiagnostics\x123\n" +
+	"\x15diagnostics_truncated\x18\b \x01(\bR\x14diagnosticsTruncatedB\v\n" +
+	"\t_platform\"\x98\x01\n" +
+	"\x12ImportInputSummary\x12\x1b\n" +
+	"\tschema_id\x18\x01 \x01(\tR\bschemaId\x12\x16\n" +
+	"\x06sha256\x18\x02 \x01(\tR\x06sha256\x12\x1d\n" +
+	"\n" +
+	"size_bytes\x18\x03 \x01(\x04R\tsizeBytes\x12 \n" +
+	"\trow_count\x18\x04 \x01(\x04H\x00R\browCount\x88\x01\x01B\f\n" +
+	"\n" +
+	"_row_count\"\xc5\x02\n" +
+	"\x17ImportFilePolicySummary\x12&\n" +
+	"\ftarget_scope\x18\x01 \x01(\tH\x00R\vtargetScope\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"data_class\x18\x02 \x01(\tH\x01R\tdataClass\x88\x01\x01\x120\n" +
+	"\x11permitted_purpose\x18\x03 \x01(\tH\x02R\x10permittedPurpose\x88\x01\x01\x12*\n" +
+	"\x0eretention_days\x18\x04 \x01(\rH\x03R\rretentionDays\x88\x01\x01\x12&\n" +
+	"\frights_state\x18\x05 \x01(\tH\x04R\vrightsState\x88\x01\x01B\x0f\n" +
+	"\r_target_scopeB\r\n" +
+	"\v_data_classB\x14\n" +
+	"\x12_permitted_purposeB\x11\n" +
+	"\x0f_retention_daysB\x0f\n" +
+	"\r_rights_state\"\xcf\x02\n" +
+	"\x13ImportTargetSummary\x12\x1b\n" +
+	"\ttarget_id\x18\x01 \x01(\tR\btargetId\x12\x1f\n" +
+	"\vtarget_name\x18\x02 \x01(\tR\n" +
+	"targetName\x12\x1b\n" +
+	"\trow_count\x18\x03 \x01(\x04R\browCount\x12l\n" +
+	"\x13metric_availability\x18\x04 \x03(\v2;.golem.intel.v1.ImportTargetSummary.MetricAvailabilityEntryR\x12metricAvailability\x1ao\n" +
+	"\x17MetricAvailabilityEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12>\n" +
+	"\x05value\x18\x02 \x01(\x0e2(.golem.intel.v1.ImportMetricAvailabilityR\x05value:\x028\x01\"\xea\x01\n" +
+	"\x10ImportDiagnostic\x12D\n" +
+	"\bseverity\x18\x01 \x01(\x0e2(.golem.intel.v1.ImportDiagnosticSeverityR\bseverity\x12\x12\n" +
+	"\x04code\x18\x02 \x01(\tR\x04code\x12(\n" +
+	"\rrecord_number\x18\x03 \x01(\rH\x00R\frecordNumber\x88\x01\x01\x12\x1b\n" +
+	"\x06column\x18\x04 \x01(\tH\x01R\x06column\x88\x01\x01\x12\x18\n" +
+	"\amessage\x18\x05 \x01(\tR\amessageB\x10\n" +
+	"\x0e_record_numberB\t\n" +
+	"\a_column\"\xb9\x01\n" +
+	"\rImportContext\x12\x1d\n" +
+	"\n" +
+	"dataset_id\x18\x01 \x01(\tR\tdatasetId\x12!\n" +
+	"\fvalidated_at\x18\x02 \x01(\tR\vvalidatedAt\x120\n" +
+	"\x14input_parser_version\x18\x03 \x01(\tR\x12inputParserVersion\x124\n" +
+	"\x16metric_catalog_version\x18\x04 \x01(\tR\x14metricCatalogVersion\"?\n" +
 	"\x0eCancelAnalysis\x12\x15\n" +
 	"\x06run_id\x18\x01 \x01(\tR\x05runId\x12\x16\n" +
 	"\x06reason\x18\x02 \x01(\tR\x06reason\"\xc3\x01\n" +
@@ -754,7 +1496,17 @@ const file_golem_intel_v1_worker_proto_rawDesc = "" +
 	"\x14report_relative_path\x18\x06 \x01(\tR\x12reportRelativePath\x12#\n" +
 	"\rreport_sha256\x18\a \x01(\tR\freportSha256\x12#\n" +
 	"\rmodel_version\x18\b \x01(\tR\fmodelVersion\x12%\n" +
-	"\x0eworker_version\x18\t \x01(\tR\rworkerVersion*t\n" +
+	"\x0eworker_version\x18\t \x01(\tR\rworkerVersion*\xf3\x01\n" +
+	"\x18ImportMetricAvailability\x12*\n" +
+	"&IMPORT_METRIC_AVAILABILITY_UNSPECIFIED\x10\x00\x12&\n" +
+	"\"IMPORT_METRIC_AVAILABILITY_MISSING\x10\x01\x12+\n" +
+	"'IMPORT_METRIC_AVAILABILITY_INSUFFICIENT\x10\x02\x12,\n" +
+	"(IMPORT_METRIC_AVAILABILITY_CONTRADICTORY\x10\x03\x12(\n" +
+	"$IMPORT_METRIC_AVAILABILITY_AVAILABLE\x10\x04*\x94\x01\n" +
+	"\x18ImportDiagnosticSeverity\x12*\n" +
+	"&IMPORT_DIAGNOSTIC_SEVERITY_UNSPECIFIED\x10\x00\x12$\n" +
+	" IMPORT_DIAGNOSTIC_SEVERITY_ERROR\x10\x01\x12&\n" +
+	"\"IMPORT_DIAGNOSTIC_SEVERITY_WARNING\x10\x02*t\n" +
 	"\x10AnalysisWorkflow\x12!\n" +
 	"\x1dANALYSIS_WORKFLOW_UNSPECIFIED\x10\x00\x12\x1d\n" +
 	"\x19ANALYSIS_WORKFLOW_COMPARE\x10\x01\x12\x1e\n" +
@@ -772,31 +1524,51 @@ func file_golem_intel_v1_worker_proto_rawDescGZIP() []byte {
 	return file_golem_intel_v1_worker_proto_rawDescData
 }
 
-var file_golem_intel_v1_worker_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_golem_intel_v1_worker_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_golem_intel_v1_worker_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_golem_intel_v1_worker_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_golem_intel_v1_worker_proto_goTypes = []any{
-	(AnalysisWorkflow)(0),      // 0: golem.intel.v1.AnalysisWorkflow
-	(*WorkerEnvelope)(nil),     // 1: golem.intel.v1.WorkerEnvelope
-	(*StartAnalysis)(nil),      // 2: golem.intel.v1.StartAnalysis
-	(*CancelAnalysis)(nil),     // 3: golem.intel.v1.CancelAnalysis
-	(*WorkerEvent)(nil),        // 4: golem.intel.v1.WorkerEvent
-	(*ArtifactDescriptor)(nil), // 5: golem.intel.v1.ArtifactDescriptor
-	(*AnalysisResult)(nil),     // 6: golem.intel.v1.AnalysisResult
-	nil,                        // 7: golem.intel.v1.StartAnalysis.OptionsEntry
+	(ImportMetricAvailability)(0),   // 0: golem.intel.v1.ImportMetricAvailability
+	(ImportDiagnosticSeverity)(0),   // 1: golem.intel.v1.ImportDiagnosticSeverity
+	(AnalysisWorkflow)(0),           // 2: golem.intel.v1.AnalysisWorkflow
+	(*WorkerEnvelope)(nil),          // 3: golem.intel.v1.WorkerEnvelope
+	(*StartAnalysis)(nil),           // 4: golem.intel.v1.StartAnalysis
+	(*ValidateImport)(nil),          // 5: golem.intel.v1.ValidateImport
+	(*ImportValidationResult)(nil),  // 6: golem.intel.v1.ImportValidationResult
+	(*ImportInputSummary)(nil),      // 7: golem.intel.v1.ImportInputSummary
+	(*ImportFilePolicySummary)(nil), // 8: golem.intel.v1.ImportFilePolicySummary
+	(*ImportTargetSummary)(nil),     // 9: golem.intel.v1.ImportTargetSummary
+	(*ImportDiagnostic)(nil),        // 10: golem.intel.v1.ImportDiagnostic
+	(*ImportContext)(nil),           // 11: golem.intel.v1.ImportContext
+	(*CancelAnalysis)(nil),          // 12: golem.intel.v1.CancelAnalysis
+	(*WorkerEvent)(nil),             // 13: golem.intel.v1.WorkerEvent
+	(*ArtifactDescriptor)(nil),      // 14: golem.intel.v1.ArtifactDescriptor
+	(*AnalysisResult)(nil),          // 15: golem.intel.v1.AnalysisResult
+	nil,                             // 16: golem.intel.v1.StartAnalysis.OptionsEntry
+	nil,                             // 17: golem.intel.v1.ImportTargetSummary.MetricAvailabilityEntry
 }
 var file_golem_intel_v1_worker_proto_depIdxs = []int32{
-	2, // 0: golem.intel.v1.WorkerEnvelope.start_analysis:type_name -> golem.intel.v1.StartAnalysis
-	3, // 1: golem.intel.v1.WorkerEnvelope.cancel_analysis:type_name -> golem.intel.v1.CancelAnalysis
-	4, // 2: golem.intel.v1.WorkerEnvelope.worker_event:type_name -> golem.intel.v1.WorkerEvent
-	6, // 3: golem.intel.v1.WorkerEnvelope.analysis_result:type_name -> golem.intel.v1.AnalysisResult
-	7, // 4: golem.intel.v1.StartAnalysis.options:type_name -> golem.intel.v1.StartAnalysis.OptionsEntry
-	0, // 5: golem.intel.v1.StartAnalysis.workflow:type_name -> golem.intel.v1.AnalysisWorkflow
-	5, // 6: golem.intel.v1.AnalysisResult.artifacts:type_name -> golem.intel.v1.ArtifactDescriptor
-	7, // [7:7] is the sub-list for method output_type
-	7, // [7:7] is the sub-list for method input_type
-	7, // [7:7] is the sub-list for extension type_name
-	7, // [7:7] is the sub-list for extension extendee
-	0, // [0:7] is the sub-list for field type_name
+	4,  // 0: golem.intel.v1.WorkerEnvelope.start_analysis:type_name -> golem.intel.v1.StartAnalysis
+	12, // 1: golem.intel.v1.WorkerEnvelope.cancel_analysis:type_name -> golem.intel.v1.CancelAnalysis
+	13, // 2: golem.intel.v1.WorkerEnvelope.worker_event:type_name -> golem.intel.v1.WorkerEvent
+	15, // 3: golem.intel.v1.WorkerEnvelope.analysis_result:type_name -> golem.intel.v1.AnalysisResult
+	5,  // 4: golem.intel.v1.WorkerEnvelope.validate_import:type_name -> golem.intel.v1.ValidateImport
+	6,  // 5: golem.intel.v1.WorkerEnvelope.import_validation_result:type_name -> golem.intel.v1.ImportValidationResult
+	16, // 6: golem.intel.v1.StartAnalysis.options:type_name -> golem.intel.v1.StartAnalysis.OptionsEntry
+	2,  // 7: golem.intel.v1.StartAnalysis.workflow:type_name -> golem.intel.v1.AnalysisWorkflow
+	11, // 8: golem.intel.v1.StartAnalysis.import_context:type_name -> golem.intel.v1.ImportContext
+	7,  // 9: golem.intel.v1.ImportValidationResult.input:type_name -> golem.intel.v1.ImportInputSummary
+	8,  // 10: golem.intel.v1.ImportValidationResult.file_policy:type_name -> golem.intel.v1.ImportFilePolicySummary
+	9,  // 11: golem.intel.v1.ImportValidationResult.targets:type_name -> golem.intel.v1.ImportTargetSummary
+	10, // 12: golem.intel.v1.ImportValidationResult.diagnostics:type_name -> golem.intel.v1.ImportDiagnostic
+	17, // 13: golem.intel.v1.ImportTargetSummary.metric_availability:type_name -> golem.intel.v1.ImportTargetSummary.MetricAvailabilityEntry
+	1,  // 14: golem.intel.v1.ImportDiagnostic.severity:type_name -> golem.intel.v1.ImportDiagnosticSeverity
+	14, // 15: golem.intel.v1.AnalysisResult.artifacts:type_name -> golem.intel.v1.ArtifactDescriptor
+	0,  // 16: golem.intel.v1.ImportTargetSummary.MetricAvailabilityEntry.value:type_name -> golem.intel.v1.ImportMetricAvailability
+	17, // [17:17] is the sub-list for method output_type
+	17, // [17:17] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_golem_intel_v1_worker_proto_init() }
@@ -809,14 +1581,20 @@ func file_golem_intel_v1_worker_proto_init() {
 		(*WorkerEnvelope_CancelAnalysis)(nil),
 		(*WorkerEnvelope_WorkerEvent)(nil),
 		(*WorkerEnvelope_AnalysisResult)(nil),
+		(*WorkerEnvelope_ValidateImport)(nil),
+		(*WorkerEnvelope_ImportValidationResult)(nil),
 	}
+	file_golem_intel_v1_worker_proto_msgTypes[3].OneofWrappers = []any{}
+	file_golem_intel_v1_worker_proto_msgTypes[4].OneofWrappers = []any{}
+	file_golem_intel_v1_worker_proto_msgTypes[5].OneofWrappers = []any{}
+	file_golem_intel_v1_worker_proto_msgTypes[7].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_golem_intel_v1_worker_proto_rawDesc), len(file_golem_intel_v1_worker_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   7,
+			NumEnums:      3,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
