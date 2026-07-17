@@ -148,10 +148,10 @@ describe("Research workspace", () => {
     await user.selectOptions(screen.getByLabelText("Source"), "demo");
     expect(screen.queryByLabelText(/I confirm the validation results/i)).not.toBeInTheDocument();
     await user.selectOptions(screen.getByLabelText("Source"), "import");
-    
+
     // Re-attest since we unchecked it earlier
     await user.click(screen.getByRole("checkbox", { name: /attest/i }));
-    
+
     // File input is reset on workflow change, need to re-upload to see confirmation
     const file2 = new File(["test2"], "test2.csv", { type: "text/csv" });
     await user.upload(screen.getByLabelText("Select CSV"), file2);
