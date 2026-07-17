@@ -575,7 +575,7 @@ export interface components {
                 evidence_observation_ids: string[];
             }[];
             evidence: {
-                [key: string]: Record<string, never>;
+                [key: string]: components["schemas"]["ImportEvidenceEntry"];
             };
             contradictions: {
                 /** @constant */
@@ -586,6 +586,56 @@ export interface components {
                 observation_ids: string[];
             }[];
             limitations: string[];
+        };
+        ImportEvidenceEntry: {
+            observation_id: string;
+            entity_id: string;
+            entity_name: string;
+            platform: string;
+            content_id: string | null;
+            dimension: string | null;
+            metric: string;
+            metric_definition_version: string;
+            numerator: number | null;
+            denominator: number | null;
+            value: number;
+            unit: string;
+            /** Format: date-time */
+            published_at: string | null;
+            /** Format: date-time */
+            observed_at: string;
+            /** Format: date-time */
+            recorded_at: string;
+            /** Format: date-time */
+            valid_from: string;
+            /** Format: date-time */
+            valid_to: string | null;
+            /**
+             * Format: uri-reference
+             * @description Exact accepted source-reference.v1 citation. Render only as escaped inert text; never navigate, fetch, prefetch, resolve, or probe it.
+             */
+            source_url: string;
+            native_id: string;
+            connector_version: string;
+            /** @enum {unknown} */
+            classification: "observed" | "derived" | "estimated" | "first_party";
+            confidence: number;
+            artifact_hash: string;
+            extraction_pointer: string;
+            freshness_seconds: number;
+            /** @enum {unknown} */
+            availability: "available" | "unavailable" | "stale" | "failed";
+            coverage: number;
+            /** @enum {unknown} */
+            acquisition_mode: "public_web" | "official_api" | "authorized_account" | "licensed_provider" | "user_import" | "fixture";
+            /** @constant */
+            data_class: "public";
+            /** @constant */
+            permitted_purpose: "competitive_research";
+            /** Format: date-time */
+            retention_until: string;
+            /** @constant */
+            rights_state: "permitted";
         };
         SearchResult: {
             /** @enum {unknown} */

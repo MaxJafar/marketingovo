@@ -11,9 +11,22 @@ export type ResearchStartRequest =
   components["schemas"]["ResearchStartRequest"];
 export type ImportPreview = components["schemas"]["ImportPreview"];
 export type ComparisonReport = components["schemas"]["ComparisonReport"];
+export type ImportEvidenceEntry =
+  components["schemas"]["ImportEvidenceEntry"];
 export type SearchResult = components["schemas"]["SearchResult"];
 export type Entity = components["schemas"]["Entity"];
 export type MonitoringStatus = components["schemas"]["MonitoringStatus"];
+
+// This is product policy, not a navigation affordance. Imported source URLs
+// remain exact, escaped citation strings and are never safe to open or fetch.
+export const importCitationPolicy = {
+  version: "source-reference.v1",
+  rendering: "escaped_inert_text",
+  clickable: false,
+  navigation: "forbidden",
+} as const;
+
+export type ImportCitationPolicy = typeof importCitationPolicy;
 
 export interface ClientOptions {
   baseUrl?: string;
