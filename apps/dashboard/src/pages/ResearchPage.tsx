@@ -233,7 +233,7 @@ export function ResearchPage(): React.JSX.Element {
                 </ul>
               </div>
             )}
-            
+
             {preview.valid && preview.dataset_id && (
               <div className="dataset-reference" style={{ marginBottom: "1.5rem" }}>
                 <h3 style={{ margin: "0 0 0.5rem" }}>Dataset Reference</h3>
@@ -253,8 +253,8 @@ export function ResearchPage(): React.JSX.Element {
                 <div className="target-list" style={{ display: "grid", gap: "0.75rem", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
                   {preview.targets.map(target => (
                     <label key={target.target_id} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem", border: "1px solid var(--line)", borderRadius: "0.5rem", cursor: "pointer", background: selectedTargets.has(target.target_id) ? "var(--mint-soft)" : "var(--canvas)" }}>
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={selectedTargets.has(target.target_id)}
                         onChange={() => toggleTarget(target.target_id)}
                       />

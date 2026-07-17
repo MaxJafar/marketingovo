@@ -57,7 +57,7 @@ const report: ComparisonReport = {
 const reportV2: ImportComparisonReport = {
   schema_version: "golem.comparison-report.v2",
   run_id: "run-import",
-  workflow: "import",
+  workflow: "compare",
   derivation: {
     worker_version: "worker@2",
     model_version: "model@2",
@@ -67,10 +67,14 @@ const reportV2: ImportComparisonReport = {
   generated_at: "2026-07-16T00:00:00Z",
   dataset: {
     dataset_id: "dataset-12345",
-    input_sha256: "abcdef123456",
+    input_sha256: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
     input_size_bytes: 1024,
-    metric_catalog_version: "v1",
-    metrics_requested: [],
+    metric_catalog_version: "competitive-pulse.v1",
+    input_schema_id: "golem.competitive-pulse-import.v1",
+    platform: "TestPlatform",
+    validated_at: "2026-07-16T00:00:00Z",
+    retention_until: "2027-01-01T00:00:00Z",
+    input_parser_version: "golem-python-competitive-pulse-csv@1.0.0",
   },
   summary: "V2 test comparison.",
   targets: [
@@ -166,7 +170,7 @@ describe("EvidencePanel", () => {
     expect(screen.getByText("V2 test comparison.")).toBeInTheDocument();
     expect(screen.getByText("MISSING")).toBeInTheDocument();
     expect(screen.getByText("Metric missing")).toBeInTheDocument();
-    
+
     // Quality check
     expect(screen.getByText("Mean Coverage: 95.0%")).toBeInTheDocument();
     expect(screen.getByText("Mean Confidence: 90.0%")).toBeInTheDocument();
@@ -177,11 +181,11 @@ describe("EvidencePanel", () => {
     // Inert citation check
     const copyButton = screen.getByRole("button", { name: "Copy source URL" });
     expect(copyButton).toBeInTheDocument();
-    
+
     // Make sure no link exists for this imported citation
     const links = screen.queryAllByRole("link");
     expect(links.length).toBe(0);
-    
+
     // Ensure exact source URL is printed
     expect(screen.getByText("https://v2.example.invalid/source")).toBeInTheDocument();
   });

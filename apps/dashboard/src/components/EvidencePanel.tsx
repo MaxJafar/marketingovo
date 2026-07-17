@@ -33,7 +33,7 @@ function EvidencePanelV2({ report }: { report: ImportComparisonReport }): React.
           <p>{report.summary}</p>
         </div>
       </div>
-      
+
       {report.dataset && (
         <div className="dataset-details" style={{ marginBottom: "1.5rem", padding: "1rem", background: "var(--canvas)", borderRadius: "0.5rem" }}>
           <strong>Dataset details</strong>
@@ -125,7 +125,7 @@ function EvidencePanelV2({ report }: { report: ImportComparisonReport }): React.
                         <div style={{ fontWeight: "bold", fontSize: "0.9rem", color: metric.availability !== "available" ? "var(--danger)" : "inherit" }}>
                           {displayValue}
                         </div>
-                        
+
                         {metric.limitations && metric.limitations.length > 0 && (
                           <ul style={{ fontSize: "0.75rem", color: "var(--warning)", marginTop: "0.25rem", paddingLeft: "1rem" }}>
                             {metric.limitations.map((lim, idx) => (
@@ -133,7 +133,7 @@ function EvidencePanelV2({ report }: { report: ImportComparisonReport }): React.
                             ))}
                           </ul>
                         )}
-                        
+
                         <div style={{ fontSize: "0.7rem", color: "var(--muted)", marginTop: "0.5rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.25rem" }}>
                           <div>Def: {metric.definition_version}</div>
                           <div>Pop: {metric.population}</div>
@@ -175,7 +175,7 @@ function EvidencePanelV2({ report }: { report: ImportComparisonReport }): React.
                                       <span style={{ fontFamily: "monospace", fontSize: "0.75rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "200px" }} title={obs.source_url}>
                                         {obs.source_url}
                                       </span>
-                                      <button 
+                                      <button
                                         onClick={() => navigator.clipboard.writeText(obs.source_url)}
                                         aria-label="Copy source URL"
                                         style={{ background: "none", border: "1px solid var(--border)", borderRadius: "0.25rem", cursor: "pointer", fontSize: "0.7rem", padding: "0.1rem 0.3rem" }}
