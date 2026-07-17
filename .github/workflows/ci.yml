@@ -54,6 +54,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
+      - name: Install Linux credential-broker metadata
+        if: matrix.os == 'ubuntu-24.04'
+        run: sudo apt-get update && sudo apt-get install --yes libdbus-1-dev pkg-config
       - name: Check native credential broker
         run: cargo check --locked --manifest-path packages/credential-broker-native/Cargo.toml
 
@@ -91,6 +94,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
+      - name: Install Linux credential-broker metadata
+        run: sudo apt-get update && sudo apt-get install --yes libdbus-1-dev pkg-config
       - name: Enforce native formatting
         run: cargo fmt --all --manifest-path packages/credential-broker-native/Cargo.toml -- --check
       - name: Enforce native lints
@@ -142,6 +147,9 @@ jobs:
   dependency-audit:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v6
         with:
