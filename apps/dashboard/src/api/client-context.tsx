@@ -17,6 +17,7 @@ export function IntelClientProvider({
         baseUrl: import.meta.env.VITE_GOLEM_INTEL_API_URL ?? "",
         csrfToken,
         credentials: "same-origin",
+        fetch: window.fetch.bind(window),
       }),
     [csrfToken],
   );

@@ -123,6 +123,7 @@ export function ResearchPage(): React.JSX.Element {
     if (next.has(id)) next.delete(id);
     else next.add(id);
     setSelectedTargets(next);
+    setPreviewConfirmed(false);
   }
 
   function copyDatasetId() {
@@ -137,7 +138,7 @@ export function ResearchPage(): React.JSX.Element {
   const isStartDisabled =
     start.isPending ||
     (workflow === "import" &&
-      (!preview?.valid || selectedTargets.size < 2 || selectedTargets.size > 5 || !previewConfirmed));
+      (!attested || !preview?.valid || selectedTargets.size < 2 || selectedTargets.size > 5 || !previewConfirmed));
 
   return (
     <div className="research-workspace">
@@ -214,7 +215,10 @@ export function ResearchPage(): React.JSX.Element {
                   <input
                     type="checkbox"
                     checked={attested}
-                    onChange={(e) => setAttested(e.target.checked)}
+                    onChange={(e) => {
+                      setAttested(e.target.checked);
+                      if (!e.target.checked) setPreviewConfirmed(false);
+                    }}
                   />
                   <span>I attest I have the right to process this data for competitive research</span>
                 </label>

@@ -18,7 +18,7 @@ vi.mock("../api/client-context.js", () => ({
       comparisons: { start: mocks.comparisonStart },
       runs: {
         get: mocks.runGet,
-        report: vi.fn(),
+        report: vi.fn().mockResolvedValue(null),
         cancel: vi.fn(),
         replay: mocks.runReplay,
       },
@@ -135,8 +135,17 @@ describe("Research workspace", () => {
     // Check confirmation
     const confirmation = screen.getByLabelText(/I confirm the validation results/i);
     await user.click(confirmation);
+    expect(confirmation).toBeChecked();
 
-    // Submi
+    // Withdraw attestation invalidates preview confirmation
+    await user.click(attestation);
+    expect(confirmation).not.toBeChecked();
+
+    // Re-check both for submission
+    await user.click(attestation);
+    await user.click(confirmation);
+
+    // Submit
     const submitBtn = screen.getByRole("button", { name: "Start comparison" });
     expect(submitBtn).not.toBeDisabled();
     fireEvent.submit(submitBtn.closest("form")!);
