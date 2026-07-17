@@ -1,70 +1,94 @@
-// Env-var compat layer.
+// Environment compatibility boundary.
 //
-// Primary names: `GOLEMSEO_*`. Legacy names: `SCREAMINGCLAW_*` (still
-// honored so existing scripts and the golem-seo-dashboard backend
-// keep working). A one-time deprecation warning is logged per
-// legacy name per process.
+// Product code reads AGENTSEO_* only. This module accepts bounded legacy
+// names in priority order and emits one value-free warning per legacy name.
 
-const warned = new Set<string>();
+const warnedLegacyNames = new Set<string>();
+const CANONICAL_PREFIX = "AGENTSEO_";
+
+function nonEmptyEnvironmentValue(name: string): string | undefined {
+  const value = process.env[name];
+  return value === undefined || value === "" ? undefined : value;
+}
+
+function legacyNames(
+  canonicalName: string,
+  explicitLegacyName: string,
+): readonly string[] {
+  const suffix = canonicalName.slice(CANONICAL_PREFIX.length);
+  const names = [`GOLEMSEO_${suffix}`, `GOLEM_SEO_${suffix}`];
+  if (explicitLegacyName) names.push(explicitLegacyName);
+  return [...new Set(names)];
+}
+
+function warnLegacyName(legacyName: string, canonicalName: string): void {
+  if (warnedLegacyNames.has(legacyName)) return;
+  warnedLegacyNames.add(legacyName);
+  // Do not include the environment value: many supported values are secrets.
+  // eslint-disable-next-line no-console
+  console.warn(
+    `[agentseo] env ${legacyName} is deprecated; use ${canonicalName} instead`,
+  );
+}
 
 function compatRead(
-  newName: string,
-  oldName: string,
-): { value: string; fromLegacy: boolean } {
-  const newRaw = process.env[newName];
-  if (newRaw !== undefined && newRaw !== "") {
-    return { value: newRaw, fromLegacy: false };
+  canonicalName: string,
+  explicitLegacyName: string,
+): string | undefined {
+  if (!canonicalName.startsWith(CANONICAL_PREFIX)) {
+    throw new Error(
+      `Canonical environment names must start with ${CANONICAL_PREFIX}`,
+    );
   }
-  const oldRaw = process.env[oldName];
-  if (oldRaw !== undefined && oldRaw !== "") {
-    if (!warned.has(oldName)) {
-      warned.add(oldName);
-      // eslint-disable-next-line no-console
-      console.warn(
-        `[golem-seo] env ${oldName} is deprecated, use ${newName} instead`,
-      );
-    }
-    return { value: oldRaw, fromLegacy: true };
+  const canonicalValue = nonEmptyEnvironmentValue(canonicalName);
+  if (canonicalValue !== undefined) return canonicalValue;
+  for (const legacyName of legacyNames(canonicalName, explicitLegacyName)) {
+    const legacyValue = nonEmptyEnvironmentValue(legacyName);
+    if (legacyValue === undefined) continue;
+    warnLegacyName(legacyName, canonicalName);
+    return legacyValue;
   }
-  return { value: "", fromLegacy: false };
+  return undefined;
 }
 
-/** Read a string env var with GOLEMSEO_* → SCREAMINGCLAW_* fallback. */
+/**
+ * Reads a canonical AGENTSEO_* value, then GOLEMSEO_*, GOLEM_SEO_*, and the
+ * explicit historical alias (normally SCREAMINGCLAW_*). Canonical wins.
+ */
 export function envStr(
-  newName: string,
-  oldName: string,
+  canonicalName: string,
+  explicitLegacyName = "",
   fallback = "",
 ): string {
-  const { value } = compatRead(newName, oldName);
-  return value === "" ? fallback : value;
+  return compatRead(canonicalName, explicitLegacyName) ?? fallback;
 }
 
-/** Read a boolean env var. Truthy: "1" or "true" (case-insensitive). */
+/** Read a boolean environment value. Truthy values are "1" and "true". */
 export function envBool(
-  newName: string,
-  oldName: string,
+  canonicalName: string,
+  explicitLegacyName: string,
   fallback: boolean,
 ): boolean {
-  const { value } = compatRead(newName, oldName);
-  if (value === "") return fallback;
+  const value = compatRead(canonicalName, explicitLegacyName);
+  if (value === undefined) return fallback;
   return value === "1" || value.toLowerCase() === "true";
 }
 
-/** Read a positive int env var. Returns fallback on missing, NaN, or <= 0. */
+/** Read a positive integer with a defensive upper bound. */
 export function envInt(
-  newName: string,
-  oldName: string,
+  canonicalName: string,
+  explicitLegacyName: string,
   fallback: number,
   hardMax = Number.MAX_SAFE_INTEGER,
 ): number {
-  const { value } = compatRead(newName, oldName);
-  if (value === "") return fallback;
-  const n = Number.parseInt(value, 10);
-  if (!Number.isFinite(n) || n <= 0) return fallback;
-  return Math.min(n, hardMax);
+  const value = compatRead(canonicalName, explicitLegacyName);
+  if (value === undefined) return fallback;
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return Math.min(parsed, hardMax);
 }
 
-/** Test-only: clear deprecation log memory between tests. */
+/** Test-only: clear one-time warning state. */
 export function _resetEnvCompatForTests(): void {
-  warned.clear();
+  warnedLegacyNames.clear();
 }

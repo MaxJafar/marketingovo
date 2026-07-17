@@ -56,7 +56,8 @@ const deployed = spawnSync(
   [
     "--config.strict-peer-dependencies=false",
     "--filter",
-    "@golem-seo/cli",
+    "agentseo",
+    "--fail-if-no-match",
     "--prod",
     "deploy",
     "--legacy",
@@ -79,7 +80,7 @@ const installedBrowser = spawnSync(
   "pnpm",
   [
     "--filter",
-    "@golem-seo/core",
+    "@agentseoapp/core",
     "exec",
     "playwright",
     "install",

@@ -1,3 +1,3 @@
-export { GolemSeoClient, GolemSeoApiError } from "@golem-seo/sdk";
-export { createLocalServer } from "@golem-seo/server";
-export { GolemLocalRuntime, defaultDataDirectory } from "@golem-seo/runtime";
+export { GolemSeoClient, GolemSeoApiError } from "@agentseoapp/sdk";
+export { createLocalServer } from "@agentseoapp/server";
+export { GolemLocalRuntime, defaultDataDirectory } from "@agentseoapp/runtime";

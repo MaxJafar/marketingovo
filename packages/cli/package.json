@@ -1,13 +1,8 @@
 {
-  "name": "@golem-seo/cli",
+  "name": "agentseo",
   "version": "0.11.0-alpha.0",
-  "description": "CLI and local service launcher for Golem SEO Community Edition",
+  "description": "CLI and local service launcher for AGENTseo",
   "license": "Elastic-2.0",
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/",
-    "provenance": true
-  },
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
@@ -19,7 +14,8 @@
     }
   },
   "bin": {
-    "golem-seo": "./dist/cli.js"
+    "agentseo": "./dist/cli.js",
+    "golem-seo": "./dist/golem-seo.js"
   },
   "files": [
     "dist",
@@ -32,34 +28,27 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests",
-    "dev": "tsx src/cli.ts serve"
+    "dev": "tsx src/cli.ts serve",
+    "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
   },
   "dependencies": {
-    "@golem-seo/contracts": "workspace:*",
-    "@golem-seo/credentials": "workspace:*",
-    "@golem-seo/legacy-import": "workspace:*",
-    "@golem-seo/runtime": "workspace:*",
-    "@golem-seo/sdk": "workspace:*",
-    "@golem-seo/server": "workspace:*",
-    "@golem-seo/storage-sqlite": "workspace:*"
+    "@agentseoapp/contracts": "workspace:*",
+    "@agentseoapp/credentials": "workspace:*",
+    "@agentseoapp/legacy-import": "workspace:*",
+    "@agentseoapp/runtime": "workspace:*",
+    "@agentseoapp/sdk": "workspace:*",
+    "@agentseoapp/server": "workspace:*",
+    "@agentseoapp/storage-sqlite": "workspace:*"
   },
   "devDependencies": {
-    "@golem-seo/dashboard": "workspace:*",
+    "@agentseoapp/dashboard": "workspace:*",
     "@types/node": "^24.3.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/GolemWorkers/golem-seo.git",
-    "directory": "packages/cli"
-  },
-  "homepage": "https://golemworkers.com/seo",
-  "bugs": {
-    "url": "https://github.com/GolemWorkers/golem-seo/issues"
-  },
   "engines": {
     "node": ">=24 <25"
-  }
+  },
+  "private": true
 }

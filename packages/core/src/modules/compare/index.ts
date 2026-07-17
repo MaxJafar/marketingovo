@@ -75,10 +75,10 @@ export const compareModule: Module = {
   },
   dependsOn: [],
   configKeys: [
-    "GOLEMSEO_RENDER",
-    "GOLEMSEO_LIGHTHOUSE",
-    "GOLEMSEO_MAX_URLS",
-    "GOLEMSEO_MAX_RUNTIME_MS",
+    "AGENTSEO_RENDER",
+    "AGENTSEO_LIGHTHOUSE",
+    "AGENTSEO_MAX_URLS",
+    "AGENTSEO_MAX_RUNTIME_MS",
   ],
   async invoke(input: ModuleInput, ctx: ModuleContext): Promise<ModuleOutput> {
     const logger = (ctx.logger ?? new ConsoleLogger()).child({

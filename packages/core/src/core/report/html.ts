@@ -73,7 +73,7 @@ export function reportToHtml(r: Report): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Golem SEO audit &mdash; ${escapeHtml(r.startUrl)}</title>
+  <title>AGENTseo audit &mdash; ${escapeHtml(r.startUrl)}</title>
   <style>
     :root { --fg: #172033; --bg: #f4f5fb; --surface: #fff; --muted: #687086; --border: #e2e5ef; --brand: #6558e8; --brand-soft: #eeecff; --high: #c33b4a; --med: #b86a00; --low: #28659d; --code: #f7f8fc; }
     @media (prefers-color-scheme: dark) {
@@ -127,7 +127,7 @@ export function reportToHtml(r: Report): string {
 <main class="report-shell">
   <header class="report-header">
     <div>
-      <div class="brand"><span class="brand-mark">GS</span> Golem SEO</div>
+      <div class="brand"><span class="brand-mark">GS</span> AGENTseo</div>
       <h1>SEO evidence snapshot</h1>
       <div class="meta">A reproducible audit for prioritization and verification.</div>
     </div>
@@ -171,7 +171,7 @@ export function reportToHtml(r: Report): string {
   }
 
   <div class="footer">
-    Golem SEO Community Edition &middot; report schema 0.11 &middot; pages: ${r.summary.pagesCrawled} &middot; request rate: ${r.config.requestsPerSecond}/s &middot; configured crawl scope: ${r.config.maxUrls} URLs
+    AGENTseo Community Edition &middot; report schema 0.11 &middot; pages: ${r.summary.pagesCrawled} &middot; request rate: ${r.config.requestsPerSecond}/s &middot; configured crawl scope: ${r.config.maxUrls} URLs
   </div>
 </main>
 </body>

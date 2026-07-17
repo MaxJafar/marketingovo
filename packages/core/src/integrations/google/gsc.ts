@@ -5,7 +5,7 @@
 // Reference: https://developers.google.com/webmasters/api/v3/searchanalytics
 
 import type { GoogleAccessTokenManager } from "./oauth.js";
-import { safeGoogleSearchConsoleFetch } from "@golem-seo/integrations";
+import { safeGoogleSearchConsoleFetch } from "@agentseoapp/integrations";
 
 const API = "https://www.googleapis.com/webmasters/v3";
 const MAX_PAGE_ROWS = 25_000;

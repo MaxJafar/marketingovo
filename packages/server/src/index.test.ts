@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { GolemLocalRuntime } from "@golem-seo/runtime";
+import { GolemLocalRuntime } from "@agentseoapp/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 const HOST = "127.0.0.1:3210";
@@ -14,6 +14,7 @@ describe("local Google desktop OAuth", () => {
   afterEach(async () => {
     await Promise.all(activeServers.splice(0).map((server) => server.close()));
     vi.unstubAllEnvs();
+    vi.restoreAllMocks();
   });
 
   async function authenticatedHeaders(
@@ -24,6 +25,7 @@ describe("local Google desktop OAuth", () => {
   }
 
   it("returns clear problem+json when the public desktop client ID is not configured", async () => {
+    vi.stubEnv("AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID", "");
     vi.stubEnv("GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID", "");
     vi.stubEnv("GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID", "");
     const dataDir = mkdtempSync(join(tmpdir(), "golem-oauth-server-"));
@@ -42,11 +44,44 @@ describe("local Google desktop OAuth", () => {
       "application/problem+json",
     );
     expect(response.json()).toMatchObject({
+      type: "urn:agentseo:problem:google-oauth-not-configured",
       code: "google_oauth_not_configured",
       title: "Google OAuth is not configured",
       status: 503,
     });
-    expect(response.body).toContain("GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID");
+    expect(response.body).toContain("AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID");
+  });
+
+  it("prefers the canonical desktop client ID over both migration aliases", async () => {
+    const canonicalClientId = "canonical-client.apps.googleusercontent.com";
+    const legacyClientId = "legacy-client-value-must-not-be-used";
+    const irregularClientId = "irregular-client-value-must-not-be-used";
+    vi.stubEnv("AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID", canonicalClientId);
+    vi.stubEnv("GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID", legacyClientId);
+    vi.stubEnv("GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID", irregularClientId);
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const runtime = new GolemLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-oauth-precedence-")),
+    });
+    const server = await createLocalServer({ runtime, port: 3210 });
+    activeServers.push(server);
+
+    const response = await server.app.inject({
+      method: "POST",
+      url: "/api/v1/integrations/google-search-console/auth/start",
+      headers: await authenticatedHeaders(server),
+    });
+
+    expect(response.statusCode).toBe(200);
+    const authorizationUrl = new URL(
+      (response.json() as { authorizationUrl: string }).authorizationUrl,
+    );
+    expect(authorizationUrl.searchParams.get("client_id")).toBe(
+      canonicalClientId,
+    );
+    expect(response.body).not.toContain(legacyClientId);
+    expect(response.body).not.toContain(irregularClientId);
+    expect(warning).not.toHaveBeenCalled();
   });
 
   it("uses a random loopback callback, persists safe metadata, and never serializes tokens", async () => {
@@ -114,6 +149,8 @@ describe("local Google desktop OAuth", () => {
     const callbackResponse = await fetch(callback, { redirect: "error" });
     expect(callbackResponse.status).toBe(200);
     const callbackBody = await callbackResponse.text();
+    expect(callbackBody).toContain("<title>AGENTseo connected</title>");
+    expect(callbackBody).not.toContain("Golem SEO connected");
     expect(callbackBody).not.toContain(accessToken);
     expect(callbackBody).not.toContain(refreshToken);
     expect(oauthFetch).toHaveBeenCalledOnce();
@@ -121,7 +158,11 @@ describe("local Google desktop OAuth", () => {
     const replayResponse = await fetch(callback, { redirect: "error" });
     expect(replayResponse.status).toBe(410);
     const replayBody = await replayResponse.text();
-    expect(replayBody).toContain("oauth_transaction_replayed");
+    expect(JSON.parse(replayBody)).toMatchObject({
+      type: "urn:agentseo:problem:oauth-transaction-replayed",
+      code: "oauth_transaction_replayed",
+      status: 410,
+    });
     expect(replayBody).not.toContain(accessToken);
     expect(replayBody).not.toContain(refreshToken);
     expect(oauthFetch).toHaveBeenCalledOnce();
@@ -401,9 +442,20 @@ describe("dashboard bootstrap tickets", () => {
       payload: { token: ticket.token },
     });
     expect(exchanged.statusCode).toBe(200);
-    expect(exchanged.headers["set-cookie"]).toContain("golem_session=");
+    const setCookieHeader = exchanged.headers["set-cookie"];
+    const setCookies = Array.isArray(setCookieHeader)
+      ? setCookieHeader
+      : [String(setCookieHeader)];
+    expect(
+      setCookies.some((cookie) => cookie.startsWith("agentseo_session=")),
+    ).toBe(true);
+    expect(
+      setCookies.some((cookie) => cookie.startsWith("golem_session=")),
+    ).toBe(true);
     const session = exchanged.json() as { csrf: string };
-    const cookie = String(exchanged.headers["set-cookie"]).split(";", 1)[0]!;
+    const cookie = setCookies
+      .find((value) => value.startsWith("agentseo_session="))!
+      .split(";", 1)[0]!;
 
     const sessionCannotMint = await server.app.inject({
       method: "POST",
@@ -412,7 +464,7 @@ describe("dashboard bootstrap tickets", () => {
         host: HOST,
         cookie,
         origin: "http://127.0.0.1:3210",
-        "x-golem-csrf": session.csrf,
+        "x-agentseo-csrf": session.csrf,
       },
     });
     expect(sessionCannotMint.statusCode).toBe(401);
@@ -446,6 +498,188 @@ describe("dashboard bootstrap tickets", () => {
     expect(expired.json()).toMatchObject({ code: "bootstrap_rejected" });
   });
 
+  it("accepts canonical and legacy dashboard identifiers with canonical-first security precedence", async () => {
+    const runtime = new GolemLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-session-compatibility-")),
+    });
+    const server = await createLocalServer({ runtime, port: 3210 });
+    activeServers.push(server);
+    const serviceToken = readFileSync(server.serviceTokenPath, "utf8").trim();
+    const serviceHeaders = {
+      host: HOST,
+      authorization: `Bearer ${serviceToken}`,
+    };
+    const ticketResponse = await server.app.inject({
+      method: "POST",
+      url: "/api/v1/session/bootstrap-token",
+      headers: serviceHeaders,
+    });
+    const ticket = ticketResponse.json() as { token: string };
+    const exchanged = await server.app.inject({
+      method: "POST",
+      url: "/api/v1/session/bootstrap",
+      headers: { host: HOST },
+      payload: ticket,
+    });
+    const session = exchanged.json() as { csrf: string };
+    const rawSetCookie = exchanged.headers["set-cookie"];
+    const setCookies = Array.isArray(rawSetCookie)
+      ? rawSetCookie
+      : [String(rawSetCookie)];
+    const cookieValue = (name: string) =>
+      setCookies
+        .find((value) => value.startsWith(`${name}=`))!
+        .split(";", 1)[0]!
+        .slice(name.length + 1);
+    const canonicalValue = cookieValue("agentseo_session");
+    const legacyValue = cookieValue("golem_session");
+    expect(legacyValue).toBe(canonicalValue);
+
+    const canonicalSession = await server.app.inject({
+      method: "GET",
+      url: "/api/v1/session",
+      headers: {
+        host: HOST,
+        cookie: `agentseo_session=${canonicalValue}`,
+      },
+    });
+    const legacySession = await server.app.inject({
+      method: "GET",
+      url: "/api/v1/session",
+      headers: { host: HOST, cookie: `golem_session=${legacyValue}` },
+    });
+    expect(canonicalSession.statusCode).toBe(200);
+    expect(legacySession.json()).toEqual(canonicalSession.json());
+
+    const canonicalMutation = await server.app.inject({
+      method: "POST",
+      url: "/api/v1/projects",
+      headers: {
+        host: HOST,
+        cookie: `agentseo_session=${canonicalValue}; golem_session=${legacyValue}`,
+        origin: "http://127.0.0.1:3210",
+        "x-agentseo-csrf": session.csrf,
+        "x-golem-csrf": "ignored-legacy-conflict",
+      },
+      payload: {
+        name: "Canonical session project",
+        canonicalUrl: "https://canonical.example.com",
+      },
+    });
+    expect(canonicalMutation.statusCode).toBe(201);
+
+    const legacyMutation = await server.app.inject({
+      method: "POST",
+      url: "/api/v1/projects",
+      headers: {
+        host: HOST,
+        cookie: `golem_session=${legacyValue}`,
+        origin: "http://127.0.0.1:3210",
+        "x-golem-csrf": session.csrf,
+      },
+      payload: {
+        name: "Legacy session project",
+        canonicalUrl: "https://legacy.example.com",
+      },
+    });
+    expect(legacyMutation.statusCode).toBe(201);
+
+    const conflictingCsrf = await server.app.inject({
+      method: "POST",
+      url: "/api/v1/projects",
+      headers: {
+        host: HOST,
+        cookie: `agentseo_session=${canonicalValue}`,
+        origin: "http://127.0.0.1:3210",
+        "x-agentseo-csrf": "invalid-canonical-conflict",
+        "x-golem-csrf": session.csrf,
+      },
+      payload: {
+        name: "Rejected project",
+        canonicalUrl: "https://rejected.example.com",
+      },
+    });
+    expect(conflictingCsrf.statusCode).toBe(403);
+    expect(conflictingCsrf.json()).toMatchObject({ code: "csrf_rejected" });
+
+    const conflictingSession = await server.app.inject({
+      method: "GET",
+      url: "/api/v1/session",
+      headers: {
+        host: HOST,
+        cookie: `agentseo_session=invalid-canonical-conflict; golem_session=${legacyValue}`,
+      },
+    });
+    expect(conflictingSession.statusCode).toBe(401);
+
+    const canonicalDashboard = await server.app.inject({
+      method: "GET",
+      url: "/api/v1/runs",
+      headers: {
+        ...serviceHeaders,
+        "x-agentseo-client": "dashboard",
+        "x-golem-client": "legacy-conflict",
+      },
+    });
+    expect(canonicalDashboard.json()).toHaveProperty("meta");
+
+    const legacyDashboard = await server.app.inject({
+      method: "GET",
+      url: "/api/v1/runs",
+      headers: { ...serviceHeaders, "x-golem-client": "dashboard" },
+    });
+    expect(legacyDashboard.json()).toHaveProperty("meta");
+
+    const canonicalNonDashboard = await server.app.inject({
+      method: "GET",
+      url: "/api/v1/runs",
+      headers: {
+        ...serviceHeaders,
+        "x-agentseo-client": "sdk",
+        "x-golem-client": "dashboard",
+      },
+    });
+    expect(canonicalNonDashboard.json()).toEqual([]);
+  });
+
+  it("publishes canonical API identity while documenting the 1.x session alias", async () => {
+    const runtime = new GolemLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-openapi-identity-")),
+    });
+    const server = await createLocalServer({ runtime, port: 3210 });
+    activeServers.push(server);
+
+    const response = await server.app.inject({
+      method: "GET",
+      url: "/api/v1/openapi.json",
+      headers: { host: HOST },
+    });
+    expect(response.statusCode).toBe(200);
+    const document = response.json() as {
+      info: { title: string; description: string };
+      components: {
+        securitySchemes: Record<string, Record<string, string>>;
+      };
+    };
+    expect(document.info).toEqual({
+      title: "AGENTseo Local API",
+      version: "1.0.0",
+      description: "Loopback API for the local-first AGENTseo application",
+    });
+    expect(document.components.securitySchemes.localServiceToken).toMatchObject(
+      { bearerFormat: "AGENTseo local service token" },
+    );
+    expect(document.components.securitySchemes.localSession).toMatchObject({
+      name: "agentseo_session",
+    });
+    expect(
+      document.components.securitySchemes.legacyLocalSession,
+    ).toMatchObject({
+      name: "golem_session",
+      description: expect.stringContaining("Deprecated 1.x"),
+    });
+  });
+
   it("serves the bundled dashboard index without registering the root route twice", async () => {
     const dataDir = mkdtempSync(join(tmpdir(), "golem-dashboard-server-"));
     const dashboardDir = mkdtempSync(join(tmpdir(), "golem-dashboard-assets-"));
@@ -472,115 +706,86 @@ describe("dashboard bootstrap tickets", () => {
   });
 });
 
-describe("GolemWorkers project transfer", () => {
+describe("hosted service independence", () => {
   const activeServers: LocalServer[] = [];
 
   afterEach(async () => {
     await Promise.all(activeServers.splice(0).map((server) => server.close()));
+    vi.unstubAllGlobals();
   });
 
-  it("links through the hosted device flow and sends a secret-free raw project bundle", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-hosted-server-"));
-    const runtime = new GolemLocalRuntime({ dataDir });
-    let importedBundle: Record<string, unknown> | null = null;
-    const hostedFetch = vi.fn<typeof fetch>(async (input, init) => {
-      const url = String(input);
-      if (url.endsWith("/v1/device/authorizations")) {
-        return new Response(
-          JSON.stringify({
-            deviceCode: "private-device-code-never-returned-locally",
-            userCode: "ABCD-1234",
-            verificationUri: "https://golemworkers.com/seo/device",
-            expiresAt: "2026-07-15T12:10:00.000Z",
-            intervalSeconds: 5,
-          }),
-          { status: 201, headers: { "content-type": "application/json" } },
-        );
-      }
-      if (url.endsWith("/v1/device/token")) {
-        return new Response(
-          JSON.stringify({
-            deviceToken: "linked-device-token-never-returned-locally",
-            orgId: "org-hosted",
-            expiresAt: "2026-10-15T12:00:00.000Z",
-          }),
-          { status: 200, headers: { "content-type": "application/json" } },
-        );
-      }
-      if (url.endsWith("/v1/imports/golemseo")) {
-        const headers = new Headers(init?.headers);
-        expect(headers.get("authorization")).toBe(
-          "Bearer linked-device-token-never-returned-locally",
-        );
-        expect(headers.get("x-device-org")).toBe("org-hosted");
-        importedBundle = JSON.parse(
-          Buffer.from(init?.body as Uint8Array).toString("utf8"),
-        ) as Record<string, unknown>;
-        return new Response(
-          JSON.stringify({
-            import: {
-              projectId: "hosted-project",
-              runCount: 0,
-              actionCount: 0,
-              issueCount: 0,
-            },
-          }),
-          { status: 201, headers: { "content-type": "application/json" } },
-        );
-      }
-      throw new Error(`Unexpected hosted request: ${url}`);
+  it("leaves legacy hosted routes unregistered without making network calls", async () => {
+    const hostedFetch = vi.fn<typeof fetch>(async (input) => {
+      throw new Error(`Unexpected hosted request: ${String(input)}`);
+    });
+    vi.stubGlobal("fetch", hostedFetch);
+    const runtime = new GolemLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-local-server-")),
     });
     const server = await createLocalServer({
       runtime,
       port: 3210,
-      golemWorkersFetch: hostedFetch,
-      golemWorkersNow: () => Date.parse("2026-07-15T12:00:00.000Z"),
     });
     activeServers.push(server);
     const serviceToken = readFileSync(server.serviceTokenPath, "utf8").trim();
     const headers = { host: HOST, authorization: `Bearer ${serviceToken}` };
-    const project = await runtime.projects.create({
-      name: "Transfer site",
-      canonicalUrl: "https://example.com",
+
+    const responses = await Promise.all([
+      server.app.inject({
+        method: "GET",
+        url: "/api/v1/golemworkers/device/status",
+        headers,
+      }),
+      server.app.inject({
+        method: "POST",
+        url: "/api/v1/golemworkers/device/start",
+        headers,
+      }),
+      server.app.inject({
+        method: "DELETE",
+        url: "/api/v1/golemworkers/device",
+        headers,
+      }),
+      server.app.inject({
+        method: "POST",
+        url: "/api/v1/golemworkers/import",
+        headers,
+        payload: { projectId: "legacy-project" },
+      }),
+    ]);
+
+    expect(responses.map(({ statusCode }) => statusCode)).toEqual([
+      404, 404, 404, 404,
+    ]);
+    expect(
+      await runtime.credentialStore.status({
+        provider: "golemworkers",
+        account: "default",
+        kind: "device",
+      }),
+    ).toMatchObject({ exists: false });
+
+    const capabilities = await server.app.inject({
+      method: "GET",
+      url: "/api/v1/capabilities",
+      headers: { host: HOST },
+    });
+    expect(capabilities.statusCode).toBe(200);
+    expect(capabilities.json()).toMatchObject({
+      hosted: {
+        available: false,
+        url: "urn:agentseo:hosted-unavailable",
+        message: "AGENTseo is local-first; no hosted service is configured.",
+      },
     });
 
-    const start = await server.app.inject({
-      method: "POST",
-      url: "/api/v1/golemworkers/device/start",
-      headers,
+    const openApi = await server.app.inject({
+      method: "GET",
+      url: "/api/v1/openapi.json",
+      headers: { host: HOST },
     });
-    expect([200, 202]).toContain(start.statusCode);
-    expect(start.body).toContain("ABCD-1234");
-    expect(start.body).not.toContain("private-device-code");
-    expect(start.body).not.toContain("linked-device-token");
-    await vi.waitFor(async () =>
-      expect(
-        (
-          await runtime.credentialStore.status({
-            provider: "golemworkers",
-            account: "default",
-            kind: "device",
-          })
-        ).exists,
-      ).toBe(true),
-    );
-
-    const imported = await server.app.inject({
-      method: "POST",
-      url: "/api/v1/golemworkers/import",
-      headers,
-      payload: { projectId: project.id },
-    });
-    expect(imported.statusCode).toBe(201);
-    expect(imported.json()).toMatchObject({
-      import: { projectId: "hosted-project" },
-    });
-    expect(imported.body).not.toContain("linked-device-token");
-    expect(importedBundle).toMatchObject({
-      format: "golemseo-project",
-      version: 2,
-      secretsIncluded: false,
-      project: { id: project.id },
-    });
+    expect(openApi.statusCode).toBe(200);
+    expect(openApi.body).not.toContain("/api/v1/golemworkers");
+    expect(hostedFetch).not.toHaveBeenCalled();
   });
 });

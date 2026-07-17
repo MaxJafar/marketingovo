@@ -2,7 +2,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { ProjectContextProfile } from "@golem-seo/contracts";
+import type { ProjectContextProfile } from "@agentseoapp/contracts";
 import { GolemDatabase } from "./database.js";
 
 const profile = (

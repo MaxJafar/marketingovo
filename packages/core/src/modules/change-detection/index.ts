@@ -8,12 +8,12 @@
 // audit-run store being populated, which the audit-full module
 // does automatically. So a typical workflow is:
 //
-//   $ golem-seo audit <url> --modules onpage,technical ...
-//   $ golem-seo change-detection <url>            # delta vs prior run
+//   $ agentseo audit <url> --modules onpage,technical ...
+//   $ agentseo change-detection <url>            # delta vs prior run
 //
 //   or in one composer run:
 //
-//   $ golem-seo audit <url> --modules onpage,technical,integrations:change-detection
+//   $ agentseo audit <url> --modules onpage,technical,integrations:change-detection
 //
 // In the composer path, the module reads the run that was just
 // persisted by audit-full and compares it to the second-most-

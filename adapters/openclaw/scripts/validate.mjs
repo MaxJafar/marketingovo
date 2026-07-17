@@ -42,7 +42,7 @@ const optionalTools = Object.entries(manifest.toolMetadata ?? {})
 if (JSON.stringify(optionalTools) !== JSON.stringify(expectedOptional))
   throw new Error("OpenClaw optional tool metadata drifted");
 
-if (!source.includes('from "@golem-seo/contracts/agent-tools"'))
+if (!source.includes('from "@agentseoapp/contracts/agent-tools"'))
   throw new Error("OpenClaw must project the canonical agent tool contracts");
 
 if (!existsSync(runtimePath))
@@ -55,7 +55,7 @@ if (
 )
   throw new Error("OpenClaw package files omit runtime metadata");
 if (
-  !packageJson.dependencies?.["@golem-seo/contracts"] ||
+  !packageJson.dependencies?.["@agentseoapp/contracts"] ||
   !packageJson.dependencies?.typebox ||
   !packageJson.peerDependencies?.openclaw
 )

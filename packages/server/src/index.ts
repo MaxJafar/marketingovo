@@ -60,27 +60,28 @@ import {
   type ExtractionRule,
   type ProjectContextProfile,
   type Run,
-} from "@golem-seo/contracts";
+} from "@agentseoapp/contracts";
 import {
   GOLEMSEO_PROJECT_BUNDLE_LIMITS,
   GolemSeoProjectBundleV2Schema,
   ProjectImportResultSchema,
-} from "@golem-seo/contracts/project-bundle";
-import { getConnectorManifest } from "@golem-seo/integrations";
+} from "@agentseoapp/contracts/project-bundle";
+import { getConnectorManifest } from "@agentseoapp/integrations";
 import {
   ActionCheckpointError,
   ActionEvidenceCursorError,
+  AgentSeoLocalRuntime,
   ExtractionRulesError,
-  GolemLocalRuntime,
   IssueAdjudicationError,
   nextCronOccurrence,
   ProjectBundleError,
   ProjectContextError,
   ProjectDeletionError,
+  resolveGoogleDesktopClientId,
   RunComparisonError,
   RunLinkExplorerError,
   RunReplayError,
-} from "@golem-seo/runtime";
+} from "@agentseoapp/runtime";
 import {
   ActionCheckpointInputSchema,
   ActionEvidenceQuerySchema,
@@ -97,11 +98,6 @@ import {
   OAuthBrokerProblem,
 } from "./google-oauth.js";
 import {
-  GolemWorkersBridge,
-  GolemWorkersBridgeError,
-  type GolemWorkersLinkStatus,
-} from "./golem-workers-bridge.js";
-import {
   dashboardPageIndexability,
   storedIndexabilityReason,
 } from "./page-indexability.js";
@@ -117,7 +113,7 @@ export {
 } from "./google-oauth.js";
 
 export interface LocalServerOptions {
-  runtime: GolemLocalRuntime;
+  runtime: AgentSeoLocalRuntime;
   host?: "127.0.0.1";
   port?: number;
   dashboardDir?: string;
@@ -133,17 +129,11 @@ export interface LocalServerOptions {
   bootstrapTokenTtlMs?: number;
   /** Injectable clock for deterministic bootstrap expiry tests. */
   bootstrapNow?: () => number;
-  /** Injectable hosted transport for deterministic device-link tests. */
-  golemWorkersFetch?: typeof fetch;
-  /** Injectable hosted clock for deterministic expiry tests. */
-  golemWorkersNow?: () => number;
-  /** Injectable poll delay for deterministic device-link tests. */
-  golemWorkersSleep?: (delayMs: number, signal: AbortSignal) => Promise<void>;
 }
 
 export interface LocalServer {
   app: FastifyInstance;
-  runtime: GolemLocalRuntime;
+  runtime: AgentSeoLocalRuntime;
   host: "127.0.0.1";
   port: number;
   serviceTokenPath: string;
@@ -159,6 +149,71 @@ interface Session {
 interface BootstrapTicket {
   expiresAt: number;
 }
+
+const AGENTSEO_SESSION_COOKIE = "agentseo_session";
+const LEGACY_SESSION_COOKIE = "golem_session";
+const AGENTSEO_CLIENT_HEADER = "x-agentseo-client";
+const LEGACY_CLIENT_HEADER = "x-golem-client";
+const AGENTSEO_CSRF_HEADER = "x-agentseo-csrf";
+const LEGACY_CSRF_HEADER = "x-golem-csrf";
+
+// This is the local API's deliberate 1.x compatibility boundary. Canonical
+// identifiers always win when both forms are supplied, so a stale legacy value
+// cannot override a canonical session, client identity, or CSRF token. The
+// aliases may be removed only with a major release and a migrated dashboard.
+function preferredHeader(
+  request: FastifyRequest,
+  canonicalName: string,
+  legacyName: string,
+): string | undefined {
+  const canonical = request.headers[canonicalName];
+  const selected =
+    canonical !== undefined ? canonical : request.headers[legacyName];
+  return typeof selected === "string" ? selected : undefined;
+}
+
+function requestSessionId(request: FastifyRequest): string | undefined {
+  const canonical = request.cookies[AGENTSEO_SESSION_COOKIE];
+  return canonical !== undefined
+    ? canonical
+    : request.cookies[LEGACY_SESSION_COOKIE];
+}
+
+function requestCsrfToken(request: FastifyRequest): string | undefined {
+  return preferredHeader(request, AGENTSEO_CSRF_HEADER, LEGACY_CSRF_HEADER);
+}
+
+function isDashboardRequest(request: FastifyRequest): boolean {
+  return (
+    preferredHeader(request, AGENTSEO_CLIENT_HEADER, LEGACY_CLIENT_HEADER) ===
+    "dashboard"
+  );
+}
+
+function setSessionCookies(reply: FastifyReply, sessionId: string): void {
+  const options = {
+    httpOnly: true,
+    sameSite: "strict" as const,
+    path: "/",
+    secure: false,
+    maxAge: 12 * 60 * 60,
+  };
+  reply.setCookie(AGENTSEO_SESSION_COOKIE, sessionId, options);
+  // The un-migrated dashboard still reads this alias. Emit the same opaque
+  // value and attributes through 1.x; never create a separate legacy session.
+  reply.setCookie(LEGACY_SESSION_COOKIE, sessionId, options);
+}
+
+const DashboardClientHeaderSchemaProperties = {
+  [AGENTSEO_CLIENT_HEADER]: Type.Optional(Type.Literal("dashboard")),
+  [LEGACY_CLIENT_HEADER]: Type.Optional(
+    Type.Literal("dashboard", {
+      deprecated: true,
+      description:
+        "Deprecated 1.x dashboard compatibility alias for x-agentseo-client.",
+    }),
+  ),
+};
 
 const terminalStatuses = new Set([
   "succeeded",
@@ -825,24 +880,6 @@ const DashboardCompetitorSchema = Type.Object(
   { additionalProperties: false },
 );
 
-const GolemWorkersLinkStatusSchema = Type.Object(
-  {
-    state: Type.Union([
-      Type.Literal("disconnected"),
-      Type.Literal("pending"),
-      Type.Literal("connected"),
-      Type.Literal("failed"),
-    ]),
-    verificationUrl: Type.Union([Type.String({ format: "uri" }), Type.Null()]),
-    userCode: Type.Union([Type.String(), Type.Null()]),
-    expiresAt: Type.Union([Type.String({ format: "date-time" }), Type.Null()]),
-    orgId: Type.Union([Type.String(), Type.Null()]),
-    errorCode: Type.Union([Type.String(), Type.Null()]),
-    errorMessage: Type.Union([Type.String(), Type.Null()]),
-  },
-  { additionalProperties: false },
-);
-
 const DashboardSettingsInputSchema = Type.Partial(
   Type.Object({
     siteName: Type.String({ minLength: 1, maxLength: 160 }),
@@ -1049,10 +1086,9 @@ export async function createLocalServer(
   const serviceTokenPath =
     options.serviceTokenPath ?? join(options.runtime.dataDir, "service-token");
   const serviceToken = ensureServiceToken(serviceTokenPath);
-  const googleDesktopClientId =
-    options.googleDesktopClientId?.trim() ||
-    process.env.GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID?.trim() ||
-    process.env.GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID?.trim();
+  const googleDesktopClientId = resolveGoogleDesktopClientId(
+    options.googleDesktopClientId,
+  );
   options.runtime.configureGoogleOAuth(
     googleDesktopClientId,
     options.oauthFetch,
@@ -1066,14 +1102,6 @@ export async function createLocalServer(
       : {}),
     ...(options.oauthNow ? { now: options.oauthNow } : {}),
   });
-  const golemWorkersBridge = new GolemWorkersBridge({
-    dataDir: options.runtime.dataDir,
-    credentialStore: options.runtime.credentialStore,
-    ...(options.golemWorkersFetch ? { fetch: options.golemWorkersFetch } : {}),
-    ...(options.golemWorkersNow ? { now: options.golemWorkersNow } : {}),
-    ...(options.golemWorkersSleep ? { sleep: options.golemWorkersSleep } : {}),
-  });
-
   await app.register(cookie);
   await app.register(rateLimit, {
     max: 240,
@@ -1083,9 +1111,9 @@ export async function createLocalServer(
   await app.register(swagger, {
     openapi: {
       info: {
-        title: "Golem SEO Local API",
+        title: "AGENTseo Local API",
         version: "1.0.0",
-        description: "Loopback API for Golem SEO Community Edition",
+        description: "Loopback API for the local-first AGENTseo application",
       },
       servers: [{ url: origin }],
       components: {
@@ -1093,16 +1121,27 @@ export async function createLocalServer(
           localServiceToken: {
             type: "http",
             scheme: "bearer",
-            bearerFormat: "Golem SEO local service token",
+            bearerFormat: "AGENTseo local service token",
           },
           localSession: {
             type: "apiKey",
             in: "cookie",
-            name: "golem_session",
+            name: AGENTSEO_SESSION_COOKIE,
+          },
+          legacyLocalSession: {
+            type: "apiKey",
+            in: "cookie",
+            name: LEGACY_SESSION_COOKIE,
+            description:
+              "Deprecated 1.x compatibility alias for agentseo_session.",
           },
         },
       },
-      security: [{ localServiceToken: [] }, { localSession: [] }],
+      security: [
+        { localServiceToken: [] },
+        { localSession: [] },
+        { legacyLocalSession: [] },
+      ],
     },
   });
 
@@ -1110,7 +1149,7 @@ export async function createLocalServer(
     const allowedHost = `${host}:${port}`;
     if (request.headers.host !== allowedHost) {
       return reply.code(421).type("application/problem+json").send({
-        type: "https://golemworkers.com/problems/invalid-host",
+        type: "urn:agentseo:problem:invalid-host",
         title: "Misdirected request",
         status: 421,
         detail: "The Host header is not accepted by the local service.",
@@ -1149,12 +1188,12 @@ export async function createLocalServer(
       ? request.headers.authorization.slice(7)
       : null;
     if (bearer && secureEqual(bearer, serviceToken)) return;
-    const sessionId = request.cookies.golem_session;
+    const sessionId = requestSessionId(request);
     const session = sessionId ? sessions.get(sessionId) : undefined;
     if (!session || session.expiresAt < Date.now()) {
       if (sessionId) sessions.delete(sessionId);
       return reply.code(401).type("application/problem+json").send({
-        type: "https://golemworkers.com/problems/authentication-required",
+        type: "urn:agentseo:problem:authentication-required",
         title: "Authentication required",
         status: 401,
         detail:
@@ -1165,10 +1204,10 @@ export async function createLocalServer(
     if (!["GET", "HEAD", "OPTIONS"].includes(request.method)) {
       if (
         request.headers.origin !== origin ||
-        request.headers["x-golem-csrf"] !== session.csrf
+        requestCsrfToken(request) !== session.csrf
       ) {
         return reply.code(403).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/csrf",
+          type: "urn:agentseo:problem:csrf",
           title: "Request rejected",
           status: 403,
           detail: "The request origin or CSRF token is invalid.",
@@ -1184,7 +1223,7 @@ export async function createLocalServer(
         .code(error.status)
         .type("application/problem+json")
         .send({
-          type: `https://golemworkers.com/problems/${error.code.replaceAll("_", "-")}`,
+          type: `urn:agentseo:problem:${error.code.replaceAll("_", "-")}`,
           title:
             error.status === 404
               ? "Issue review target not found"
@@ -1200,7 +1239,7 @@ export async function createLocalServer(
         .code(error.status)
         .type("application/problem+json")
         .send({
-          type: `https://golemworkers.com/problems/${error.code.replaceAll("_", "-")}`,
+          type: `urn:agentseo:problem:${error.code.replaceAll("_", "-")}`,
           title:
             error.status === 404
               ? "Project context not found"
@@ -1216,7 +1255,7 @@ export async function createLocalServer(
         .code(error.status)
         .type("application/problem+json")
         .send({
-          type: `https://golemworkers.com/problems/${error.code.replaceAll("_", "-")}`,
+          type: `urn:agentseo:problem:${error.code.replaceAll("_", "-")}`,
           title:
             error.code === "extraction_template_catalog_invalid"
               ? "Extraction template catalog unavailable"
@@ -1241,7 +1280,7 @@ export async function createLocalServer(
         .code(error.status)
         .type("application/problem+json")
         .send({
-          type: `https://golemworkers.com/problems/${error.code.replaceAll("_", "-")}`,
+          type: `urn:agentseo:problem:${error.code.replaceAll("_", "-")}`,
           title:
             error.status === 404
               ? "Project not found"
@@ -1259,7 +1298,7 @@ export async function createLocalServer(
         .code(error.status)
         .type("application/problem+json")
         .send({
-          type: `https://golemworkers.com/problems/${error.code.replaceAll("_", "-")}`,
+          type: `urn:agentseo:problem:${error.code.replaceAll("_", "-")}`,
           title:
             error.status === 409
               ? "Source run cannot be replayed yet"
@@ -1275,7 +1314,7 @@ export async function createLocalServer(
         .code(error.status)
         .type("application/problem+json")
         .send({
-          type: `https://golemworkers.com/problems/${error.code.replaceAll("_", "-")}`,
+          type: `urn:agentseo:problem:${error.code.replaceAll("_", "-")}`,
           title:
             error.status === 404
               ? "Audit comparison target not found"
@@ -1293,7 +1332,7 @@ export async function createLocalServer(
         .code(error.status)
         .type("application/problem+json")
         .send({
-          type: `https://golemworkers.com/problems/${error.code.replaceAll("_", "-")}`,
+          type: `urn:agentseo:problem:${error.code.replaceAll("_", "-")}`,
           title:
             error.status === 404
               ? "Link explorer target not found"
@@ -1311,32 +1350,13 @@ export async function createLocalServer(
         .code(error.status)
         .type("application/problem+json")
         .send({
-          type: `https://golemworkers.com/problems/${error.code.replaceAll("_", "-")}`,
+          type: `urn:agentseo:problem:${error.code.replaceAll("_", "-")}`,
           title:
             error.status === 413
               ? "Project bundle is too large"
               : "Project bundle was rejected",
           status: error.status,
           detail: error.message,
-          instance: request.id,
-          code: error.code,
-        });
-    }
-    if (error instanceof GolemWorkersBridgeError) {
-      return reply
-        .code(error.status)
-        .type("application/problem+json")
-        .send({
-          type: `https://golemworkers.com/problems/${error.code.replaceAll("_", "-")}`,
-          title:
-            error.status >= 500
-              ? "GolemWorkers is unavailable"
-              : "GolemWorkers request rejected",
-          status: error.status,
-          detail:
-            error.status >= 500
-              ? "The hosted service could not complete the request."
-              : error.message,
           instance: request.id,
           code: error.code,
         });
@@ -1359,7 +1379,7 @@ export async function createLocalServer(
       .code(status)
       .type("application/problem+json")
       .send({
-        type: `https://golemworkers.com/problems/${status === 500 ? "internal" : "request"}`,
+        type: `urn:agentseo:problem:${status === 500 ? "internal" : "request"}`,
         title: status === 500 ? "Internal service error" : "Request rejected",
         status,
         detail: safeDetail,
@@ -1440,7 +1460,7 @@ export async function createLocalServer(
         : null;
       if (!bearer || !secureEqual(bearer, serviceToken)) {
         return reply.code(401).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/service-token-required",
+          type: "urn:agentseo:problem:service-token-required",
           title: "Service token required",
           status: 401,
           detail:
@@ -1490,7 +1510,7 @@ export async function createLocalServer(
       bootstrapTickets.delete(ticketHash);
       if (!ticket || ticket.expiresAt <= bootstrapNow()) {
         return reply.code(401).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/bootstrap",
+          type: "urn:agentseo:problem:bootstrap",
           title: "Bootstrap rejected",
           status: 401,
           detail: "The bootstrap token is invalid, expired, or already used.",
@@ -1503,13 +1523,7 @@ export async function createLocalServer(
         csrf,
         expiresAt: Date.now() + 12 * 60 * 60 * 1_000,
       });
-      reply.setCookie("golem_session", sessionId, {
-        httpOnly: true,
-        sameSite: "strict",
-        path: "/",
-        secure: false,
-        maxAge: 12 * 60 * 60,
-      });
+      setSessionCookies(reply, sessionId);
       return {
         csrf,
         expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1_000).toISOString(),
@@ -1533,7 +1547,7 @@ export async function createLocalServer(
       },
     },
     async (request) => {
-      const session = sessions.get(request.cookies.golem_session ?? "");
+      const session = sessions.get(requestSessionId(request) ?? "");
       return {
         csrf: session!.csrf,
         expiresAt: new Date(session!.expiresAt).toISOString(),
@@ -1597,9 +1611,7 @@ export async function createLocalServer(
         projectId,
         confirmation: body.confirmation,
       });
-      return request.headers["x-golem-client"] === "dashboard"
-        ? envelope(receipt)
-        : receipt;
+      return isDashboardRequest(request) ? envelope(receipt) : receipt;
     },
   );
   app.get(
@@ -1640,14 +1652,14 @@ export async function createLocalServer(
       const context = await options.runtime.context.get(projectId);
       if (!context) {
         return reply.code(404).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/project-not-found",
+          type: "urn:agentseo:problem:project-not-found",
           title: "Project not found",
           status: 404,
           detail: "The selected project does not exist.",
           code: "project_not_found",
         });
       }
-      return request.headers["x-golem-client"] === "dashboard"
+      return isDashboardRequest(request)
         ? envelope(context, context.current ? "fresh" : "missing")
         : context;
     },
@@ -1682,9 +1694,7 @@ export async function createLocalServer(
         profile: body.profile,
         changeSummary: body.changeSummary,
       });
-      return request.headers["x-golem-client"] === "dashboard"
-        ? envelope(context!)
-        : context;
+      return isDashboardRequest(request) ? envelope(context!) : context;
     },
   );
   app.post(
@@ -1718,10 +1728,7 @@ export async function createLocalServer(
         projectId,
         ...body,
       });
-      const response =
-        request.headers["x-golem-client"] === "dashboard"
-          ? envelope(entry!)
-          : entry;
+      const response = isDashboardRequest(request) ? envelope(entry!) : entry;
       return reply.code(201).send(response);
     },
   );
@@ -1741,9 +1748,7 @@ export async function createLocalServer(
     },
     async (request) => {
       const catalog = await options.runtime.extractionRules.templates();
-      return request.headers["x-golem-client"] === "dashboard"
-        ? envelope(catalog)
-        : catalog;
+      return isDashboardRequest(request) ? envelope(catalog) : catalog;
     },
   );
 
@@ -1767,14 +1772,14 @@ export async function createLocalServer(
       const workspace = await options.runtime.extractionRules.get(projectId);
       if (!workspace) {
         return reply.code(404).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/project-not-found",
+          type: "urn:agentseo:problem:project-not-found",
           title: "Project not found",
           status: 404,
           detail: "The selected project does not exist.",
           code: "project_not_found",
         });
       }
-      return request.headers["x-golem-client"] === "dashboard"
+      return isDashboardRequest(request)
         ? envelope(workspace, workspace.current ? "fresh" : "missing")
         : workspace;
     },
@@ -1808,9 +1813,7 @@ export async function createLocalServer(
         projectId,
         ...body,
       });
-      return request.headers["x-golem-client"] === "dashboard"
-        ? envelope(workspace!)
-        : workspace;
+      return isDashboardRequest(request) ? envelope(workspace!) : workspace;
     },
   );
   app.post(
@@ -1844,9 +1847,7 @@ export async function createLocalServer(
         projectId,
         ...body,
       });
-      return request.headers["x-golem-client"] === "dashboard"
-        ? envelope(preview)
-        : preview;
+      return isDashboardRequest(request) ? envelope(preview) : preview;
     },
   );
 
@@ -1860,7 +1861,7 @@ export async function createLocalServer(
               minLength: 8,
               maxLength: 256,
             }),
-            "x-golem-client": Type.Optional(Type.Literal("dashboard")),
+            ...DashboardClientHeaderSchemaProperties,
           },
           { additionalProperties: true },
         ),
@@ -1897,7 +1898,7 @@ export async function createLocalServer(
       const idempotencyKey = request.headers["idempotency-key"];
       if (typeof idempotencyKey !== "string" || idempotencyKey.length < 8) {
         return reply.code(400).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/idempotency-key",
+          type: "urn:agentseo:problem:idempotency-key",
           title: "Idempotency-Key required",
           status: 400,
           detail:
@@ -1933,7 +1934,7 @@ export async function createLocalServer(
         },
         idempotencyKey,
       );
-      if (request.headers["x-golem-client"] === "dashboard")
+      if (isDashboardRequest(request))
         return reply.code(202).send(envelope(dashboardRun(started)));
       return reply.code(202).send(started);
     },
@@ -1970,7 +1971,7 @@ export async function createLocalServer(
           .listRunDashboardStatistics(query.projectId ?? query.siteId)
           .map((item) => [item.runId, item]),
       );
-      return request.headers["x-golem-client"] === "dashboard"
+      return isDashboardRequest(request)
         ? envelope(
             {
               items: runs.map((run) =>
@@ -2003,11 +2004,12 @@ export async function createLocalServer(
         (request.params as { id: string }).id,
       );
       if (!run)
-        return reply
-          .code(404)
-          .type("application/problem+json")
-          .send({ type: "about:blank", title: "Run not found", status: 404 });
-      if (request.headers["x-golem-client"] === "dashboard") {
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:agentseo:problem:run-not-found",
+          title: "Run not found",
+          status: 404,
+        });
+      if (isDashboardRequest(request)) {
         const issues = await options.runtime.runs.issues(run.id);
         const events = options.runtime.listRunEvents(run.id);
         const statistics = options.runtime.database
@@ -2064,11 +2066,12 @@ export async function createLocalServer(
         ...(query.search ? { search: query.search } : {}),
       });
       if (!evidence)
-        return reply
-          .code(404)
-          .type("application/problem+json")
-          .send({ type: "about:blank", title: "Run not found", status: 404 });
-      if (request.headers["x-golem-client"] !== "dashboard") return evidence;
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:agentseo:problem:run-not-found",
+          title: "Run not found",
+          status: 404,
+        });
+      if (!isDashboardRequest(request)) return evidence;
       return envelope(
         evidence,
         evidence.state === "available"
@@ -2115,12 +2118,13 @@ export async function createLocalServer(
         ...(query.search ? { search: query.search } : {}),
       });
       if (!explorer) {
-        return reply
-          .code(404)
-          .type("application/problem+json")
-          .send({ type: "about:blank", title: "Run not found", status: 404 });
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:agentseo:problem:run-not-found",
+          title: "Run not found",
+          status: 404,
+        });
       }
-      if (request.headers["x-golem-client"] !== "dashboard") return explorer;
+      if (!isDashboardRequest(request)) return explorer;
       return envelope(
         explorer,
         explorer.state === "available"
@@ -2158,7 +2162,7 @@ export async function createLocalServer(
         runId,
         baselineRunId,
       );
-      if (request.headers["x-golem-client"] !== "dashboard") {
+      if (!isDashboardRequest(request)) {
         return comparison;
       }
       return envelope(
@@ -2183,7 +2187,7 @@ export async function createLocalServer(
               minLength: 8,
               maxLength: 256,
             }),
-            "x-golem-client": Type.Optional(Type.Literal("dashboard")),
+            ...DashboardClientHeaderSchemaProperties,
           },
           { additionalProperties: true },
         ),
@@ -2204,7 +2208,7 @@ export async function createLocalServer(
       const idempotencyKey = request.headers["idempotency-key"];
       if (typeof idempotencyKey !== "string" || idempotencyKey.length < 8) {
         return reply.code(400).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/idempotency-key",
+          type: "urn:agentseo:problem:idempotency-key",
           title: "Idempotency-Key required",
           status: 400,
           detail:
@@ -2219,13 +2223,13 @@ export async function createLocalServer(
       );
       if (!replay) {
         return reply.code(404).type("application/problem+json").send({
-          type: "about:blank",
+          type: "urn:agentseo:problem:source-run-not-found",
           title: "Source run not found",
           status: 404,
           code: "source_run_not_found",
         });
       }
-      if (request.headers["x-golem-client"] !== "dashboard") {
+      if (!isDashboardRequest(request)) {
         return reply.code(202).send(replay);
       }
       return reply.code(202).send(
@@ -2255,10 +2259,11 @@ export async function createLocalServer(
       );
       return (
         run ??
-        reply
-          .code(404)
-          .type("application/problem+json")
-          .send({ type: "about:blank", title: "Run not found", status: 404 })
+        reply.code(404).type("application/problem+json").send({
+          type: "urn:agentseo:problem:run-not-found",
+          title: "Run not found",
+          status: 404,
+        })
       );
     },
   );
@@ -2306,7 +2311,7 @@ export async function createLocalServer(
       const projectId = query.projectId ?? query.siteId;
       if (!projectId) {
         return reply.code(400).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/project-required",
+          type: "urn:agentseo:problem:project-required",
           title: "Project required",
           status: 400,
           detail: "projectId or siteId is required to review issues.",
@@ -2320,7 +2325,7 @@ export async function createLocalServer(
         ...(query.severity ? { severity: query.severity } : {}),
         ...(query.search ? { search: query.search } : {}),
       });
-      return request.headers["x-golem-client"] === "dashboard"
+      return isDashboardRequest(request)
         ? envelope(page, page.total > 0 ? "fresh" : "missing")
         : page;
     },
@@ -2352,16 +2357,14 @@ export async function createLocalServer(
       );
       if (!review) {
         return reply.code(404).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/issue-not-found",
+          type: "urn:agentseo:problem:issue-not-found",
           title: "Issue not found",
           status: 404,
           detail: "The issue does not belong to the selected project.",
           code: "issue_not_found",
         });
       }
-      return request.headers["x-golem-client"] === "dashboard"
-        ? envelope(review)
-        : review;
+      return isDashboardRequest(request) ? envelope(review) : review;
     },
   );
   app.get(
@@ -2390,10 +2393,11 @@ export async function createLocalServer(
     async (request, reply) => {
       const runId = (request.params as { id: string }).id;
       if (!(await options.runtime.runs.get(runId)))
-        return reply
-          .code(404)
-          .type("application/problem+json")
-          .send({ type: "about:blank", title: "Run not found", status: 404 });
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:agentseo:problem:run-not-found",
+          title: "Run not found",
+          status: 404,
+        });
       const after = Number((request.query as { after?: string }).after ?? 0);
       reply.hijack();
       reply.raw.writeHead(200, {
@@ -2489,14 +2493,14 @@ export async function createLocalServer(
         "html") as "html" | "pdf" | "csv" | "json";
       if (!["html", "pdf", "csv", "json"].includes(format))
         return reply.code(400).send({
-          type: "about:blank",
+          type: "urn:agentseo:problem:unsupported-report-format",
           title: "Unsupported format",
           status: 400,
         });
       const bytes = await options.runtime.reports.get(runId, format);
       if (!bytes)
         return reply.code(404).type("application/problem+json").send({
-          type: "about:blank",
+          type: "urn:agentseo:problem:report-not-found",
           title: "Report not found",
           status: 404,
         });
@@ -2510,7 +2514,7 @@ export async function createLocalServer(
         .type(mediaType)
         .header(
           "content-disposition",
-          `attachment; filename=\"golem-seo-${runId}.${format}\"`,
+          `attachment; filename=\"agentseo-${runId}.${format}\"`,
         )
         .send(Buffer.from(bytes));
     },
@@ -2543,7 +2547,7 @@ export async function createLocalServer(
       const actions = await options.runtime.actions.list(
         query.projectId ?? query.siteId,
       );
-      return request.headers["x-golem-client"] === "dashboard"
+      return isDashboardRequest(request)
         ? envelope(
             { items: actions.map(dashboardAction), total: actions.length },
             actions.length ? "fresh" : "missing",
@@ -2586,7 +2590,7 @@ export async function createLocalServer(
           code === "invalid_action_evidence_cursor"
         ) {
           return reply.code(400).type("application/problem+json").send({
-            type: "https://golemworkers.com/problems/invalid-action-evidence-cursor",
+            type: "urn:agentseo:problem:invalid-action-evidence-cursor",
             title: "Invalid action evidence cursor",
             status: 400,
             detail: "The evidence cursor is invalid or has expired.",
@@ -2597,11 +2601,11 @@ export async function createLocalServer(
       }
       if (!workspace)
         return reply.code(404).type("application/problem+json").send({
-          type: "about:blank",
+          type: "urn:agentseo:problem:action-not-found",
           title: "Action not found",
           status: 404,
         });
-      return request.headers["x-golem-client"] === "dashboard"
+      return isDashboardRequest(request)
         ? envelope(dashboardActionEvidence(workspace))
         : workspace;
     },
@@ -2631,14 +2635,14 @@ export async function createLocalServer(
         const checkpoint = await options.runtime.actions.createCheckpoint(id);
         if (!checkpoint)
           return reply.code(404).type("application/problem+json").send({
-            type: "about:blank",
+            type: "urn:agentseo:problem:action-not-found",
             title: "Action not found",
             status: 404,
           });
         return reply
           .code(201)
           .send(
-            request.headers["x-golem-client"] === "dashboard"
+            isDashboardRequest(request)
               ? envelope(dashboardActionCheckpoint(checkpoint))
               : checkpoint,
           );
@@ -2652,7 +2656,7 @@ export async function createLocalServer(
           code === "checkpoint_baseline_unavailable"
         ) {
           return reply.code(409).type("application/problem+json").send({
-            type: "https://golemworkers.com/problems/checkpoint-baseline-unavailable",
+            type: "urn:agentseo:problem:checkpoint-baseline-unavailable",
             title: "Checkpoint baseline unavailable",
             status: 409,
             detail:
@@ -2675,7 +2679,7 @@ export async function createLocalServer(
               minLength: 8,
               maxLength: 256,
             }),
-            "x-golem-client": Type.Optional(Type.Literal("dashboard")),
+            ...DashboardClientHeaderSchemaProperties,
           },
           { additionalProperties: true },
         ),
@@ -2700,7 +2704,7 @@ export async function createLocalServer(
       const idempotencyKey = request.headers["idempotency-key"];
       if (typeof idempotencyKey !== "string") {
         return reply.code(400).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/idempotency-key",
+          type: "urn:agentseo:problem:idempotency-key",
           title: "Idempotency-Key required",
           status: 400,
           detail:
@@ -2714,17 +2718,13 @@ export async function createLocalServer(
         ).verify(id, checkpointId, idempotencyKey);
         if (!started)
           return reply.code(404).type("application/problem+json").send({
-            type: "about:blank",
+            type: "urn:agentseo:problem:action-or-checkpoint-not-found",
             title: "Action or checkpoint not found",
             status: 404,
           });
         return reply
           .code(202)
-          .send(
-            request.headers["x-golem-client"] === "dashboard"
-              ? envelope(started)
-              : started,
-          );
+          .send(isDashboardRequest(request) ? envelope(started) : started);
       } catch (error) {
         const code =
           typeof error === "object" && error !== null && "code" in error
@@ -2732,7 +2732,7 @@ export async function createLocalServer(
             : undefined;
         if (code === "checkpoint_action_mismatch") {
           return reply.code(409).type("application/problem+json").send({
-            type: "https://golemworkers.com/problems/checkpoint-action-mismatch",
+            type: "urn:agentseo:problem:checkpoint-action-mismatch",
             title: "Checkpoint does not belong to this action",
             status: 409,
             detail: "Use a checkpoint created for the action being verified.",
@@ -2741,7 +2741,7 @@ export async function createLocalServer(
         }
         if (code === "verification_targets_unavailable") {
           return reply.code(422).type("application/problem+json").send({
-            type: "https://golemworkers.com/problems/verification-targets-unavailable",
+            type: "urn:agentseo:problem:verification-targets-unavailable",
             title: "Verification targets unavailable",
             status: 422,
             detail:
@@ -2771,7 +2771,7 @@ export async function createLocalServer(
       const outcomes = await options.runtime.actions.outcomes(
         (request.params as { id: string }).id,
       );
-      return request.headers["x-golem-client"] === "dashboard"
+      return isDashboardRequest(request)
         ? envelope(
             dashboardActionOutcomes(outcomes),
             outcomes.length ? "fresh" : "missing",
@@ -2799,10 +2799,11 @@ export async function createLocalServer(
       );
       return (
         action ??
-        reply
-          .code(404)
-          .type("application/problem+json")
-          .send({ type: "about:blank", title: "Action not found", status: 404 })
+        reply.code(404).type("application/problem+json").send({
+          type: "urn:agentseo:problem:action-not-found",
+          title: "Action not found",
+          status: 404,
+        })
       );
     },
   );
@@ -2834,7 +2835,7 @@ export async function createLocalServer(
       const integrations = await options.runtime.integrations.list(
         query.projectId ?? query.siteId,
       );
-      return request.headers["x-golem-client"] === "dashboard"
+      return isDashboardRequest(request)
         ? envelope({
             items: integrations.map(integrationForDashboard),
             total: integrations.length,
@@ -2872,7 +2873,7 @@ export async function createLocalServer(
         Array.isArray(body.configuration)
       ) {
         return reply.code(400).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/invalid-integration-configuration",
+          type: "urn:agentseo:problem:invalid-integration-configuration",
           title: "Integration configuration is invalid",
           status: 400,
           detail:
@@ -2886,7 +2887,7 @@ export async function createLocalServer(
           projectId,
           body.configuration,
         );
-        if (request.headers["x-golem-client"] === "dashboard")
+        if (isDashboardRequest(request))
           return envelope(integrationForDashboard(configured));
         const { secretRef: _secretRef, ...publicIntegration } = configured;
         return publicIntegration;
@@ -2900,7 +2901,7 @@ export async function createLocalServer(
           .code(notFound ? 404 : 400)
           .type("application/problem+json")
           .send({
-            type: `https://golemworkers.com/problems/${notFound ? "integration-not-found" : "invalid-integration-configuration"}`,
+            type: `urn:agentseo:problem:${notFound ? "integration-not-found" : "invalid-integration-configuration"}`,
             title: notFound
               ? "Integration or project not found"
               : "Integration configuration is invalid",
@@ -2932,7 +2933,7 @@ export async function createLocalServer(
       const manifest = getConnectorManifest(provider);
       if (!manifest) {
         return reply.code(404).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/integration-not-found",
+          type: "urn:agentseo:problem:integration-not-found",
           title: "Integration not found",
           status: 404,
           detail: "The requested integration provider is not registered.",
@@ -2941,7 +2942,7 @@ export async function createLocalServer(
       }
       if (manifest.auth.type === "oauth-pkce") {
         return reply.code(405).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/oauth-required",
+          type: "urn:agentseo:problem:oauth-required",
           title: "OAuth connection required",
           status: 405,
           detail:
@@ -2958,7 +2959,7 @@ export async function createLocalServer(
         !Value.Check(manifest.credentialSchema, body.credentials)
       ) {
         return reply.code(400).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/invalid-credentials",
+          type: "urn:agentseo:problem:invalid-credentials",
           title: "Credential fields are invalid",
           status: 400,
           detail:
@@ -2969,7 +2970,7 @@ export async function createLocalServer(
       const account = body.account ?? "default";
       if (!/^[a-zA-Z0-9._-]{1,64}$/u.test(account)) {
         return reply.code(400).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/invalid-account",
+          type: "urn:agentseo:problem:invalid-account",
           title: "Account key is invalid",
           status: 400,
           detail:
@@ -2985,7 +2986,7 @@ export async function createLocalServer(
           "credentials",
           secret,
         );
-        if (request.headers["x-golem-client"] === "dashboard")
+        if (isDashboardRequest(request))
           return envelope(integrationForDashboard(saved));
         const { secretRef: _secretRef, ...publicIntegration } = saved;
         return publicIntegration;
@@ -3020,7 +3021,7 @@ export async function createLocalServer(
       const candidate = body.projectId ?? body.siteId;
       if (candidate !== undefined && typeof candidate !== "string") {
         return reply.code(400).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/invalid-project-id",
+          type: "urn:agentseo:problem:invalid-project-id",
           title: "Project identifier is invalid",
           status: 400,
           detail: "projectId or siteId must be a string when provided.",
@@ -3032,7 +3033,7 @@ export async function createLocalServer(
           provider,
           candidate,
         );
-        if (request.headers["x-golem-client"] === "dashboard") {
+        if (isDashboardRequest(request)) {
           return envelope(integrationForDashboard(tested));
         }
         const { secretRef: _secretRef, ...publicIntegration } = tested;
@@ -3045,7 +3046,7 @@ export async function createLocalServer(
           .code(notFound ? 404 : 400)
           .type("application/problem+json")
           .send({
-            type: `https://golemworkers.com/problems/${notFound ? "integration-not-found" : "integration-test-failed"}`,
+            type: `urn:agentseo:problem:${notFound ? "integration-not-found" : "integration-test-failed"}`,
             title: notFound
               ? "Integration or project not found"
               : "Integration test failed",
@@ -3079,7 +3080,7 @@ export async function createLocalServer(
       return removed
         ? reply.code(204).send()
         : reply.code(404).type("application/problem+json").send({
-            type: "about:blank",
+            type: "urn:agentseo:problem:integration-not-found",
             title: "Integration not found",
             status: 404,
           });
@@ -3113,7 +3114,7 @@ export async function createLocalServer(
         .code(problem.status)
         .type("application/problem+json")
         .send({
-          type: `https://golemworkers.com/problems/${problem.code.replaceAll("_", "-")}`,
+          type: `urn:agentseo:problem:${problem.code.replaceAll("_", "-")}`,
           title: problem.title,
           status: problem.status,
           detail: problem.message,
@@ -3202,7 +3203,7 @@ export async function createLocalServer(
     },
     async (_request, reply) =>
       reply.code(410).type("application/problem+json").send({
-        type: "https://golemworkers.com/problems/oauth-expired",
+        type: "urn:agentseo:problem:oauth-expired",
         title: "OAuth transaction expired",
         status: 410,
         detail: "Start a new connection from the Integrations screen.",
@@ -3274,7 +3275,7 @@ export async function createLocalServer(
           .code(notFound ? 404 : 400)
           .type("application/problem+json")
           .send({
-            type: `https://golemworkers.com/problems/${notFound ? "project-not-found" : "invalid-schedule"}`,
+            type: `urn:agentseo:problem:${notFound ? "project-not-found" : "invalid-schedule"}`,
             title: notFound ? "Project not found" : "Schedule is invalid",
             status: notFound ? 404 : 400,
             detail,
@@ -3309,7 +3310,7 @@ export async function createLocalServer(
       );
       if (!current)
         return reply.code(404).type("application/problem+json").send({
-          type: "about:blank",
+          type: "urn:agentseo:problem:schedule-not-found",
           title: "Schedule not found",
           status: 404,
         });
@@ -3333,7 +3334,7 @@ export async function createLocalServer(
           .code(400)
           .type("application/problem+json")
           .send({
-            type: "https://golemworkers.com/problems/invalid-schedule",
+            type: "urn:agentseo:problem:invalid-schedule",
             title: "Schedule is invalid",
             status: 400,
             detail:
@@ -3364,7 +3365,7 @@ export async function createLocalServer(
       return removed
         ? reply.code(204).send()
         : reply.code(404).type("application/problem+json").send({
-            type: "about:blank",
+            type: "urn:agentseo:problem:schedule-not-found",
             title: "Schedule not found",
             status: 404,
           });
@@ -3405,7 +3406,7 @@ export async function createLocalServer(
       const projectId = (request.body as { projectId?: string }).projectId;
       if (!projectId)
         return reply.code(400).type("application/problem+json").send({
-          type: "about:blank",
+          type: "urn:agentseo:problem:project-required",
           title: "projectId is required",
           status: 400,
         });
@@ -3450,7 +3451,7 @@ export async function createLocalServer(
         mediaType !== "application/vnd.golemseo.project+json"
       ) {
         return reply.code(415).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/unsupported-project-bundle-media-type",
+          type: "urn:agentseo:problem:unsupported-project-bundle-media-type",
           title: "Unsupported project bundle media type",
           status: 415,
           detail:
@@ -3462,89 +3463,6 @@ export async function createLocalServer(
       return reply.code(201).send(result);
     },
   );
-  app.get(
-    "/api/v1/golemworkers/device/status",
-    {
-      schema: {
-        response: {
-          200: GolemWorkersLinkStatusSchema,
-          ...StandardProblemResponses,
-          502: ProblemResponse("GolemWorkers returned an invalid response."),
-          503: ProblemResponse("GolemWorkers is unavailable."),
-        },
-      },
-    },
-    async (): Promise<GolemWorkersLinkStatus> => golemWorkersBridge.status(),
-  );
-  app.post(
-    "/api/v1/golemworkers/device/start",
-    {
-      schema: {
-        response: {
-          200: GolemWorkersLinkStatusSchema,
-          202: GolemWorkersLinkStatusSchema,
-          ...StandardProblemResponses,
-          409: ProblemResponse("A device-link request is already active."),
-          429: ProblemResponse("Too many device-link attempts were made."),
-          502: ProblemResponse("GolemWorkers returned an invalid response."),
-          503: ProblemResponse("GolemWorkers is unavailable."),
-        },
-      },
-    },
-    async (_request, reply) => {
-      const status = await golemWorkersBridge.start();
-      return reply.code(status.state === "connected" ? 200 : 202).send(status);
-    },
-  );
-  app.delete(
-    "/api/v1/golemworkers/device",
-    {
-      schema: {
-        response: {
-          204: {
-            description: "The local device link was removed.",
-          },
-          ...StandardProblemResponses,
-        },
-      },
-    },
-    async (_request, reply) => {
-      await golemWorkersBridge.disconnect();
-      return reply.code(204).send();
-    },
-  );
-  app.post(
-    "/api/v1/golemworkers/import",
-    {
-      schema: {
-        body: Type.Object({ projectId: Type.String({ minLength: 1 }) }),
-        response: {
-          201: Type.Object({
-            import: Type.Object({
-              projectId: Type.String(),
-              runCount: Type.Integer({ minimum: 0 }),
-              actionCount: Type.Integer({ minimum: 0 }),
-              issueCount: Type.Integer({ minimum: 0 }),
-            }),
-          }),
-          ...StandardProblemResponses,
-          402: ProblemResponse("Golem SEO Full is required for this import."),
-          404: ProblemResponse("The local project was not found."),
-          409: ProblemResponse("Connect this device to GolemWorkers first."),
-          413: ProblemResponse("The project bundle is too large."),
-          502: ProblemResponse("GolemWorkers returned an invalid response."),
-          503: ProblemResponse("GolemWorkers is unavailable."),
-        },
-      },
-    },
-    async (request, reply) => {
-      const projectId = (request.body as { projectId: string }).projectId;
-      const bundle = await options.runtime.exportProject(projectId);
-      const imported = await golemWorkersBridge.importProject(bundle);
-      return reply.code(201).send(imported);
-    },
-  );
-
   // Dashboard compatibility endpoints. They adapt the public contracts without
   // creating a second source of truth.
   app.get("/api/v1/sites", async () =>
@@ -3863,7 +3781,7 @@ export async function createLocalServer(
     const project = options.runtime.database.getProject(siteId);
     if (!project) {
       return reply.code(404).type("application/problem+json").send({
-        type: "https://golemworkers.com/problems/project-not-found",
+        type: "urn:agentseo:problem:project-not-found",
         title: "Project not found",
         status: 404,
         detail: "The selected project does not exist.",
@@ -3889,7 +3807,7 @@ export async function createLocalServer(
       const siteId = (request.query as { siteId?: string }).siteId;
       if (!siteId) {
         return reply.code(400).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/project-required",
+          type: "urn:agentseo:problem:project-required",
           title: "Project is required",
           status: 400,
           detail: "Select a project before updating settings.",
@@ -3908,7 +3826,7 @@ export async function createLocalServer(
       const siteName = body.siteName?.trim();
       if (body.siteName !== undefined && !siteName) {
         return reply.code(400).type("application/problem+json").send({
-          type: "https://golemworkers.com/problems/invalid-settings",
+          type: "urn:agentseo:problem:invalid-settings",
           title: "Settings are invalid",
           status: 400,
           detail: "Site name cannot be empty.",
@@ -3924,7 +3842,7 @@ export async function createLocalServer(
           siteUrl = parsed.href;
         } catch {
           return reply.code(400).type("application/problem+json").send({
-            type: "https://golemworkers.com/problems/invalid-settings",
+            type: "urn:agentseo:problem:invalid-settings",
             title: "Settings are invalid",
             status: 400,
             detail: "Canonical URL must be an absolute HTTP or HTTPS URL.",
@@ -3938,7 +3856,7 @@ export async function createLocalServer(
           new Intl.DateTimeFormat("en-US", { timeZone: timezone }).format();
         } catch {
           return reply.code(400).type("application/problem+json").send({
-            type: "https://golemworkers.com/problems/invalid-settings",
+            type: "urn:agentseo:problem:invalid-settings",
             title: "Settings are invalid",
             status: 400,
             detail:
@@ -3970,7 +3888,7 @@ export async function createLocalServer(
         });
         if (!updated) {
           return reply.code(404).type("application/problem+json").send({
-            type: "https://golemworkers.com/problems/project-not-found",
+            type: "urn:agentseo:problem:project-not-found",
             title: "Project not found",
             status: 404,
             detail: "The selected project does not exist.",
@@ -3996,7 +3914,7 @@ export async function createLocalServer(
           .code(conflict ? 409 : 400)
           .type("application/problem+json")
           .send({
-            type: `https://golemworkers.com/problems/${conflict ? "project-url-conflict" : "invalid-settings"}`,
+            type: `urn:agentseo:problem:${conflict ? "project-url-conflict" : "invalid-settings"}`,
             title: conflict
               ? "Canonical URL is already in use"
               : "Settings are invalid",
@@ -4043,10 +3961,11 @@ export async function createLocalServer(
     app.setNotFoundHandler(async (request, reply) => {
       if (request.method === "GET" && !request.url.startsWith("/api/"))
         return reply.type("text/html").sendFile("index.html");
-      return reply
-        .code(404)
-        .type("application/problem+json")
-        .send({ type: "about:blank", title: "Not found", status: 404 });
+      return reply.code(404).type("application/problem+json").send({
+        type: "urn:agentseo:problem:not-found",
+        title: "Not found",
+        status: 404,
+      });
     });
   }
 
@@ -4058,7 +3977,6 @@ export async function createLocalServer(
     serviceTokenPath,
     listen: async () => app.listen({ host, port }),
     close: async () => {
-      golemWorkersBridge.close();
       await oauthBroker.close();
       await app.close();
       options.runtime.close();

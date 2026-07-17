@@ -4,12 +4,15 @@ import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import {
   NPM_RELEASE_SCHEMA_VERSION,
+  assertNpmPublicationDisabled,
   assertSourceTag,
   npmDistributionTag,
   readNpmReleaseWorkspace,
   tarballHashes,
   validatePackedManifest,
 } from "./npm-release-policy.mjs";
+
+assertNpmPublicationDisabled("direct npm release preparation");
 
 const root = resolve(import.meta.dirname, "..");
 const sourceTagFlag = process.argv.indexOf("--tag");

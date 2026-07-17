@@ -2,7 +2,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { Report as EngineReport } from "@golem-seo/core";
+import type { Report as EngineReport } from "@agentseoapp/core";
 import { GolemLocalRuntime } from "./index.js";
 
 async function waitForTerminalRun(runtime: GolemLocalRuntime, runId: string) {

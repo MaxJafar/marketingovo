@@ -2,7 +2,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { MemoryCredentialStore } from "@golem-seo/credentials";
+import { MemoryCredentialStore } from "@agentseoapp/credentials";
 import { GolemLocalRuntime } from "./index.js";
 
 function runtimeWith(

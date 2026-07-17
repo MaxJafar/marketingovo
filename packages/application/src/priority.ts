@@ -1,4 +1,4 @@
-import type { Action, Effort, Severity } from "@golem-seo/contracts";
+import type { Action, Effort, Severity } from "@agentseoapp/contracts";
 
 export interface PriorityV1Input {
   severity: Severity | number;

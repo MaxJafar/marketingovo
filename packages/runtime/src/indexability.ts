@@ -1,7 +1,7 @@
 import {
   assessPageIndexability,
   type PageIndexabilityAssessment,
-} from "@golem-seo/core";
+} from "@agentseoapp/core";
 
 export interface EnginePageIndexabilityEvidence {
   status: number;

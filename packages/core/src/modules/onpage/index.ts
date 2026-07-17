@@ -66,7 +66,7 @@ export const onpageModule: Module = {
     required: ["issues", "issueCount"],
   },
   dependsOn: ["crawl"],
-  configKeys: ["GOLEMSEO_KEEP_HTML", "GOLEMSEO_RENDER", "GOLEMSEO_USER_AGENT"],
+  configKeys: ["AGENTSEO_KEEP_HTML", "AGENTSEO_RENDER", "AGENTSEO_USER_AGENT"],
   checks: allChecks,
   async invoke(input: ModuleInput, ctx: ModuleContext): Promise<ModuleOutput> {
     const logger = (ctx.logger ?? new ConsoleLogger()).child({

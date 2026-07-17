@@ -9,6 +9,19 @@ import { crawl } from "../src/orchestrator.js";
 describe("loadLimits", () => {
   const saved: Record<string, string | undefined> = {};
   const envKeys = [
+    "AGENTSEO_MAX_URLS",
+    "AGENTSEO_MAX_RUNTIME_MS",
+    "AGENTSEO_MAX_CONCURRENCY",
+    "AGENTSEO_REQUESTS_PER_SECOND",
+    "AGENTSEO_REQUEST_TIMEOUT_MS",
+    "AGENTSEO_MAX_BODY_BYTES",
+    "AGENTSEO_MAX_REDIRECTS",
+    "AGENTSEO_USER_AGENT",
+    "AGENTSEO_ALLOW_PRIVATE",
+    "AGENTSEO_IGNORE_ROBOTS",
+    "AGENTSEO_RENDER",
+    "AGENTSEO_HEADERS",
+    "AGENTSEO_KEEP_HTML",
     "GOLEMSEO_MAX_URLS",
     "GOLEMSEO_MAX_RUNTIME_MS",
     "GOLEMSEO_MAX_CONCURRENCY",
@@ -22,6 +35,19 @@ describe("loadLimits", () => {
     "GOLEMSEO_RENDER",
     "GOLEMSEO_HEADERS",
     "GOLEMSEO_KEEP_HTML",
+    "GOLEM_SEO_MAX_URLS",
+    "GOLEM_SEO_MAX_RUNTIME_MS",
+    "GOLEM_SEO_MAX_CONCURRENCY",
+    "GOLEM_SEO_REQUESTS_PER_SECOND",
+    "GOLEM_SEO_REQUEST_TIMEOUT_MS",
+    "GOLEM_SEO_MAX_BODY_BYTES",
+    "GOLEM_SEO_MAX_REDIRECTS",
+    "GOLEM_SEO_USER_AGENT",
+    "GOLEM_SEO_ALLOW_PRIVATE",
+    "GOLEM_SEO_IGNORE_ROBOTS",
+    "GOLEM_SEO_RENDER",
+    "GOLEM_SEO_HEADERS",
+    "GOLEM_SEO_KEEP_HTML",
     "SCREAMINGCLAW_MAX_URLS",
     "SCREAMINGCLAW_MAX_RUNTIME_MS",
     "SCREAMINGCLAW_MAX_CONCURRENCY",
@@ -63,6 +89,7 @@ describe("loadLimits", () => {
     expect(l.ignoreRobots).toBe(false);
     expect(l.renderMode).toBe("static");
     expect(l.customHeaders).toEqual({});
+    expect(l.userAgent).toBe("AGENTseo/0.11.0-alpha.0");
   });
 
   it("parses renderMode and customHeaders from env", () => {
@@ -79,6 +106,13 @@ describe("loadLimits", () => {
   it("accepts a large user-selected crawl scope", () => {
     process.env.GOLEMSEO_MAX_URLS = "250000";
     expect(loadLimits().maxUrls).toBe(250_000);
+  });
+
+  it("prefers the canonical crawl scope over both legacy spellings", () => {
+    process.env.AGENTSEO_MAX_URLS = "321";
+    process.env.GOLEMSEO_MAX_URLS = "654";
+    process.env.GOLEM_SEO_MAX_URLS = "987";
+    expect(loadLimits().maxUrls).toBe(321);
   });
 
   it("clamps corrupt env values to defensive configuration boundaries", () => {

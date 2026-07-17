@@ -1,6 +1,6 @@
 import { Type } from "@sinclair/typebox";
 import { describe, expect, it, vi } from "vitest";
-import type { LeafModuleRegistry, SeoModule } from "@golem-seo/contracts";
+import type { LeafModuleRegistry, SeoModule } from "@agentseoapp/contracts";
 import {
   createWorkflowPlan,
   createWorkflowRegistry,

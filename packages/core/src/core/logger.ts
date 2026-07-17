@@ -6,7 +6,7 @@
 // logger in tests.
 //
 // We don't pull in pino/winston as a hard dep yet. The default
-// implementation writes to console with a golem-seo prefix; an
+// implementation writes to console with a agentseo prefix; an
 // adapter to pino can be added in Sprint 15 (enterprise hardening)
 // when observability becomes a hard requirement.
 
@@ -23,13 +23,13 @@ export interface Logger {
   child(bindings: Record<string, unknown>): Logger;
 }
 
-/** Default console-backed logger. Prefix: `[golem-seo]`. */
+/** Default console-backed logger. Prefix: `[agentseo]`. */
 export class ConsoleLogger implements Logger {
   private readonly prefix: string;
   private readonly bindings: Record<string, unknown>;
 
   constructor(bindings: Record<string, unknown> = {}) {
-    this.prefix = "[golem-seo]";
+    this.prefix = "[agentseo]";
     this.bindings = bindings;
   }
 

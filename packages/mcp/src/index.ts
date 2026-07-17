@@ -16,8 +16,9 @@ import {
   type AgentKeywordResearchStartInput,
   type AgentMonitoringStatusInput,
   type AgentRunGetInput,
-} from "@golem-seo/contracts/agent-tools";
-import { GolemSeoClient } from "@golem-seo/sdk";
+} from "@agentseoapp/contracts/agent-tools";
+import { GolemSeoClient } from "@agentseoapp/sdk";
+import { resolveMcpConnectionEnvironment } from "./compatibility.js";
 
 export const PUBLIC_TOOL_NAMES = PUBLIC_AGENT_TOOL_NAMES;
 
@@ -75,14 +76,16 @@ function dataDirectory(): string {
 export async function createGolemSeoMcpServer(
   options: GolemSeoMcpOptions = {},
 ): Promise<McpServer> {
-  const client =
-    options.client ??
-    (await GolemSeoClient.fromTokenFile(
+  let client = options.client;
+  if (!client) {
+    const connectionEnvironment = resolveMcpConnectionEnvironment();
+    client = await GolemSeoClient.fromTokenFile(
       options.tokenFile ??
-        process.env.GOLEM_SEO_SERVICE_TOKEN_FILE ??
+        connectionEnvironment.tokenFile ??
         join(dataDirectory(), "service-token"),
-      { baseUrl: options.baseUrl ?? process.env.GOLEM_SEO_API_URL },
-    ));
+      { baseUrl: options.baseUrl ?? connectionEnvironment.baseUrl },
+    );
+  }
   const server = new McpServer(
     { name: "golem-seo", version: "0.11.0-alpha.0" },
     {

@@ -35,10 +35,10 @@ importers:
 
   adapters/openclaw:
     dependencies:
-      '@golem-seo/contracts':
+      '@agentseoapp/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
-      '@golem-seo/sdk':
+      '@agentseoapp/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
       typebox:
@@ -136,7 +136,7 @@ importers:
 
   packages/application:
     dependencies:
-      '@golem-seo/contracts':
+      '@agentseoapp/contracts':
         specifier: workspace:*
         version: link:../contracts
       '@sinclair/typebox':
@@ -152,29 +152,29 @@ importers:
 
   packages/cli:
     dependencies:
-      '@golem-seo/contracts':
+      '@agentseoapp/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@golem-seo/credentials':
+      '@agentseoapp/credentials':
         specifier: workspace:*
         version: link:../credentials
-      '@golem-seo/legacy-import':
+      '@agentseoapp/legacy-import':
         specifier: workspace:*
         version: link:../legacy-import
-      '@golem-seo/runtime':
+      '@agentseoapp/runtime':
         specifier: workspace:*
         version: link:../runtime
-      '@golem-seo/sdk':
+      '@agentseoapp/sdk':
         specifier: workspace:*
         version: link:../sdk
-      '@golem-seo/server':
+      '@agentseoapp/server':
         specifier: workspace:*
         version: link:../server
-      '@golem-seo/storage-sqlite':
+      '@agentseoapp/storage-sqlite':
         specifier: workspace:*
         version: link:../storage-sqlite
     devDependencies:
-      '@golem-seo/dashboard':
+      '@agentseoapp/dashboard':
         specifier: workspace:*
         version: link:../../apps/dashboard
       '@types/node':
@@ -205,7 +205,7 @@ importers:
 
   packages/core:
     dependencies:
-      '@golem-seo/integrations':
+      '@agentseoapp/integrations':
         specifier: workspace:*
         version: link:../integrations
       chrome-launcher:
@@ -259,7 +259,7 @@ importers:
 
   packages/integrations:
     dependencies:
-      '@golem-seo/contracts':
+      '@agentseoapp/contracts':
         specifier: workspace:*
         version: link:../contracts
       '@sinclair/typebox':
@@ -278,13 +278,13 @@ importers:
 
   packages/legacy-import:
     dependencies:
-      '@golem-seo/contracts':
+      '@agentseoapp/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@golem-seo/credentials':
+      '@agentseoapp/credentials':
         specifier: workspace:*
         version: link:../credentials
-      '@golem-seo/storage-sqlite':
+      '@agentseoapp/storage-sqlite':
         specifier: workspace:*
         version: link:../storage-sqlite
     devDependencies:
@@ -300,10 +300,10 @@ importers:
 
   packages/mcp:
     dependencies:
-      '@golem-seo/contracts':
+      '@agentseoapp/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@golem-seo/sdk':
+      '@agentseoapp/sdk':
         specifier: workspace:*
         version: link:../sdk
       '@modelcontextprotocol/server':
@@ -325,22 +325,22 @@ importers:
 
   packages/runtime:
     dependencies:
-      '@golem-seo/application':
+      '@agentseoapp/application':
         specifier: workspace:*
         version: link:../application
-      '@golem-seo/contracts':
+      '@agentseoapp/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@golem-seo/core':
+      '@agentseoapp/core':
         specifier: workspace:*
         version: link:../core
-      '@golem-seo/credentials':
+      '@agentseoapp/credentials':
         specifier: workspace:*
         version: link:../credentials
-      '@golem-seo/integrations':
+      '@agentseoapp/integrations':
         specifier: workspace:*
         version: link:../integrations
-      '@golem-seo/storage-sqlite':
+      '@agentseoapp/storage-sqlite':
         specifier: workspace:*
         version: link:../storage-sqlite
       '@sinclair/typebox':
@@ -362,14 +362,14 @@ importers:
 
   packages/sdk:
     dependencies:
-      '@golem-seo/contracts':
+      '@agentseoapp/contracts':
         specifier: workspace:*
         version: link:../contracts
       openapi-fetch:
         specifier: 0.17.0
         version: 0.17.0
     devDependencies:
-      '@golem-seo/server':
+      '@agentseoapp/server':
         specifier: workspace:*
         version: link:../server
       '@types/node':
@@ -390,6 +390,18 @@ importers:
 
   packages/server:
     dependencies:
+      '@agentseoapp/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@agentseoapp/credentials':
+        specifier: workspace:*
+        version: link:../credentials
+      '@agentseoapp/integrations':
+        specifier: workspace:*
+        version: link:../integrations
+      '@agentseoapp/runtime':
+        specifier: workspace:*
+        version: link:../runtime
       '@fastify/cookie':
         specifier: ^11.0.2
         version: 11.1.1
@@ -402,18 +414,6 @@ importers:
       '@fastify/swagger':
         specifier: ^9.5.1
         version: 9.8.1
-      '@golem-seo/contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      '@golem-seo/credentials':
-        specifier: workspace:*
-        version: link:../credentials
-      '@golem-seo/integrations':
-        specifier: workspace:*
-        version: link:../integrations
-      '@golem-seo/runtime':
-        specifier: workspace:*
-        version: link:../runtime
       '@sinclair/typebox':
         specifier: ^0.34.41
         version: 0.34.52
@@ -433,7 +433,7 @@ importers:
 
   packages/storage-sqlite:
     dependencies:
-      '@golem-seo/contracts':
+      '@agentseoapp/contracts':
         specifier: workspace:*
         version: link:../contracts
     devDependencies:
@@ -449,7 +449,7 @@ importers:
 
   plugins/codex/golem-seo:
     dependencies:
-      '@golem-seo/mcp':
+      '@agentseoapp/mcp':
         specifier: workspace:*
         version: link:../../../packages/mcp
     devDependencies:

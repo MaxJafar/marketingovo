@@ -60,6 +60,38 @@ async function throughProxy(
   });
 }
 
+async function connectThroughProxy(
+  proxyUrl: string,
+  target: string,
+): Promise<{ status: number; proxyAgent: string | undefined }> {
+  const proxy = new URL(proxyUrl);
+  const destination = new URL(target);
+  return await new Promise((resolve, reject) => {
+    const outbound = request({
+      hostname: proxy.hostname,
+      port: Number(proxy.port),
+      method: "CONNECT",
+      path: destination.host,
+    });
+    outbound.once("connect", (response, socket) => {
+      const proxyAgent = response.headers["proxy-agent"];
+      const result = {
+        status: response.statusCode ?? 0,
+        proxyAgent:
+          typeof proxyAgent === "string" ? proxyAgent : proxyAgent?.[0],
+      };
+      socket.once("error", reject);
+      socket.once("close", () => resolve(result));
+      socket.end(
+        `GET ${destination.pathname} HTTP/1.1\r\nHost: ${destination.host}\r\nConnection: close\r\n\r\n`,
+      );
+      socket.resume();
+    });
+    outbound.once("error", reject);
+    outbound.end();
+  });
+}
+
 describe("browser egress proxy", () => {
   it("blocks loopback by default", async () => {
     const target = await localFixture();
@@ -77,6 +109,20 @@ describe("browser egress proxy", () => {
     activeProxies.push(proxy);
     const response = await throughProxy(proxy.url, target);
     expect(response).toEqual({ status: 200, body: "safe fixture" });
+  });
+
+  it("identifies successful CONNECT tunnels with the canonical product name", async () => {
+    const target = await localFixture();
+    const proxy = await createBrowserEgressProxy({
+      allowPrivate: true,
+      allowedPrivateHosts: ["127.0.0.1"],
+    });
+    activeProxies.push(proxy);
+
+    expect(await connectThroughProxy(proxy.url, target)).toEqual({
+      status: 200,
+      proxyAgent: "AGENTseo",
+    });
   });
 
   it("always blocks cloud metadata even when private crawling is enabled", async () => {

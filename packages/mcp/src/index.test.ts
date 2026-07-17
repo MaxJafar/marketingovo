@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ZodType } from "zod/v4";
-import type { GolemSeoClient } from "@golem-seo/sdk";
+import type { GolemSeoClient } from "@agentseoapp/sdk";
 import { createGolemSeoMcpServer, PUBLIC_TOOL_NAMES } from "./index.js";
 
 type RegisteredTool = {

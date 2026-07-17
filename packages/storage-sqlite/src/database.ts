@@ -33,7 +33,7 @@ import type {
   RunEvent,
   Schedule,
   UpdateActionInput,
-} from "@golem-seo/contracts";
+} from "@agentseoapp/contracts";
 import type {
   ProjectBundleConnector,
   ProjectBundleIssueAdjudication,
@@ -42,7 +42,7 @@ import type {
   ProjectBundleRunConfiguration,
   ProjectBundleRunModule,
   ProjectBundleSettings,
-} from "@golem-seo/contracts/project-bundle";
+} from "@agentseoapp/contracts/project-bundle";
 import { migrations } from "./schema.js";
 
 interface Row {

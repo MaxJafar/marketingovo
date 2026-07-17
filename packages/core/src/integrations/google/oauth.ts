@@ -17,7 +17,7 @@ import {
 import { randomUUID } from "node:crypto";
 import { dirname, join } from "node:path";
 import { envStr } from "../../env.js";
-import { safeGoogleOAuthFetch } from "@golem-seo/integrations";
+import { safeGoogleOAuthFetch } from "@agentseoapp/integrations";
 
 export interface OAuthCreds {
   clientId: string;
@@ -228,14 +228,14 @@ export function resolveTokenFiles(): {
 } {
   const candidates = {
     gsc: [
-      envStr("GOLEMSEO_GSC_TOKEN", "SCREAMINGCLAW_GSC_TOKEN", ""),
+      envStr("AGENTSEO_GSC_TOKEN", "SCREAMINGCLAW_GSC_TOKEN", ""),
       join(
         process.env.HOME ?? "/root",
         ".config/google-search-console/token.json",
       ),
     ].filter((x): x is string => !!x),
     ga4: [
-      envStr("GOLEMSEO_GA4_TOKEN", "SCREAMINGCLAW_GA4_TOKEN", ""),
+      envStr("AGENTSEO_GA4_TOKEN", "SCREAMINGCLAW_GA4_TOKEN", ""),
       join(process.env.HOME ?? "/root", ".config/google-analytics/token.json"),
     ].filter((x): x is string => !!x),
   };

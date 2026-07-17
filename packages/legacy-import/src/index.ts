@@ -15,9 +15,9 @@ import type {
   Project,
   Run,
   RunStatus,
-} from "@golem-seo/contracts";
-import type { CredentialRef, CredentialStore } from "@golem-seo/credentials";
-import { GolemDatabase } from "@golem-seo/storage-sqlite";
+} from "@agentseoapp/contracts";
+import type { CredentialRef, CredentialStore } from "@agentseoapp/credentials";
+import { GolemDatabase } from "@agentseoapp/storage-sqlite";
 
 interface LegacyAuditIssue {
   id?: string;

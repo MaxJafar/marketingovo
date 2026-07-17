@@ -191,9 +191,16 @@ describe("notify webhook channel (mocked fetch)", () => {
     });
     expect(result[0]?.ok).toBe(true);
     const headers = captured?.headers as Record<string, string>;
-    expect(headers["x-golemseo-timestamp"]).toMatch(/^\d+$/);
-    expect(headers["x-golemseo-event-id"]).toMatch(/^[0-9a-f-]{36}$/);
-    expect(headers["x-golemseo-signature"]).toMatch(/^sha256=[0-9a-f]{64}$/);
+    expect(headers["x-agentseo-timestamp"]).toMatch(/^\d+$/);
+    expect(headers["x-agentseo-event-id"]).toMatch(/^[0-9a-f-]{36}$/);
+    expect(headers["x-agentseo-signature"]).toMatch(/^sha256=[0-9a-f]{64}$/);
+    expect(headers["x-golemseo-timestamp"]).toBe(
+      headers["x-agentseo-timestamp"],
+    );
+    expect(headers["x-golemseo-event-id"]).toBe(headers["x-agentseo-event-id"]);
+    expect(headers["x-golemseo-signature"]).toBe(
+      headers["x-agentseo-signature"],
+    );
     expect(captured?.redirect).toBe("error");
   });
 });

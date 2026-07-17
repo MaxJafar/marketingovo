@@ -13,8 +13,8 @@ const workspace = await readNpmReleaseWorkspace(root);
 const packageNames = new Set(
   workspace.packages.map(({ manifest }) => manifest.name),
 );
-const output = await mkdtemp(join(tmpdir(), "golem-seo-pack-"));
-const consumer = await mkdtemp(join(tmpdir(), "golem-seo-consumer-"));
+const output = await mkdtemp(join(tmpdir(), "agentseo-pack-"));
+const consumer = await mkdtemp(join(tmpdir(), "agentseo-consumer-"));
 const tarballs = [];
 try {
   for (const [flag, expected] of [
@@ -30,7 +30,7 @@ try {
     assert.equal(
       cli.status,
       0,
-      `golem-seo ${flag} failed:\n${cli.stdout}\n${cli.stderr}`,
+      `agentseo ${flag} failed:\n${cli.stdout}\n${cli.stderr}`,
     );
     assert.match(cli.stdout, new RegExp(expected.replaceAll(".", "\\."), "u"));
   }
@@ -100,7 +100,7 @@ try {
     resolve(consumer, "package.json"),
     `${JSON.stringify(
       {
-        name: "golem-seo-clean-install-smoke",
+        name: "agentseo-clean-install-smoke",
         version: "1.0.0",
         private: true,
         type: "module",
@@ -118,7 +118,9 @@ try {
     )}\n`,
   );
   const installTarballs =
-    process.env.CI === "true" || process.env.GOLEMSEO_NPM_INSTALL_SMOKE === "1";
+    process.env.CI === "true" ||
+    process.env.AGENTSEO_NPM_INSTALL_SMOKE === "1" ||
+    process.env.GOLEMSEO_NPM_INSTALL_SMOKE === "1";
   if (installTarballs) {
     const installed = spawnSync(
       "pnpm",
@@ -137,10 +139,7 @@ try {
     );
     const installedCli = spawnSync(
       process.execPath,
-      [
-        resolve(consumer, "node_modules/@golem-seo/cli/dist/cli.js"),
-        "--version",
-      ],
+      [resolve(consumer, "node_modules/agentseo/dist/cli.js"), "--version"],
       { cwd: consumer, encoding: "utf8", shell: false },
     );
     assert.equal(
@@ -151,7 +150,7 @@ try {
     assert.equal(installedCli.stdout.trim(), workspace.version);
   }
   process.stdout.write(
-    `${installTarballs ? "Packed, installed and executed" : "Packed and inspected"} ${workspace.packages.length} publishable artifacts.\n`,
+    `${installTarballs ? "Packed, installed and executed" : "Packed and inspected"} ${workspace.packages.length} private artifacts.\n`,
   );
 } finally {
   await Promise.all(

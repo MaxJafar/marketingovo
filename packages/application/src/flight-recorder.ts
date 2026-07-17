@@ -1,4 +1,4 @@
-import type { IssueInstance } from "@golem-seo/contracts";
+import type { IssueInstance } from "@agentseoapp/contracts";
 
 export interface CohortPageMetric {
   url: string;

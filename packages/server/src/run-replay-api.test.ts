@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { GolemLocalRuntime } from "@golem-seo/runtime";
+import { GolemLocalRuntime } from "@agentseoapp/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 function replayEngine() {

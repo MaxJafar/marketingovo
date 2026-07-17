@@ -77,9 +77,9 @@ export const technicalModule: Module = {
   },
   dependsOn: ["crawl"],
   configKeys: [
-    "GOLEMSEO_RENDER",
-    "GOLEMSEO_KEEP_HTML",
-    "GOLEMSEO_ALLOW_PRIVATE",
+    "AGENTSEO_RENDER",
+    "AGENTSEO_KEEP_HTML",
+    "AGENTSEO_ALLOW_PRIVATE",
   ],
   checks: allChecks,
   async invoke(input: ModuleInput, ctx: ModuleContext): Promise<ModuleOutput> {

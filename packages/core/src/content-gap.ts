@@ -12,7 +12,11 @@ import {
   computeContentGap,
   type ContentGapReport,
 } from "./integrations/content-gap.js";
-import { loadLimits, type Limits } from "./core/limits.js";
+import {
+  AGENTSEO_DEFAULT_USER_AGENT,
+  loadLimits,
+  type Limits,
+} from "./core/limits.js";
 
 export interface ContentGapCliOptions {
   targetUrl: string;
@@ -104,7 +108,7 @@ async function fetchAndExtract(
       const page = await renderer.render(url, {
         timeoutMs: 30_000,
         maxBodyBytes: 2_621_440,
-        userAgent: "GolemSEO/0.11 (content-gap; +https://golemworkers.com/seo)",
+        userAgent: AGENTSEO_DEFAULT_USER_AGENT,
         allowPrivate: false,
         waitUntil: "networkidle",
       });

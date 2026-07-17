@@ -2,8 +2,8 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import { decodeOAuthCredential } from "@golem-seo/credentials";
-import type { Report as EngineReport } from "@golem-seo/core";
+import { decodeOAuthCredential } from "@agentseoapp/credentials";
+import type { Report as EngineReport } from "@agentseoapp/core";
 import { GolemLocalRuntime } from "./index.js";
 
 function reportFixture(input: Record<string, unknown>): EngineReport {
@@ -71,6 +71,24 @@ function reportFixture(input: Record<string, unknown>): EngineReport {
       : {}),
   } as unknown as EngineReport;
 }
+
+describe("runtime independence capabilities", () => {
+  it("advertises local-only operation without a hosted service", async () => {
+    const runtime = new GolemLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-capabilities-")),
+    });
+
+    try {
+      expect((await runtime.system.capabilities()).hosted).toEqual({
+        available: false,
+        url: "urn:agentseo:hosted-unavailable",
+        message: "AGENTseo is local-first; no hosted service is configured.",
+      });
+    } finally {
+      runtime.close();
+    }
+  });
+});
 
 describe("runtime OAuth integration persistence", () => {
   it("persists health, scopes and absolute expiry while keeping tokens in CredentialStore", async () => {
