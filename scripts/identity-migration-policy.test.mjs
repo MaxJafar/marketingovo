@@ -115,6 +115,17 @@ test("identity rules cover relevant implementation text surfaces", () => {
   }
 });
 
+test("identity rules preserve top-level source config coverage", () => {
+  const oldDisplayName = `${"Golem"} SEO`;
+  assert.equal(
+    validateTextSource(
+      "playwright.config.ts",
+      `export const displayName = ${JSON.stringify(oldDisplayName)};\n`,
+    )[0]?.rule,
+    "legacy-product-identity",
+  );
+});
+
 test("legacy protocol headers remain confined to their pinned compatibility owner", async () => {
   const oldHeader = `x-${"golem"}-client`;
   const source = `const legacyHeader = ${JSON.stringify(oldHeader)};\n`;

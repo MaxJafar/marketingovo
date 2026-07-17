@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFile, stat, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { PRIVATE_WORKSPACE_IDENTITIES } from "./npm-release-policy.mjs";
 
@@ -11,6 +11,18 @@ const BASELINE_SCHEMA_VERSION = 2;
 const BASELINE_FINGERPRINT_ALGORITHM =
   "sha256(rule,path,line,column,previous-line,matched-line,next-line)-multiset-v2";
 
+const SOURCE_EXTENSIONS = new Set([
+  ".cjs",
+  ".js",
+  ".json",
+  ".mjs",
+  ".rs",
+  ".toml",
+  ".ts",
+  ".tsx",
+  ".yaml",
+  ".yml",
+]);
 const IDENTITY_TEXT_ROOTS = Object.freeze([
   ".github/",
   "adapters/",
@@ -746,6 +758,7 @@ function isIdentityTextSurface(path) {
   const filename = path.slice(path.lastIndexOf("/") + 1);
   if (filename === "LICENSE" || filename === "NOTICE") return false;
   return (
+    SOURCE_EXTENSIONS.has(extname(path)) ||
     IDENTITY_ROOT_TEXT_FILES.has(path) ||
     IDENTITY_TEXT_ROOTS.some((prefix) => path.startsWith(prefix))
   );
