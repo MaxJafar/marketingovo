@@ -2,7 +2,7 @@
 
 Cadence: three primary posts per week, one short community follow-up after each, and a Friday evidence review. Publish only completed work or clearly labeled experiments. Keep `0.11 alpha` visible throughout the cycle.
 
-Keep the edition boundary explicit: AGENTseo is Apache-2.0 open source, while AGENTseo is a separate commercial service for managed infrastructure and collaboration.
+Keep the edition boundary explicit: Marketingovo is Apache-2.0 open source, while Marketingovo is a separate commercial service for managed infrastructure and collaboration.
 
 ## Weekly operating rhythm
 
@@ -97,11 +97,11 @@ Friday review:
 
 **Goal:** close the launch cycle with a clear Community/Full boundary and a public quality agenda.
 
-| Day       | Channel and asset            | Post angle                                                       | Evidence to show                                                                      | Primary CTA                           |
-| --------- | ---------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------- |
-| Monday    | LinkedIn carousel slides 7–8 | Open source for local control; Full for managed collaboration    | AGENTseo shown as Apache-2.0 open source; Full shown as a separate commercial service | Install or try Full                   |
-| Wednesday | GitHub release-status update | What passed, what remains, and what changed over six weeks       | Linked tests, issues, and 1.0 gate status                                             | Contribute to one gate                |
-| Friday    | Founder retrospective        | What the team believed, learned, changed, and still cannot claim | Before/after assumptions and unresolved risks                                         | Star, install, or request Full access |
+| Day       | Channel and asset            | Post angle                                                       | Evidence to show                                                                          | Primary CTA                           |
+| --------- | ---------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------- |
+| Monday    | LinkedIn carousel slides 7–8 | Open source for local control; Full for managed collaboration    | Marketingovo shown as Apache-2.0 open source; Full shown as a separate commercial service | Install or try Full                   |
+| Wednesday | GitHub release-status update | What passed, what remains, and what changed over six weeks       | Linked tests, issues, and 1.0 gate status                                                 | Contribute to one gate                |
+| Friday    | Founder retrospective        | What the team believed, learned, changed, and still cannot claim | Before/after assumptions and unresolved risks                                             | Star, install, or request Full access |
 
 Friday review:
 

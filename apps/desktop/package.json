@@ -1,8 +1,8 @@
 {
-  "name": "@agentseoapp/desktop",
+  "name": "@marketingovo/desktop",
   "version": "1.0.0",
   "private": true,
-  "description": "Tauri 2 desktop launcher for AGENTseo",
+  "description": "Tauri 2 desktop launcher for Marketingovo",
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {

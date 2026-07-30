@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { AgentSeoLocalRuntime } from "@agentseoapp/runtime";
+import { AgentSeoLocalRuntime } from "@marketingovo/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 describe("run comparison API", () => {
@@ -13,7 +13,7 @@ describe("run comparison API", () => {
 
   async function setup() {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-run-comparison-api-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-run-comparison-api-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
     servers.push(server);
@@ -101,7 +101,7 @@ describe("run comparison API", () => {
     const dashboard = await server.app.inject({
       method: "GET",
       url,
-      headers: { ...headers, "x-agentseo-client": "dashboard" },
+      headers: { ...headers, "x-marketingovo-client": "dashboard" },
     });
     expect(dashboard.statusCode).toBe(200);
     expect(dashboard.json()).toMatchObject({

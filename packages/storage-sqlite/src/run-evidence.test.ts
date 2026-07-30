@@ -8,8 +8,8 @@ describe("stored run evidence pagination", () => {
   it("filters versioned page evidence by section, search and stable offsets", () => {
     const database = new AgentSeoDatabase({
       path: join(
-        mkdtempSync(join(tmpdir(), "agentseo-evidence-db-")),
-        "agentseo.db",
+        mkdtempSync(join(tmpdir(), "marketingovo-evidence-db-")),
+        "marketingovo.db",
       ),
     });
     try {

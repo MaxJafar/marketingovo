@@ -2,7 +2,7 @@
 
 ## Working title
 
-**From SEO findings to verifiable actions: the contracts behind AGENTseo**
+**From SEO findings to verifiable actions: the contracts behind Marketingovo**
 
 ## Audience and promise
 
@@ -113,7 +113,7 @@ Use [`packages/integrations`](../packages/integrations/src/index.ts).
 Cover:
 
 - authentication mode, requested scopes, host allowlists, request limits, input/output schemas, and retention policy;
-- BYOK in AGENTseo;
+- BYOK in Marketingovo;
 - explicit connection, freshness, quota, degraded, expired, and failure states;
 - why manifest presence does not prove every provider fixture has cleared the 1.0 gate.
 
@@ -139,12 +139,12 @@ Reference [`docs/editions.md`](../docs/editions.md) and [`COMMERCIAL.md`](../COM
 
 Explain:
 
-- AGENTseo as the local-first, single-user product;
-- AGENTseo as a separate proprietary service for always-on execution, portfolios, teams/RBAC, managed credentials, hosted artifacts, retention, and support;
+- Marketingovo as the local-first, single-user product;
+- Marketingovo as a separate proprietary service for always-on execution, portfolios, teams/RBAC, managed credentials, hosted artifacts, retention, and support;
 - project portability without credential portability;
 - why paid value does not require weakening local analysis.
 
-Use the phrase “open source under the Apache License 2.0” for AGENTseo.
+Use the phrase “open source under the Apache License 2.0” for Marketingovo.
 
 ## 10. What the alpha does not prove yet
 
@@ -165,7 +165,7 @@ This section is required. It turns limitations into an inspectable engineering a
 End with:
 
 ```bash
-npx @agentseoapp/cli serve
+npx @marketingovo/cli serve
 ```
 
 Then ask the reader to:
@@ -177,9 +177,9 @@ Then ask the reader to:
 5. verify a change with a second run;
 6. open a focused issue or contribution.
 
-Primary CTA: star and inspect [github.com/MaxJafar/AGENTseo](https://github.com/MaxJafar/AGENTseo).
+Primary CTA: star and inspect [github.com/MaxJafar/marketingovo](https://github.com/MaxJafar/marketingovo).
 
-Secondary CTA: try [AGENTseo](https://github.com/MaxJafar/AGENTseo) for managed team workflows.
+Secondary CTA: try [Marketingovo](https://github.com/MaxJafar/marketingovo) for managed team workflows.
 
 ## Editorial proof checklist
 
@@ -188,4 +188,4 @@ Secondary CTA: try [AGENTseo](https://github.com/MaxJafar/AGENTseo) for managed 
 - No benchmark number appears without a public corpus and method.
 - No provider is called production-ready solely because its manifest exists.
 - The alpha qualifier appears in the introduction and limitations section.
-- AGENTseo is called open source under Apache-2.0.
+- Marketingovo is called open source under Apache-2.0.

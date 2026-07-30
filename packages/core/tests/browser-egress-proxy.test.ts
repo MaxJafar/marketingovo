@@ -121,7 +121,7 @@ describe("browser egress proxy", () => {
 
     expect(await connectThroughProxy(proxy.url, target)).toEqual({
       status: 200,
-      proxyAgent: "AGENTseo",
+      proxyAgent: "Marketingovo",
     });
   });
 

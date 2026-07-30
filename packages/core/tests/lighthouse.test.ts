@@ -34,12 +34,15 @@ describe("lighthouse integration", () => {
     );
   });
   it("uses the packaged Chromium path for both browser engines", async () => {
-    vi.stubEnv("AGENTSEO_CHROME_PATH", process.execPath);
+    vi.stubEnv("MARKETINGOVO_CHROME_PATH", process.execPath);
     expect(await resolveChromiumExecutablePath()).toBe(process.execPath);
   });
   it("fails closed when a configured packaged Chromium executable is missing", async () => {
-    const missing = join(tmpdir(), `agentseo-missing-chromium-${process.pid}`);
-    vi.stubEnv("AGENTSEO_CHROME_PATH", missing);
+    const missing = join(
+      tmpdir(),
+      `marketingovo-missing-chromium-${process.pid}`,
+    );
+    vi.stubEnv("MARKETINGOVO_CHROME_PATH", missing);
     await expect(resolveChromiumExecutablePath()).rejects.toThrow(
       "Configured Chromium executable does not exist",
     );

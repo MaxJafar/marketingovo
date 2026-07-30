@@ -1,8 +1,8 @@
 {
-  "name": "@agentseoapp/docs",
+  "name": "@marketingovo/docs",
   "version": "1.0.0",
   "private": true,
-  "description": "Product documentation for AGENTseo",
+  "description": "Product documentation for Marketingovo",
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {

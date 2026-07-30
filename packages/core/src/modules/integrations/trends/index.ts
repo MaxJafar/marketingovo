@@ -34,7 +34,7 @@ export const trendsModule: Module = {
         type: "array",
         items: { type: "string" },
         description:
-          "1-5 keywords to compare. Default: AGENTSEO_TRENDS_KEYWORDS env (comma-separated).",
+          "1-5 keywords to compare. Default: MARKETINGOVO_TRENDS_KEYWORDS env (comma-separated).",
       },
       timeframe: {
         type: "string",
@@ -60,7 +60,7 @@ export const trendsModule: Module = {
     },
   },
   dependsOn: [],
-  configKeys: ["AGENTSEO_TRENDS_KEYWORDS"],
+  configKeys: ["MARKETINGOVO_TRENDS_KEYWORDS"],
   async invoke(input: ModuleInput, ctx: ModuleContext): Promise<ModuleOutput> {
     const logger = (ctx.logger ?? new ConsoleLogger()).child({
       module: "trends",
@@ -73,7 +73,7 @@ export const trendsModule: Module = {
     const keywords = (input.keywords as string[] | undefined) ?? [];
     if (keywords.length === 0) {
       throw new Error(
-        "trends module requires keywords in input or AGENTSEO_TRENDS_KEYWORDS env",
+        "trends module requires keywords in input or MARKETINGOVO_TRENDS_KEYWORDS env",
       );
     }
     const timeframeMap: Record<string, number> = {

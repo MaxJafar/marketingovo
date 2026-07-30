@@ -60,13 +60,13 @@ import {
   type ExtractionRule,
   type ProjectContextProfile,
   type Run,
-} from "@agentseoapp/contracts";
+} from "@marketingovo/contracts";
 import {
-  AGENTSEO_PROJECT_BUNDLE_LIMITS,
+  MARKETINGOVO_PROJECT_BUNDLE_LIMITS,
   AgentSeoProjectBundleV2Schema,
   ProjectImportResultSchema,
-} from "@agentseoapp/contracts/project-bundle";
-import { getConnectorManifest } from "@agentseoapp/integrations";
+} from "@marketingovo/contracts/project-bundle";
+import { getConnectorManifest } from "@marketingovo/integrations";
 import {
   ActionCheckpointError,
   ActionEvidenceCursorError,
@@ -81,7 +81,7 @@ import {
   RunComparisonError,
   RunLinkExplorerError,
   RunReplayError,
-} from "@agentseoapp/runtime";
+} from "@marketingovo/runtime";
 import {
   ActionCheckpointInputSchema,
   ActionEvidenceQuerySchema,
@@ -150,9 +150,9 @@ interface BootstrapTicket {
   expiresAt: number;
 }
 
-const AGENTSEO_SESSION_COOKIE = "agentseo_session";
-const AGENTSEO_CLIENT_HEADER = "x-agentseo-client";
-const AGENTSEO_CSRF_HEADER = "x-agentseo-csrf";
+const MARKETINGOVO_SESSION_COOKIE = "marketingovo_session";
+const MARKETINGOVO_CLIENT_HEADER = "x-marketingovo-client";
+const MARKETINGOVO_CSRF_HEADER = "x-marketingovo-csrf";
 
 // Exactly one accepted name per credential. The rebrand deliberately did not
 // carry a second accepted session cookie or CSRF header forward: the session is
@@ -167,15 +167,15 @@ function headerValue(
 }
 
 function requestSessionId(request: FastifyRequest): string | undefined {
-  return request.cookies[AGENTSEO_SESSION_COOKIE];
+  return request.cookies[MARKETINGOVO_SESSION_COOKIE];
 }
 
 function requestCsrfToken(request: FastifyRequest): string | undefined {
-  return headerValue(request, AGENTSEO_CSRF_HEADER);
+  return headerValue(request, MARKETINGOVO_CSRF_HEADER);
 }
 
 function isDashboardRequest(request: FastifyRequest): boolean {
-  return headerValue(request, AGENTSEO_CLIENT_HEADER) === "dashboard";
+  return headerValue(request, MARKETINGOVO_CLIENT_HEADER) === "dashboard";
 }
 
 function setSessionCookies(reply: FastifyReply, sessionId: string): void {
@@ -186,11 +186,11 @@ function setSessionCookies(reply: FastifyReply, sessionId: string): void {
     secure: false,
     maxAge: 12 * 60 * 60,
   };
-  reply.setCookie(AGENTSEO_SESSION_COOKIE, sessionId, options);
+  reply.setCookie(MARKETINGOVO_SESSION_COOKIE, sessionId, options);
 }
 
 const DashboardClientHeaderSchemaProperties = {
-  [AGENTSEO_CLIENT_HEADER]: Type.Optional(Type.Literal("dashboard")),
+  [MARKETINGOVO_CLIENT_HEADER]: Type.Optional(Type.Literal("dashboard")),
 };
 
 const terminalStatuses = new Set([
@@ -1038,7 +1038,7 @@ export async function createLocalServer(
     trustProxy: false,
   });
   app.addContentTypeParser(
-    "application/vnd.agentseo.project+json",
+    "application/vnd.marketingovo.project+json",
     { parseAs: "string" },
     (_request, body, done) => {
       try {
@@ -1089,9 +1089,10 @@ export async function createLocalServer(
   await app.register(swagger, {
     openapi: {
       info: {
-        title: "AGENTseo Local API",
+        title: "Marketingovo Local API",
         version: "1.0.0",
-        description: "Loopback API for the local-first AGENTseo application",
+        description:
+          "Loopback API for the local-first Marketingovo application",
       },
       servers: [{ url: origin }],
       components: {
@@ -1099,12 +1100,12 @@ export async function createLocalServer(
           localServiceToken: {
             type: "http",
             scheme: "bearer",
-            bearerFormat: "AGENTseo local service token",
+            bearerFormat: "Marketingovo local service token",
           },
           localSession: {
             type: "apiKey",
             in: "cookie",
-            name: AGENTSEO_SESSION_COOKIE,
+            name: MARKETINGOVO_SESSION_COOKIE,
           },
         },
       },
@@ -1116,7 +1117,7 @@ export async function createLocalServer(
     const allowedHost = `${host}:${port}`;
     if (request.headers.host !== allowedHost) {
       return reply.code(421).type("application/problem+json").send({
-        type: "urn:agentseo:problem:invalid-host",
+        type: "urn:marketingovo:problem:invalid-host",
         title: "Misdirected request",
         status: 421,
         detail: "The Host header is not accepted by the local service.",
@@ -1160,7 +1161,7 @@ export async function createLocalServer(
     if (!session || session.expiresAt < Date.now()) {
       if (sessionId) sessions.delete(sessionId);
       return reply.code(401).type("application/problem+json").send({
-        type: "urn:agentseo:problem:authentication-required",
+        type: "urn:marketingovo:problem:authentication-required",
         title: "Authentication required",
         status: 401,
         detail:
@@ -1174,7 +1175,7 @@ export async function createLocalServer(
         requestCsrfToken(request) !== session.csrf
       ) {
         return reply.code(403).type("application/problem+json").send({
-          type: "urn:agentseo:problem:csrf",
+          type: "urn:marketingovo:problem:csrf",
           title: "Request rejected",
           status: 403,
           detail: "The request origin or CSRF token is invalid.",
@@ -1190,7 +1191,7 @@ export async function createLocalServer(
         .code(error.status)
         .type("application/problem+json")
         .send({
-          type: `urn:agentseo:problem:${error.code.replaceAll("_", "-")}`,
+          type: `urn:marketingovo:problem:${error.code.replaceAll("_", "-")}`,
           title:
             error.status === 404
               ? "Issue review target not found"
@@ -1206,7 +1207,7 @@ export async function createLocalServer(
         .code(error.status)
         .type("application/problem+json")
         .send({
-          type: `urn:agentseo:problem:${error.code.replaceAll("_", "-")}`,
+          type: `urn:marketingovo:problem:${error.code.replaceAll("_", "-")}`,
           title:
             error.status === 404
               ? "Project context not found"
@@ -1222,7 +1223,7 @@ export async function createLocalServer(
         .code(error.status)
         .type("application/problem+json")
         .send({
-          type: `urn:agentseo:problem:${error.code.replaceAll("_", "-")}`,
+          type: `urn:marketingovo:problem:${error.code.replaceAll("_", "-")}`,
           title:
             error.code === "extraction_template_catalog_invalid"
               ? "Extraction template catalog unavailable"
@@ -1247,7 +1248,7 @@ export async function createLocalServer(
         .code(error.status)
         .type("application/problem+json")
         .send({
-          type: `urn:agentseo:problem:${error.code.replaceAll("_", "-")}`,
+          type: `urn:marketingovo:problem:${error.code.replaceAll("_", "-")}`,
           title:
             error.status === 404
               ? "Project not found"
@@ -1265,7 +1266,7 @@ export async function createLocalServer(
         .code(error.status)
         .type("application/problem+json")
         .send({
-          type: `urn:agentseo:problem:${error.code.replaceAll("_", "-")}`,
+          type: `urn:marketingovo:problem:${error.code.replaceAll("_", "-")}`,
           title:
             error.status === 409
               ? "Source run cannot be replayed yet"
@@ -1281,7 +1282,7 @@ export async function createLocalServer(
         .code(error.status)
         .type("application/problem+json")
         .send({
-          type: `urn:agentseo:problem:${error.code.replaceAll("_", "-")}`,
+          type: `urn:marketingovo:problem:${error.code.replaceAll("_", "-")}`,
           title:
             error.status === 404
               ? "Audit comparison target not found"
@@ -1299,7 +1300,7 @@ export async function createLocalServer(
         .code(error.status)
         .type("application/problem+json")
         .send({
-          type: `urn:agentseo:problem:${error.code.replaceAll("_", "-")}`,
+          type: `urn:marketingovo:problem:${error.code.replaceAll("_", "-")}`,
           title:
             error.status === 404
               ? "Link explorer target not found"
@@ -1317,7 +1318,7 @@ export async function createLocalServer(
         .code(error.status)
         .type("application/problem+json")
         .send({
-          type: `urn:agentseo:problem:${error.code.replaceAll("_", "-")}`,
+          type: `urn:marketingovo:problem:${error.code.replaceAll("_", "-")}`,
           title:
             error.status === 413
               ? "Project bundle is too large"
@@ -1346,7 +1347,7 @@ export async function createLocalServer(
       .code(status)
       .type("application/problem+json")
       .send({
-        type: `urn:agentseo:problem:${status === 500 ? "internal" : "request"}`,
+        type: `urn:marketingovo:problem:${status === 500 ? "internal" : "request"}`,
         title: status === 500 ? "Internal service error" : "Request rejected",
         status,
         detail: safeDetail,
@@ -1427,7 +1428,7 @@ export async function createLocalServer(
         : null;
       if (!bearer || !secureEqual(bearer, serviceToken)) {
         return reply.code(401).type("application/problem+json").send({
-          type: "urn:agentseo:problem:service-token-required",
+          type: "urn:marketingovo:problem:service-token-required",
           title: "Service token required",
           status: 401,
           detail:
@@ -1477,7 +1478,7 @@ export async function createLocalServer(
       bootstrapTickets.delete(ticketHash);
       if (!ticket || ticket.expiresAt <= bootstrapNow()) {
         return reply.code(401).type("application/problem+json").send({
-          type: "urn:agentseo:problem:bootstrap",
+          type: "urn:marketingovo:problem:bootstrap",
           title: "Bootstrap rejected",
           status: 401,
           detail: "The bootstrap token is invalid, expired, or already used.",
@@ -1619,7 +1620,7 @@ export async function createLocalServer(
       const context = await options.runtime.context.get(projectId);
       if (!context) {
         return reply.code(404).type("application/problem+json").send({
-          type: "urn:agentseo:problem:project-not-found",
+          type: "urn:marketingovo:problem:project-not-found",
           title: "Project not found",
           status: 404,
           detail: "The selected project does not exist.",
@@ -1739,7 +1740,7 @@ export async function createLocalServer(
       const workspace = await options.runtime.extractionRules.get(projectId);
       if (!workspace) {
         return reply.code(404).type("application/problem+json").send({
-          type: "urn:agentseo:problem:project-not-found",
+          type: "urn:marketingovo:problem:project-not-found",
           title: "Project not found",
           status: 404,
           detail: "The selected project does not exist.",
@@ -1865,7 +1866,7 @@ export async function createLocalServer(
       const idempotencyKey = request.headers["idempotency-key"];
       if (typeof idempotencyKey !== "string" || idempotencyKey.length < 8) {
         return reply.code(400).type("application/problem+json").send({
-          type: "urn:agentseo:problem:idempotency-key",
+          type: "urn:marketingovo:problem:idempotency-key",
           title: "Idempotency-Key required",
           status: 400,
           detail:
@@ -1972,7 +1973,7 @@ export async function createLocalServer(
       );
       if (!run)
         return reply.code(404).type("application/problem+json").send({
-          type: "urn:agentseo:problem:run-not-found",
+          type: "urn:marketingovo:problem:run-not-found",
           title: "Run not found",
           status: 404,
         });
@@ -2034,7 +2035,7 @@ export async function createLocalServer(
       });
       if (!evidence)
         return reply.code(404).type("application/problem+json").send({
-          type: "urn:agentseo:problem:run-not-found",
+          type: "urn:marketingovo:problem:run-not-found",
           title: "Run not found",
           status: 404,
         });
@@ -2086,7 +2087,7 @@ export async function createLocalServer(
       });
       if (!explorer) {
         return reply.code(404).type("application/problem+json").send({
-          type: "urn:agentseo:problem:run-not-found",
+          type: "urn:marketingovo:problem:run-not-found",
           title: "Run not found",
           status: 404,
         });
@@ -2175,7 +2176,7 @@ export async function createLocalServer(
       const idempotencyKey = request.headers["idempotency-key"];
       if (typeof idempotencyKey !== "string" || idempotencyKey.length < 8) {
         return reply.code(400).type("application/problem+json").send({
-          type: "urn:agentseo:problem:idempotency-key",
+          type: "urn:marketingovo:problem:idempotency-key",
           title: "Idempotency-Key required",
           status: 400,
           detail:
@@ -2190,7 +2191,7 @@ export async function createLocalServer(
       );
       if (!replay) {
         return reply.code(404).type("application/problem+json").send({
-          type: "urn:agentseo:problem:source-run-not-found",
+          type: "urn:marketingovo:problem:source-run-not-found",
           title: "Source run not found",
           status: 404,
           code: "source_run_not_found",
@@ -2227,7 +2228,7 @@ export async function createLocalServer(
       return (
         run ??
         reply.code(404).type("application/problem+json").send({
-          type: "urn:agentseo:problem:run-not-found",
+          type: "urn:marketingovo:problem:run-not-found",
           title: "Run not found",
           status: 404,
         })
@@ -2278,7 +2279,7 @@ export async function createLocalServer(
       const projectId = query.projectId ?? query.siteId;
       if (!projectId) {
         return reply.code(400).type("application/problem+json").send({
-          type: "urn:agentseo:problem:project-required",
+          type: "urn:marketingovo:problem:project-required",
           title: "Project required",
           status: 400,
           detail: "projectId or siteId is required to review issues.",
@@ -2324,7 +2325,7 @@ export async function createLocalServer(
       );
       if (!review) {
         return reply.code(404).type("application/problem+json").send({
-          type: "urn:agentseo:problem:issue-not-found",
+          type: "urn:marketingovo:problem:issue-not-found",
           title: "Issue not found",
           status: 404,
           detail: "The issue does not belong to the selected project.",
@@ -2361,7 +2362,7 @@ export async function createLocalServer(
       const runId = (request.params as { id: string }).id;
       if (!(await options.runtime.runs.get(runId)))
         return reply.code(404).type("application/problem+json").send({
-          type: "urn:agentseo:problem:run-not-found",
+          type: "urn:marketingovo:problem:run-not-found",
           title: "Run not found",
           status: 404,
         });
@@ -2460,14 +2461,14 @@ export async function createLocalServer(
         "html") as "html" | "pdf" | "csv" | "json";
       if (!["html", "pdf", "csv", "json"].includes(format))
         return reply.code(400).send({
-          type: "urn:agentseo:problem:unsupported-report-format",
+          type: "urn:marketingovo:problem:unsupported-report-format",
           title: "Unsupported format",
           status: 400,
         });
       const bytes = await options.runtime.reports.get(runId, format);
       if (!bytes)
         return reply.code(404).type("application/problem+json").send({
-          type: "urn:agentseo:problem:report-not-found",
+          type: "urn:marketingovo:problem:report-not-found",
           title: "Report not found",
           status: 404,
         });
@@ -2481,7 +2482,7 @@ export async function createLocalServer(
         .type(mediaType)
         .header(
           "content-disposition",
-          `attachment; filename=\"agentseo-${runId}.${format}\"`,
+          `attachment; filename=\"marketingovo-${runId}.${format}\"`,
         )
         .send(Buffer.from(bytes));
     },
@@ -2557,7 +2558,7 @@ export async function createLocalServer(
           code === "invalid_action_evidence_cursor"
         ) {
           return reply.code(400).type("application/problem+json").send({
-            type: "urn:agentseo:problem:invalid-action-evidence-cursor",
+            type: "urn:marketingovo:problem:invalid-action-evidence-cursor",
             title: "Invalid action evidence cursor",
             status: 400,
             detail: "The evidence cursor is invalid or has expired.",
@@ -2568,7 +2569,7 @@ export async function createLocalServer(
       }
       if (!workspace)
         return reply.code(404).type("application/problem+json").send({
-          type: "urn:agentseo:problem:action-not-found",
+          type: "urn:marketingovo:problem:action-not-found",
           title: "Action not found",
           status: 404,
         });
@@ -2602,7 +2603,7 @@ export async function createLocalServer(
         const checkpoint = await options.runtime.actions.createCheckpoint(id);
         if (!checkpoint)
           return reply.code(404).type("application/problem+json").send({
-            type: "urn:agentseo:problem:action-not-found",
+            type: "urn:marketingovo:problem:action-not-found",
             title: "Action not found",
             status: 404,
           });
@@ -2623,7 +2624,7 @@ export async function createLocalServer(
           code === "checkpoint_baseline_unavailable"
         ) {
           return reply.code(409).type("application/problem+json").send({
-            type: "urn:agentseo:problem:checkpoint-baseline-unavailable",
+            type: "urn:marketingovo:problem:checkpoint-baseline-unavailable",
             title: "Checkpoint baseline unavailable",
             status: 409,
             detail:
@@ -2671,7 +2672,7 @@ export async function createLocalServer(
       const idempotencyKey = request.headers["idempotency-key"];
       if (typeof idempotencyKey !== "string") {
         return reply.code(400).type("application/problem+json").send({
-          type: "urn:agentseo:problem:idempotency-key",
+          type: "urn:marketingovo:problem:idempotency-key",
           title: "Idempotency-Key required",
           status: 400,
           detail:
@@ -2685,7 +2686,7 @@ export async function createLocalServer(
         ).verify(id, checkpointId, idempotencyKey);
         if (!started)
           return reply.code(404).type("application/problem+json").send({
-            type: "urn:agentseo:problem:action-or-checkpoint-not-found",
+            type: "urn:marketingovo:problem:action-or-checkpoint-not-found",
             title: "Action or checkpoint not found",
             status: 404,
           });
@@ -2699,7 +2700,7 @@ export async function createLocalServer(
             : undefined;
         if (code === "checkpoint_action_mismatch") {
           return reply.code(409).type("application/problem+json").send({
-            type: "urn:agentseo:problem:checkpoint-action-mismatch",
+            type: "urn:marketingovo:problem:checkpoint-action-mismatch",
             title: "Checkpoint does not belong to this action",
             status: 409,
             detail: "Use a checkpoint created for the action being verified.",
@@ -2708,7 +2709,7 @@ export async function createLocalServer(
         }
         if (code === "verification_targets_unavailable") {
           return reply.code(422).type("application/problem+json").send({
-            type: "urn:agentseo:problem:verification-targets-unavailable",
+            type: "urn:marketingovo:problem:verification-targets-unavailable",
             title: "Verification targets unavailable",
             status: 422,
             detail:
@@ -2767,7 +2768,7 @@ export async function createLocalServer(
       return (
         action ??
         reply.code(404).type("application/problem+json").send({
-          type: "urn:agentseo:problem:action-not-found",
+          type: "urn:marketingovo:problem:action-not-found",
           title: "Action not found",
           status: 404,
         })
@@ -2840,7 +2841,7 @@ export async function createLocalServer(
         Array.isArray(body.configuration)
       ) {
         return reply.code(400).type("application/problem+json").send({
-          type: "urn:agentseo:problem:invalid-integration-configuration",
+          type: "urn:marketingovo:problem:invalid-integration-configuration",
           title: "Integration configuration is invalid",
           status: 400,
           detail:
@@ -2868,7 +2869,7 @@ export async function createLocalServer(
           .code(notFound ? 404 : 400)
           .type("application/problem+json")
           .send({
-            type: `urn:agentseo:problem:${notFound ? "integration-not-found" : "invalid-integration-configuration"}`,
+            type: `urn:marketingovo:problem:${notFound ? "integration-not-found" : "invalid-integration-configuration"}`,
             title: notFound
               ? "Integration or project not found"
               : "Integration configuration is invalid",
@@ -2900,7 +2901,7 @@ export async function createLocalServer(
       const manifest = getConnectorManifest(provider);
       if (!manifest) {
         return reply.code(404).type("application/problem+json").send({
-          type: "urn:agentseo:problem:integration-not-found",
+          type: "urn:marketingovo:problem:integration-not-found",
           title: "Integration not found",
           status: 404,
           detail: "The requested integration provider is not registered.",
@@ -2909,7 +2910,7 @@ export async function createLocalServer(
       }
       if (manifest.auth.type === "oauth-pkce") {
         return reply.code(405).type("application/problem+json").send({
-          type: "urn:agentseo:problem:oauth-required",
+          type: "urn:marketingovo:problem:oauth-required",
           title: "OAuth connection required",
           status: 405,
           detail:
@@ -2926,7 +2927,7 @@ export async function createLocalServer(
         !Value.Check(manifest.credentialSchema, body.credentials)
       ) {
         return reply.code(400).type("application/problem+json").send({
-          type: "urn:agentseo:problem:invalid-credentials",
+          type: "urn:marketingovo:problem:invalid-credentials",
           title: "Credential fields are invalid",
           status: 400,
           detail:
@@ -2937,7 +2938,7 @@ export async function createLocalServer(
       const account = body.account ?? "default";
       if (!/^[a-zA-Z0-9._-]{1,64}$/u.test(account)) {
         return reply.code(400).type("application/problem+json").send({
-          type: "urn:agentseo:problem:invalid-account",
+          type: "urn:marketingovo:problem:invalid-account",
           title: "Account key is invalid",
           status: 400,
           detail:
@@ -2988,7 +2989,7 @@ export async function createLocalServer(
       const candidate = body.projectId ?? body.siteId;
       if (candidate !== undefined && typeof candidate !== "string") {
         return reply.code(400).type("application/problem+json").send({
-          type: "urn:agentseo:problem:invalid-project-id",
+          type: "urn:marketingovo:problem:invalid-project-id",
           title: "Project identifier is invalid",
           status: 400,
           detail: "projectId or siteId must be a string when provided.",
@@ -3013,7 +3014,7 @@ export async function createLocalServer(
           .code(notFound ? 404 : 400)
           .type("application/problem+json")
           .send({
-            type: `urn:agentseo:problem:${notFound ? "integration-not-found" : "integration-test-failed"}`,
+            type: `urn:marketingovo:problem:${notFound ? "integration-not-found" : "integration-test-failed"}`,
             title: notFound
               ? "Integration or project not found"
               : "Integration test failed",
@@ -3047,7 +3048,7 @@ export async function createLocalServer(
       return removed
         ? reply.code(204).send()
         : reply.code(404).type("application/problem+json").send({
-            type: "urn:agentseo:problem:integration-not-found",
+            type: "urn:marketingovo:problem:integration-not-found",
             title: "Integration not found",
             status: 404,
           });
@@ -3081,7 +3082,7 @@ export async function createLocalServer(
         .code(problem.status)
         .type("application/problem+json")
         .send({
-          type: `urn:agentseo:problem:${problem.code.replaceAll("_", "-")}`,
+          type: `urn:marketingovo:problem:${problem.code.replaceAll("_", "-")}`,
           title: problem.title,
           status: problem.status,
           detail: problem.message,
@@ -3170,7 +3171,7 @@ export async function createLocalServer(
     },
     async (_request, reply) =>
       reply.code(410).type("application/problem+json").send({
-        type: "urn:agentseo:problem:oauth-expired",
+        type: "urn:marketingovo:problem:oauth-expired",
         title: "OAuth transaction expired",
         status: 410,
         detail: "Start a new connection from the Integrations screen.",
@@ -3242,7 +3243,7 @@ export async function createLocalServer(
           .code(notFound ? 404 : 400)
           .type("application/problem+json")
           .send({
-            type: `urn:agentseo:problem:${notFound ? "project-not-found" : "invalid-schedule"}`,
+            type: `urn:marketingovo:problem:${notFound ? "project-not-found" : "invalid-schedule"}`,
             title: notFound ? "Project not found" : "Schedule is invalid",
             status: notFound ? 404 : 400,
             detail,
@@ -3277,7 +3278,7 @@ export async function createLocalServer(
       );
       if (!current)
         return reply.code(404).type("application/problem+json").send({
-          type: "urn:agentseo:problem:schedule-not-found",
+          type: "urn:marketingovo:problem:schedule-not-found",
           title: "Schedule not found",
           status: 404,
         });
@@ -3301,7 +3302,7 @@ export async function createLocalServer(
           .code(400)
           .type("application/problem+json")
           .send({
-            type: "urn:agentseo:problem:invalid-schedule",
+            type: "urn:marketingovo:problem:invalid-schedule",
             title: "Schedule is invalid",
             status: 400,
             detail:
@@ -3332,7 +3333,7 @@ export async function createLocalServer(
       return removed
         ? reply.code(204).send()
         : reply.code(404).type("application/problem+json").send({
-            type: "urn:agentseo:problem:schedule-not-found",
+            type: "urn:marketingovo:problem:schedule-not-found",
             title: "Schedule not found",
             status: 404,
           });
@@ -3350,7 +3351,7 @@ export async function createLocalServer(
         response: {
           200: {
             description:
-              "A portable AGENTseo project bundle. Credentials and secret references are never included.",
+              "A portable Marketingovo project bundle. Credentials and secret references are never included.",
             headers: {
               "content-disposition": {
                 description: "Attachment filename for the project bundle.",
@@ -3358,7 +3359,7 @@ export async function createLocalServer(
               },
             },
             content: {
-              "application/vnd.agentseo.project+json": {
+              "application/vnd.marketingovo.project+json": {
                 schema: Type.String({ contentEncoding: "binary" }),
               },
             },
@@ -3373,16 +3374,16 @@ export async function createLocalServer(
       const projectId = (request.body as { projectId?: string }).projectId;
       if (!projectId)
         return reply.code(400).type("application/problem+json").send({
-          type: "urn:agentseo:problem:project-required",
+          type: "urn:marketingovo:problem:project-required",
           title: "projectId is required",
           status: 400,
         });
       const bytes = await options.runtime.exportProject(projectId);
       return reply
-        .type("application/vnd.agentseo.project+json")
+        .type("application/vnd.marketingovo.project+json")
         .header(
           "content-disposition",
-          `attachment; filename=\"${projectId}.agentseo\"`,
+          `attachment; filename=\"${projectId}.marketingovo\"`,
         )
         .send(Buffer.from(bytes));
     },
@@ -3390,13 +3391,16 @@ export async function createLocalServer(
   app.post(
     "/api/v1/import",
     {
-      bodyLimit: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxBytes,
+      bodyLimit: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxBytes,
       // Keep the exact parsed object for the signed canonical checksum. The
       // runtime performs the same TypeBox validation plus semantic, secret,
       // relationship and checksum checks without AJV coercion/removal.
       validatorCompiler: () => () => true,
       schema: {
-        consumes: ["application/vnd.agentseo.project+json", "application/json"],
+        consumes: [
+          "application/vnd.marketingovo.project+json",
+          "application/json",
+        ],
         produces: ["application/json"],
         body: AgentSeoProjectBundleV2Schema,
         response: {
@@ -3415,17 +3419,17 @@ export async function createLocalServer(
         .toLowerCase();
       if (
         mediaType !== "application/json" &&
-        mediaType !== "application/vnd.agentseo.project+json" &&
+        mediaType !== "application/vnd.marketingovo.project+json" &&
         // Accepted for compatibility with bundles exported under the previous
         // product name. Exports always emit the canonical type above.
         mediaType !== "application/vnd.golemseo.project+json"
       ) {
         return reply.code(415).type("application/problem+json").send({
-          type: "urn:agentseo:problem:unsupported-project-bundle-media-type",
+          type: "urn:marketingovo:problem:unsupported-project-bundle-media-type",
           title: "Unsupported project bundle media type",
           status: 415,
           detail:
-            "Use application/vnd.agentseo.project+json or application/json.",
+            "Use application/vnd.marketingovo.project+json or application/json.",
           code: "unsupported_bundle_media_type",
         });
       }
@@ -3751,7 +3755,7 @@ export async function createLocalServer(
     const project = options.runtime.database.getProject(siteId);
     if (!project) {
       return reply.code(404).type("application/problem+json").send({
-        type: "urn:agentseo:problem:project-not-found",
+        type: "urn:marketingovo:problem:project-not-found",
         title: "Project not found",
         status: 404,
         detail: "The selected project does not exist.",
@@ -3777,7 +3781,7 @@ export async function createLocalServer(
       const siteId = (request.query as { siteId?: string }).siteId;
       if (!siteId) {
         return reply.code(400).type("application/problem+json").send({
-          type: "urn:agentseo:problem:project-required",
+          type: "urn:marketingovo:problem:project-required",
           title: "Project is required",
           status: 400,
           detail: "Select a project before updating settings.",
@@ -3796,7 +3800,7 @@ export async function createLocalServer(
       const siteName = body.siteName?.trim();
       if (body.siteName !== undefined && !siteName) {
         return reply.code(400).type("application/problem+json").send({
-          type: "urn:agentseo:problem:invalid-settings",
+          type: "urn:marketingovo:problem:invalid-settings",
           title: "Settings are invalid",
           status: 400,
           detail: "Site name cannot be empty.",
@@ -3812,7 +3816,7 @@ export async function createLocalServer(
           siteUrl = parsed.href;
         } catch {
           return reply.code(400).type("application/problem+json").send({
-            type: "urn:agentseo:problem:invalid-settings",
+            type: "urn:marketingovo:problem:invalid-settings",
             title: "Settings are invalid",
             status: 400,
             detail: "Canonical URL must be an absolute HTTP or HTTPS URL.",
@@ -3826,7 +3830,7 @@ export async function createLocalServer(
           new Intl.DateTimeFormat("en-US", { timeZone: timezone }).format();
         } catch {
           return reply.code(400).type("application/problem+json").send({
-            type: "urn:agentseo:problem:invalid-settings",
+            type: "urn:marketingovo:problem:invalid-settings",
             title: "Settings are invalid",
             status: 400,
             detail:
@@ -3858,7 +3862,7 @@ export async function createLocalServer(
         });
         if (!updated) {
           return reply.code(404).type("application/problem+json").send({
-            type: "urn:agentseo:problem:project-not-found",
+            type: "urn:marketingovo:problem:project-not-found",
             title: "Project not found",
             status: 404,
             detail: "The selected project does not exist.",
@@ -3884,7 +3888,7 @@ export async function createLocalServer(
           .code(conflict ? 409 : 400)
           .type("application/problem+json")
           .send({
-            type: `urn:agentseo:problem:${conflict ? "project-url-conflict" : "invalid-settings"}`,
+            type: `urn:marketingovo:problem:${conflict ? "project-url-conflict" : "invalid-settings"}`,
             title: conflict
               ? "Canonical URL is already in use"
               : "Settings are invalid",
@@ -3932,7 +3936,7 @@ export async function createLocalServer(
       if (request.method === "GET" && !request.url.startsWith("/api/"))
         return reply.type("text/html").sendFile("index.html");
       return reply.code(404).type("application/problem+json").send({
-        type: "urn:agentseo:problem:not-found",
+        type: "urn:marketingovo:problem:not-found",
         title: "Not found",
         status: 404,
       });

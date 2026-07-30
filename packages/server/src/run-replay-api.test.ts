@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { AgentSeoLocalRuntime } from "@agentseoapp/runtime";
+import { AgentSeoLocalRuntime } from "@marketingovo/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 function replayEngine() {
@@ -38,7 +38,7 @@ describe("run replay API", () => {
 
   async function setup() {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-run-replay-api-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-run-replay-api-")),
       engine: replayEngine(),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
@@ -102,7 +102,7 @@ describe("run replay API", () => {
       headers: {
         ...headers,
         "idempotency-key": "dashboard-replay-request",
-        "x-agentseo-client": "dashboard",
+        "x-marketingovo-client": "dashboard",
       },
     });
     expect(dashboard.statusCode).toBe(202);

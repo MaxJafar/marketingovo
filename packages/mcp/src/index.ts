@@ -22,8 +22,8 @@ import {
   type AgentRunEvidenceInput,
   type AgentRunGetInput,
   type AgentRunLinksInput,
-} from "@agentseoapp/contracts/agent-tools";
-import { AgentSeoClient } from "@agentseoapp/sdk";
+} from "@marketingovo/contracts/agent-tools";
+import { AgentSeoClient } from "@marketingovo/sdk";
 import { resolveMcpConnectionEnvironment } from "./compatibility.js";
 
 export const PUBLIC_TOOL_NAMES = PUBLIC_AGENT_TOOL_NAMES;
@@ -78,15 +78,15 @@ function defaultAgentSeoDataDirectory(): string {
   // Preserve the persisted 1.x data root until the storage migration owns the
   // default-path cutover. Connection environment variables remain canonical.
   if (process.platform === "darwin")
-    return join(homedir(), "Library", "Application Support", "AGENTseo");
+    return join(homedir(), "Library", "Application Support", "Marketingovo");
   if (process.platform === "win32")
     return join(
       process.env.LOCALAPPDATA ?? process.env.APPDATA ?? homedir(),
-      "AGENTseo",
+      "Marketingovo",
     );
   return join(
     process.env.XDG_DATA_HOME ?? join(homedir(), ".local", "share"),
-    "agentseo",
+    "marketingovo",
   );
 }
 
@@ -104,10 +104,10 @@ export async function createAgentSeoMcpServer(
     );
   }
   const server = new McpServer(
-    { name: "agentseo", version: "1.0.0" },
+    { name: "marketingovo", version: "1.0.0" },
     {
       instructions:
-        "Use start tools only after identifying the project and reading its context resource. Runs are asynchronous: call agentseo_run_get until terminal, then summarize evidence, confidence, effort, and the five highest-value actions. Respect ignored and false-positive classifications exposed by the project issue-review resource. Never ask for or transmit credentials through tools.",
+        "Use start tools only after identifying the project and reading its context resource. Runs are asynchronous: call marketingovo_run_get until terminal, then summarize evidence, confidence, effort, and the five highest-value actions. Respect ignored and false-positive classifications exposed by the project issue-review resource. Never ask for or transmit credentials through tools.",
     },
   );
 
@@ -318,17 +318,17 @@ export async function createAgentSeoMcpServer(
   );
 
   server.registerResource(
-    "agentseo-run",
-    new ResourceTemplate("agentseo://runs/{id}", {
+    "marketingovo-run",
+    new ResourceTemplate("marketingovo://runs/{id}", {
       list: async () => ({
         resources: (await client.runs.list()).slice(0, 100).map((run) => ({
-          uri: `agentseo://runs/${run.id}`,
+          uri: `marketingovo://runs/${run.id}`,
           name: `${run.workflowId} — ${run.status}`,
         })),
       }),
     }),
     {
-      title: "AGENTseo run",
+      title: "Marketingovo run",
       description: "Canonical local run and issue state",
       mimeType: "application/json",
     },
@@ -351,10 +351,12 @@ export async function createAgentSeoMcpServer(
   );
 
   server.registerResource(
-    "agentseo-run-report",
-    new ResourceTemplate("agentseo://runs/{id}/report", { list: undefined }),
+    "marketingovo-run-report",
+    new ResourceTemplate("marketingovo://runs/{id}/report", {
+      list: undefined,
+    }),
     {
-      title: "AGENTseo run report",
+      title: "Marketingovo run report",
       description: "Agent-ready run summary with top issues",
       mimeType: "application/json",
     },
@@ -378,17 +380,17 @@ export async function createAgentSeoMcpServer(
   );
 
   server.registerResource(
-    "agentseo-project-overview",
-    new ResourceTemplate("agentseo://projects/{id}/overview", {
+    "marketingovo-project-overview",
+    new ResourceTemplate("marketingovo://projects/{id}/overview", {
       list: async () => ({
         resources: (await client.projects.list()).map((project) => ({
-          uri: `agentseo://projects/${project.id}/overview`,
+          uri: `marketingovo://projects/${project.id}/overview`,
           name: project.name,
         })),
       }),
     }),
     {
-      title: "AGENTseo project overview",
+      title: "Marketingovo project overview",
       description: "Marketer overview and prioritized actions",
       mimeType: "application/json",
     },
@@ -408,17 +410,17 @@ export async function createAgentSeoMcpServer(
   );
 
   server.registerResource(
-    "agentseo-project-issues",
-    new ResourceTemplate("agentseo://projects/{id}/issues", {
+    "marketingovo-project-issues",
+    new ResourceTemplate("marketingovo://projects/{id}/issues", {
       list: async () => ({
         resources: (await client.projects.list()).map((project) => ({
-          uri: `agentseo://projects/${project.id}/issues`,
+          uri: `marketingovo://projects/${project.id}/issues`,
           name: `${project.name} — issue review`,
         })),
       }),
     }),
     {
-      title: "AGENTseo project issue review",
+      title: "Marketingovo project issue review",
       description:
         "Latest project findings with evidence, occurrence counts, and marketer adjudications",
       mimeType: "application/json",
@@ -439,17 +441,17 @@ export async function createAgentSeoMcpServer(
   );
 
   server.registerResource(
-    "agentseo-project-context",
-    new ResourceTemplate("agentseo://projects/{id}/context", {
+    "marketingovo-project-context",
+    new ResourceTemplate("marketingovo://projects/{id}/context", {
       list: async () => ({
         resources: (await client.projects.list()).map((project) => ({
-          uri: `agentseo://projects/${project.id}/context`,
+          uri: `marketingovo://projects/${project.id}/context`,
           name: `${project.name} — business and SEO context`,
         })),
       }),
     }),
     {
-      title: "AGENTseo project context",
+      title: "Marketingovo project context",
       description:
         "Versioned business profile and append-only marketer decision journal",
       mimeType: "application/json",

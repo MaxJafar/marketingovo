@@ -13,7 +13,7 @@ import {
   type ContentGapReport,
 } from "./integrations/content-gap.js";
 import {
-  AGENTSEO_DEFAULT_USER_AGENT,
+  MARKETINGOVO_DEFAULT_USER_AGENT,
   loadLimits,
   type Limits,
 } from "./core/limits.js";
@@ -108,7 +108,7 @@ async function fetchAndExtract(
       const page = await renderer.render(url, {
         timeoutMs: 30_000,
         maxBodyBytes: 2_621_440,
-        userAgent: AGENTSEO_DEFAULT_USER_AGENT,
+        userAgent: MARKETINGOVO_DEFAULT_USER_AGENT,
         allowPrivate: false,
         waitUntil: "networkidle",
       });

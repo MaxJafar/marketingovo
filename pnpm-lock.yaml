@@ -41,10 +41,10 @@ importers:
 
   adapters/openclaw:
     dependencies:
-      '@agentseoapp/contracts':
+      '@marketingovo/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
-      '@agentseoapp/sdk':
+      '@marketingovo/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
       typebox:
@@ -142,7 +142,7 @@ importers:
 
   packages/application:
     dependencies:
-      '@agentseoapp/contracts':
+      '@marketingovo/contracts':
         specifier: workspace:*
         version: link:../contracts
       '@sinclair/typebox':
@@ -158,29 +158,29 @@ importers:
 
   packages/cli:
     dependencies:
-      '@agentseoapp/contracts':
+      '@marketingovo/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@agentseoapp/credentials':
+      '@marketingovo/credentials':
         specifier: workspace:*
         version: link:../credentials
-      '@agentseoapp/legacy-import':
+      '@marketingovo/legacy-import':
         specifier: workspace:*
         version: link:../legacy-import
-      '@agentseoapp/runtime':
+      '@marketingovo/runtime':
         specifier: workspace:*
         version: link:../runtime
-      '@agentseoapp/sdk':
+      '@marketingovo/sdk':
         specifier: workspace:*
         version: link:../sdk
-      '@agentseoapp/server':
+      '@marketingovo/server':
         specifier: workspace:*
         version: link:../server
-      '@agentseoapp/storage-sqlite':
+      '@marketingovo/storage-sqlite':
         specifier: workspace:*
         version: link:../storage-sqlite
     devDependencies:
-      '@agentseoapp/dashboard':
+      '@marketingovo/dashboard':
         specifier: workspace:*
         version: link:../../apps/dashboard
       '@types/node':
@@ -211,7 +211,7 @@ importers:
 
   packages/core:
     dependencies:
-      '@agentseoapp/integrations':
+      '@marketingovo/integrations':
         specifier: workspace:*
         version: link:../integrations
       chrome-launcher:
@@ -265,7 +265,7 @@ importers:
 
   packages/integrations:
     dependencies:
-      '@agentseoapp/contracts':
+      '@marketingovo/contracts':
         specifier: workspace:*
         version: link:../contracts
       '@sinclair/typebox':
@@ -284,13 +284,13 @@ importers:
 
   packages/legacy-import:
     dependencies:
-      '@agentseoapp/contracts':
+      '@marketingovo/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@agentseoapp/credentials':
+      '@marketingovo/credentials':
         specifier: workspace:*
         version: link:../credentials
-      '@agentseoapp/storage-sqlite':
+      '@marketingovo/storage-sqlite':
         specifier: workspace:*
         version: link:../storage-sqlite
     devDependencies:
@@ -306,15 +306,15 @@ importers:
 
   packages/mcp:
     dependencies:
-      '@agentseoapp/contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      '@agentseoapp/sdk':
-        specifier: workspace:*
-        version: link:../sdk
       '@modelcontextprotocol/server':
         specifier: 2.0.0-beta.3
         version: 2.0.0-beta.3
+      '@marketingovo/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@marketingovo/sdk':
+        specifier: workspace:*
+        version: link:../sdk
       zod:
         specifier: 4.4.3
         version: 4.4.3
@@ -331,22 +331,22 @@ importers:
 
   packages/runtime:
     dependencies:
-      '@agentseoapp/application':
+      '@marketingovo/application':
         specifier: workspace:*
         version: link:../application
-      '@agentseoapp/contracts':
+      '@marketingovo/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@agentseoapp/core':
+      '@marketingovo/core':
         specifier: workspace:*
         version: link:../core
-      '@agentseoapp/credentials':
+      '@marketingovo/credentials':
         specifier: workspace:*
         version: link:../credentials
-      '@agentseoapp/integrations':
+      '@marketingovo/integrations':
         specifier: workspace:*
         version: link:../integrations
-      '@agentseoapp/storage-sqlite':
+      '@marketingovo/storage-sqlite':
         specifier: workspace:*
         version: link:../storage-sqlite
       '@sinclair/typebox':
@@ -368,14 +368,14 @@ importers:
 
   packages/sdk:
     dependencies:
-      '@agentseoapp/contracts':
+      '@marketingovo/contracts':
         specifier: workspace:*
         version: link:../contracts
       openapi-fetch:
         specifier: 0.17.0
         version: 0.17.0
     devDependencies:
-      '@agentseoapp/server':
+      '@marketingovo/server':
         specifier: workspace:*
         version: link:../server
       '@types/node':
@@ -396,18 +396,6 @@ importers:
 
   packages/server:
     dependencies:
-      '@agentseoapp/contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      '@agentseoapp/credentials':
-        specifier: workspace:*
-        version: link:../credentials
-      '@agentseoapp/integrations':
-        specifier: workspace:*
-        version: link:../integrations
-      '@agentseoapp/runtime':
-        specifier: workspace:*
-        version: link:../runtime
       '@fastify/cookie':
         specifier: ^11.0.2
         version: 11.1.1
@@ -420,6 +408,18 @@ importers:
       '@fastify/swagger':
         specifier: ^9.5.1
         version: 9.8.1
+      '@marketingovo/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@marketingovo/credentials':
+        specifier: workspace:*
+        version: link:../credentials
+      '@marketingovo/integrations':
+        specifier: workspace:*
+        version: link:../integrations
+      '@marketingovo/runtime':
+        specifier: workspace:*
+        version: link:../runtime
       '@sinclair/typebox':
         specifier: ^0.34.41
         version: 0.34.52
@@ -439,7 +439,7 @@ importers:
 
   packages/storage-sqlite:
     dependencies:
-      '@agentseoapp/contracts':
+      '@marketingovo/contracts':
         specifier: workspace:*
         version: link:../contracts
     devDependencies:
@@ -453,9 +453,9 @@ importers:
         specifier: ^3.2.4
         version: 3.2.7(@types/node@24.13.3)(jsdom@26.1.0)(tsx@4.23.1)(yaml@2.9.0)
 
-  plugins/codex/agentseo:
+  plugins/codex/marketingovo:
     dependencies:
-      '@agentseoapp/mcp':
+      '@marketingovo/mcp':
         specifier: workspace:*
         version: link:../../../packages/mcp
     devDependencies:

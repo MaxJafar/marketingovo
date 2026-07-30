@@ -27,7 +27,7 @@ import {
   selectMatchedControlCohort,
   validateWorkflowOutput,
   workflowById,
-} from "@agentseoapp/application";
+} from "@marketingovo/application";
 import {
   AppendProjectContextJournalInputSchema,
   BUILT_IN_EXTRACTION_RULE_TEMPLATE_CATALOG,
@@ -37,7 +37,7 @@ import {
   ProjectContextProfileSchema,
   SitemapEvidenceSchema,
   UpdateExtractionRulesInputSchema,
-} from "@agentseoapp/contracts";
+} from "@marketingovo/contracts";
 import type {
   Action,
   ActionCheckpoint,
@@ -79,9 +79,9 @@ import type {
   UpdateExtractionRulesInput,
   UpdateIssueAdjudicationInput,
   UpdateProjectContextInput,
-} from "@agentseoapp/contracts";
+} from "@marketingovo/contracts";
 import {
-  AGENTSEO_PROJECT_BUNDLE_LIMITS,
+  MARKETINGOVO_PROJECT_BUNDLE_LIMITS,
   AgentSeoProjectBundleV2Schema,
   type AgentSeoProjectBundleV2,
   type ProjectBundleArtifact,
@@ -90,44 +90,44 @@ import {
   type ProjectBundlePage,
   type ProjectBundleRunConfiguration,
   type ProjectImportResult,
-} from "@agentseoapp/contracts/project-bundle";
+} from "@marketingovo/contracts/project-bundle";
 import type {
   CredentialRef,
   CredentialStore,
   StoredOAuthCredential,
-} from "@agentseoapp/credentials";
+} from "@marketingovo/credentials";
 import {
   decodeOAuthCredential,
   encodeOAuthCredential,
   MemoryCredentialStore,
   oauthCredentialRef,
-} from "@agentseoapp/credentials";
+} from "@marketingovo/credentials";
 import type {
   ConnectorHealth,
   ConnectorId,
   GoogleOAuthTokenSet,
-} from "@agentseoapp/integrations";
+} from "@marketingovo/integrations";
 import {
   checkConnectorHealth,
   connectorManifests,
   getConnectorManifest,
   refreshGoogleOAuthToken,
   validateConnectorConfiguration,
-} from "@agentseoapp/integrations";
+} from "@marketingovo/integrations";
 import {
   AgentSeoDatabase,
   type PagePerformanceRecord,
   type PerformanceWindowRecord,
   type QueryPerformanceRecord,
   type StoredPageRecord,
-} from "@agentseoapp/storage-sqlite";
+} from "@marketingovo/storage-sqlite";
 import {
   redactSecrets,
   type PerformancePeriodSummary,
   type Report as EngineReport,
   validateExtractorRules,
-} from "@agentseoapp/core";
-import { validateCustomRuleRegex } from "@agentseoapp/core/custom-rule-regex";
+} from "@marketingovo/core";
+import { validateCustomRuleRegex } from "@marketingovo/core/custom-rule-regex";
 import { nextCronOccurrence } from "./cron.js";
 import { resolveGoogleDesktopClientId } from "./google-oauth-env.js";
 import {
@@ -213,15 +213,15 @@ export interface LocalRuntimeOptions {
 
 export function defaultDataDirectory(): string {
   if (process.platform === "darwin")
-    return join(homedir(), "Library", "Application Support", "AGENTseo");
+    return join(homedir(), "Library", "Application Support", "Marketingovo");
   if (process.platform === "win32")
     return join(
       process.env.LOCALAPPDATA ?? process.env.APPDATA ?? homedir(),
-      "AGENTseo",
+      "Marketingovo",
     );
   return join(
     process.env.XDG_DATA_HOME ?? join(homedir(), ".local", "share"),
-    "agentseo",
+    "marketingovo",
   );
 }
 
@@ -779,7 +779,7 @@ function validateProjectBundle(
       .map((error) => `${error.path || "$"}: ${error.message}`)
       .join("; ");
     throw new ProjectBundleError(
-      `The file does not match .agentseo format version 2${detail ? `: ${detail}` : "."}`,
+      `The file does not match .marketingovo format version 2${detail ? `: ${detail}` : "."}`,
       "invalid_project_bundle",
     );
   }
@@ -1124,7 +1124,7 @@ function validateProjectBundle(
   }
   if (
     embeddedBytes !== raw.integrity.embeddedArtifactBytes ||
-    embeddedBytes > AGENTSEO_PROJECT_BUNDLE_LIMITS.maxEmbeddedArtifactBytes
+    embeddedBytes > MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxEmbeddedArtifactBytes
   ) {
     throw new ProjectBundleError(
       "The embedded artifact byte count is invalid.",
@@ -2140,13 +2140,13 @@ function buildSitemapEvidence(report: EngineReport): SitemapEvidence {
 
 async function createPdf(report: EngineReport): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
-  pdf.setTitle("AGENTseo audit");
+  pdf.setTitle("Marketingovo audit");
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
   const page = pdf.addPage([595, 842]);
   let y = 790;
   const safe = (value: string): string => value.replace(/[^\x20-\x7E]/g, "?");
-  page.drawText("AGENTseo audit", {
+  page.drawText("Marketingovo audit", {
     x: 48,
     y,
     size: 22,
@@ -3654,8 +3654,9 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
       ],
       hosted: {
         available: false,
-        url: "urn:agentseo:hosted-unavailable",
-        message: "AGENTseo is local-first; no hosted service is configured.",
+        url: "urn:marketingovo:hosted-unavailable",
+        message:
+          "Marketingovo is local-first; no hosted service is configured.",
       },
     }),
   };
@@ -3669,7 +3670,7 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
       /* platform ACL may own this */
     }
     this.database = new AgentSeoDatabase({
-      path: join(this.dataDir, "agentseo.db"),
+      path: join(this.dataDir, "marketingovo.db"),
     });
     this.recoverDeletionStaging();
     this.credentialStore =
@@ -3748,7 +3749,7 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
   private async loadEngine(): Promise<EngineModule> {
     if (!this.engine)
       this.engine =
-        (await import("@agentseoapp/core")) as unknown as EngineModule;
+        (await import("@marketingovo/core")) as unknown as EngineModule;
     return this.engine;
   }
 
@@ -5523,9 +5524,10 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
         omittedReason: reason,
       });
       if (
-        artifact.sizeBytes > AGENTSEO_PROJECT_BUNDLE_LIMITS.maxArtifactBytes ||
+        artifact.sizeBytes >
+          MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxArtifactBytes ||
         embeddedArtifactBytes + artifact.sizeBytes >
-          AGENTSEO_PROJECT_BUNDLE_LIMITS.maxEmbeddedArtifactBytes
+          MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxEmbeddedArtifactBytes
       ) {
         artifacts.push(omitted("size_limit"));
         continue;
@@ -5575,7 +5577,7 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
     }
 
     const payload: Omit<AgentSeoProjectBundleV2, "integrity"> = {
-      format: "agentseo-project",
+      format: "marketingovo-project",
       version: 2,
       exportedAt: new Date().toISOString(),
       secretsIncluded: false,
@@ -5644,9 +5646,9 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
     };
     validateProjectBundle(bundle);
     const bytes = Buffer.from(JSON.stringify(bundle, null, 2));
-    if (bytes.byteLength > AGENTSEO_PROJECT_BUNDLE_LIMITS.maxBytes) {
+    if (bytes.byteLength > MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxBytes) {
       throw new ProjectBundleError(
-        `The project export is ${bytes.byteLength} bytes; the safe .agentseo limit is ${AGENTSEO_PROJECT_BUNDLE_LIMITS.maxBytes} bytes.`,
+        `The project export is ${bytes.byteLength} bytes; the safe .marketingovo limit is ${MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxBytes} bytes.`,
         "bundle_too_large",
         413,
       );
@@ -5663,9 +5665,9 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
         typeof input === "string"
           ? Buffer.byteLength(input, "utf8")
           : input.byteLength;
-      if (bytes > AGENTSEO_PROJECT_BUNDLE_LIMITS.maxBytes)
+      if (bytes > MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxBytes)
         throw new ProjectBundleError(
-          "The .agentseo file exceeds the 25 MiB import limit.",
+          "The .marketingovo file exceeds the 25 MiB import limit.",
           "bundle_too_large",
           413,
         );
@@ -5677,7 +5679,7 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
         ) as unknown;
       } catch {
         throw new ProjectBundleError(
-          "The .agentseo file is not valid JSON.",
+          "The .marketingovo file is not valid JSON.",
           "invalid_bundle_json",
         );
       }
@@ -5693,15 +5695,15 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
       }
       if (encoded === undefined)
         throw new ProjectBundleError(
-          "A .agentseo project bundle is required.",
+          "A .marketingovo project bundle is required.",
           "invalid_bundle_json",
         );
       if (
         Buffer.byteLength(encoded, "utf8") >
-        AGENTSEO_PROJECT_BUNDLE_LIMITS.maxBytes
+        MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxBytes
       )
         throw new ProjectBundleError(
-          "The .agentseo file exceeds the 25 MiB import limit.",
+          "The .marketingovo file exceeds the 25 MiB import limit.",
           "bundle_too_large",
           413,
         );

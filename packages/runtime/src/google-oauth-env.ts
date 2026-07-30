@@ -1,4 +1,4 @@
-const GOOGLE_DESKTOP_CLIENT_ID_ENV = "AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID";
+const GOOGLE_DESKTOP_CLIENT_ID_ENV = "MARKETINGOVO_GOOGLE_DESKTOP_CLIENT_ID";
 const LEGACY_GOOGLE_DESKTOP_CLIENT_ID_ENVS = [
   "GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID",
   "GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID",
@@ -16,7 +16,7 @@ function warnLegacyName(name: string): void {
   // and warnings may be persisted in local logs.
   // eslint-disable-next-line no-console
   console.warn(
-    `[agentseo] env ${name} is deprecated; use ${GOOGLE_DESKTOP_CLIENT_ID_ENV} instead`,
+    `[marketingovo] env ${name} is deprecated; use ${GOOGLE_DESKTOP_CLIENT_ID_ENV} instead`,
   );
 }
 

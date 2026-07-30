@@ -87,7 +87,7 @@ const checks = [
 ];
 
 let missing = 0;
-const lines = ["", "AGENTseo toolchain report", ""];
+const lines = ["", "Marketingovo toolchain report", ""];
 
 for (const check of checks) {
   const ok = check.satisfied(check.found);

@@ -39,11 +39,11 @@ import type {
   UpdateExtractionRulesInput,
   UpdateIssueAdjudicationInput,
   UpdateProjectContextInput,
-} from "@agentseoapp/contracts";
+} from "@marketingovo/contracts";
 import type {
   AgentSeoProjectBundleV2,
   ProjectImportResult,
-} from "@agentseoapp/contracts/project-bundle";
+} from "@marketingovo/contracts/project-bundle";
 import {
   DEFAULT_LOCAL_API_BASE_URL,
   validateLocalApiBaseUrl,
@@ -64,7 +64,7 @@ export class AgentSeoApiError extends Error {
     super(
       problem?.detail ??
         problem?.title ??
-        `AGENTseo API request failed (${status})`,
+        `Marketingovo API request failed (${status})`,
     );
     this.name = "AgentSeoApiError";
     this.status = status;
@@ -103,14 +103,14 @@ export class AgentSeoClient {
       options.baseUrl ?? DEFAULT_LOCAL_API_BASE_URL,
     );
     const token = (await readFile(path, "utf8")).trim();
-    if (!token) throw new Error("AGENTseo service token file is empty");
+    if (!token) throw new Error("Marketingovo service token file is empty");
     return new AgentSeoClient({ ...options, baseUrl, token });
   }
 
   private async request<T>(path: string, init: RequestInit = {}): Promise<T> {
     const controller = new AbortController();
     const timer = setTimeout(
-      () => controller.abort(new Error("AGENTseo API request timed out")),
+      () => controller.abort(new Error("Marketingovo API request timed out")),
       this.timeoutMs,
     );
     const headers = new Headers(init.headers);
@@ -147,7 +147,7 @@ export class AgentSeoClient {
   ): Promise<Uint8Array> {
     const controller = new AbortController();
     const timer = setTimeout(
-      () => controller.abort(new Error("AGENTseo API request timed out")),
+      () => controller.abort(new Error("Marketingovo API request timed out")),
       this.timeoutMs,
     );
     const headers = new Headers(init.headers);
@@ -474,7 +474,7 @@ export class AgentSeoClient {
     this.request<ProjectImportResult>("/import", {
       method: "POST",
       headers: {
-        "content-type": "application/vnd.agentseo.project+json",
+        "content-type": "application/vnd.marketingovo.project+json",
       },
       body:
         bundle instanceof Uint8Array

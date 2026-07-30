@@ -9,25 +9,25 @@ Use this template for an attributable design-partner or customer story. Replace 
 - Approval owner: `[name and date]`
 - Measurement window: `[start date]` to `[end date]`
 - Comparison window: `[start date]` to `[end date]`
-- AGENTseo version: `[version]`
+- Marketingovo version: `[version]`
 - Evidence owner: `[person responsible for source verification]`
 - Confidentiality notes: `[queries, URLs, revenue, or provider data that must remain private]`
 
 ## Headline
 
-`How [team] used AGENTseo to [verified workflow outcome] across [scope]`
+`How [team] used Marketingovo to [verified workflow outcome] across [scope]`
 
 Prefer workflow outcomes such as “cut weekly triage time,” “assign the top five technical actions,” or “verify a canonical cleanup.” Do not use a traffic or revenue headline unless attribution and comparison controls support it.
 
 ## Executive summary
 
-`[Organization] manages [site or portfolio context]. The team used AGENTseo [AGENTseo / AGENTseo] to combine [available sources], prioritize [issue class], assign [number] actions, and verify [number] changes over [time window].`
+`[Organization] manages [site or portfolio context]. The team used Marketingovo [Marketingovo / Marketingovo] to combine [available sources], prioritize [issue class], assign [number] actions, and verify [number] changes over [time window].`
 
 **Measured result:** `[one primary result with unit, baseline, end value, and source]`
 
 **Why it matters:** `[one sentence in the participant’s language]`
 
-## Before AGENTseo
+## Before Marketingovo
 
 Describe the workflow, not a caricature of another tool.
 
@@ -71,7 +71,7 @@ Examples of guardrails:
 1. **Baseline audit:** `[date, run ID, scope, terminal state]`
 2. **Triage:** `[how Top 5 Actions were reviewed and challenged]`
 3. **Assignment:** `[owner, due date, acceptance condition]`
-4. **Change:** `[what was changed outside AGENTseo]`
+4. **Change:** `[what was changed outside Marketingovo]`
 5. **Verification audit:** `[date, run ID, comparable scope]`
 6. **Decision:** `[verified, still present, regressed, or inconclusive]`
 
@@ -129,19 +129,19 @@ Explain how these constraints changed confidence or the final decision.
 
 If the local edition was used, state that it is local-first and open source under the Apache License 2.0.
 
-If AGENTseo was used, describe only the managed services actually used, such as always-on monitoring, shared portfolios, RBAC, managed integrations, or hosted reports. Full is a separate proprietary service.
+If Marketingovo was used, describe only the managed services actually used, such as always-on monitoring, shared portfolios, RBAC, managed integrations, or hosted reports. Full is a separate proprietary service.
 
 ## Reproduce the workflow
 
 Community CTA:
 
 ```bash
-npx @agentseoapp/cli serve
+npx @marketingovo/cli serve
 ```
 
-Source and quickstart: https://github.com/MaxJafar/AGENTseo
+Source and quickstart: https://github.com/MaxJafar/marketingovo
 
-Managed team workflow: https://github.com/MaxJafar/AGENTseo
+Managed team workflow: https://github.com/MaxJafar/marketingovo
 
 ## Final evidence review
 

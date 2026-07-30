@@ -13,7 +13,7 @@ import {
 
 const root = resolve(import.meta.dirname, "..");
 
-test("the frozen workspace graph uses only private AGENTseo package identities", async () => {
+test("the frozen workspace graph uses only private Marketingovo package identities", async () => {
   const workspace = await readNpmReleaseWorkspace(root);
   assert.equal(workspace.packages.length, 13);
   // 17 after the never-published legacy Codex plugin workspace was removed.
@@ -21,7 +21,7 @@ test("the frozen workspace graph uses only private AGENTseo package identities",
   assert.equal(
     workspace.versioned.find(({ directory }) => directory === "packages/cli")
       ?.manifest.name,
-    "agentseo",
+    "marketingovo",
   );
   assert.deepEqual(
     new Set(workspace.versioned.map(({ manifest }) => manifest.name)),
@@ -68,13 +68,13 @@ test("private packable packages remain topologically ordered", async () => {
 test("packed artifacts retain private metadata and deterministic local versions", async () => {
   const workspace = await readNpmReleaseWorkspace(root);
   const sourcePackage = workspace.packages.find(
-    ({ manifest }) => manifest.name === "@agentseoapp/application",
+    ({ manifest }) => manifest.name === "@marketingovo/application",
   );
   const packageNames = new Set(
     workspace.packages.map(({ manifest }) => manifest.name),
   );
   const packed = structuredClone(sourcePackage.manifest);
-  packed.dependencies["@agentseoapp/contracts"] = workspace.version;
+  packed.dependencies["@marketingovo/contracts"] = workspace.version;
   assert.doesNotThrow(() =>
     validatePackedManifest(
       packed,

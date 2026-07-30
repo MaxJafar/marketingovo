@@ -64,27 +64,13 @@ const emptyPreferences: OnboardingPreferences = {
 };
 
 function preferencesKey(siteId: string): string {
-  return `agentseo:onboarding:v1:${siteId}`;
-}
-
-function legacyPreferencesKey(siteId: string): string {
-  return `golem-seo:onboarding:v1:${siteId}`;
+  return `marketingovo:onboarding:v1:${siteId}`;
 }
 
 function readPreferences(siteId: string): OnboardingPreferences {
   if (!siteId) return emptyPreferences;
   try {
-    let raw = window.localStorage.getItem(preferencesKey(siteId));
-    if (raw === null) {
-      const legacyRaw = window.localStorage.getItem(
-        legacyPreferencesKey(siteId),
-      );
-      if (legacyRaw !== null) {
-        window.localStorage.setItem(preferencesKey(siteId), legacyRaw);
-        window.localStorage.removeItem(legacyPreferencesKey(siteId));
-        raw = legacyRaw;
-      }
-    }
+    const raw = window.localStorage.getItem(preferencesKey(siteId));
     const parsed = JSON.parse(raw ?? "{}") as Partial<OnboardingPreferences>;
     const validGoal = goals.some((goal) => goal.id === parsed.goal)
       ? (parsed.goal as GoalId)

@@ -38,7 +38,7 @@ export function createGeneratedAgentSeoClient(
       )
     ) {
       throw new Error(
-        "Generated AGENTseo client refused a non-local API destination",
+        "Generated Marketingovo client refused a non-local API destination",
       );
     }
     const headers = new Headers(request.headers);
@@ -64,7 +64,7 @@ export async function createGeneratedAgentSeoClientFromTokenFile(
     options.baseUrl ?? DEFAULT_LOCAL_API_BASE_URL,
   );
   const token = (await readFile(path, "utf8")).trim();
-  if (!token) throw new Error("AGENTseo service token file is empty");
+  if (!token) throw new Error("Marketingovo service token file is empty");
   return createGeneratedAgentSeoClient({ ...options, baseUrl, token });
 }
 

@@ -9,7 +9,7 @@
 //      status: 'completed'
 //   6. <projectRoot>/audits.json is written and readable
 //
-// This is the Sprint 4 sanity gate (replaces the G2 github.com/MaxJafar/AGENTseo
+// This is the Sprint 4 sanity gate (replaces the G2 github.com/MaxJafar/marketingovo
 // run, which needs explicit Max go-ahead to hit the live site). When
 // the real G2 runs, we'll add a separate integration test that
 // compares the fixture-baseline issue list against the live-site
@@ -37,9 +37,9 @@ let tmpRoot: string;
 
 beforeAll(async () => {
   process.env.SCREAMINGCLAW_ALLOW_PRIVATE = "1";
-  process.env.AGENTSEO_ALLOW_PRIVATE = "1";
+  process.env.MARKETINGOVO_ALLOW_PRIVATE = "1";
   site = await startFixtureSite();
-  tmpRoot = mkdtempSync(join(tmpdir(), "agentseo-audit-full-"));
+  tmpRoot = mkdtempSync(join(tmpdir(), "marketingovo-audit-full-"));
 }, 30_000);
 
 afterAll(async () => {

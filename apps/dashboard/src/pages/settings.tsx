@@ -43,12 +43,12 @@ export function SettingsPage() {
       onSuccess: (blob) => {
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement("a");
-        const name = (settings?.siteName ?? "agentseo-project")
+        const name = (settings?.siteName ?? "marketingovo-project")
           .replace(/[^a-z0-9]+/gi, "-")
           .replace(/^-|-$/g, "")
           .toLowerCase();
         anchor.href = url;
-        anchor.download = `${name || "agentseo-project"}.agentseo`;
+        anchor.download = `${name || "marketingovo-project"}.marketingovo`;
         anchor.hidden = true;
         document.body.append(anchor);
         anchor.click();
@@ -233,8 +233,8 @@ export function SettingsPage() {
                       defaultValue={settings.alertEmail ?? ""}
                     />
                     <small>
-                      Stored locally as report metadata. AGENTseo does not send
-                      hosted email alerts.
+                      Stored locally as report metadata. Marketingovo does not
+                      send hosted email alerts.
                     </small>
                   </label>
                   <label className="checkbox-label">
@@ -272,7 +272,7 @@ export function SettingsPage() {
             <div>
               <h2>Project portability</h2>
               <p>
-                Export a versioned <code>.agentseo</code> bundle with audit
+                Export a versioned <code>.marketingovo</code> bundle with audit
                 history, actions, metrics, Project Context revisions, the
                 marketer journal, custom rules, connector settings, and bounded
                 report artifacts. Credentials, tokens, cookies, headers, and
@@ -297,7 +297,7 @@ export function SettingsPage() {
                   id="project-import-file"
                   className="sr-only"
                   type="file"
-                  accept=".agentseo,.golemseo,application/vnd.agentseo.project+json"
+                  accept=".marketingovo,application/vnd.marketingovo.project+json"
                   aria-describedby="project-import-help"
                   onChange={importBundle}
                   disabled={importProject.isPending}

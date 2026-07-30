@@ -5,7 +5,7 @@ import type {
   LeafModuleRegistry,
   Requirement,
   SeoModule,
-} from "@agentseoapp/contracts";
+} from "@marketingovo/contracts";
 import {
   executePlan,
   executionStatus,

@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
-import type { StartRunInput } from "@agentseoapp/contracts";
+import type { StartRunInput } from "@marketingovo/contracts";
 import type {
   ClaimedSchedule,
   DurableJob,
   AgentSeoDatabase,
-} from "@agentseoapp/storage-sqlite";
+} from "@marketingovo/storage-sqlite";
 import { nextCronOccurrence } from "./cron.js";
 
 export type DurableJobHandler = (

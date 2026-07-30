@@ -3,12 +3,13 @@ import { access, readFile, stat } from "node:fs/promises";
 import { dirname, relative, resolve, sep } from "node:path";
 
 export const PUBLIC_RUNTIME_CONFIG_VERSION = 1;
-export const GOOGLE_DESKTOP_CLIENT_ID_ENV = "AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID";
+export const GOOGLE_DESKTOP_CLIENT_ID_ENV =
+  "MARKETINGOVO_GOOGLE_DESKTOP_CLIENT_ID";
 export const GOOGLE_DESKTOP_CLIENT_SECRET_ENV_NAMES = [
   // Desktop OAuth is PKCE-only. Reject a packaged client secret under the
   // canonical name as well as every retired name, so the rebrand cannot open a
   // hole by leaving the guard pointed only at old variables.
-  "AGENTSEO_GOOGLE_DESKTOP_CLIENT_SECRET",
+  "MARKETINGOVO_GOOGLE_DESKTOP_CLIENT_SECRET",
   "GOLEMSEO_GOOGLE_DESKTOP_CLIENT_SECRET",
   "GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_SECRET",
 ];

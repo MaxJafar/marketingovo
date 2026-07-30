@@ -1221,7 +1221,7 @@ export type paths = {
         query?: never;
         header: {
           "idempotency-key": string;
-          "x-agentseo-client"?: "dashboard";
+          "x-marketingovo-client"?: "dashboard";
         };
         path: {
           id: string;
@@ -1663,7 +1663,7 @@ export type paths = {
         };
       };
       responses: {
-        /** @description A portable AGENTseo project bundle. Credentials and secret references are never included. */
+        /** @description A portable Marketingovo project bundle. Credentials and secret references are never included. */
         200: {
           headers: {
             /** @description Attachment filename for the project bundle. */
@@ -1671,7 +1671,7 @@ export type paths = {
             [name: string]: unknown;
           };
           content: {
-            "application/vnd.agentseo.project+json": string;
+            "application/vnd.marketingovo.project+json": string;
           };
         };
         /** @description The request is invalid. */
@@ -2175,7 +2175,7 @@ export type paths = {
               }[];
             }[];
             /** @enum {string} */
-            format: "agentseo-project";
+            format: "marketingovo-project";
             integrity: {
               /** @enum {string} */
               algorithm: "sha256";
@@ -2352,7 +2352,7 @@ export type paths = {
             /** @enum {number} */
             version: 2;
           };
-          "application/vnd.agentseo.project+json": {
+          "application/vnd.marketingovo.project+json": {
             actions: {
               affectedUrls: string[];
               confidence: number;
@@ -2458,7 +2458,7 @@ export type paths = {
               }[];
             }[];
             /** @enum {string} */
-            format: "agentseo-project";
+            format: "marketingovo-project";
             integrity: {
               /** @enum {string} */
               algorithm: "sha256";
@@ -7452,7 +7452,7 @@ export type paths = {
         query?: never;
         header: {
           "idempotency-key": string;
-          "x-agentseo-client"?: "dashboard";
+          "x-marketingovo-client"?: "dashboard";
         };
         path?: never;
         cookie?: never;
@@ -9653,7 +9653,7 @@ export type paths = {
         query?: never;
         header: {
           "idempotency-key": string;
-          "x-agentseo-client"?: "dashboard";
+          "x-marketingovo-client"?: "dashboard";
         };
         path: {
           id: string;

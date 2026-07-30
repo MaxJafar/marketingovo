@@ -1,6 +1,6 @@
 import { join, resolve } from "node:path";
 
-export const CANONICAL_CLI_NAME = "agentseo";
+export const CANONICAL_CLI_NAME = "marketingovo";
 
 type Environment = Readonly<Record<string, string | undefined>>;
 type Warn = (message: string) => void;
@@ -82,14 +82,14 @@ function canonicalizeLocalApiUrl(value: string): string {
     parsed = new URL(value);
   } catch {
     throw new Error(
-      "The AGENTseo API URL must be an absolute loopback URL ending in /api/v1",
+      "The Marketingovo API URL must be an absolute loopback URL ending in /api/v1",
     );
   }
 
   const loopbackHosts = new Set(["127.0.0.1", "localhost", "[::1]"]);
   if (!loopbackHosts.has(parsed.hostname.toLowerCase())) {
     throw new Error(
-      "The AGENTseo API URL must use 127.0.0.1, localhost, or [::1]; remote API URLs are not allowed",
+      "The Marketingovo API URL must use 127.0.0.1, localhost, or [::1]; remote API URLs are not allowed",
     );
   }
   if (
@@ -101,12 +101,12 @@ function canonicalizeLocalApiUrl(value: string): string {
     parsed.password
   ) {
     throw new Error(
-      "The AGENTseo API URL must match http://127.0.0.1:<port>/api/v1; localhost and [::1] are accepted aliases",
+      "The Marketingovo API URL must match http://127.0.0.1:<port>/api/v1; localhost and [::1] are accepted aliases",
     );
   }
   const port = parsed.port ? Number(parsed.port) : 80;
   if (!Number.isInteger(port) || port < 1 || port > 65_535) {
-    throw new Error("The AGENTseo API URL port must be from 1 to 65535");
+    throw new Error("The Marketingovo API URL port must be from 1 to 65535");
   }
   return `http://127.0.0.1:${port}/api/v1`;
 }
@@ -117,7 +117,7 @@ export function resolveCliDataDirectory(
   const configured = configuredValue(
     options,
     "data-dir",
-    "AGENTSEO_DATA_DIR",
+    "MARKETINGOVO_DATA_DIR",
     DATA_DIRECTORY_LEGACY_NAMES,
   );
   return resolve(
@@ -133,13 +133,13 @@ export function resolveCliConnectionOptions(
   const serviceTokenFile = configuredValue(
     options,
     "service-token-file",
-    "AGENTSEO_SERVICE_TOKEN_FILE",
+    "MARKETINGOVO_SERVICE_TOKEN_FILE",
     SERVICE_TOKEN_FILE_LEGACY_NAMES,
   );
   const configuredApiUrl = configuredValue(
     options,
     "api-url",
-    "AGENTSEO_API_URL",
+    "MARKETINGOVO_API_URL",
     API_URL_LEGACY_NAMES,
   );
   return {
@@ -169,7 +169,7 @@ export function readCompatibleEnvironmentVariable(
     if (!warningState.has(legacyName)) {
       warningState.add(legacyName);
       warn(
-        `Warning: ${legacyName} is deprecated; use ${canonicalName}. The legacy alias remains supported through AGENTseo 1.x.\n`,
+        `Warning: ${legacyName} is deprecated; use ${canonicalName}. The legacy alias remains supported through Marketingovo 1.x.\n`,
       );
     }
     return legacyValue;

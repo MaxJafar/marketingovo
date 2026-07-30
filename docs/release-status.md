@@ -2,9 +2,9 @@
 
 ## 1.0.0 — released state
 
-AGENTseo 1.0.0 declares a stable public surface: the REST API and its OpenAPI
+Marketingovo 1.0.0 declares a stable public surface: the REST API and its OpenAPI
 document, the generated SDK, the nine-tool agent contract registry, the CLI, and
-the `.agentseo` project bundle format. Breaking changes to any of these now
+the `.marketingovo` project bundle format. Breaking changes to any of these now
 require a major version.
 
 **What 1.0.0 covers:** source, CLI, MCP plugin (Claude Code, Codex, OpenClaw,

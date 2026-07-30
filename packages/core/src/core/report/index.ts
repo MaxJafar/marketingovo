@@ -331,7 +331,7 @@ export { reportToCsv } from "./csv.js";
 
 export function reportToMarkdown(r: Report): string {
   const lines: string[] = [];
-  lines.push(`# AGENTseo audit`);
+  lines.push(`# Marketingovo audit`);
   lines.push("");
   lines.push(`- Start URL: ${r.startUrl}`);
   lines.push(`- Generated: ${r.generatedAt}`);

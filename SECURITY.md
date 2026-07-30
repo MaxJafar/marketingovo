@@ -1,6 +1,6 @@
 # Security policy
 
-Security is a release gate for AGENTseo, especially around crawled content,
+Security is a release gate for Marketingovo, especially around crawled content,
 localhost authorization, browser isolation, SSRF, credentials, and exports.
 
 ## Supported versions
@@ -13,7 +13,7 @@ localhost authorization, browser isolation, SSRF, credentials, and exports.
 
 ## Reporting a vulnerability
 
-Email `security@github.com/MaxJafar/AGENTseo` with a description, affected version, impact,
+Email `security@github.com/MaxJafar/marketingovo` with a description, affected version, impact,
 and minimal reproduction. Encrypt sensitive material when possible and do not
 include real customer secrets. We aim to acknowledge a report within two
 business days, provide a status update within five, and coordinate disclosure

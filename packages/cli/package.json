@@ -1,7 +1,7 @@
 {
-  "name": "agentseo",
+  "name": "marketingovo",
   "version": "1.0.0",
-  "description": "CLI and local service launcher for AGENTseo",
+  "description": "CLI and local service launcher for Marketingovo",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
@@ -14,7 +14,7 @@
     }
   },
   "bin": {
-    "agentseo": "./dist/cli.js"
+    "marketingovo": "./dist/cli.js"
   },
   "files": [
     "dist",
@@ -31,16 +31,16 @@
     "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
   },
   "dependencies": {
-    "@agentseoapp/contracts": "workspace:*",
-    "@agentseoapp/credentials": "workspace:*",
-    "@agentseoapp/legacy-import": "workspace:*",
-    "@agentseoapp/runtime": "workspace:*",
-    "@agentseoapp/sdk": "workspace:*",
-    "@agentseoapp/server": "workspace:*",
-    "@agentseoapp/storage-sqlite": "workspace:*"
+    "@marketingovo/contracts": "workspace:*",
+    "@marketingovo/credentials": "workspace:*",
+    "@marketingovo/legacy-import": "workspace:*",
+    "@marketingovo/runtime": "workspace:*",
+    "@marketingovo/sdk": "workspace:*",
+    "@marketingovo/server": "workspace:*",
+    "@marketingovo/storage-sqlite": "workspace:*"
   },
   "devDependencies": {
-    "@agentseoapp/dashboard": "workspace:*",
+    "@marketingovo/dashboard": "workspace:*",
     "@types/node": "^24.3.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",

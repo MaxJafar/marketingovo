@@ -1,7 +1,7 @@
 import {
   assessPageIndexability,
   type PageIndexabilityAssessment,
-} from "@agentseoapp/core";
+} from "@marketingovo/core";
 
 export interface EnginePageIndexabilityEvidence {
   status: number;

@@ -1,7 +1,7 @@
 {
-  "name": "@agentseoapp/runtime",
+  "name": "@marketingovo/runtime",
   "version": "1.0.0",
-  "description": "Local AGENTseo service composition and workflow runtime",
+  "description": "Local Marketingovo service composition and workflow runtime",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
@@ -25,12 +25,12 @@
     "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
   },
   "dependencies": {
-    "@agentseoapp/application": "workspace:*",
-    "@agentseoapp/contracts": "workspace:*",
-    "@agentseoapp/core": "workspace:*",
-    "@agentseoapp/credentials": "workspace:*",
-    "@agentseoapp/integrations": "workspace:*",
-    "@agentseoapp/storage-sqlite": "workspace:*",
+    "@marketingovo/application": "workspace:*",
+    "@marketingovo/contracts": "workspace:*",
+    "@marketingovo/core": "workspace:*",
+    "@marketingovo/credentials": "workspace:*",
+    "@marketingovo/integrations": "workspace:*",
+    "@marketingovo/storage-sqlite": "workspace:*",
     "@sinclair/typebox": "^0.34.41",
     "pdf-lib": "^1.17.1"
   },

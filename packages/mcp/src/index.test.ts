@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ZodType } from "zod/v4";
-import type { AgentSeoClient } from "@agentseoapp/sdk";
+import type { AgentSeoClient } from "@marketingovo/sdk";
 import { createAgentSeoMcpServer, PUBLIC_TOOL_NAMES } from "./index.js";
 
 type RegisteredTool = {
@@ -103,7 +103,7 @@ function stubClient(status: string, workflowId = "audit") {
   return { client, issues };
 }
 
-describe("AGENTseo MCP public contract", () => {
+describe("Marketingovo MCP public contract", () => {
   it("makes the canonical server factory primary while retaining its 1.x alias", () => {
     expect(createAgentSeoMcpServer).toBe(createAgentSeoMcpServer);
   });
@@ -116,22 +116,22 @@ describe("AGENTseo MCP public contract", () => {
       ...PUBLIC_TOOL_NAMES,
     ]);
     expect(PUBLIC_TOOL_NAMES).toEqual([
-      "agentseo_audit_start",
-      "agentseo_run_get",
-      "agentseo_run_evidence",
-      "agentseo_run_links",
-      "agentseo_run_compare",
-      "agentseo_compare_start",
-      "agentseo_keyword_research_start",
-      "agentseo_content_plan_start",
-      "agentseo_monitoring_status",
+      "marketingovo_audit_start",
+      "marketingovo_run_get",
+      "marketingovo_run_evidence",
+      "marketingovo_run_links",
+      "marketingovo_run_compare",
+      "marketingovo_compare_start",
+      "marketingovo_keyword_research_start",
+      "marketingovo_content_plan_start",
+      "marketingovo_monitoring_status",
     ]);
   });
 
   it("passes evidence pagination through untouched and defaults the section", async () => {
     const { client } = stubClient("succeeded");
     const server = await createAgentSeoMcpServer({ client });
-    const tool = registeredTools(server).agentseo_run_evidence;
+    const tool = registeredTools(server).marketingovo_run_evidence;
 
     await tool.handler({ run_id: "run-1" });
     expect(client.runs.evidence).toHaveBeenCalledWith("run-1", {
@@ -156,7 +156,7 @@ describe("AGENTseo MCP public contract", () => {
   it("rejects an evidence section the API does not serve", async () => {
     const { client } = stubClient("succeeded");
     const server = await createAgentSeoMcpServer({ client });
-    const tool = registeredTools(server).agentseo_run_evidence;
+    const tool = registeredTools(server).marketingovo_run_evidence;
 
     expect(
       tool.inputSchema.safeParse({ run_id: "run-1", section: "sitemaps" })
@@ -167,7 +167,7 @@ describe("AGENTseo MCP public contract", () => {
   it("requires an http page URL for the link explorer", async () => {
     const { client } = stubClient("succeeded");
     const server = await createAgentSeoMcpServer({ client });
-    const tool = registeredTools(server).agentseo_run_links;
+    const tool = registeredTools(server).marketingovo_run_links;
 
     expect(
       tool.inputSchema.safeParse({
@@ -189,7 +189,7 @@ describe("AGENTseo MCP public contract", () => {
   it("delegates run comparison to the server instead of recomputing it", async () => {
     const { client } = stubClient("succeeded");
     const server = await createAgentSeoMcpServer({ client });
-    const tool = registeredTools(server).agentseo_run_compare;
+    const tool = registeredTools(server).marketingovo_run_compare;
 
     const result = await tool.handler({
       run_id: "run-2",
@@ -207,15 +207,17 @@ describe("AGENTseo MCP public contract", () => {
     expect(Object.keys(registeredTools(server))).toEqual([
       ...PUBLIC_TOOL_NAMES,
     ]);
-    expect(resources["agentseo-project-context"]).toBeDefined();
+    expect(resources["marketingovo-project-context"]).toBeDefined();
 
-    const result = await resources["agentseo-project-context"]!.readCallback(
-      new URL("agentseo://projects/project-1/context"),
+    const result = await resources[
+      "marketingovo-project-context"
+    ]!.readCallback(
+      new URL("marketingovo://projects/project-1/context"),
       { id: "project-1" },
       {},
     );
     expect(result.contents[0]).toMatchObject({
-      uri: "agentseo://projects/project-1/context",
+      uri: "marketingovo://projects/project-1/context",
       mimeType: "application/json",
     });
     expect(JSON.parse(result.contents[0]!.text!)).toMatchObject({
@@ -231,39 +233,41 @@ describe("AGENTseo MCP public contract", () => {
     const tools = registeredTools(await createAgentSeoMcpServer({ client }));
 
     expect(
-      tools.agentseo_audit_start.inputSchema.parse({ project_id: "site-1" }),
+      tools.marketingovo_audit_start.inputSchema.parse({
+        project_id: "site-1",
+      }),
     ).toEqual({
       project_id: "site-1",
       render_mode: "static",
       collect_vitals: false,
     });
     expect(
-      tools.agentseo_audit_start.inputSchema.safeParse({
+      tools.marketingovo_audit_start.inputSchema.safeParse({
         project_id: "site-1",
         render_mode: "browser",
       }).success,
     ).toBe(false);
     expect(
-      tools.agentseo_audit_start.inputSchema.safeParse({
+      tools.marketingovo_audit_start.inputSchema.safeParse({
         project_id: "site-1",
         credential: "must-not-exist",
       }).success,
     ).toBe(false);
     expect(
-      tools.agentseo_compare_start.inputSchema.safeParse({
+      tools.marketingovo_compare_start.inputSchema.safeParse({
         project_id: "site-1",
         competitor_urls: ["ftp://example.com"],
       }).success,
     ).toBe(false);
     expect(
-      tools.agentseo_compare_start.inputSchema.safeParse({
+      tools.marketingovo_compare_start.inputSchema.safeParse({
         project_id: "site-1",
         competitor_urls: ["https://example.com"],
         max_urls: 1.5,
       }).success,
     ).toBe(false);
     expect(
-      tools.agentseo_content_plan_start.inputSchema.safeParse({
+      tools.marketingovo_content_plan_start.inputSchema.safeParse({
         project_id: "site-1",
         seeds: Array.from({ length: 11 }, (_, index) => `seed-${index}`),
       }).success,
@@ -274,7 +278,7 @@ describe("AGENTseo MCP public contract", () => {
     const { client, issues } = stubClient("running");
     const server = await createAgentSeoMcpServer({ client });
 
-    const result = await registeredTools(server).agentseo_run_get.handler({
+    const result = await registeredTools(server).marketingovo_run_get.handler({
       run_id: "run-1",
       include_issues: true,
     });
@@ -292,10 +296,12 @@ describe("AGENTseo MCP public contract", () => {
       const { client, issues } = stubClient(status);
       const server = await createAgentSeoMcpServer({ client });
 
-      const result = await registeredTools(server).agentseo_run_get.handler({
-        run_id: "run-1",
-        include_issues: true,
-      });
+      const result = await registeredTools(server).marketingovo_run_get.handler(
+        {
+          run_id: "run-1",
+          include_issues: true,
+        },
+      );
 
       expect(issues).toHaveBeenCalledWith("run-1");
       expect(JSON.parse(result.content[0]!.text).issues).toEqual([
@@ -308,7 +314,7 @@ describe("AGENTseo MCP public contract", () => {
     const { client } = stubClient("succeeded", "keyword-research");
     const server = await createAgentSeoMcpServer({ client });
 
-    const result = await registeredTools(server).agentseo_run_get.handler({
+    const result = await registeredTools(server).marketingovo_run_get.handler({
       run_id: "run-1",
       include_issues: true,
     });

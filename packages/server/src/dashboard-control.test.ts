@@ -3,8 +3,8 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { Action } from "@agentseoapp/contracts";
-import { AgentSeoLocalRuntime } from "@agentseoapp/runtime";
+import type { Action } from "@marketingovo/contracts";
+import { AgentSeoLocalRuntime } from "@marketingovo/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 const HOST = "127.0.0.1:3210";
@@ -17,7 +17,9 @@ describe("dashboard control panel API", () => {
   });
 
   async function setup() {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-dashboard-controls-"));
+    const dataDir = mkdtempSync(
+      join(tmpdir(), "marketingovo-dashboard-controls-"),
+    );
     const runtime = new AgentSeoLocalRuntime({ dataDir });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
@@ -25,7 +27,7 @@ describe("dashboard control panel API", () => {
     const headers = {
       host: HOST,
       authorization: `Bearer ${token}`,
-      "x-agentseo-client": "dashboard",
+      "x-marketingovo-client": "dashboard",
     };
     const project = await runtime.projects.create({
       name: "Example",

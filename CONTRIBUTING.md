@@ -1,4 +1,4 @@
-# Contributing to AGENTseo
+# Contributing to Marketingovo
 
 Thank you for helping build a trustworthy SEO operations system. Contributions
 must be in English. Contributions are accepted under the Apache License 2.0;

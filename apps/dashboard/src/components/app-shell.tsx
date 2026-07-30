@@ -170,7 +170,7 @@ export function AppShell() {
   }, []);
 
   useEffect(() => {
-    document.title = `${routeTitle} | AGENTseo`;
+    document.title = `${routeTitle} | Marketingovo`;
     setRouteAnnouncement(`${routeTitle} page loaded.`);
     if (previousPathnameRef.current !== pathname) {
       mainRef.current?.focus();
@@ -262,17 +262,17 @@ export function AppShell() {
             to="/"
             className="brand"
             onClick={() => closeMobileNavigation(false)}
-            aria-label="AGENTseo home"
+            aria-label="Marketingovo home"
           >
             <img
               className="brand-mark"
-              src="/agentseo-icon.png"
+              src="/marketingovo-icon.png"
               alt=""
               width="38"
               height="38"
             />
             <span>
-              <strong>AGENTseo</strong>
+              <strong>Marketingovo</strong>
               <small>SEO control panel</small>
             </span>
           </Link>

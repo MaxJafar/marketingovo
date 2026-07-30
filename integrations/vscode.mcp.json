@@ -1,12 +1,12 @@
 {
   "servers": {
-    "agentseo": {
+    "marketingovo": {
       "type": "stdio",
       "command": "npx",
       "args": [
         "-y",
-        "@agentseoapp/mcp",
-        "agentseo-mcp"
+        "@marketingovo/mcp",
+        "marketingovo-mcp"
       ]
     }
   }

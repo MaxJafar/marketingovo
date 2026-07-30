@@ -129,7 +129,7 @@ const agentTool = <const Contract extends AgentToolContract>(
 ): Contract => contract;
 
 export const AgentAuditStartTool = agentTool({
-  name: "agentseo_audit_start",
+  name: "marketingovo_audit_start",
   title: "Start SEO audit",
   description:
     "Start a static or JavaScript audit for an existing local project. Returns immediately with a run id.",
@@ -143,7 +143,7 @@ export const AgentAuditStartTool = agentTool({
 } as const);
 
 export const AgentRunGetTool = agentTool({
-  name: "agentseo_run_get",
+  name: "marketingovo_run_get",
   title: "Get SEO run",
   description:
     "Read current run state and, when finished, its canonical issues. Safe to replay.",
@@ -158,7 +158,7 @@ export const AgentRunGetTool = agentTool({
 } as const);
 
 export const AgentCompareStartTool = agentTool({
-  name: "agentseo_compare_start",
+  name: "marketingovo_compare_start",
   title: "Start competitor comparison",
   description:
     "Compare a project to one or more public competitor URLs using the same bounded crawl settings.",
@@ -172,7 +172,7 @@ export const AgentCompareStartTool = agentTool({
 } as const);
 
 export const AgentKeywordResearchStartTool = agentTool({
-  name: "agentseo_keyword_research_start",
+  name: "marketingovo_keyword_research_start",
   title: "Start keyword research",
   description:
     "Expand a seed across configured sources, classify intent, and evaluate momentum. Returns a run id.",
@@ -186,7 +186,7 @@ export const AgentKeywordResearchStartTool = agentTool({
 } as const);
 
 export const AgentContentPlanStartTool = agentTool({
-  name: "agentseo_content_plan_start",
+  name: "marketingovo_content_plan_start",
   title: "Start content plan",
   description:
     "Build keyword profiles and topic clusters for up to ten seed topics. Returns a run id.",
@@ -200,7 +200,7 @@ export const AgentContentPlanStartTool = agentTool({
 } as const);
 
 export const AgentMonitoringStatusTool = agentTool({
-  name: "agentseo_monitoring_status",
+  name: "marketingovo_monitoring_status",
   title: "Read monitoring status",
   description:
     "Read schedules, recent runs, and runtime health without changing configuration.",
@@ -215,7 +215,7 @@ export const AgentMonitoringStatusTool = agentTool({
 } as const);
 
 export const AgentRunEvidenceTool = agentTool({
-  name: "agentseo_run_evidence",
+  name: "marketingovo_run_evidence",
   title: "Read run evidence",
   description:
     "Read one paginated evidence section of a finished run: crawl paths, redirect chains, reciprocal hreflang, or captured extraction results. Reads an immutable snapshot; safe to replay.",
@@ -230,7 +230,7 @@ export const AgentRunEvidenceTool = agentTool({
 } as const);
 
 export const AgentRunLinksTool = agentTool({
-  name: "agentseo_run_links",
+  name: "marketingovo_run_links",
   title: "Read internal links for a page",
   description:
     "Read the inlinks or outlinks recorded for one page URL in a finished run, with anchor text, placement, follow state, and resolved or broken targets. Unavailable for runs crawled before the link graph existed.",
@@ -245,7 +245,7 @@ export const AgentRunLinksTool = agentTool({
 } as const);
 
 export const AgentRunCompareTool = agentTool({
-  name: "agentseo_run_compare",
+  name: "marketingovo_run_compare",
   title: "Compare two runs",
   description:
     "Read the server-computed comparison between two completed audits: new and worsened issues, resolved and reduced findings, HTTP and indexability changes, link-graph deltas, and configuration drift. Never recomputed client-side.",

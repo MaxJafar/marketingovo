@@ -1,10 +1,10 @@
 // Environment compatibility boundary.
 //
-// Product code reads AGENTSEO_* only. This module accepts bounded legacy
+// Product code reads MARKETINGOVO_* only. This module accepts bounded legacy
 // names in priority order and emits one value-free warning per legacy name.
 
 const warnedLegacyNames = new Set<string>();
-const CANONICAL_PREFIX = "AGENTSEO_";
+const CANONICAL_PREFIX = "MARKETINGOVO_";
 
 function nonEmptyEnvironmentValue(name: string): string | undefined {
   const value = process.env[name];
@@ -27,7 +27,7 @@ function warnLegacyName(legacyName: string, canonicalName: string): void {
   // Do not include the environment value: many supported values are secrets.
   // eslint-disable-next-line no-console
   console.warn(
-    `[agentseo] env ${legacyName} is deprecated; use ${canonicalName} instead`,
+    `[marketingovo] env ${legacyName} is deprecated; use ${canonicalName} instead`,
   );
 }
 
@@ -52,7 +52,7 @@ function compatRead(
 }
 
 /**
- * Reads a canonical AGENTSEO_* value, then GOLEMSEO_*, GOLEM_SEO_*, and the
+ * Reads a canonical MARKETINGOVO_* value, then GOLEMSEO_*, GOLEM_SEO_*, and the
  * explicit historical alias (normally SCREAMINGCLAW_*). Canonical wins.
  */
 export function envStr(

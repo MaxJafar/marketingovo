@@ -99,7 +99,7 @@ const COMMAND_REQUIREMENTS = [
     id: "references-a-real-tool",
     protects:
       "A command that names no tool is prose, not an entry point. Unknown tool names are caught separately by validate:plugins.",
-    holds: (text) => /`agentseo_[a-z_]+`/u.test(text),
+    holds: (text) => /`marketingovo_[a-z_]+`/u.test(text),
   },
   {
     id: "no-guessing",
@@ -120,7 +120,7 @@ const START_COMMAND_REQUIREMENTS = [
     id: "poll-before-reporting",
     protects:
       "A start command that reports immediately describes a queued job as a result.",
-    holds: anyOf(/`agentseo_run_get`/u, /until the run/iu),
+    holds: anyOf(/`marketingovo_run_get`/u, /until the run/iu),
   },
   {
     id: "no-gap-filling",
@@ -178,7 +178,7 @@ for (const dir of skillDirs) {
   }
 }
 
-const commandsRoot = resolve(root, "plugins/claude/agentseo/commands");
+const commandsRoot = resolve(root, "plugins/claude/marketingovo/commands");
 const commandFiles = (await readdir(commandsRoot)).filter((name) =>
   name.endsWith(".md"),
 );
@@ -190,11 +190,11 @@ const startTools = new Set(
 );
 
 for (const file of commandFiles) {
-  const relative = `plugins/claude/agentseo/commands/${file}`;
+  const relative = `plugins/claude/marketingovo/commands/${file}`;
   const text = await readFile(resolve(commandsRoot, file), "utf8");
   check(relative, text, COMMAND_REQUIREMENTS);
 
-  const startsWork = [...text.matchAll(/`(agentseo_[a-z_]+)`/gu)].some(
+  const startsWork = [...text.matchAll(/`(marketingovo_[a-z_]+)`/gu)].some(
     ([, name]) => startTools.has(name),
   );
   if (startsWork) {

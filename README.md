@@ -1,7 +1,7 @@
-# AGENTseo
+# Marketingovo
 
 <p align="center">
-  <img src="assets/brand/agentseo-icon.png" width="132" height="132" alt="AGENTseo product mark">
+  <img src="assets/brand/marketingovo-icon.png" width="132" height="132" alt="Marketingovo product mark">
 </p>
 
 **A local-first SEO operations system that turns crawl, Search Console, GA4,
@@ -11,14 +11,14 @@ performance, and SERP data into verified actions.**
 [![Telemetry](https://img.shields.io/badge/telemetry-off%20by%20default-242b36)](PRIVACY.md)
 [![Version](https://img.shields.io/badge/version-1.0.0-20b486)](docs/release-status.md)
 
-AGENTseo runs on your machine, requires no account, and
+Marketingovo runs on your machine, requires no account, and
 keeps projects and credentials under your control. It does more than produce an
 issue dump: it connects technical evidence to organic exposure, conversion
 exposure, reach, confidence, and effort so a marketer can decide what to fix
 first and verify the result after the next audit.
 
 > **Status: 1.0.0.** The REST API, OpenAPI document, SDK, nine-tool agent
-> contract registry, CLI and `.agentseo` bundle format are stable; breaking
+> contract registry, CLI and `.marketingovo` bundle format are stable; breaking
 > changes to them now require a major version.
 >
 > Install from source or as an agent plugin. Signed desktop installers, the
@@ -28,7 +28,7 @@ first and verify the result after the next audit.
 > [`release/acceptance/1.0.0.json`](release/acceptance/1.0.0.json). See
 > [release status](docs/release-status.md) for exactly what was verified.
 
-## Why AGENTseo
+## Why Marketingovo
 
 - **Actions, not noise.** Every prioritized action explains impact, effort,
   confidence, affected URLs, evidence, and verification state.
@@ -67,7 +67,7 @@ first and verify the result after the next audit.
 - **Extensible and reproducible.** Custom rules, connector contracts, fixtures,
   and benchmark inputs are inspectable.
 - **No artificial local limits.** Projects and audits are limited only by the
-  resources of the machine running AGENTseo.
+  resources of the machine running Marketingovo.
 
 ## Quick start
 
@@ -77,7 +77,7 @@ Requirements: Node.js 24 LTS and Corepack.
 corepack enable
 pnpm install
 pnpm build
-pnpm agentseo serve
+pnpm marketingovo serve
 ```
 
 Open the exact `Dashboard:` URL printed by the command. It includes a short-lived,
@@ -96,7 +96,7 @@ Verified tagged releases also provide an npm route that does not require
 cloning the repository:
 
 ```bash
-npx @agentseoapp/cli serve
+npx @marketingovo/cli serve
 ```
 
 The current source version is not evidence that the same version has already
@@ -112,7 +112,7 @@ production sites.
 There is no paid tier and no hosted edition. Every capability in this repository
 is available to everyone, and nothing is withheld to sell later.
 
-Projects can be exported as `.agentseo` bundles. Secrets are never exported and
+Projects can be exported as `.marketingovo` bundles. Secrets are never exported and
 must be reconnected after import. Issue fingerprints, review decisions, and
 bounded review reasons are preserved together with Project Context revisions
 and the append-only marketer journal.
@@ -183,14 +183,14 @@ shown as unavailable; they are never silently converted to zero.
 
 ## Honest scope
 
-AGENTseo is not marketed as a complete Ahrefs, Semrush, or Screaming Frog
+Marketingovo is not marketed as a complete Ahrefs, Semrush, or Screaming Frog
 replacement. Those products have mature proprietary datasets and workflows.
 Our claim is narrower and testable: local-first evidence from several sources
 becomes a transparent action queue that can be re-audited and verified.
 
 ## License and marks
 
-AGENTseo is **open source** under the [Apache License 2.0](LICENSE), an
+Marketingovo is **open source** under the [Apache License 2.0](LICENSE), an
 OSI-approved license that grants patent rights and permits commercial use,
 modification, and redistribution. See
 [ADR 0001](docs/adr/0001-apache-2-0-relicense.md) for why the project moved off

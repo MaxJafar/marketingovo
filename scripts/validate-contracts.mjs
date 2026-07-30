@@ -269,14 +269,14 @@ assert.ok(
 const exportOperation = operation("post", "/api/v1/export");
 assert.deepEqual(
   Object.keys(exportOperation.responses?.["200"]?.content ?? {}),
-  ["application/vnd.agentseo.project+json"],
-  "Project export must use the versioned AGENTseo bundle media type",
+  ["application/vnd.marketingovo.project+json"],
+  "Project export must use the versioned Marketingovo bundle media type",
 );
 const importOperation = operation("post", "/api/v1/import");
 assert.deepEqual(
   Object.keys(importOperation.requestBody?.content ?? {}).sort(),
-  ["application/json", "application/vnd.agentseo.project+json"],
-  "Project import must accept JSON and the AGENTseo bundle media type",
+  ["application/json", "application/vnd.marketingovo.project+json"],
+  "Project import must accept JSON and the Marketingovo bundle media type",
 );
 assert.ok(
   importOperation.responses?.["201"],

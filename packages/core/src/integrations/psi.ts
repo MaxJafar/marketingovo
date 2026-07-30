@@ -4,7 +4,7 @@
 //
 // Why a thin client instead of an SDK?
 //   1. The PSI v5 response is a stable, well-documented JSON shape.
-//   2. We want a small surface that fits the rest of agentseo: a
+//   2. We want a small surface that fits the rest of marketingovo: a
 //      `psiReport(url, opts)` function that returns a typed object
 //      or throws on error.
 //   3. No auth is required for low-volume calls. When the local runtime
@@ -15,7 +15,7 @@
 // the module can surface it as a failed module in the audit run
 // (rather than crashing the whole run).
 
-import { safePageSpeedFetch } from "@agentseoapp/integrations";
+import { safePageSpeedFetch } from "@marketingovo/integrations";
 
 const API =
   "https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed";

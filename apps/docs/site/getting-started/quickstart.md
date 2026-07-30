@@ -1,11 +1,11 @@
 ---
 title: Quickstart and onboarding
-description: Install AGENTseo, open the local dashboard, and reach the first prioritized action.
+description: Install Marketingovo, open the local dashboard, and reach the first prioritized action.
 ---
 
 # Quickstart and onboarding
 
-This path uses AGENTseo. It requires Node.js 24 LTS and Corepack. No account is required.
+This path uses Marketingovo. It requires Node.js 24 LTS and Corepack. No account is required.
 
 <div class="status-banner">
   <strong>Alpha guidance</strong>
@@ -15,18 +15,18 @@ This path uses AGENTseo. It requires Node.js 24 LTS and Corepack. No account is 
 ## Install from source
 
 ```bash
-git clone https://github.com/MaxJafar/AGENTseo.git
-cd agentseo
+git clone https://github.com/MaxJafar/marketingovo.git
+cd marketingovo
 corepack enable
 pnpm install --frozen-lockfile
 pnpm build
-pnpm agentseo serve
+pnpm marketingovo serve
 ```
 
 The published-package route described by the project is:
 
 ```bash
-npx @agentseoapp/cli serve
+npx @marketingovo/cli serve
 ```
 
 The daemon binds to `127.0.0.1:3210`. Keep it on loopback. Current `0.11` builds print a one-time dashboard URL; open that exact URL so the fragment token can be exchanged for the HttpOnly local session and removed from the address bar.
@@ -41,7 +41,7 @@ on the next start.
 In the current CLI alpha, the credential vault is locked unless the daemon receives either:
 
 - `--master-password-file /absolute/path/to/password-file`, or
-- `AGENTSEO_MASTER_PASSWORD` in the daemon environment.
+- `MARKETINGOVO_MASTER_PASSWORD` in the daemon environment.
 
 The password must contain at least 12 characters. Protect a password file with owner-only permissions. Without a master password, connections are memory-only for that process and must be entered again after restart.
 
@@ -84,9 +84,9 @@ Use a focused goal such as technical health, organic quick wins, competitor comp
 Long work returns a run ID. The UI can follow progress; the CLI can inspect the same state:
 
 ```bash
-pnpm agentseo run list --project PROJECT_ID
-pnpm agentseo run watch RUN_ID
-pnpm agentseo run replay RUN_ID
+pnpm marketingovo run list --project PROJECT_ID
+pnpm marketingovo run watch RUN_ID
+pnpm marketingovo run replay RUN_ID
 ```
 
 Wait for `succeeded`, `partial`, `failed`, or `cancelled`. A partial run may still be useful, but its unavailable sources must remain part of the conclusion.
@@ -147,13 +147,13 @@ the project rules change.
 Trusted local clients can inspect the same versioned catalog:
 
 ```bash
-agentseo extraction templates
+marketingovo extraction templates
 ```
 
 ## Check local health
 
 ```bash
-pnpm agentseo doctor
+pnpm marketingovo doctor
 ```
 
 Doctor reports the resolved data directory, dashboard assets, local API health, database state, and service-token location. The service-token file is for trusted non-browser clients; never paste it into the dashboard or an agent prompt.
@@ -164,7 +164,7 @@ Stop the local daemon before either operation. Backup creates a consistent
 SQLite snapshot, refuses to overwrite an existing file, and prints its SHA-256:
 
 ```bash
-agentseo backup /safe/location/agentseo-backup.db
+marketingovo backup /safe/location/marketingovo-backup.db
 ```
 
 Restore validates integrity, schema compatibility, and the optional expected
@@ -172,7 +172,7 @@ checksum before replacing the database. It keeps the previous database as a
 dated rollback file and requires explicit confirmation:
 
 ```bash
-agentseo restore /safe/location/agentseo-backup.db \
+marketingovo restore /safe/location/marketingovo-backup.db \
   --expected-sha256 PRINTED_SHA256 \
   --confirm
 ```
@@ -191,7 +191,7 @@ For CLI deletion, create a private text file containing only the exact project
 name, then run:
 
 ```bash
-agentseo project delete PROJECT_ID --confirm-name-file ./project-name.txt
+marketingovo project delete PROJECT_ID --confirm-name-file ./project-name.txt
 ```
 
 The receipt reports deleted record counts and file cleanup state. Global BYOK
@@ -207,6 +207,6 @@ provider when required. Agents cannot delete projects.
 - [Set up BYOK integrations](/integrations/byok)
 
 <p class="source-note">
-  Canonical operational source: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/docs/quickstart.md">ten-minute quickstart</a>.
-  Confirm alpha limitations in <a href="https://github.com/MaxJafar/AGENTseo/blob/main/docs/release-status.md">release status</a>.
+  Canonical operational source: <a href="https://github.com/MaxJafar/marketingovo/blob/main/docs/quickstart.md">ten-minute quickstart</a>.
+  Confirm alpha limitations in <a href="https://github.com/MaxJafar/marketingovo/blob/main/docs/release-status.md">release status</a>.
 </p>

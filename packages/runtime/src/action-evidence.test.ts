@@ -2,8 +2,8 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { Action, IssueInstance } from "@agentseoapp/contracts";
-import type { Report } from "@agentseoapp/core";
+import type { Action, IssueInstance } from "@marketingovo/contracts";
+import type { Report } from "@marketingovo/core";
 import { ActionEvidenceCursorError, AgentSeoLocalRuntime } from "./index.js";
 
 const observedAt = "2026-07-15T10:00:00.000Z";
@@ -220,7 +220,9 @@ async function waitForTerminal(runtime: AgentSeoLocalRuntime, runId: string) {
 describe("runtime Action Evidence service", () => {
   it("preserves the full URL history and paginates exact evidence", async () => {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-action-evidence-history-")),
+      dataDir: mkdtempSync(
+        join(tmpdir(), "marketingovo-action-evidence-history-"),
+      ),
     });
     try {
       const project = await runtime.projects.create({
@@ -396,7 +398,9 @@ describe("runtime Action Evidence service", () => {
   });
 
   it("persists comparison evidence and matched checkpoints across restart", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-action-checkpoint-"));
+    const dataDir = mkdtempSync(
+      join(tmpdir(), "marketingovo-action-checkpoint-"),
+    );
     const engineReport = report("https://example.com/");
     let runtime = new AgentSeoLocalRuntime({
       dataDir,
@@ -486,7 +490,9 @@ describe("runtime Action Evidence service", () => {
 
   it("returns null metrics instead of zeros when providers are unavailable", async () => {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-action-evidence-missing-")),
+      dataDir: mkdtempSync(
+        join(tmpdir(), "marketingovo-action-evidence-missing-"),
+      ),
     });
     try {
       const project = await runtime.projects.create({
@@ -556,7 +562,9 @@ describe("runtime Action Evidence service", () => {
     };
     let invocation = 0;
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-action-evidence-partial-")),
+      dataDir: mkdtempSync(
+        join(tmpdir(), "marketingovo-action-evidence-partial-"),
+      ),
       engine: {
         crawl: async () => ({
           runId: `partial-engine-${invocation}`,

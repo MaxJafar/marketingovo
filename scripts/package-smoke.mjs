@@ -13,8 +13,8 @@ const workspace = await readNpmReleaseWorkspace(root);
 const packageNames = new Set(
   workspace.packages.map(({ manifest }) => manifest.name),
 );
-const output = await mkdtemp(join(tmpdir(), "agentseo-pack-"));
-const consumer = await mkdtemp(join(tmpdir(), "agentseo-consumer-"));
+const output = await mkdtemp(join(tmpdir(), "marketingovo-pack-"));
+const consumer = await mkdtemp(join(tmpdir(), "marketingovo-consumer-"));
 const tarballs = [];
 try {
   for (const [flag, expected] of [
@@ -30,7 +30,7 @@ try {
     assert.equal(
       cli.status,
       0,
-      `agentseo ${flag} failed:\n${cli.stdout}\n${cli.stderr}`,
+      `marketingovo ${flag} failed:\n${cli.stdout}\n${cli.stderr}`,
     );
     assert.match(cli.stdout, new RegExp(expected.replaceAll(".", "\\."), "u"));
   }
@@ -69,7 +69,7 @@ try {
     );
     assert.ok(
       entries.includes("package/NOTICE"),
-      `${archive} is missing the AGENTseo attribution notice`,
+      `${archive} is missing the Marketingovo attribution notice`,
     );
     assert.ok(
       entries.some((entry) => /^package\/dist\/.+\.js$/u.test(entry)),
@@ -100,7 +100,7 @@ try {
     resolve(consumer, "package.json"),
     `${JSON.stringify(
       {
-        name: "agentseo-clean-install-smoke",
+        name: "marketingovo-clean-install-smoke",
         version: "1.0.0",
         private: true,
         type: "module",
@@ -119,8 +119,8 @@ try {
   );
   const installTarballs =
     process.env.CI === "true" ||
-    process.env.AGENTSEO_NPM_INSTALL_SMOKE === "1" ||
-    process.env.AGENTSEO_NPM_INSTALL_SMOKE === "1";
+    process.env.MARKETINGOVO_NPM_INSTALL_SMOKE === "1" ||
+    process.env.MARKETINGOVO_NPM_INSTALL_SMOKE === "1";
   if (installTarballs) {
     const installed = spawnSync(
       "pnpm",
@@ -139,7 +139,7 @@ try {
     );
     const installedCli = spawnSync(
       process.execPath,
-      [resolve(consumer, "node_modules/agentseo/dist/cli.js"), "--version"],
+      [resolve(consumer, "node_modules/marketingovo/dist/cli.js"), "--version"],
       { cwd: consumer, encoding: "utf8", shell: false },
     );
     assert.equal(

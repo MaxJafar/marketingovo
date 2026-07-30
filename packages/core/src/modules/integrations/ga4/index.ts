@@ -41,7 +41,7 @@ export const ga4Module: Module = {
     required: ["rows"],
   },
   dependsOn: [],
-  configKeys: ["AGENTSEO_GA4_PROPERTY"],
+  configKeys: ["MARKETINGOVO_GA4_PROPERTY"],
   async invoke(input: ModuleInput, ctx: ModuleContext): Promise<ModuleOutput> {
     const logger = (ctx.logger ?? new ConsoleLogger()).child({ module: "ga4" });
     const accessToken =

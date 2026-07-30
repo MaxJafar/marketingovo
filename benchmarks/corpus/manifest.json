@@ -140,5 +140,5 @@
   "maximumHighSeverityFalsePositiveRate": 0.05,
   "baselineElapsedMs": 90,
   "maximumRegressionPercent": 20,
-  "baselineProvenance": "Median of five consecutive local runs was 58 ms (range 57-58) on macOS arm64, Node 24.18.1, 2026-07-30. The baseline is set to 90 ms: roughly 55% headroom over the observed median, which absorbs local noise while still failing on a 2x algorithmic regression. The previous 500 ms baseline was 8.6x the measured time, so the gate could not fail. Slower hardware must set AGENTSEO_BENCHMARK_BASELINE_MS rather than loosening this value."
+  "baselineProvenance": "Median of five consecutive local runs was 58 ms (range 57-58) on macOS arm64, Node 24.18.1, 2026-07-30. The baseline is set to 90 ms: roughly 55% headroom over the observed median, which absorbs local noise while still failing on a 2x algorithmic regression. The previous 500 ms baseline was 8.6x the measured time, so the gate could not fail. Slower hardware must set MARKETINGOVO_BENCHMARK_BASELINE_MS rather than loosening this value."
 }

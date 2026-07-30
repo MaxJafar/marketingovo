@@ -14,7 +14,7 @@ let csrfToken: string | null = null;
 let sessionPromise: Promise<void> | null = null;
 
 const API_UNAVAILABLE_MESSAGE =
-  "The AGENTseo API is unavailable. Check the local service and try again.";
+  "The Marketingovo API is unavailable. Check the local service and try again.";
 
 function bootstrapTokenFromFragment(): string | null {
   if (typeof window === "undefined") return null;
@@ -155,12 +155,12 @@ export async function apiRequest<T>(
   await ensureSession();
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
-  headers.set("X-AGENTseo-Client", "dashboard");
+  headers.set("X-Marketingovo-Client", "dashboard");
   if (init.body && !headers.has("Content-Type"))
     headers.set("Content-Type", "application/json");
   const method = (init.method ?? "GET").toUpperCase();
   if (!["GET", "HEAD", "OPTIONS"].includes(method) && csrfToken)
-    headers.set("X-AGENTseo-CSRF", csrfToken);
+    headers.set("X-Marketingovo-CSRF", csrfToken);
   if (
     method === "POST" &&
     requiresIdempotencyKey(path) &&
@@ -192,11 +192,11 @@ export async function apiDownload(
 ): Promise<Blob> {
   await ensureSession();
   const headers = new Headers(init.headers);
-  headers.set("Accept", "application/vnd.agentseo.project+json");
-  headers.set("X-AGENTseo-Client", "dashboard");
+  headers.set("Accept", "application/vnd.marketingovo.project+json");
+  headers.set("X-Marketingovo-Client", "dashboard");
   const method = (init.method ?? "GET").toUpperCase();
   if (!["GET", "HEAD", "OPTIONS"].includes(method) && csrfToken) {
-    headers.set("X-AGENTseo-CSRF", csrfToken);
+    headers.set("X-Marketingovo-CSRF", csrfToken);
   }
   if (init.body && !headers.has("Content-Type"))
     headers.set("Content-Type", "application/json");

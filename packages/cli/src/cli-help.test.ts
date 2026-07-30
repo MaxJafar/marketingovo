@@ -7,11 +7,11 @@ describe("CLI help", () => {
 
     expect(output).toContain("Connection options:");
     expect(output).toContain("--data-dir PATH");
-    expect(output).toContain("AGENTSEO_DATA_DIR");
+    expect(output).toContain("MARKETINGOVO_DATA_DIR");
     expect(output).toContain("--service-token-file PATH");
-    expect(output).toContain("AGENTSEO_SERVICE_TOKEN_FILE");
+    expect(output).toContain("MARKETINGOVO_SERVICE_TOKEN_FILE");
     expect(output).toContain("--api-url URL");
-    expect(output).toContain("AGENTSEO_API_URL");
+    expect(output).toContain("MARKETINGOVO_API_URL");
     expect(output).toContain(
       "--port PORT                 Port for the default API URL only",
     );

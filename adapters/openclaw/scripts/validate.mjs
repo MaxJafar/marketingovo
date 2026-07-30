@@ -23,7 +23,7 @@ const expectedOptional = PUBLIC_AGENT_TOOL_CONTRACTS.filter(
   (contract) => contract.optional,
 ).map((contract) => contract.name);
 
-if (manifest.id !== "agentseo")
+if (manifest.id !== "marketingovo")
   throw new Error("OpenClaw manifest id is invalid");
 if (manifest.version !== packageJson.version)
   throw new Error("OpenClaw manifest and package versions differ");
@@ -42,7 +42,7 @@ const optionalTools = Object.entries(manifest.toolMetadata ?? {})
 if (JSON.stringify(optionalTools) !== JSON.stringify(expectedOptional))
   throw new Error("OpenClaw optional tool metadata drifted");
 
-if (!source.includes('from "@agentseoapp/contracts/agent-tools"'))
+if (!source.includes('from "@marketingovo/contracts/agent-tools"'))
   throw new Error("OpenClaw must project the canonical agent tool contracts");
 
 if (!existsSync(runtimePath))
@@ -55,7 +55,7 @@ if (
 )
   throw new Error("OpenClaw package files omit runtime metadata");
 if (
-  !packageJson.dependencies?.["@agentseoapp/contracts"] ||
+  !packageJson.dependencies?.["@marketingovo/contracts"] ||
   !packageJson.dependencies?.typebox ||
   !packageJson.peerDependencies?.openclaw
 )

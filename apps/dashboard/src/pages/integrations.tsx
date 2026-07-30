@@ -241,8 +241,8 @@ function RemovalConfirmation({
         </button>
       </div>
       <InlineNotice tone="warning" title="Provider access may remain active">
-        AGENTseo can delete its local copy, but it cannot deactivate an API key
-        or OAuth grant at the provider. Use the provider setup page when you
+        Marketingovo can delete its local copy, but it cannot deactivate an API
+        key or OAuth grant at the provider. Use the provider setup page when you
         need to revoke the credential at its source.
       </InlineNotice>
       <label className="integration-removal-confirmation">
@@ -316,7 +316,7 @@ export function IntegrationsPage() {
       ) : null}
       {removeIntegration.isSuccess ? (
         <InlineNotice tone="success" title="Local credential removed">
-          The provider is disconnected from AGENTseo. Any non-secret site
+          The provider is disconnected from Marketingovo. Any non-secret site
           mapping remains available for a later reconnect.
         </InlineNotice>
       ) : null}

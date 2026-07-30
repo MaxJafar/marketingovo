@@ -3,7 +3,7 @@
 version = 4
 
 [[package]]
-name = "agentseo-credential-broker"
+name = "marketingovo-credential-broker"
 version = "1.0.0"
 dependencies = [
  "base64",

@@ -1,4 +1,4 @@
-# AGENTseo — Road to 1.0.0
+# Marketingovo — Road to 1.0.0
 
 Plan date: 2026-07-30. Baseline: `main` at `v0.12.0-alpha.0`, the first tag this
 repository has ever had.
@@ -22,7 +22,7 @@ release-truth record.
 | Storage          | `packages/storage-sqlite` 6.5k LOC, migrations through #11, immutable per-run snapshots                                                                                      |
 | SDK              | `packages/sdk` 12.1k LOC, OpenAPI-generated, build fails on projection drift                                                                                                 |
 | GUI dashboard    | `apps/dashboard` — 18 routed pages, ~6,100 LOC of page code, 25 test files including axe suites                                                                              |
-| Agent surface    | 6 MCP tools from one `@agentseoapp/contracts` registry; Claude Code, Codex and OpenClaw bundles plus Cursor/VS Code/generic MCP configs, all generated with a drift gate     |
+| Agent surface    | 6 MCP tools from one `@marketingovo/contracts` registry; Claude Code, Codex and OpenClaw bundles plus Cursor/VS Code/generic MCP configs, all generated with a drift gate    |
 | CLI              | `packages/cli` 2.6k LOC                                                                                                                                                      |
 | CI               | `ci.yml` (full `pnpm check`, dependency advisories, license policy, SBOM, Rust broker matrix, real-browser E2E), `codeql.yml`, `release.yml`, dependabot, issue/PR templates |
 | Docs             | 9 docs + a VitePress site under `apps/docs`                                                                                                                                  |
@@ -67,7 +67,7 @@ These were the release blockers. They are done, and the plan below assumes it.
   tool no command can reach.
 - **Repository consolidation.** `main` is the only long-lived branch; eight stale
   branches and two orphaned worktree registrations are gone. Canonical identity
-  is `MaxJafar/AGENTseo`, matching the actual remote.
+  is `MaxJafar/marketingovo`, matching the actual remote.
 - **Toolchain.** `pnpm doctor` reports missing Node, pnpm and cargo with exact
   remedies. `.nvmrc` and `.node-version` pin Node 24; `rust-toolchain.toml` pins
   Rust 1.97.0.
@@ -80,8 +80,8 @@ canonical links were never actually resolved.
 
 ### Closed since this plan was written
 
-- **Agent tool surface completed.** Three read-only tools — `agentseo_run_evidence`,
-  `agentseo_run_links`, `agentseo_run_compare` — expose the evidence workbench,
+- **Agent tool surface completed.** Three read-only tools — `marketingovo_run_evidence`,
+  `marketingovo_run_links`, `marketingovo_run_compare` — expose the evidence workbench,
   the internal-link graph and the server-computed comparison, which existed in
   the API and dashboard but were unreachable from any agent host. The registry is
   now nine tools, and `openclaw.plugin.json` is generated rather than
@@ -127,7 +127,7 @@ canonical links were never actually resolved.
 
 - `scratch/` and `codex-tasks/` are still tracked and empty.
 - Two orphaned directories sit beside this repo in the parent folder —
-  `AGENTseo-zil196-review` (553 MB) and `AGENTseo-zil276-integration` (12 MB) —
+  `Marketingovo-zil196-review` (553 MB) and `Marketingovo-zil276-integration` (12 MB) —
   each an abandoned worktree pointing at a `.git` that no longer exists. Their
   recorded commits are preserved in this repository's object database. Safe to
   delete once you have confirmed you want nothing from them.
@@ -278,7 +278,7 @@ Scope:
 4. **Native lifecycle matrix.** Run the fail-closed DMG/MSI/deb/AppImage
    install → background start → single-instance activation → stop → upgrade →
    uninstall scripts against real signed artifacts, using `v0.12.0-alpha.0` as
-   the `AGENTSEO_UPGRADE_BASELINE_TAG` baseline.
+   the `MARKETINGOVO_UPGRADE_BASELINE_TAG` baseline.
 5. **npm publication (B3).** Replace `npm-publication-disabled.mjs` with the real
    path: 13 packages in dependency order, no unresolved `workspace:` protocols,
    clean tarball install in CI, OIDC + provenance attestations, published only
@@ -289,7 +289,7 @@ Scope:
 - Signed, notarized artifacts for every supported target, attached to a tag.
 - `latest.json` published and an in-app update verified end to end.
 - Lifecycle matrix green on real signed artifacts with a real upgrade baseline.
-- 13 packages on npm with provenance; `npx agentseo` works from a clean machine.
+- 13 packages on npm with provenance; `npx marketingovo` works from a clean machine.
 
 ---
 

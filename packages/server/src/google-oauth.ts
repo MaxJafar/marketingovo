@@ -5,8 +5,8 @@ import {
   exchangeGoogleAuthorizationCode,
   GoogleOAuthError,
   isGoogleOAuthProvider,
-} from "@agentseoapp/integrations";
-import type { AgentSeoLocalRuntime } from "@agentseoapp/runtime";
+} from "@marketingovo/integrations";
+import type { AgentSeoLocalRuntime } from "@marketingovo/runtime";
 
 export interface GoogleOAuthStartResponse {
   provider: string;
@@ -47,7 +47,7 @@ function writeProblem(
   });
   response.end(
     JSON.stringify({
-      type: `urn:agentseo:problem:${problem.code.replaceAll("_", "-")}`,
+      type: `urn:marketingovo:problem:${problem.code.replaceAll("_", "-")}`,
       title: problem.title,
       status: problem.status,
       detail: problem.message,
@@ -66,7 +66,7 @@ function writeSuccess(response: ServerResponse, provider: string): void {
     "referrer-policy": "no-referrer",
   });
   response.end(
-    `<!doctype html><meta charset="utf-8"><title>AGENTseo connected</title><style>body{font:16px system-ui;margin:3rem;max-width:42rem}h1{font-size:1.5rem}</style><h1>Google connected</h1><p>${provider === "google-search-console" ? "Search Console" : "Google Analytics 4"} is connected. You can close this window.</p>`,
+    `<!doctype html><meta charset="utf-8"><title>Marketingovo connected</title><style>body{font:16px system-ui;margin:3rem;max-width:42rem}h1{font-size:1.5rem}</style><h1>Google connected</h1><p>${provider === "google-search-console" ? "Search Console" : "Google Analytics 4"} is connected. You can close this window.</p>`,
   );
 }
 
@@ -126,7 +126,7 @@ export class GoogleDesktopOAuthBroker {
         503,
         "google_oauth_not_configured",
         "Google OAuth is not configured",
-        "Set AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID or pass googleDesktopClientId to the local server. The legacy GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID and GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID names remain migration aliases.",
+        "Set MARKETINGOVO_GOOGLE_DESKTOP_CLIENT_ID or pass googleDesktopClientId to the local server. The legacy GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID and GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID names remain migration aliases.",
       );
     }
     if (!isGoogleOAuthProvider(provider)) {

@@ -16,7 +16,9 @@ describe("project deletion runtime", () => {
   afterEach(() => runtime?.close());
 
   it("requires exact confirmation and removes deterministic project files without touching global credentials", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-runtime-deletion-"));
+    const dataDir = mkdtempSync(
+      join(tmpdir(), "marketingovo-runtime-deletion-"),
+    );
     runtime = new AgentSeoLocalRuntime({ dataDir });
     const project = await runtime.projects.create({
       name: "Exact Project Name",
@@ -117,7 +119,9 @@ describe("project deletion runtime", () => {
   });
 
   it("returns a typed not-found error instead of making deletion idempotently ambiguous", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-runtime-deletion-"));
+    const dataDir = mkdtempSync(
+      join(tmpdir(), "marketingovo-runtime-deletion-"),
+    );
     runtime = new AgentSeoLocalRuntime({ dataDir });
 
     await expect(
@@ -129,7 +133,9 @@ describe("project deletion runtime", () => {
   });
 
   it("retries isolated deletion staging at the next service start", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-runtime-deletion-"));
+    const dataDir = mkdtempSync(
+      join(tmpdir(), "marketingovo-runtime-deletion-"),
+    );
     const staleDirectory = join(
       dataDir,
       ".deletion-staging",
@@ -159,7 +165,9 @@ describe("project deletion runtime", () => {
   });
 
   it("restores staged files after a crash when the SQLite project still exists", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-runtime-deletion-"));
+    const dataDir = mkdtempSync(
+      join(tmpdir(), "marketingovo-runtime-deletion-"),
+    );
     runtime = new AgentSeoLocalRuntime({ dataDir });
     const project = await runtime.projects.create({
       name: "Crash recovery project",
@@ -198,7 +206,9 @@ describe("project deletion runtime", () => {
   });
 
   it("fails closed on unrecognized staging instead of deleting unknown files", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-runtime-deletion-"));
+    const dataDir = mkdtempSync(
+      join(tmpdir(), "marketingovo-runtime-deletion-"),
+    );
     const unknownStaging = join(
       dataDir,
       ".deletion-staging",
@@ -218,7 +228,9 @@ describe("project deletion runtime", () => {
   });
 
   it("cancels an executing project job before deleting its database graph", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-runtime-deletion-"));
+    const dataDir = mkdtempSync(
+      join(tmpdir(), "marketingovo-runtime-deletion-"),
+    );
     runtime = new AgentSeoLocalRuntime({
       dataDir,
       engine: {

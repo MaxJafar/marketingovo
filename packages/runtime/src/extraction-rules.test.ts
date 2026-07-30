@@ -2,7 +2,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { ExtractionRule } from "@agentseoapp/contracts";
+import type { ExtractionRule } from "@marketingovo/contracts";
 import { ExtractionRulesError, AgentSeoLocalRuntime } from "./index.js";
 
 const rule = (
@@ -104,7 +104,7 @@ describe("versioned project extraction rules", () => {
     const crawls: Array<Record<string, unknown>> = [];
     const stub = engine(crawls);
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-extraction-rules-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-extraction-rules-")),
       engine: stub,
     });
     runtimes.push(runtime);

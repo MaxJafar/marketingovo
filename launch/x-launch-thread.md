@@ -6,7 +6,7 @@ Nine-post launch thread. Publish the GitHub link in post 8 and the Full link in 
 
 An SEO audit can find 1,000 issues and still fail to answer one question: what should we fix first?
 
-Today we are sharing AGENTseo `0.11` alpha — a local-first SEO operations system built around actions, evidence, priority, and verification. 🧵
+Today we are sharing Marketingovo `0.11` alpha — a local-first SEO operations system built around actions, evidence, priority, and verification. 🧵
 
 ## 2/9
 
@@ -24,11 +24,11 @@ Priority is inspectable.
 
 Missing data stays missing.
 
-Unavailable, stale, or failed sources are shown explicitly. AGENTseo does not silently turn missing Search Console or analytics exposure into zero and pretend the score is complete.
+Unavailable, stale, or failed sources are shown explicitly. Marketingovo does not silently turn missing Search Console or analytics exposure into zero and pretend the score is complete.
 
 ## 5/9
 
-AGENTseo runs locally, needs no product account, and has telemetry off by default. Credentials are write-only and excluded from project exports.
+Marketingovo runs locally, needs no product account, and has telemetry off by default. Credentials are write-only and excluded from project exports.
 
 It is open source under the Apache License 2.0.
 
@@ -48,17 +48,17 @@ Installation, migrations, accessibility, security corpora, packaging, and the pu
 
 Try the local workflow:
 
-`npx @agentseoapp/cli serve`
+`npx @marketingovo/cli serve`
 
 Then add one site, run one audit, inspect the Top 5 Actions, fix one item, and re-run to verify it.
 
-Source + docs: https://github.com/MaxJafar/AGENTseo
+Source + docs: https://github.com/MaxJafar/marketingovo
 
 ## 9/9
 
 Need always-on monitoring, portfolio views, managed integrations, teams/RBAC, hosted reports, and commercial support?
 
-That is AGENTseo, a separate proprietary service: https://github.com/MaxJafar/AGENTseo
+That is Marketingovo, a separate proprietary service: https://github.com/MaxJafar/marketingovo
 
 What would make this useful in your weekly SEO workflow?
 
@@ -66,4 +66,4 @@ What would make this useful in your weekly SEO workflow?
 
 Attach the short demo to post 1 or a four-frame crop of carousel slides 1, 3, 5, and 8.
 
-Alt text: “AGENTseo alpha demo showing a local site audit, explicit data-source states, a transparent priority score, and a Top 5 Actions queue.”
+Alt text: “Marketingovo alpha demo showing a local site audit, explicit data-source states, a transparent priority score, and a Top 5 Actions queue.”

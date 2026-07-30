@@ -60,12 +60,16 @@ const sbom = {
     timestamp: new Date().toISOString(),
     component: {
       type: "application",
-      name: "agentseo-community",
+      name: "marketingovo-community",
       version: "1.0.0",
     },
     tools: {
       components: [
-        { type: "application", name: "agentseo-sbom-generator", version: "1" },
+        {
+          type: "application",
+          name: "marketingovo-sbom-generator",
+          version: "1",
+        },
       ],
     },
   },
@@ -76,7 +80,7 @@ const sbom = {
 const outputDirectory = resolve(root, "artifacts");
 await mkdir(outputDirectory, { recursive: true });
 await writeFile(
-  resolve(outputDirectory, "agentseo.cdx.json"),
+  resolve(outputDirectory, "marketingovo.cdx.json"),
   `${JSON.stringify(sbom, null, 2)}\n`,
 );
 process.stdout.write(

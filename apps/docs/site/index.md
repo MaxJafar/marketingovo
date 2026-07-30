@@ -2,12 +2,12 @@
 layout: home
 
 hero:
-  name: AGENTseo
+  name: Marketingovo
   text: Evidence into action.
   tagline: A local-first SEO operations system that connects crawl, search, analytics, performance, and research signals to a transparent action queue.
   image:
     src: /brand-mark.svg
-    alt: AGENTseo brand mark
+    alt: Marketingovo brand mark
   actions:
     - theme: brand
       text: Start in ten minutes
@@ -17,7 +17,7 @@ hero:
       link: /workflows/marketer-workflows
     - theme: alt
       text: View source
-      link: https://github.com/MaxJafar/AGENTseo
+      link: https://github.com/MaxJafar/marketingovo
 
 features:
   - icon: ↗
@@ -51,7 +51,7 @@ features:
     link: /product/project-context
     linkText: Build shared context
   - icon: ◆
-    title: Source-available AGENTseo
+    title: Source-available Marketingovo
     details: Run meaningful local analysis under the Apache License 2.0. Hosted collaboration and managed execution are a separate MaxJafar service.
     link: /product/editions
     linkText: Compare editions
@@ -64,10 +64,10 @@ features:
 
 <div class="edition-callout">
   <a href="/getting-started/quickstart">
-    <strong>AGENTseo</strong>
+    <strong>Marketingovo</strong>
     <span>Run locally, bring your own provider credentials, keep analysis and history on your machine, and use every product surface.</span>
   </a>
-  <a href="https://github.com/MaxJafar/AGENTseo" target="_blank" rel="noreferrer">
+  <a href="https://github.com/MaxJafar/marketingovo" target="_blank" rel="noreferrer">
     <strong>MaxJafar</strong>
     <span>Add always-on workers, teams, managed providers, hosted delivery, approval workflows, and commercial support.</span>
   </a>
@@ -75,6 +75,6 @@ features:
 
 <p class="source-note">
   Product positioning and release claims follow the canonical
-  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/README.md">repository README</a>
-  and <a href="https://github.com/MaxJafar/AGENTseo/blob/main/docs/release-status.md">release status</a>.
+  <a href="https://github.com/MaxJafar/marketingovo/blob/main/README.md">repository README</a>
+  and <a href="https://github.com/MaxJafar/marketingovo/blob/main/docs/release-status.md">release status</a>.
 </p>

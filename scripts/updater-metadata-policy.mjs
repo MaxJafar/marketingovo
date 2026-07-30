@@ -185,7 +185,7 @@ export async function buildUpdaterMetadata({
   }
   return {
     version,
-    notes: `AGENTseo ${version}. Platform-verified AGENTseo release.`,
+    notes: `Marketingovo ${version}. Platform-verified Marketingovo release.`,
     platforms,
   };
 }

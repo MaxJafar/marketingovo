@@ -2,7 +2,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { ProjectContextProfile } from "@agentseoapp/contracts";
+import type { ProjectContextProfile } from "@marketingovo/contracts";
 import { AgentSeoDatabase } from "./database.js";
 
 const profile = (
@@ -21,8 +21,10 @@ const profile = (
 
 describe("project context storage", () => {
   it("keeps profile revisions and journal entries immutable, ordered, scoped, and out of audit payloads", () => {
-    const root = mkdtempSync(join(tmpdir(), "agentseo-project-context-"));
-    const database = new AgentSeoDatabase({ path: join(root, "agentseo.db") });
+    const root = mkdtempSync(join(tmpdir(), "marketingovo-project-context-"));
+    const database = new AgentSeoDatabase({
+      path: join(root, "marketingovo.db"),
+    });
     const project = database.createProject({
       name: "Context fixture",
       canonicalUrl: "https://example.com",

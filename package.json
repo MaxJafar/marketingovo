@@ -1,8 +1,8 @@
 {
-  "name": "agentseo-workspace",
+  "name": "marketingovo-workspace",
   "version": "1.0.0",
   "private": true,
-  "description": "AGENTseo monorepo",
+  "description": "Marketingovo monorepo",
   "license": "Apache-2.0",
   "packageManager": "pnpm@10.34.5",
   "engines": {
@@ -25,7 +25,7 @@
     "dev": "turbo run dev --parallel",
     "test": "turbo run test --concurrency=2 -- --maxWorkers=2",
     "test:e2e": "playwright test --config=playwright.config.ts",
-    "test:core": "pnpm --filter @agentseoapp/core test",
+    "test:core": "pnpm --filter @marketingovo/core test",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "format": "prettier --write .",
@@ -55,7 +55,7 @@
     "identity:test": "node --test scripts/identity-migration-policy.test.mjs",
     "check": "pnpm format:check && pnpm validate:no-containers && pnpm identity:check && pnpm identity:test && pnpm build && pnpm lint && pnpm typecheck && pnpm test && pnpm release:test && pnpm npm:release-test && pnpm benchmark && pnpm validate:contracts && pnpm validate:plugins && pnpm validate:skills && pnpm validate:licenses && pnpm pack:smoke",
     "clean": "turbo run clean",
-    "agentseo": "node packages/cli/dist/cli.js",
+    "marketingovo": "node packages/cli/dist/cli.js",
     "validate:skills": "node scripts/validate-skill-discipline.mjs"
   },
   "devDependencies": {

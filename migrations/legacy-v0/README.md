@@ -1,8 +1,8 @@
 # Legacy v0 migration
 
 The pre-monorepo crawler is preserved as the implementation base of
-`@agentseoapp/core`; its old internal sprint notes and private operating logs are
-not part of AGENTseo documentation.
+`@marketingovo/core`; its old internal sprint notes and private operating logs are
+not part of Marketingovo documentation.
 
 The 0.11 migration path is non-destructive. The importer detects legacy
 `audits.json`, `crawls.db`, `schedule.json`, custom rule files, supported

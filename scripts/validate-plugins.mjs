@@ -37,35 +37,35 @@ const openClaw = JSON.parse(
     "utf8",
   ),
 );
-assert.equal(openClaw.id, "agentseo");
+assert.equal(openClaw.id, "marketingovo");
 assert.deepEqual(openClaw.contracts?.tools, expectedTools);
 
 const codex = JSON.parse(
   await readFile(
-    resolve(root, "plugins/codex/agentseo/.codex-plugin/plugin.json"),
+    resolve(root, "plugins/codex/marketingovo/.codex-plugin/plugin.json"),
     "utf8",
   ),
 );
-assert.equal(codex.name, "agentseo");
+assert.equal(codex.name, "marketingovo");
 assert.equal(codex.license, "Apache-2.0");
 assert.equal(codex.skills, "./skills/");
 
 const mcp = JSON.parse(
-  await readFile(resolve(root, "plugins/codex/agentseo/.mcp.json"), "utf8"),
+  await readFile(resolve(root, "plugins/codex/marketingovo/.mcp.json"), "utf8"),
 );
 assert.ok(
-  mcp.mcpServers?.agentseo,
+  mcp.mcpServers?.marketingovo,
   "Codex bundle must register its bundled MCP bridge",
 );
 // Every agent host must expose the same tool surface. A host that drifts, or a
 // host that is missing entirely, fails here rather than at install time.
 const claude = JSON.parse(
   await readFile(
-    resolve(root, "plugins/claude/agentseo/.claude-plugin/plugin.json"),
+    resolve(root, "plugins/claude/marketingovo/.claude-plugin/plugin.json"),
     "utf8",
   ),
 );
-assert.equal(claude.name, "agentseo");
+assert.equal(claude.name, "marketingovo");
 assert.equal(claude.license, "Apache-2.0");
 assert.equal(claude.skills, "./skills/");
 assert.equal(claude.commands, "./commands/");
@@ -75,11 +75,11 @@ const marketplace = JSON.parse(
   await readFile(resolve(root, ".claude-plugin/marketplace.json"), "utf8"),
 );
 assert.equal(marketplace.plugins.length, 1);
-assert.equal(marketplace.plugins[0].source, "./plugins/claude/agentseo");
+assert.equal(marketplace.plugins[0].source, "./plugins/claude/marketingovo");
 assert.equal(marketplace.plugins[0].license, "Apache-2.0");
 
 // Each generated slash command must reference a tool that actually exists.
-const commandsDir = resolve(root, "plugins/claude/agentseo/commands");
+const commandsDir = resolve(root, "plugins/claude/marketingovo/commands");
 const commandFiles = (await readdir(commandsDir)).filter((name) =>
   name.endsWith(".md"),
 );
@@ -88,7 +88,7 @@ const referenced = new Set();
 for (const file of commandFiles) {
   const body = await readFile(resolve(commandsDir, file), "utf8");
   assert.match(body, /^---\ndescription: .+\n---\n/u);
-  for (const [, name] of body.matchAll(/`(agentseo_[a-z_]+)`/gu)) {
+  for (const [, name] of body.matchAll(/`(marketingovo_[a-z_]+)`/gu)) {
     assert.ok(
       expectedTools.includes(name),
       `${file} references unknown tool ${name}`,
@@ -113,7 +113,10 @@ const sharedSkill = await readFile(
   resolve(root, "plugins/shared/skills/seo-marketer/SKILL.md"),
   "utf8",
 );
-for (const host of ["plugins/claude/agentseo", "plugins/codex/agentseo"]) {
+for (const host of [
+  "plugins/claude/marketingovo",
+  "plugins/codex/marketingovo",
+]) {
   const copy = await readFile(
     resolve(root, host, "skills/seo-marketer/SKILL.md"),
     "utf8",
@@ -139,7 +142,7 @@ for (const file of [
 ]) {
   const config = JSON.parse(await readFile(resolve(root, file), "utf8"));
   assert.ok(
-    config.mcpServers?.agentseo?.command,
+    config.mcpServers?.marketingovo?.command,
     `${file} has no server command`,
   );
   assert.ok(
@@ -150,7 +153,7 @@ for (const file of [
 const vscode = JSON.parse(
   await readFile(resolve(root, "integrations/vscode.mcp.json"), "utf8"),
 );
-assert.equal(vscode.servers?.agentseo?.type, "stdio");
+assert.equal(vscode.servers?.marketingovo?.type, "stdio");
 
 process.stdout.write(
   `Validated Claude Code, Codex, OpenClaw and plain-MCP surfaces against the ${expectedTools.length}-tool registry.\n`,

@@ -2,7 +2,7 @@ import { existsSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { Report as EngineReport } from "@agentseoapp/core";
+import type { Report as EngineReport } from "@marketingovo/core";
 import { AgentSeoLocalRuntime } from "./index.js";
 
 const generatedAt = "2026-07-15T12:00:00.000Z";
@@ -189,7 +189,7 @@ describe("run evidence runtime", () => {
   afterEach(() => runtime?.close());
 
   it("persists a versioned summary and paginates evidence without losing totals", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-run-evidence-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "marketingovo-run-evidence-"));
     const root = "https://example.com/";
     const fr = "https://example.com/fr";
     const redirected = "https://example.com/new";
@@ -326,7 +326,7 @@ describe("run evidence runtime", () => {
   });
 
   it("fails closed when the evidence artifact no longer matches its checksum", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-run-evidence-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "marketingovo-run-evidence-"));
     const report = evidenceReport("https://example.com/");
     runtime = new AgentSeoLocalRuntime({
       dataDir,

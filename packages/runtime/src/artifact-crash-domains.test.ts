@@ -30,7 +30,7 @@ import { AgentSeoLocalRuntime } from "./index.js";
 const observedAt = "2026-07-15T10:00:00.000Z";
 
 async function runtimeWithRun(label: string) {
-  const dataDir = mkdtempSync(join(tmpdir(), `agentseo-${label}-`));
+  const dataDir = mkdtempSync(join(tmpdir(), `marketingovo-${label}-`));
   const runtime = new AgentSeoLocalRuntime({ dataDir });
   const project = await runtime.projects.create({
     name: "Crash domains",

@@ -5,7 +5,7 @@ description: Understand localhost authorization, egress controls, credential han
 
 # Security and privacy
 
-Security is a release gate because AGENTseo processes hostile crawled pages, confidential marketing evidence, browser sessions, and provider credentials.
+Security is a release gate because Marketingovo processes hostile crawled pages, confidential marketing evidence, browser sessions, and provider credentials.
 
 <div class="status-banner">
   <strong>0.11 pre-release</strong>
@@ -69,18 +69,18 @@ See [Integrations and BYOK](/integrations/byok) for current alpha setup behavior
 
 ## Privacy model
 
-AGENTseo is local-first. Product telemetry is disabled by default and requires explicit opt-in. Calls made to a configured provider to perform an audit are product functionality, not telemetry.
+Marketingovo is local-first. Product telemetry is disabled by default and requires explicit opt-in. Calls made to a configured provider to perform an audit are product functionality, not telemetry.
 
 The first signed desktop process makes one HTTPS update check before the local
 daemon starts, whether it was opened by the user or by login startup. Its path
 contains the current version, operating-system target, and CPU architecture,
 but no stable device identifier, project URL, account, credential, or usage
 event. The release host can still receive ordinary HTTPS transport metadata,
-including the source IP address and request headers; AGENTseo attaches no
+including the source IP address and request headers; Marketingovo attaches no
 product telemetry identifier. New payloads are installed only after
 detached-signature verification. Secondary desktop activations reuse the
 existing launcher and npm CLI services do not check; desktop users can opt out
-with `--no-update` or `AGENTSEO_AUTO_UPDATE=off`.
+with `--no-update` or `MARKETINGOVO_AUTO_UPDATE=off`.
 
 Projects can contain:
 
@@ -107,7 +107,7 @@ MaxJafar has a separate privacy policy for its hosted service.
 
 ## Exports and backups
 
-A `.agentseo` project bundle can contain configuration, run history, Project
+A `.marketingovo` project bundle can contain configuration, run history, Project
 Context revisions, marketer journal entries, issue fingerprints, actions,
 metrics, and artifact metadata. It never contains secret values. Context writes
 reject secret-like text and local filesystem paths; reconnect each provider
@@ -130,12 +130,12 @@ A fully compromised operating system or administrator-level attacker is outside 
 
 ## Report a vulnerability
 
-Email `security@github.com/MaxJafar/AGENTseo` with the affected version, impact, and minimal reproduction. Do not open a public issue for a working exploit, credential leak, or bypass of local authorization, egress, credential, entitlement, or update-signature controls.
+Email `security@github.com/MaxJafar/marketingovo` with the affected version, impact, and minimal reproduction. Do not open a public issue for a working exploit, credential leak, or bypass of local authorization, egress, credential, entitlement, or update-signature controls.
 
 The project aims to acknowledge a report within two business days, provide a status update within five, and coordinate disclosure after a fix is available.
 
 <p class="source-note">
-  Normative sources: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/SECURITY.md">security policy</a>,
-  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/PRIVACY.md">privacy policy</a>, and
-  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/docs/threat-model.md">threat model</a>.
+  Normative sources: <a href="https://github.com/MaxJafar/marketingovo/blob/main/SECURITY.md">security policy</a>,
+  <a href="https://github.com/MaxJafar/marketingovo/blob/main/PRIVACY.md">privacy policy</a>, and
+  <a href="https://github.com/MaxJafar/marketingovo/blob/main/docs/threat-model.md">threat model</a>.
 </p>

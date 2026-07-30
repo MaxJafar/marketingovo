@@ -2,13 +2,15 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { Action, IssueInstance } from "@agentseoapp/contracts";
+import type { Action, IssueInstance } from "@marketingovo/contracts";
 import { AgentSeoLocalRuntime } from "./index.js";
 
 describe("issue adjudication runtime boundary", () => {
   it("requires an evidence-based note and rejects secret-like material", async () => {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-issue-review-")),
+      dataDir: mkdtempSync(
+        join(tmpdir(), "marketingovo-runtime-issue-review-"),
+      ),
     });
     try {
       const project = await runtime.projects.create({
@@ -73,7 +75,9 @@ describe("issue adjudication runtime boundary", () => {
 
   it("re-scores the remaining action scope and suppresses only a fully reviewed group", async () => {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-action-scope-")),
+      dataDir: mkdtempSync(
+        join(tmpdir(), "marketingovo-runtime-action-scope-"),
+      ),
     });
     try {
       const project = await runtime.projects.create({

@@ -1,7 +1,7 @@
 {
-  "name": "@agentseoapp/mcp",
+  "name": "@marketingovo/mcp",
   "version": "1.0.0",
-  "description": "Bundled stdio MCP bridge for AGENTseo",
+  "description": "Bundled stdio MCP bridge for Marketingovo",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
@@ -14,7 +14,7 @@
     }
   },
   "bin": {
-    "agentseo-mcp": "./dist/stdio.js"
+    "marketingovo-mcp": "./dist/stdio.js"
   },
   "files": [
     "dist",
@@ -29,8 +29,8 @@
     "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
   },
   "dependencies": {
-    "@agentseoapp/contracts": "workspace:*",
-    "@agentseoapp/sdk": "workspace:*",
+    "@marketingovo/contracts": "workspace:*",
+    "@marketingovo/sdk": "workspace:*",
     "@modelcontextprotocol/server": "2.0.0-beta.3",
     "zod": "4.4.3"
   },

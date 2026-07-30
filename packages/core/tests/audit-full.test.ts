@@ -39,7 +39,7 @@ const BASE_LIMITS: Limits = {
   requestTimeoutMs: 2000,
   maxBodyBytes: 1024 * 1024,
   maxRedirects: 1,
-  userAgent: "agentseo-test",
+  userAgent: "marketingovo-test",
   allowPrivate: true,
   ignoreRobots: true,
   renderMode: "static",
@@ -48,7 +48,7 @@ const BASE_LIMITS: Limits = {
 
 let tmp: string;
 beforeEach(() => {
-  tmp = mkdtempSync(join(tmpdir(), "agentseo-audit-"));
+  tmp = mkdtempSync(join(tmpdir(), "marketingovo-audit-"));
 });
 afterEach(() => {
   rmSync(tmp, { recursive: true, force: true });
@@ -614,10 +614,10 @@ describe("composer (T-033)", () => {
     const module: Module = {
       ...fakeModule({ id: "needs-key" as ModuleId }),
       requirements: [
-        { kind: "environment", keys: ["AGENTSEO_TEST_REQUIRED_KEY"] },
+        { kind: "environment", keys: ["MARKETINGOVO_TEST_REQUIRED_KEY"] },
       ],
     };
-    delete process.env.AGENTSEO_TEST_REQUIRED_KEY;
+    delete process.env.MARKETINGOVO_TEST_REQUIRED_KEY;
     const result = await runComposer({
       startUrl: "https://x/",
       registry: [module],

@@ -1,7 +1,7 @@
 {
-  "name": "@agentseoapp/application",
+  "name": "@marketingovo/application",
   "version": "1.0.0",
-  "description": "AGENTseo workflows and transparent action scoring",
+  "description": "Marketingovo workflows and transparent action scoring",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
@@ -25,7 +25,7 @@
     "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
   },
   "dependencies": {
-    "@agentseoapp/contracts": "workspace:*",
+    "@marketingovo/contracts": "workspace:*",
     "@sinclair/typebox": "^0.34.41"
   },
   "devDependencies": {

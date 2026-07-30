@@ -1,12 +1,12 @@
-# AGENTseo launch kit
+# Marketingovo launch kit
 
-This directory contains the English launch narrative for AGENTseo `0.11` alpha. The assets are ready to adapt for GitHub, LinkedIn, X, a short product demo, engineering content, marketer case studies, and a six-week build-in-public cycle.
+This directory contains the English launch narrative for Marketingovo `0.11` alpha. The assets are ready to adapt for GitHub, LinkedIn, X, a short product demo, engineering content, marketer case studies, and a six-week build-in-public cycle.
 
 ## Launch thesis
 
 SEO audits are easy to generate. Deciding what deserves attention, explaining why, assigning the work, and verifying the result are the harder parts.
 
-AGENTseo is a local-first SEO operations system that turns crawl and connected marketing evidence into a transparent action queue. Each action can carry impact, effort, confidence, affected URLs, evidence, and a verification state.
+Marketingovo is a local-first SEO operations system that turns crawl and connected marketing evidence into a transparent action queue. Each action can carry impact, effort, confidence, affected URLs, evidence, and a verification state.
 
 The current release is `0.11` alpha. It is intended for design partners and contributors while installation, migrations, security corpora, accessibility, packaging, and the public correctness benchmark move toward the 1.0 gates.
 
@@ -14,13 +14,13 @@ The current release is `0.11` alpha. It is intended for design partners and cont
 
 Use these claims consistently:
 
-- AGENTseo is **open source under the Apache License 2.0**.
+- Marketingovo is **open source under the Apache License 2.0**.
 - Community is local-first, requires no product account, and has telemetry off by default.
 - Community analysis is not intentionally limited; project and audit scale depends on the machine running it.
 - The product is designed around actions, evidence, source state, prioritization, ownership, and verification rather than a flat issue dump.
 - Missing provider data remains unavailable or stale and must not be presented as zero.
 - Dashboard, CLI, REST, MCP, Codex, and OpenClaw use the same runtime contracts.
-- AGENTseo is a separate proprietary service for managed infrastructure and collaboration: always-on execution, portfolios, teams and RBAC, managed integrations, hosted artifacts, retention, and commercial support.
+- Marketingovo is a separate proprietary service for managed infrastructure and collaboration: always-on execution, portfolios, teams and RBAC, managed integrations, hosted artifacts, retention, and commercial support.
 - Community exports exclude credentials. Integrations must be reconnected after import.
 
 Do not claim that `0.11` replaces mature commercial SEO suites, that every provider path has cleared production readiness, or that the 1.0 quality gates have already passed.
@@ -30,16 +30,16 @@ Do not claim that `0.11` replaces mature commercial SEO suites, that every provi
 1. **Install and run locally**
 
    ```bash
-   npx @agentseoapp/cli serve
+   npx @marketingovo/cli serve
    ```
 
 2. **Star or inspect the source**
 
-   [github.com/MaxJafar/AGENTseo](https://github.com/MaxJafar/AGENTseo)
+   [github.com/MaxJafar/marketingovo](https://github.com/MaxJafar/marketingovo)
 
-3. **Try AGENTseo** when the buyer needs always-on workflows, portfolio scale, managed integrations, teams, or commercial support.
+3. **Try Marketingovo** when the buyer needs always-on workflows, portfolio scale, managed integrations, teams, or commercial support.
 
-   [github.com/MaxJafar/AGENTseo/seo](https://github.com/MaxJafar/AGENTseo)
+   [github.com/MaxJafar/marketingovo/seo](https://github.com/MaxJafar/marketingovo)
 
 ## Asset map
 
@@ -61,7 +61,7 @@ Do not claim that `0.11` replaces mature commercial SEO suites, that every provi
 - Show real UI, real terminal output, or a clearly labeled fixture. Never present a staged result as customer evidence.
 - Redact project names, queries, URLs, credentials, tokens, account identifiers, and provider errors before recording.
 - When quoting a result, include the source window, audit/run identifier, comparison method, and source state.
-- Use “AGENTseo” and “AGENTseo” exactly; do not imply that Full is hidden inside the Community repository.
+- Use “Marketingovo” and “Marketingovo” exactly; do not imply that Full is hidden inside the Community repository.
 
 ## Link and tracking pattern
 
@@ -70,7 +70,7 @@ Use the canonical links above. Add channel-specific UTM parameters only at publi
 Suggested campaign values:
 
 ```text
-utm_campaign=agentseo-alpha-launch
+utm_campaign=marketingovo-alpha-launch
 utm_source=linkedin | x | github | demo
 utm_medium=organic-social | repository | video
 utm_content=<asset-and-variant>
@@ -81,7 +81,7 @@ utm_content=<asset-and-variant>
 - [ ] Every sentence is English.
 - [ ] `0.11 alpha` is visible.
 - [ ] The license is described as Apache-2.0 open source.
-- [ ] Community and AGENTseo are clearly separated.
+- [ ] Community and Marketingovo are clearly separated.
 - [ ] Product footage contains no secrets or private customer data.
 - [ ] Metrics have a source, date range, baseline, and caveat.
 - [ ] The primary CTA is install, star, or try Full.

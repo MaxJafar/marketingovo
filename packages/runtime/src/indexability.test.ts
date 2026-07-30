@@ -140,7 +140,7 @@ describe("runtime page indexability", () => {
       reportToCsv: () => "url,status\n",
     };
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-indexability-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-indexability-")),
       engine,
     });
     try {

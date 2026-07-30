@@ -18,7 +18,7 @@ function readCompatibleEnvironmentVariable(
     if (!warningState.has(legacyName)) {
       warningState.add(legacyName);
       warn(
-        `Warning: ${legacyName} is deprecated; use ${canonicalName}. The legacy alias remains supported through AGENTseo 1.x.\n`,
+        `Warning: ${legacyName} is deprecated; use ${canonicalName}. The legacy alias remains supported through Marketingovo 1.x.\n`,
       );
     }
     return legacyValue;
@@ -38,14 +38,14 @@ export function resolveMcpConnectionEnvironment(
 ): McpConnectionEnvironment {
   return {
     tokenFile: readCompatibleEnvironmentVariable(
-      "AGENTSEO_SERVICE_TOKEN_FILE",
+      "MARKETINGOVO_SERVICE_TOKEN_FILE",
       ["GOLEMSEO_SERVICE_TOKEN_FILE", "GOLEM_SEO_SERVICE_TOKEN_FILE"],
       environment,
       warn,
       warningState,
     ),
     baseUrl: readCompatibleEnvironmentVariable(
-      "AGENTSEO_API_URL",
+      "MARKETINGOVO_API_URL",
       ["GOLEMSEO_API_URL", "GOLEM_SEO_API_URL"],
       environment,
       warn,

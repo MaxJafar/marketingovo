@@ -1,6 +1,6 @@
 {
-  "id": "agentseo",
-  "name": "AGENTseo",
+  "id": "marketingovo",
+  "name": "Marketingovo",
   "description": "Run local SEO audits, comparisons, keyword research, content plans, evidence inspection, and monitoring through bounded workflow-level tools.",
   "version": "1.0.0",
   "configSchema": {
@@ -10,11 +10,11 @@
       "serverUrl": {
         "type": "string",
         "default": "http://127.0.0.1:3210/api/v1",
-        "description": "AGENTseo loopback API URL."
+        "description": "Marketingovo loopback API URL."
       },
       "tokenFile": {
         "type": "string",
-        "description": "Path to the local AGENTseo service-token file."
+        "description": "Path to the local Marketingovo service-token file."
       },
       "timeoutMs": {
         "type": "number",
@@ -42,28 +42,28 @@
   },
   "contracts": {
     "tools": [
-      "agentseo_audit_start",
-      "agentseo_run_get",
-      "agentseo_run_evidence",
-      "agentseo_run_links",
-      "agentseo_run_compare",
-      "agentseo_compare_start",
-      "agentseo_keyword_research_start",
-      "agentseo_content_plan_start",
-      "agentseo_monitoring_status"
+      "marketingovo_audit_start",
+      "marketingovo_run_get",
+      "marketingovo_run_evidence",
+      "marketingovo_run_links",
+      "marketingovo_run_compare",
+      "marketingovo_compare_start",
+      "marketingovo_keyword_research_start",
+      "marketingovo_content_plan_start",
+      "marketingovo_monitoring_status"
     ]
   },
   "toolMetadata": {
-    "agentseo_audit_start": {
+    "marketingovo_audit_start": {
       "optional": true
     },
-    "agentseo_compare_start": {
+    "marketingovo_compare_start": {
       "optional": true
     },
-    "agentseo_keyword_research_start": {
+    "marketingovo_keyword_research_start": {
       "optional": true
     },
-    "agentseo_content_plan_start": {
+    "marketingovo_content_plan_start": {
       "optional": true
     }
   }

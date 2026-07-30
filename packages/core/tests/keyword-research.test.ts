@@ -519,7 +519,7 @@ describe("keyword-research module contract (Sprint 7)", () => {
   });
 });
 
-describe("suggestOne with mocked fetch (transport plumbing)", () => {
+describe("suggestOne with mocked fetch (transport marketingovoing)", () => {
   it("builds the right URL and parses the response", async () => {
     const calls: Array<{ url: string; init?: RequestInit }> = [];
     const mockFetch: typeof fetch = async (input, init) => {

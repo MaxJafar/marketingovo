@@ -10,10 +10,10 @@ describe("CLI identity compatibility", () => {
     const warn = vi.fn();
     expect(
       readCompatibleEnvironmentVariable(
-        "AGENTSEO_MASTER_PASSWORD",
+        "MARKETINGOVO_MASTER_PASSWORD",
         ["GOLEMSEO_MASTER_PASSWORD", "GOLEM_SEO_MASTER_PASSWORD"],
         {
-          AGENTSEO_MASTER_PASSWORD: " canonical ",
+          MARKETINGOVO_MASTER_PASSWORD: " canonical ",
           GOLEM_SEO_MASTER_PASSWORD: "legacy",
         },
         warn,
@@ -27,7 +27,7 @@ describe("CLI identity compatibility", () => {
     const warn = vi.fn();
     expect(
       readCompatibleEnvironmentVariable(
-        "AGENTSEO_MASTER_PASSWORD",
+        "MARKETINGOVO_MASTER_PASSWORD",
         ["GOLEMSEO_MASTER_PASSWORD", "GOLEM_SEO_MASTER_PASSWORD"],
         { GOLEM_SEO_MASTER_PASSWORD: "do-not-log-this" },
         warn,
@@ -36,7 +36,7 @@ describe("CLI identity compatibility", () => {
     ).toBe("do-not-log-this");
     expect(warn).toHaveBeenCalledOnce();
     expect(warn.mock.calls[0]![0]).toContain("GOLEM_SEO_MASTER_PASSWORD");
-    expect(warn.mock.calls[0]![0]).toContain("AGENTSEO_MASTER_PASSWORD");
+    expect(warn.mock.calls[0]![0]).toContain("MARKETINGOVO_MASTER_PASSWORD");
     expect(warn.mock.calls[0]![0]).not.toContain("do-not-log-this");
   });
 
@@ -56,7 +56,7 @@ describe("CLI identity compatibility", () => {
     },
     {
       environment: { SCREAMINGCLAW_CHROME_PATH: "/legacy/chrome" },
-      canonical: "AGENTSEO_CHROME_PATH",
+      canonical: "MARKETINGOVO_CHROME_PATH",
       legacy: [
         "GOLEMSEO_CHROME_PATH",
         "GOLEM_SEO_CHROME_PATH",
@@ -69,7 +69,7 @@ describe("CLI identity compatibility", () => {
     "uses the ordered legacy matrix and warns for $warned",
     ({
       environment,
-      canonical = "AGENTSEO_MASTER_PASSWORD",
+      canonical = "MARKETINGOVO_MASTER_PASSWORD",
       legacy = ["GOLEMSEO_MASTER_PASSWORD", "GOLEM_SEO_MASTER_PASSWORD"],
       expected,
       warned,
@@ -95,7 +95,7 @@ describe("CLI identity compatibility", () => {
     for (let index = 0; index < 2; index++) {
       expect(
         readCompatibleEnvironmentVariable(
-          "AGENTSEO_CREDENTIAL_BROKER",
+          "MARKETINGOVO_CREDENTIAL_BROKER",
           ["GOLEMSEO_CREDENTIAL_BROKER", "GOLEM_SEO_CREDENTIAL_BROKER"],
           { GOLEMSEO_CREDENTIAL_BROKER: "/legacy/broker" },
           warn,
@@ -139,7 +139,7 @@ describe("CLI connection compatibility", () => {
     );
     expect(
       resolveConnection(new Map([["port", "4310"]]), {
-        AGENTSEO_API_URL: "http://localhost:7310/api/v1",
+        MARKETINGOVO_API_URL: "http://localhost:7310/api/v1",
       }).apiUrl,
     ).toBe("http://127.0.0.1:7310/api/v1");
   });
@@ -154,11 +154,11 @@ describe("CLI connection compatibility", () => {
         ["port", "9999"],
       ]),
       {
-        AGENTSEO_DATA_DIR: "canonical-data",
+        MARKETINGOVO_DATA_DIR: "canonical-data",
         GOLEMSEO_DATA_DIR: "legacy-data",
-        AGENTSEO_SERVICE_TOKEN_FILE: "canonical-token",
+        MARKETINGOVO_SERVICE_TOKEN_FILE: "canonical-token",
         GOLEMSEO_SERVICE_TOKEN_FILE: "legacy-token",
-        AGENTSEO_API_URL: "http://127.0.0.1:7654/api/v1",
+        MARKETINGOVO_API_URL: "http://127.0.0.1:7654/api/v1",
         GOLEMSEO_API_URL: "http://127.0.0.1:8765/api/v1",
       },
       warn,
@@ -178,11 +178,11 @@ describe("CLI connection compatibility", () => {
       resolveConnection(
         new Map(),
         {
-          AGENTSEO_DATA_DIR: "canonical-data",
+          MARKETINGOVO_DATA_DIR: "canonical-data",
           GOLEMSEO_DATA_DIR: "ignored-data",
-          AGENTSEO_SERVICE_TOKEN_FILE: "canonical-token",
+          MARKETINGOVO_SERVICE_TOKEN_FILE: "canonical-token",
           GOLEMSEO_SERVICE_TOKEN_FILE: "ignored-token",
-          AGENTSEO_API_URL: "http://[::1]:4100/api/v1",
+          MARKETINGOVO_API_URL: "http://[::1]:4100/api/v1",
           GOLEMSEO_API_URL: "http://127.0.0.1:4200/api/v1",
         },
         warn,

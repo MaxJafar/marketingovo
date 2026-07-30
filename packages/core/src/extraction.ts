@@ -282,23 +282,23 @@ export function applyExtraction(
 }
 
 export function loadExtractors(): ExtractorRule[] {
-  // Inline: AGENTSEO_EXTRACTORS = JSON array of rules.
-  const raw = envStr("AGENTSEO_EXTRACTORS", "SCREAMINGCLAW_EXTRACTORS", "");
+  // Inline: MARKETINGOVO_EXTRACTORS = JSON array of rules.
+  const raw = envStr("MARKETINGOVO_EXTRACTORS", "SCREAMINGCLAW_EXTRACTORS", "");
   if (!raw) return [];
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch (err) {
     throw new Error(
-      `AGENTSEO_EXTRACTORS: invalid JSON: ${(err as Error).message}`,
+      `MARKETINGOVO_EXTRACTORS: invalid JSON: ${(err as Error).message}`,
     );
   }
   if (!Array.isArray(parsed)) {
-    throw new Error("AGENTSEO_EXTRACTORS: expected JSON array");
+    throw new Error("MARKETINGOVO_EXTRACTORS: expected JSON array");
   }
   if (parsed.length > EXTRACTION_LIMITS.maxRules) {
     throw new Error(
-      `AGENTSEO_EXTRACTORS: at most ${EXTRACTION_LIMITS.maxRules} rules are allowed`,
+      `MARKETINGOVO_EXTRACTORS: at most ${EXTRACTION_LIMITS.maxRules} rules are allowed`,
     );
   }
   const out: ExtractorRule[] = [];
@@ -333,7 +333,7 @@ export function loadExtractors(): ExtractorRule[] {
         const validation = validateCustomRuleRegex(re);
         if (!validation.safe) {
           throw new Error(
-            `AGENTSEO_EXTRACTORS: unsafe regex for ${label}: ${validation.message}`,
+            `MARKETINGOVO_EXTRACTORS: unsafe regex for ${label}: ${validation.message}`,
           );
         }
         rule.regex = re;

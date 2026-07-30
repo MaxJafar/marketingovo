@@ -7,20 +7,20 @@ import {
 describe("public agent tool contracts", () => {
   it("keeps exactly nine unique workflow-level tools", () => {
     expect(PUBLIC_AGENT_TOOL_NAMES).toEqual([
-      "agentseo_audit_start",
-      "agentseo_run_get",
-      "agentseo_run_evidence",
-      "agentseo_run_links",
-      "agentseo_run_compare",
-      "agentseo_compare_start",
-      "agentseo_keyword_research_start",
-      "agentseo_content_plan_start",
-      "agentseo_monitoring_status",
+      "marketingovo_audit_start",
+      "marketingovo_run_get",
+      "marketingovo_run_evidence",
+      "marketingovo_run_links",
+      "marketingovo_run_compare",
+      "marketingovo_compare_start",
+      "marketingovo_keyword_research_start",
+      "marketingovo_content_plan_start",
+      "marketingovo_monitoring_status",
     ]);
     expect(new Set(PUBLIC_AGENT_TOOL_NAMES).size).toBe(9);
     expect(
       PUBLIC_AGENT_TOOL_NAMES.every((toolName) =>
-        toolName.startsWith("agentseo_"),
+        toolName.startsWith("marketingovo_"),
       ),
     ).toBe(true);
   });

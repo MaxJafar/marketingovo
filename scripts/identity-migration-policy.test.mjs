@@ -39,7 +39,7 @@ test("the sentinel rejects forbidden package scopes and invented domains", () =>
     [
       "legacy-product-identity",
       "legacy-package-scope",
-      "invented-agentseo-domain",
+      "invented-marketingovo-domain",
     ],
   );
 });

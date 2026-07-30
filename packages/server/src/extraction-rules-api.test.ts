@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { AgentSeoLocalRuntime } from "@agentseoapp/runtime";
+import { AgentSeoLocalRuntime } from "@marketingovo/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 function extractionEngine() {
@@ -38,7 +38,7 @@ describe("project extraction-rule API", () => {
   async function setup() {
     const engine = extractionEngine();
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-extraction-api-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-extraction-api-")),
       engine,
     });
     const server = await createLocalServer({ runtime, port: 3210 });
@@ -79,7 +79,7 @@ describe("project extraction-rule API", () => {
     const dashboard = await server.app.inject({
       method: "GET",
       url: "/api/v1/extraction-rule-templates",
-      headers: { ...headers, "x-agentseo-client": "dashboard" },
+      headers: { ...headers, "x-marketingovo-client": "dashboard" },
     });
     expect(dashboard.statusCode).toBe(200);
     expect(dashboard.json()).toMatchObject({
@@ -116,7 +116,7 @@ describe("project extraction-rule API", () => {
     const saved = await server.app.inject({
       method: "PUT",
       url: path,
-      headers: { ...headers, "x-agentseo-client": "dashboard" },
+      headers: { ...headers, "x-marketingovo-client": "dashboard" },
       payload: {
         rules: [rule],
         changeSummary: "Capture product prices",
@@ -138,7 +138,7 @@ describe("project extraction-rule API", () => {
     const preview = await server.app.inject({
       method: "POST",
       url: `${path}/preview`,
-      headers: { ...headers, "x-agentseo-client": "dashboard" },
+      headers: { ...headers, "x-marketingovo-client": "dashboard" },
       payload: {
         url: "https://example.com/product",
         renderMode: "static",

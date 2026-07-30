@@ -1,6 +1,6 @@
 # Architecture
 
-AGENTseo is a local-first system with one daemon as the authority for jobs,
+Marketingovo is a local-first system with one daemon as the authority for jobs,
 SQLite, scheduling, sessions, artifacts, and credentials.
 
 ```text
@@ -68,7 +68,7 @@ grouped actions remove reviewed URL instances and recalculate URL reach. An
 action is omitted from live priorities only when all of its active issue
 instances are reviewed; raw actions remain available in history and portable
 exports. Import reconstructs action-to-issue links from canonical rule/module
-identities so this behavior survives a `.agentseo` transfer.
+identities so this behavior survives a `.marketingovo` transfer.
 
 ## Project Context and human memory
 
@@ -86,7 +86,7 @@ update or delete endpoint. A later entry records a correction explicitly.
 These records guide interpretation but do not replace crawl or provider
 evidence. MCP exposes them as a read-only project resource; the six workflow
 tools remain unchanged. Secret-like text and local paths are rejected before a
-write, while audit events record only structural metadata. `.agentseo` transfer
+write, while audit events record only structural metadata. `.marketingovo` transfer
 includes the complete stored context and remaps project, entry, and linked-run
 identifiers on import.
 
@@ -117,7 +117,7 @@ snapshot and normalize them into `page_links` migration 11. The graph stores a
 run-scoped source, literal destination, resolved crawled page, distinct anchor
 samples, placement, and follow/nofollow counts. Indexed source and target views
 serve page-level inlinks and outlinks without reconstructing a graph in the
-browser. Import rebuilds the normalized table from sanitized `.agentseo` page
+browser. Import rebuilds the normalized table from sanitized `.marketingovo` page
 snapshots, while older runs remain explicitly unavailable until replayed.
 Custom extraction configuration is stored as immutable project revisions in
 `project_extraction_rule_versions`. Each revision has a stable SHA-256 over the
@@ -193,7 +193,7 @@ malformed URLs, and cross-snapshot page guesses fail through typed Problem
 Details.
 
 The six workflow-level agent tools have one TypeBox/JSON Schema registry in
-`@agentseoapp/contracts`. MCP derives Zod validators from those schemas and
+`@marketingovo/contracts`. MCP derives Zod validators from those schemas and
 OpenClaw derives typed `Unsafe` projections without redefining their fields.
 Build and bundle tests verify strict objects, defaults, numeric and collection
 limits, URL protocols, safety metadata, manifest parity, and the exact six-tool

@@ -6,8 +6,8 @@ import type {
   Action,
   ActionService,
   IssueInstance,
-} from "@agentseoapp/contracts";
-import { AgentSeoLocalRuntime } from "@agentseoapp/runtime";
+} from "@marketingovo/contracts";
+import { AgentSeoLocalRuntime } from "@marketingovo/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 const HOST = "127.0.0.1:3210";
@@ -21,7 +21,9 @@ describe("action workbench API", () => {
   });
 
   async function setup() {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-action-workbench-"));
+    const dataDir = mkdtempSync(
+      join(tmpdir(), "marketingovo-action-workbench-"),
+    );
     const runtime = new AgentSeoLocalRuntime({ dataDir });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
@@ -32,7 +34,7 @@ describe("action workbench API", () => {
     };
     const headers = {
       ...serviceHeaders,
-      "x-agentseo-client": "dashboard",
+      "x-marketingovo-client": "dashboard",
     };
     const project = await runtime.projects.create({
       name: "Action evidence fixture",

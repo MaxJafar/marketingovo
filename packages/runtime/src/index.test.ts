@@ -2,8 +2,8 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import { decodeOAuthCredential } from "@agentseoapp/credentials";
-import type { Report as EngineReport } from "@agentseoapp/core";
+import { decodeOAuthCredential } from "@marketingovo/credentials";
+import type { Report as EngineReport } from "@marketingovo/core";
 import { AgentSeoLocalRuntime } from "./index.js";
 
 function reportFixture(input: Record<string, unknown>): EngineReport {
@@ -75,14 +75,15 @@ function reportFixture(input: Record<string, unknown>): EngineReport {
 describe("runtime independence capabilities", () => {
   it("advertises local-only operation without a hosted service", async () => {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-capabilities-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-capabilities-")),
     });
 
     try {
       expect((await runtime.system.capabilities()).hosted).toEqual({
         available: false,
-        url: "urn:agentseo:hosted-unavailable",
-        message: "AGENTseo is local-first; no hosted service is configured.",
+        url: "urn:marketingovo:hosted-unavailable",
+        message:
+          "Marketingovo is local-first; no hosted service is configured.",
       });
     } finally {
       runtime.close();
@@ -92,7 +93,7 @@ describe("runtime independence capabilities", () => {
 
 describe("runtime OAuth integration persistence", () => {
   it("persists health, scopes and absolute expiry while keeping tokens in CredentialStore", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-runtime-oauth-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "marketingovo-runtime-oauth-"));
     const runtime = new AgentSeoLocalRuntime({ dataDir });
     const accessToken = "runtime-access-secret";
     const refreshToken = "runtime-refresh-secret";
@@ -127,7 +128,7 @@ describe("runtime OAuth integration persistence", () => {
       });
       expect(Buffer.from(credential!).toString("utf8")).toContain(accessToken);
       expect(Buffer.from(credential!).toString("utf8")).toContain(refreshToken);
-      const database = readFileSync(join(dataDir, "agentseo.db"));
+      const database = readFileSync(join(dataDir, "marketingovo.db"));
       expect(database.includes(Buffer.from(accessToken))).toBe(false);
       expect(database.includes(Buffer.from(refreshToken))).toBe(false);
     } finally {
@@ -137,7 +138,7 @@ describe("runtime OAuth integration persistence", () => {
 
   it("persists expired health for an already-expired token set", async () => {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-oauth-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-oauth-")),
     });
     try {
       const integration = await runtime.integrations.completeOAuth(
@@ -211,7 +212,7 @@ describe("runtime OAuth integration persistence", () => {
         ),
     );
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-bridge-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-bridge-")),
       engine,
       googleDesktopClientId: "desktop-client.apps.googleusercontent.com",
       oauthFetch,
@@ -297,7 +298,7 @@ describe("runtime OAuth integration persistence", () => {
       },
     };
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-research-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-research-")),
       engine,
     });
     vi.stubEnv("SERPAPI_API_KEY", "legacy-env-serp-must-not-be-used");
@@ -373,7 +374,7 @@ describe("runtime OAuth integration persistence", () => {
   });
 
   it("injects the stored PSI key into an audit without persisting or reporting it", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-runtime-psi-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "marketingovo-runtime-psi-"));
     const apiKey = "vault-psi-key-that-must-never-leak";
     let receivedPageSpeed: unknown;
     let receivedProviderFetch: unknown;
@@ -453,7 +454,7 @@ describe("runtime OAuth integration persistence", () => {
         (await runtime.reports.get(run.id, "json"))!,
       ).toString("utf8");
       expect(report).not.toContain(apiKey);
-      expect(readFileSync(join(dataDir, "agentseo.db"))).not.toContain(
+      expect(readFileSync(join(dataDir, "marketingovo.db"))).not.toContain(
         Buffer.from(apiKey),
       );
       expect(
@@ -541,7 +542,7 @@ describe("runtime GA4 action exposure", () => {
 
   it("resolves relative pagePath rows against the project origin", async () => {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-ga4-path-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-ga4-path-")),
       engine: engineFor([
         { page: "/pricing#ga4-fragment", keyEvents: 5 },
         { page: "/benchmark", keyEvents: 10 },
@@ -578,7 +579,7 @@ describe("runtime GA4 action exposure", () => {
 
   it("keeps invalid or unmatched GA4 rows unavailable and out of actions", async () => {
     const dataDir = mkdtempSync(
-      join(tmpdir(), "agentseo-runtime-ga4-invalid-"),
+      join(tmpdir(), "marketingovo-runtime-ga4-invalid-"),
     );
     const embeddedSecret = "ga4-provider-secret-must-not-leak";
     const runtime = new AgentSeoLocalRuntime({
@@ -611,7 +612,7 @@ describe("runtime GA4 action exposure", () => {
       expect(action?.scoreInputs.conversionExposure).toBeNull();
       expect(action?.scoreInputs.unavailable).toContain("conversion_exposure");
       expect(JSON.stringify(action)).not.toContain(embeddedSecret);
-      expect(readFileSync(join(dataDir, "agentseo.db"))).not.toContain(
+      expect(readFileSync(join(dataDir, "marketingovo.db"))).not.toContain(
         Buffer.from(embeddedSecret),
       );
     } finally {
@@ -651,7 +652,9 @@ describe("runtime issue reconciliation", () => {
       reportToCsv: () => "url,status\n",
     };
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-exact-cohort-")),
+      dataDir: mkdtempSync(
+        join(tmpdir(), "marketingovo-runtime-exact-cohort-"),
+      ),
       engine,
     });
     try {
@@ -740,7 +743,7 @@ describe("runtime issue reconciliation", () => {
       reportToCsv: () => "url,status\n",
     };
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-issues-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-issues-")),
       engine,
     });
     try {
@@ -837,7 +840,7 @@ describe("runtime issue reconciliation", () => {
       reportToCsv: () => "url,status\n",
     };
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-action-key-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-action-key-")),
       engine,
     });
     const waitForTerminal = async (runId: string) => {
@@ -936,7 +939,7 @@ describe("runtime issue reconciliation", () => {
       reportToCsv: () => "url,status\n",
     };
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-lifecycle-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-lifecycle-")),
       engine,
     });
     const waitForTerminal = async (runId: string) => {
@@ -1020,7 +1023,7 @@ describe("runtime issue reconciliation", () => {
       reportToCsv: () => "",
     };
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-cancel-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-cancel-")),
       engine,
     });
     try {
@@ -1089,10 +1092,12 @@ describe("runtime issue reconciliation", () => {
       reportToHtml: () => "",
       reportToCsv: () => "",
     };
-    const previous = process.env.AGENTSEO_ALLOW_PRIVATE;
-    process.env.AGENTSEO_ALLOW_PRIVATE = "true";
+    const previous = process.env.MARKETINGOVO_ALLOW_PRIVATE;
+    process.env.MARKETINGOVO_ALLOW_PRIVATE = "true";
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-private-policy-")),
+      dataDir: mkdtempSync(
+        join(tmpdir(), "marketingovo-runtime-private-policy-"),
+      ),
       engine,
     });
     const waitForTerminal = async (runId: string) => {
@@ -1136,8 +1141,8 @@ describe("runtime issue reconciliation", () => {
       ]);
     } finally {
       runtime.close();
-      if (previous === undefined) delete process.env.AGENTSEO_ALLOW_PRIVATE;
-      else process.env.AGENTSEO_ALLOW_PRIVATE = previous;
+      if (previous === undefined) delete process.env.MARKETINGOVO_ALLOW_PRIVATE;
+      else process.env.MARKETINGOVO_ALLOW_PRIVATE = previous;
     }
   });
 
@@ -1182,7 +1187,7 @@ describe("runtime issue reconciliation", () => {
       reportToCsv: () => "",
     };
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-partial-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-partial-")),
       engine,
     });
     try {

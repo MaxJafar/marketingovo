@@ -77,9 +77,9 @@ export const technicalModule: Module = {
   },
   dependsOn: ["crawl"],
   configKeys: [
-    "AGENTSEO_RENDER",
-    "AGENTSEO_KEEP_HTML",
-    "AGENTSEO_ALLOW_PRIVATE",
+    "MARKETINGOVO_RENDER",
+    "MARKETINGOVO_KEEP_HTML",
+    "MARKETINGOVO_ALLOW_PRIVATE",
   ],
   checks: allChecks,
   async invoke(input: ModuleInput, ctx: ModuleContext): Promise<ModuleOutput> {

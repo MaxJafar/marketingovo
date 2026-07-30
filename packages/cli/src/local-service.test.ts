@@ -10,7 +10,9 @@ import {
 
 describe("local desktop service lifecycle", () => {
   it("issues a dashboard URL from an existing daemon with the local service token", async () => {
-    const dataDirectory = mkdtempSync(join(tmpdir(), "agentseo-cli-existing-"));
+    const dataDirectory = mkdtempSync(
+      join(tmpdir(), "marketingovo-cli-existing-"),
+    );
     writeFileSync(
       join(dataDirectory, "service-token"),
       "local-service-secret\n",
@@ -44,7 +46,7 @@ describe("local desktop service lifecycle", () => {
   });
 
   it("treats a missing or unauthenticated daemon as unavailable", async () => {
-    const missing = mkdtempSync(join(tmpdir(), "agentseo-cli-missing-"));
+    const missing = mkdtempSync(join(tmpdir(), "marketingovo-cli-missing-"));
     const fetchImpl = vi.fn<typeof fetch>();
     await expect(
       findExistingDashboard(missing, 3210, fetchImpl),

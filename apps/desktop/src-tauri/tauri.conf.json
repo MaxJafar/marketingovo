@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "AGENTseo",
+  "productName": "Marketingovo",
   "version": "1.0.0",
-  "identifier": "io.github.maxjafar.agentseo",
+  "identifier": "io.github.maxjafar.marketingovo",
   "build": {
     "frontendDist": "../shell"
   },
@@ -18,13 +18,13 @@
     "targets": "all",
     "category": "DeveloperTool",
     "publisher": "MaxJafar",
-    "homepage": "https://github.com/MaxJafar/AGENTseo",
+    "homepage": "https://github.com/MaxJafar/marketingovo",
     "copyright": "Copyright 2026 MaxJafar",
     "license": "Apache-2.0",
     "licenseFile": "../../../LICENSE",
     "shortDescription": "Local-first SEO operations system",
     "longDescription": "Turn crawl, Search Console, GA4, performance and SERP evidence into verified SEO actions.",
-    "externalBin": ["binaries/agentseo-node"],
+    "externalBin": ["binaries/marketingovo-node"],
     "resources": ["runtime/**/*"],
     "macOS": { "minimumSystemVersion": "13.0" },
     "windows": {
@@ -39,10 +39,10 @@
   "plugins": {
     "updater": {
       "endpoints": [
-        "https://github.com/MaxJafar/AGENTseo/releases/latest/download/latest.json"
+        "https://github.com/MaxJafar/marketingovo/releases/latest/download/latest.json"
       ],
       "windows": { "installMode": "passive" },
-      "pubkey": "__AGENTSEO_UPDATER_PUBLIC_KEY__"
+      "pubkey": "__MARKETINGOVO_UPDATER_PUBLIC_KEY__"
     }
   }
 }

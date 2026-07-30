@@ -1,4 +1,4 @@
-import type { IssueInstance } from "@agentseoapp/contracts";
+import type { IssueInstance } from "@marketingovo/contracts";
 
 export interface CohortPageMetric {
   url: string;

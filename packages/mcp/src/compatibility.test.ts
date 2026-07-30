@@ -7,9 +7,9 @@ describe("MCP connection environment compatibility", () => {
     expect(
       resolveMcpConnectionEnvironment(
         {
-          AGENTSEO_SERVICE_TOKEN_FILE: "/canonical/token",
+          MARKETINGOVO_SERVICE_TOKEN_FILE: "/canonical/token",
           GOLEM_SEO_SERVICE_TOKEN_FILE: "/legacy/token",
-          AGENTSEO_API_URL: "http://127.0.0.1:3210/api/v1",
+          MARKETINGOVO_API_URL: "http://127.0.0.1:3210/api/v1",
           GOLEM_SEO_API_URL: "http://127.0.0.1:9999/api/v1",
         },
         warn,
@@ -38,8 +38,10 @@ describe("MCP connection environment compatibility", () => {
       baseUrl: "http://127.0.0.1:9999/api/v1",
     });
     expect(warn).toHaveBeenCalledTimes(2);
-    expect(warn.mock.calls.join("\n")).toContain("AGENTSEO_SERVICE_TOKEN_FILE");
-    expect(warn.mock.calls.join("\n")).toContain("AGENTSEO_API_URL");
+    expect(warn.mock.calls.join("\n")).toContain(
+      "MARKETINGOVO_SERVICE_TOKEN_FILE",
+    );
+    expect(warn.mock.calls.join("\n")).toContain("MARKETINGOVO_API_URL");
   });
 
   it("uses GOLEMSEO before GOLEM_SEO and warns once per selected alias", () => {

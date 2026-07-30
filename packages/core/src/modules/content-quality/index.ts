@@ -43,7 +43,7 @@ export const contentQualityModule: Module = {
     required: ["issues", "issueCount"],
   },
   dependsOn: ["crawl"],
-  configKeys: ["AGENTSEO_KEEP_HTML", "AGENTSEO_RENDER"],
+  configKeys: ["MARKETINGOVO_KEEP_HTML", "MARKETINGOVO_RENDER"],
   checks: allChecks,
   async invoke(input: ModuleInput, ctx: ModuleContext): Promise<ModuleOutput> {
     const logger = (ctx.logger ?? new ConsoleLogger()).child({

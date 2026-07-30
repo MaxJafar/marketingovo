@@ -115,15 +115,15 @@ describe("notify webhook channel (mocked fetch)", () => {
     );
   });
 
-  it("returns error 'no webhook URL' when AGENTSEO_WEBHOOK_URL is unset", async () => {
-    const origEnv = process.env.AGENTSEO_WEBHOOK_URL;
-    delete process.env.AGENTSEO_WEBHOOK_URL;
+  it("returns error 'no webhook URL' when MARKETINGOVO_WEBHOOK_URL is unset", async () => {
+    const origEnv = process.env.MARKETINGOVO_WEBHOOK_URL;
+    delete process.env.MARKETINGOVO_WEBHOOK_URL;
     try {
       const results = await notify(SAMPLE_PAYLOAD, { channels: ["webhook"] });
       expect(results[0]?.ok).toBe(false);
       expect(results[0]?.error).toMatch(/no webhook URL/);
     } finally {
-      if (origEnv !== undefined) process.env.AGENTSEO_WEBHOOK_URL = origEnv;
+      if (origEnv !== undefined) process.env.MARKETINGOVO_WEBHOOK_URL = origEnv;
     }
   });
 
@@ -191,15 +191,19 @@ describe("notify webhook channel (mocked fetch)", () => {
     });
     expect(result[0]?.ok).toBe(true);
     const headers = captured?.headers as Record<string, string>;
-    expect(headers["x-agentseo-timestamp"]).toMatch(/^\d+$/);
-    expect(headers["x-agentseo-event-id"]).toMatch(/^[0-9a-f-]{36}$/);
-    expect(headers["x-agentseo-signature"]).toMatch(/^sha256=[0-9a-f]{64}$/);
-    expect(headers["x-agentseo-timestamp"]).toBe(
-      headers["x-agentseo-timestamp"],
+    expect(headers["x-marketingovo-timestamp"]).toMatch(/^\d+$/);
+    expect(headers["x-marketingovo-event-id"]).toMatch(/^[0-9a-f-]{36}$/);
+    expect(headers["x-marketingovo-signature"]).toMatch(
+      /^sha256=[0-9a-f]{64}$/,
     );
-    expect(headers["x-agentseo-event-id"]).toBe(headers["x-agentseo-event-id"]);
-    expect(headers["x-agentseo-signature"]).toBe(
-      headers["x-agentseo-signature"],
+    expect(headers["x-marketingovo-timestamp"]).toBe(
+      headers["x-marketingovo-timestamp"],
+    );
+    expect(headers["x-marketingovo-event-id"]).toBe(
+      headers["x-marketingovo-event-id"],
+    );
+    expect(headers["x-marketingovo-signature"]).toBe(
+      headers["x-marketingovo-signature"],
     );
     expect(captured?.redirect).toBe("error");
   });
@@ -262,19 +266,19 @@ describe("notify telegram channel (mocked fetch)", () => {
   });
 
   it("returns error 'missing ...' when creds unset", async () => {
-    const origToken = process.env.AGENTSEO_TELEGRAM_BOT_TOKEN;
-    const origChat = process.env.AGENTSEO_TELEGRAM_CHAT_ID;
-    delete process.env.AGENTSEO_TELEGRAM_BOT_TOKEN;
-    delete process.env.AGENTSEO_TELEGRAM_CHAT_ID;
+    const origToken = process.env.MARKETINGOVO_TELEGRAM_BOT_TOKEN;
+    const origChat = process.env.MARKETINGOVO_TELEGRAM_CHAT_ID;
+    delete process.env.MARKETINGOVO_TELEGRAM_BOT_TOKEN;
+    delete process.env.MARKETINGOVO_TELEGRAM_CHAT_ID;
     try {
       const results = await notify(SAMPLE_PAYLOAD, { channels: ["telegram"] });
       expect(results[0]?.ok).toBe(false);
       expect(results[0]?.error).toMatch(/missing/);
     } finally {
       if (origToken !== undefined)
-        process.env.AGENTSEO_TELEGRAM_BOT_TOKEN = origToken;
+        process.env.MARKETINGOVO_TELEGRAM_BOT_TOKEN = origToken;
       if (origChat !== undefined)
-        process.env.AGENTSEO_TELEGRAM_CHAT_ID = origChat;
+        process.env.MARKETINGOVO_TELEGRAM_CHAT_ID = origChat;
     }
   });
 });

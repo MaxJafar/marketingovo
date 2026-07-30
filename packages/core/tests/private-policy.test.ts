@@ -4,7 +4,7 @@ import { StaticRenderer } from "../src/renderer.js";
 const base = {
   timeoutMs: 100,
   maxBodyBytes: 1_024,
-  userAgent: "agentseo-private-policy-test",
+  userAgent: "marketingovo-private-policy-test",
   allowPrivate: true,
   enforcePrivateHostAllowlist: true,
   maxRedirects: 0,

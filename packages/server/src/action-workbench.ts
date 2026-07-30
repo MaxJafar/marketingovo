@@ -6,7 +6,7 @@ import type {
   ActionOutcomeObservation,
   Evidence,
   MetricValue,
-} from "@agentseoapp/contracts";
+} from "@marketingovo/contracts";
 
 const IdentifierSchema = Type.String({ minLength: 1, maxLength: 160 });
 const DateTimeSchema = Type.String({ format: "date-time" });

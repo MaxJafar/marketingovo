@@ -1,4 +1,4 @@
-import { createSafeProviderFetch } from "@agentseoapp/integrations";
+import { createSafeProviderFetch } from "@marketingovo/integrations";
 
 /**
  * Exact-host, DNS/address-pinned transport for keyword research providers.

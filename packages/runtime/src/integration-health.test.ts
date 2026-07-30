@@ -2,7 +2,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { MemoryCredentialStore } from "@agentseoapp/credentials";
+import { MemoryCredentialStore } from "@marketingovo/credentials";
 import { AgentSeoLocalRuntime } from "./index.js";
 
 function runtimeWith(
@@ -11,7 +11,7 @@ function runtimeWith(
 ): { runtime: AgentSeoLocalRuntime; credentialStore: MemoryCredentialStore } {
   return {
     runtime: new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-integration-health-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-integration-health-")),
       integrationFetch: fetchImpl,
       credentialStore,
     }),

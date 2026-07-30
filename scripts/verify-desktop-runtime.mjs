@@ -80,10 +80,10 @@ await assertExecutable(chromiumExecutable);
 // signed.
 const deployedChromiumResolver = resolve(
   runtimeRoot,
-  "app/node_modules/.pnpm/node_modules/@agentseoapp/core/dist/chromium-runtime.js",
+  "app/node_modules/.pnpm/node_modules/@marketingovo/core/dist/chromium-runtime.js",
 );
 await access(deployedChromiumResolver);
-process.env.AGENTSEO_CHROME_PATH = chromiumExecutable;
+process.env.MARKETINGOVO_CHROME_PATH = chromiumExecutable;
 const { resolveChromiumExecutablePath } = await import(
   pathToFileURL(deployedChromiumResolver).href
 );
@@ -95,7 +95,7 @@ const extension = process.platform === "win32" ? ".exe" : "";
 const nodeExecutable = resolve(
   tauriRoot,
   "binaries",
-  `agentseo-node-${target}${extension}`,
+  `marketingovo-node-${target}${extension}`,
 );
 await assertExecutable(nodeExecutable);
 const bundledNodeVersion = execFileSync(nodeExecutable, ["--version"], {
@@ -111,7 +111,7 @@ if (process.argv.includes("--require-broker")) {
   const broker = resolve(
     runtimeRoot,
     "broker",
-    `agentseo-credential-broker${extension}`,
+    `marketingovo-credential-broker${extension}`,
   );
   await assertExecutable(broker);
 }
@@ -146,9 +146,9 @@ if (process.argv.includes("--launch-browser")) {
   try {
     const page = await browser.newPage();
     await page.setContent(
-      "<!doctype html><title>AGENTseo runtime smoke</title>",
+      "<!doctype html><title>Marketingovo runtime smoke</title>",
     );
-    if ((await page.title()) !== "AGENTseo runtime smoke")
+    if ((await page.title()) !== "Marketingovo runtime smoke")
       throw new Error("Bundled Chromium smoke page failed");
     await page.close();
   } finally {

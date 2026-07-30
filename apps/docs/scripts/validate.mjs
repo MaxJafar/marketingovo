@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
 const workspaceRoot = resolve(root, "../..");
-const canonicalPrefix = "https://github.com/MaxJafar/AGENTseo/blob/main/";
+const canonicalPrefix = "https://github.com/MaxJafar/marketingovo/blob/main/";
 const requiredPages = [
   "site/index.md",
   "site/getting-started/overview.md",

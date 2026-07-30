@@ -20,7 +20,7 @@ import {
  * Hard limits are part of the public transfer contract. They keep a local
  * import bounded before any rows or artifacts are written.
  */
-export const AGENTSEO_PROJECT_BUNDLE_LIMITS = Object.freeze({
+export const MARKETINGOVO_PROJECT_BUNDLE_LIMITS = Object.freeze({
   maxBytes: 25 * 1024 * 1024,
   maxArtifactBytes: 4 * 1024 * 1024,
   maxEmbeddedArtifactBytes: 16 * 1024 * 1024,
@@ -134,10 +134,10 @@ export type ProjectBundleIssueAdjudication = Static<
 export const ProjectBundleContextSchema = Type.Object(
   {
     versions: Type.Array(ProjectContextVersionSchema, {
-      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxContextVersions,
+      maxItems: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxContextVersions,
     }),
     journal: Type.Array(ProjectContextJournalEntrySchema, {
-      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxContextEntries,
+      maxItems: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxContextEntries,
     }),
   },
   { additionalProperties: false },
@@ -179,13 +179,13 @@ const EmbeddedArtifactSchema = Type.Object(
     mediaType: Type.String({ minLength: 1, maxLength: 160 }),
     sizeBytes: Type.Integer({
       minimum: 0,
-      maximum: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxArtifactBytes,
+      maximum: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxArtifactBytes,
     }),
     sha256: Sha256Schema,
     contentIncluded: Type.Literal(true),
     contentBase64: Type.String({
       maxLength:
-        Math.ceil(AGENTSEO_PROJECT_BUNDLE_LIMITS.maxArtifactBytes / 3) * 4,
+        Math.ceil(MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxArtifactBytes / 3) * 4,
       pattern: "^[A-Za-z0-9+/]*={0,2}$",
     }),
   },
@@ -254,57 +254,57 @@ export type ProjectBundleCustomRule = Static<
 
 export const AgentSeoProjectBundleV2Schema = Type.Object(
   {
-    format: Type.Literal("agentseo-project"),
+    format: Type.Literal("marketingovo-project"),
     version: Type.Literal(2),
     exportedAt: IsoDateTimeSchema,
     secretsIncluded: Type.Literal(false),
     project: ProjectSchema,
     settings: Type.Union([ProjectBundleSettingsSchema, Type.Null()]),
     runs: Type.Array(RunSchema, {
-      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxRuns,
+      maxItems: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxRuns,
     }),
     runConfigurations: Type.Optional(
       Type.Array(ProjectBundleRunConfigurationSchema, {
-        maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxRunConfigurations,
+        maxItems: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxRunConfigurations,
       }),
     ),
     runModules: Type.Array(ProjectBundleRunModuleSchema, {
-      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxRunModules,
+      maxItems: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxRunModules,
     }),
     pages: Type.Array(ProjectBundlePageSchema, {
-      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxPages,
+      maxItems: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxPages,
     }),
     issues: Type.Array(ProjectBundleIssueSchema, {
-      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxIssues,
+      maxItems: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxIssues,
     }),
     issueAdjudications: Type.Optional(
       Type.Array(ProjectBundleIssueAdjudicationSchema, {
-        maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxIssueAdjudications,
+        maxItems: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxIssueAdjudications,
       }),
     ),
     projectContext: Type.Optional(ProjectBundleContextSchema),
     extractionRuleVersions: Type.Optional(
       Type.Array(ExtractionRuleSetVersionSchema, {
-        maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxExtractionRuleVersions,
+        maxItems: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxExtractionRuleVersions,
       }),
     ),
     actions: Type.Array(ActionSchema, {
-      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxActions,
+      maxItems: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxActions,
     }),
     metrics: Type.Array(ProjectBundleMetricSchema, {
-      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxMetrics,
+      maxItems: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxMetrics,
     }),
     schedules: Type.Array(ScheduleSchema, {
-      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxSchedules,
+      maxItems: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxSchedules,
     }),
     connectors: Type.Array(ProjectBundleConnectorSchema, {
-      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxConnectors,
+      maxItems: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxConnectors,
     }),
     customRules: Type.Array(ProjectBundleCustomRuleSchema, {
       maxItems: 500,
     }),
     artifacts: Type.Array(ProjectBundleArtifactSchema, {
-      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxArtifacts,
+      maxItems: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxArtifacts,
     }),
     integrity: Type.Object(
       {
@@ -312,7 +312,7 @@ export const AgentSeoProjectBundleV2Schema = Type.Object(
         bundleSha256: Sha256Schema,
         embeddedArtifactBytes: Type.Integer({
           minimum: 0,
-          maximum: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxEmbeddedArtifactBytes,
+          maximum: MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxEmbeddedArtifactBytes,
         }),
       },
       { additionalProperties: false },

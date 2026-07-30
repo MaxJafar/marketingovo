@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { AgentSeoClient } from "@agentseoapp/sdk";
+import { AgentSeoClient } from "@marketingovo/sdk";
 
 export interface LocalServiceResolution<T> {
   dashboardUrl: string;
@@ -120,7 +120,7 @@ export async function startOrReuseLocalService<T>(
     if (racedExisting)
       return { dashboardUrl: racedExisting, service: null, reused: true };
     throw new Error(
-      "The local API port is occupied by a service that could not authenticate as this AGENTseo workspace",
+      "The local API port is occupied by a service that could not authenticate as this Marketingovo workspace",
       { cause: error },
     );
   }

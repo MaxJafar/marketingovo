@@ -1,11 +1,11 @@
 ---
 title: Reference-tool audit
-description: See how AGENTseo evaluates public SEO tools, preserves license boundaries, and turns proven workflows into testable product behavior.
+description: See how Marketingovo evaluates public SEO tools, preserves license boundaries, and turns proven workflows into testable product behavior.
 ---
 
 # Reference-tool audit
 
-AGENTseo studies public products to identify durable workflow mechanics, not to
+Marketingovo studies public products to identify durable workflow mechanics, not to
 assemble a clone. Every candidate is screened for marketer value, evidence
 quality, architectural fit, security, and license compatibility.
 
@@ -59,7 +59,7 @@ condition.
 
 MIT projects can be adapted with their notices. AGPL and GPL projects were used
 only to understand observable behavior; no implementation code, tests, text, or
-assets from them were copied into AGENTseo.
+assets from them were copied into Marketingovo.
 
 | Reference                                                       | License  | High-value behavior selected                                          |
 | --------------------------------------------------------------- | -------- | --------------------------------------------------------------------- |
@@ -79,4 +79,4 @@ issue fingerprint disappears.
 
 Read the complete commit-pinned matrix, adopted mechanics, deferred queue, and
 implementation contracts in the
-[canonical reverse-engineering record](https://github.com/MaxJafar/AGENTseo/blob/main/docs/reference-tool-reverse-engineering.md).
+[canonical reverse-engineering record](https://github.com/MaxJafar/marketingovo/blob/main/docs/reference-tool-reverse-engineering.md).

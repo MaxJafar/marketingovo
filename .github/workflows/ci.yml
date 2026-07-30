@@ -29,12 +29,12 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build, lint, typecheck, test and validate public surfaces
         env:
-          AGENTSEO_NPM_INSTALL_SMOKE: "1"
+          MARKETINGOVO_NPM_INSTALL_SMOKE: "1"
           # The checked-in baseline is calibrated for developer hardware so a
           # local `pnpm check` fails on a real slowdown. Shared runners are
           # slower and declare their allowance here, where it is visible, rather
           # than by loosening the default for everyone.
-          AGENTSEO_BENCHMARK_BASELINE_MS: "500"
+          MARKETINGOVO_BENCHMARK_BASELINE_MS: "500"
         run: pnpm check
       - name: Reject high and critical dependency advisories
         run: pnpm audit:dependencies
@@ -45,7 +45,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: community-sbom
-          path: artifacts/agentseo.cdx.json
+          path: artifacts/marketingovo.cdx.json
           if-no-files-found: error
           retention-days: 14
 
@@ -153,7 +153,7 @@ jobs:
           node-version: 24.15.0
       - name: Assemble the native desktop inputs
         env:
-          AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID: ci-public-desktop.apps.googleusercontent.com
+          MARKETINGOVO_GOOGLE_DESKTOP_CLIENT_ID: ci-public-desktop.apps.googleusercontent.com
         run: |
           corepack enable
           corepack prepare pnpm@10.34.5 --activate

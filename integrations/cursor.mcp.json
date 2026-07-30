@@ -1,11 +1,11 @@
 {
   "mcpServers": {
-    "agentseo": {
+    "marketingovo": {
       "command": "npx",
       "args": [
         "-y",
-        "@agentseoapp/mcp",
-        "agentseo-mcp"
+        "@marketingovo/mcp",
+        "marketingovo-mcp"
       ]
     }
   }

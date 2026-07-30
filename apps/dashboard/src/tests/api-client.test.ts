@@ -102,8 +102,8 @@ describe("apiRequest session flow", () => {
 
     const mutationInit = fetchMock.mock.calls[1]?.[1] as RequestInit;
     const headers = new Headers(mutationInit.headers);
-    expect(headers.get("X-AGENTseo-CSRF")).toBe("csrf-bootstrap");
-    expect(headers.get("X-AGENTseo-Client")).toBe("dashboard");
+    expect(headers.get("X-Marketingovo-CSRF")).toBe("csrf-bootstrap");
+    expect(headers.get("X-Marketingovo-Client")).toBe("dashboard");
     expect(headers.get("Idempotency-Key")).toMatch(/^[0-9a-f-]{36}$/i);
   });
 
@@ -130,7 +130,7 @@ describe("apiRequest session flow", () => {
 
     const request = fetchMock.mock.calls[1]?.[1] as RequestInit;
     const headers = new Headers(request.headers);
-    expect(headers.get("X-AGENTseo-CSRF")).toBe("csrf-verification");
+    expect(headers.get("X-Marketingovo-CSRF")).toBe("csrf-verification");
     expect(headers.get("Idempotency-Key")).toMatch(/^[0-9a-f-]{36}$/i);
   });
 
@@ -159,7 +159,7 @@ describe("apiRequest session flow", () => {
 
     const request = fetchMock.mock.calls[1]?.[1] as RequestInit;
     const headers = new Headers(request.headers);
-    expect(headers.get("X-AGENTseo-CSRF")).toBe("csrf-replay");
+    expect(headers.get("X-Marketingovo-CSRF")).toBe("csrf-replay");
     expect(headers.get("Idempotency-Key")).toMatch(/^[0-9a-f-]{36}$/i);
   });
 
@@ -199,7 +199,7 @@ describe("apiRequest session flow", () => {
       .mockResolvedValueOnce(
         jsonResponse(
           {
-            type: "https://github.com/MaxJafar/AGENTseo/problems/source-unavailable",
+            type: "https://github.com/MaxJafar/marketingovo/problems/source-unavailable",
             title: "Source unavailable",
             status: 503,
             detail: "Search Console did not respond",
@@ -254,7 +254,7 @@ describe("apiRequest session flow", () => {
         status: 0,
         code: "api_unavailable",
         message:
-          "The AGENTseo API is unavailable. Check the local service and try again.",
+          "The Marketingovo API is unavailable. Check the local service and try again.",
       }),
     );
   });
@@ -283,7 +283,9 @@ describe("apiRequest session flow", () => {
       .mockResolvedValueOnce(
         new Response('{"version":2}', {
           status: 200,
-          headers: { "content-type": "application/vnd.agentseo.project+json" },
+          headers: {
+            "content-type": "application/vnd.marketingovo.project+json",
+          },
         }),
       );
     vi.stubGlobal("fetch", fetchMock);
@@ -295,11 +297,13 @@ describe("apiRequest session flow", () => {
     });
 
     expect(bundle.size).toBeGreaterThan(0);
-    expect(bundle.type).toBe("application/vnd.agentseo.project+json");
+    expect(bundle.type).toBe("application/vnd.marketingovo.project+json");
     const init = fetchMock.mock.calls[1]?.[1] as RequestInit;
     const headers = new Headers(init.headers);
-    expect(headers.get("Accept")).toBe("application/vnd.agentseo.project+json");
-    expect(headers.get("X-AGENTseo-CSRF")).toBe("csrf-export");
+    expect(headers.get("Accept")).toBe(
+      "application/vnd.marketingovo.project+json",
+    );
+    expect(headers.get("X-Marketingovo-CSRF")).toBe("csrf-export");
     expect(headers.get("Content-Type")).toBe("application/json");
   });
 });

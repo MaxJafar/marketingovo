@@ -1,8 +1,8 @@
 {
-  "name": "@agentseoapp/core",
+  "name": "@marketingovo/core",
   "version": "1.0.0",
   "private": true,
-  "description": "Crawler, checks, rule engine and reporting primitives for AGENTseo",
+  "description": "Crawler, checks, rule engine and reporting primitives for Marketingovo",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -39,7 +39,7 @@
     "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
   },
   "dependencies": {
-    "@agentseoapp/integrations": "workspace:*",
+    "@marketingovo/integrations": "workspace:*",
     "chrome-launcher": "^1.2.1",
     "google-trends-api": "^4.9.2",
     "lighthouse": "^13.3.0",

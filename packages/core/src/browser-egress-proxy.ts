@@ -180,7 +180,7 @@ export async function createBrowserEgressProxy(
         );
         upstream.once("connect", () => {
           clientSocket.write(
-            "HTTP/1.1 200 Connection Established\r\nProxy-Agent: AGENTseo\r\n\r\n",
+            "HTTP/1.1 200 Connection Established\r\nProxy-Agent: Marketingovo\r\n\r\n",
           );
           if (head.length > 0) upstream.write(head);
           upstream.pipe(clientSocket);

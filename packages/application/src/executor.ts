@@ -6,7 +6,7 @@ import type {
   ModuleStatus,
   Requirement,
   SeoModule,
-} from "@agentseoapp/contracts";
+} from "@marketingovo/contracts";
 
 export interface NodeExecutionResult {
   nodeId: string;

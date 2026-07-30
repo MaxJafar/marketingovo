@@ -216,7 +216,7 @@ async function startDaemon(
 ): Promise<{ process: ChildProcessWithoutNullStreams; url: string }> {
   const cli = resolve(repositoryRoot, "packages/cli/dist/cli.js");
   const environment = { ...process.env, NO_COLOR: "1" };
-  delete environment.AGENTSEO_ALLOW_PRIVATE;
+  delete environment.MARKETINGOVO_ALLOW_PRIVATE;
   delete environment.SCREAMINGCLAW_ALLOW_PRIVATE;
   const child = spawn(
     process.execPath,
@@ -334,7 +334,7 @@ async function runCliCommand(args: string[]): Promise<string> {
 }
 
 test.beforeAll(async () => {
-  dataDirectory = await mkdtemp(resolve(tmpdir(), "agentseo-e2e-"));
+  dataDirectory = await mkdtemp(resolve(tmpdir(), "marketingovo-e2e-"));
   const masterPasswordFile = resolve(dataDirectory, "master-password");
   await writeFile(
     masterPasswordFile,
@@ -369,12 +369,14 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
   );
 
   await page.goto(dashboardUrl, { waitUntil: "networkidle" });
-  await expect(page.getByRole("link", { name: "AGENTseo home" })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Marketingovo home" }),
+  ).toBeVisible();
   await expect.poll(() => new URL(page.url()).hash).toBe("");
   await expectNoWcagViolations(page, "Empty local overview");
 
   const session = (await context.cookies()).find(
-    (cookie) => cookie.name === "agentseo_session",
+    (cookie) => cookie.name === "marketingovo_session",
   );
   expect(session).toMatchObject({ httpOnly: true, sameSite: "Strict" });
 
@@ -487,21 +489,21 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
   await expect(pagesTable).toBeVisible();
   const rootPageRow = pagesTable
     .locator("tbody tr")
-    .filter({ hasText: "AGENTseo synthetic benchmark" });
+    .filter({ hasText: "Marketingovo synthetic benchmark" });
   await expect(rootPageRow).toHaveCount(1);
   await rootPageRow
     .getByRole("button", {
-      name: "Explore internal links for AGENTseo synthetic benchmark",
+      name: "Explore internal links for Marketingovo synthetic benchmark",
     })
     .click();
   await expect(
     page.getByRole("region", {
-      name: "Internal links for AGENTseo synthetic benchmark",
+      name: "Internal links for Marketingovo synthetic benchmark",
     }),
   ).toBeVisible();
   await page.getByRole("button", { name: /Outlinks ·/u }).click();
   const outlinksTable = page.getByRole("table", {
-    name: "outlinks for AGENTseo synthetic benchmark",
+    name: "outlinks for Marketingovo synthetic benchmark",
   });
   await expect(outlinksTable).toBeVisible();
   await expect(
@@ -868,7 +870,7 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
   await expect(previewTable.getByText("SEO benchmark index")).toBeVisible();
   await expect(previewTable.getByText("Open Graph title")).toBeVisible();
   await expect(
-    previewTable.getByText("AGENTseo benchmark preview"),
+    previewTable.getByText("Marketingovo benchmark preview"),
   ).toBeVisible();
   await page
     .getByLabel("Revision summary")
@@ -908,7 +910,7 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
     extractionEvidence.getByText("SEO benchmark index").first(),
   ).toBeVisible();
   await expect(
-    extractionEvidence.getByText("AGENTseo benchmark preview").first(),
+    extractionEvidence.getByText("Marketingovo benchmark preview").first(),
   ).toBeVisible();
   await expectNoWcagViolations(page, "Captured extraction evidence");
 
@@ -917,7 +919,7 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export project" }).click();
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toMatch(/\.agentseo$/u);
+  expect(download.suggestedFilename()).toMatch(/\.marketingovo$/u);
   const bundlePath = await download.path();
   expect(bundlePath).toBeTruthy();
   const bundleBuffer = await readFile(bundlePath!);
@@ -996,7 +998,7 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
   );
   await page.locator("#project-import-file").setInputFiles({
     name: download.suggestedFilename(),
-    mimeType: "application/vnd.agentseo.project+json",
+    mimeType: "application/vnd.marketingovo.project+json",
     buffer: bundleBuffer,
   });
   await expect(page.getByText("Project imported", { exact: true })).toBeVisible(

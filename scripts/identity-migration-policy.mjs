@@ -48,7 +48,7 @@ const IDENTITY_ROOT_TEXT_FILES = new Set([
   "turbo.json",
 ]);
 
-// Authorized legacy-identity exceptions after the completed AGENTseo rebrand.
+// Authorized legacy-identity exceptions after the completed Marketingovo rebrand.
 //
 // The rebrand removed every cosmetic occurrence of the old product name. What
 // remains falls into three groups, and nothing else may be added without a
@@ -71,14 +71,24 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
     reason:
       "The sentinel must name the old-brand patterns and every reasoned exception in order to prevent unreviewed additions.",
   },
-  ...["legacy-agent-contract", "legacy-cli-alias", "former-affiliation"].map(
-    (rule) => ({
-      rule,
-      path: "scripts/identity-migration-policy.mjs",
-      reason:
-        "The sentinel must name the old-brand patterns it detects for every rule.",
-    }),
-  ),
+  ...[
+    "legacy-agent-contract",
+    "legacy-cli-alias",
+    "former-affiliation",
+    "retired-agentseo-identity",
+  ].map((rule) => ({
+    rule,
+    path: "scripts/identity-migration-policy.mjs",
+    reason:
+      "The sentinel must name the old-brand patterns it detects for every rule.",
+  })),
+
+  {
+    rule: "retired-agentseo-identity",
+    path: "scripts/npm-release-policy.mjs",
+    reason:
+      "The npm release policy must name the retired package scope in order to forbid it.",
+  },
 
   // 1. Compatibility surfaces.
   {
@@ -129,30 +139,18 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
     reason:
       "Project import still accepts the application/vnd.golemseo.project+json media type; exports always emit the canonical type.",
   },
-  ...[
-    "apps/dashboard/src/api/queries.ts",
-    "apps/dashboard/src/pages/settings.tsx",
-  ].map((path) => ({
+  ...[].map((path) => ({
     rule: "legacy-product-identity",
     path,
     reason:
-      "Project import accepts the .golemseo bundle extension alongside .agentseo; export only writes .agentseo.",
+      "Project import accepts the .golemseo bundle extension alongside .marketingovo; export only writes .marketingovo.",
   })),
-  ...[
-    "apps/dashboard/src/context/site-context.tsx",
-    "apps/dashboard/src/pages/onboarding.tsx",
-  ].map((path) => ({
+  ...[].map((path) => ({
     rule: "legacy-product-identity",
     path,
     reason:
       "One-time localStorage migration reads the golem-seo:* key, rewrites it under the canonical key, and deletes the original.",
   })),
-  {
-    rule: "legacy-product-identity",
-    path: "packages/cli/dashboard/",
-    reason:
-      "Generated dashboard bundle. It contains only the three compatibility strings above and is regenerated, never hand-edited.",
-  },
   {
     rule: "legacy-product-identity",
     path: "scripts/desktop-runtime-config.mjs",
@@ -178,9 +176,6 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
     "packages/cli/src/compatibility.test.ts",
     "packages/mcp/src/compatibility.test.ts",
     "packages/runtime/src/google-oauth-env.test.ts",
-    "apps/dashboard/src/tests/queries-import.test.tsx",
-    "apps/dashboard/src/tests/onboarding.test.tsx",
-    "apps/dashboard/src/tests/site-context.test.tsx",
     "apps/desktop/scripts/validate.mjs",
   ].map((path) => ({
     rule: "legacy-product-identity",
@@ -213,7 +208,7 @@ const TEXT_RULES = Object.freeze([
   },
   {
     id: "legacy-package-scope",
-    pattern: /@(?:golem-seo|agent-seo|agentseo)\//giu,
+    pattern: /@(?:golem-seo|agent-seo|agentseoapp)\//giu,
     sourceOnly: true,
   },
   {
@@ -222,10 +217,19 @@ const TEXT_RULES = Object.freeze([
     sourceOnly: true,
   },
   {
-    id: "invented-agentseo-domain",
-    // The product is now named agentseo, so this rule must distinguish a
-    // hostname from an ordinary dotted identifier. `agentseo.db`,
-    // `agentseo.service`, `agentseo.cdx.json`, and `vnd.agentseo.project+json`
+    // The product has now been renamed twice. Nothing shipped under either prior
+    // name, so unlike a normal rename there is no compatibility surface to keep:
+    // any occurrence is a leftover, not an alias.
+    id: "retired-agentseo-identity",
+    pattern:
+      /AGENTseo|AGENTSEO|agentseoapp|agentseo_[a-z_]+|agentseo:\/\/|\.agentseo\b/gu,
+    sourceOnly: true,
+  },
+  {
+    id: "invented-marketingovo-domain",
+    // The product is now named marketingovo, so this rule must distinguish a
+    // hostname from an ordinary dotted identifier. `marketingovo.db`,
+    // `marketingovo.service`, `marketingovo.cdx.json`, and `vnd.marketingovo.project+json`
     // are file names and media types, not domains. Only flag a match that is
     // either in an explicit URL/email context or ends in a real TLD.
     pattern:
@@ -250,9 +254,10 @@ const BASELINE_RULE_LABELS = Object.freeze({
   "legacy-product-identity": "legacy-product",
   "legacy-package-scope": "reserved-package-scope",
   "former-affiliation": "former-affiliation",
-  "invented-agentseo-domain": "unapproved-domain",
+  "invented-marketingovo-domain": "unapproved-domain",
   "legacy-agent-contract": "legacy-agent-contract",
   "legacy-cli-alias": "legacy-cli-alias",
+  "retired-agentseo-identity": "retired-agentseo",
 });
 
 function sha256(...parts) {
@@ -601,7 +606,7 @@ async function validateCanonicalIdentity(repositoryRoot) {
   const rootManifest = JSON.parse(
     await readFile(resolve(repositoryRoot, "package.json"), "utf8"),
   );
-  const expectedUserAgent = `AGENTseo/${rootManifest.version}`;
+  const expectedUserAgent = `Marketingovo/${rootManifest.version}`;
   if (
     rootManifest.private !== true ||
     rootManifest.scripts?.prepublishOnly !==
@@ -618,7 +623,7 @@ async function validateCanonicalIdentity(repositoryRoot) {
   const limits = await readFile(resolve(repositoryRoot, limitsPath), "utf8");
   const userAgents = [
     ...limits.matchAll(
-      /export const AGENTSEO_DEFAULT_USER_AGENT\s*=\s*["']([^"']+)["']/gu,
+      /export const MARKETINGOVO_DEFAULT_USER_AGENT\s*=\s*["']([^"']+)["']/gu,
     ),
   ];
   if (
@@ -641,16 +646,17 @@ async function validateCanonicalIdentity(repositoryRoot) {
   // Exactly one bin. The retired golem-seo entry was never published, so it is
   // removed rather than carried as a deprecated alias.
   if (
-    cliManifest.name !== "agentseo" ||
+    cliManifest.name !== "marketingovo" ||
     cliManifest.private !== true ||
-    cliManifest.bin?.agentseo !== "./dist/cli.js" ||
+    cliManifest.bin?.marketingovo !== "./dist/cli.js" ||
     Object.keys(cliManifest.bin ?? {}).length !== 1
   ) {
     violations.push({
       rule: "canonical-cli-identity",
       path: cliManifestPath,
       line: 1,
-      match: "expected private agentseo package with exactly one canonical bin",
+      match:
+        "expected private marketingovo package with exactly one canonical bin",
     });
   }
 
@@ -660,17 +666,17 @@ async function validateCanonicalIdentity(repositoryRoot) {
     "utf8",
   );
   if (
-    !/["']--filter["']\s*,\s*["']agentseo["']\s*,\s*["']--fail-if-no-match["']/u.test(
+    !/["']--filter["']\s*,\s*["']marketingovo["']\s*,\s*["']--fail-if-no-match["']/u.test(
       desktopPrepare,
     ) ||
-    desktopPrepare.includes("@agentseoapp/cli")
+    desktopPrepare.includes("@marketingovo/cli")
   ) {
     violations.push({
       rule: "canonical-cli-identity",
       path: desktopPreparePath,
       line: 1,
       match:
-        "desktop runtime deployment must fail closed while selecting the unscoped agentseo CLI package",
+        "desktop runtime deployment must fail closed while selecting the unscoped marketingovo CLI package",
     });
   }
 
@@ -679,7 +685,7 @@ async function validateCanonicalIdentity(repositoryRoot) {
   const cliVersion = cli.match(/const VERSION\s*=\s*["']([^"']+)["']/u)?.[1];
   if (
     cliVersion !== rootManifest.version ||
-    !cli.includes("AGENTseo ${VERSION}") ||
+    !cli.includes("Marketingovo ${VERSION}") ||
     cli.includes("usage: golem-seo") ||
     /process\.env\.(?:GOLEMSEO|GOLEM_SEO|SCREAMINGCLAW)_[A-Z0-9_]+\s*=/u.test(
       cli,
@@ -689,7 +695,8 @@ async function validateCanonicalIdentity(repositoryRoot) {
       rule: "canonical-cli-identity",
       path: cliPath,
       line: 1,
-      match: "CLI version/help/env writes must use canonical AGENTseo identity",
+      match:
+        "CLI version/help/env writes must use canonical Marketingovo identity",
     });
   }
   return violations;

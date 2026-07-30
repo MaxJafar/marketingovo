@@ -1,7 +1,7 @@
 {
-  "name": "@agentseoapp/storage-sqlite",
+  "name": "@marketingovo/storage-sqlite",
   "version": "1.0.0",
-  "description": "Single-writer SQLite storage and durable jobs for AGENTseo",
+  "description": "Single-writer SQLite storage and durable jobs for Marketingovo",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
@@ -25,7 +25,7 @@
     "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
   },
   "dependencies": {
-    "@agentseoapp/contracts": "workspace:*"
+    "@marketingovo/contracts": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",

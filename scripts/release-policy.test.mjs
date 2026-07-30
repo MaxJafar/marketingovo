@@ -27,7 +27,7 @@ test("upgrade baseline policy orders prereleases and rejects unverified installe
   assert.equal(compareReleaseVersions("1.0.0-rc.2", "1.0.0"), -1);
   const target = "x86_64-pc-windows-msvc";
   const installer = {
-    path: "msi/AGENTseo_1.0.0-rc.1_x64_en-US.msi",
+    path: "msi/Marketingovo_1.0.0-rc.1_x64_en-US.msi",
     role: "installer-updater-payload",
     sha256: "a".repeat(64),
   };
@@ -120,9 +120,9 @@ test("macOS releases fail closed when any signing or notarization input is missi
 });
 
 test("artifact collection requires a detached updater signature", async () => {
-  const root = await mkdtemp(join(tmpdir(), "agentseo-release-policy-"));
-  const dmg = join(root, "dmg", "AGENTseo.dmg");
-  const updater = join(root, "macos", "AGENTseo.app.tar.gz");
+  const root = await mkdtemp(join(tmpdir(), "marketingovo-release-policy-"));
+  const dmg = join(root, "dmg", "Marketingovo.dmg");
+  const updater = join(root, "macos", "Marketingovo.app.tar.gz");
   await mkdir(join(root, "dmg"), { recursive: true });
   await mkdir(join(root, "macos"), { recursive: true });
   await writeFile(dmg, "installer");
@@ -134,9 +134,9 @@ test("artifact collection requires a detached updater signature", async () => {
 });
 
 test("artifact collection records payload hashes rather than trusting extensions", async () => {
-  const root = await mkdtemp(join(tmpdir(), "agentseo-release-policy-"));
-  const dmg = join(root, "dmg", "AGENTseo.dmg");
-  const updater = join(root, "macos", "AGENTseo.app.tar.gz");
+  const root = await mkdtemp(join(tmpdir(), "marketingovo-release-policy-"));
+  const dmg = join(root, "dmg", "Marketingovo.dmg");
+  const updater = join(root, "macos", "Marketingovo.app.tar.gz");
   await mkdir(join(root, "dmg"), { recursive: true });
   await mkdir(join(root, "macos"), { recursive: true });
   await writeFile(dmg, "installer");
@@ -152,8 +152,8 @@ test("artifact collection records payload hashes rather than trusting extensions
 });
 
 test("Tauri v2 Windows MSI must have a detached signature", async () => {
-  const root = await mkdtemp(join(tmpdir(), "agentseo-release-policy-"));
-  const msi = join(root, "msi", "AGENTseo.msi");
+  const root = await mkdtemp(join(tmpdir(), "marketingovo-release-policy-"));
+  const msi = join(root, "msi", "Marketingovo.msi");
   await mkdir(join(root, "msi"), { recursive: true });
   await writeFile(msi, "installer");
   await writeFile(`${msi}.sig`, "A".repeat(88));
@@ -169,8 +169,8 @@ test("Tauri v2 Windows MSI must have a detached signature", async () => {
 
 test("published artifact names remain unique across native targets", () => {
   assert.notEqual(
-    releaseAssetName("aarch64-apple-darwin", "macos/AGENTseo.app.tar.gz"),
-    releaseAssetName("x86_64-apple-darwin", "macos/AGENTseo.app.tar.gz"),
+    releaseAssetName("aarch64-apple-darwin", "macos/Marketingovo.app.tar.gz"),
+    releaseAssetName("x86_64-apple-darwin", "macos/Marketingovo.app.tar.gz"),
   );
   assert.throws(() =>
     releaseAssetName("aarch64-apple-darwin", "bad\nasset.tar.gz"),
@@ -178,9 +178,9 @@ test("published artifact names remain unique across native targets", () => {
 });
 
 test("manifest validation rejects bytes changed after platform verification", async () => {
-  const root = await mkdtemp(join(tmpdir(), "agentseo-release-policy-"));
-  const dmg = join(root, "dmg", "AGENTseo.dmg");
-  const updater = join(root, "macos", "AGENTseo.app.tar.gz");
+  const root = await mkdtemp(join(tmpdir(), "marketingovo-release-policy-"));
+  const dmg = join(root, "dmg", "Marketingovo.dmg");
+  const updater = join(root, "macos", "Marketingovo.app.tar.gz");
   await mkdir(join(root, "dmg"), { recursive: true });
   await mkdir(join(root, "macos"), { recursive: true });
   await writeFile(dmg, "verified installer");
@@ -237,8 +237,8 @@ test("manifest validation rejects bytes changed after platform verification", as
 });
 
 test("Windows verification records fail closed without the full installer lifecycle", async () => {
-  const root = await mkdtemp(join(tmpdir(), "agentseo-release-policy-"));
-  const msi = join(root, "msi", "AGENTseo.msi");
+  const root = await mkdtemp(join(tmpdir(), "marketingovo-release-policy-"));
+  const msi = join(root, "msi", "Marketingovo.msi");
   await mkdir(join(root, "msi"), { recursive: true });
   await writeFile(msi, "installer");
   await writeFile(`${msi}.sig`, "A".repeat(88));
@@ -294,9 +294,9 @@ test("Windows verification records fail closed without the full installer lifecy
 });
 
 test("Linux verification requires deb lifecycle and AppImage execution evidence", async () => {
-  const root = await mkdtemp(join(tmpdir(), "agentseo-release-policy-"));
-  const deb = join(root, "deb", "AGENTseo.deb");
-  const appImage = join(root, "appimage", "AGENTseo.AppImage");
+  const root = await mkdtemp(join(tmpdir(), "marketingovo-release-policy-"));
+  const deb = join(root, "deb", "Marketingovo.deb");
+  const appImage = join(root, "appimage", "Marketingovo.AppImage");
   await mkdir(join(root, "deb"), { recursive: true });
   await mkdir(join(root, "appimage"), { recursive: true });
   await writeFile(deb, "deb installer");
@@ -406,7 +406,7 @@ test("the release workflow executes every destructive native lifecycle gate", as
   assert.match(workflow, /create-updater-metadata\.mjs/u);
   assert.match(workflow, /verified-updater-\$\{\{ matrix\.target \}\}/u);
   assert.match(workflow, /needs: publish-updater-metadata/u);
-  assert.match(workflow, /AGENTSEO_UPGRADE_BASELINE_TAG/u);
+  assert.match(workflow, /MARKETINGOVO_UPGRADE_BASELINE_TAG/u);
   assert.match(lifecycle, /GITHUB_ACTIONS/u);
   assert.match(lifecycle, /--background/u);
   assert.match(lifecycle, /Wait-ForHealthyService/u);
@@ -433,7 +433,7 @@ test("the release workflow executes every destructive native lifecycle gate", as
   assert.match(desktopLauncher, /UpdaterExt/u);
   assert.match(desktopLauncher, /\.updater_builder\(\)/u);
   assert.match(desktopLauncher, /\.download_and_install\(/u);
-  assert.match(desktopLauncher, /AGENTSEO_AUTO_UPDATE/u);
+  assert.match(desktopLauncher, /MARKETINGOVO_AUTO_UPDATE/u);
   assert.match(desktopLauncher, /--no-update/u);
   assert.match(desktopLauncher, /tauri_plugin_single_instance::init/u);
   assert.match(desktopLauncher, /activate_existing_instance/u);
@@ -484,8 +484,8 @@ test("a stable release is rejected without verified upgrade evidence, and accept
   // The stable branch of the upgrade gate had no coverage: every fixture used a
   // prerelease version, so `not-tested-prerelease` always satisfied it. A stable
   // native release must prove an upgrade from an older signed installer.
-  const root = await mkdtemp(join(tmpdir(), "agentseo-release-policy-"));
-  const msi = join(root, "msi", "AGENTseo.msi");
+  const root = await mkdtemp(join(tmpdir(), "marketingovo-release-policy-"));
+  const msi = join(root, "msi", "Marketingovo.msi");
   await mkdir(join(root, "msi"), { recursive: true });
   await writeFile(msi, "installer");
   await writeFile(`${msi}.sig`, "A".repeat(88));

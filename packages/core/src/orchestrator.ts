@@ -118,7 +118,7 @@ export async function crawl(opts: CrawlOptions): Promise<CrawlOutcome> {
     : limits.allowPrivate;
   const projectRoot =
     opts.projectRoot ??
-    envStr("AGENTSEO_PROJECT_ROOT", "SCREAMINGCLAW_PROJECT_ROOT", "") ??
+    envStr("MARKETINGOVO_PROJECT_ROOT", "SCREAMINGCLAW_PROJECT_ROOT", "") ??
     "";
   const mode = opts.renderMode ?? limits.renderMode;
   const crawlConfig = loadCrawlConfig();
@@ -362,8 +362,11 @@ async function buildReportWithRealData(
   // Build the baseline report first; realData stays undefined if no
   // integrations are configured.
   const hasTrends = !!(
-    envStr("AGENTSEO_TRENDS_KEYWORDS", "SCREAMINGCLAW_TRENDS_KEYWORDS", "") ??
-    ""
+    envStr(
+      "MARKETINGOVO_TRENDS_KEYWORDS",
+      "SCREAMINGCLAW_TRENDS_KEYWORDS",
+      "",
+    ) ?? ""
   ).trim();
   if (
     !gscSiteUrl &&
@@ -591,8 +594,11 @@ async function buildReportWithRealData(
   // and surface a topic-momentum section in the report. We never
   // auto-pick keywords — the operator (or agent) must opt in.
   const trendsKeywords = (
-    envStr("AGENTSEO_TRENDS_KEYWORDS", "SCREAMINGCLAW_TRENDS_KEYWORDS", "") ??
-    ""
+    envStr(
+      "MARKETINGOVO_TRENDS_KEYWORDS",
+      "SCREAMINGCLAW_TRENDS_KEYWORDS",
+      "",
+    ) ?? ""
   )
     .split(",")
     .map((s) => s.trim())

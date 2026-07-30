@@ -1,6 +1,6 @@
 // Generates every agent-host surface from one source of truth.
 //
-// The tool registry in @agentseoapp/contracts is authoritative. Host manifests
+// The tool registry in @marketingovo/contracts is authoritative. Host manifests
 // (Claude Code, Codex, Cursor, generic MCP) and the plugin marketplace entry are
 // derived from it, never hand-maintained, so a tool cannot be added or renamed
 // in one host and forgotten in another. `validate:plugins` re-derives the same
@@ -23,14 +23,17 @@ const rootManifest = JSON.parse(
   await readFile(resolve(root, "package.json"), "utf8"),
 );
 const version = JSON.parse(
-  await readFile(resolve(root, "plugins/codex/agentseo/package.json"), "utf8"),
+  await readFile(
+    resolve(root, "plugins/codex/marketingovo/package.json"),
+    "utf8",
+  ),
 ).version;
 
 const AUTHOR = {
-  name: "AGENTseo",
-  url: "https://github.com/MaxJafar/AGENTseo",
+  name: "Marketingovo",
+  url: "https://github.com/MaxJafar/marketingovo",
 };
-const REPOSITORY = "https://github.com/MaxJafar/AGENTseo";
+const REPOSITORY = "https://github.com/MaxJafar/marketingovo";
 const DESCRIPTION =
   "Turn local crawl, Search Console, GA4, performance, and SERP evidence into prioritized SEO actions.";
 
@@ -44,12 +47,12 @@ const COMMANDS = [
   {
     file: "seo-audit.md",
     description: "Audit a project and rank the actions that matter most.",
-    tool: "agentseo_audit_start",
-    body: `Run an AGENTseo audit and report prioritized, evidence-backed actions.
+    tool: "marketingovo_audit_start",
+    body: `Run an Marketingovo audit and report prioritized, evidence-backed actions.
 
-1. Call \`agentseo_audit_start\` for the project named in $ARGUMENTS (ask which
+1. Call \`marketingovo_audit_start\` for the project named in $ARGUMENTS (ask which
    project if it is ambiguous — never guess).
-2. Poll \`agentseo_run_get\` until the run leaves the running state.
+2. Poll \`marketingovo_run_get\` until the run leaves the running state.
 3. Report only findings present in the run's issues. Cite the run id and the
    affected URLs. If the run is \`partial\`, say which evidence is missing rather
    than filling the gap with generic advice.
@@ -60,30 +63,30 @@ Never request or echo API keys, OAuth values, or cookies.`,
   {
     file: "seo-compare.md",
     description: "Compare a project against competitor URLs.",
-    tool: "agentseo_compare_start",
-    body: `Compare an AGENTseo project against competitors under identical crawl settings.
+    tool: "marketingovo_compare_start",
+    body: `Compare an Marketingovo project against competitors under identical crawl settings.
 
-1. Call \`agentseo_compare_start\` with the project and the competitor URLs in
+1. Call \`marketingovo_compare_start\` with the project and the competitor URLs in
    $ARGUMENTS. Ask which project is meant if it is ambiguous — never guess, and
    never substitute a competitor URL the user did not give you.
-2. Poll \`agentseo_run_get\` until the run finishes.
+2. Poll \`marketingovo_run_get\` until the run finishes.
 3. Report only differences the run actually measured. Separate structural gaps
    from content gaps, and state which competitor pages were not reachable.
-4. Use \`agentseo_run_evidence\` to show the rows behind a claimed gap rather
+4. Use \`marketingovo_run_evidence\` to show the rows behind a claimed gap rather
    than describing it.
 
-Do not infer a competitor's traffic or rankings; AGENTseo does not measure them.`,
+Do not infer a competitor's traffic or rankings; Marketingovo does not measure them.`,
   },
   {
     file: "seo-plan.md",
     description: "Build a content plan from seed topics.",
-    tool: "agentseo_content_plan_start",
-    body: `Build an AGENTseo content plan from the seed topics in $ARGUMENTS.
+    tool: "marketingovo_content_plan_start",
+    body: `Build an Marketingovo content plan from the seed topics in $ARGUMENTS.
 
-1. Call \`agentseo_content_plan_start\` with up to ten seeds for the project
+1. Call \`marketingovo_content_plan_start\` with up to ten seeds for the project
    named in $ARGUMENTS. Ask which project is meant if it is ambiguous — never
    guess.
-2. Poll \`agentseo_run_get\` until it finishes.
+2. Poll \`marketingovo_run_get\` until it finishes.
 3. Present clusters with their supporting keyword evidence. Mark any cluster
    whose demand signal is unavailable as unavailable — not as zero.
 4. Do not invent a publishing cadence, word count, or traffic projection. If the
@@ -93,12 +96,12 @@ Do not infer a competitor's traffic or rankings; AGENTseo does not measure them.
   {
     file: "seo-keywords.md",
     description: "Research keyword demand and intent for a seed.",
-    tool: "agentseo_keyword_research_start",
+    tool: "marketingovo_keyword_research_start",
     body: `Research keyword demand for the seed in $ARGUMENTS.
 
-1. Call \`agentseo_keyword_research_start\` for the project named in
+1. Call \`marketingovo_keyword_research_start\` for the project named in
    $ARGUMENTS. Ask which project is meant if it is ambiguous — never guess.
-2. Poll \`agentseo_run_get\` until it finishes.
+2. Poll \`marketingovo_run_get\` until it finishes.
 3. Report intent classification and momentum with the evidence behind each.
    Name the configured sources; if a source is not connected, say so.
 4. Do not invent search volume. Autocomplete breadth is not demand, and a
@@ -108,10 +111,10 @@ Do not infer a competitor's traffic or rankings; AGENTseo does not measure them.
   {
     file: "seo-status.md",
     description: "Read schedules, recent runs, and runtime health.",
-    tool: "agentseo_monitoring_status",
-    body: `Report AGENTseo monitoring status.
+    tool: "marketingovo_monitoring_status",
+    body: `Report Marketingovo monitoring status.
 
-1. Call \`agentseo_monitoring_status\`.
+1. Call \`marketingovo_monitoring_status\`.
 2. Summarize schedules, recent run outcomes, and runtime health.
 3. Flag failed or partial runs explicitly. Change nothing — this is read-only.`,
   },
@@ -123,16 +126,16 @@ Do not infer a competitor's traffic or rankings; AGENTseo does not measure them.
 
 const mcpServerEntry = {
   command: "node",
-  args: ["./dist/agentseo-mcp.mjs"],
+  args: ["./dist/marketingovo-mcp.mjs"],
   cwd: ".",
 };
 
 const claudePluginManifest = {
-  name: "agentseo",
+  name: "marketingovo",
   version,
   description: DESCRIPTION,
   author: AUTHOR,
-  homepage: "https://github.com/MaxJafar/AGENTseo",
+  homepage: "https://github.com/MaxJafar/marketingovo",
   repository: REPOSITORY,
   license: rootManifest.license,
   keywords: ["seo", "marketing", "crawler", "search-console", "analytics"],
@@ -142,7 +145,7 @@ const claudePluginManifest = {
 };
 
 const marketplaceManifest = {
-  name: "agentseo",
+  name: "marketingovo",
   owner: AUTHOR,
   metadata: {
     description: "Local-first, evidence-based SEO tooling for coding agents.",
@@ -150,12 +153,12 @@ const marketplaceManifest = {
   },
   plugins: [
     {
-      name: "agentseo",
-      source: "./plugins/claude/agentseo",
+      name: "marketingovo",
+      source: "./plugins/claude/marketingovo",
       description: DESCRIPTION,
       version,
       author: AUTHOR,
-      homepage: "https://github.com/MaxJafar/AGENTseo",
+      homepage: "https://github.com/MaxJafar/marketingovo",
       license: rootManifest.license,
       keywords: ["seo", "marketing", "crawler", "search-console", "analytics"],
     },
@@ -166,25 +169,25 @@ const marketplaceManifest = {
 // bridge rather than a bundled copy, so there is nothing to build first.
 const stdioServer = {
   command: "npx",
-  args: ["-y", "@agentseoapp/mcp", "agentseo-mcp"],
+  args: ["-y", "@marketingovo/mcp", "marketingovo-mcp"],
 };
 
 const editorConfigs = [
   {
     file: "integrations/cursor.mcp.json",
-    body: { mcpServers: { agentseo: stdioServer } },
+    body: { mcpServers: { marketingovo: stdioServer } },
   },
   {
     file: "integrations/vscode.mcp.json",
-    body: { servers: { agentseo: { type: "stdio", ...stdioServer } } },
+    body: { servers: { marketingovo: { type: "stdio", ...stdioServer } } },
   },
   {
     file: "integrations/claude-code.mcp.json",
-    body: { mcpServers: { agentseo: stdioServer } },
+    body: { mcpServers: { marketingovo: stdioServer } },
   },
   {
     file: "integrations/generic.mcp.json",
-    body: { mcpServers: { agentseo: stdioServer } },
+    body: { mcpServers: { marketingovo: stdioServer } },
   },
 ];
 
@@ -195,18 +198,18 @@ const json = (value) => `${JSON.stringify(value, null, 2)}\n`;
 const outputs = new Map();
 
 outputs.set(
-  "plugins/claude/agentseo/.claude-plugin/plugin.json",
+  "plugins/claude/marketingovo/.claude-plugin/plugin.json",
   json(claudePluginManifest),
 );
 outputs.set(
-  "plugins/claude/agentseo/.mcp.json",
-  json({ mcpServers: { agentseo: mcpServerEntry } }),
+  "plugins/claude/marketingovo/.mcp.json",
+  json({ mcpServers: { marketingovo: mcpServerEntry } }),
 );
 outputs.set(".claude-plugin/marketplace.json", json(marketplaceManifest));
 
 for (const command of COMMANDS) {
   outputs.set(
-    `plugins/claude/agentseo/commands/${command.file}`,
+    `plugins/claude/marketingovo/commands/${command.file}`,
     `---\ndescription: ${command.description}\n---\n\n${command.body}\n`,
   );
 }
@@ -223,8 +226,8 @@ for (const config of editorConfigs) {
 outputs.set(
   "adapters/openclaw/openclaw.plugin.json",
   json({
-    id: "agentseo",
-    name: "AGENTseo",
+    id: "marketingovo",
+    name: "Marketingovo",
     description:
       "Run local SEO audits, comparisons, keyword research, content plans, evidence inspection, and monitoring through bounded workflow-level tools.",
     version,
@@ -235,11 +238,11 @@ outputs.set(
         serverUrl: {
           type: "string",
           default: "http://127.0.0.1:3210/api/v1",
-          description: "AGENTseo loopback API URL.",
+          description: "Marketingovo loopback API URL.",
         },
         tokenFile: {
           type: "string",
-          description: "Path to the local AGENTseo service-token file.",
+          description: "Path to the local Marketingovo service-token file.",
         },
         timeoutMs: {
           type: "number",
@@ -275,7 +278,10 @@ for (const skill of await readdir(sharedSkills, { withFileTypes: true })) {
     join(sharedSkills, skill.name, "SKILL.md"),
     "utf8",
   );
-  for (const host of ["plugins/claude/agentseo", "plugins/codex/agentseo"]) {
+  for (const host of [
+    "plugins/claude/marketingovo",
+    "plugins/codex/marketingovo",
+  ]) {
     outputs.set(`${host}/skills/${skill.name}/SKILL.md`, source);
   }
 }

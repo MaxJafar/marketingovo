@@ -5,7 +5,7 @@ import { validateUpgradeLifecycleEvidence } from "./upgrade-baseline-policy.mjs"
 
 export const RELEASE_VERIFICATION_SCHEMA_VERSION = 2;
 
-export const CANONICAL_RELEASE_REPOSITORY = "MaxJafar/AGENTseo";
+export const CANONICAL_RELEASE_REPOSITORY = "MaxJafar/marketingovo";
 
 export function releasePlatform(target) {
   if (/apple-darwin$/u.test(target)) return "macos";

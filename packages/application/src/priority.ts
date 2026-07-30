@@ -1,4 +1,4 @@
-import type { Action, Effort, Severity } from "@agentseoapp/contracts";
+import type { Action, Effort, Severity } from "@marketingovo/contracts";
 
 export interface PriorityV1Input {
   severity: Severity | number;

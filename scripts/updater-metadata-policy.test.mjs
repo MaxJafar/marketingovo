@@ -15,16 +15,18 @@ import {
 } from "./updater-metadata-policy.mjs";
 
 async function fixture() {
-  const assetRoot = await mkdtemp(join(tmpdir(), "agentseo-updater-metadata-"));
+  const assetRoot = await mkdtemp(
+    join(tmpdir(), "marketingovo-updater-metadata-"),
+  );
   const version = "1.0.0";
   const records = [];
   for (const specification of UPDATER_TARGETS) {
     const payloadPath =
       specification.platform === "macos"
-        ? "macos/AGENTseo.app.tar.gz"
+        ? "macos/Marketingovo.app.tar.gz"
         : specification.platform === "windows"
-          ? "msi/AGENTseo.msi"
-          : "appimage/AGENTseo.AppImage";
+          ? "msi/Marketingovo.msi"
+          : "appimage/Marketingovo.AppImage";
     const signaturePath = `${payloadPath}.sig`;
     const payloadName = releaseAssetName(specification.target, payloadPath);
     const signatureName = releaseAssetName(specification.target, signaturePath);
@@ -85,7 +87,7 @@ test("static updater metadata covers every canonical target with verified bytes"
     assert.equal(platform.signature, "A".repeat(88));
     assert.match(
       platform.url,
-      /^https:\/\/github\.com\/MaxJafar\/AGENTseo\/releases\/download\/v1\.0\.0\//u,
+      /^https:\/\/github\.com\/MaxJafar\/marketingovo\/releases\/download\/v1\.0\.0\//u,
     );
   }
 });
@@ -138,9 +140,9 @@ test("updater metadata refuses a non-canonical publication repository", async ()
     buildUpdaterMetadata({
       records,
       assetRoot,
-      repository: "fork/agentseo",
+      repository: "fork/marketingovo",
       tag: `v${version}`,
     }),
-    /can only target MaxJafar\/AGENTseo/u,
+    /can only target MaxJafar\/marketingovo/u,
   );
 });

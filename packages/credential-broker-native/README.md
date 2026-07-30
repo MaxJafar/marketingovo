@@ -8,4 +8,4 @@ Manager, or Linux Secret Service through the platform-native `keyring` backend.
 Secrets are never accepted as command-line arguments or environment variables.
 The JavaScript client sends them over a private child-process pipe and redacts
 broker errors before structured logging. Headless environments use the separate
-Argon2id + AES-256-GCM vault in `@agentseoapp/credentials`.
+Argon2id + AES-256-GCM vault in `@marketingovo/credentials`.

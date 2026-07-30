@@ -1,7 +1,7 @@
 {
-  "name": "@agentseoapp/contracts",
+  "name": "@marketingovo/contracts",
   "version": "1.0.0",
-  "description": "Runtime-validated public contracts for AGENTseo",
+  "description": "Runtime-validated public contracts for Marketingovo",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,

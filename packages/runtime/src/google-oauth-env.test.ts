@@ -9,7 +9,7 @@ describe("Google desktop OAuth environment compatibility", () => {
 
   it("prefers explicit configuration, then the canonical environment name", () => {
     vi.stubEnv(
-      "AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID",
+      "MARKETINGOVO_GOOGLE_DESKTOP_CLIENT_ID",
       "canonical-client.apps.googleusercontent.com",
     );
     vi.stubEnv(
@@ -36,7 +36,7 @@ describe("Google desktop OAuth environment compatibility", () => {
   it("warns once per selected legacy name without logging either value", () => {
     const legacyValue = "legacy-client-value-must-not-be-logged";
     const irregularValue = "irregular-client-value-must-not-be-logged";
-    vi.stubEnv("AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID", "");
+    vi.stubEnv("MARKETINGOVO_GOOGLE_DESKTOP_CLIENT_ID", "");
     vi.stubEnv("GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID", legacyValue);
     vi.stubEnv("GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID", irregularValue);
     const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -45,7 +45,7 @@ describe("Google desktop OAuth environment compatibility", () => {
     expect(resolveGoogleDesktopClientId()).toBe(legacyValue);
     expect(warning).toHaveBeenCalledTimes(1);
     expect(warning).toHaveBeenLastCalledWith(
-      "[agentseo] env GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID is deprecated; use AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID instead",
+      "[marketingovo] env GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID is deprecated; use MARKETINGOVO_GOOGLE_DESKTOP_CLIENT_ID instead",
     );
 
     vi.stubEnv("GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID", "");
@@ -53,7 +53,7 @@ describe("Google desktop OAuth environment compatibility", () => {
     expect(resolveGoogleDesktopClientId()).toBe(irregularValue);
     expect(warning).toHaveBeenCalledTimes(2);
     expect(warning).toHaveBeenLastCalledWith(
-      "[agentseo] env GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID is deprecated; use AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID instead",
+      "[marketingovo] env GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID is deprecated; use MARKETINGOVO_GOOGLE_DESKTOP_CLIENT_ID instead",
     );
     expect(JSON.stringify(warning.mock.calls)).not.toContain(legacyValue);
     expect(JSON.stringify(warning.mock.calls)).not.toContain(irregularValue);

@@ -1,8 +1,8 @@
 {
-  "name": "agentseo",
+  "name": "marketingovo",
   "owner": {
-    "name": "AGENTseo",
-    "url": "https://github.com/MaxJafar/AGENTseo"
+    "name": "Marketingovo",
+    "url": "https://github.com/MaxJafar/marketingovo"
   },
   "metadata": {
     "description": "Local-first, evidence-based SEO tooling for coding agents.",
@@ -10,15 +10,15 @@
   },
   "plugins": [
     {
-      "name": "agentseo",
-      "source": "./plugins/claude/agentseo",
+      "name": "marketingovo",
+      "source": "./plugins/claude/marketingovo",
       "description": "Turn local crawl, Search Console, GA4, performance, and SERP evidence into prioritized SEO actions.",
       "version": "1.0.0",
       "author": {
-        "name": "AGENTseo",
-        "url": "https://github.com/MaxJafar/AGENTseo"
+        "name": "Marketingovo",
+        "url": "https://github.com/MaxJafar/marketingovo"
       },
-      "homepage": "https://github.com/MaxJafar/AGENTseo",
+      "homepage": "https://github.com/MaxJafar/marketingovo",
       "license": "Apache-2.0",
       "keywords": [
         "seo",

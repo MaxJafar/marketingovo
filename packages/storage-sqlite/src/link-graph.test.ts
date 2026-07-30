@@ -8,8 +8,8 @@ describe("immutable internal-link graph", () => {
   it("normalizes aliases and serves bounded inlink and outlink evidence", () => {
     const database = new AgentSeoDatabase({
       path: join(
-        mkdtempSync(join(tmpdir(), "agentseo-link-db-")),
-        "agentseo.db",
+        mkdtempSync(join(tmpdir(), "marketingovo-link-db-")),
+        "marketingovo.db",
       ),
     });
     try {

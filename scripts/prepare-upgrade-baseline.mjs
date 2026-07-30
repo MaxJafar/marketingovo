@@ -50,11 +50,11 @@ if (currentTag !== `v${currentVersion}`) {
   );
 }
 
-const baselineTag = process.env.AGENTSEO_UPGRADE_BASELINE_TAG?.trim();
+const baselineTag = process.env.MARKETINGOVO_UPGRADE_BASELINE_TAG?.trim();
 if (!baselineTag) {
   if (stableRelease(currentVersion)) {
     throw new Error(
-      "AGENTSEO_UPGRADE_BASELINE_TAG is required for a stable native release",
+      "MARKETINGOVO_UPGRADE_BASELINE_TAG is required for a stable native release",
     );
   }
   await mkdir(resolve(output, ".."), { recursive: true, mode: 0o755 });
@@ -188,7 +188,7 @@ if (selected.signature) {
     {
       env: {
         ...process.env,
-        AGENTSEO_TAURI_UPDATER_PUBLIC_KEY: updaterPublicKey,
+        MARKETINGOVO_TAURI_UPDATER_PUBLIC_KEY: updaterPublicKey,
       },
     },
   );

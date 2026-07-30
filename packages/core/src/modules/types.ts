@@ -1,4 +1,4 @@
-// Module interface — the contract every agentseo module must satisfy.
+// Module interface — the contract every marketingovo module must satisfy.
 //
 // A module is a self-contained, independently testable, independently
 // composable unit of SEO work. The composer (src/core/composer.ts,

@@ -16,7 +16,7 @@ describe("EncryptedFileCredentialStore", () => {
     "round-trips an authenticated secret without writing plaintext",
     async () => {
       const path = join(
-        mkdtempSync(join(tmpdir(), "agentseo-vault-")),
+        mkdtempSync(join(tmpdir(), "marketingovo-vault-")),
         "vault.json",
       );
       const store = new EncryptedFileCredentialStore(
@@ -38,7 +38,7 @@ describe("EncryptedFileCredentialStore", () => {
     "detects a wrong master password",
     async () => {
       const path = join(
-        mkdtempSync(join(tmpdir(), "agentseo-vault-")),
+        mkdtempSync(join(tmpdir(), "marketingovo-vault-")),
         "vault.json",
       );
       const ref = { provider: "gsc", account: "default", kind: "oauth" };
@@ -60,7 +60,7 @@ describe("EncryptedFileCredentialStore", () => {
     "stores a versioned OAuth token set with an absolute expiry only in the vault",
     async () => {
       const path = join(
-        mkdtempSync(join(tmpdir(), "agentseo-vault-")),
+        mkdtempSync(join(tmpdir(), "marketingovo-vault-")),
         "vault.json",
       );
       const store = new EncryptedFileCredentialStore(

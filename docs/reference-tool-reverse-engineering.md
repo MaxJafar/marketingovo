@@ -1,8 +1,8 @@
 # Reference-tool reverse engineering
 
 This document records the license-safe behavioral audit used to improve Golem
-SEO AGENTseo. It is an engineering decision record, not a claim that
-the referenced projects endorse AGENTseo.
+SEO Marketingovo. It is an engineering decision record, not a claim that
+the referenced projects endorse Marketingovo.
 
 Snapshot date: **2026-07-15**. Each repository was inspected at the exact commit
 listed below. Golem's implementation remains TypeScript/ELv2 and follows its
@@ -19,7 +19,7 @@ license compatibility.
   than copied file-for-file.
 - AGPL and GPL references were used only to understand observable behavior and
   workflow design. No source, tests, text, or assets from those repositories
-  were copied into AGENTseo.
+  were copied into Marketingovo.
 - Deployment-specific container and Cloudflare mechanics were excluded by product
   policy.
 - A heuristic from another tool is not automatically truth. Golem exposes the
@@ -27,12 +27,12 @@ license compatibility.
 
 ## Reference matrix
 
-| Reference                                                                                                     | Snapshot and license | Strongest mechanics                                                                                                                                | Decision in AGENTseo                                                                                                                                                                                                                                                                                           |
+| Reference                                                                                                     | Snapshot and license | Strongest mechanics                                                                                                                                | Decision in Marketingovo                                                                                                                                                                                                                                                                                       |
 | ------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Open SEO](https://github.com/every-app/open-seo/tree/61c0b0c65791b855d83cdc5d0f299a8c7b87527d)               | `61c0b0c`, MIT       | Provider-centric research workflows, actual DataForSEO cost accounting, explicit data-source routing, reusable project context, agent/MCP surfaces | **Adopted now through Golem contracts:** provider economics and actual DataForSEO task cost; versioned business/SEO profiles; append-only marketer journal; read-only MCP context; secret-safe `.agentseo` transfer. **Excluded:** original deployment and hosted billing code.                                |
+| [Open SEO](https://github.com/every-app/open-seo/tree/61c0b0c65791b855d83cdc5d0f299a8c7b87527d)               | `61c0b0c`, MIT       | Provider-centric research workflows, actual DataForSEO cost accounting, explicit data-source routing, reusable project context, agent/MCP surfaces | **Adopted now through Golem contracts:** provider economics and actual DataForSEO task cost; versioned business/SEO profiles; append-only marketer journal; read-only MCP context; secret-safe `.marketingovo` transfer. **Excluded:** original deployment and hosted billing code.                            |
 | [Seonaut](https://github.com/stjudewashere/seonaut/tree/880b312c28fab8b0bf7fe4f9449dc4746dbb82ff)             | `880b312`, MIT       | Persistent crawl/report model, small composable reporters, replay/archive workflow, deep technical rule coverage                                   | **Adopted now:** usable viewport, duplicate DOM id, large DOM, image dimensions/fallback, richer hreflang, click-depth diagnostics, idempotent local run replay, and evidence-based archive comparison with configuration provenance.                                                                          |
 | [Claude SEO](https://github.com/AgricIDaniel/claude-seo/tree/6cf1ea9fe4c2088b2ad3089797f846850fd66164)        | `6cf1ea9`, MIT       | Goal router, evidence-first audit discipline, layered outputs, quality gates, explicit limitations, dependency-aware action planning               | **Adopted now:** Golem's Codex marketer skill observes before scoring, states assumptions, challenges contradictory evidence, orders gating constraints, and defines success and failure conditions.                                                                                                           |
-| [SiteInspector](https://github.com/siteinspector/siteinspector/tree/7493e509cc11420f7f31ee17a959478d78ac580c) | `7493e50`, AGPL-3.0  | Custom rules, false-positive adjudication, crawl sessions/cancellation, content QA, shareable report links                                         | **Adopted now through a clean implementation:** durable, reversible issue adjudication with evidence, reasons, project isolation, audit events, future-run persistence, REST/SDK/dashboard/MCP surfaces, and `.agentseo` transfer. Public share links remain a hosted MaxJafar capability.                     |
+| [SiteInspector](https://github.com/siteinspector/siteinspector/tree/7493e509cc11420f7f31ee17a959478d78ac580c) | `7493e50`, AGPL-3.0  | Custom rules, false-positive adjudication, crawl sessions/cancellation, content QA, shareable report links                                         | **Adopted now through a clean implementation:** durable, reversible issue adjudication with evidence, reasons, project isolation, audit events, future-run persistence, REST/SDK/dashboard/MCP surfaces, and `.marketingovo` transfer. Public share links remain a hosted MaxJafar capability.                 |
 | [Greenflare](https://github.com/beb7/gflare-tk/tree/4e6e90299c96071a6e1466d49eae21e181643d75)                 | `4e6e902`, GPL-3.0   | Desktop list crawl, include/exclude controls, custom extraction workbench, inlink inspection                                                       | **Adopted now through a clean implementation:** exact URL cohort audits use the durable runtime and dashboard Expert scope. Custom extraction has immutable project revisions, draft preview through the production egress policy, bounded paginated evidence, safe regex validation, and explicit truncation. |
 | [SEO Macroscope](https://github.com/nazuke/SEOMacroscope/tree/62e67130ecbe3062ad2bca2c43686c34a2ff49c1)       | `62e6713`, GPL-3.0   | Click-path analysis, redirect-chain workbench, inlink/outlink evidence, hreflang matrix, sitemap and spreadsheet artifacts                         | **Adopted now through a clean implementation:** crawler depth and first referrer, redirect paths, reciprocal hreflang matrix, sitemap coverage, and a page-level inlink/outlink explorer are backed by immutable run evidence.                                                                                 |
 
@@ -115,7 +115,7 @@ reject secret-like material, local paths, malformed profiles, and cross-project
 run references. Audit logs contain only structural metadata. Export/import
 preserves the full history while remapping project, journal, and run identifiers.
 
-Agents read `agentseo://projects/{id}/context` before overview and issue
+Agents read `marketingovo://projects/{id}/context` before overview and issue
 resources. The resource is read-only and does not expand the exact six-tool
 workflow surface. Journal observations remain hypotheses until crawl or
 provider evidence verifies them.
@@ -145,7 +145,7 @@ Action scope and `priority-v1` is recalculated; the Action leaves live
 priorities only when every active instance in that rule/module group is
 reviewed. Nothing deletes the issue instance, old run, or evidence. Notes are bounded,
 rejected when they resemble credentials or local paths, excluded from audit-log
-payloads, and transferred in secret-screened `.agentseo` bundles. Agents receive
+payloads, and transferred in secret-screened `.marketingovo` bundles. Agents receive
 the result through a read-only project resource and cannot change it through a
 default workflow tool.
 
@@ -209,7 +209,7 @@ configuration fingerprints and named scope differences. URL additions and
 removals remain neutral because a changed crawl scope can produce either
 without proving a site regression. The same typed result is available through
 REST, generated OpenAPI SDK types, the ergonomic SDK, and
-`agentseo run compare`.
+`marketingovo run compare`.
 
 ### Immutable internal-link explorer
 
@@ -229,8 +229,8 @@ occurrence totals.
 The Pages workspace opens a page-scoped explorer with anchor and placement
 evidence, follow/nofollow counts, search, bounded pagination, honest legacy-run
 states, and direct links to the observed pages. REST, generated OpenAPI types,
-the ergonomic SDK, and `agentseo run links` expose the same server result. The
-browser never recomputes the graph, and `.agentseo` import rebuilds the index
+the ergonomic SDK, and `marketingovo run links` expose the same server result. The
+browser never recomputes the graph, and `.marketingovo` import rebuilds the index
 from the sanitized immutable snapshots.
 
 ### Immutable link-graph comparison
@@ -255,7 +255,7 @@ server-computed result.
 ### Versioned custom extraction workspace
 
 Greenflare's observable extraction workbench informed the marketer workflow,
-not the implementation. AGENTseo now owns a clean project-scoped contract for
+not the implementation. Marketingovo now owns a clean project-scoped contract for
 up to 50 ordered rules. A rule selects text, inner HTML, or one attribute and
 may apply the existing bounded regex language. CSS selector compilation,
 attribute semantics, duplicate labels, unsafe regex structures, and contract
@@ -287,7 +287,7 @@ does nothing; **Add fields to draft** materializes fresh local rule IDs only
 after review. Existing labels and the 50-rule boundary block the operation
 instead of silently renaming, dropping, or overwriting fields. Import never
 saves a revision or starts a crawl. REST, generated OpenAPI types, the ergonomic
-SDK, and `agentseo extraction templates` expose the same read-only catalog,
+SDK, and `marketingovo extraction templates` expose the same read-only catalog,
 while the normal exact-origin preview and immutable save remain authoritative.
 
 ## Explicitly not adopted
@@ -307,4 +307,4 @@ The next highest-value clean-room tranche is:
 1. design-partner validation of `link-delta-v1` classification and language
    before any link signal is allowed to affect the aggregate regression score.
 
-These are sequencing decisions, not AGENTseo paywalls.
+These are sequencing decisions, not Marketingovo paywalls.

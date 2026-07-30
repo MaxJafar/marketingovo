@@ -207,7 +207,7 @@ export function compareToHtml(c: ComparisonResult): string {
 <head>
   <meta charset="utf-8">
   <title>Competitive SEO comparison</title>
-  <meta name="generator" content="AGENTseo 0.11">
+  <meta name="generator" content="Marketingovo 0.11">
   <style>${styles}</style>
 </head>
 <body>

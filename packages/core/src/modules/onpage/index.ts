@@ -66,7 +66,11 @@ export const onpageModule: Module = {
     required: ["issues", "issueCount"],
   },
   dependsOn: ["crawl"],
-  configKeys: ["AGENTSEO_KEEP_HTML", "AGENTSEO_RENDER", "AGENTSEO_USER_AGENT"],
+  configKeys: [
+    "MARKETINGOVO_KEEP_HTML",
+    "MARKETINGOVO_RENDER",
+    "MARKETINGOVO_USER_AGENT",
+  ],
   checks: allChecks,
   async invoke(input: ModuleInput, ctx: ModuleContext): Promise<ModuleOutput> {
     const logger = (ctx.logger ?? new ConsoleLogger()).child({

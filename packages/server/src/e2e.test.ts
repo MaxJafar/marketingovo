@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { AgentSeoLocalRuntime } from "@agentseoapp/runtime";
+import { AgentSeoLocalRuntime } from "@marketingovo/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 const HOST = "127.0.0.1:3210";
@@ -65,11 +65,11 @@ describe("local API end-to-end", () => {
       topUrls: [],
     };
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-server-e2e-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-server-e2e-")),
       engine: {
         crawl: async () => ({ report, runId: "engine-run" }),
         reportToJson: (value) => JSON.stringify(value),
-        reportToHtml: () => "<!doctype html><title>AGENTseo report</title>",
+        reportToHtml: () => "<!doctype html><title>Marketingovo report</title>",
         reportToCsv: () => "url,status\nhttps://example.com/,200\n",
       },
     });
@@ -167,7 +167,7 @@ describe("local API end-to-end", () => {
       expect(artifact.statusCode).toBe(200);
       expect(artifact.headers["content-type"]).toContain(mediaType);
       expect(artifact.headers["content-disposition"]).toBe(
-        `attachment; filename=\"agentseo-${runId}.${format}\"`,
+        `attachment; filename=\"marketingovo-${runId}.${format}\"`,
       );
       expect(artifact.rawPayload.byteLength).toBeGreaterThan(20);
       expect(artifact.rawPayload.includes(Buffer.from(ENGINE_CANARY))).toBe(
@@ -186,10 +186,10 @@ describe("local API end-to-end", () => {
     });
     expect(exported.statusCode).toBe(200);
     expect(exported.headers["content-type"]).toContain(
-      "application/vnd.agentseo.project+json",
+      "application/vnd.marketingovo.project+json",
     );
     expect(exported.json()).toMatchObject({
-      format: "agentseo-project",
+      format: "marketingovo-project",
       version: 2,
       secretsIncluded: false,
     });
@@ -200,7 +200,7 @@ describe("local API end-to-end", () => {
       url: "/api/v1/import",
       headers: {
         ...headers,
-        "content-type": "application/vnd.agentseo.project+json",
+        "content-type": "application/vnd.marketingovo.project+json",
       },
       payload: exported.body,
     });
@@ -224,7 +224,7 @@ describe("local API end-to-end", () => {
       url: "/api/v1/import",
       headers: {
         ...headers,
-        "content-type": "application/vnd.agentseo.project+json",
+        "content-type": "application/vnd.marketingovo.project+json",
       },
       payload: tamperedBundle,
     });
@@ -240,7 +240,7 @@ describe("local API end-to-end", () => {
 
   it("rejects non-loopback Host headers before authentication", async () => {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-server-host-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-server-host-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
     servers.push(server);
@@ -254,7 +254,7 @@ describe("local API end-to-end", () => {
       "application/problem+json",
     );
     expect(response.json()).toMatchObject({
-      type: "urn:agentseo:problem:invalid-host",
+      type: "urn:marketingovo:problem:invalid-host",
       status: 421,
       code: "invalid_host",
     });

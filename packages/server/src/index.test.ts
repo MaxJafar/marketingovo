@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { AgentSeoLocalRuntime } from "@agentseoapp/runtime";
+import { AgentSeoLocalRuntime } from "@marketingovo/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 const HOST = "127.0.0.1:3210";
@@ -25,10 +25,10 @@ describe("local Google desktop OAuth", () => {
   }
 
   it("returns clear problem+json when the public desktop client ID is not configured", async () => {
-    vi.stubEnv("AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID", "");
+    vi.stubEnv("MARKETINGOVO_GOOGLE_DESKTOP_CLIENT_ID", "");
     vi.stubEnv("GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID", "");
     vi.stubEnv("GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID", "");
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-oauth-server-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "marketingovo-oauth-server-"));
     const runtime = new AgentSeoLocalRuntime({ dataDir });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
@@ -44,24 +44,24 @@ describe("local Google desktop OAuth", () => {
       "application/problem+json",
     );
     expect(response.json()).toMatchObject({
-      type: "urn:agentseo:problem:google-oauth-not-configured",
+      type: "urn:marketingovo:problem:google-oauth-not-configured",
       code: "google_oauth_not_configured",
       title: "Google OAuth is not configured",
       status: 503,
     });
-    expect(response.body).toContain("AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID");
+    expect(response.body).toContain("MARKETINGOVO_GOOGLE_DESKTOP_CLIENT_ID");
   });
 
   it("prefers the canonical desktop client ID over both migration aliases", async () => {
     const canonicalClientId = "canonical-client.apps.googleusercontent.com";
     const legacyClientId = "legacy-client-value-must-not-be-used";
     const irregularClientId = "irregular-client-value-must-not-be-used";
-    vi.stubEnv("AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID", canonicalClientId);
+    vi.stubEnv("MARKETINGOVO_GOOGLE_DESKTOP_CLIENT_ID", canonicalClientId);
     vi.stubEnv("GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID", legacyClientId);
     vi.stubEnv("GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID", irregularClientId);
     const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-oauth-precedence-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-oauth-precedence-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
@@ -85,7 +85,7 @@ describe("local Google desktop OAuth", () => {
   });
 
   it("uses a random loopback callback, persists safe metadata, and never serializes tokens", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-oauth-server-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "marketingovo-oauth-server-"));
     const runtime = new AgentSeoLocalRuntime({ dataDir });
     const now = Date.now();
     const accessToken = "access-token-must-never-leak";
@@ -149,7 +149,7 @@ describe("local Google desktop OAuth", () => {
     const callbackResponse = await fetch(callback, { redirect: "error" });
     expect(callbackResponse.status).toBe(200);
     const callbackBody = await callbackResponse.text();
-    expect(callbackBody).toContain("<title>AGENTseo connected</title>");
+    expect(callbackBody).toContain("<title>Marketingovo connected</title>");
     expect(callbackBody).not.toContain("Golem SEO connected");
     expect(callbackBody).not.toContain(accessToken);
     expect(callbackBody).not.toContain(refreshToken);
@@ -159,7 +159,7 @@ describe("local Google desktop OAuth", () => {
     expect(replayResponse.status).toBe(410);
     const replayBody = await replayResponse.text();
     expect(JSON.parse(replayBody)).toMatchObject({
-      type: "urn:agentseo:problem:oauth-transaction-replayed",
+      type: "urn:marketingovo:problem:oauth-transaction-replayed",
       code: "oauth_transaction_replayed",
       status: 410,
     });
@@ -193,7 +193,7 @@ describe("local Google desktop OAuth", () => {
     const dashboardResponse = await server.app.inject({
       method: "GET",
       url: "/api/v1/integrations",
-      headers: { ...headers, "x-agentseo-client": "dashboard" },
+      headers: { ...headers, "x-marketingovo-client": "dashboard" },
     });
     for (const serialized of [
       integrationsResponse.body,
@@ -204,14 +204,14 @@ describe("local Google desktop OAuth", () => {
       expect(serialized).not.toContain("authorization-code");
       expect(serialized).not.toContain("secretRef");
     }
-    const databaseBytes = readFileSync(join(dataDir, "agentseo.db"));
+    const databaseBytes = readFileSync(join(dataDir, "marketingovo.db"));
     expect(databaseBytes.includes(Buffer.from(accessToken))).toBe(false);
     expect(databaseBytes.includes(Buffer.from(refreshToken))).toBe(false);
   });
 
   it("validates and isolates connector configuration for the selected project", async () => {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-config-server-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-config-server-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
@@ -253,7 +253,7 @@ describe("local Google desktop OAuth", () => {
 
   it("exposes the PageSpeed API key as optional to the dashboard", async () => {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-pagespeed-dashboard-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-pagespeed-dashboard-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
@@ -263,7 +263,7 @@ describe("local Google desktop OAuth", () => {
       url: "/api/v1/integrations",
       headers: {
         ...(await authenticatedHeaders(server)),
-        "x-agentseo-client": "dashboard",
+        "x-marketingovo-client": "dashboard",
       },
     });
 
@@ -303,7 +303,9 @@ describe("local Google desktop OAuth", () => {
         ),
     );
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-provider-test-server-")),
+      dataDir: mkdtempSync(
+        join(tmpdir(), "marketingovo-provider-test-server-"),
+      ),
       integrationFetch: providerFetch,
     });
     const server = await createLocalServer({ runtime, port: 3210 });
@@ -402,7 +404,9 @@ describe("dashboard bootstrap tickets", () => {
   });
 
   it("requires the service token to issue short-lived, one-time tickets", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-bootstrap-server-"));
+    const dataDir = mkdtempSync(
+      join(tmpdir(), "marketingovo-bootstrap-server-"),
+    );
     const runtime = new AgentSeoLocalRuntime({ dataDir });
     let now = Date.now();
     const server = await createLocalServer({
@@ -447,14 +451,14 @@ describe("dashboard bootstrap tickets", () => {
       ? setCookieHeader
       : [String(setCookieHeader)];
     expect(
-      setCookies.some((cookie) => cookie.startsWith("agentseo_session=")),
+      setCookies.some((cookie) => cookie.startsWith("marketingovo_session=")),
     ).toBe(true);
     expect(
-      setCookies.some((cookie) => cookie.startsWith("agentseo_session=")),
+      setCookies.some((cookie) => cookie.startsWith("marketingovo_session=")),
     ).toBe(true);
     const session = exchanged.json() as { csrf: string };
     const cookie = setCookies
-      .find((value) => value.startsWith("agentseo_session="))!
+      .find((value) => value.startsWith("marketingovo_session="))!
       .split(";", 1)[0]!;
 
     const sessionCannotMint = await server.app.inject({
@@ -464,7 +468,7 @@ describe("dashboard bootstrap tickets", () => {
         host: HOST,
         cookie,
         origin: "http://127.0.0.1:3210",
-        "x-agentseo-csrf": session.csrf,
+        "x-marketingovo-csrf": session.csrf,
       },
     });
     expect(sessionCannotMint.statusCode).toBe(401);
@@ -500,7 +504,7 @@ describe("dashboard bootstrap tickets", () => {
 
   it("accepts only the canonical dashboard identifiers and rejects the retired aliases", async () => {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-session-identity-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-session-identity-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
@@ -532,21 +536,21 @@ describe("dashboard bootstrap tickets", () => {
       setCookies.filter((value) => value.includes("_session=")),
     ).toHaveLength(1);
     expect(
-      setCookies.some((value) => value.startsWith("agentseo_session=")),
+      setCookies.some((value) => value.startsWith("marketingovo_session=")),
     ).toBe(true);
     expect(setCookies.some((value) => value.startsWith("golem_session="))).toBe(
       false,
     );
 
     const sessionValue = setCookies
-      .find((value) => value.startsWith("agentseo_session="))!
+      .find((value) => value.startsWith("marketingovo_session="))!
       .split(";", 1)[0]!
-      .slice("agentseo_session=".length);
+      .slice("marketingovo_session=".length);
 
     const canonicalSession = await server.app.inject({
       method: "GET",
       url: "/api/v1/session",
-      headers: { host: HOST, cookie: `agentseo_session=${sessionValue}` },
+      headers: { host: HOST, cookie: `marketingovo_session=${sessionValue}` },
     });
     expect(canonicalSession.statusCode).toBe(200);
 
@@ -563,9 +567,9 @@ describe("dashboard bootstrap tickets", () => {
       url: "/api/v1/projects",
       headers: {
         host: HOST,
-        cookie: `agentseo_session=${sessionValue}`,
+        cookie: `marketingovo_session=${sessionValue}`,
         origin: "http://127.0.0.1:3210",
-        "x-agentseo-csrf": session.csrf,
+        "x-marketingovo-csrf": session.csrf,
       },
       payload: {
         name: "Canonical session project",
@@ -580,7 +584,7 @@ describe("dashboard bootstrap tickets", () => {
       url: "/api/v1/projects",
       headers: {
         host: HOST,
-        cookie: `agentseo_session=${sessionValue}`,
+        cookie: `marketingovo_session=${sessionValue}`,
         origin: "http://127.0.0.1:3210",
         "x-golem-csrf": session.csrf,
       },
@@ -596,7 +600,7 @@ describe("dashboard bootstrap tickets", () => {
     const canonicalDashboard = await server.app.inject({
       method: "GET",
       url: "/api/v1/runs",
-      headers: { ...serviceHeaders, "x-agentseo-client": "dashboard" },
+      headers: { ...serviceHeaders, "x-marketingovo-client": "dashboard" },
     });
     expect(canonicalDashboard.json()).toHaveProperty("meta");
 
@@ -610,7 +614,7 @@ describe("dashboard bootstrap tickets", () => {
 
   it("publishes exactly one canonical session security scheme", async () => {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-openapi-identity-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-openapi-identity-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
@@ -628,15 +632,15 @@ describe("dashboard bootstrap tickets", () => {
       };
     };
     expect(document.info).toEqual({
-      title: "AGENTseo Local API",
+      title: "Marketingovo Local API",
       version: "1.0.0",
-      description: "Loopback API for the local-first AGENTseo application",
+      description: "Loopback API for the local-first Marketingovo application",
     });
     expect(document.components.securitySchemes.localServiceToken).toMatchObject(
-      { bearerFormat: "AGENTseo local service token" },
+      { bearerFormat: "Marketingovo local service token" },
     );
     expect(document.components.securitySchemes.localSession).toMatchObject({
-      name: "agentseo_session",
+      name: "marketingovo_session",
     });
     expect(document.components.securitySchemes).not.toHaveProperty(
       "legacyLocalSession",
@@ -644,13 +648,15 @@ describe("dashboard bootstrap tickets", () => {
   });
 
   it("serves the bundled dashboard index without registering the root route twice", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-dashboard-server-"));
+    const dataDir = mkdtempSync(
+      join(tmpdir(), "marketingovo-dashboard-server-"),
+    );
     const dashboardDir = mkdtempSync(
-      join(tmpdir(), "agentseo-dashboard-assets-"),
+      join(tmpdir(), "marketingovo-dashboard-assets-"),
     );
     writeFileSync(
       join(dashboardDir, "index.html"),
-      "<!doctype html><title>AGENTseo</title>",
+      "<!doctype html><title>Marketingovo</title>",
     );
     const runtime = new AgentSeoLocalRuntime({ dataDir });
     const server = await createLocalServer({
@@ -667,7 +673,7 @@ describe("dashboard bootstrap tickets", () => {
       headers: { host: HOST },
     });
     expect(response.statusCode).toBe(200);
-    expect(response.body).toContain("<title>AGENTseo</title>");
+    expect(response.body).toContain("<title>Marketingovo</title>");
   });
 });
 
@@ -685,7 +691,7 @@ describe("hosted service independence", () => {
     });
     vi.stubGlobal("fetch", hostedFetch);
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-local-server-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-local-server-")),
     });
     const server = await createLocalServer({
       runtime,
@@ -739,8 +745,9 @@ describe("hosted service independence", () => {
     expect(capabilities.json()).toMatchObject({
       hosted: {
         available: false,
-        url: "urn:agentseo:hosted-unavailable",
-        message: "AGENTseo is local-first; no hosted service is configured.",
+        url: "urn:marketingovo:hosted-unavailable",
+        message:
+          "Marketingovo is local-first; no hosted service is configured.",
       },
     });
 

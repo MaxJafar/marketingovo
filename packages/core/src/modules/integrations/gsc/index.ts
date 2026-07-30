@@ -53,7 +53,7 @@ export const gscModule: Module = {
     required: ["rows"],
   },
   dependsOn: [],
-  configKeys: ["AGENTSEO_GSC_SITE"],
+  configKeys: ["MARKETINGOVO_GSC_SITE"],
   async invoke(input: ModuleInput, ctx: ModuleContext): Promise<ModuleOutput> {
     const logger = (ctx.logger ?? new ConsoleLogger()).child({ module: "gsc" });
     const accessToken =

@@ -157,8 +157,8 @@ export function AuditsPage() {
           <div>
             <h2>Audit an exact URL cohort</h2>
             <p>
-              Paste one absolute URL per line. AGENTseo crawls only this list
-              and keeps each URL as a seed, which is useful for migrations,
+              Paste one absolute URL per line. Marketingovo crawls only this
+              list and keeps each URL as a seed, which is useful for migrations,
               templates, QA samples, and verification runs.
             </p>
           </div>

@@ -1,4 +1,4 @@
-import type { IntegrationStatus } from "@agentseoapp/contracts";
+import type { IntegrationStatus } from "@marketingovo/contracts";
 import { connectorEgressHosts, type ConnectorId } from "./egress.js";
 import { safeConnectorFetch } from "./provider-fetch.js";
 

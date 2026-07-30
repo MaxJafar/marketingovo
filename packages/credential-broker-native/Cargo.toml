@@ -1,7 +1,7 @@
 [package]
-name = "agentseo-credential-broker"
+name = "marketingovo-credential-broker"
 version = "1.0.0"
-description = "Native credential broker for AGENTseo"
+description = "Native credential broker for Marketingovo"
 authors = ["MaxJafar"]
 edition = "2021"
 license = "Apache-2.0"

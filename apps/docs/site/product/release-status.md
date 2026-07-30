@@ -117,7 +117,7 @@ The canonical release status requires, among other checks:
 corepack enable
 pnpm install --frozen-lockfile
 pnpm check
-pnpm agentseo doctor
+pnpm marketingovo doctor
 ```
 
 Treat a failing gate as evidence, not an inconvenience to hide. Partial or unavailable source states must remain explicit in UI, API, reports, and agent summaries.
@@ -126,11 +126,11 @@ Treat a failing gate as evidence, not an inconvenience to hide. Partial or unava
 
 Use this language externally:
 
-> AGENTseo 0.11 is an active alpha for design partners and contributors. The engine and product surfaces are usable, while signed cross-platform lifecycle evidence, provider matrices, external legal review, and design-partner acceptance are progressing toward the public 1.0 gates.
+> Marketingovo 0.11 is an active alpha for design partners and contributors. The engine and product surfaces are usable, while signed cross-platform lifecycle evidence, provider matrices, external legal review, and design-partner acceptance are progressing toward the public 1.0 gates.
 
 Do not claim production certification, universal provider availability, or full replacement of a mature proprietary dataset.
 
 <p class="source-note">
-  Canonical status: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/docs/release-status.md">0.11 alpha and public 1.0 gates</a>.
-  Broader direction belongs in the <a href="https://github.com/MaxJafar/AGENTseo/blob/main/README.md">product README</a> and project planning documents.
+  Canonical status: <a href="https://github.com/MaxJafar/marketingovo/blob/main/docs/release-status.md">0.11 alpha and public 1.0 gates</a>.
+  Broader direction belongs in the <a href="https://github.com/MaxJafar/marketingovo/blob/main/README.md">product README</a> and project planning documents.
 </p>

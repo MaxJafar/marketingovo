@@ -54,7 +54,7 @@ describe("local API trust boundary", () => {
   });
 
   it("sends a token only to the canonical IPv4 loopback API", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "agentseo-sdk-token-"));
+    const directory = await mkdtemp(join(tmpdir(), "marketingovo-sdk-token-"));
     const tokenFile = join(directory, "service-token");
     await writeFile(tokenFile, "local-service-secret\n", { mode: 0o600 });
     const fetchImpl = vi.fn<typeof fetch>(async () =>

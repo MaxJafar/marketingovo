@@ -140,7 +140,9 @@ export async function loadModules(
       if (!seen.has(dep)) {
         // Soft warning: not added to errors[] so result.ok stays true.
         // eslint-disable-next-line no-console
-        console.warn(`[agentseo] module ${m.id} has unknown dependsOn: ${dep}`);
+        console.warn(
+          `[marketingovo] module ${m.id} has unknown dependsOn: ${dep}`,
+        );
       }
     }
   }
@@ -344,7 +346,7 @@ export function topoSort(modules: readonly Module[]): Module[] {
   if (skipped.length > 0) {
     // eslint-disable-next-line no-console
     console.warn(
-      `[agentseo] topoSort: skipped ${skipped.length} unknown dep(s): ${skipped.join(", ")}`,
+      `[marketingovo] topoSort: skipped ${skipped.length} unknown dep(s): ${skipped.join(", ")}`,
     );
   }
   return out;

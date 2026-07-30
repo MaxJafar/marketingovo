@@ -27,17 +27,20 @@ const startupFragmentPath = resolve(
   "src-tauri/windows/fragments/background-startup.wxs",
 );
 const startupFragment = await readFile(startupFragmentPath, "utf8");
-assert.equal(config.productName, "AGENTseo");
-assert.equal(config.identifier, "io.github.maxjafar.agentseo");
+assert.equal(config.productName, "Marketingovo");
+assert.equal(config.identifier, "io.github.maxjafar.marketingovo");
 assert.equal(config.bundle.active, true);
 assert.equal(config.bundle.createUpdaterArtifacts, true);
 assert.equal(config.bundle.publisher, "MaxJafar");
-assert.equal(config.bundle.homepage, "https://github.com/MaxJafar/AGENTseo");
+assert.equal(
+  config.bundle.homepage,
+  "https://github.com/MaxJafar/marketingovo",
+);
 assert.equal(config.bundle.license, "Apache-2.0");
 assert.equal(config.bundle.licenseFile, "../../../LICENSE");
-assert.deepEqual(config.bundle.externalBin, ["binaries/agentseo-node"]);
+assert.deepEqual(config.bundle.externalBin, ["binaries/marketingovo-node"]);
 assert.ok(
-  launcher.includes('.sidecar("agentseo-node")'),
+  launcher.includes('.sidecar("marketingovo-node")'),
   "desktop launcher must use the product-scoped Node sidecar name",
 );
 assert.ok(
@@ -45,7 +48,10 @@ assert.ok(
   "desktop launcher must never use a system-conflicting generic sidecar name",
 );
 assert.deepEqual(config.bundle.resources, ["runtime/**/*"]);
-assert.equal(config.plugins.updater.pubkey, "__AGENTSEO_UPDATER_PUBLIC_KEY__");
+assert.equal(
+  config.plugins.updater.pubkey,
+  "__MARKETINGOVO_UPDATER_PUBLIC_KEY__",
+);
 assert.deepEqual(config.plugins.updater.endpoints, [
   CANONICAL_UPDATER_ENDPOINT,
 ]);
@@ -69,7 +75,7 @@ assert.ok(
   "desktop users must have an explicit update-check opt-out",
 );
 assert.ok(
-  launcher.includes('std::env::var("AGENTSEO_AUTO_UPDATE")'),
+  launcher.includes('std::env::var("MARKETINGOVO_AUTO_UPDATE")'),
   "desktop services must expose a documented update-check policy override",
 );
 assert.match(startupShell, /id="startup-status"/u);
@@ -152,7 +158,7 @@ assert.throws(() =>
 assert.doesNotThrow(() => rejectGoogleClientSecrets({}));
 assert.throws(() =>
   rejectGoogleClientSecrets({
-    AGENTSEO_GOOGLE_DESKTOP_CLIENT_SECRET: "forbidden",
+    MARKETINGOVO_GOOGLE_DESKTOP_CLIENT_SECRET: "forbidden",
   }),
 );
 assert.throws(() =>

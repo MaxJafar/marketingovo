@@ -1,4 +1,4 @@
-// Sprint 11: `agentseo watch` end-to-end smoke (--once mode).
+// Sprint 11: `marketingovo watch` end-to-end smoke (--once mode).
 //
 // We spawn the compiled CLI with `--once` to make it run a
 // single cycle and exit, then verify:
@@ -64,7 +64,7 @@ function runCli(args: string[]): Promise<CliResult> {
 }
 
 beforeAll(async () => {
-  tmpRoot = mkdtempSync(join(tmpdir(), "agentseo-watch-"));
+  tmpRoot = mkdtempSync(join(tmpdir(), "marketingovo-watch-"));
   site = await startFixtureSite();
 }, 30_000);
 
@@ -73,11 +73,11 @@ afterAll(async () => {
   rmSync(tmpRoot, { recursive: true, force: true });
 }, 5_000);
 
-describe("agentseo watch --once (Sprint 11 smoke)", () => {
+describe("marketingovo watch --once (Sprint 11 smoke)", () => {
   it("prints usage to stderr and exits 2 when called without url", async () => {
     const r = await runCli(["watch"]);
     expect(r.exitCode).toBe(2);
-    expect(r.stderr).toMatch(/usage: agentseo watch <url>/);
+    expect(r.stderr).toMatch(/usage: marketingovo watch <url>/);
   });
 
   it("rejects NaN-producing numeric flags before starting a crawl", async () => {

@@ -3,9 +3,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { PDFDocument } from "pdf-lib";
 import { describe, expect, it, vi } from "vitest";
-import { EncryptedFileCredentialStore } from "@agentseoapp/credentials";
-import { ConsoleLogger, type Report as EngineReport } from "@agentseoapp/core";
-import { createDatabaseBackup } from "@agentseoapp/storage-sqlite";
+import { EncryptedFileCredentialStore } from "@marketingovo/credentials";
+import { ConsoleLogger, type Report as EngineReport } from "@marketingovo/core";
+import { createDatabaseBackup } from "@marketingovo/storage-sqlite";
 import { AgentSeoLocalRuntime } from "./index.js";
 
 const CANARY = "psi-runtime-canary-Z9y8X7w6V5u4";
@@ -94,7 +94,9 @@ describe("runtime secret serialization boundary", () => {
   it(
     "keeps a run credential only in the decryptable vault and out of DB, events, reports, exports, backups, and logs",
     async () => {
-      const dataDir = mkdtempSync(join(tmpdir(), "agentseo-secret-boundary-"));
+      const dataDir = mkdtempSync(
+        join(tmpdir(), "marketingovo-secret-boundary-"),
+      );
       const vaultPath = join(dataDir, "vault", "credentials.json");
       const credentialStore = new EncryptedFileCredentialStore(
         vaultPath,
@@ -187,7 +189,7 @@ describe("runtime secret serialization boundary", () => {
           expect(Buffer.from(bytes!).includes(Buffer.from(CANARY))).toBe(false);
           if (format === "pdf") {
             const pdf = await PDFDocument.load(bytes!);
-            expect(pdf.getTitle()).toBe("AGENTseo audit");
+            expect(pdf.getTitle()).toBe("Marketingovo audit");
           }
         }
 
@@ -210,9 +212,9 @@ describe("runtime secret serialization boundary", () => {
         );
         expectFileNotToContain(backup.path, CANARY);
         for (const databaseFile of [
-          join(dataDir, "agentseo.db"),
-          join(dataDir, "agentseo.db-wal"),
-          join(dataDir, "agentseo.db-shm"),
+          join(dataDir, "marketingovo.db"),
+          join(dataDir, "marketingovo.db-wal"),
+          join(dataDir, "marketingovo.db-shm"),
         ]) {
           if (existsSync(databaseFile))
             expectFileNotToContain(databaseFile, CANARY);

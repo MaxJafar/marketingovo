@@ -5,7 +5,7 @@ description: Connect provider evidence while keeping credentials write-only and 
 
 # Integrations and BYOK
 
-AGENTseo uses a bring-your-own-key model. You choose the provider, account, scopes, and local retention; the local daemon owns the credential boundary. MaxJafar can instead provide managed credentials, provider credits, centralized billing, and hosted execution.
+Marketingovo uses a bring-your-own-key model. You choose the provider, account, scopes, and local retention; the local daemon owns the credential boundary. MaxJafar can instead provide managed credentials, provider credits, centralized billing, and hosted execution.
 
 ## Connector catalog in 0.11
 
@@ -52,7 +52,7 @@ The dashboard:
 API responses and SQLite records carry a `secretRef` and masked metadata, not plaintext secret values.
 
 **Rotate credentials** replaces the write-only local value. **Revoke local
-access** deletes the saved value from AGENTseo for every local project after an
+access** deletes the saved value from Marketingovo for every local project after an
 explicit acknowledgement; non-secret per-site mappings remain available for a
 later reconnect. Local deletion cannot deactivate an API key or OAuth grant at
 the provider, so revoke it in the provider console as well when the credential
@@ -73,7 +73,7 @@ provided:
 Start the local daemon with a master password if provider credentials must survive restart:
 
 ```bash
-pnpm agentseo serve --master-password-file /absolute/path/to/password-file
+pnpm marketingovo serve --master-password-file /absolute/path/to/password-file
 ```
 
 The encrypted local vault uses Argon2id key derivation and authenticated encryption. Its directory and file permissions are restricted to the user. Without a master password or native broker, the CLI keeps the vault locked and refuses credential writes.
@@ -118,7 +118,7 @@ Research outputs use three explicit cost states:
 
 DataForSEO task costs are summed into the latest keyword-research workspace.
 SerpAPI quota usage is billable-account context but does not currently report
-an observable per-call cost, so AGENTseo never labels it `$0`.
+an observable per-call cost, so Marketingovo never labels it `$0`.
 
 ## Provider calls and privacy
 
@@ -131,13 +131,13 @@ Project exports omit secrets. Importing a project requires reconnecting integrat
 1. Open **System health** and confirm the daemon and queue are healthy.
 2. Open **Integrations** and inspect the exact state, last sync, scope, and redacted error.
 3. Use **Test connection** after credential rotation.
-4. Run `pnpm agentseo doctor` for local service and vault context.
+4. Run `pnpm marketingovo doctor` for local service and vault context.
 5. Treat provider data as unavailable until a successful test and fresh sync prove otherwise.
 
 <p class="source-note">
-  Canonical sources: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/packages/integrations/src/index.ts">connector manifests</a>,
-  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/PRIVACY.md">privacy policy</a>,
-  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/SECURITY.md">security policy</a>, and
-  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/docs/desktop-release.md">desktop runtime configuration</a>, and
-  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/README.md">project overview</a>.
+  Canonical sources: <a href="https://github.com/MaxJafar/marketingovo/blob/main/packages/integrations/src/index.ts">connector manifests</a>,
+  <a href="https://github.com/MaxJafar/marketingovo/blob/main/PRIVACY.md">privacy policy</a>,
+  <a href="https://github.com/MaxJafar/marketingovo/blob/main/SECURITY.md">security policy</a>, and
+  <a href="https://github.com/MaxJafar/marketingovo/blob/main/docs/desktop-release.md">desktop runtime configuration</a>, and
+  <a href="https://github.com/MaxJafar/marketingovo/blob/main/README.md">project overview</a>.
 </p>

@@ -1,14 +1,14 @@
 // Limit configuration. All values are loaded from env with safe defaults.
 // Never read these from argv so URLs and secrets don't leak into `ps`.
 //
-// Env var naming: primary is `AGENTSEO_*`. The historical `SCREAMINGCLAW_*`
+// Env var naming: primary is `MARKETINGOVO_*`. The historical `SCREAMINGCLAW_*`
 // names are still honored as a fallback (see src/env.ts) so existing
-// scripts and the agentseo-dashboard backend keep working without
+// scripts and the marketingovo-dashboard backend keep working without
 // changes. A one-time deprecation warning is logged per legacy name.
 
 import { envBool, envInt, envStr } from "../env.js";
 
-export const AGENTSEO_DEFAULT_USER_AGENT = "AGENTseo/1.0.0";
+export const MARKETINGOVO_DEFAULT_USER_AGENT = "Marketingovo/1.0.0";
 
 export interface Limits {
   maxUrls: number;
@@ -28,7 +28,7 @@ export interface Limits {
 }
 
 /**
- * Defensive configuration boundary, not a AGENTseo entitlement or
+ * Defensive configuration boundary, not a Marketingovo entitlement or
  * audit quota. Users choose the crawl scope that fits their machine; this
  * rejects corrupt or accidentally unbounded numeric input before allocation.
  */
@@ -53,13 +53,13 @@ export function validateMaxUrls(value: number): number {
 }
 
 function readEnvRenderMode(): "static" | "js" {
-  const raw = envStr("AGENTSEO_RENDER", "SCREAMINGCLAW_RENDER", "static");
+  const raw = envStr("MARKETINGOVO_RENDER", "SCREAMINGCLAW_RENDER", "static");
   return raw === "js" ? "js" : "static";
 }
 
 function readEnvHeaders(): Record<string, string> {
   // Format: "Key1: Value1|Key2: Value2". Empty -> no custom headers.
-  const raw = envStr("AGENTSEO_HEADERS", "SCREAMINGCLAW_HEADERS", "");
+  const raw = envStr("MARKETINGOVO_HEADERS", "SCREAMINGCLAW_HEADERS", "");
   if (!raw) return {};
   const out: Record<string, string> = {};
   for (const pair of raw.split("|")) {
@@ -75,66 +75,66 @@ function readEnvHeaders(): Record<string, string> {
 export function loadLimits(): Limits {
   return {
     maxUrls: envInt(
-      "AGENTSEO_MAX_URLS",
+      "MARKETINGOVO_MAX_URLS",
       "SCREAMINGCLAW_MAX_URLS",
       500,
       MAX_URLS_CONFIGURATION_BOUNDARY,
     ),
     maxRuntimeMs: envInt(
-      "AGENTSEO_MAX_RUNTIME_MS",
+      "MARKETINGOVO_MAX_RUNTIME_MS",
       "SCREAMINGCLAW_MAX_RUNTIME_MS",
       300_000,
       HARD_MAX_RUNTIME_MS,
     ),
     maxConcurrency: envInt(
-      "AGENTSEO_MAX_CONCURRENCY",
+      "MARKETINGOVO_MAX_CONCURRENCY",
       "SCREAMINGCLAW_MAX_CONCURRENCY",
       4,
       HARD_MAX_CONCURRENCY,
     ),
     requestsPerSecond: envInt(
-      "AGENTSEO_REQUESTS_PER_SECOND",
+      "MARKETINGOVO_REQUESTS_PER_SECOND",
       "SCREAMINGCLAW_REQUESTS_PER_SECOND",
       5,
       HARD_MAX_RPS,
     ),
     requestTimeoutMs: envInt(
-      "AGENTSEO_REQUEST_TIMEOUT_MS",
+      "MARKETINGOVO_REQUEST_TIMEOUT_MS",
       "SCREAMINGCLAW_REQUEST_TIMEOUT_MS",
       15_000,
       HARD_TIMEOUT_MS,
     ),
     maxBodyBytes: envInt(
-      "AGENTSEO_MAX_BODY_BYTES",
+      "MARKETINGOVO_MAX_BODY_BYTES",
       "SCREAMINGCLAW_MAX_BODY_BYTES",
       5 * 1024 * 1024,
       HARD_MAX_BODY_BYTES,
     ),
     maxRedirects: envInt(
-      "AGENTSEO_MAX_REDIRECTS",
+      "MARKETINGOVO_MAX_REDIRECTS",
       "SCREAMINGCLAW_MAX_REDIRECTS",
       5,
       HARD_MAX_REDIRECTS,
     ),
     userAgent: envStr(
-      "AGENTSEO_USER_AGENT",
+      "MARKETINGOVO_USER_AGENT",
       "SCREAMINGCLAW_USER_AGENT",
-      AGENTSEO_DEFAULT_USER_AGENT,
+      MARKETINGOVO_DEFAULT_USER_AGENT,
     ),
     allowPrivate: envBool(
-      "AGENTSEO_ALLOW_PRIVATE",
+      "MARKETINGOVO_ALLOW_PRIVATE",
       "SCREAMINGCLAW_ALLOW_PRIVATE",
       false,
     ),
     ignoreRobots: envBool(
-      "AGENTSEO_IGNORE_ROBOTS",
+      "MARKETINGOVO_IGNORE_ROBOTS",
       "SCREAMINGCLAW_IGNORE_ROBOTS",
       false,
     ),
     renderMode: readEnvRenderMode(),
     customHeaders: readEnvHeaders(),
     keepRawHtml: envBool(
-      "AGENTSEO_KEEP_HTML",
+      "MARKETINGOVO_KEEP_HTML",
       "SCREAMINGCLAW_KEEP_HTML",
       false,
     ),

@@ -7,7 +7,7 @@ import { acquireDataDirectoryDaemonLease } from "./daemon-lease.js";
 
 describe("data-directory daemon lease", () => {
   it("allows one writer across ports and releases ownership cleanly", () => {
-    const root = mkdtempSync(join(tmpdir(), "agentseo-daemon-lease-"));
+    const root = mkdtempSync(join(tmpdir(), "marketingovo-daemon-lease-"));
     const first = acquireDataDirectoryDaemonLease(root, 3210);
     expect(first.status).toBe("acquired");
     if (first.status !== "acquired") return;
@@ -25,7 +25,7 @@ describe("data-directory daemon lease", () => {
   });
 
   it("transactionally replaces a crashed owner without trusting a stale row", () => {
-    const root = mkdtempSync(join(tmpdir(), "agentseo-daemon-stale-"));
+    const root = mkdtempSync(join(tmpdir(), "marketingovo-daemon-stale-"));
     const initial = acquireDataDirectoryDaemonLease(root, 3210);
     expect(initial.status).toBe("acquired");
     if (initial.status !== "acquired") return;
@@ -54,7 +54,7 @@ describe("data-directory daemon lease", () => {
   });
 
   it("never steals from a live owner after a long sleep", () => {
-    const root = mkdtempSync(join(tmpdir(), "agentseo-daemon-live-"));
+    const root = mkdtempSync(join(tmpdir(), "marketingovo-daemon-live-"));
     const first = acquireDataDirectoryDaemonLease(root, 3210, {
       pid: 4444,
       now: () => 1,

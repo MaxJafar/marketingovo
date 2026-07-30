@@ -1,0 +1,24 @@
+{
+  "name": "marketingovo",
+  "version": "1.0.0",
+  "description": "Turn local crawl, Search Console, GA4, performance, and SERP evidence into prioritized SEO actions.",
+  "author": { "name": "Marketingovo" },
+  "license": "Apache-2.0",
+  "keywords": ["seo", "marketing", "crawler", "search-console", "analytics"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Marketingovo",
+    "shortDescription": "Verified SEO actions from local evidence.",
+    "longDescription": "Connect Codex to Marketingovo on localhost. Start audits, comparisons, keyword research, and content plans; inspect asynchronous runs and summarize evidence without exposing integration credentials.",
+    "developerName": "Marketingovo",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": [
+      "Audit my site and rank the five actions that matter most.",
+      "Compare my SEO health with these competitors.",
+      "Build a content plan from these seed topics."
+    ],
+    "brandColor": "#61E7B7"
+  }
+}

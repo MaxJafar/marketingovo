@@ -21,8 +21,8 @@ import {
   type AgentRunEvidenceInput,
   type AgentRunGetInput,
   type AgentRunLinksInput,
-} from "@agentseoapp/contracts/agent-tools";
-import { AgentSeoClient } from "@agentseoapp/sdk";
+} from "@marketingovo/contracts/agent-tools";
+import { AgentSeoClient } from "@marketingovo/sdk";
 
 const toOpenClawInputSchema = <Value>(schema: unknown) =>
   Type.Unsafe<Value>(schema as TSchema);
@@ -63,12 +63,12 @@ const configSchema = Type.Object(
     serverUrl: Type.Optional(
       Type.String({
         default: "http://127.0.0.1:3210/api/v1",
-        description: "AGENTseo loopback API URL.",
+        description: "Marketingovo loopback API URL.",
       }),
     ),
     tokenFile: Type.Optional(
       Type.String({
-        description: "Path to the local AGENTseo service-token file.",
+        description: "Path to the local Marketingovo service-token file.",
       }),
     ),
     timeoutMs: Type.Optional(
@@ -85,24 +85,24 @@ const configSchema = Type.Object(
 
 function defaultTokenFile(): string {
   // Keep the durable 1.x root readable until the storage migration owns the
-  // default-path cutover; the adapter's visible identity is AGENTseo.
+  // default-path cutover; the adapter's visible identity is Marketingovo.
   if (process.platform === "darwin")
     return join(
       homedir(),
       "Library",
       "Application Support",
-      "AGENTseo",
+      "Marketingovo",
       "service-token",
     );
   if (process.platform === "win32")
     return join(
       process.env.LOCALAPPDATA ?? process.env.APPDATA ?? homedir(),
-      "AGENTseo",
+      "Marketingovo",
       "service-token",
     );
   return join(
     process.env.XDG_DATA_HOME ?? join(homedir(), ".local", "share"),
-    "agentseo",
+    "marketingovo",
     "service-token",
   );
 }
@@ -120,8 +120,8 @@ function client(config: Config): Promise<AgentSeoClient> {
 }
 
 export default defineToolPlugin({
-  id: "agentseo",
-  name: "AGENTseo",
+  id: "marketingovo",
+  name: "Marketingovo",
   description:
     "Run local SEO audits, comparisons, keyword research, content plans, evidence inspection, and monitoring through bounded workflow-level tools.",
   configSchema,

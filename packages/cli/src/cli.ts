@@ -16,24 +16,24 @@ import { fileURLToPath } from "node:url";
 import type {
   ProjectContextJournalKind,
   ProjectContextProfile,
-} from "@agentseoapp/contracts";
+} from "@marketingovo/contracts";
 import {
   EncryptedFileCredentialStore,
   LockedCredentialStore,
   NativeBrokerCredentialStore,
-} from "@agentseoapp/credentials";
-import { importLegacyData } from "@agentseoapp/legacy-import";
+} from "@marketingovo/credentials";
+import { importLegacyData } from "@marketingovo/legacy-import";
 import {
   AgentSeoLocalRuntime,
   defaultDataDirectory,
-} from "@agentseoapp/runtime";
-import { AgentSeoClient } from "@agentseoapp/sdk";
-import { createLocalServer, type LocalServer } from "@agentseoapp/server";
+} from "@marketingovo/runtime";
+import { AgentSeoClient } from "@marketingovo/sdk";
+import { createLocalServer, type LocalServer } from "@marketingovo/server";
 import {
   createDatabaseBackup,
   AgentSeoDatabase,
   restoreDatabaseBackup,
-} from "@agentseoapp/storage-sqlite";
+} from "@marketingovo/storage-sqlite";
 import {
   findExistingDashboard,
   issueDashboardUrl,
@@ -171,14 +171,14 @@ function desktopRuntimeFlags(
 
 function applyDesktopRuntimeFlags(options: DesktopRuntimeFlags): void {
   if (options.chromiumExecutable) {
-    process.env.AGENTSEO_CHROME_PATH = options.chromiumExecutable;
+    process.env.MARKETINGOVO_CHROME_PATH = options.chromiumExecutable;
   }
   if (options.browserDirectory) {
     process.env.PLAYWRIGHT_BROWSERS_PATH = options.browserDirectory;
     process.env.PLAYWRIGHT_SKIP_BROWSER_GC = "1";
   }
   if (options.googleDesktopClientId) {
-    process.env.AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID =
+    process.env.MARKETINGOVO_GOOGLE_DESKTOP_CLIENT_ID =
       options.googleDesktopClientId;
   }
 }
@@ -188,7 +188,7 @@ function vaultFor(root: string, flags: Map<string, string | boolean>) {
   const brokerPath =
     typeof brokerFlag === "string"
       ? resolve(brokerFlag)
-      : readCompatibleEnvironmentVariable("AGENTSEO_CREDENTIAL_BROKER", [
+      : readCompatibleEnvironmentVariable("MARKETINGOVO_CREDENTIAL_BROKER", [
           "GOLEMSEO_CREDENTIAL_BROKER",
           "GOLEM_SEO_CREDENTIAL_BROKER",
         ]);
@@ -201,13 +201,13 @@ function vaultFor(root: string, flags: Map<string, string | boolean>) {
   const password =
     typeof passwordFile === "string"
       ? readFileSync(resolve(passwordFile), "utf8").trim()
-      : readCompatibleEnvironmentVariable("AGENTSEO_MASTER_PASSWORD", [
+      : readCompatibleEnvironmentVariable("MARKETINGOVO_MASTER_PASSWORD", [
           "GOLEMSEO_MASTER_PASSWORD",
           "GOLEM_SEO_MASTER_PASSWORD",
         ]);
   if (!password) {
     process.stderr.write(
-      "Warning: credential vault is locked. Restart with --credential-broker, --master-password-file, or AGENTSEO_MASTER_PASSWORD before connecting integrations.\n",
+      "Warning: credential vault is locked. Restart with --credential-broker, --master-password-file, or MARKETINGOVO_MASTER_PASSWORD before connecting integrations.\n",
     );
     return new LockedCredentialStore();
   }
@@ -227,7 +227,7 @@ async function serve(args: ParsedArgs): Promise<void> {
     activePort: number,
     reused: boolean,
   ): void => {
-    process.stdout.write(`AGENTseo ${VERSION}\n`);
+    process.stdout.write(`Marketingovo ${VERSION}\n`);
     process.stdout.write(`Service: ${reused ? "reused" : "started"}\n`);
     process.stdout.write(`Dashboard: ${dashboardUrl}\n`);
     process.stdout.write(`API: http://127.0.0.1:${activePort}/api/v1\n`);
@@ -253,7 +253,7 @@ async function serve(args: ParsedArgs): Promise<void> {
     });
     if (!ownerDashboard) {
       throw new Error(
-        `This data directory is owned by AGENTseo PID ${leaseAttempt.owner.pid} on port ${ownerPort}, but its authenticated API is not ready`,
+        `This data directory is owned by Marketingovo PID ${leaseAttempt.owner.pid} on port ${ownerPort}, but its authenticated API is not ready`,
       );
     }
     printResolution(ownerDashboard, ownerPort, true);
@@ -331,22 +331,23 @@ async function project(args: ParsedArgs): Promise<void> {
   if (subcommand === "create") {
     const [name, canonicalUrl] = rest;
     if (!name || !canonicalUrl)
-      throw new Error("usage: agentseo project create <name> <https-url>");
+      throw new Error("usage: marketingovo project create <name> <https-url>");
     return json(await client.projects.create({ name, canonicalUrl }));
   }
   if (subcommand === "show") {
-    if (!rest[0]) throw new Error("usage: agentseo project show <project-id>");
+    if (!rest[0])
+      throw new Error("usage: marketingovo project show <project-id>");
     return json(await client.projects.overview(rest[0]));
   }
   if (subcommand === "export") {
     const [projectId, output] = rest;
     if (!projectId || !output)
       throw new Error(
-        "usage: agentseo project export <project-id> <output.agentseo>",
+        "usage: marketingovo project export <project-id> <output.marketingovo>",
       );
     const destination = resolve(output);
-    if (!destination.endsWith(".agentseo"))
-      throw new Error("The export filename must end in .agentseo");
+    if (!destination.endsWith(".marketingovo"))
+      throw new Error("The export filename must end in .marketingovo");
     const bytes = await client.exportProject(projectId);
     writeFileSync(destination, bytes, { mode: 0o600, flag: "wx" });
     return json({ path: destination, bytes: bytes.byteLength });
@@ -354,10 +355,12 @@ async function project(args: ParsedArgs): Promise<void> {
   if (subcommand === "import") {
     const source = rest[0];
     if (!source)
-      throw new Error("usage: agentseo project import <project.agentseo>");
+      throw new Error(
+        "usage: marketingovo project import <project.marketingovo>",
+      );
     const path = resolve(source);
-    if (!path.endsWith(".agentseo"))
-      throw new Error("The import filename must end in .agentseo");
+    if (!path.endsWith(".marketingovo"))
+      throw new Error("The import filename must end in .marketingovo");
     if (!statSync(path).isFile())
       throw new Error("The import path is not a file");
     return json(await client.importProject(readFileSync(path)));
@@ -366,7 +369,7 @@ async function project(args: ParsedArgs): Promise<void> {
     const projectId = rest[0];
     if (!projectId) {
       throw new Error(
-        "usage: agentseo project delete <project-id> --confirm-name-file PATH",
+        "usage: marketingovo project delete <project-id> --confirm-name-file PATH",
       );
     }
     const confirmation = readBoundedInputFile(
@@ -387,7 +390,9 @@ async function project(args: ParsedArgs): Promise<void> {
 async function audit(args: ParsedArgs): Promise<void> {
   const projectId = args.rest[0];
   if (!projectId)
-    throw new Error("usage: agentseo audit <project-id> [--render static|js]");
+    throw new Error(
+      "usage: marketingovo audit <project-id> [--render static|js]",
+    );
   const client = await clientFor(args.flags);
   const render = args.flags.get("render");
   const run = await client.runs.start(
@@ -415,13 +420,13 @@ async function runCommand(args: ParsedArgs): Promise<void> {
           : undefined,
       ),
     );
-  if (!id) throw new Error(`usage: agentseo run ${subcommand} <run-id>`);
+  if (!id) throw new Error(`usage: marketingovo run ${subcommand} <run-id>`);
   if (subcommand === "show") return json(await client.runs.get(id));
   if (subcommand === "compare") {
     const baselineRunId = optionalStringFlag(args.flags, "baseline");
     if (!baselineRunId) {
       throw new Error(
-        "usage: agentseo run compare <current-run-id> --baseline <baseline-run-id>",
+        "usage: marketingovo run compare <current-run-id> --baseline <baseline-run-id>",
       );
     }
     return json(await client.runs.compare(id, baselineRunId));
@@ -430,7 +435,7 @@ async function runCommand(args: ParsedArgs): Promise<void> {
     const pageUrl = optionalStringFlag(args.flags, "url");
     if (!pageUrl) {
       throw new Error(
-        "usage: agentseo run links <run-id> --url <https-url> [--direction inlinks|outlinks] [--limit N] [--offset N] [--search TEXT]",
+        "usage: marketingovo run links <run-id> --url <https-url> [--direction inlinks|outlinks] [--limit N] [--offset N] [--search TEXT]",
       );
     }
     let parsedPageUrl: URL;
@@ -488,7 +493,7 @@ async function issueCommand(args: ParsedArgs): Promise<void> {
   const [subcommand = "list", projectId, fingerprint, decision] = args.rest;
   if (!projectId) {
     throw new Error(
-      "usage: agentseo issue list <project-id> | issue review <project-id> <fingerprint> <open|ignored|false-positive>",
+      "usage: marketingovo issue list <project-id> | issue review <project-id> <fingerprint> <open|ignored|false-positive>",
     );
   }
   const client = await clientFor(args.flags);
@@ -546,7 +551,7 @@ async function issueCommand(args: ParsedArgs): Promise<void> {
   if (subcommand === "review") {
     if (!fingerprint || !decision)
       throw new Error(
-        "usage: agentseo issue review <project-id> <fingerprint> <open|ignored|false-positive> [--reason-file PATH]",
+        "usage: marketingovo issue review <project-id> <fingerprint> <open|ignored|false-positive> [--reason-file PATH]",
       );
     if (!/^[a-f0-9]{16,128}$/iu.test(fingerprint))
       throw new Error("The issue fingerprint is invalid");
@@ -606,7 +611,7 @@ async function contextCommand(args: ParsedArgs): Promise<void> {
   const [subcommand = "show", projectId, kindValue] = args.rest;
   if (!projectId) {
     throw new Error(
-      "usage: agentseo context show <project-id> | update <project-id> --profile-file PATH --change-summary-file PATH | append <project-id> <observation|decision|constraint|experiment> --title-file PATH --detail-file PATH [--source-run ID]",
+      "usage: marketingovo context show <project-id> | update <project-id> --profile-file PATH --change-summary-file PATH | append <project-id> <observation|decision|constraint|experiment> --title-file PATH --detail-file PATH [--source-run ID]",
     );
   }
   const client = await clientFor(args.flags);
@@ -681,7 +686,7 @@ async function integration(args: ParsedArgs): Promise<void> {
   const client = await clientFor(args.flags);
   if (subcommand === "list") return json(await client.integrations.list());
   if (!provider)
-    throw new Error(`usage: agentseo integration ${subcommand} <provider>`);
+    throw new Error(`usage: marketingovo integration ${subcommand} <provider>`);
   if (subcommand === "test") {
     const project = args.flags.get("project");
     return json(
@@ -703,7 +708,7 @@ async function integration(args: ParsedArgs): Promise<void> {
 async function extractionCommand(args: ParsedArgs): Promise<void> {
   const [subcommand = "templates"] = args.rest;
   if (subcommand !== "templates") {
-    throw new Error("usage: agentseo extraction templates");
+    throw new Error("usage: marketingovo extraction templates");
   }
   const client = await clientFor(args.flags);
   return json(await client.extractionRules.templates());
@@ -752,7 +757,7 @@ async function migrate(args: ParsedArgs): Promise<void> {
   const source = args.rest[0];
   if (!source) {
     throw new Error(
-      "usage: agentseo migrate <legacy-project-directory> [--data-dir PATH] [--master-password-file PATH]",
+      "usage: marketingovo migrate <legacy-project-directory> [--data-dir PATH] [--master-password-file PATH]",
     );
   }
   const destination = dataDirectory(args.flags);
@@ -765,7 +770,7 @@ async function migrate(args: ParsedArgs): Promise<void> {
   const password =
     typeof passwordFile === "string"
       ? readFileSync(resolve(passwordFile), "utf8").trim()
-      : readCompatibleEnvironmentVariable("AGENTSEO_MASTER_PASSWORD", [
+      : readCompatibleEnvironmentVariable("MARKETINGOVO_MASTER_PASSWORD", [
           "GOLEMSEO_MASTER_PASSWORD",
           "GOLEM_SEO_MASTER_PASSWORD",
         ]);
@@ -793,7 +798,7 @@ function offlineLease(args: ParsedArgs) {
   const attempt = acquireDataDirectoryDaemonLease(root, 3210);
   if (attempt.status === "held") {
     throw new Error(
-      `Stop AGENTseo before this operation; PID ${attempt.owner.pid} owns the data directory`,
+      `Stop Marketingovo before this operation; PID ${attempt.owner.pid} owns the data directory`,
     );
   }
   return attempt.lease;
@@ -803,13 +808,13 @@ async function backupCommand(args: ParsedArgs): Promise<void> {
   const destination = args.rest[0];
   if (!destination) {
     throw new Error(
-      "usage: agentseo backup <destination.db> [--data-dir PATH]",
+      "usage: marketingovo backup <destination.db> [--data-dir PATH]",
     );
   }
   const root = dataDirectory(args.flags);
-  const databasePath = join(root, "agentseo.db");
+  const databasePath = join(root, "marketingovo.db");
   if (!existsSync(databasePath)) {
-    throw new Error("No AGENTseo database exists in this data directory");
+    throw new Error("No Marketingovo database exists in this data directory");
   }
   const lease = offlineLease(args);
   let database: AgentSeoDatabase | undefined;
@@ -826,12 +831,12 @@ async function restoreCommand(args: ParsedArgs): Promise<void> {
   const source = args.rest[0];
   if (!source) {
     throw new Error(
-      "usage: agentseo restore <backup.db> --confirm [--expected-sha256 HASH] [--data-dir PATH]",
+      "usage: marketingovo restore <backup.db> --confirm [--expected-sha256 HASH] [--data-dir PATH]",
     );
   }
   if (!args.flags.has("confirm")) {
     throw new Error(
-      "Restore replaces the active local database. Re-run with --confirm after stopping AGENTseo.",
+      "Restore replaces the active local database. Re-run with --confirm after stopping Marketingovo.",
     );
   }
   const expected = args.flags.get("expected-sha256");
@@ -844,7 +849,7 @@ async function restoreCommand(args: ParsedArgs): Promise<void> {
     json(
       await restoreDatabaseBackup(
         resolve(source),
-        join(root, "agentseo.db"),
+        join(root, "marketingovo.db"),
         expected,
       ),
     );
@@ -885,13 +890,13 @@ function backgroundServiceBroker(args: ParsedArgs): string {
   const configured =
     typeof flag === "string"
       ? flag
-      : readCompatibleEnvironmentVariable("AGENTSEO_CREDENTIAL_BROKER", [
+      : readCompatibleEnvironmentVariable("MARKETINGOVO_CREDENTIAL_BROKER", [
           "GOLEMSEO_CREDENTIAL_BROKER",
           "GOLEM_SEO_CREDENTIAL_BROKER",
         ]);
   if (!configured) {
     throw new Error(
-      "service install requires --credential-broker PATH (or AGENTSEO_CREDENTIAL_BROKER); master passwords are never written to service definitions",
+      "service install requires --credential-broker PATH (or MARKETINGOVO_CREDENTIAL_BROKER); master passwords are never written to service definitions",
     );
   }
   return validateCredentialBrokerPath(resolve(configured));
@@ -955,7 +960,7 @@ function service(args: ParsedArgs): void {
     if (platform === "linux")
       execFileSync(
         "systemctl",
-        ["--user", "disable", "--now", "agentseo.service"],
+        ["--user", "disable", "--now", "marketingovo.service"],
         { stdio: "inherit" },
       );
     if (platform === "win32") {
@@ -985,10 +990,10 @@ function service(args: ParsedArgs): void {
         ? [
             "launchctl",
             "print",
-            `gui/${process.getuid?.()}/io.github.maxjafar.agentseo`,
+            `gui/${process.getuid?.()}/io.github.maxjafar.marketingovo`,
           ]
         : platform === "linux"
-          ? ["systemctl", "--user", "status", "agentseo.service"]
+          ? ["systemctl", "--user", "status", "marketingovo.service"]
           : [
               "schtasks.exe",
               "/Query",
@@ -1056,7 +1061,7 @@ async function main(): Promise<void> {
 
 main().catch((error) => {
   process.stderr.write(
-    `agentseo: ${error instanceof Error ? error.message : String(error)}\n`,
+    `marketingovo: ${error instanceof Error ? error.message : String(error)}\n`,
   );
   process.exitCode = 1;
 });

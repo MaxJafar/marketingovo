@@ -4,7 +4,7 @@ import { join, win32 as windowsPath } from "node:path";
 
 export type ServicePlatform = "darwin" | "linux" | "win32";
 
-export const WINDOWS_TASK_NAME = "AGENTseo Local Service";
+export const WINDOWS_TASK_NAME = "Marketingovo Local Service";
 
 export interface ServiceDefinitionOptions {
   platform: ServicePlatform;
@@ -110,7 +110,7 @@ export function serviceDefinitionPath(
       homeDirectory,
       "Library",
       "LaunchAgents",
-      "io.github.maxjafar.agentseo.plist",
+      "io.github.maxjafar.marketingovo.plist",
     );
   }
   if (platform === "linux") {
@@ -119,14 +119,14 @@ export function serviceDefinitionPath(
       ".config",
       "systemd",
       "user",
-      "agentseo.service",
+      "marketingovo.service",
     );
   }
   return windowsPath.join(
     dataDirectory ??
-      windowsPath.join(homeDirectory, "AppData", "Local", "AGENTseo"),
+      windowsPath.join(homeDirectory, "AppData", "Local", "Marketingovo"),
     "service",
-    "agentseo-login-task.xml",
+    "marketingovo-login-task.xml",
   );
 }
 
@@ -174,7 +174,7 @@ export function createServiceDefinition(
 <plist version="1.0">
   <dict>
     <key>Label</key>
-    <string>io.github.maxjafar.agentseo</string>
+    <string>io.github.maxjafar.marketingovo</string>
     <key>ProgramArguments</key>
     <array>
 ${programArguments}
@@ -199,7 +199,7 @@ ${programArguments}
 
   if (options.platform === "linux") {
     const content = `[Unit]
-Description=AGENTseo local service
+Description=Marketingovo local service
 After=network-online.target
 
 [Service]
@@ -216,7 +216,7 @@ WantedBy=default.target
       content,
       installCommands: [
         ["systemctl", "--user", "daemon-reload"],
-        ["systemctl", "--user", "enable", "--now", "agentseo.service"],
+        ["systemctl", "--user", "enable", "--now", "marketingovo.service"],
       ],
     };
   }
@@ -238,7 +238,7 @@ WantedBy=default.target
 <Task version="1.4" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
     <Author>MaxJafar</Author>
-    <Description>Runs the local AGENTseo daemon for durable audits and schedules.</Description>
+    <Description>Runs the local Marketingovo daemon for durable audits and schedules.</Description>
   </RegistrationInfo>
   <Triggers>
     <LogonTrigger>

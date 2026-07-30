@@ -14,7 +14,7 @@ Which five deserve attention this week?
 
 **Footer**
 
-AGENTseo `0.11` alpha
+Marketingovo `0.11` alpha
 
 **Visual direction**
 
@@ -104,7 +104,7 @@ Compare “0 clicks” with “GSC unavailable”; highlight why they are differ
 
 “A comparison between a measured zero and unavailable Search Console data.”
 
-## Slide 6 — Local-first AGENTseo
+## Slide 6 — Local-first Marketingovo
 
 **Headline**
 
@@ -124,7 +124,7 @@ A local dashboard and terminal connected to a private project store.
 
 **Alt text**
 
-“A local AGENTseo dashboard connected to a private project database and credential boundary.”
+“A local Marketingovo dashboard connected to a private project database and credential boundary.”
 
 ## Slide 7 — Community and Full
 
@@ -132,11 +132,11 @@ A local dashboard and terminal connected to a private project store.
 
 Local power or managed collaboration.
 
-**AGENTseo**
+**Marketingovo**
 
 Single-user, local-first analysis, BYOK integrations, local reports, and local scheduling while the service runs.
 
-**AGENTseo**
+**Marketingovo**
 
 Always-on execution, portfolios, teams and RBAC, managed integrations, hosted artifacts, retention, and commercial support.
 
@@ -146,7 +146,7 @@ Full is a separate proprietary service. Local analysis is not deliberately weake
 
 **Alt text**
 
-“A side-by-side comparison of AGENTseo and AGENTseo.”
+“A side-by-side comparison of Marketingovo and Marketingovo.”
 
 ## Slide 8 — Try the alpha
 
@@ -156,15 +156,15 @@ Turn one audit into one verified action.
 
 **Body**
 
-`npx @agentseoapp/cli serve`
+`npx @marketingovo/cli serve`
 
 Star and inspect:
 
-github.com/MaxJafar/AGENTseo
+github.com/MaxJafar/marketingovo
 
 Need managed team workflows?
 
-github.com/MaxJafar/AGENTseo/seo
+github.com/MaxJafar/marketingovo/seo
 
 **Footer**
 
@@ -172,4 +172,4 @@ github.com/MaxJafar/AGENTseo/seo
 
 **Alt text**
 
-“AGENTseo alpha call to action with local install, GitHub, and AGENTseo links.”
+“Marketingovo alpha call to action with local install, GitHub, and Marketingovo links.”

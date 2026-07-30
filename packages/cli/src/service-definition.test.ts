@@ -12,7 +12,9 @@ import {
 } from "./service-definition.js";
 
 function executableFixture(name: string): string {
-  const directory = mkdtempSync(join(tmpdir(), "agentseo-service-definition-"));
+  const directory = mkdtempSync(
+    join(tmpdir(), "marketingovo-service-definition-"),
+  );
   const path = join(directory, name);
   writeFileSync(path, "#!/bin/sh\nexit 0\n", { mode: 0o700 });
   chmodSync(path, 0o700);
@@ -57,7 +59,7 @@ describe("background service definitions", () => {
         "launchctl",
         "bootstrap",
         "gui/501",
-        "/Users/SEO & Growth/Library/LaunchAgents/io.github.maxjafar.agentseo.plist",
+        "/Users/SEO & Growth/Library/LaunchAgents/io.github.maxjafar.marketingovo.plist",
       ],
     ]);
   });
@@ -69,44 +71,47 @@ describe("background service definitions", () => {
     const definition = createServiceDefinition({
       platform: "linux",
       homeDirectory: "/home/SEO Growth",
-      executable: "/opt/AGENTseo/node$24%",
-      cliPath: '/opt/AGENTseo/cli "release"; rm -rf.js',
+      executable: "/opt/Marketingovo/node$24%",
+      cliPath: '/opt/Marketingovo/cli "release"; rm -rf.js',
       dataDirectory: "/home/SEO Growth/data;$HOME%prod",
       credentialBrokerPath: broker,
     });
 
     expect(definition.content).toContain(
-      'ExecStart="/opt/AGENTseo/node$$24%%" "/opt/AGENTseo/cli \\"release\\"; rm -rf.js" "serve" "--data-dir" "/home/SEO Growth/data;$$HOME%%prod" "--credential-broker"',
+      'ExecStart="/opt/Marketingovo/node$$24%%" "/opt/Marketingovo/cli \\"release\\"; rm -rf.js" "serve" "--data-dir" "/home/SEO Growth/data;$$HOME%%prod" "--credential-broker"',
     );
     expect(definition.content).toContain(quoteSystemdArgument(broker));
     expect(definition.content).not.toContain("master-password");
     expect(definition.installCommands).toEqual([
       ["systemctl", "--user", "daemon-reload"],
-      ["systemctl", "--user", "enable", "--now", "agentseo.service"],
+      ["systemctl", "--user", "enable", "--now", "marketingovo.service"],
     ]);
   });
 
   it("rejects a non-executable credential broker", () => {
-    const directory = mkdtempSync(join(tmpdir(), "agentseo-service-broker-"));
+    const directory = mkdtempSync(
+      join(tmpdir(), "marketingovo-service-broker-"),
+    );
     const broker = join(directory, "broker");
     writeFileSync(broker, "not executable", { mode: 0o600 });
     expect(() => validateCredentialBrokerPath(broker)).toThrow();
   });
 
   it("creates a least-privilege Windows login task with the complete packaged runtime", () => {
-    const dataDirectory = "C:\\Users\\SEO & Growth\\AppData\\Local\\AGENTseo";
+    const dataDirectory =
+      "C:\\Users\\SEO & Growth\\AppData\\Local\\Marketingovo";
     const definition = createServiceDefinition({
       platform: "win32",
       homeDirectory: "C:\\Users\\SEO & Growth",
       windowsUserId: "ACME\\SEO & Growth",
-      executable: "C:\\Program Files\\AGENTseo\\node.exe",
-      cliPath: "C:\\Program Files\\AGENTseo\\runtime\\app\\dist\\cli.js",
+      executable: "C:\\Program Files\\Marketingovo\\node.exe",
+      cliPath: "C:\\Program Files\\Marketingovo\\runtime\\app\\dist\\cli.js",
       dataDirectory,
       credentialBrokerPath:
-        "C:\\Program Files\\AGENTseo\\runtime\\broker\\credential-broker.exe",
+        "C:\\Program Files\\Marketingovo\\runtime\\broker\\credential-broker.exe",
       chromiumExecutable:
-        "C:\\Program Files\\AGENTseo\\runtime\\browser\\chrome.exe",
-      browserDirectory: "C:\\Program Files\\AGENTseo\\runtime\\browser",
+        "C:\\Program Files\\Marketingovo\\runtime\\browser\\chrome.exe",
+      browserDirectory: "C:\\Program Files\\Marketingovo\\runtime\\browser",
       googleDesktopClientId: "public-client.apps.googleusercontent.com",
     });
 
@@ -126,7 +131,7 @@ describe("background service definitions", () => {
     expect(definition.content).toContain("--browser-directory");
     expect(definition.content).toContain("--google-desktop-client-id");
     expect(definition.content).toContain(
-      "C:\\Program Files\\AGENTseo\\runtime\\app\\dist",
+      "C:\\Program Files\\Marketingovo\\runtime\\app\\dist",
     );
     expect(definition.content).not.toContain("master-password");
     expect(definition.content).not.toContain("<Password>");
@@ -149,10 +154,10 @@ describe("background service definitions", () => {
       platform: "win32",
       homeDirectory: "C:\\Users\\SEO",
       windowsUserId: "SEO",
-      executable: "C:\\AGENTseo\\node.exe",
-      cliPath: "C:\\AGENTseo\\cli.js",
-      dataDirectory: "C:\\Users\\SEO\\AGENTseo",
-      credentialBrokerPath: "C:\\AGENTseo\\broker.exe",
+      executable: "C:\\Marketingovo\\node.exe",
+      cliPath: "C:\\Marketingovo\\cli.js",
+      dataDirectory: "C:\\Users\\SEO\\Marketingovo",
+      credentialBrokerPath: "C:\\Marketingovo\\broker.exe",
       startImmediately: false,
     });
     expect(definition.installCommands).toHaveLength(1);
@@ -165,7 +170,7 @@ describe("background service definitions", () => {
     expect(quoteWindowsArgument('value with "quote"')).toBe(
       '"value with \\"quote\\""',
     );
-    expect(() => quoteWindowsArgument("%APPDATA%\\AGENTseo")).toThrow(
+    expect(() => quoteWindowsArgument("%APPDATA%\\Marketingovo")).toThrow(
       "environment expansion marker",
     );
   });

@@ -1,11 +1,11 @@
 import { defineConfig } from "vitepress";
 
-const repository = "https://github.com/MaxJafar/AGENTseo";
+const repository = "https://github.com/MaxJafar/marketingovo";
 
 export default defineConfig({
   lang: "en-US",
-  title: "AGENTseo",
-  titleTemplate: ":title · AGENTseo Docs",
+  title: "Marketingovo",
+  titleTemplate: ":title · Marketingovo Docs",
   description:
     "Local-first SEO operations documentation for marketers, developers, and agents.",
   cleanUrls: true,
@@ -21,11 +21,11 @@ export default defineConfig({
   },
   themeConfig: {
     logo: "/brand-mark.svg",
-    siteTitle: "AGENTseo",
+    siteTitle: "Marketingovo",
     nav: [
       { text: "Start", link: "/getting-started/quickstart" },
       {
-        text: "Use AGENTseo",
+        text: "Use Marketingovo",
         items: [
           { text: "Marketer workflows", link: "/workflows/marketer-workflows" },
           { text: "Dashboard and actions", link: "/product/dashboard-actions" },
@@ -47,7 +47,7 @@ export default defineConfig({
       {
         text: "Getting started",
         items: [
-          { text: "What is AGENTseo?", link: "/getting-started/overview" },
+          { text: "What is Marketingovo?", link: "/getting-started/overview" },
           {
             text: "Quickstart and onboarding",
             link: "/getting-started/quickstart",
@@ -101,7 +101,7 @@ export default defineConfig({
       formatOptions: { dateStyle: "medium", timeStyle: "short" },
     },
     footer: {
-      message: "AGENTseo is open source under the Apache License 2.0.",
+      message: "Marketingovo is open source under the Apache License 2.0.",
       copyright: "Copyright © 2026 MaxJafar",
     },
     docFooter: {

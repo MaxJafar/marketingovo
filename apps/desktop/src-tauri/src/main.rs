@@ -1,3 +1,3 @@
 fn main() {
-    agentseo_desktop_lib::run();
+    marketingovo_desktop_lib::run();
 }

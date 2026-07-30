@@ -36,7 +36,7 @@ const REPO = resolve(import.meta.dirname, "..");
 let tmpRoot: string;
 
 beforeAll(() => {
-  tmpRoot = mkdtempSync(join(tmpdir(), "agentseo-change-"));
+  tmpRoot = mkdtempSync(join(tmpdir(), "marketingovo-change-"));
 });
 afterAll(() => {
   rmSync(tmpRoot, { recursive: true, force: true });

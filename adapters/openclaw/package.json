@@ -1,7 +1,7 @@
 {
-  "name": "@agentseoapp/openclaw",
+  "name": "@marketingovo/openclaw",
   "version": "1.0.0",
-  "description": "Official OpenClaw tool adapter for AGENTseo",
+  "description": "Official OpenClaw tool adapter for Marketingovo",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -23,8 +23,8 @@
     "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
   },
   "dependencies": {
-    "@agentseoapp/contracts": "workspace:*",
-    "@agentseoapp/sdk": "workspace:*",
+    "@marketingovo/contracts": "workspace:*",
+    "@marketingovo/sdk": "workspace:*",
     "typebox": "1.1.39"
   },
   "devDependencies": {

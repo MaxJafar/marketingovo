@@ -56,7 +56,7 @@ const deployed = spawnSync(
   [
     "--config.strict-peer-dependencies=false",
     "--filter",
-    "agentseo",
+    "marketingovo",
     "--fail-if-no-match",
     "--prod",
     "deploy",
@@ -80,7 +80,7 @@ const installedBrowser = spawnSync(
   "pnpm",
   [
     "--filter",
-    "@agentseoapp/core",
+    "@marketingovo/core",
     "exec",
     "playwright",
     "install",
@@ -107,7 +107,7 @@ await assertExecutable(chromiumExecutable);
 const extension = process.platform === "win32" ? ".exe" : "";
 const nodeDestination = resolve(
   binaries,
-  `agentseo-node-${target}${extension}`,
+  `marketingovo-node-${target}${extension}`,
 );
 await copyFile(process.execPath, nodeDestination);
 if (process.platform !== "win32") await chmod(nodeDestination, 0o755);

@@ -9,7 +9,7 @@
 //
 // Note: this module is a wrapper. The actual invoke() runs the
 // webVitalsChecks per-page and the Lighthouse runner (when
-// AGENTSEO_LIGHTHOUSE is set). It requires renderMode=js to be
+// MARKETINGOVO_LIGHTHOUSE is set). It requires renderMode=js to be
 // useful, which the composer (or operator) must set.
 
 import { ConsoleLogger } from "../../core/logger.js";
@@ -65,10 +65,10 @@ export const performanceModule: Module = {
   },
   dependsOn: ["crawl"],
   configKeys: [
-    "AGENTSEO_LIGHTHOUSE",
-    "AGENTSEO_COLLECT_VITALS",
-    "AGENTSEO_RENDER",
-    "AGENTSEO_CHROME_PATH",
+    "MARKETINGOVO_LIGHTHOUSE",
+    "MARKETINGOVO_COLLECT_VITALS",
+    "MARKETINGOVO_RENDER",
+    "MARKETINGOVO_CHROME_PATH",
   ],
   checks: perPageChecks,
   async invoke(input: ModuleInput, ctx: ModuleContext): Promise<ModuleOutput> {

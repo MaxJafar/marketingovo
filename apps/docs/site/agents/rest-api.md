@@ -34,7 +34,7 @@ Browser mutations require the same origin and the `X-AgentSeo-CSRF` header. The 
 
 ### Trusted local clients
 
-The CLI, SDK, MCP bridge, and adapters use the service-token file created in the private AGENTseo data directory. Prefer the typed SDK or official adapter so the token is read from the file rather than copied into shell history or configuration text.
+The CLI, SDK, MCP bridge, and adapters use the service-token file created in the private Marketingovo data directory. Prefer the typed SDK or official adapter so the token is read from the file rather than copied into shell history or configuration text.
 
 Do not paste the service token into the dashboard, an agent prompt, a report, or a support request.
 
@@ -91,9 +91,9 @@ as a default mutation tool.
 The CLI mirrors this boundary:
 
 ```bash
-agentseo issue list PROJECT_ID --status open --severity high
-agentseo issue review PROJECT_ID FINGERPRINT false-positive --reason-file ./review-reason.txt
-agentseo issue review PROJECT_ID FINGERPRINT open
+marketingovo issue list PROJECT_ID --status open --severity high
+marketingovo issue review PROJECT_ID FINGERPRINT false-positive --reason-file ./review-reason.txt
+marketingovo issue review PROJECT_ID FINGERPRINT open
 ```
 
 Mutation reasons use a file so they do not become a shell-history argument.
@@ -103,9 +103,9 @@ The CLI mirrors Project Context without placing profile or journal prose in
 shell history:
 
 ```bash
-agentseo context show PROJECT_ID
-agentseo context update PROJECT_ID --profile-file ./context.json --change-summary-file ./change.txt
-agentseo context append PROJECT_ID decision --title-file ./title.txt --detail-file ./detail.txt --source-run RUN_ID
+marketingovo context show PROJECT_ID
+marketingovo context update PROJECT_ID --profile-file ./context.json --change-summary-file ./change.txt
+marketingovo context append PROJECT_ID decision --title-file ./title.txt --detail-file ./detail.txt --source-run RUN_ID
 ```
 
 Project Context is also a deliberate human write boundary. A profile update
@@ -118,7 +118,7 @@ Extraction templates are read-only catalog data. The response declares
 `importMode: "review_required"` and includes every selector, capture mode,
 recommended page, and assumption. Clients must create fresh rule IDs and show
 the proposed fields before adding them to an unsaved draft. The CLI exposes the
-same catalog with `agentseo extraction templates`; saving remains an explicit
+same catalog with `marketingovo extraction templates`; saving remains an explicit
 project-scoped operation.
 
 Project deletion is deliberately outside the agent surface. `DELETE
@@ -150,7 +150,7 @@ Do not treat `202` as a completed audit. Read `/runs/:id`, stream `/runs/:id/eve
 ## Use the typed SDK
 
 ```ts
-import { AgentSeoClient } from "@agentseoapp/sdk";
+import { AgentSeoClient } from "@marketingovo/sdk";
 
 const client = await AgentSeoClient.fromTokenFile(
   "/private/path/to/service-token",
@@ -192,7 +192,7 @@ Use the service-token path printed by the local CLI; keep the file private. Prod
 The same immutable graph is available without writing code:
 
 ```bash
-pnpm agentseo run links RUN_ID \
+pnpm marketingovo run links RUN_ID \
   --url https://example.com/pricing \
   --direction outlinks \
   --limit 50
@@ -208,7 +208,7 @@ OpenAPI document, while the runtime wrapper still refuses any token destination
 other than the canonical IPv4 loopback API.
 
 ```ts
-import { createGeneratedAgentSeoClientFromTokenFile } from "@agentseoapp/sdk";
+import { createGeneratedAgentSeoClientFromTokenFile } from "@marketingovo/sdk";
 
 const api = await createGeneratedAgentSeoClientFromTokenFile(
   "/private/path/to/service-token",
@@ -230,9 +230,9 @@ Measurements use explicit source state. A metric can be `available`, `unavailabl
 The versioned route is `/api/v1`, but `0.11` remains an alpha. Route contract changes should update TypeBox schemas, runtime validation, OpenAPI, generated SDK types, tests, and documentation together. The six agent tools use a separate canonical TypeBox registry that MCP and OpenClaw project into their native schema dialects.
 
 <p class="source-note">
-  Canonical sources: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/packages/contracts/src/index.ts">public API TypeBox contracts</a>,
-  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/packages/contracts/src/agent-tools.ts">agent tool contracts</a>,
-  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/packages/server/src/index.ts">local server</a>,
-  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/packages/sdk/src/index.ts">typed SDK</a>, and
-  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/docs/architecture.md">architecture</a>.
+  Canonical sources: <a href="https://github.com/MaxJafar/marketingovo/blob/main/packages/contracts/src/index.ts">public API TypeBox contracts</a>,
+  <a href="https://github.com/MaxJafar/marketingovo/blob/main/packages/contracts/src/agent-tools.ts">agent tool contracts</a>,
+  <a href="https://github.com/MaxJafar/marketingovo/blob/main/packages/server/src/index.ts">local server</a>,
+  <a href="https://github.com/MaxJafar/marketingovo/blob/main/packages/sdk/src/index.ts">typed SDK</a>, and
+  <a href="https://github.com/MaxJafar/marketingovo/blob/main/docs/architecture.md">architecture</a>.
 </p>

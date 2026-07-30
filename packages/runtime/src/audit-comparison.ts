@@ -10,12 +10,12 @@ import type {
   RunComparisonLinkSnapshot,
   RunComparisonPageChange,
   Severity,
-} from "@agentseoapp/contracts";
+} from "@marketingovo/contracts";
 import type {
   StoredPageLinkEdge,
   StoredPageRecord,
   StoredRunLinkGraphSnapshot,
-} from "@agentseoapp/storage-sqlite";
+} from "@marketingovo/storage-sqlite";
 
 export interface RunMetricRecord {
   runId: string | null;

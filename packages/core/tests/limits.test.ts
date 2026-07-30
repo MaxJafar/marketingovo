@@ -9,19 +9,19 @@ import { crawl } from "../src/orchestrator.js";
 describe("loadLimits", () => {
   const saved: Record<string, string | undefined> = {};
   const envKeys = [
-    "AGENTSEO_MAX_URLS",
-    "AGENTSEO_MAX_RUNTIME_MS",
-    "AGENTSEO_MAX_CONCURRENCY",
-    "AGENTSEO_REQUESTS_PER_SECOND",
-    "AGENTSEO_REQUEST_TIMEOUT_MS",
-    "AGENTSEO_MAX_BODY_BYTES",
-    "AGENTSEO_MAX_REDIRECTS",
-    "AGENTSEO_USER_AGENT",
-    "AGENTSEO_ALLOW_PRIVATE",
-    "AGENTSEO_IGNORE_ROBOTS",
-    "AGENTSEO_RENDER",
-    "AGENTSEO_HEADERS",
-    "AGENTSEO_KEEP_HTML",
+    "MARKETINGOVO_MAX_URLS",
+    "MARKETINGOVO_MAX_RUNTIME_MS",
+    "MARKETINGOVO_MAX_CONCURRENCY",
+    "MARKETINGOVO_REQUESTS_PER_SECOND",
+    "MARKETINGOVO_REQUEST_TIMEOUT_MS",
+    "MARKETINGOVO_MAX_BODY_BYTES",
+    "MARKETINGOVO_MAX_REDIRECTS",
+    "MARKETINGOVO_USER_AGENT",
+    "MARKETINGOVO_ALLOW_PRIVATE",
+    "MARKETINGOVO_IGNORE_ROBOTS",
+    "MARKETINGOVO_RENDER",
+    "MARKETINGOVO_HEADERS",
+    "MARKETINGOVO_KEEP_HTML",
     "GOLEMSEO_MAX_URLS",
     "GOLEMSEO_MAX_RUNTIME_MS",
     "GOLEMSEO_MAX_CONCURRENCY",
@@ -89,7 +89,7 @@ describe("loadLimits", () => {
     expect(l.ignoreRobots).toBe(false);
     expect(l.renderMode).toBe("static");
     expect(l.customHeaders).toEqual({});
-    expect(l.userAgent).toBe("AGENTseo/1.0.0");
+    expect(l.userAgent).toBe("Marketingovo/1.0.0");
   });
 
   it("parses renderMode and customHeaders from env", () => {
@@ -109,7 +109,7 @@ describe("loadLimits", () => {
   });
 
   it("prefers the canonical crawl scope over both legacy spellings", () => {
-    process.env.AGENTSEO_MAX_URLS = "321";
+    process.env.MARKETINGOVO_MAX_URLS = "321";
     process.env.GOLEMSEO_MAX_URLS = "654";
     process.env.GOLEM_SEO_MAX_URLS = "987";
     expect(loadLimits().maxUrls).toBe(321);

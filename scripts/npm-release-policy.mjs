@@ -8,8 +8,8 @@ export const NPM_PUBLICATION_ENABLED = false;
 
 // Repository/domain ownership and public release are separate human gates.
 // Keep this legacy coordinate only for validating old release artifacts; it is
-// not AGENTseo product identity and must not authorize publication.
-export const SOURCE_REPOSITORY = "MaxJafar/AGENTseo";
+// not Marketingovo product identity and must not authorize publication.
+export const SOURCE_REPOSITORY = "MaxJafar/marketingovo";
 
 export const PRIVATE_PACKABLE_WORKSPACE_DIRECTORIES = Object.freeze([
   "packages/contracts",
@@ -28,23 +28,23 @@ export const PRIVATE_PACKABLE_WORKSPACE_DIRECTORIES = Object.freeze([
 ]);
 
 export const PRIVATE_WORKSPACE_IDENTITIES = Object.freeze({
-  "adapters/openclaw": "@agentseoapp/openclaw",
-  "apps/dashboard": "@agentseoapp/dashboard",
-  "apps/desktop": "@agentseoapp/desktop",
-  "apps/docs": "@agentseoapp/docs",
-  "packages/application": "@agentseoapp/application",
-  "packages/cli": "agentseo",
-  "packages/contracts": "@agentseoapp/contracts",
-  "packages/core": "@agentseoapp/core",
-  "packages/credentials": "@agentseoapp/credentials",
-  "packages/integrations": "@agentseoapp/integrations",
-  "packages/legacy-import": "@agentseoapp/legacy-import",
-  "packages/mcp": "@agentseoapp/mcp",
-  "packages/runtime": "@agentseoapp/runtime",
-  "packages/sdk": "@agentseoapp/sdk",
-  "packages/server": "@agentseoapp/server",
-  "packages/storage-sqlite": "@agentseoapp/storage-sqlite",
-  "plugins/codex/agentseo": "@agentseoapp/codex-plugin",
+  "adapters/openclaw": "@marketingovo/openclaw",
+  "apps/dashboard": "@marketingovo/dashboard",
+  "apps/desktop": "@marketingovo/desktop",
+  "apps/docs": "@marketingovo/docs",
+  "packages/application": "@marketingovo/application",
+  "packages/cli": "marketingovo",
+  "packages/contracts": "@marketingovo/contracts",
+  "packages/core": "@marketingovo/core",
+  "packages/credentials": "@marketingovo/credentials",
+  "packages/integrations": "@marketingovo/integrations",
+  "packages/legacy-import": "@marketingovo/legacy-import",
+  "packages/mcp": "@marketingovo/mcp",
+  "packages/runtime": "@marketingovo/runtime",
+  "packages/sdk": "@marketingovo/sdk",
+  "packages/server": "@marketingovo/server",
+  "packages/storage-sqlite": "@marketingovo/storage-sqlite",
+  "plugins/codex/marketingovo": "@marketingovo/codex-plugin",
 });
 
 const DEPENDENCY_FIELDS = Object.freeze([
@@ -53,10 +53,12 @@ const DEPENDENCY_FIELDS = Object.freeze([
   "peerDependencies",
   "devDependencies",
 ]);
+// Scopes retired by a rename. The canonical scope is @marketingovo/, so listing
+// it here would forbid the product's own packages — which the rename briefly did.
 const FORBIDDEN_PACKAGE_PREFIXES = Object.freeze([
   "@golem-seo/",
   "@agent-seo/",
-  "@agentseo/",
+  "@agentseoapp/",
 ]);
 
 async function readJson(path) {
@@ -172,7 +174,7 @@ export async function readNpmReleaseWorkspace(root) {
   const rootManifest = await readJson(resolve(root, "package.json"));
   const version = assertReleaseVersion(rootManifest.version);
   if (rootManifest.private !== true) {
-    throw new Error("The AGENTseo workspace root must remain private");
+    throw new Error("The Marketingovo workspace root must remain private");
   }
   if (
     rootManifest.scripts?.prepublishOnly !==

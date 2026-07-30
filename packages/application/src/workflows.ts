@@ -5,7 +5,7 @@ import type {
   LeafModuleRegistry,
   Workflow,
   WorkflowRegistry,
-} from "@agentseoapp/contracts";
+} from "@marketingovo/contracts";
 
 export const runtimeWorkflowIds = [
   "audit",

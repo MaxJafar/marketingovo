@@ -84,8 +84,8 @@ await copyFile(
   resolve(output, lifecycleName),
 );
 await copyFile(
-  resolve(root, "artifacts/agentseo.cdx.json"),
-  resolve(output, `agentseo-${target}.cdx.json`),
+  resolve(root, "artifacts/marketingovo.cdx.json"),
+  resolve(output, `marketingovo-${target}.cdx.json`),
 );
 await copyFile(
   resolve(root, "LICENSE"),

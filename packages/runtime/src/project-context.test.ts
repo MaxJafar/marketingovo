@@ -2,7 +2,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { ProjectContextProfile } from "@agentseoapp/contracts";
+import type { ProjectContextProfile } from "@marketingovo/contracts";
 import { AgentSeoLocalRuntime } from "./index.js";
 
 const profile = (overrides: Partial<ProjectContextProfile> = {}) => ({
@@ -20,7 +20,7 @@ const profile = (overrides: Partial<ProjectContextProfile> = {}) => ({
 describe("project context runtime boundary", () => {
   it("normalizes reusable context while preserving immutable revisions and linked journal evidence", async () => {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-context-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-context-")),
     });
     try {
       const project = await runtime.projects.create({
@@ -89,7 +89,9 @@ describe("project context runtime boundary", () => {
 
   it("rejects malformed, secret-like, local-path, and cross-project material", async () => {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-context-safety-")),
+      dataDir: mkdtempSync(
+        join(tmpdir(), "marketingovo-runtime-context-safety-"),
+      ),
     });
     try {
       const project = await runtime.projects.create({

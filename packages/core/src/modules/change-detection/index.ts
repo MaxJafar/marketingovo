@@ -8,12 +8,12 @@
 // audit-run store being populated, which the audit-full module
 // does automatically. So a typical workflow is:
 //
-//   $ agentseo audit <url> --modules onpage,technical ...
-//   $ agentseo change-detection <url>            # delta vs prior run
+//   $ marketingovo audit <url> --modules onpage,technical ...
+//   $ marketingovo change-detection <url>            # delta vs prior run
 //
 //   or in one composer run:
 //
-//   $ agentseo audit <url> --modules onpage,technical,integrations:change-detection
+//   $ marketingovo audit <url> --modules onpage,technical,integrations:change-detection
 //
 // In the composer path, the module reads the run that was just
 // persisted by audit-full and compares it to the second-most-

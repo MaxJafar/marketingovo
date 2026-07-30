@@ -1,7 +1,7 @@
 {
-  "name": "@agentseoapp/legacy-import",
+  "name": "@marketingovo/legacy-import",
   "version": "1.0.0",
-  "description": "Non-destructive AGENTseo v0 data importer",
+  "description": "Non-destructive Marketingovo v0 data importer",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
@@ -26,9 +26,9 @@
     "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
   },
   "dependencies": {
-    "@agentseoapp/contracts": "workspace:*",
-    "@agentseoapp/credentials": "workspace:*",
-    "@agentseoapp/storage-sqlite": "workspace:*"
+    "@marketingovo/contracts": "workspace:*",
+    "@marketingovo/credentials": "workspace:*",
+    "@marketingovo/storage-sqlite": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",

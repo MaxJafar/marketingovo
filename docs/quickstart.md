@@ -1,23 +1,23 @@
 # Ten-minute quickstart
 
-This guide uses AGENTseo local service. It requires Node.js 24 LTS
+This guide uses Marketingovo local service. It requires Node.js 24 LTS
 and Corepack; no account is required.
 
 ## Install from source
 
 ```bash
-git clone https://github.com/MaxJafar/AGENTseo.git
-cd agentseo
+git clone https://github.com/MaxJafar/marketingovo.git
+cd marketingovo
 corepack enable
 pnpm install --frozen-lockfile
 pnpm build
-pnpm agentseo serve
+pnpm marketingovo serve
 ```
 
 For a release whose attached npm publication record is verified:
 
 ```bash
-npx @agentseoapp/cli serve
+npx @marketingovo/cli serve
 ```
 
 Prerelease source code does not imply that the same version already exists on
@@ -56,18 +56,18 @@ not a valid first-session entry point.
 10. Resolve an action and run verification, or create a local schedule that runs
     while the background service is active.
 
-The CLI can inspect the same review queue with `agentseo issue list
+The CLI can inspect the same review queue with `marketingovo issue list
 PROJECT_ID`. A non-open decision requires `--reason-file`; review text is never
 accepted as an inline shell argument.
 
 Project Context also has a file-based CLI boundary:
 
 ```bash
-agentseo context show PROJECT_ID
-agentseo context update PROJECT_ID \
+marketingovo context show PROJECT_ID
+marketingovo context update PROJECT_ID \
   --profile-file ./project-context.json \
   --change-summary-file ./context-change.txt
-agentseo context append PROJECT_ID decision \
+marketingovo context append PROJECT_ID decision \
   --title-file ./decision-title.txt \
   --detail-file ./decision-detail.txt \
   --source-run RUN_ID
@@ -99,14 +99,14 @@ commercial billing remain deliberate UI/CLI actions.
 ## Local data
 
 The app data directory is user-only. SQLite and vault material use restrictive
-file permissions. `.agentseo` exports include context revisions and journal
-history but never include secrets. Use `agentseo doctor` to see the resolved
+file permissions. `.marketingovo` exports include context revisions and journal
+history but never include secrets. Use `marketingovo doctor` to see the resolved
 data directory, database state, browser isolation, and integration health.
 
 Create a consistent local database snapshot only after stopping the daemon:
 
 ```bash
-agentseo backup /safe/location/agentseo-backup.db
+marketingovo backup /safe/location/marketingovo-backup.db
 ```
 
 The command refuses to overwrite an existing backup and prints its SHA-256.
@@ -114,7 +114,7 @@ Restore is also offline, requires explicit confirmation, verifies the optional
 expected checksum, and preserves the previous database as a rollback file:
 
 ```bash
-agentseo restore /safe/location/agentseo-backup.db \
+marketingovo restore /safe/location/marketingovo-backup.db \
   --expected-sha256 PRINTED_SHA256 \
   --confirm
 ```
@@ -132,7 +132,7 @@ The CLI keeps the confirmation out of a shell-history argument:
 
 ```bash
 # Create ./project-name.txt in your editor with only the exact project name.
-agentseo project delete PROJECT_ID --confirm-name-file ./project-name.txt
+marketingovo project delete PROJECT_ID --confirm-name-file ./project-name.txt
 ```
 
 Deletion stops active work, removes runs, raw evidence, actions, Project

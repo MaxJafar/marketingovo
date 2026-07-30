@@ -118,9 +118,9 @@ function serviceDefinition(platform) {
   return platform === "macos"
     ? resolve(
         homedir(),
-        "Library/LaunchAgents/io.github.maxjafar.agentseo.plist",
+        "Library/LaunchAgents/io.github.maxjafar.marketingovo.plist",
       )
-    : resolve(homedir(), ".config/systemd/user/agentseo.service");
+    : resolve(homedir(), ".config/systemd/user/marketingovo.service");
 }
 
 async function serviceLayout(runtimeRoot, sidecar) {
@@ -142,7 +142,7 @@ async function serviceLayout(runtimeRoot, sidecar) {
     runtimeRoot,
     sidecar: await regularExecutable(sidecar),
     cli: resolve(runtimeRoot, "app/dist/cli.js"),
-    broker: resolve(runtimeRoot, "broker/agentseo-credential-broker"),
+    broker: resolve(runtimeRoot, "broker/marketingovo-credential-broker"),
     browserDirectory: resolve(runtimeRoot, publicConfig.browserDirectory),
     chromiumExecutable: resolve(runtimeRoot, publicConfig.chromiumExecutable),
     googleDesktopClientId: publicConfig.googleDesktopClientId,
@@ -325,14 +325,14 @@ function verifyMacApplication(applicationPath) {
 async function macLayout(applicationPath) {
   const layout = await serviceLayout(
     resolve(applicationPath, "Contents/Resources/runtime"),
-    resolve(applicationPath, "Contents/MacOS/agentseo-node"),
+    resolve(applicationPath, "Contents/MacOS/marketingovo-node"),
   );
   const executableDirectory = resolve(applicationPath, "Contents/MacOS");
   const launchers = [];
   for (const entry of await readdir(executableDirectory, {
     withFileTypes: true,
   })) {
-    if (!entry.isFile() || entry.name === "agentseo-node") continue;
+    if (!entry.isFile() || entry.name === "marketingovo-node") continue;
     const candidate = resolve(executableDirectory, entry.name);
     const metadata = await stat(candidate);
     if ((metadata.mode & 0o111) !== 0) launchers.push(candidate);
@@ -347,7 +347,7 @@ async function macLayout(applicationPath) {
 
 function linuxPackageName(debPath) {
   const name = run("dpkg-deb", ["-f", debPath, "Package"]).trim();
-  if (!/^agentseo(?:-desktop)?$/u.test(name)) {
+  if (!/^marketingovo(?:-desktop)?$/u.test(name)) {
     throw new Error(`Unexpected Linux package name: ${name}`);
   }
   return name;
@@ -374,9 +374,11 @@ async function linuxLayout(packageName) {
   const configFiles = files.filter((path) =>
     path.endsWith("/runtime/config/public-runtime.json"),
   );
-  const sidecars = files.filter((path) => basename(path) === "agentseo-node");
+  const sidecars = files.filter(
+    (path) => basename(path) === "marketingovo-node",
+  );
   const launchers = files.filter(
-    (path) => basename(path) === "agentseo-desktop",
+    (path) => basename(path) === "marketingovo-desktop",
   );
   if (
     configFiles.length !== 1 ||
@@ -600,7 +602,7 @@ if (!runnerTemporaryValue) {
 const runnerTemporary = resolve(runnerTemporaryValue);
 const temporaryRoot = resolve(
   runnerTemporary,
-  `agentseo-native-lifecycle-${target}`,
+  `marketingovo-native-lifecycle-${target}`,
 );
 if (relative(runnerTemporary, temporaryRoot).startsWith(`..${sep}`)) {
   throw new Error("Unsafe lifecycle temporary directory");
@@ -610,11 +612,15 @@ await mkdir(temporaryRoot, { recursive: true, mode: 0o700 });
 const dataDirectory = resolve(temporaryRoot, "data");
 const definition = serviceDefinition(platform);
 if ((await health()) !== null) {
-  throw new Error("AGENTseo port is already occupied on the ephemeral runner");
+  throw new Error(
+    "Marketingovo port is already occupied on the ephemeral runner",
+  );
 }
 try {
   await access(definition);
-  throw new Error("A AGENTseo background service already exists on the runner");
+  throw new Error(
+    "A Marketingovo background service already exists on the runner",
+  );
 } catch (error) {
   if (error?.code !== "ENOENT") throw error;
 }
@@ -627,14 +633,16 @@ let currentHealth = null;
 let processCount = 0;
 let canaryProjectId = null;
 let appImageHealth = null;
-const applicationPath = "/Applications/AGENTseo.app";
+const applicationPath = "/Applications/Marketingovo.app";
 const mountPoint = resolve(temporaryRoot, "mounted-dmg");
 
 try {
   if (platform === "macos") {
     try {
       await access(applicationPath);
-      throw new Error("AGENTseo is already installed on the ephemeral runner");
+      throw new Error(
+        "Marketingovo is already installed on the ephemeral runner",
+      );
     } catch (error) {
       if (error?.code !== "ENOENT") throw error;
     }
@@ -649,7 +657,9 @@ try {
   } else {
     packageName = linuxPackageName(baselineInstaller ?? currentInstaller);
     if (linuxPackageInstalled(packageName)) {
-      throw new Error("AGENTseo package is already installed on the runner");
+      throw new Error(
+        "Marketingovo package is already installed on the runner",
+      );
     }
     installLinux(baselineInstaller ?? currentInstaller);
     installed = true;
@@ -719,7 +729,7 @@ try {
   if ((await health()) !== null) {
     throw new Error("Background service remains reachable after uninstall");
   }
-  await access(resolve(dataDirectory, "agentseo.db"));
+  await access(resolve(dataDirectory, "marketingovo.db"));
 
   const evidence = {
     schemaVersion: 2,

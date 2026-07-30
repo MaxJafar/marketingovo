@@ -3,11 +3,11 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { Action, IssueInstance } from "@agentseoapp/contracts";
+import type { Action, IssueInstance } from "@marketingovo/contracts";
 import {
-  AGENTSEO_PROJECT_BUNDLE_LIMITS,
+  MARKETINGOVO_PROJECT_BUNDLE_LIMITS,
   type AgentSeoProjectBundleV2,
-} from "@agentseoapp/contracts/project-bundle";
+} from "@marketingovo/contracts/project-bundle";
 import { AgentSeoLocalRuntime, ProjectBundleError } from "./index.js";
 
 const hash = (value: string | Uint8Array): string =>
@@ -41,7 +41,7 @@ async function createBundle(
   fingerprint: string;
   sourceProjectId: string;
 }> {
-  const dataDir = mkdtempSync(join(tmpdir(), "agentseo-bundle-source-"));
+  const dataDir = mkdtempSync(join(tmpdir(), "marketingovo-bundle-source-"));
   const runtime = new AgentSeoLocalRuntime({ dataDir });
   try {
     const project = runtime.database.createProject({
@@ -306,7 +306,7 @@ async function createBundle(
   }
 }
 
-describe(".agentseo project bundles", () => {
+describe(".marketingovo project bundles", () => {
   it("round-trips history and embedded reports while remapping every local id", async () => {
     const source = await createBundle();
     const serialized = Buffer.from(source.bytes).toString("utf8");
@@ -372,7 +372,7 @@ describe(".agentseo project bundles", () => {
     expect(serialized).not.toContain('"secretRef"');
 
     const destination = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-bundle-destination-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-bundle-destination-")),
     });
     try {
       const first = await destination.importProject(source.bytes);
@@ -551,7 +551,7 @@ describe(".agentseo project bundles", () => {
     expect(Array.from(bundle.actions[0]!.whyNow)).toHaveLength(2_000);
 
     const destination = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-bundle-bounded-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-bundle-bounded-")),
     });
     try {
       await expect(
@@ -574,7 +574,7 @@ describe(".agentseo project bundles", () => {
     resign(bundle);
 
     const destination = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-bundle-v2-compat-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-bundle-v2-compat-")),
     });
     try {
       const imported = await destination.importProject(bundle);
@@ -604,7 +604,7 @@ describe(".agentseo project bundles", () => {
       Buffer.from(source.bytes).toString("utf8"),
     ) as AgentSeoProjectBundleV2;
     const destination = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-bundle-malicious-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-bundle-malicious-")),
     });
     try {
       await expect(
@@ -614,7 +614,7 @@ describe(".agentseo project bundles", () => {
       });
       await expect(
         destination.importProject(
-          new Uint8Array(AGENTSEO_PROJECT_BUNDLE_LIMITS.maxBytes + 1),
+          new Uint8Array(MARKETINGOVO_PROJECT_BUNDLE_LIMITS.maxBytes + 1),
         ),
       ).rejects.toMatchObject({ code: "bundle_too_large", status: 413 });
 
@@ -711,7 +711,7 @@ describe(".agentseo project bundles", () => {
 
   it("uses a typed error for absent projects", async () => {
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-bundle-absent-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-bundle-absent-")),
     });
     try {
       await expect(runtime.exportProject("missing")).rejects.toBeInstanceOf(
@@ -723,7 +723,7 @@ describe(".agentseo project bundles", () => {
   });
 
   it("fails export instead of silently dropping an unreadable custom-rule source", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-bundle-rule-io-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "marketingovo-bundle-rule-io-"));
     const runtime = new AgentSeoLocalRuntime({ dataDir });
     try {
       const project = runtime.database.createProject({

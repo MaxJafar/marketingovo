@@ -32,7 +32,7 @@ The `npm-production` GitHub environment must be protected. Each public package
 must configure npm trusted publishing for:
 
 ```text
-Repository: MaxJafar/AGENTseo
+Repository: MaxJafar/marketingovo
 Workflow: release.yml
 Environment: npm-production
 Allowed action: npm publish

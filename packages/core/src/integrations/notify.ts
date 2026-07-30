@@ -7,13 +7,13 @@
 //      "no config" default.
 //
 //   2. webhook: HTTP POST. POST the payload as JSON to a
-//      configured URL. Configured via AGENTSEO_WEBHOOK_URL env
+//      configured URL. Configured via MARKETINGOVO_WEBHOOK_URL env
 //      or per-call url param. Headers optional. Best for Slack
 //      incoming webhooks, n8n, Make.com, custom backends.
 //
 //   3. telegram: Telegram Bot API. Sends a message via
 //      sendMessage to the configured chat_id. Configured via
-//      AGENTSEO_TELEGRAM_BOT_TOKEN + AGENTSEO_TELEGRAM_CHAT_ID.
+//      MARKETINGOVO_TELEGRAM_BOT_TOKEN + MARKETINGOVO_TELEGRAM_CHAT_ID.
 //
 // All channels are independent best-effort. A failure in one
 // doesn't affect the others. Results are returned per-channel
@@ -45,13 +45,13 @@ export interface NotificationPayload {
 
 export interface NotifyOptions {
   channels?: readonly NotifyChannel[];
-  /** Webhook URL (otherwise: AGENTSEO_WEBHOOK_URL env). */
+  /** Webhook URL (otherwise: MARKETINGOVO_WEBHOOK_URL env). */
   webhookUrl?: string;
-  /** Telegram bot token (otherwise: AGENTSEO_TELEGRAM_BOT_TOKEN env). */
+  /** Telegram bot token (otherwise: MARKETINGOVO_TELEGRAM_BOT_TOKEN env). */
   telegramBotToken?: string;
-  /** Telegram chat id (otherwise: AGENTSEO_TELEGRAM_CHAT_ID env). */
+  /** Telegram chat id (otherwise: MARKETINGOVO_TELEGRAM_CHAT_ID env). */
   telegramChatId?: string;
-  /** Optional HMAC secret (otherwise: AGENTSEO_WEBHOOK_SECRET env). */
+  /** Optional HMAC secret (otherwise: MARKETINGOVO_WEBHOOK_SECRET env). */
   webhookSecret?: string;
   /** Override host validation (tests only). */
   webhookHostValidator?: (hostname: string) => Promise<void>;
@@ -110,13 +110,13 @@ async function dispatchOne(
       case "webhook": {
         const url =
           opts.webhookUrl ??
-          envStr("AGENTSEO_WEBHOOK_URL", "SCREAMINGCLAW_WEBHOOK_URL", "");
+          envStr("MARKETINGOVO_WEBHOOK_URL", "SCREAMINGCLAW_WEBHOOK_URL", "");
         if (!url) {
           return {
             channel,
             ok: false,
             error:
-              "no webhook URL (set AGENTSEO_WEBHOOK_URL or pass webhookUrl)",
+              "no webhook URL (set MARKETINGOVO_WEBHOOK_URL or pass webhookUrl)",
             durationMs: Date.now() - started,
           };
         }
@@ -127,7 +127,7 @@ async function dispatchOne(
           opts.fetchImpl,
           opts.webhookSecret ??
             envStr(
-              "AGENTSEO_WEBHOOK_SECRET",
+              "MARKETINGOVO_WEBHOOK_SECRET",
               "SCREAMINGCLAW_WEBHOOK_SECRET",
               "",
             ),
@@ -138,14 +138,14 @@ async function dispatchOne(
         const token =
           opts.telegramBotToken ??
           envStr(
-            "AGENTSEO_TELEGRAM_BOT_TOKEN",
+            "MARKETINGOVO_TELEGRAM_BOT_TOKEN",
             "SCREAMINGCLAW_TELEGRAM_BOT_TOKEN",
             "",
           );
         const chatId =
           opts.telegramChatId ??
           envStr(
-            "AGENTSEO_TELEGRAM_CHAT_ID",
+            "MARKETINGOVO_TELEGRAM_CHAT_ID",
             "SCREAMINGCLAW_TELEGRAM_CHAT_ID",
             "",
           );
@@ -154,7 +154,7 @@ async function dispatchOne(
             channel,
             ok: false,
             error:
-              "missing AGENTSEO_TELEGRAM_BOT_TOKEN or AGENTSEO_TELEGRAM_CHAT_ID",
+              "missing MARKETINGOVO_TELEGRAM_BOT_TOKEN or MARKETINGOVO_TELEGRAM_CHAT_ID",
             durationMs: Date.now() - started,
           };
         }
@@ -235,12 +235,12 @@ async function postWebhook(
     const eventId = randomUUID();
     const headers: Record<string, string> = {
       "content-type": "application/json",
-      "x-agentseo-event-id": eventId,
-      "x-agentseo-timestamp": timestamp,
+      "x-marketingovo-event-id": eventId,
+      "x-marketingovo-timestamp": timestamp,
     };
     if (secret) {
       const signature = `sha256=${createHmac("sha256", secret).update(`${timestamp}.${body}`).digest("hex")}`;
-      headers["x-agentseo-signature"] = signature;
+      headers["x-marketingovo-signature"] = signature;
     }
     if (fetchImpl) {
       const res = await fetchImpl(parsed.toString(), {

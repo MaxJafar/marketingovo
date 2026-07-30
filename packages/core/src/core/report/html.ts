@@ -73,7 +73,7 @@ export function reportToHtml(r: Report): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AGENTseo audit &mdash; ${escapeHtml(r.startUrl)}</title>
+  <title>Marketingovo audit &mdash; ${escapeHtml(r.startUrl)}</title>
   <style>
     :root { --fg: #172033; --bg: #f4f5fb; --surface: #fff; --muted: #687086; --border: #e2e5ef; --brand: #6558e8; --brand-soft: #eeecff; --high: #c33b4a; --med: #b86a00; --low: #28659d; --code: #f7f8fc; }
     @media (prefers-color-scheme: dark) {
@@ -127,11 +127,11 @@ export function reportToHtml(r: Report): string {
 <main class="report-shell">
   <header class="report-header">
     <div>
-      <div class="brand"><span class="brand-mark">GS</span> AGENTseo</div>
+      <div class="brand"><span class="brand-mark">GS</span> Marketingovo</div>
       <h1>SEO evidence snapshot</h1>
       <div class="meta">A reproducible audit for prioritization and verification.</div>
     </div>
-    <span class="report-label">AGENTseo</span>
+    <span class="report-label">Marketingovo</span>
   </header>
   <div class="meta">
     <div><strong>Site:</strong> <a href="${escapeHtml(r.startUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(r.startUrl)}</a></div>
@@ -171,7 +171,7 @@ export function reportToHtml(r: Report): string {
   }
 
   <div class="footer">
-    AGENTseo &middot; report schema 0.11 &middot; pages: ${r.summary.pagesCrawled} &middot; request rate: ${r.config.requestsPerSecond}/s &middot; configured crawl scope: ${r.config.maxUrls} URLs
+    Marketingovo &middot; report schema 0.11 &middot; pages: ${r.summary.pagesCrawled} &middot; request rate: ${r.config.requestsPerSecond}/s &middot; configured crawl scope: ${r.config.maxUrls} URLs
   </div>
 </main>
 </body>

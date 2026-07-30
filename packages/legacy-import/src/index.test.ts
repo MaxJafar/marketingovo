@@ -14,8 +14,8 @@ import { describe, expect, it } from "vitest";
 import {
   MemoryCredentialStore,
   type CredentialRef,
-} from "@agentseoapp/credentials";
-import { AgentSeoDatabase } from "@agentseoapp/storage-sqlite";
+} from "@marketingovo/credentials";
+import { AgentSeoDatabase } from "@marketingovo/storage-sqlite";
 import { discoverLegacyData, importLegacyData } from "./index.js";
 
 const GSC_SECRET = "gsc-refresh-never-leak";
@@ -226,7 +226,7 @@ describe("legacy v0 importer", () => {
       if (process.platform !== "win32") expect(mode(path)).toBe(original.mode);
     }
 
-    const databasePath = join(destination, "agentseo.db");
+    const databasePath = join(destination, "marketingovo.db");
     const database = new AgentSeoDatabase({ path: databasePath });
     try {
       const projects = database.listProjects();

@@ -15,9 +15,9 @@ import type {
   Project,
   Run,
   RunStatus,
-} from "@agentseoapp/contracts";
-import type { CredentialRef, CredentialStore } from "@agentseoapp/credentials";
-import { AgentSeoDatabase } from "@agentseoapp/storage-sqlite";
+} from "@marketingovo/contracts";
+import type { CredentialRef, CredentialStore } from "@marketingovo/credentials";
+import { AgentSeoDatabase } from "@marketingovo/storage-sqlite";
 
 interface LegacyAuditIssue {
   id?: string;
@@ -516,7 +516,7 @@ export async function importLegacyData(
   }
   const ownedDatabase =
     options.database ??
-    new AgentSeoDatabase({ path: join(destination, "agentseo.db") });
+    new AgentSeoDatabase({ path: join(destination, "marketingovo.db") });
   const receipt: LegacyImportReceipt = {
     id: randomUUID(),
     importedAt: new Date().toISOString(),

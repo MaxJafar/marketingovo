@@ -43,9 +43,9 @@ export const linkAnalysisModule: Module = {
   },
   dependsOn: ["crawl"],
   configKeys: [
-    "AGENTSEO_FOLLOW_NOFOLLOW",
-    "AGENTSEO_FOLLOW_EXTERNAL",
-    "AGENTSEO_MAX_DEPTH",
+    "MARKETINGOVO_FOLLOW_NOFOLLOW",
+    "MARKETINGOVO_FOLLOW_EXTERNAL",
+    "MARKETINGOVO_MAX_DEPTH",
   ],
   checks: allChecks,
   async invoke(input: ModuleInput, ctx: ModuleContext): Promise<ModuleOutput> {

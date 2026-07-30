@@ -1,11 +1,11 @@
 ---
-title: What is AGENTseo?
+title: What is Marketingovo?
 description: Understand the local-first SEO operations model, product boundaries, and core evidence loop.
 ---
 
-# What is AGENTseo?
+# What is Marketingovo?
 
-AGENTseo is a local-first SEO operations system. It combines technical crawl observations with available search, analytics, performance, and research signals, then turns them into prioritized actions that a marketer can inspect and verify.
+Marketingovo is a local-first SEO operations system. It combines technical crawl observations with available search, analytics, performance, and research signals, then turns them into prioritized actions that a marketer can inspect and verify.
 
 The product is deliberately narrower than a claim to replace every mature SEO suite. Its testable promise is that evidence from several sources becomes one explainable action queue.
 
@@ -43,14 +43,14 @@ The React dashboard, CLI, typed SDK, MCP bridge, Codex bundle, and OpenClaw adap
 
 ## Product boundary
 
-AGENTseo is a local, single-user product with analysis limited only by the resources of the machine and the provider access you bring. MaxJafar is a separate proprietary service for always-on execution, collaboration, managed providers, portfolio operations, hosted artifacts, approval workflows, and commercial support.
+Marketingovo is a local, single-user product with analysis limited only by the resources of the machine and the provider access you bring. MaxJafar is a separate proprietary service for always-on execution, collaboration, managed providers, portfolio operations, hosted artifacts, approval workflows, and commercial support.
 
 The commercial value is infrastructure and collaboration—not deliberately incomplete local analysis.
 
 ## License boundary
 
 <div class="license-note">
-  AGENTseo is <strong>open source under the Apache License 2.0</strong>, an OSI-approved license. It grants patent rights and permits use, copying, distribution, modification, and commercial use, including offering it as a hosted or managed service.
+  Marketingovo is <strong>open source under the Apache License 2.0</strong>, an OSI-approved license. It grants patent rights and permits use, copying, distribution, modification, and commercial use, including offering it as a hosted or managed service.
 </div>
 
 Read the license itself before relying on a summary. Product names and marks have separate terms.
@@ -63,8 +63,8 @@ Read the license itself before relying on a summary. Product names and marks hav
 - [Create durable Project Context](/product/project-context)
 
 <p class="source-note">
-  Canonical sources: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/README.md">product README</a>,
-  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/docs/architecture.md">architecture</a>,
-  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/LICENSE">Apache License 2.0</a>, and
-  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/LICENSE">Apache License 2.0</a>.
+  Canonical sources: <a href="https://github.com/MaxJafar/marketingovo/blob/main/README.md">product README</a>,
+  <a href="https://github.com/MaxJafar/marketingovo/blob/main/docs/architecture.md">architecture</a>,
+  <a href="https://github.com/MaxJafar/marketingovo/blob/main/LICENSE">Apache License 2.0</a>, and
+  <a href="https://github.com/MaxJafar/marketingovo/blob/main/LICENSE">Apache License 2.0</a>.
 </p>

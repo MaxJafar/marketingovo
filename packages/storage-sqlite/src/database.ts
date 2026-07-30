@@ -33,7 +33,7 @@ import type {
   RunEvent,
   Schedule,
   UpdateActionInput,
-} from "@agentseoapp/contracts";
+} from "@marketingovo/contracts";
 import type {
   ProjectBundleConnector,
   ProjectBundleIssueAdjudication,
@@ -42,7 +42,7 @@ import type {
   ProjectBundleRunConfiguration,
   ProjectBundleRunModule,
   ProjectBundleSettings,
-} from "@agentseoapp/contracts/project-bundle";
+} from "@marketingovo/contracts/project-bundle";
 import { migrations } from "./schema.js";
 
 interface Row {
@@ -3949,7 +3949,7 @@ export class AgentSeoDatabase {
           input.project.id,
           input.importedAt,
           JSON.stringify({
-            format: "agentseo-project",
+            format: "marketingovo-project",
             version: 2,
             sourceProjectId: input.sourceProjectId,
           }),

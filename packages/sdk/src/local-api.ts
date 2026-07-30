@@ -5,7 +5,7 @@ const LOCAL_API_BASE_URL_PATTERN =
 
 /**
  * Validate and canonicalize the only origin shape that may receive a local
- * AGENTseo service token. Keep this deliberately stricter than URL parsing:
+ * Marketingovo service token. Keep this deliberately stricter than URL parsing:
  * aliases such as `localhost`, IPv6 loopback, credentials, and URL suffixes
  * must not become alternate trust boundaries.
  */
@@ -14,7 +14,7 @@ export function validateLocalApiBaseUrl(value: string): string {
   const port = match ? Number(match[1]) : Number.NaN;
   if (!Number.isInteger(port) || port < 1 || port > 65_535) {
     throw new Error(
-      "The AGENTseo local API URL must match http://127.0.0.1:<port>/api/v1",
+      "The Marketingovo local API URL must match http://127.0.0.1:<port>/api/v1",
     );
   }
   return `http://127.0.0.1:${port}/api/v1`;

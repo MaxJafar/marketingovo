@@ -1,6 +1,6 @@
 ---
 title: Contributing
-description: Contribute focused, tested changes to AGENTseo and its documentation.
+description: Contribute focused, tested changes to Marketingovo and its documentation.
 ---
 
 # Contributing
@@ -53,10 +53,10 @@ Never commit:
 The docs workspace is `apps/docs` and uses VitePress.
 
 ```bash
-pnpm --filter @agentseoapp/docs dev
-pnpm --filter @agentseoapp/docs test
-pnpm --filter @agentseoapp/docs typecheck
-pnpm --filter @agentseoapp/docs build
+pnpm --filter @marketingovo/docs dev
+pnpm --filter @marketingovo/docs test
+pnpm --filter @marketingovo/docs typecheck
+pnpm --filter @marketingovo/docs build
 ```
 
 Documentation changes should:
@@ -73,6 +73,6 @@ Documentation changes should:
 Maintainers decide release readiness, security response, contract acceptance, and product-boundary questions according to the governance policy. All participation is covered by the Code of Conduct.
 
 <p class="source-note">
-  Normative sources: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/CONTRIBUTING.md">contribution guide</a>,
-  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>.
+  Normative sources: <a href="https://github.com/MaxJafar/marketingovo/blob/main/CONTRIBUTING.md">contribution guide</a>,
+  <a href="https://github.com/MaxJafar/marketingovo/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>.
 </p>

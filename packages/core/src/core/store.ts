@@ -10,7 +10,7 @@
 // All data is local. The file lives next to the project
 // configuration; the operator controls backups.
 //
-// Backward compat: the default file name is `agentseo.db`. If one of
+// Backward compat: the default file name is `marketingovo.db`. If one of
 // the earlier names (`golem-seo.db`, `screaming-claw.db`) exists in the
 // project root and the new name does not, we read/write the legacy file
 // (with a one-time deprecation notice) so existing data is preserved.
@@ -20,7 +20,7 @@ import { existsSync, mkdirSync, renameSync } from "node:fs";
 import type { CrawledPage, Issue } from "../checks/index.js";
 
 export interface ProjectStoreOptions {
-  projectRoot: string; // directory; store file is <root>/agentseo.db
+  projectRoot: string; // directory; store file is <root>/marketingovo.db
 }
 
 export interface DiffResult {
@@ -96,7 +96,7 @@ export class ProjectStore {
     if (this.db) return this.db;
     const { DatabaseSync } = await loadSqlite();
     mkdirSync(this.opts.projectRoot, { recursive: true });
-    const newPath = join(this.opts.projectRoot, "agentseo.db");
+    const newPath = join(this.opts.projectRoot, "marketingovo.db");
     // Earlier store names, newest first. Each rename adds one entry rather
     // than replacing the previous one, so no generation of local data is
     // stranded by a product rename.
@@ -112,7 +112,7 @@ export class ProjectStore {
         dbPath = legacyPath;
         // eslint-disable-next-line no-console
         console.warn(
-          `[agentseo] using legacy store file ${legacyPath}; it will be migrated to ${newPath} on next write.`,
+          `[marketingovo] using legacy store file ${legacyPath}; it will be migrated to ${newPath} on next write.`,
         );
       }
     }

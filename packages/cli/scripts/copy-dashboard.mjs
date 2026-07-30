@@ -7,7 +7,7 @@ const source = resolve(root, "apps/dashboard/dist");
 const destination = resolve(root, "packages/cli/dashboard");
 if (!existsSync(source))
   throw new Error(
-    "Dashboard build is missing. Build @agentseoapp/dashboard before agentseo.",
+    "Dashboard build is missing. Build @marketingovo/dashboard before marketingovo.",
   );
 rmSync(destination, { recursive: true, force: true });
 mkdirSync(destination, { recursive: true });

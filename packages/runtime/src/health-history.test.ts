@@ -2,7 +2,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { Report as EngineReport } from "@agentseoapp/core";
+import type { Report as EngineReport } from "@marketingovo/core";
 import { AgentSeoLocalRuntime } from "./index.js";
 
 async function waitForTerminalRun(
@@ -87,7 +87,7 @@ describe("run-specific SEO Health history", () => {
       reportToCsv: () => "url,status\n",
     };
     const runtime = new AgentSeoLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-health-history-")),
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-health-history-")),
       engine,
     });
     try {

@@ -5,9 +5,9 @@ dist/
 coverage/
 *.tsbuildinfo
 
-# Local AGENTseo state and artifacts
-.agentseo/
-*.agentseo
+# Local Marketingovo state and artifacts
+.marketingovo/
+*.marketingovo
 *.db
 *.db-wal
 *.db-shm

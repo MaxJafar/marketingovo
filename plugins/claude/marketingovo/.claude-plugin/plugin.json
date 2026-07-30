@@ -1,0 +1,22 @@
+{
+  "name": "marketingovo",
+  "version": "1.0.0",
+  "description": "Turn local crawl, Search Console, GA4, performance, and SERP evidence into prioritized SEO actions.",
+  "author": {
+    "name": "Marketingovo",
+    "url": "https://github.com/MaxJafar/marketingovo"
+  },
+  "homepage": "https://github.com/MaxJafar/marketingovo",
+  "repository": "https://github.com/MaxJafar/marketingovo",
+  "license": "Apache-2.0",
+  "keywords": [
+    "seo",
+    "marketing",
+    "crawler",
+    "search-console",
+    "analytics"
+  ],
+  "commands": "./commands/",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}

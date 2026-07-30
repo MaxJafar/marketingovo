@@ -11,8 +11,8 @@ import { AgentSeoDatabase } from "./database.js";
 
 describe("SQLite backup and restore", () => {
   it("creates a validated snapshot and restores it with a rollback copy", async () => {
-    const root = mkdtempSync(join(tmpdir(), "agentseo-backup-"));
-    const databasePath = join(root, "agentseo.db");
+    const root = mkdtempSync(join(tmpdir(), "marketingovo-backup-"));
+    const databasePath = join(root, "marketingovo.db");
     const backupPath = join(root, "snapshots", "baseline.db");
     const database = new AgentSeoDatabase({ path: databasePath });
     const original = database.createProject({
@@ -40,7 +40,7 @@ describe("SQLite backup and restore", () => {
   });
 
   it("rejects a checksum mismatch, malformed file and symbolic link", async () => {
-    const root = mkdtempSync(join(tmpdir(), "agentseo-backup-invalid-"));
+    const root = mkdtempSync(join(tmpdir(), "marketingovo-backup-invalid-"));
     const malformed = join(root, "not-a-database.db");
     writeFileSync(malformed, "not sqlite");
     await expect(validateDatabaseBackup(malformed)).rejects.toThrow();
@@ -66,7 +66,7 @@ describe("SQLite backup and restore", () => {
   });
 
   it("refuses to overwrite an existing backup destination", async () => {
-    const root = mkdtempSync(join(tmpdir(), "agentseo-backup-existing-"));
+    const root = mkdtempSync(join(tmpdir(), "marketingovo-backup-existing-"));
     const database = new AgentSeoDatabase({ path: join(root, "source.db") });
     const destination = join(root, "existing.db");
     writeFileSync(destination, "keep me");

@@ -9,7 +9,7 @@ import type { ApiError } from "../api/client";
 import type { Site } from "../api/contracts";
 import { useSites } from "../api/queries";
 
-const STORAGE_KEY = "agentseo:selected-site:v1";
+const STORAGE_KEY = "marketingovo:selected-site:v1";
 
 interface SiteContextValue {
   sites: Site[];
@@ -25,16 +25,7 @@ const SiteContext = createContext<SiteContextValue | null>(null);
 
 function readStoredSite(): string {
   try {
-    const modern = window.localStorage.getItem(STORAGE_KEY);
-    if (modern !== null) return modern;
-
-    const legacy = window.localStorage.getItem("golem-seo:selected-site:v1");
-    if (legacy !== null) {
-      window.localStorage.setItem(STORAGE_KEY, legacy);
-      window.localStorage.removeItem("golem-seo:selected-site:v1");
-      return legacy;
-    }
-    return "";
+    return window.localStorage.getItem(STORAGE_KEY) ?? "";
   } catch {
     return "";
   }

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "marketingovo": {
+      "command": "node",
+      "args": [
+        "./dist/marketingovo-mcp.mjs"
+      ],
+      "cwd": "."
+    }
+  }
+}

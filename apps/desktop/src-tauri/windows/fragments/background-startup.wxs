@@ -9,7 +9,7 @@
           Action="createAndRemoveOnUninstall"
         >
           <RegistryValue
-            Name="AGENTseo"
+            Name="Marketingovo"
             Type="string"
             Value="&quot;[#Path]&quot; --background"
             KeyPath="yes"

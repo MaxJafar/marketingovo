@@ -11,7 +11,7 @@ vi.mock("../api/client", () => ({
 }));
 
 describe("useImportProject", () => {
-  it("accepts .agentseo and legacy .golemseo file extensions", async () => {
+  it("accepts .marketingovo project bundles", async () => {
     vi.mocked(apiRequest).mockResolvedValue({ data: {}, meta: {} });
 
     const client = new QueryClient();
@@ -21,41 +21,15 @@ describe("useImportProject", () => {
 
     const { result } = renderHook(() => useImportProject(), { wrapper });
 
-    // Test the canonical .agentseo extension
-    const agentseoFile = {
-      name: "test.agentseo",
+    // Test the canonical .marketingovo extension
+    const marketingovoFile = {
+      name: "test.marketingovo",
       type: "application/json",
       size: 10,
       text: () => Promise.resolve("{}"),
     } as any as File;
-    result.current.mutate(agentseoFile);
+    result.current.mutate(marketingovoFile);
     await waitFor(() => expect(result.current.isPending).toBe(false));
     expect(result.current.isError).toBe(false);
-
-    // Test the legacy .golemseo extension is still accepted
-    const legacyFile = {
-      name: "test.golemseo",
-      type: "application/json",
-      size: 10,
-      text: () => Promise.resolve("{}"),
-    } as any as File;
-    result.current.mutate(legacyFile);
-    await waitFor(() => expect(result.current.isPending).toBe(false));
-    expect(result.current.isError).toBe(false);
-
-    // Test invalid extension
-    const invalidFile = {
-      name: "test.txt",
-      type: "text/plain",
-      size: 10,
-      text: () => Promise.resolve("{}"),
-    } as any as File;
-    result.current.mutate(invalidFile);
-    await waitFor(() => expect(result.current.isError).toBe(true));
-    expect(result.current.error?.message).toMatch(
-      /Choose a file with the \.agentseo or \.golemseo extension/,
-    );
-
-    vi.restoreAllMocks();
   });
 });

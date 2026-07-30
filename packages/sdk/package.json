@@ -1,7 +1,7 @@
 {
-  "name": "@agentseoapp/sdk",
+  "name": "@marketingovo/sdk",
   "version": "1.0.0",
-  "description": "Typed client for the AGENTseo local REST API",
+  "description": "Typed client for the Marketingovo local REST API",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
@@ -28,11 +28,11 @@
     "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
   },
   "dependencies": {
-    "@agentseoapp/contracts": "workspace:*",
+    "@marketingovo/contracts": "workspace:*",
     "openapi-fetch": "0.17.0"
   },
   "devDependencies": {
-    "@agentseoapp/server": "workspace:*",
+    "@marketingovo/server": "workspace:*",
     "@types/node": "^24.3.0",
     "openapi-typescript": "7.13.0",
     "prettier": "^3.6.2",
