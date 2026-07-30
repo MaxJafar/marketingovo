@@ -60,7 +60,7 @@ def test_golden_preview_is_valid_complete_and_sorted(tmp_path: Path, repository_
 
     assert result.valid
     assert result.input.sha256 == hashlib.sha256(payload).hexdigest()
-    assert result.input.size_bytes == 5569
+    assert result.input.size_bytes == 5659
     assert result.input.row_count == 18
     assert result.platform == "youtube"
     assert result.file_policy.retention_days == 90
@@ -224,7 +224,7 @@ def test_absent_metric_rows_remain_missing_not_zero(repository_root: Path) -> No
         + "\n".join(
             line
             for line in lines[1:]
-            if not line.startswith("golem.competitive-pulse-import.v1,obs-north-engagement")
+            if not line.startswith("agentintel.competitive-pulse-import.v1,obs-north-engagement")
         )
         + "\n"
     ).encode()
@@ -375,9 +375,9 @@ def test_import_analysis_emits_authority_valid_artifacts_and_report_v2(
     result = run_analysis(request, EventEmitter(request.run_id))
     assert result.succeeded
     assert [artifact.schema_id for artifact in result.artifacts] == [
-        "golem.observations.v1",
-        "golem.observations.v1",
-        "golem.comparison-report.v2",
+        "agentintel.observations.v1",
+        "agentintel.observations.v1",
+        "agentintel.comparison-report.v2",
     ]
     with ipc.open_file(tmp_path / "out/normalized.arrow") as reader:
         table = reader.read_all()
@@ -395,7 +395,7 @@ def test_import_analysis_emits_authority_valid_artifacts_and_report_v2(
     assert all(row["retention_until"].isoformat() == "2026-10-14T12:00:00+00:00" for row in rows)
 
     report = json.loads((tmp_path / "out/report.json").read_text())
-    assert report["schema_version"] == "golem.comparison-report.v2"
+    assert report["schema_version"] == "agentintel.comparison-report.v2"
     assert report["derivation"]["parser_version"] == CSV_PARSER_VERSION
     assert [target["target_id"] for target in report["targets"]] == [
         "northstar-labs",

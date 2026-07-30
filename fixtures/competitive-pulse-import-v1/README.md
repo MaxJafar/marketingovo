@@ -18,6 +18,5 @@ copyable inert text but never clickable or fetched.
 The normative grammar, validation diagnostics, canonical field mapping,
 metrics, lifecycle, retention, API, worker, and report contracts are in
 [`docs/adr/0002-local-competitive-pulse-import-alpha.md`](../../docs/adr/0002-local-competitive-pulse-import-alpha.md).
-The sample retains the inherited `golem.*` wire namespace until the separately
-approved AGENTintel compatibility migration; that identifier is not the public
+The sample uses the canonical `agentintel.*` wire namespace.
 product name or a license decision.

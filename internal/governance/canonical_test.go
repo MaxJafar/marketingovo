@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GolemWorkers/agentintel/internal/domain"
+	"github.com/MaxJafar/AGENTintel/internal/domain"
 	"github.com/apache/arrow-go/v18/arrow"
 )
 
 func TestCanonicalSchemaIsExactly32PhysicalFields(t *testing.T) {
-	metadata := arrow.MetadataFrom(map[string]string{"golem.schema_id": "golem.observations.v1"})
+	metadata := arrow.MetadataFrom(map[string]string{"agentintel.schema_id": "agentintel.observations.v1"})
 	if err := validateCanonicalSchema(arrow.NewSchema(canonicalObservationFields, &metadata), true); err != nil {
 		t.Fatalf("exact schema rejected: %v", err)
 	}

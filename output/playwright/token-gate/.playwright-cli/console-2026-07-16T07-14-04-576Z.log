@@ -1,2 +1,0 @@
-[   54104ms] [ERROR] You are calling ReactDOMClient.createRoot() on a container that has already been passed to createRoot() before. Instead, call root.render() on the existing root instead if you want to update it. @ http://127.0.0.1:7466/node_modules/.vite/deps/react-dom_client.js?v=5ba0e2b4:17253
-[   54363ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:7466/node_modules/.vite/deps/react-dom_client.js?v=5ba0e2b4:20102

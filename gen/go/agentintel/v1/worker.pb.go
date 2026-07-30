@@ -1510,7 +1510,7 @@ const file_agentintel_v1_worker_proto_rawDesc = "" +
 	"\x10AnalysisWorkflow\x12!\n" +
 	"\x1dANALYSIS_WORKFLOW_UNSPECIFIED\x10\x00\x12\x1d\n" +
 	"\x19ANALYSIS_WORKFLOW_COMPARE\x10\x01\x12\x1e\n" +
-	"\x1aANALYSIS_WORKFLOW_RESEARCH\x10\x02BAZ?github.com/GolemWorkers/agentintel/gen/go/agentintel/v1;intelv1b\x06proto3"
+	"\x1aANALYSIS_WORKFLOW_RESEARCH\x10\x02B=Z;github.com/MaxJafar/AGENTintel/gen/go/agentintel/v1;intelv1b\x06proto3"
 
 var (
 	file_agentintel_v1_worker_proto_rawDescOnce sync.Once

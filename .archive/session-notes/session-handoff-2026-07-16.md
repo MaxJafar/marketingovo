@@ -38,8 +38,8 @@ company research, публичные профессиональные данны
 
 ## 2. Зафиксированные продуктовые и правовые решения
 
-- Community edition распространяется по **Elastic License 2.0** и является
-  source-available, а не OSI open source. Hosted GolemWorkers edition отделяется.
+- AGENTintel распространяется по **Elastic License 2.0** и является
+  source-available, а не OSI open source. Hosted MaxJafar edition отделяется.
 - Первый глубокий vertical — social/creator competitive intelligence.
 - People intelligence ограничен публичными профессиональными/company evidence
   и лицензированными рабочими контактами.
@@ -306,7 +306,7 @@ rate/cost budget, retention, kill switch, golden fixtures и failure tests. Не
 - governed licensed business contacts с masking, expiry и suppression;
 - reversible entity resolution и review UI;
 - graph/trend/anomaly/model workloads и calibration corpus;
-- hosted GolemWorkers tenancy, RBAC, billing и distributed workers.
+- hosted MaxJafar tenancy, RBAC, billing и distributed workers.
 
 ## 7. Рекомендуемая точная последовательность продолжения
 
@@ -402,7 +402,7 @@ go test -count=1 ./internal/api -run TestRealPythonWorkerThroughHTTPAndGoAuthori
 Последний использованный рабочий Playwright CLI invocation:
 
 ```bash
-NPM_CONFIG_CACHE=/tmp/golem-npm-cache \
+NPM_CONFIG_CACHE=/tmp/agentintel-npm-cache \
 npx --yes --package @playwright/cli playwright-cli -s=agentintel ...
 ```
 

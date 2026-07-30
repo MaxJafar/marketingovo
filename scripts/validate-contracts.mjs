@@ -129,7 +129,7 @@ if (
   );
 }
 if (
-  arrowSchema.properties?.schema_id?.const !== "golem.observations.v1" ||
+  arrowSchema.properties?.schema_id?.const !== "agentintel.observations.v1" ||
   arrowSchema.properties?.fields?.prefixItems?.length !== 32
 ) {
   throw new Error("Canonical Arrow observation schema drifted");

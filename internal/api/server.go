@@ -18,11 +18,11 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/GolemWorkers/agentintel/internal/domain"
-	"github.com/GolemWorkers/agentintel/internal/governance"
-	"github.com/GolemWorkers/agentintel/internal/jobs"
-	"github.com/GolemWorkers/agentintel/internal/policy"
-	"github.com/GolemWorkers/agentintel/internal/storage"
+	"github.com/MaxJafar/AGENTintel/internal/domain"
+	"github.com/MaxJafar/AGENTintel/internal/governance"
+	"github.com/MaxJafar/AGENTintel/internal/jobs"
+	"github.com/MaxJafar/AGENTintel/internal/policy"
+	"github.com/MaxJafar/AGENTintel/internal/storage"
 )
 
 type ServerConfig struct {

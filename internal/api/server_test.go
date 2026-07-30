@@ -13,10 +13,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GolemWorkers/agentintel/internal/connectors"
-	"github.com/GolemWorkers/agentintel/internal/domain"
-	"github.com/GolemWorkers/agentintel/internal/jobs"
-	"github.com/GolemWorkers/agentintel/internal/storage"
+	"github.com/MaxJafar/AGENTintel/internal/connectors"
+	"github.com/MaxJafar/AGENTintel/internal/domain"
+	"github.com/MaxJafar/AGENTintel/internal/jobs"
+	"github.com/MaxJafar/AGENTintel/internal/storage"
 )
 
 func TestBearerAndOneTimeBrowserSessionBoundaries(t *testing.T) {

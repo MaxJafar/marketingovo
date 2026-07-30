@@ -1,14 +1,14 @@
 {
-  "schema_version": "golem.import-preview.v1",
+  "schema_version": "agentintel.import-preview.v1",
   "valid": true,
   "dataset_id": "dataset_00000000000000000000000001",
   "state": "ready",
   "validated_at": "2026-07-16T12:00:00Z",
   "retention_until": "2026-10-14T12:00:00Z",
   "input": {
-    "schema_id": "golem.competitive-pulse-import.v1",
-    "sha256": "0f1ed3ee80ef1009b21a58f7e551fb75fdc2826f7b5c959c340adf20814bf8bd",
-    "size_bytes": 5569,
+    "schema_id": "agentintel.competitive-pulse-import.v1",
+    "sha256": "300a5bdfc2313818e49ee28c86488a7bbace034a50ed06ba704e3f0e2f4e5810",
+    "size_bytes": 5659,
     "row_count": 18
   },
   "policy": {

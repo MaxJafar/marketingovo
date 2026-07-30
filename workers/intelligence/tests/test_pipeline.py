@@ -103,7 +103,7 @@ def test_golden_pipeline_emits_exact_artifacts_and_metrics(
             "worker_version": "0.1.0",
             "model_version": "competitive-pulse-baseline@0.1.0",
             "connector_version": "fixture.competitive-pulse@1.0.0",
-            "parser_version": "golem-go-arrow-parquet.v1",
+            "parser_version": "agentintel-go-arrow-parquet.v1",
         }
         assert "customer retention" in report["summary"]
         assert len(findings["northstar-labs"]["citations"]) == 6

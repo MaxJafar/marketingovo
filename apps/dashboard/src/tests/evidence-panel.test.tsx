@@ -11,7 +11,7 @@ afterEach(() => {
 });
 
 const report: ComparisonReport = {
-  schema_version: "golem.comparison-report.v1",
+  schema_version: "agentintel.comparison-report.v1",
   run_id: "run-research",
   workflow: "research",
   research_question: "What changed?",
@@ -55,7 +55,7 @@ const report: ComparisonReport = {
 };
 
 const reportV2: ImportComparisonReport = {
-  schema_version: "golem.comparison-report.v2",
+  schema_version: "agentintel.comparison-report.v2",
   run_id: "run-import",
   workflow: "compare",
   derivation: {
@@ -71,11 +71,11 @@ const reportV2: ImportComparisonReport = {
       "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
     input_size_bytes: 1024,
     metric_catalog_version: "competitive-pulse.v1",
-    input_schema_id: "golem.competitive-pulse-import.v1",
+    input_schema_id: "agentintel.competitive-pulse-import.v1",
     platform: "TestPlatform",
     validated_at: "2026-07-16T00:00:00Z",
     retention_until: "2027-01-01T00:00:00Z",
-    input_parser_version: "golem-python-competitive-pulse-csv@1.0.0",
+    input_parser_version: "agentintel-python-competitive-pulse-csv@1.0.0",
   },
   summary: "V2 test comparison.",
   targets: [

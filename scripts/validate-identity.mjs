@@ -23,7 +23,11 @@ const RULES = Object.freeze([
   },
   {
     id: "retired-wire-identity",
-    pattern: /X-Golem-|x-golem-|golem_session|@golem-intel\//giu,
+    // Headers, cookies, npm scope, and the schema / parser namespaces recorded
+    // in evidence manifests. The namespace forms are easy to miss because they
+    // do not contain the product name.
+    pattern:
+      /X-Golem-|x-golem-|golem_session|@golem-intel\/|golem\.[a-z]|golem:\/\/|golem-(?:go|python)-/giu,
   },
   {
     id: "retired-sibling-identity",

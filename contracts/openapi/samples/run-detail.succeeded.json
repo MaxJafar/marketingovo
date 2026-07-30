@@ -18,7 +18,7 @@
   "connector_version": "fixture.competitive-pulse@1",
   "parser_version": "agentintel-parser@0.2.0-alpha.0",
   "input_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "input_schema_id": "golem.fixture-observations.v1",
+  "input_schema_id": "agentintel.fixture-observations.v1",
   "input_size_bytes": 16384,
   "events": [
     {
@@ -41,7 +41,7 @@
       "media_type": "application/json",
       "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       "size_bytes": 2048,
-      "schema_id": "golem.evidence-manifest.v1",
+      "schema_id": "agentintel.evidence-manifest.v1",
       "data_class": "public"
     }
   ]

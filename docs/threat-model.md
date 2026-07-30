@@ -77,7 +77,7 @@ host from arbitrary worker code.
   exports and backups;
 - canary-secret scanning across databases, logs, Arrow, Parquet, reports and
   release bundles;
-- tenant isolation, RBAC and provider-budget enforcement for GolemWorkers;
+- tenant isolation, RBAC and provider-budget enforcement for MaxJafar;
 - signed release provenance and an exercised updater rollback path.
 
 ## Explicit non-goals

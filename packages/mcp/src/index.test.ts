@@ -251,7 +251,7 @@ describe("AGENTintel MCP surface", () => {
             params: {
               protocolVersion: "2025-06-18",
               capabilities: {},
-              clientInfo: { name: "golem-test", version: "1.0.0" },
+              clientInfo: { name: "agentintel-test", version: "1.0.0" },
             },
           }),
         }),

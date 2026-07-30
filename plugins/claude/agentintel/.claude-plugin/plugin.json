@@ -3,11 +3,11 @@
   "version": "0.2.0-alpha.0",
   "description": "Turn public and authorized market signals into replayable, cited competitive research.",
   "author": {
-    "name": "GolemWorkers",
-    "url": "https://golemworkers.com"
+    "name": "MaxJafar",
+    "url": "https://github.com/MaxJafar/AGENTintel"
   },
-  "homepage": "https://golemworkers.com",
-  "repository": "https://github.com/GolemWorkers/agentintel",
+  "homepage": "https://github.com/MaxJafar/AGENTintel",
+  "repository": "https://github.com/MaxJafar/AGENTintel",
   "license": "Apache-2.0",
   "keywords": [
     "competitive-intelligence",

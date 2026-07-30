@@ -15,8 +15,8 @@ import (
 	"sync"
 	"time"
 
-	intelv1 "github.com/GolemWorkers/agentintel/gen/go/agentintel/v1"
-	"github.com/GolemWorkers/agentintel/internal/domain"
+	intelv1 "github.com/MaxJafar/AGENTintel/gen/go/agentintel/v1"
+	"github.com/MaxJafar/AGENTintel/internal/domain"
 	"google.golang.org/protobuf/proto"
 )
 

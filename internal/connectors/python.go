@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/GolemWorkers/agentintel/internal/domain"
+	"github.com/MaxJafar/AGENTintel/internal/domain"
 )
 
 const maximumWorkerControlBytes = 4 << 20

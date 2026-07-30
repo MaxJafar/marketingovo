@@ -78,7 +78,7 @@ Important limits:
 | 3     | Licensed creator discovery, campaign history, transparent anomaly models and governed business contacts       | Not implemented                                       |
 | 4     | Registries, filings, products, funding, hiring signals, role timelines and human-approved CRM export          | Not implemented                                       |
 | 5     | Cross-source trends, semantic clusters, coordination networks and aggregate workforce intelligence            | Not implemented                                       |
-| 6     | Hosted GolemWorkers storage/workers, tenancy, RBAC, billing and managed providers                             | Not implemented                                       |
+| 6     | Hosted MaxJafar storage/workers, tenancy, RBAC, billing and managed providers                             | Not implemented                                       |
 
 No roadmap connector should be inferred from a menu label, type definition,
 reference card or architecture diagram. A connector is shipped only after its

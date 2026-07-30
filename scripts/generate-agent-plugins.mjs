@@ -29,8 +29,8 @@ const version = JSON.parse(
   ),
 ).version;
 
-const AUTHOR = { name: "GolemWorkers", url: "https://golemworkers.com" };
-const REPOSITORY = "https://github.com/GolemWorkers/agentintel";
+const AUTHOR = { name: "MaxJafar", url: "https://github.com/MaxJafar/AGENTintel" };
+const REPOSITORY = "https://github.com/MaxJafar/AGENTintel";
 const DESCRIPTION =
   "Turn public and authorized market signals into replayable, cited competitive research.";
 
@@ -107,7 +107,7 @@ const claudePluginManifest = {
   version,
   description: DESCRIPTION,
   author: AUTHOR,
-  homepage: "https://golemworkers.com",
+  homepage: "https://github.com/MaxJafar/AGENTintel",
   repository: REPOSITORY,
   license: rootManifest.license,
   keywords: [
@@ -137,7 +137,7 @@ const marketplaceManifest = {
       description: DESCRIPTION,
       version,
       author: AUTHOR,
-      homepage: "https://golemworkers.com",
+      homepage: "https://github.com/MaxJafar/AGENTintel",
       license: rootManifest.license,
       keywords: [
         "competitive-intelligence",

@@ -54,7 +54,7 @@ def test_start_contract_rejects_legacy_schema_and_incoherent_workflow(tmp_path: 
         _analysis_request(
             pb2.StartAnalysis(
                 **baseline,
-                input_schema_id="golem.observations.v1",
+                input_schema_id="agentintel.observations.v1",
                 workflow=pb2.ANALYSIS_WORKFLOW_COMPARE,
             )
         )
@@ -64,7 +64,7 @@ def test_start_contract_rejects_legacy_schema_and_incoherent_workflow(tmp_path: 
         _analysis_request(
             pb2.StartAnalysis(
                 **baseline,
-                input_schema_id="golem.fixture-observations.v1",
+                input_schema_id="agentintel.fixture-observations.v1",
                 workflow=pb2.ANALYSIS_WORKFLOW_RESEARCH,
                 research_question="What changed?",
                 source_budget=0,
@@ -87,7 +87,7 @@ def test_protocol_emits_events_and_result_parity(
             workspace_path=str(tmp_path),
             input_path=str(copied_input),
             input_sha256=fixture_sha256,
-            input_schema_id="golem.fixture-observations.v1",
+            input_schema_id="agentintel.fixture-observations.v1",
             output_directory=str(tmp_path / "out"),
             target_ids=target_ids,
             options={"simulate": "none"},
@@ -130,7 +130,7 @@ def test_protocol_cancel_message_interrupts_slow_analysis(
             workspace_path=str(tmp_path),
             input_path=str(copied_input),
             input_sha256=fixture_sha256,
-            input_schema_id="golem.fixture-observations.v1",
+            input_schema_id="agentintel.fixture-observations.v1",
             output_directory=str(tmp_path / "out"),
             target_ids=["northstar-labs"],
             options={"simulate": "slow"},
@@ -180,7 +180,7 @@ def test_protocol_success_subprocess_exits_cleanly_after_result(
             workspace_path=str(tmp_path),
             input_path=str(copied_input),
             input_sha256=fixture_sha256,
-            input_schema_id="golem.fixture-observations.v1",
+            input_schema_id="agentintel.fixture-observations.v1",
             output_directory=str(tmp_path / "out"),
             target_ids=target_ids,
             options={"simulate": "none"},
@@ -222,7 +222,7 @@ def test_protocol_back_to_back_start_cancel_is_fast_and_cancelled(
             workspace_path=str(tmp_path),
             input_path=str(copied_input),
             input_sha256=fixture_sha256,
-            input_schema_id="golem.fixture-observations.v1",
+            input_schema_id="agentintel.fixture-observations.v1",
             output_directory=str(tmp_path / "out"),
             target_ids=["northstar-labs"],
             options={"simulate": "slow"},
@@ -278,7 +278,7 @@ def test_protocol_research_fields_drive_a_distinct_cited_dossier(
             workspace_path=str(tmp_path),
             input_path=str(copied_input),
             input_sha256=fixture_sha256,
-            input_schema_id="golem.fixture-observations.v1",
+            input_schema_id="agentintel.fixture-observations.v1",
             output_directory=str(tmp_path / "out"),
             target_ids=target_ids,
             options={"simulate": "none"},

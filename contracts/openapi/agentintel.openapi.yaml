@@ -369,7 +369,7 @@ components:
       additionalProperties: false
       required: [schema_id, sha256, size_bytes, row_count]
       properties:
-        schema_id: { const: "golem.competitive-pulse-import.v1" }
+        schema_id: { const: "agentintel.competitive-pulse-import.v1" }
         sha256: { type: string, pattern: "^[a-f0-9]{64}$" }
         size_bytes: { type: integer, minimum: 0, maximum: 8388608 }
         row_count: { type: [integer, "null"], minimum: 0 }
@@ -443,7 +443,7 @@ components:
           diagnostics_truncated,
         ]
       properties:
-        schema_version: { const: "golem.import-preview.v1" }
+        schema_version: { const: "agentintel.import-preview.v1" }
         valid: { type: boolean }
         dataset_id: { type: string }
         state: { enum: [ready, deleting, deleted] }
@@ -649,7 +649,7 @@ components:
           limitations,
         ]
       properties:
-        schema_version: { const: "golem.comparison-report.v1" }
+        schema_version: { const: "agentintel.comparison-report.v1" }
         run_id: { type: string }
         workflow: { enum: [compare, research] }
         research_question:
@@ -714,7 +714,7 @@ components:
           limitations,
         ]
       properties:
-        schema_version: { const: "golem.comparison-report.v2" }
+        schema_version: { const: "agentintel.comparison-report.v2" }
         run_id: { type: string }
         workflow: { const: compare }
         generated_at: { type: string, format: date-time }
@@ -737,13 +737,13 @@ components:
           properties:
             dataset_id: { type: string }
             input_sha256: { type: string, pattern: "^[a-f0-9]{64}$" }
-            input_schema_id: { const: "golem.competitive-pulse-import.v1" }
+            input_schema_id: { const: "agentintel.competitive-pulse-import.v1" }
             input_size_bytes: { type: integer, minimum: 1 }
             platform: { type: string }
             validated_at: { type: string, format: date-time }
             retention_until: { type: string, format: date-time }
             input_parser_version:
-              { const: "golem-python-competitive-pulse-csv@1.0.0" }
+              { const: "agentintel-python-competitive-pulse-csv@1.0.0" }
             metric_catalog_version: { const: "competitive-pulse.v1" }
         summary: { type: string, minLength: 1 }
         targets:

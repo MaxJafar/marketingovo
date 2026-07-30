@@ -27,9 +27,9 @@ handwritten or copied Protobuf contract.
 ### Competitive Pulse CSV v1
 
 `ValidateImport` and imported `StartAnalysis` requests share one fail-closed
-parser for `golem.competitive-pulse-import.v1`. The parser is
-`golem-python-competitive-pulse-csv@1.0.0`; imported analytics use
-`competitive-pulse.v1` and emit `golem.comparison-report.v2`. Preview binds the
+parser for `agentintel.competitive-pulse-import.v1`. The parser is
+`agentintel-python-competitive-pulse-csv@1.0.0`; imported analytics use
+`competitive-pulse.v1` and emit `agentintel.comparison-report.v2`. Preview binds the
 exact lowercase SHA-256 and authority-supplied whole-second `validated_at`.
 Analysis additionally requires the matching dataset, parser, and metric catalog
 in `StartAnalysis.import_context`.
@@ -38,7 +38,7 @@ The boundary accepts exactly the frozen 22-column header, at most 10,000 data
 records, and at most 65,536 encoded bytes per record. It never evaluates
 formulas, trims values, follows paths, opens citations, or substitutes defaults
 for missing values. Accepted rows normalize to the unchanged
-`golem.observations.v1` Arrow schema in `(target_id, observed_at,
+`agentintel.observations.v1` Arrow schema in `(target_id, observed_at,
 observation_id)` order. Missing and contradictory evidence is represented by
 metric availability states and metric-scoped canonical observation IDs, not by
 zero fill or source-order selection.

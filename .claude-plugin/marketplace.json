@@ -1,8 +1,8 @@
 {
   "name": "agentintel",
   "owner": {
-    "name": "GolemWorkers",
-    "url": "https://golemworkers.com"
+    "name": "MaxJafar",
+    "url": "https://github.com/MaxJafar/AGENTintel"
   },
   "metadata": {
     "description": "Local-first, evidence-first competitive research for coding agents.",
@@ -15,10 +15,10 @@
       "description": "Turn public and authorized market signals into replayable, cited competitive research.",
       "version": "0.2.0-alpha.0",
       "author": {
-        "name": "GolemWorkers",
-        "url": "https://golemworkers.com"
+        "name": "MaxJafar",
+        "url": "https://github.com/MaxJafar/AGENTintel"
       },
-      "homepage": "https://golemworkers.com",
+      "homepage": "https://github.com/MaxJafar/AGENTintel",
       "license": "Apache-2.0",
       "keywords": [
         "competitive-intelligence",

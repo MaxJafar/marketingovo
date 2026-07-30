@@ -16,11 +16,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GolemWorkers/agentintel/internal/connectors"
-	"github.com/GolemWorkers/agentintel/internal/domain"
-	"github.com/GolemWorkers/agentintel/internal/governance"
-	"github.com/GolemWorkers/agentintel/internal/policy"
-	"github.com/GolemWorkers/agentintel/internal/storage"
+	"github.com/MaxJafar/AGENTintel/internal/connectors"
+	"github.com/MaxJafar/AGENTintel/internal/domain"
+	"github.com/MaxJafar/AGENTintel/internal/governance"
+	"github.com/MaxJafar/AGENTintel/internal/policy"
+	"github.com/MaxJafar/AGENTintel/internal/storage"
 )
 
 const maximumFixtureBytes int64 = 128 << 20
@@ -528,7 +528,7 @@ func (manager *Manager) execute(run domain.Run) {
 	}
 	provenance := domain.Provenance{
 		WorkerVersion: result.WorkerVersion, ModelVersion: result.ModelVersion,
-		ConnectorVersion: manager.worker.ID(), ParserVersion: "golem-go-fixture.v1",
+		ConnectorVersion: manager.worker.ID(), ParserVersion: "agentintel-go-fixture.v1",
 	}
 	if provenance.WorkerVersion == "" {
 		provenance.WorkerVersion = manager.worker.ID()
@@ -537,7 +537,7 @@ func (manager *Manager) execute(run domain.Run) {
 		provenance.ModelVersion = "none"
 	}
 	if manager.worker.ID() == "python.intelligence.protocol.v1" {
-		provenance.ParserVersion = "golem-go-arrow-parquet.v1"
+		provenance.ParserVersion = "agentintel-go-arrow-parquet.v1"
 	}
 	if run.DatasetID != "" {
 		provenance.ConnectorVersion = "local.competitive-pulse-import@1.0.0"
@@ -640,7 +640,7 @@ func deriveCanonicalProjections(runID string, observations []domain.Observation,
 }
 
 func (manager *Manager) prepareInputSnapshot(run domain.Run, destinationPath string) (domain.InputSnapshot, error) {
-	const schemaID = "golem.fixture-observations.v1"
+	const schemaID = "agentintel.fixture-observations.v1"
 	if run.InputSHA256 != "" {
 		if run.InputSchemaID == "" || run.InputRelativePath == "" || run.InputSizeBytes <= 0 {
 			return domain.InputSnapshot{}, &connectors.WorkerError{Code: "input_snapshot_invalid", Message: "replay input snapshot metadata is incomplete"}

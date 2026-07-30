@@ -5,9 +5,9 @@
 - Model ID: `competitive-pulse-baseline@0.1.0`
 - Type: deterministic descriptive analytics; no trained parameters
 - Owner: AGENTintel Community
-- Inputs: validated `golem.observations.v1` evidence selected by target ID
-- Outputs: `golem.comparison-report.v1` for the legacy fixture and
-  `golem.comparison-report.v2` for validated Competitive Pulse CSV v1 imports
+- Inputs: validated `agentintel.observations.v1` evidence selected by target ID
+- Outputs: `agentintel.comparison-report.v1` for the legacy fixture and
+  `agentintel.comparison-report.v2` for validated Competitive Pulse CSV v1 imports
 
 ## Intended use
 

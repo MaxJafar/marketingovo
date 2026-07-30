@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/GolemWorkers/agentintel/internal/domain"
+	"github.com/MaxJafar/AGENTintel/internal/domain"
 )
 
 // CreateDataset persists only an opaque projection and a daemon-created

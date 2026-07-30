@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GolemWorkers/agentintel/internal/api"
-	"github.com/GolemWorkers/agentintel/internal/daemonlock"
+	"github.com/MaxJafar/AGENTintel/internal/api"
+	"github.com/MaxJafar/AGENTintel/internal/daemonlock"
 )
 
 func TestReadBootstrapTokenExactBoundedInput(t *testing.T) {

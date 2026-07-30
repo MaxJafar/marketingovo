@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/GolemWorkers/agentintel/internal/domain"
+	"github.com/MaxJafar/AGENTintel/internal/domain"
 )
 
 func TestDurableRunCancellationReplayAndRecovery(t *testing.T) {
@@ -20,7 +20,7 @@ func TestDurableRunCancellationReplayAndRecovery(t *testing.T) {
 	request, _ := json.Marshal(domain.JobRequest{Comparison: &domain.ComparisonStartRequest{ProjectID: "demo", TargetIDs: []string{"northstar-labs", "orbit-coffee"}}})
 	run, err := store.createRun(ctx, "demo", domain.WorkflowCompare, request, nil, domain.InputSnapshot{
 		RelativePath: "input-snapshots/test.ndjson", SHA256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-		SchemaID: "golem.fixture-observations.v1", SizeBytes: 1,
+		SchemaID: "agentintel.fixture-observations.v1", SizeBytes: 1,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -70,7 +70,7 @@ func TestCompleteRunPersistsArtifactsEntitiesAndSearch(t *testing.T) {
 	if _, err := store.ClaimNextRun(ctx); err != nil {
 		t.Fatal(err)
 	}
-	report := domain.Artifact{ID: "artifact-report", RunID: run.ID, Kind: "report", RelativePath: "runs/x/evidence/report.json", MediaType: "application/json", SHA256: string(make([]byte, 64)), SchemaID: "golem.comparison-report.v1", DataClass: "public"}
+	report := domain.Artifact{ID: "artifact-report", RunID: run.ID, Kind: "report", RelativePath: "runs/x/evidence/report.json", MediaType: "application/json", SHA256: string(make([]byte, 64)), SchemaID: "agentintel.comparison-report.v1", DataClass: "public"}
 	entity := domain.Entity{ID: "northstar-labs", Type: "social_account", DisplayName: "Northstar Labs", ResolutionState: "observed"}
 	if err := store.CompleteRun(ctx, run.ID, []domain.Artifact{report}, []domain.Entity{entity}, []domain.SearchDocument{{Kind: "entity", ID: entity.ID, Label: entity.DisplayName, Excerpt: "fixture", Confidence: 1}}, false); err != nil {
 		t.Fatal(err)

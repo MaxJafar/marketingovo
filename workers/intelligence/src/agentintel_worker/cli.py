@@ -33,7 +33,7 @@ def _parser() -> argparse.ArgumentParser:
     analyze.add_argument("--workspace-path", type=Path, default=Path.cwd())
     analyze.add_argument("--input", dest="input_path", required=True, type=Path)
     analyze.add_argument("--input-sha256", required=True)
-    analyze.add_argument("--input-schema-id", default="golem.fixture-observations.v1")
+    analyze.add_argument("--input-schema-id", default="agentintel.fixture-observations.v1")
     analyze.add_argument("--output-dir", dest="output_directory", required=True, type=Path)
     analyze.add_argument("--target-id", dest="target_ids", action="append", default=[])
     analyze.add_argument(

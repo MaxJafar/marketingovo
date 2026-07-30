@@ -38,3 +38,6 @@ service-token
 
 # The source archives are a local reference laboratory, never build input.
 TO REVERSE ENGINEEER/
+
+# Local run output from ad-hoc browser sessions.
+output/

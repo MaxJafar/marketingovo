@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GolemWorkers/agentintel/internal/domain"
-	"github.com/GolemWorkers/agentintel/internal/policy"
+	"github.com/MaxJafar/AGENTintel/internal/domain"
+	"github.com/MaxJafar/AGENTintel/internal/policy"
 	"github.com/apache/arrow-go/v18/arrow"
 	arrowarray "github.com/apache/arrow-go/v18/arrow/array"
 	"github.com/apache/arrow-go/v18/arrow/ipc"
@@ -21,7 +21,7 @@ import (
 	"github.com/apache/arrow-go/v18/parquet/pqarrow"
 )
 
-const CanonicalParserVersion = "golem-go-arrow-parquet.v1"
+const CanonicalParserVersion = "agentintel-go-arrow-parquet.v1"
 
 var canonicalObservationFields = []arrow.Field{
 	{Name: "observation_id", Type: arrow.BinaryTypes.String, Nullable: false},
@@ -159,8 +159,8 @@ func validateCanonicalSchema(schema *arrow.Schema, requireSchemaID bool) error {
 				index, expected.Name, expected.Type, expected.Nullable, actual.Name, actual.Type, actual.Nullable)
 		}
 	}
-	if schemaID, present := schema.Metadata().GetValue("golem.schema_id"); requireSchemaID && (!present || schemaID != "golem.observations.v1") {
-		return fmt.Errorf("%w: canonical schema metadata lacks golem.observations.v1", ErrArtifactMismatch)
+	if schemaID, present := schema.Metadata().GetValue("agentintel.schema_id"); requireSchemaID && (!present || schemaID != "agentintel.observations.v1") {
+		return fmt.Errorf("%w: canonical schema metadata lacks agentintel.observations.v1", ErrArtifactMismatch)
 	}
 	return nil
 }

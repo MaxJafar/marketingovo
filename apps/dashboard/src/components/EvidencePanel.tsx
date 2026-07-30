@@ -2,11 +2,11 @@ import type { ComparisonReport } from "@agentintel/sdk";
 
 type ImportComparisonReport = Extract<
   ComparisonReport,
-  { schema_version: "golem.comparison-report.v2" }
+  { schema_version: "agentintel.comparison-report.v2" }
 >;
 type ComparisonReportV1 = Extract<
   ComparisonReport,
-  { schema_version: "golem.comparison-report.v1" }
+  { schema_version: "agentintel.comparison-report.v1" }
 >;
 
 interface EvidencePanelProps {
@@ -16,7 +16,7 @@ interface EvidencePanelProps {
 export function EvidencePanel({
   report,
 }: EvidencePanelProps): React.JSX.Element {
-  if (report.schema_version === "golem.comparison-report.v2") {
+  if (report.schema_version === "agentintel.comparison-report.v2") {
     return <EvidencePanelV2 report={report} />;
   }
   return <EvidencePanelV1 report={report} />;

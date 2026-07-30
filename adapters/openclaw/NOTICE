@@ -1,2 +1,29 @@
-See ../../NOTICE.
+AGENTintel
+Copyright 2026 MaxJafar
 
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+
+AGENTintel is open-source software under an Open Source Initiative approved
+license. Apache-2.0 grants patent rights and permits commercial use,
+modification, distribution, and private use.
+
+There is no paid tier, no hosted edition, and no telemetry. Everything runs
+locally and every capability in this repository is available to everyone.
+
+Reference projects under "TO REVERSE ENGINEEER/" are third-party works retained
+locally for study. They keep their own copyrights and licenses, are excluded
+from version control and from every product, build, and test input, and are not
+distributed with this repository or any release artifact. Several are licensed
+under GPL or AGPL terms; no code from them is copied into this product.
+
+Third-party notices are generated for each release from the dependency lockfile
+and are distributed with release artifacts.

@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	intelv1 "github.com/GolemWorkers/agentintel/gen/go/agentintel/v1"
-	"github.com/GolemWorkers/agentintel/internal/domain"
+	intelv1 "github.com/MaxJafar/AGENTintel/gen/go/agentintel/v1"
+	"github.com/MaxJafar/AGENTintel/internal/domain"
 )
 
 func TestProtocolEnvelopeUsesBigEndianLengthPrefix(t *testing.T) {
@@ -73,7 +73,7 @@ func TestWorkerCommandsAndEnvironmentAreSealed(t *testing.T) {
 }
 
 func TestStartAnalysisRequiresCoherentTypedWorkflow(t *testing.T) {
-	base := AnalysisRequest{RunID: "run-1", ProjectID: "demo", WorkspacePath: "/job", InputPath: "/job/input", InputSHA256: strings.Repeat("a", 64), InputSchemaID: "golem.fixture-observations.v1", OutputDir: "/job/output"}
+	base := AnalysisRequest{RunID: "run-1", ProjectID: "demo", WorkspacePath: "/job", InputPath: "/job/input", InputSHA256: strings.Repeat("a", 64), InputSchemaID: "agentintel.fixture-observations.v1", OutputDir: "/job/output"}
 	compare := base
 	compare.Workflow = domain.WorkflowCompare
 	envelope, err := startAnalysisEnvelope(compare)

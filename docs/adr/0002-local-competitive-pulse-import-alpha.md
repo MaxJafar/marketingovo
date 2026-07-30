@@ -11,7 +11,7 @@
 
 AGENTintel is the confirmed target product identity: an independent,
 local-first, evidence-first agent tool. The inherited repository still presents
-AGENTintel/GolemWorkers throughout code, contracts, persisted identifiers, and
+AGENTintel/MaxJafar throughout code, contracts, persisted identifiers, and
 legal files, and remains Elastic-2.0 source-available rather than an
 OSI-approved open-source distribution. This ADR neither performs that migration
 nor makes an open-source release claim.
@@ -27,7 +27,7 @@ The repository already has boundaries worth preserving:
 - the Go daemon is authoritative for policy, durable state, immutable input,
   cancellation, evidence validation, and publication;
 - the Python worker owns normalization and deterministic analytics;
-- `golem.observations.v1` is an exact 32-field Arrow/Parquet contract;
+- `agentintel.observations.v1` is an exact 32-field Arrow/Parquet contract;
 - metric definitions prohibit missing-as-zero and silent denominator changes;
 - every published artifact and citation is physically revalidated by Go; and
 - the six MCP actions expose workflows rather than credentials or files.
@@ -79,7 +79,7 @@ paths, cookies, headers, or desktop identity.
 ## Decision summary
 
 The alpha accepts exactly one versioned UTF-8 CSV contract,
-`golem.competitive-pulse-import.v1`. A human-controlled dashboard or CLI sends
+`agentintel.competitive-pulse-import.v1`. A human-controlled dashboard or CLI sends
 the file bytes to the authenticated exact-loopback daemon. The request never
 contains a path for the daemon to open.
 
@@ -97,8 +97,8 @@ uses only that snapshot and the pinned v1 contracts.
 
 The canonical 32-field observation schema is unchanged. Import-specific
 missingness and metric-to-evidence resolution require a new
-`golem.comparison-report.v2`; the existing synthetic fixture continues to emit
-`golem.comparison-report.v1`.
+`agentintel.comparison-report.v2`; the existing synthetic fixture continues to emit
+`agentintel.comparison-report.v1`.
 
 The following are invariants, not implementation suggestions:
 
@@ -253,7 +253,7 @@ user-facing product and handoff language says AGENTintel.
 
 | Property                       | Frozen value                                                     |
 | ------------------------------ | ---------------------------------------------------------------- |
-| Schema ID                      | `golem.competitive-pulse-import.v1`                              |
+| Schema ID                      | `agentintel.competitive-pulse-import.v1`                              |
 | Media type                     | `text/csv; charset=utf-8`                                        |
 | Encoding                       | UTF-8 without BOM; invalid sequences are rejected                |
 | Maximum raw body               | 8,388,608 bytes                                                  |
@@ -286,7 +286,7 @@ and rule names, never the rejected cell value.
 
 | Column              | Required value and validation                                                                                                                                                                       |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `schema_version`    | Exact constant `golem.competitive-pulse-import.v1`.                                                                                                                                                 |
+| `schema_version`    | Exact constant `agentintel.competitive-pulse-import.v1`.                                                                                                                                                 |
 | `observation_id`    | 1–128 ASCII characters matching `^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`; unique in the file.                                                                                                          |
 | `target_id`         | 1–64 lowercase ASCII characters matching `^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$`. The file contains 2–5 distinct brand/organization IDs; natural-person targets are out of scope.                  |
 | `target_name`       | 1–200 Unicode scalar values; one exact NFC brand/organization name per `target_id`. No entity resolution or name-based merge occurs.                                                                |
@@ -538,7 +538,7 @@ The importer emits the existing fields in the existing order and types. It may
 not add a 33rd field, make a non-nullable field nullable, relax a governance
 validator, or publish CSV directly as evidence.
 
-| Canonical `golem.observations.v1` field | Import v1 source or derivation                                                                                   |
+| Canonical `agentintel.observations.v1` field | Import v1 source or derivation                                                                                   |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `observation_id`                        | CSV `observation_id`                                                                                             |
 | `entity_id`                             | CSV `target_id`                                                                                                  |
@@ -611,7 +611,7 @@ invalid result contains no dataset ID and its temporary bytes have already been
 removed. Transport, authentication, or service failures use Problem responses
 with their conventional HTTP status (400/401/403/413/415/500).
 
-The response is `golem.import-preview.v1`:
+The response is `agentintel.import-preview.v1`:
 
 ```text
 schema_version             constant
@@ -825,12 +825,12 @@ The expected versions are:
 
 | Contract           | Version                                    |
 | ------------------ | ------------------------------------------ |
-| CSV schema         | `golem.competitive-pulse-import.v1`        |
-| Input parser       | `golem-python-competitive-pulse-csv@1.0.0` |
+| CSV schema         | `agentintel.competitive-pulse-import.v1`        |
+| Input parser       | `agentintel-python-competitive-pulse-csv@1.0.0` |
 | Connector          | `local.competitive-pulse-import@1.0.0`     |
 | Metric catalog     | `competitive-pulse.v1`                     |
-| Canonical evidence | `golem.observations.v1`                    |
-| Report             | `golem.comparison-report.v2`               |
+| Canonical evidence | `agentintel.observations.v1`                    |
+| Report             | `agentintel.comparison-report.v2`               |
 
 The preview result is a proposal. Go owns the body hash and size, dataset state,
 attestation, retention clock, and target selection, and it revalidates the
@@ -1060,7 +1060,7 @@ claim for that metric. Format mix is descriptive and never receives a generic
 winner claim. No metric supports a causal, revenue, customer-retention, or
 employment-performance inference.
 
-## `golem.comparison-report.v2`
+## `agentintel.comparison-report.v2`
 
 V1 hard-codes four non-null numbers and one undifferentiated citation array, so
 it cannot truthfully represent missing metrics or resolve each display value to
@@ -1110,7 +1110,7 @@ entry against canonical Arrow/Parquet rows and validates each non-null metric by
 recomputing its deterministic definition before accepting the report.
 
 Existing fixture and research runs continue to return
-`golem.comparison-report.v1`. Consumers discriminate on `schema_version`.
+`agentintel.comparison-report.v1`. Consumers discriminate on `schema_version`.
 
 ## Retention, deletion, and residual storage
 

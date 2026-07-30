@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "golem://arrow/observations/v1",
+  "$id": "agentintel://arrow/observations/v1",
   "title": "AGENTintel observation Arrow schema",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_id", "fields"],
   "properties": {
-    "schema_id": { "const": "golem.observations.v1" },
+    "schema_id": { "const": "agentintel.observations.v1" },
     "fields": {
       "type": "array",
       "prefixItems": [

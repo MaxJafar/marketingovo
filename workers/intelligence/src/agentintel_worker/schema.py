@@ -41,7 +41,7 @@ OBSERVATION_SCHEMA = pa.schema(
         pa.field("retention_until", UTC_MICROSECOND_TIMESTAMP, nullable=False),
         pa.field("rights_state", pa.string(), nullable=False),
     ],
-    metadata={b"golem.schema_id": OBSERVATION_SCHEMA_ID.encode("ascii")},
+    metadata={b"agentintel.schema_id": OBSERVATION_SCHEMA_ID.encode("ascii")},
 )
 
 OBSERVATION_FIELD_NAMES = tuple(field.name for field in OBSERVATION_SCHEMA)

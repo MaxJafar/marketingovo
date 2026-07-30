@@ -1,5 +1,5 @@
 {
-  "schema_version": "golem.comparison-report.v1",
+  "schema_version": "agentintel.comparison-report.v1",
   "run_id": "run_sample_01",
   "workflow": "compare",
   "research_plan": [

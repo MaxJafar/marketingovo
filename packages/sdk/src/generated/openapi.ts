@@ -321,7 +321,7 @@ export interface components {
         };
         ImportInputSummary: {
             /** @constant */
-            schema_id: "golem.competitive-pulse-import.v1";
+            schema_id: "agentintel.competitive-pulse-import.v1";
             sha256: string;
             size_bytes: number;
             row_count: number | null;
@@ -364,7 +364,7 @@ export interface components {
         };
         ImportPreview: {
             /** @constant */
-            schema_version: "golem.import-preview.v1";
+            schema_version: "agentintel.import-preview.v1";
             valid: boolean;
             dataset_id?: string;
             /** @enum {unknown} */
@@ -486,7 +486,7 @@ export interface components {
         ComparisonReport: components["schemas"]["ComparisonReportV1"] | components["schemas"]["ImportComparisonReport"];
         ComparisonReportV1: {
             /** @constant */
-            schema_version: "golem.comparison-report.v1";
+            schema_version: "agentintel.comparison-report.v1";
             run_id: string;
             /** @enum {unknown} */
             workflow: "compare" | "research";
@@ -505,7 +505,7 @@ export interface components {
         } & unknown;
         ImportComparisonReport: {
             /** @constant */
-            schema_version: "golem.comparison-report.v2";
+            schema_version: "agentintel.comparison-report.v2";
             run_id: string;
             /** @constant */
             workflow: "compare";
@@ -516,7 +516,7 @@ export interface components {
                 dataset_id: string;
                 input_sha256: string;
                 /** @constant */
-                input_schema_id: "golem.competitive-pulse-import.v1";
+                input_schema_id: "agentintel.competitive-pulse-import.v1";
                 input_size_bytes: number;
                 platform: string;
                 /** Format: date-time */
@@ -524,7 +524,7 @@ export interface components {
                 /** Format: date-time */
                 retention_until: string;
                 /** @constant */
-                input_parser_version: "golem-python-competitive-pulse-csv@1.0.0";
+                input_parser_version: "agentintel-python-competitive-pulse-csv@1.0.0";
                 /** @constant */
                 metric_catalog_version: "competitive-pulse.v1";
             };

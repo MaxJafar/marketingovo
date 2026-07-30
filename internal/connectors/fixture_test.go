@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GolemWorkers/agentintel/internal/domain"
-	"github.com/GolemWorkers/agentintel/internal/governance"
+	"github.com/MaxJafar/AGENTintel/internal/domain"
+	"github.com/MaxJafar/AGENTintel/internal/governance"
 )
 
 func TestFixtureReportProducesGoldenFollowerDeltas(t *testing.T) {
@@ -59,7 +59,7 @@ func TestFixtureCorruptionSimulationIsRejected(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := governance.CommitEvidence(governance.CommitOptions{DataRoot: root, RunID: "run-corrupt", StageDir: stage, Descriptors: result.Artifacts,
-		Provenance: domain.Provenance{WorkerVersion: "fixture.v1", ModelVersion: "none", ConnectorVersion: "fixture.v1", ParserVersion: "golem-go-fixture.v1"}}); err == nil {
+		Provenance: domain.Provenance{WorkerVersion: "fixture.v1", ModelVersion: "none", ConnectorVersion: "fixture.v1", ParserVersion: "agentintel-go-fixture.v1"}}); err == nil {
 		t.Fatal("corrupt fixture artifact was committed")
 	}
 }

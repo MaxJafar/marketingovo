@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GolemWorkers/agentintel/internal/domain"
+	"github.com/MaxJafar/AGENTintel/internal/domain"
 )
 
 type Client struct {

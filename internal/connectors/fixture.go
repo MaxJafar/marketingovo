@@ -17,8 +17,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GolemWorkers/agentintel/internal/domain"
-	"github.com/GolemWorkers/agentintel/internal/governance"
+	"github.com/MaxJafar/AGENTintel/internal/domain"
+	"github.com/MaxJafar/AGENTintel/internal/governance"
 )
 
 const FixtureID = "fixture.competitive-pulse"
@@ -127,13 +127,13 @@ collected:
 			{
 				RelativePath: "observations.ndjson", Kind: "raw", MediaType: "application/x-ndjson",
 				SHA256: observationHash, SizeBytes: observationSize, RowCount: int64(len(observations)),
-				SchemaID: "golem.observations.v1", MinimumObservedAt: minimum, MaximumObservedAt: maximum,
+				SchemaID: "agentintel.observations.v1", MinimumObservedAt: minimum, MaximumObservedAt: maximum,
 				DataClass: "public",
 			},
 			{
 				RelativePath: "report.json", Kind: "report", MediaType: "application/json",
 				SHA256: reportHash, SizeBytes: reportSize, RowCount: int64(len(report.Targets)),
-				SchemaID: "golem.comparison-report.v1", DataClass: "public",
+				SchemaID: "agentintel.comparison-report.v1", DataClass: "public",
 			},
 		},
 		ReportRelativePath: "report.json", ReportSHA256: reportHash, ModelVersion: "fixture-analytics.v1", WorkerVersion: FixtureID,
@@ -217,9 +217,9 @@ func BuildFixtureReport(runID string, targetIDs []string, options map[string]str
 		}
 	}
 	report := domain.ComparisonReport{
-		SchemaVersion: "golem.comparison-report.v1", RunID: runID, GeneratedAt: time.Now().UTC(),
+		SchemaVersion: "agentintel.comparison-report.v1", RunID: runID, GeneratedAt: time.Now().UTC(),
 		Workflow: domain.Workflow(workflow), ResearchQuestion: options["question"], ResearchPlan: []string{"validate fixture observations", "derive denominator-specific metrics", "cite public observations"},
-		Derivation: domain.Provenance{WorkerVersion: FixtureID, ModelVersion: "fixture-analytics.v1", ConnectorVersion: FixtureID, ParserVersion: "golem-go-fixture.v1"},
+		Derivation: domain.Provenance{WorkerVersion: FixtureID, ModelVersion: "fixture-analytics.v1", ConnectorVersion: FixtureID, ParserVersion: "agentintel-go-fixture.v1"},
 		Title:      title, Summary: summary, Targets: findings,
 		MetricDefinitions: []domain.MetricDefinition{
 			{ID: "follower_delta", Version: "followers.v1", Label: "Observed follower change", Numerator: "latest public follower count minus earliest public follower count", Denominator: "not_applicable", Period: "fixture observation window"},

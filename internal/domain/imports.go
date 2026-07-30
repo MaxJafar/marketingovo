@@ -3,8 +3,8 @@ package domain
 import "time"
 
 const (
-	CompetitivePulseImportSchema  = "golem.competitive-pulse-import.v1"
-	CompetitivePulseParserVersion = "golem-python-competitive-pulse-csv@1.0.0"
+	CompetitivePulseImportSchema  = "agentintel.competitive-pulse-import.v1"
+	CompetitivePulseParserVersion = "agentintel-python-competitive-pulse-csv@1.0.0"
 	CompetitivePulseMetricCatalog = "competitive-pulse.v1"
 )
 

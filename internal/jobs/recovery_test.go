@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GolemWorkers/agentintel/internal/connectors"
-	"github.com/GolemWorkers/agentintel/internal/domain"
-	"github.com/GolemWorkers/agentintel/internal/governance"
-	"github.com/GolemWorkers/agentintel/internal/storage"
+	"github.com/MaxJafar/AGENTintel/internal/connectors"
+	"github.com/MaxJafar/AGENTintel/internal/domain"
+	"github.com/MaxJafar/AGENTintel/internal/governance"
+	"github.com/MaxJafar/AGENTintel/internal/storage"
 )
 
 func TestManagerRecoversPublishedEvidenceBeforeWorkers(t *testing.T) {
@@ -345,7 +345,7 @@ func createPublishedRecoveredRun(t *testing.T, mutate func(*testing.T, string, s
 		DataRoot: root, RunID: run.ID, StageDir: stage, Descriptors: result.Artifacts,
 		MaximumBytes: governance.DefaultMaximumArtifactBytes, AllowLegacyFixture: true,
 		Provenance: domain.Provenance{WorkerVersion: result.WorkerVersion, ModelVersion: result.ModelVersion,
-			ConnectorVersion: connectors.FixtureID, ParserVersion: "golem-go-fixture.v1"},
+			ConnectorVersion: connectors.FixtureID, ParserVersion: "agentintel-go-fixture.v1"},
 	})
 	if err != nil {
 		t.Fatal(err)

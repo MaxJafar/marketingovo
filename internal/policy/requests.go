@@ -7,7 +7,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/GolemWorkers/agentintel/internal/domain"
+	"github.com/MaxJafar/AGENTintel/internal/domain"
 )
 
 var (
