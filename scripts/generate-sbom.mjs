@@ -61,7 +61,7 @@ const sbom = {
     component: {
       type: "application",
       name: "agentseo-community",
-      version: "0.12.0-alpha.0",
+      version: "1.0.0",
     },
     tools: {
       components: [

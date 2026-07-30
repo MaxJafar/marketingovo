@@ -2,7 +2,7 @@
   "id": "agentseo",
   "name": "AGENTseo",
   "description": "Run local SEO audits, comparisons, keyword research, content plans, evidence inspection, and monitoring through bounded workflow-level tools.",
-  "version": "0.12.0-alpha.0",
+  "version": "1.0.0",
   "configSchema": {
     "type": "object",
     "additionalProperties": false,

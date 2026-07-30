@@ -24,7 +24,11 @@ if (!requiresPublicAcceptance(workspace.version)) {
   const path = resolve(root, "release/acceptance", `${workspace.version}.json`);
   const record = JSON.parse(await readFile(path, "utf8"));
   validatePublicReleaseAcceptance(record, workspace.version);
+  const gates = Object.keys(record.evidence).length;
+  const deferred = record.deferredChannels.length;
   process.stdout.write(
-    `Validated legal, release-owner and ${record.designPartners.length} attributable design-partner approvals for ${tag}.\n`,
+    `Validated release-owner and licence-compliance approval for ${tag}, ` +
+      `${gates} recorded quality gate(s), and ${deferred} declared deferred ` +
+      `distribution channel(s).\n`,
   );
 }

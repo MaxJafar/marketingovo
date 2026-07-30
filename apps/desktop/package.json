@@ -1,6 +1,6 @@
 {
   "name": "@agentseoapp/desktop",
-  "version": "0.12.0-alpha.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Tauri 2 desktop launcher for AGENTseo",
   "license": "Apache-2.0",

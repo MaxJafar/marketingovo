@@ -1,16 +1,22 @@
 # Release status
 
-## 0.11 alpha
+## 1.0.0 — released state
 
-The current branch is the production-foundation release. Its acceptance target
-is a clean local install, correct workflow execution, safe browser networking,
-durable SQLite history, a real dashboard, and working CLI/MCP/adapters.
+AGENTseo 1.0.0 declares a stable public surface: the REST API and its OpenAPI
+document, the generated SDK, the nine-tool agent contract registry, the CLI, and
+the `.agentseo` project bundle format. Breaking changes to any of these now
+require a major version.
 
-Alpha builds are for design partners and contributors. Native installer signing,
-automatic-update and upgrade evidence, and every supported operating-system
-matrix remain release gates for the 1.0 candidate.
+**What 1.0.0 covers:** source, CLI, MCP plugin (Claude Code, Codex, OpenClaw,
+Cursor, VS Code and generic MCP), and the npm-packable packages.
 
-The current alpha includes the first license-safe Audit Intelligence Pack:
+**What it does not cover:** signed native installers, the Tauri updater channel,
+and npm registry publication. These are declared as deferred channels in
+`release/acceptance/1.0.0.json` rather than left to be inferred. A stable native
+release still requires a verified upgrade from an older signed installer, and no
+signing identity has been procured.
+
+1.0.0 includes the Audit Intelligence Pack:
 source-aware internal redirects, click-depth and inlink diagnostics, structural
 markup and hreflang checks, exact URL cohort audits, provider-cost transparency,
 an evidence-first Codex marketer workflow, and a durable Issue Review workspace
@@ -60,193 +66,49 @@ The local data lifecycle also includes exact-name project deletion with active
 job cancellation, orphan-safe SQLite cleanup, two-phase artifact removal, a
 bounded receipt, and deliberately retained global BYOK credentials.
 
-## Public 1.0 gates
+## Evidence recorded for 1.0.0
 
-- no known critical or high application/dependency vulnerability;
-- correct succeeded/partial/failed/cancelled states and no recursive workflows;
-- SSRF, redirect, DNS, browser, OAuth, and secret-leak corpora pass;
-- scheduled work survives process crashes without duplication;
-- GSC/GA4 pagination and current field contracts pass fixtures;
-- clean install, upgrade, package, MCP, Codex, and OpenClaw smoke tests pass;
-- native background-start, stop, upgrade, and uninstall tests pass on every
-  supported operating system, including a signed-installer Windows startup
-  implementation;
-- dashboard meets WCAG 2.2 AA and first action is reachable within 15 minutes;
-- fixed correctness corpus detects at least 95% of labeled issues with fewer
-  than 5% high-severity false positives;
-- no unexplained benchmark regression above 20%;
-- three design partners approve attributable weekly-workflow case studies.
+`release/acceptance/1.0.0.json` names every gate with the command that produced
+it. All were observed passing on macOS arm64, Node 24.18.1, pnpm 10.34.5:
 
-Claims about replacing commercial tools require a reproducible public corpus.
+| Gate                                              | Command                   |
+| ------------------------------------------------- | ------------------------- |
+| Workspace gate across 17 workspaces               | `pnpm check`              |
+| Correctness corpus and benchmark regression       | `pnpm benchmark`          |
+| Dependency advisories                             | `pnpm audit:dependencies` |
+| Dependency licence policy                         | `pnpm validate:licenses`  |
+| Agent host surfaces against the contract registry | `pnpm validate:plugins`   |
+| Instruction guardrails                            | `pnpm validate:skills`    |
+| Packaged real-browser journey with axe            | `pnpm test:e2e`           |
 
-Current implementation status: the Windows MSI now owns an HKCU login-start
-component that launches the signed desktop executable with only
-`--background`. WiX removes that component on uninstall. The background
-launcher passes validated packaged runtime paths to the daemon in memory and
-never persists a password. The release matrix now has fail-closed destructive
-lifecycle scripts for the DMG, MSI, deb, and AppImage. They install an older
-published and cryptographically verified baseline when configured, create a
-real project, stop the packaged service, upgrade, prove the same project and
-release version remain healthy, uninstall, and verify process/package/service
-cleanup while retaining user data. Stable tags require
-`AGENTSEO_UPGRADE_BASELINE_TAG`; prereleases can only use an explicit
-not-tested waiver. The separate npm CLI
-uses a least-privilege per-user Task Scheduler task when the user explicitly
-runs `agentseo service install`.
+Additional facts about this release:
 
-The npm release path now version-locks all JavaScript and native surfaces,
-packs 13 public packages in dependency order, rejects unresolved `workspace:`
-protocols, performs a clean tarball install in CI, and publishes only after the
-native matrix passes. Publication requires GitHub Actions OIDC, matching
-registry integrity, and npm provenance attestations. No package or signed
-native artifact is claimed as released until those gates run successfully on
-the canonical tag workflow.
-
-The exact-tag workflow now adds a blocking source-evidence job before any native
-build. It reruns the complete Community gate, live npm advisory audit, real
-packaged-browser journey, RustSec audits for both native lockfiles, Gitleaks,
-CodeQL, and SBOM generation. These controls are fail-closed policy until the
-canonical tag workflow produces its evidence; their presence in source is not
-reported as a completed public release.
-
-## Locally verified on 2026-07-16
-
-- `pnpm check` exits successfully across all 17 workspaces, including build,
-  strict types, unit/integration tests, release and npm policy tests, contract
-  and plugin parity, license validation, benchmark, and 13-package tarball
-  inspection;
-- the SDK exposes a complete OpenAPI-generated typed client and fails its build
-  when the checked-in path/parameter/request/response projection drifts from
-  the server document; the ergonomic client retains the same strict loopback
-  token boundary;
-- audit comparison now validates 18 public schemas and 36 API operations,
-  rejects invalid run pairs with typed Problem Details, preserves per-run issue
-  snapshots across later severity changes, and renders configuration-aware
-  regressions, fixes, page changes, and unavailable data without client-side
-  recomputation;
-- the internal-link explorer extends that boundary to 19 public schemas and 37
-  API operations; storage/runtime/API/UI tests cover aliases, broken and
-  uncrawled targets, pagination, search, non-audit history isolation, and
-  portable graph reconstruction;
-- `link-delta-v1` reuses that immutable graph inside audit comparison without
-  adding another API operation; storage/runtime/API/UI tests cover full and
-  unavailable coverage, exact edge identities, added/removed/modified edges,
-  broken-target regression and recovery, bounded output, and neutral
-  editorial or uncrawled states;
-- the review-first extraction template catalog extends the current boundary to
-  20 public schemas and 38 API operations; runtime validation, clone isolation,
-  REST/OpenAPI/SDK/CLI parity, draft-only import, label conflicts, and the
-  50-rule boundary have dedicated coverage;
-- Issue Review now preserves project-scoped adjudications across audits and
-  `.agentseo` transfers, narrows grouped Action scope and recalculates priority
-  per reviewed URL, hides fully reviewed groups without deleting evidence,
-  rejects secret-like reasons, and exposes only read access to MCP agents;
-- Project Context now preserves normalized business/SEO profiles as immutable
-  revisions and human observations, decisions, constraints, and experiments as
-  an append-only journal; cross-project run links, secret-like text, and local
-  paths are rejected, while `.agentseo` import remaps the complete history;
-- MCP and OpenClaw now derive all six tool names, descriptions, input schemas,
-  limits and safety annotations from one `@agentseoapp/contracts` registry;
-  contract and bundled-plugin tests reject schema or manifest drift;
-- the previously recorded packaged Playwright journey completes onboarding, a real crawl, audit
-  history, immutable configuration replay, audit-to-audit regression and fix
-  comparison, action workflow persistence, partial
-  and complete Issue Review, Project Context revision and journal persistence,
-  review-first template inspection and draft import, custom-extraction preview,
-  immutable rule save, a second crawl with captured extraction evidence, a
-  page-level inlink/outlink investigation with anchor and redirect evidence,
-  run-configuration export/import, system diagnostics,
-  mobile navigation, exact-name deletion of the imported project, survival of
-  the original project, and axe-based accessibility checks against the real
-  local daemon. The exact current tree still requires a fresh canonical browser
-  record after the latest history and page-inventory assertions; component,
-  API, and contract coverage does not substitute for that evidence;
-- project-deletion storage/runtime/API tests prove exact confirmation, complete
-  project-graph cascade, shared-fingerprint preservation, global-credential
-  isolation, deterministic file cleanup, crash-before-commit restoration,
-  fail-closed unknown staging, structural receipts, and typed Problem Details;
-- the live npm advisory query checks 604 package names with no known High or
-  Critical finding, the Community license gate accepts all 573 installed
-  package/version pairs, and CycloneDX 1.6 SBOM generation records 698
-  components;
-- the credential broker passes Rust formatting and `clippy -D warnings`; the
-  Tauri launcher passes locked native compilation, formatting,
-  `clippy -D warnings`, and all eight Rust policy tests on macOS arm64;
-- the native release policy uses the product-scoped `agentseo-node` sidecar,
-  validates older-release selection and signatures, and rejects stable records
-  without install, background start, single-instance activation, stop,
-  data-preserving upgrade, uninstall, and AppImage evidence as applicable;
-- the desktop launcher now performs the previously missing foreground update
-  lifecycle before its single owned daemon starts, downloads and installs only
-  through Tauri's signature-verifying Rust API, restarts after a successful
-  install, fails open to the installed version when the release endpoint is
-  unavailable, and routes repeated launches through a single-instance
-  activation instead of creating a competing updater/runtime owner;
-- the updater channel is no longer an unimplemented external endpoint. Every
-  native runner exports target-prefixed, hash-verified updater inputs; a final
-  fail-closed job requires all four targets and one public key, rechecks the
-  transferred bytes, creates the canonical Tauri `latest.json`, attests it, and
-  attaches it before the draft release can become public. GitHub `latest`
-  intentionally serves stable releases only; prerelease distribution remains a
-  manual design-partner flow;
-- the native webview now has an empty Tauri capability set: sidecar, updater,
-  and window lifecycle authority stays in Rust, while the dashboard reaches
-  product operations only through the authenticated loopback API;
-- Integrations now exposes clear connect, reconnect, rotate, test, and
-  acknowledged local-removal states. Server coverage proves the vault secret is
-  deleted globally while non-secret per-project mapping survives, and the UI
-  explicitly distinguishes local deletion from provider-side revocation;
-- Reports exposes authenticated same-origin HTML, PDF, CSV, and JSON downloads.
-  Dashboard URL-safety coverage rejects foreign origins, and server end-to-end
-  coverage verifies each media type, attachment name, non-empty artifact, and
-  secret-redaction boundary;
-- Audits history now reads per-run page counts and SEO Health directly from
-  immutable page rows and run-scoped metrics. The list and detail APIs expose
-  the same values, while absent health remains unavailable instead of becoming
-  a synthetic zero;
-- Overview now persists the first health delta as explicitly unavailable,
-  calculates later changes against the prior completed audit, and renders up to
-  30 dated run-specific health observations. It no longer ships a permanently
-  empty trend or labels health-score points as a percentage;
-- Pages now joins the latest completed audit to run-scoped performance and
-  issue evidence. It exposes real organic clicks and key events when available,
-  counts only open findings per canonical URL, derives pass/needs-improvement/
-  fail from measured LCP, CLS, and TTFB, and keeps missing measurements nullable
-  instead of inventing zeroes. The report index now lists audit workflows only;
-- the monorepo test gate bounds both Turbo package concurrency and Vitest worker
-  pools. A clean uncached run completes all 34 tasks without starving encrypted
-  vault, SQLite, browser fixture, OAuth callback, or user-event suites;
 - `community-synthetic-v2` detects all 26 labeled defect instances with 1.0
-  recall, zero High-severity false positives, no severity drift, and no High
-  finding on either healthy control page;
-- the non-destructive legacy migration test imports audits, crawl pages/issues,
-  schedules, custom rules, Google token files and BYOK environment credentials,
-  preserves every source byte and mode, keeps secrets out of SQLite/receipts,
-  and proves the second import is a no-op;
-- the consolidated secret canary proves active credentials cannot cross into
-  DB/WAL/SHM, events, modules, pages, issues, actions, integration metadata,
-  logs, reports, project bundles, or backups.
+  recall, zero High-severity false positives, and no severity drift on either
+  healthy control page. The corpus is small for the confidence it supports;
+  expanding it to a larger public corpus is tracked in `PLAN.md` and is a
+  post-1.0 improvement, not a correctness failure.
+- Eight High-severity dependency advisories were cleared for this release by
+  pinning patched versions of `brace-expansion`, `fast-uri`, `find-my-way`,
+  `js-yaml` and `postcss`, and by taking `@fastify/static` to 10.1.2, which is
+  the first release fixing a route-guard bypass via path traversal. No patched
+  8.x or 9.x exists.
+- The benchmark baseline is calibrated to developer hardware with recorded
+  provenance, so it can fail; the shared-runner allowance is declared in
+  `.github/workflows/ci.yml`.
+- The acceptance policy itself changed for this release. See
+  [ADR 0002](adr/0002-stable-release-acceptance.md) for which gates were retired,
+  which were added, and why.
 
-## Evidence still required before public 1.0
+## Known limits
 
-- the packaged Playwright and axe journey must run in the canonical
-  source-evidence job. It now completes locally on the current tree (2026-07-30,
-  21.7 s, macOS arm64, Node 24.18.1) against the real local daemon, which closed
-  a genuine dashboard defect rather than a stale assertion: an integration card
-  lost its accessible name while one of its sub-forms was open, because the inner
-  heading changed from the provider name to "Configure <provider>". The provider
-  name now lives on the card container as a stable accessible name. A local pass
-  is still not canonical-job evidence;
-- the canonical tag workflow must produce signed/notarized installers, updater
-  signatures, `latest.json`, checksums, attestations and native lifecycle
-  evidence on every supported target from the canonical
-  `MaxJafar/AGENTseo` repository;
-- the newly enforced DMG/MSI/deb/AppImage lifecycle jobs must run successfully
-  on canonical signed artifacts; the local source tests do not substitute for
-  that target-native evidence, and a published prerelease must be selected as
-  the stable upgrade baseline;
-- npm publication, registry integrity and provenance must be observed against
-  the real public registry;
-- qualified legal review of ELv2, trademarks and CLA plus three attributable
-  design-partner weekly-workflow approvals remain mandatory stable-release
-  inputs.
+- The packaged browser journey passes locally on this commit. Running it in the
+  canonical tag workflow is still the stronger evidence and has not happened.
+- Security coverage exists for SSRF, redirect, DNS-rebinding, browser and
+  OAuth-callback paths, but not yet as separately named CI jobs with documented
+  case counts.
+- Scheduled-work crash safety is proven for report artifacts and project
+  deletion. A broader "no duplicate result under a mid-lease kill" proof is
+  tracked in `PLAN.md`.
+- Claims about replacing commercial tools still require a larger reproducible
+  public corpus than the one shipped here.

@@ -1,6 +1,6 @@
 {
   "name": "@agentseoapp/server",
-  "version": "0.12.0-alpha.0",
+  "version": "1.0.0",
   "description": "Authenticated loopback Fastify API for AGENTseo",
   "license": "Apache-2.0",
   "type": "module",
@@ -28,7 +28,7 @@
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
     "@fastify/rate-limit": "^10.3.0",
-    "@fastify/static": "^8.2.0",
+    "@fastify/static": "^10.1.2",
     "@fastify/swagger": "^9.5.1",
     "@agentseoapp/contracts": "workspace:*",
     "@agentseoapp/credentials": "workspace:*",

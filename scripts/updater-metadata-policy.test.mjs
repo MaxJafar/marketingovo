@@ -16,7 +16,7 @@ import {
 
 async function fixture() {
   const assetRoot = await mkdtemp(join(tmpdir(), "agentseo-updater-metadata-"));
-  const version = "0.12.0-alpha.0";
+  const version = "1.0.0";
   const records = [];
   for (const specification of UPDATER_TARGETS) {
     const payloadPath =
@@ -85,7 +85,7 @@ test("static updater metadata covers every canonical target with verified bytes"
     assert.equal(platform.signature, "A".repeat(88));
     assert.match(
       platform.url,
-      /^https:\/\/github\.com\/MaxJafar\/AGENTseo\/releases\/download\/v0\.12\.0-alpha\.0\//u,
+      /^https:\/\/github\.com\/MaxJafar\/AGENTseo\/releases\/download\/v1\.0\.0\//u,
     );
   }
 });

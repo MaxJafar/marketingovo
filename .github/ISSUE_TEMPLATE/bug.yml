@@ -8,7 +8,7 @@ body:
       value: Never paste tokens, cookies, API keys, private URLs, or raw production reports.
   - type: input
     id: version
-    attributes: { label: Version, placeholder: 0.12.0-alpha.0 }
+    attributes: { label: Version, placeholder: 1.0.0 }
     validations: { required: true }
   - type: dropdown
     id: surface

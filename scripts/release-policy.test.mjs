@@ -3,6 +3,12 @@ import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
+
+// Pinned deliberately: the native release policy is exercised against explicit
+// prerelease and stable fixtures, never against the workspace version, so a
+// version bump cannot silently change which policy branch these tests cover.
+const PRERELEASE_FIXTURE_VERSION = "9.9.9-fixture.0";
+const STABLE_FIXTURE_VERSION = "9.9.9";
 import {
   collectReleaseArtifacts,
   releaseAssetName,
@@ -181,7 +187,7 @@ test("manifest validation rejects bytes changed after platform verification", as
   await writeFile(updater, "verified updater");
   await writeFile(`${updater}.sig`, "A".repeat(88));
   const target = "aarch64-apple-darwin";
-  const version = "0.12.0-alpha.0";
+  const version = PRERELEASE_FIXTURE_VERSION;
   const artifacts = await collectReleaseArtifacts(root, target);
   const installer = artifacts.find(({ path }) => path.endsWith(".dmg"));
   const record = {
@@ -237,7 +243,7 @@ test("Windows verification records fail closed without the full installer lifecy
   await writeFile(msi, "installer");
   await writeFile(`${msi}.sig`, "A".repeat(88));
   const target = "x86_64-pc-windows-msvc";
-  const version = "0.12.0-alpha.0";
+  const version = PRERELEASE_FIXTURE_VERSION;
   const artifacts = await collectReleaseArtifacts(root, target);
   const installer = artifacts.find(({ path }) => path.endsWith(".msi"));
   const record = {
@@ -298,7 +304,7 @@ test("Linux verification requires deb lifecycle and AppImage execution evidence"
   await writeFile(appImage, "appimage installer");
   await writeFile(`${appImage}.sig`, "A".repeat(88));
   const target = "x86_64-unknown-linux-gnu";
-  const version = "0.12.0-alpha.0";
+  const version = PRERELEASE_FIXTURE_VERSION;
   const artifacts = await collectReleaseArtifacts(root, target);
   assert.deepEqual(
     artifacts.map(({ role }) => role).sort(),
@@ -471,5 +477,88 @@ test("the exact-tag release waits for browser, advisory, secret and CodeQL evide
   assert.equal(
     communityWorkflow.match(/rustsec\/audit-check@v2\.0\.0/gu)?.length,
     2,
+  );
+});
+
+test("a stable release is rejected without verified upgrade evidence, and accepted with it", async () => {
+  // The stable branch of the upgrade gate had no coverage: every fixture used a
+  // prerelease version, so `not-tested-prerelease` always satisfied it. A stable
+  // native release must prove an upgrade from an older signed installer.
+  const root = await mkdtemp(join(tmpdir(), "agentseo-release-policy-"));
+  const msi = join(root, "msi", "AGENTseo.msi");
+  await mkdir(join(root, "msi"), { recursive: true });
+  await writeFile(msi, "installer");
+  await writeFile(`${msi}.sig`, "A".repeat(88));
+  const target = "x86_64-pc-windows-msvc";
+  const version = STABLE_FIXTURE_VERSION;
+  const artifacts = await collectReleaseArtifacts(root, target);
+  const installer = artifacts.find(({ path }) => path.endsWith(".msi"));
+  const lifecycleEvidence = {
+    schemaVersion: 2,
+    target,
+    platform: "windows",
+    version,
+    installerSha256: installer.sha256,
+    install: "verified",
+    stop: "verified",
+    upgrade: "not-tested-prerelease",
+    uninstall: "verified",
+    backgroundHealth: { status: "ok", version },
+    processTreeOwnership: "verified",
+    singleInstanceActivation: "verified",
+    ownedChildProcessCount: 1,
+    loginRegistrationAfterUninstall: "removed",
+    backgroundServiceAfterUninstall: "stopped",
+    installedProcessesAfterUninstall: "removed",
+    executableAfterUninstall: "removed",
+    userDataAfterUninstall: "retained",
+  };
+  const record = {
+    schemaVersion: 2,
+    target,
+    platform: "windows",
+    version,
+    updater: { detachedSignatures: "cryptographically-verified" },
+    platformVerification: {
+      authenticode: "valid",
+      timestamp: "present",
+      installLifecycle: "verified",
+      loginStartup: "verified",
+      backgroundService: "healthy-before-uninstall",
+      stopLifecycle: "verified",
+      processTreeCleanup: "verified",
+      uninstallCleanup: "verified",
+      lifecycleEvidence,
+    },
+    artifacts,
+  };
+
+  // A prerelease waiver cannot carry a stable release.
+  await assert.rejects(
+    validateVerificationRecord(record, { target, bundleRoot: root }),
+    /verified upgrade from an older signed installer/u,
+  );
+
+  Object.assign(lifecycleEvidence, {
+    upgrade: "verified",
+    baselineVersion: "9.9.8",
+    baselineInstallerSha256: "b".repeat(64),
+    dataSurvivedUpgrade: "verified",
+    // backgroundHealth describes the service *before* the upgrade, so once an
+    // upgrade is claimed it must report the baseline version, not the new one.
+    backgroundHealth: { status: "ok", version: "9.9.8" },
+    healthAfterUpgrade: { status: "ok", version },
+    versionAfterUpgrade: version,
+  });
+  await validateVerificationRecord(record, { target, bundleRoot: root });
+
+  // A baseline that is not older than the release proves nothing. Keep
+  // backgroundHealth consistent with it so the upgrade comparison is what fails,
+  // rather than the earlier installer-match guard.
+  lifecycleEvidence.baselineVersion = version;
+  lifecycleEvidence.backgroundHealth = { status: "ok", version };
+  await assert.rejects(
+    validateVerificationRecord(record, { target, bundleRoot: root }),
+    /upgrade lifecycle evidence is malformed/u,
   );
 });

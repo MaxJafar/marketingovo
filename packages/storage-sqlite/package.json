@@ -1,6 +1,6 @@
 {
   "name": "@agentseoapp/storage-sqlite",
-  "version": "0.12.0-alpha.0",
+  "version": "1.0.0",
   "description": "Single-writer SQLite storage and durable jobs for AGENTseo",
   "license": "Apache-2.0",
   "type": "module",

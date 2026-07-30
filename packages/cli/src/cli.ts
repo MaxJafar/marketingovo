@@ -55,7 +55,7 @@ import {
 } from "./compatibility.js";
 import { renderCliHelp } from "./cli-help.js";
 
-const VERSION = "0.12.0-alpha.0";
+const VERSION = "1.0.0";
 
 interface ParsedArgs {
   command: string;

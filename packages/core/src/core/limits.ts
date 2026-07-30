@@ -8,7 +8,7 @@
 
 import { envBool, envInt, envStr } from "../env.js";
 
-export const AGENTSEO_DEFAULT_USER_AGENT = "AGENTseo/0.12.0-alpha.0";
+export const AGENTSEO_DEFAULT_USER_AGENT = "AGENTseo/1.0.0";
 
 export interface Limits {
   maxUrls: number;

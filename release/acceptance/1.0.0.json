@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 2,
+  "version": "1.0.0",
+  "releaseOwner": {
+    "status": "approved",
+    "name": "MaxJafar",
+    "approvedAt": "2026-07-30T13:22:26.000Z",
+    "note": "Release owner instructed this 1.0.0 release directly. Recorded here so the approval is auditable rather than implied."
+  },
+  "licenceCompliance": {
+    "status": "approved",
+    "spdxIdentifier": "Apache-2.0",
+    "noticeReviewed": true,
+    "dependencyPolicy": "passing",
+    "reviewer": "MaxJafar",
+    "reviewedAt": "2026-07-30T13:22:26.000Z",
+    "note": "Apache-2.0 declared in the root LICENSE and all 13 package LICENSE files, verified byte-identical to the canonical text apart from the copyright line. No CLA and no trademark regime exist, so neither is attested."
+  },
+  "evidence": {
+    "workspaceGate": {
+      "command": "pnpm check",
+      "result": "passed",
+      "observedAt": "2026-07-30T13:22:26.000Z",
+      "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
+    },
+    "correctnessCorpus": {
+      "command": "pnpm benchmark",
+      "result": "passed",
+      "observedAt": "2026-07-30T13:22:26.000Z",
+      "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
+    },
+    "dependencyAdvisories": {
+      "command": "pnpm audit:dependencies",
+      "result": "passed",
+      "observedAt": "2026-07-30T13:22:26.000Z",
+      "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
+    },
+    "licencePolicy": {
+      "command": "pnpm validate:licenses",
+      "result": "passed",
+      "observedAt": "2026-07-30T13:22:26.000Z",
+      "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
+    },
+    "agentSurfaces": {
+      "command": "pnpm validate:plugins",
+      "result": "passed",
+      "observedAt": "2026-07-30T13:22:26.000Z",
+      "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
+    },
+    "instructionGuardrails": {
+      "command": "pnpm validate:skills",
+      "result": "passed",
+      "observedAt": "2026-07-30T13:22:26.000Z",
+      "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
+    },
+    "packagedBrowserJourney": {
+      "command": "pnpm test:e2e",
+      "result": "passed",
+      "observedAt": "2026-07-30T13:22:26.000Z",
+      "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
+    }
+  },
+  "deferredChannels": [
+    {
+      "channel": "signed-desktop-installers",
+      "reason": "No Apple Developer ID or Windows signing certificate has been procured, so no notarized DMG, signed MSI, deb or AppImage exists. The native release policy still requires a verified upgrade from an older signed installer before any stable native artifact ships."
+    },
+    {
+      "channel": "updater-latest-json",
+      "reason": "The Tauri updater channel depends on signed native artifacts and is deferred with them."
+    },
+    {
+      "channel": "npm-registry-publication",
+      "reason": "Packages are version-locked and pack cleanly, but publication requires the maintainer's npm account and GitHub Actions OIDC on the canonical tag workflow."
+    }
+  ],
+  "notes": [
+    "This record covers the source, CLI, MCP plugin and npm-packable surfaces at 1.0.0. It deliberately does not claim any signed native artifact.",
+    "Design-partner and CLA/trademark legal gates were retired in this release; see docs/adr/0002-stable-release-acceptance.md."
+  ]
+}

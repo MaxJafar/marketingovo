@@ -9,6 +9,7 @@ performance, and SERP data into verified actions.**
 
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-5b63ff)](LICENSE)
 [![Telemetry](https://img.shields.io/badge/telemetry-off%20by%20default-242b36)](PRIVACY.md)
+[![Version](https://img.shields.io/badge/version-1.0.0-20b486)](docs/release-status.md)
 
 AGENTseo runs on your machine, requires no account, and
 keeps projects and credentials under your control. It does more than produce an
@@ -16,8 +17,16 @@ issue dump: it connects technical evidence to organic exposure, conversion
 exposure, reach, confidence, and effort so a marketer can decide what to fix
 first and verify the result after the next audit.
 
-> Status: active `0.11` alpha development. The engine is usable; the local
-> platform and native packaging are being hardened toward the 1.0 quality gates.
+> **Status: 1.0.0.** The REST API, OpenAPI document, SDK, nine-tool agent
+> contract registry, CLI and `.agentseo` bundle format are stable; breaking
+> changes to them now require a major version.
+>
+> Install from source or as an agent plugin. Signed desktop installers, the
+> updater channel, and npm registry publication are **not** part of this release
+> — they need a code-signing identity and a registry account that do not exist
+> yet, and are declared as deferred channels in
+> [`release/acceptance/1.0.0.json`](release/acceptance/1.0.0.json). See
+> [release status](docs/release-status.md) for exactly what was verified.
 
 ## Why AGENTseo
 

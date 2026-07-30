@@ -3675,7 +3675,7 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
     this.credentialStore =
       options.credentialStore ?? new MemoryCredentialStore();
     this.engine = options.engine;
-    this.version = options.version ?? "0.12.0-alpha.0";
+    this.version = options.version ?? "1.0.0";
     this.googleDesktopClientId = resolveGoogleDesktopClientId(
       options.googleDesktopClientId,
     );
