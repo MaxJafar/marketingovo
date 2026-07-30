@@ -115,7 +115,7 @@ export async function createAgentIntelMcpServer(
     }));
 
   const server = new McpServer(
-    { name: "agentintel", version: "0.1.0-alpha.0" },
+    { name: "agentintel", version: "0.2.0-alpha.0" },
     {
       instructions:
         "AGENTintel is an evidence system. Start collection only for public, user-authorized, or licensed business sources. Poll asynchronous runs until terminal. Distinguish observed, derived, estimated, unavailable, and contradictory evidence; cite source records and exact metric definitions. Never request credentials, reveal contacts, change policy, perform outreach, merge people by name, or make employment decisions through these tools.",
