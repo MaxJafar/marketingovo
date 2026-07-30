@@ -2,6 +2,11 @@
 // assets. Designed to be readable on both desktop and mobile.
 
 import type { Report } from "./index.js";
+import {
+  deriveExecutiveSummary,
+  type ComparisonInput,
+  type ExecutiveSummary,
+} from "./executive.js";
 
 const HTML_URL_SAMPLE_SIZE = 200;
 
@@ -58,7 +63,113 @@ function categorySection(issues: Report["issues"], cat: string): string {
 </section>`;
 }
 
-export function reportToHtml(r: Report): string {
+function executiveHtml(summary: ExecutiveSummary): string {
+  const change = summary.change;
+  const changeBlock = change
+    ? `<section class="exec-block">
+    <h2>What changed since ${escapeHtml(new Date(change.baselineGeneratedAt).toLocaleDateString())}</h2>
+    ${
+      change.scopeChanged
+        ? `<p class="caution"><strong>Scope changed.</strong> This crawl covered
+           ${change.pagesCrawledDelta > 0 ? "+" : ""}${change.pagesCrawledDelta}
+           pages versus the baseline. Issue counts across crawls of different
+           sizes are not directly comparable.</p>`
+        : ""
+    }
+    <table class="change-table">
+      <thead><tr><th>Priority</th><th>Baseline</th><th>Now</th><th>Change</th></tr></thead>
+      <tbody>
+        ${change.byPriority
+          .map(
+            (row) => `<tr>
+              <td>${escapeHtml(row.priority)}</td>
+              <td>${row.baseline}</td>
+              <td>${row.current}</td>
+              <td class="${row.delta > 0 ? "worse" : row.delta < 0 ? "better" : ""}">${
+                row.delta > 0 ? "+" : ""
+              }${row.delta}</td>
+            </tr>`,
+          )
+          .join("")}
+      </tbody>
+    </table>
+  </section>`
+    : `<section class="exec-block">
+    <h2>What changed</h2>
+    <p>This is the first audit for this site, so there is no baseline to compare
+    against. The next audit will report movement against this one.</p>
+  </section>`;
+
+  return `<section class="executive">
+  <h2 class="exec-title">Summary</h2>
+  <p class="exec-lede">
+    ${summary.pagesCrawled} page${summary.pagesCrawled === 1 ? "" : "s"} crawled.
+    ${summary.issueTotal} finding${summary.issueTotal === 1 ? "" : "s"},
+    of which ${summary.byPriority.find((p) => p.priority === "High")?.count ?? 0}
+    are high priority.
+    ${
+      summary.dataPeriod
+        ? `Search and analytics data covers ${escapeHtml(summary.dataPeriod.start)} to ${escapeHtml(summary.dataPeriod.end)}.`
+        : ""
+    }
+  </p>
+
+  ${changeBlock}
+
+  <section class="exec-block">
+    <h2>Do these first</h2>
+    <p class="exec-note">Ranked by severity, then by how many pages the finding
+    actually affects.</p>
+    <ol class="action-list">
+      ${summary.topActions
+        .map(
+          (action) => `<li class="${priorityClass(action.priority)}">
+        <div class="action-head">
+          <span class="badge">${escapeHtml(action.priority)}</span>
+          <span class="msg">${escapeHtml(action.message)}</span>
+        </div>
+        <div class="action-meta">
+          Affects <strong>${action.affectedUrls}</strong>
+          page${action.affectedUrls === 1 ? "" : "s"} &middot;
+          ${escapeHtml(action.category)}
+        </div>
+        ${action.fix ? `<div class="fix"><strong>Fix:</strong> ${escapeHtml(action.fix)}</div>` : ""}
+        ${
+          action.sampleUrls.length > 0
+            ? `<div class="action-sample">Example${action.sampleUrls.length === 1 ? "" : "s"}:
+               ${action.sampleUrls.map((url) => `<code>${escapeHtml(shortUrl(url))}</code>`).join(" ")}</div>`
+            : ""
+        }
+      </li>`,
+        )
+        .join("")}
+    </ol>
+  </section>
+
+  <section class="exec-block">
+    <h2>What this audit could not measure</h2>
+    ${
+      summary.coverageGaps.length === 0
+        ? `<p>Every configured source returned data for this run.</p>`
+        : `<p class="exec-note">Stated so that absence is not read as a clean
+           result.</p>
+           <ul class="gap-list">
+      ${summary.coverageGaps
+        .map(
+          (gap) =>
+            `<li><strong>${escapeHtml(gap.source)}.</strong> ${escapeHtml(gap.consequence)}</li>`,
+        )
+        .join("")}
+    </ul>`
+    }
+  </section>
+</section>`;
+}
+
+export function reportToHtml(r: Report, baseline?: ComparisonInput): string {
+  const executive = executiveHtml(
+    deriveExecutiveSummary(r, { baseline: baseline ?? null }),
+  );
   const categories = Array.from(
     new Set(r.issues.map((i) => i.category)),
   ).sort();
@@ -119,6 +230,26 @@ export function reportToHtml(r: Report): string {
     .url-list li { padding: 0.1rem 0; break-inside: avoid; }
     a { color: inherit; text-underline-offset: 0.16em; }
     .footer { color: var(--muted); font-size: 0.85rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .executive { margin: 1.75rem 0 0.5rem; padding: 1.4rem; border: 1px solid var(--border); border-radius: 14px; background: var(--code); }
+    .exec-title { margin: 0 0 0.35rem; font-size: 1.25rem; }
+    .exec-lede { margin: 0 0 1.1rem; line-height: 1.55; }
+    .exec-block { margin: 1.25rem 0 0; }
+    .exec-block h2 { font-size: 1rem; margin: 0 0 0.5rem; }
+    .exec-note { margin: 0 0 0.6rem; font-size: 0.85rem; color: var(--muted); }
+    .caution { margin: 0 0 0.75rem; padding: 0.6rem 0.75rem; border-inline-start: 3px solid #d29a2a; background: rgb(210 154 42 / 10%); font-size: 0.85rem; }
+    .change-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .change-table th, .change-table td { text-align: start; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); }
+    .change-table td.worse { color: #b3261e; font-weight: 600; }
+    .change-table td.better { color: #186a3b; font-weight: 600; }
+    .action-list { margin: 0; padding-inline-start: 1.25rem; }
+    .action-list li { margin: 0 0 0.9rem; }
+    .action-head { display: flex; gap: 0.5rem; align-items: baseline; flex-wrap: wrap; }
+    .action-head .msg { font-weight: 600; }
+    .action-meta { font-size: 0.85rem; color: var(--muted); margin: 0.2rem 0; }
+    .action-sample { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+    .action-sample code { background: var(--code); padding: 0.05rem 0.3rem; border-radius: 4px; }
+    .gap-list { margin: 0; padding-inline-start: 1.25rem; line-height: 1.5; }
+    .gap-list li { margin: 0 0 0.5rem; }
     @media (max-width: 640px) { body { padding: 0; } .report-shell { border-radius: 0; border-inline: 0; } .report-header { display: block; } .report-label { display: inline-block; margin-top: 1rem; } .url-list { columns: 1; } }
     @media print { :root { --bg: #fff; --surface: #fff; --fg: #172033; --muted: #687086; --border: #dfe2eb; --code: #f8f9fc; } body { max-width: none; padding: 0; } .report-shell { border: 0; border-radius: 0; padding: 0; box-shadow: none; } details { break-inside: avoid; } a { text-decoration: none; } }
   </style>
@@ -127,8 +258,8 @@ export function reportToHtml(r: Report): string {
 <main class="report-shell">
   <header class="report-header">
     <div>
-      <div class="brand"><span class="brand-mark">GS</span> Marketingovo</div>
-      <h1>SEO evidence snapshot</h1>
+      <div class="brand"><span class="brand-mark">M</span> Marketingovo</div>
+      <h1>SEO audit</h1>
       <div class="meta">A reproducible audit for prioritization and verification.</div>
     </div>
     <span class="report-label">Marketingovo</span>
@@ -146,6 +277,8 @@ export function reportToHtml(r: Report): string {
     <div class="stat med"><div class="n">${med}</div><div class="l">Medium priority</div></div>
     <div class="stat low"><div class="n">${low}</div><div class="l">Low priority</div></div>
   </div>
+
+  ${executive}
 
   <div class="meta"><strong>Connected evidence:</strong> ${r.realData ? "Crawl plus configured search/analytics sources" : "Crawl evidence only; search and analytics data were unavailable for this run"}</div>
 

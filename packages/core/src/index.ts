@@ -150,3 +150,16 @@ export {
   type FeedUnavailableReason,
   type PublishingCadence,
 } from "./integrations/feed.js";
+
+// The executive layer of a report, shared by every renderer so the HTML and PDF
+// can never disagree about what an audit found.
+export {
+  deriveChange,
+  deriveCoverageGaps,
+  deriveExecutiveSummary,
+  type ChangeSinceBaseline,
+  type ComparisonInput,
+  type CoverageGap,
+  type ExecutiveSummary,
+  type HeadlineAction,
+} from "./core/report/executive.js";

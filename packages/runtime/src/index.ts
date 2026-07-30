@@ -126,6 +126,8 @@ import {
   type PerformancePeriodSummary,
   type Report as EngineReport,
   validateExtractorRules,
+  deriveExecutiveSummary,
+  type ComparisonInput,
 } from "@marketingovo/core";
 import { validateCustomRuleRegex } from "@marketingovo/core/custom-rule-regex";
 import { nextCronOccurrence } from "./cron.js";
@@ -2138,56 +2140,180 @@ function buildSitemapEvidence(report: EngineReport): SitemapEvidence {
   };
 }
 
-async function createPdf(report: EngineReport): Promise<Uint8Array> {
+/** Exported for tests: pagination is the property that regressed before. */
+export async function createPdf(
+  report: EngineReport,
+  baseline?: ComparisonInput | null,
+): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
   pdf.setTitle("Marketingovo audit");
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
-  const page = pdf.addPage([595, 842]);
-  let y = 790;
+
+  const MARGIN = 48;
+  const TOP = 794;
+  const BOTTOM = 56;
+  const WIDTH = 595 - MARGIN * 2;
+  const ink = rgb(0.12, 0.16, 0.23);
+  const muted = rgb(0.42, 0.46, 0.53);
+
+  let page = pdf.addPage([595, 842]);
+  let y = TOP;
+
+  // The previous version drew onto one page and stopped at whatever fit, so a
+  // site with many findings silently lost most of them. Every writer below goes
+  // through here, which starts a new page instead of discarding content.
+  const need = (height: number): void => {
+    if (y - height >= BOTTOM) return;
+    page = pdf.addPage([595, 842]);
+    y = TOP;
+  };
   const safe = (value: string): string => value.replace(/[^\x20-\x7E]/g, "?");
-  page.drawText("Marketingovo audit", {
-    x: 48,
-    y,
-    size: 22,
-    font: bold,
-    color: rgb(0.12, 0.16, 0.23),
+
+  const wrap = (value: string, size: number, maxWidth: number): string[] => {
+    const words = safe(value).split(/\s+/).filter(Boolean);
+    const lines: string[] = [];
+    let line = "";
+    for (const word of words) {
+      const candidate = line ? `${line} ${word}` : word;
+      if (font.widthOfTextAtSize(candidate, size) <= maxWidth) {
+        line = candidate;
+        continue;
+      }
+      if (line) lines.push(line);
+      line = word;
+    }
+    if (line) lines.push(line);
+    return lines.length > 0 ? lines : [""];
+  };
+
+  const text = (
+    value: string,
+    options: {
+      size?: number;
+      bold?: boolean;
+      indent?: number;
+      color?: typeof ink;
+    } = {},
+  ): void => {
+    const size = options.size ?? 9;
+    const indent = options.indent ?? 0;
+    const lineHeight = size + 4;
+    for (const line of wrap(value, size, WIDTH - indent)) {
+      need(lineHeight);
+      page.drawText(line, {
+        x: MARGIN + indent,
+        y,
+        size,
+        font: options.bold ? bold : font,
+        color: options.color ?? ink,
+      });
+      y -= lineHeight;
+    }
+  };
+  const gap = (height: number): void => {
+    need(height);
+    y -= height;
+  };
+  const heading = (value: string): void => {
+    gap(10);
+    text(value, { size: 13, bold: true });
+    gap(4);
+  };
+
+  const summary = deriveExecutiveSummary(report, {
+    baseline: baseline ?? null,
   });
-  y -= 32;
-  page.drawText(safe(report.startUrl).slice(0, 88), {
-    x: 48,
-    y,
-    size: 9,
-    font,
-  });
-  y -= 28;
-  page.drawText(
-    `Pages: ${report.summary.pagesCrawled}    Issues: ${report.issues.length}    Generated: ${report.generatedAt}`,
-    { x: 48, y, size: 9, font },
+
+  text("Marketingovo audit", { size: 22, bold: true });
+  gap(6);
+  text(summary.site, { size: 9, color: muted });
+  text(
+    `Generated ${summary.generatedAt}  |  ${summary.pagesCrawled} pages crawled  |  ${summary.issueTotal} findings`,
+    { size: 9, color: muted },
   );
-  y -= 32;
-  page.drawText("Highest-priority findings", {
-    x: 48,
-    y,
-    size: 14,
-    font: bold,
+
+  heading("Summary");
+  text(
+    summary.byPriority
+      .map((row) => `${row.priority}: ${row.count}`)
+      .join("    "),
+  );
+  if (summary.dataPeriod) {
+    text(
+      `Search and analytics data covers ${summary.dataPeriod.start} to ${summary.dataPeriod.end}.`,
+      { color: muted },
+    );
+  }
+
+  heading("What changed");
+  if (!summary.change) {
+    text(
+      "This is the first audit for this site, so there is no baseline to compare against.",
+      { color: muted },
+    );
+  } else {
+    if (summary.change.scopeChanged) {
+      text(
+        `Scope changed: this crawl covered ${summary.change.pagesCrawledDelta > 0 ? "+" : ""}${summary.change.pagesCrawledDelta} pages versus the baseline. Counts across crawls of different sizes are not directly comparable.`,
+      );
+      gap(4);
+    }
+    for (const row of summary.change.byPriority) {
+      const delta = row.delta > 0 ? `+${row.delta}` : `${row.delta}`;
+      text(`${row.priority}: ${row.baseline} -> ${row.current}  (${delta})`, {
+        indent: 8,
+      });
+    }
+  }
+
+  heading("Do these first");
+  text("Ranked by severity, then by how many pages the finding affects.", {
+    color: muted,
   });
-  y -= 22;
+  gap(4);
+  summary.topActions.forEach((action, index) => {
+    text(`${index + 1}. [${action.priority}] ${action.message}`, {
+      bold: true,
+    });
+    text(
+      `Affects ${action.affectedUrls} page${action.affectedUrls === 1 ? "" : "s"} - ${action.category}`,
+      { indent: 12, color: muted },
+    );
+    if (action.fix) text(`Fix: ${action.fix}`, { indent: 12 });
+    for (const url of action.sampleUrls) {
+      text(url, { indent: 12, size: 8, color: muted });
+    }
+    gap(6);
+  });
+
+  heading("What this audit could not measure");
+  if (summary.coverageGaps.length === 0) {
+    text("Every configured source returned data for this run.");
+  } else {
+    text("Stated so that absence is not read as a clean result.", {
+      color: muted,
+    });
+    gap(4);
+    for (const item of summary.coverageGaps) {
+      text(`${item.source}. ${item.consequence}`, { indent: 8 });
+      gap(3);
+    }
+  }
+
+  heading("All findings");
   const ordered = [...report.issues].sort(
     (a, b) =>
       ({ High: 0, Medium: 1, Low: 2 })[a.priority] -
       { High: 0, Medium: 1, Low: 2 }[b.priority],
   );
-  for (const issue of ordered.slice(0, 18)) {
-    if (y < 60) break;
-    page.drawText(safe(`[${issue.priority}] ${issue.message}`).slice(0, 92), {
-      x: 52,
-      y,
-      size: 9,
-      font,
-    });
-    y -= 18;
+  for (const issue of ordered) {
+    text(
+      `[${issue.priority}] ${issue.message}  (${issue.urls.length} page${issue.urls.length === 1 ? "" : "s"})`,
+      { indent: 8 },
+    );
   }
+
   return pdf.save();
 }
 
