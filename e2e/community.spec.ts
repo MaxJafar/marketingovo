@@ -772,9 +772,10 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
   ).toBeVisible();
   await expectNoWcagViolations(page, "Integration catalog");
 
-  const serpApiCard = page.locator(".integration-card").filter({
-    has: page.getByRole("heading", { name: "SerpAPI", exact: true }),
-  });
+  // The card is addressed by its stable container name, not by its inner
+  // heading: opening a sub-form replaces "SerpAPI" with "Configure SerpAPI", so
+  // a heading filter matches nothing once the form is open.
+  const serpApiCard = page.getByRole("group", { name: "SerpAPI" });
   await serpApiCard.getByRole("button", { name: "Configure site" }).click();
   await serpApiCard
     .getByLabel("Default location")

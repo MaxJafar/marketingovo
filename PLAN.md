@@ -78,12 +78,34 @@ so a secret under the canonical name would not have been rejected; and the docs
 link validator's regex was case-mismatched against its own canonical prefix, so
 canonical links were never actually resolved.
 
+### Closed since this plan was written
+
+- **Agent tool surface completed.** Three read-only tools — `agentseo_run_evidence`,
+  `agentseo_run_links`, `agentseo_run_compare` — expose the evidence workbench,
+  the internal-link graph and the server-computed comparison, which existed in
+  the API and dashboard but were unreachable from any agent host. The registry is
+  now nine tools, and `openclaw.plugin.json` is generated rather than
+  hand-maintained (it had silently stayed at six).
+- **Instruction guardrails are gated.** `pnpm validate:skills` pins nine skill
+  invariants and four command invariants, each recording what it protects. Every
+  guardrail was falsified individually. It found five real gaps in generated
+  commands, and one defect in itself — loose alternate patterns had made the
+  "unavailable is not zero" check unfalsifiable.
+- **Benchmark regression gate can now fail.** It was already enforced (the
+  original B6 note was wrong); the defect was a 500 ms baseline against a 58 ms
+  median, 8.6x of slack. Baseline is now 90 ms with recorded provenance, and the
+  shared-runner allowance is declared in `ci.yml` where it is visible.
+- **Crash-domain invariants pinned.** Artifact write-then-register ordering, the
+  defensive read path, per-format degradation, and schema-enforced referential
+  integrity all have tests. The original B8 note overstated the risk: the
+  ordering was already fail-closed, what was missing was proof.
+
 ### What still blocks 1.0.0
 
-- **B1 — Stale packaged evidence.** The packaged Playwright + axe journey needs a
-  fresh canonical record; the local rerun predates the history and
-  page-inventory assertions. This is an explicit blocker in
-  `docs/release-status.md`.
+- **B1 — Packaged evidence needs a canonical run.** The journey now passes
+  locally on the current tree (21.7 s), after fixing the defect that was actually
+  blocking it: an integration card lost its accessible name while a sub-form was
+  open. What remains is running it in the canonical CI job, not making it pass.
 - **B2 — No signed artifacts, ever.** No notarized DMG, signed MSI, deb or
   AppImage; no updater `latest.json`; no native lifecycle evidence produced on a
   canonical tag. Code-signing certificates are not procured.
@@ -95,17 +117,11 @@ canonical links were never actually resolved.
   1.0 gate is ≥95% recall with <5% high-severity false positives, and
   `docs/release-status.md` already says tool-replacement claims require a
   reproducible public corpus.
-- **B5 — Security corpora are not all blocking jobs.** SSRF, redirect,
+- **B5 — Security corpora are not all named blocking jobs.** SSRF, redirect,
   DNS-rebinding, browser, OAuth-callback and secret-leak coverage exists in
-  pieces; Gitleaks and RustSec run only on the tag workflow, not on PRs.
-- **B6 — Benchmark regression is not enforced.** `pnpm benchmark` runs but no
-  committed baseline fails CI on the stated >20% threshold.
-- **B7 — Skills are one file.** A single `seo-marketer` skill covers six
-  workflows, and no eval asserts that an agent cites run IDs rather than
-  inventing findings.
-- **B8 — Crash-domain reconciliation is untested.** Filesystem artifact
-  publication and SQLite finalization are separate crash domains; nothing proves
-  exactly one result survives a kill between them.
+  pieces rather than as separately named gates with documented case counts.
+  _(Partly resolved: Gitleaks now runs on every PR. RustSec already did — the
+  original note claiming both were tag-only was half wrong.)_
 
 ### Lower-severity
 
@@ -141,26 +157,24 @@ correct in every host.
 
 Scope:
 
-1. **Skills per workflow (B7).** Split the single `seo-marketer` skill into
-   discrete skills — `seo-audit`, `seo-regression-review`, `seo-keyword-research`,
-   `seo-content-plan`, `seo-issue-triage` — each keeping the evidence-citation
-   discipline the current skill establishes. They live once in
-   `plugins/shared/skills/` and are copied into every host bundle by the
-   generator.
-2. **Skill evals.** One fixture per skill asserting the agent cites run IDs and
-   affected URLs, reports `partial` runs as partial, and never fills an evidence
-   gap with generic advice. This is the highest-value guardrail for an
-   evidence-first product driven by an LLM, and there is currently none.
-3. **Tool-surface review.** The 6 public tools are start/get shaped. Add the
-   read-only capabilities agents actually need and the REST API already supports:
-   fetch issue evidence for a run, list pages with link evidence, read Project
-   Context. Contract-registered, with the same annotation and limit metadata.
-4. **Plugin install smoke test in CI.** Install the packed bundle into a clean
+1. **Skills per workflow.** The single `seo-marketer` skill is 175 lines of
+   genuinely good methodology, so splitting it five ways would duplicate the
+   operating standard rather than improve it. Instead keep it as the core skill
+   and add focused skills that reference it where the methodology is genuinely
+   distinct: `seo-regression-review` and `seo-issue-triage` are the two that earn
+   their own trigger description. Each new skill must satisfy `validate:skills`.
+2. **A real behavioural eval.** `validate:skills` pins the guardrails as text but
+   cannot show a model obeys them. Add an eval that runs the plugin against a
+   seeded local daemon with a live key, scoring whether the agent cites run IDs,
+   reports a `partial` run as partial, and refuses to fill an evidence gap. It
+   cannot gate a PR — it needs a key and is non-deterministic — so run it per
+   release and record the transcript as evidence.
+3. **Plugin install smoke test in CI.** Install the packed bundle into a clean
    agent host, call every tool against a live local daemon, assert typed
    responses. This is the plugin equivalent of `pack:smoke` and does not exist.
-5. **Marketplace submission prep.** Verify the Claude Code marketplace manifest
+4. **Marketplace submission prep.** Verify the Claude Code marketplace manifest
    installs from a clean clone, and that Codex accepts the bundle directory.
-6. Delete `scratch/` and `codex-tasks/`.
+5. Delete `scratch/` and `codex-tasks/`.
 
 **Exit criteria**
 
@@ -220,21 +234,19 @@ Scope:
    across technical, on-page, content, link and CWV rules, including adversarial
    healthy pages. Publish it. Recall and false-positive rates must be reproduced
    by CI, not by hand.
-2. **Security corpora as blocking gates (B5).** SSRF, open-redirect,
-   DNS-rebinding, browser-escape, OAuth-callback and secret-leak suites become
-   named blocking CI jobs with documented case counts. Gitleaks and RustSec move
-   to PR CI.
-3. **Crash-domain reconciliation (B8).** Fault-injection tests that kill the
-   daemon between filesystem artifact publication and SQLite finalization, and
-   assert exactly one result. Then prove scheduled work survives a crash without
-   duplication.
+2. **Security corpora as named blocking gates (B5).** SSRF, open-redirect,
+   DNS-rebinding, browser-escape and OAuth-callback suites become separately
+   named CI jobs with documented case counts, so a reviewer can see which
+   defences are actually exercised. Gitleaks and RustSec already run on every PR.
+3. **Scheduled-work crash safety.** Artifact crash domains are now pinned by
+   tests, but the stated gate is broader: prove scheduled work survives a process
+   crash without duplication. Fault-inject a kill mid-lease and assert exactly one
+   result.
 4. **Run-state correctness.** Exhaustive succeeded/partial/failed/cancelled
    transitions; prove no recursive workflow can be scheduled.
 5. **Provider contract fixtures.** GSC and GA4 pagination and current field
    contracts, recorded against real responses and replayed offline.
-6. **Benchmark baseline (B6).** Commit a baseline and fail CI on >20%
-   unexplained regression.
-7. **Dependency zero-state.** No known High/Critical advisory across npm and
+6. **Dependency zero-state.** No known High/Critical advisory across npm and
    both Rust lockfiles, checked live, with a documented triage path for
    unfixable transitive findings.
 

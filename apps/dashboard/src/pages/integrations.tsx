@@ -342,6 +342,13 @@ export function IntegrationsPage() {
                 <Card
                   className={`integration-card ${editingId === integration.id || configuringId === integration.id || removingId === integration.id ? "integration-editing" : ""}`}
                   key={integration.id}
+                  // The card's inner heading changes while a sub-form is open
+                  // ("Configure SerpAPI" replaces "SerpAPI"), so the provider
+                  // name lives on the container instead. That keeps the card
+                  // identifiable to assistive technology and to tests no matter
+                  // which form is showing.
+                  role="group"
+                  aria-label={integration.name}
                 >
                   {editingId === integration.id ? (
                     <CredentialForm

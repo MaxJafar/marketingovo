@@ -108,42 +108,42 @@
       ]
     },
     {
-      "id": "sha256:dc84e5893d0f971c7820ae9cef28b3d0d17c1218c4a9c5b737a1f2abeb51bdea",
+      "id": "sha256:cdb9b15390a86b13598c1e2def88fe807a63bd5ac5e723b7efd496c02b87f93d",
       "rule": "legacy-product",
-      "file": "packages/cli/dashboard/assets/index-pTUVTO0B.js",
+      "file": "packages/cli/dashboard/assets/index-pU5s3KxP.js",
       "authorizedBy": "packages/cli/dashboard/",
       "authorizationHash": "sha256:d1d84760c9beffb7c5e7a84f32e295b10debb247372e7aed1924e93e933193e0",
       "count": 4,
-      "contentHash": "sha256:fde5971afcbc6181ab6c09759e646ef7a9f2be07b02a7411bb7ce29cc788675e",
+      "contentHash": "sha256:8653253483530cafc3b7fc4dde7de1d5c12eadca2bad75f15ffb852a8278fb9c",
       "occurrenceHashes": [
-        "sha256:3115fef2fb397cf626ffc26df5e365a52f9dd1cc634511a57b46afcc707cd300",
-        "sha256:58881938be24e317d12807a29ee4d5f57ced7415e39d622a457db8a9986e6c30",
-        "sha256:83e3e12361a073c1eaea9c5755d6323a7441f9a1ba9e7aa70feb5e3ac5bd4dd6",
-        "sha256:f304fd017185a5cf3065df2b28c11615d1f5fe1d78eb264de5287bcefd1cd6c8"
+        "sha256:0e294d49a28e41ea95b73e3610dd8b5e21f50478eaf0a51fc5be58eb892a55f5",
+        "sha256:318364761ef187ba70c8779ef41c1cb9c5e6e51da94372e8fcbfaee685d4fef2",
+        "sha256:3d1ca1e4d24b0bcc6ade8b9ef7357007de0e367a95b56eb8659bb5c685472ba1",
+        "sha256:d77ff0a3da7346391aad748802ea585c392a9c235113f95ad964d00964f051f9"
       ]
     },
     {
-      "id": "sha256:d4ce7cfdffd35380349ba8a186648358f84f19535751c83f1fcdd1385da7769d",
+      "id": "sha256:f0a7064f57987184aab43b0c23b598b52fd35d31edf5c79e675e9fc24593d089",
       "rule": "legacy-product",
-      "file": "packages/cli/dashboard/assets/onboarding-PWdUIxcG.js",
+      "file": "packages/cli/dashboard/assets/onboarding-BtM54YNI.js",
       "authorizedBy": "packages/cli/dashboard/",
       "authorizationHash": "sha256:d1d84760c9beffb7c5e7a84f32e295b10debb247372e7aed1924e93e933193e0",
       "count": 1,
-      "contentHash": "sha256:339c5a66064f1e51e7f257c851a6395473987ab00bab08a4c135803a3cc9519b",
+      "contentHash": "sha256:8c57b86733164ae34abd84b98a4df7f0c581e7574fbb1454525980c3b443324c",
       "occurrenceHashes": [
-        "sha256:25187451065864416b1abb079fb15cf0785d35be6c204f04ff43b173146741f1"
+        "sha256:083917c0a36942c1b9660653595d9eb0ccdb1355b389d5964c2c8062763ffa5a"
       ]
     },
     {
-      "id": "sha256:3654e6a6013b0ab5d4a180f4b68891c08acb59dcb451d148a003f62940dec81d",
+      "id": "sha256:c0c4d2cdc110cab81164ef0e4705e7b8498fe465462f9534f88adc7a37ca87ab",
       "rule": "legacy-product",
-      "file": "packages/cli/dashboard/assets/settings-B_6aM5D1.js",
+      "file": "packages/cli/dashboard/assets/settings-C7s7jx7u.js",
       "authorizedBy": "packages/cli/dashboard/",
       "authorizationHash": "sha256:d1d84760c9beffb7c5e7a84f32e295b10debb247372e7aed1924e93e933193e0",
       "count": 1,
-      "contentHash": "sha256:0caa01320c625c87e03d4388b47155ad4242c03122c2ba02bfe1b21074ae55dc",
+      "contentHash": "sha256:b9b932ae23b0c441100be6a3dd2a62da16ddf54b444b378a928a49fec71f1e1a",
       "occurrenceHashes": [
-        "sha256:16cda4a2612679e7b774183da5d49f641c9d97101101a2c80d515257d9018bc3"
+        "sha256:0fb05d96627eece490adb0e12b583f4cb9cc192f37d7937dd79a48730ed606a2"
       ]
     },
     {

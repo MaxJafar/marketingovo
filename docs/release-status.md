@@ -229,9 +229,14 @@ reported as a completed public release.
 
 ## Evidence still required before public 1.0
 
-- the exact current commit must complete the packaged Playwright and axe journey
-  in the canonical source-evidence job; the latest local browser rerun was not
-  available after the history and page-inventory assertions changed;
+- the packaged Playwright and axe journey must run in the canonical
+  source-evidence job. It now completes locally on the current tree (2026-07-30,
+  21.7 s, macOS arm64, Node 24.18.1) against the real local daemon, which closed
+  a genuine dashboard defect rather than a stale assertion: an integration card
+  lost its accessible name while one of its sub-forms was open, because the inner
+  heading changed from the provider name to "Configure <provider>". The provider
+  name now lives on the card container as a stable accessible name. A local pass
+  is still not canonical-job evidence;
 - the canonical tag workflow must produce signed/notarized installers, updater
   signatures, `latest.json`, checksums, attestations and native lifecycle
   evidence on every supported target from the canonical
