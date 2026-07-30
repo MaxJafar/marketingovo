@@ -64,10 +64,13 @@ Never request or echo API keys, OAuth values, or cookies.`,
     body: `Compare an AGENTseo project against competitors under identical crawl settings.
 
 1. Call \`agentseo_compare_start\` with the project and the competitor URLs in
-   $ARGUMENTS.
+   $ARGUMENTS. Ask which project is meant if it is ambiguous — never guess, and
+   never substitute a competitor URL the user did not give you.
 2. Poll \`agentseo_run_get\` until the run finishes.
 3. Report only differences the run actually measured. Separate structural gaps
    from content gaps, and state which competitor pages were not reachable.
+4. Use \`agentseo_run_evidence\` to show the rows behind a claimed gap rather
+   than describing it.
 
 Do not infer a competitor's traffic or rankings; AGENTseo does not measure them.`,
   },
@@ -77,10 +80,15 @@ Do not infer a competitor's traffic or rankings; AGENTseo does not measure them.
     tool: "agentseo_content_plan_start",
     body: `Build an AGENTseo content plan from the seed topics in $ARGUMENTS.
 
-1. Call \`agentseo_content_plan_start\` with up to ten seeds.
+1. Call \`agentseo_content_plan_start\` with up to ten seeds for the project
+   named in $ARGUMENTS. Ask which project is meant if it is ambiguous — never
+   guess.
 2. Poll \`agentseo_run_get\` until it finishes.
 3. Present clusters with their supporting keyword evidence. Mark any cluster
-   whose demand signal is unavailable as unavailable — not as zero.`,
+   whose demand signal is unavailable as unavailable — not as zero.
+4. Do not invent a publishing cadence, word count, or traffic projection. If the
+   run could not support a cluster, name the missing evidence rather than filling
+   the gap with generic advice.`,
   },
   {
     file: "seo-keywords.md",
@@ -88,10 +96,14 @@ Do not infer a competitor's traffic or rankings; AGENTseo does not measure them.
     tool: "agentseo_keyword_research_start",
     body: `Research keyword demand for the seed in $ARGUMENTS.
 
-1. Call \`agentseo_keyword_research_start\`.
+1. Call \`agentseo_keyword_research_start\` for the project named in
+   $ARGUMENTS. Ask which project is meant if it is ambiguous — never guess.
 2. Poll \`agentseo_run_get\` until it finishes.
 3. Report intent classification and momentum with the evidence behind each.
-   Name the configured sources; if a source is not connected, say so.`,
+   Name the configured sources; if a source is not connected, say so.
+4. Do not invent search volume. Autocomplete breadth is not demand, and a
+   provider value that was not returned is unavailable, never zero. Name the gap
+   instead of filling it with generic advice.`,
   },
   {
     file: "seo-status.md",

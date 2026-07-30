@@ -47,9 +47,10 @@
     "prepublishOnly": "node scripts/npm-publication-disabled.mjs direct-package-publish",
     "identity:check": "node scripts/identity-migration-policy.mjs",
     "identity:test": "node --test scripts/identity-migration-policy.test.mjs",
-    "check": "pnpm format:check && pnpm validate:no-containers && pnpm identity:check && pnpm identity:test && pnpm build && pnpm lint && pnpm typecheck && pnpm test && pnpm release:test && pnpm npm:release-test && pnpm benchmark && pnpm validate:contracts && pnpm validate:plugins && pnpm validate:licenses && pnpm pack:smoke",
+    "check": "pnpm format:check && pnpm validate:no-containers && pnpm identity:check && pnpm identity:test && pnpm build && pnpm lint && pnpm typecheck && pnpm test && pnpm release:test && pnpm npm:release-test && pnpm benchmark && pnpm validate:contracts && pnpm validate:plugins && pnpm validate:skills && pnpm validate:licenses && pnpm pack:smoke",
     "clean": "turbo run clean",
-    "agentseo": "node packages/cli/dist/cli.js"
+    "agentseo": "node packages/cli/dist/cli.js",
+    "validate:skills": "node scripts/validate-skill-discipline.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1",
