@@ -1,117 +1,117 @@
 # AGENTintel — Road to 1.0.0
 
-Plan date: 2026-07-30. Audited tree: `e7b8abf`, workspace version
-`0.1.0-alpha.0`, still internally named **Golem Intel**.
+Plan date: 2026-07-30. Baseline: `main` at `v0.2.0-alpha.0`, the first tag this
+repository has ever had.
 
-This document is the sprint plan from the current walking skeleton to a public
-`1.0.0` release as an installable agent plugin with a GUI dashboard. It reads
+This document is the sprint plan from that tag to a public `1.0.0` release as an
+installable agent plugin with a GUI dashboard. It reads
 [`docs/status.md`](docs/status.md) as the release-truth boundary and does not
 soften it.
 
 ---
 
-## 1. Audit summary
+## 1. Where the project actually stands
 
 ### What is genuinely built
 
-Verified locally on 2026-07-30: `go build ./...` clean, `go vet ./...` clean,
-`go test ./...` **all 9 packages pass** (api, connectors, daemonlock, governance,
-jobs, policy, storage, both cmds).
+Verified locally: `pnpm check` green end to end — reference validation, strict
+secret scan, contracts, build, strict types, ruff and `go vet`, TypeScript tests,
+`go test` across 9 packages, 33 Python tests, and plugin validation.
 
-| Area          | State                                                                                                                             |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Code volume   | 24,232 tracked LOC                                                                                                                |
-| Go daemon     | `internal/` 8,758 LOC + `cmd/` 734 LOC — sessions, jobs, connectors, governance, policy, SQLite                                   |
-| Python worker | `workers/intelligence` 4,800 LOC — Arrow/Polars normalization, DuckDB analytics, exact 32-field schema, hypothesis property tests |
-| TypeScript    | `packages/` 2,964 LOC (contracts, generated SDK, MCP)                                                                             |
-| GUI dashboard | `apps/dashboard` **1 page**, 6 components, 2,809 LOC including tests                                                              |
-| Agent surface | 6 MCP tools over stdio + authenticated Streamable HTTP, Codex bundle, OpenClaw adapter, 3 editor MCP configs                      |
-| Contracts     | OpenAPI + Protobuf + JSON Schema + Arrow, generated not handwritten, Buf breaking-change gate                                     |
-| Docs          | architecture, threat model, quickstart, status, ADRs, metric catalog, model cards                                                 |
+| Area          | State                                                                                                                            |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Code volume   | ~24,000 tracked LOC                                                                                                              |
+| Go daemon     | `internal/` 8.8k LOC + `cmd/` 0.7k — sessions, jobs, connectors, governance, policy, SQLite                                      |
+| Python worker | `workers/intelligence` 4.8k LOC — Arrow/Polars normalization, DuckDB analytics, exact 32-field schema, hypothesis property tests |
+| TypeScript    | `packages/` 3.0k LOC (contracts, generated SDK, MCP)                                                                             |
+| GUI dashboard | `apps/dashboard` — **1 page**, 6 components, 2.8k LOC including tests                                                            |
+| Agent surface | 6 MCP tools over stdio + authenticated Streamable HTTP; Claude Code, Codex and OpenClaw bundles plus 5 plain-MCP editor configs  |
+| Contracts     | OpenAPI + Protobuf + JSON Schema + Arrow, generated not handwritten, Buf breaking-change gate                                    |
+| Docs          | architecture, threat model, quickstart, status, 3 ADRs, metric catalog, model cards                                              |
 
 The architecture is unusually disciplined for an alpha: the Go authority treats
 every Python artifact as untrusted, physically re-decodes Arrow and Parquet,
 compares decoded rows, verifies citations and provenance, and publishes by
 filesystem rename. The evidence and governance layer is the strongest part of the
-codebase and is real.
+codebase and it is real.
 
-### The central finding
+### The central finding, unchanged
 
 **There is no live data source.** `internal/connectors/` contains exactly one
 connector — `fixture.go`, 378 LOC, synthetic, using reserved `.invalid` URLs. The
-"research" workflow is deterministic descriptive synthesis over a single committed
-fixture, not research. `docs/status.md` states this plainly, and the README does
-too, to the project's credit.
+"research" workflow is deterministic descriptive synthesis over a single
+committed fixture, not research. `docs/status.md` and the README both state this.
 
-So the honest reading is: **AGENTintel is a well-engineered pipeline with nothing
-flowing through it.** Everything in the audit summary above is infrastructure. The
-gap to a 1.0.0 product a user would install is therefore much larger than
-AGENTseo's, and this plan reflects that — Sprint 2 is where the product actually
+So: **AGENTintel is a well-engineered pipeline with nothing flowing through it.**
+Everything in the table above is infrastructure. Sprint 2 is where the product
 starts existing.
 
-### Release blockers found
+### Resolved since the original audit
 
-**B1 — Not open source.** `LICENSE` is Elastic License 2.0. Same situation as
-AGENTseo: source-available, not OSI-approved, and the README says so. Blocks
-marketplace listing and OSI-gated adoption.
+- **Licensing.** Apache-2.0 throughout, copyright MaxJafar, recorded in
+  [ADR 0003](docs/adr/0003-apache-2-0-relicense.md). The ADR states plainly that
+  Apache-2.0 _raises_ rather than lowers the cost of GPL/AGPL derivation, because
+  the project now invites unrestricted redistribution — which promotes the
+  clean-room record from a nice-to-have to a release gate.
+- **No affiliation.** No corporate owner, no paid tier, no telemetry. The Go
+  module is `github.com/MaxJafar/AGENTintel`; bundle identity is
+  `io.github.maxjafar.agentintel`; schema `$id`s and all homepage/privacy/terms
+  links point at the repository.
+- **Rebrand complete and guarded.** Renamed across Go, Python, Protobuf and
+  TypeScript, including the schema and parser namespaces recorded in evidence
+  manifests (`agentintel.observations.v1`, `agentintel.comparison-report.v1/v2`,
+  and the rest). Generated projections were regenerated by buf, not hand-edited.
+  `scripts/validate-identity.mjs` fails if any retired identifier reappears, and
+  its wire rule covers the namespace forms that are easy to miss because they do
+  not contain the product name.
+- **Agent plugin surface.** Claude Code plugin with four slash commands and a
+  marketplace manifest, the Codex bundle, the OpenClaw adapter, and
+  Cursor/VS Code/Antigravity/generic MCP configs — all generated from
+  `@agentintel/contracts` by `pnpm plugins:generate`, with `validate:plugins`
+  failing on drift. The `/absolute/path/to/...` placeholders are gone.
+- **Repository hygiene.** A 705 MB nested orphaned git worktree at
+  `AGENTintel/AGENTintel` is deleted, and `validate-no-nested-checkout` fails if
+  one reappears. Four stale branches pruned; `main` is the only long-lived
+  branch. Local Playwright run output is no longer tracked.
+- **Toolchain.** `pnpm doctor` reports missing Go, uv, buf, Node, pnpm and cargo
+  with exact remedies, including the stale-venv case that bit this session.
 
-**B2 — 705 MB untracked duplicate.** `AGENTintel/AGENTintel/` is a nested,
-untracked, near-complete copy of the repository — the only entry in
-`git status`. Almost certainly a botched rename or copy. Must be deleted.
+### What still blocks 1.0.0
 
-**B3 — No rebrand has happened at all.** Go module is
-`github.com/GolemWorkers/golem-intel`. Binaries are `golem-intel` and
-`golem-inteld`. Workspace package is `golem-intel-workspace`. Data directory is
-`.golem-intel/`. Plugin name is `golem-intel`, display name "Golem Intel".
-README title is "Golem Intel". Unlike AGENTseo, there is no partial migration and
-no identity-policy script to enforce one.
-
-**B4 — No CI whatsoever.** There is no `.github/` directory. No workflows, no
-CodeQL, no dependabot, no issue or PR templates. `pnpm check` exists and is
-comprehensive but has never run in automation. For a repository with a Go +
-Python + TypeScript + Rust surface, this is the single highest-leverage gap.
-
-**B5 — Governance and legal docs missing.** Present: LICENSE, NOTICE, README,
-CONTRIBUTING, SECURITY, PRIVACY. Missing, all of which the sibling AGENTseo repo
-has: `CODE_OF_CONDUCT.md`, `GOVERNANCE.md`, `SUPPORT.md`, `TRADEMARKS.md`,
-`CLA.md`, `COMMERCIAL.md`.
-
-**B6 — Dashboard is one page.** `apps/dashboard/src/pages/` contains only
-`ResearchPage.tsx`. A "GUI dashboard" release claim needs projects, run history,
-an evidence browser, watchlists, reports, and settings. This is a from-scratch
-build, not a polish pass.
-
-**B7 — Reverse-engineering corpus is a legal and scope liability.**
-`TO REVERSE ENGINEEER/` holds 820 MB of 49 third-party projects. It is correctly
-gitignored and correctly blocked from build inputs by
-`scripts/reference-lab-validate.mjs`, and `docs/status.md` is candid that
-provenance is unresolved. Two unresolved problems remain:
-
-- **License derivation.** Much of that corpus is GPL/AGPL (`minet`, `spiderfoot`,
-  `IntelOwl`, `mixpost`, `postiz`, `4cat`, `zeeschuimer`). Reading AGPL source
-  and reimplementing behavior into an ELv2 product is exactly the fact pattern
-  that produces derivation claims. Gitignoring prevents _distribution_, not
-  _derivation_. There is no clean-room process record.
-- **Product-boundary conflict.** The corpus is heavily weighted toward account
-  enumeration and people-search — `sherlock`, `maigret`, `holehe`, `GHunt`,
-  `toutatis`, `yesitsme`, `WhatsMyName`, `Osintgram`, `linkedin_scraper`,
-  `social-media-hacker-list`. The README's product boundary explicitly disclaims
-  "covert identity enumeration" and "private-account access". Those two facts
-  need to be reconciled in writing before a public release, or the first
-  reviewer who lists that directory will draw their own conclusion.
-
-**B8 — Zero tags, no releases, no desktop distribution.** No signed desktop
-build, no updater channel, no published packages.
-
-**B9 — Scheduler is not durable enough for its own claims.**
-`docs/status.md`: single-daemon, no distributed lease/heartbeat/checkpoint/
-dead-letter design; filesystem evidence publication and SQLite finalization are
-separate crash domains "requiring explicit reconciliation testing" that has not
-been done.
-
-**B10 — Local toolchain cannot verify the JS/Rust surface.** Node v26.5.0
-installed vs `engines: >=24 <25`; `pnpm` absent; `cargo` absent. Only the Go
-surface is verifiable on this machine today.
+- **B1 — One synthetic connector.** No live source. This is the whole product gap.
+- **B2 — Dashboard is one page.** `apps/dashboard/src/pages/` contains only
+  `ResearchPage.tsx`. A "GUI dashboard" claim needs projects, runs, an evidence
+  browser, watchlists, reports and settings.
+- **B3 — No CI.** There is still no `.github/` directory: no workflows, no
+  CodeQL, no dependabot, no templates. `pnpm check` is comprehensive and has never
+  run in automation. For a four-language repository this is the highest-leverage
+  remaining gap.
+- **B4 — Governance docs absent.** No `CODE_OF_CONDUCT.md` or `SUPPORT.md`. (No
+  CLA or trademark policy is needed — Apache-2.0 alone governs contributions.)
+- **B5 — Reference corpus has no clean-room record.**
+  `TO REVERSE ENGINEEER/` holds 820 MB of 49 third-party projects, retained
+  deliberately for study. It is correctly gitignored and blocked from build
+  inputs by `scripts/reference-lab-validate.mjs`, and the NOTICE now discloses it.
+  Two problems remain unresolved:
+  - **Licence derivation.** Much of it is GPL/AGPL (`minet`, `spiderfoot`,
+    `IntelOwl`, `mixpost`, `postiz`, `4cat`, `zeeschuimer`). Gitignoring prevents
+    distribution, not derivation, and Apache-2.0 makes any contamination
+    propagate further. Apache-2.0 is also one-way incompatible with GPLv2, so no
+    GPLv2 code may enter this tree at all.
+  - **Product-boundary conflict.** The corpus is weighted toward account
+    enumeration and people-search (`sherlock`, `maigret`, `holehe`, `GHunt`,
+    `toutatis`, `WhatsMyName`, `linkedin_scraper`, `social-media-hacker-list`),
+    while the README's product boundary explicitly disclaims covert identity
+    enumeration and private-account access. Reconcile that in writing before a
+    public release, or the first reviewer who lists the directory will draw their
+    own conclusion.
+- **B6 — Scheduler is not durable enough for its own claims.** Single-daemon; no
+  lease/heartbeat/checkpoint/dead-letter design. Filesystem evidence publication
+  and SQLite finalization are separate crash domains with no reconciliation test.
+- **B7 — Python worker is not sandboxed.** `docs/status.md` is explicit that
+  developer Python is a trusted same-user process, not an OS sandbox.
+- **B8 — No signed desktop build, updater channel, or published packages.**
+- **B9 — Benchmark absent.** The million-observation benchmark is an open gate.
 
 ---
 
@@ -120,134 +120,103 @@ surface is verifiable on this machine today.
 Two-week sprints; five sprints ≈ 10 weeks. **You cannot reach the roadmap's
 Phases 2–6 in that window, and this plan does not pretend otherwise.**
 
-`1.0.0` is therefore redefined as: **a narrow but genuinely useful product** —
-three real connectors, a real dashboard, real distribution — rather than a partial
-delivery of the full vision. Concretely:
+`1.0.0` is therefore **a narrow but genuinely useful product** rather than a
+partial delivery of the full vision:
 
-- **In for 1.0.0:** Website/RSS, YouTube Data API, and Reddit connectors;
-  competitive comparison and monitoring over those three sources; a full
-  dashboard; the agent plugin surface; signed desktop distribution.
-- **Out for 1.0.0:** Meta, TikTok, Trends, licensed providers, the AGENTseo
-  bridge, creator discovery, campaign history, registries/filings/funding/hiring
-  signals, coordination networks, and all hosted/multi-tenant work (roadmap
-  Phases 3–6).
+- **In:** Website/RSS, YouTube Data API and Reddit connectors; comparison and
+  monitoring over those three sources; a real dashboard; the agent plugin
+  surface; CI; signed desktop distribution.
+- **Out:** Meta, TikTok, Trends, licensed providers, the AGENTseo bridge, creator
+  discovery, campaign history, registries/filings/funding/hiring signals,
+  coordination networks, and all hosted/multi-tenant work (Phases 3–6).
 
-If that narrowing is not acceptable, the correct response is more sprints, not a
-denser plan — the pipeline is sound but the product surface is close to empty, and
-compressing three real connectors plus a six-page dashboard plus first-ever CI
-plus signed distribution into ten weeks is already aggressive.
+If that narrowing is not acceptable, the answer is more sprints, not a denser
+plan. Three real connectors plus a six-page dashboard plus first-ever CI plus
+signed distribution in ten weeks is already aggressive for one maintainer.
 
 ---
 
 ## 3. Sprint plan
 
-### Sprint 1 — Hygiene, identity, CI, and the legal clean-room
+### Sprint 1 — CI, governance, and the legal clean-room
 
-**Goal:** make the repository safe and legible to a stranger, and give it a build
-gate for the first time.
+**Goal:** make the repository safe, automated, and legible to a stranger. This is
+deliberately first: shipping connectors into a repo with no CI compounds risk.
 
 Scope:
 
-1. **Delete `AGENTintel/AGENTintel/` (B2).** Confirm nothing unique lives there
-   first — `diff -rq` against the parent showed only cache and `.DS_Store`
-   differences — then remove 705 MB and add a guard to `pnpm check` that fails on
-   a nested self-copy.
-2. **Rebrand to AGENTintel (B3).** Go module path
-   `github.com/<canonical-org>/agentintel`; binaries `agentintel` and
-   `agentinteld`; workspace `agentintel-workspace`; data dir `.agentintel/`;
-   plugin name/display `agentintel`/`AGENTintel`; README title. Port AGENTseo's
-   `scripts/identity-migration-policy.mjs` approach so the rebrand cannot regress.
-   No shims needed — nothing is published yet, which makes this the cheapest it
-   will ever be.
-3. **Stand up CI (B4).** Model it on AGENTseo's `ci.yml`, which is already good:
-   - `quality`: `pnpm install --frozen-lockfile` → `pnpm check` (which already
-     chains reference validation, secret scan, contract lint, build, typecheck,
-     lint incl. ruff + go vet, and all three test suites).
-   - `go`: `go build`, `go vet`, `go test ./...` with race detector.
-   - `python`: `uv sync --frozen`, `ruff`, `pytest` including the hypothesis
-     property suites.
-   - `native`: `cargo check --locked` and `cargo clippy -D warnings` on the Tauri
-     shell, matrix across macOS/Windows/Linux.
+1. **Stand up CI (B3).** Model it on AGENTseo's `ci.yml`:
+   - `quality`: `pnpm install --frozen-lockfile` → `pnpm check`.
+   - `go`: build, vet, `go test ./...` with the race detector.
+   - `python`: `uv sync --frozen`, ruff, pytest including hypothesis suites.
+   - `native`: `cargo check --locked` and `clippy -D warnings`, matrixed across
+     macOS/Windows/Linux.
    - `codeql.yml` for Go + JS/TS + Python; `dependabot.yml` for npm, Go modules,
-     uv, and cargo.
-   - Issue templates and a PR template.
-4. **Resolve the license (B1).** Same decision as AGENTseo and it should be made
-   once for both. Recommendation: Apache-2.0 for contracts, SDK, MCP, adapters,
-   and the plugin bundle; ELv2 retained for the daemon and workers if commercial
-   protection matters. Record as an ADR under `docs/adr/`.
-5. **Add the missing governance docs (B5)** — port from AGENTseo and adapt.
-6. **Clean-room record for the reference corpus (B7).** This is legal risk, not
-   engineering preference, so it gets a named deliverable:
-   `docs/reverse-engineering/CLEAN-ROOM.md` recording, per project actually
-   consulted: upstream URL, exact commit, archive hash, license, and what was
-   taken — _interface shape and observable behavior only_, never implementation.
-   Plus an explicit statement that no AGPL/GPL source was copied, and a
-   scope-reconciliation section explaining why account-enumeration tooling appears
-   in the corpus while the product boundary disclaims that behavior. If any
-   connector design cannot be defended this way, drop it. Also: move the corpus
-   out of the repository working tree entirely, to a sibling path, so a `find`
-   in the repo cannot surface it.
-7. **Toolchain doctor (B10).** `.nvmrc`, exact tool versions in CONTRIBUTING, and
-   a `scripts/doctor.mjs` that names what is missing.
-8. Cut `v0.2.0-alpha.0` to prove the tag path exists.
+     uv and cargo; issue and PR templates.
+   - Build it incrementally in this order — Go first — rather than all at once.
+2. **Clean-room record (B5).** `docs/reverse-engineering/CLEAN-ROOM.md` recording,
+   per project actually consulted: upstream URL, exact commit, archive hash,
+   licence, and what was taken — interface shape and observable behaviour only,
+   never implementation. Plus an explicit statement that no GPL/AGPL source was
+   copied, and a scope-reconciliation section explaining why account-enumeration
+   tooling appears in the corpus while the product boundary disclaims that
+   behaviour. If a connector design cannot be defended this way, drop it.
+   Also move the corpus to a sibling path outside the repository working tree so
+   a `find` in the repo cannot surface it.
+3. **Governance docs (B4).** `CODE_OF_CONDUCT.md` and `SUPPORT.md`.
+4. **Branch protection** on `main`: CI required, no direct pushes.
 
 **Exit criteria**
 
-- `git status` clean; repository under 200 MB.
-- No `golem` token anywhere outside license/NOTICE history, enforced by policy script.
-- CI green on a PR: Go, Python, TypeScript, Rust, CodeQL all reporting.
-- License ADR recorded; all six missing governance docs present.
+- CI green on a PR with Go, Python, TypeScript, Rust and CodeQL all reporting.
 - `CLEAN-ROOM.md` written and reviewed; corpus outside the working tree.
-- A tag exists.
+- Both governance docs present.
 
 ---
 
 ### Sprint 2 — Real connectors: the product starts here
 
-**Goal:** replace fixture-only operation with three live sources, each meeting the
-project's own shipping bar.
+**Goal:** replace fixture-only operation with three live sources.
 
-`docs/status.md` already defines that bar, and it is the right one — a connector
-ships only with "source policy, credential scopes, rate limits, retention, kill
-switch, fixtures and failure tests". Every connector below must satisfy all seven.
+`docs/status.md` already defines the bar, and it is the right one: a connector
+ships only with source policy, credential scopes, rate limits, retention, kill
+switch, fixtures and failure tests. All seven, every time.
 
 Scope:
 
 1. **Website/RSS connector.** Highest value, no credentials, lowest policy risk.
    `robots.txt` compliance, conditional requests, feed discovery, content
-   extraction, change detection. SSRF and redirect defenses at the egress layer —
-   the daemon owns networking, so this belongs in `internal/policy`, not the
-   connector.
+   extraction, change detection.
 2. **YouTube Data API connector.** First-party API, clear terms, BYOK. Channel and
    video metadata, public statistics, quota accounting with a hard kill switch on
-   quota exhaustion.
+   exhaustion.
 3. **Reddit connector.** Official API with OAuth app credentials, BYOK,
    documented rate limits.
-4. **Credential handling.** BYOK vault via the Rust native broker, never in
-   SQLite, never in artifacts. Port AGENTseo's secret-canary test: prove active
-   credentials cannot reach DB/WAL/SHM, events, artifacts, reports, logs, or
-   backups.
-5. **Egress policy layer.** Allowlisted schemes, blocked private address space
-   with explicit per-project approval, DNS-rebinding defense, redirect-chain
+4. **Egress policy layer.** Allowlisted schemes, blocked private address space
+   with explicit per-project approval, DNS-rebinding defence, redirect-chain
    limits, response size and time bounds, per-source concurrency. One
-   implementation, shared by all connectors.
-6. **Extend the Arrow schema honestly.** The exact 32-field schema is
-   fixture-shaped. Widen it for real multi-source observations, bump the schema
-   version, and keep the Go-side physical re-decode and row-equivalence checks —
-   that authority boundary is the best property of this codebase and must not be
+   implementation in `internal/policy`, shared by all connectors — the daemon owns
+   networking, so this does not belong in the connectors.
+5. **Credential handling.** BYOK via the Rust native broker, never in SQLite,
+   never in artifacts. Port AGENTseo's secret-canary test: prove active
+   credentials cannot reach DB/WAL/SHM, events, artifacts, reports, logs or
+   backups.
+6. **Widen the Arrow schema honestly.** The exact 32-field schema is
+   fixture-shaped. Widen it for real multi-source observations and bump the
+   version, but keep the Go-side physical re-decode and row-equivalence checks.
+   That authority boundary is the best property of this codebase and must not be
    relaxed to accommodate real data.
 7. **Fixtures and failure paths per connector.** Recorded real responses replayed
-   offline; plus 429, 5xx, timeout, truncated-body, schema-drift, and
+   offline, plus 429, 5xx, timeout, truncated-body, schema-drift and
    credential-revoked paths.
-8. **Kill switch.** Per-source disable, honored mid-run, with the run correctly
-   ending `partial` rather than `failed`.
+8. **Kill switch.** Per-source disable, honoured mid-run, ending the run
+   `partial` rather than `failed`.
 
 **Exit criteria**
 
-- Three connectors live; a real three-brand comparison over real sources
-  completes end to end and every claim in the report cites a real observation.
-- Each connector has policy, scopes, limits, retention, kill switch, fixtures,
-  and failure tests — all seven, all reviewed.
+- Three connectors live; a real three-target comparison completes end to end and
+  every claim in the report cites a real observation.
+- Each connector has all seven bar items, reviewed.
 - Secret canary passes across the widened schema.
 - The fixture connector still passes, retained as a test-only source.
 
@@ -259,149 +228,139 @@ Scope:
 
 Scope:
 
-1. **Pages to build (B6).** Beyond the existing Research page:
+1. **Pages to build (B2).** Beyond the existing Research page:
    - **Projects** — create, list, configure sources, delete by exact name.
    - **Runs** — history, status, cancel, replay, configuration provenance.
    - **Evidence browser** — the differentiator. Every observation traceable to
-     source, snapshot hash, and manifest. This is what the governance layer
-     already supports and nothing currently exposes.
-   - **Watchlists** — monitored brand/creator sets and what changed.
+     source, snapshot hash and manifest. The governance layer already supports
+     this and nothing exposes it.
+   - **Watchlists** — monitored target sets and what changed.
    - **Reports** — HTML/CSV/JSON export with citations intact.
    - **Integrations/Settings** — BYOK connect, rotate, test, remove, with local
      removal clearly distinguished from provider-side revocation.
    - **System health** — daemon, worker, job queue, disk.
-2. **Reuse, do not reinvent.** AGENTseo's `apps/dashboard` has a working
-   `data-state`, `data-table`, `trend-chart`, `app-shell`, and accessibility test
-   pattern. Port the patterns.
+   - If the sprint slips, Projects/Runs/Evidence are mandatory; Watchlists and
+     Reports may move to post-1.0.
+2. **Reuse, do not reinvent.** AGENTseo's dashboard has working `data-state`,
+   `data-table`, `trend-chart`, `app-shell` and accessibility test patterns. Port
+   the patterns.
 3. **Accessibility from the start.** WCAG 2.2 AA, axe in CI on every route from
-   the first page. Retrofitting this is more expensive than the pages.
+   the first page. Retrofitting costs more than the pages.
 4. **Missing-is-not-zero in the UI.** The Python layer is rigorous about
    denominator safety and contradiction preservation; the UI must surface
    warnings and unavailable states rather than flattening them.
-5. **Real-browser E2E.** Playwright journey against the live daemon: onboarding →
+5. **Real-browser E2E.** Playwright against the live daemon: onboarding →
    project → real crawl → run → evidence trace → replay → report → deletion.
-6. **Time to first result.** Instrument it; target under 15 minutes from install
-   for a first-time user, matching the sibling project's gate.
+6. **Time to first result** under 15 minutes from install, instrumented.
 
 **Exit criteria**
 
-- Seven routes shipped, tested, zero axe violations in CI.
-- Every rendered claim reaches its source evidence in no more than three clicks.
+- Seven routes shipped and tested; zero axe violations in CI.
+- Every rendered claim reaches its source evidence in at most three clicks.
 - Playwright journey green against real connectors.
-- First result under 15 minutes with 3 unfamiliar testers.
 
 ---
 
-### Sprint 4 — Agent plugin surface and durability
+### Sprint 4 — Durability, security and the agent surface for real data
 
-**Goal:** installable in every agent host, and trustworthy under failure.
+**Goal:** trustworthy under failure, and useful to an agent over live sources.
 
 Scope:
 
-1. **Multi-host plugin.** Currently Codex-only. Add `.claude-plugin/plugin.json`
-   and `marketplace.json`, generated from `packages/contracts`, plus verified
-   Cursor and generic-MCP configs. Replace the `/absolute/path/to/...` placeholder
-   in `integrations/*.mcp.json` with a real installed-path resolution.
-2. **Skills.** One `intelligence-researcher` skill today. Add per-workflow
-   skills — competitive comparison, source investigation, evidence tracing,
-   watchlist review — each with an eval fixture asserting it cites run IDs and
-   observation IDs and never asserts an uncited conclusion. This is the
-   highest-value guardrail for an evidence-first product driven by an LLM.
-3. **MCP tool surface for real data.** The 6 tools were shaped around the fixture.
-   Add read-only evidence retrieval, source listing, and watchlist status, all
-   contract-registered with limits and safety annotations, and a plugin-parity
-   test that fails when a tool is added without appearing in every host manifest.
-4. **Scheduler durability (B9).** Job leases, heartbeats, checkpointing, and a
-   dead-letter path. Then fault-injection tests killing the daemon between
-   filesystem manifest publication and SQLite finalization — the two crash domains
-   `docs/status.md` names — asserting exactly one durable result and no
-   duplication.
-5. **Run-state correctness.** Exhaustive succeeded/partial/failed/cancelled
+1. **Scheduler durability (B6).** Job leases, heartbeats, checkpointing and a
+   dead-letter path. Then fault-injection tests that kill the daemon between
+   filesystem manifest publication and SQLite finalization — the two crash
+   domains `docs/status.md` names — asserting exactly one durable result.
+2. **Run-state correctness.** Exhaustive succeeded/partial/failed/cancelled
    transitions; prove no recursive workflow is schedulable.
-6. **Python worker sandbox.** `docs/status.md` is explicit that developer Python is
-   a trusted same-user process, not an OS sandbox. For 1.0, either implement real
-   process isolation for the packaged path or state the trust boundary
-   unambiguously in the threat model and README. Do not leave it implied.
-7. **Benchmark.** The million-observation benchmark is an open gate. Build it,
-   commit a baseline, fail CI on >20% unexplained regression.
+3. **MCP tools for real data.** The 6 tools were shaped around the fixture. Add
+   read-only evidence retrieval, source listing and watchlist status, all
+   contract-registered, with a parity test that fails when a tool is added
+   without appearing in every host manifest.
+4. **Skill evals.** Per-workflow skills, each with a fixture asserting it cites
+   run IDs and observation IDs and never asserts an uncited conclusion. For an
+   evidence-first product driven by an LLM this is the highest-value guardrail.
+5. **Python worker boundary (B7).** Either implement real process isolation for
+   the packaged path, or state the trust boundary unambiguously in the threat
+   model and README. Do not leave it implied. This is a decision point, not a
+   task to defer again.
+6. **Security corpora as blocking gates.** SSRF, redirect, DNS-rebinding,
+   credential-leak, artifact-tampering and path-traversal suites, each a named CI
+   job with a documented case count. Gitleaks and RustSec on every PR.
+7. **Benchmark (B9).** Build it, commit a baseline, fail CI on >20% unexplained
+   regression.
 
 **Exit criteria**
 
-- Plugin installs and completes a real research run from Claude Code, Codex, and
-  Cursor.
-- Every skill has a passing citation eval.
 - Fault-injection suite proves no duplicate or lost results across both crash
   domains.
+- The plugin completes a real research run from Claude Code, Codex and Cursor.
+- Every skill has a passing citation eval.
 - Benchmark baseline committed and enforced.
 - Python trust boundary either enforced or documented explicitly.
 
 ---
 
-### Sprint 5 — Security, distribution, and GA
+### Sprint 5 — Distribution and GA
 
 **Goal:** ship `1.0.0` with evidence.
 
 Scope:
 
-1. **Security suites as blocking gates.** SSRF, redirect, DNS-rebinding,
-   credential-leak, artifact-tampering, and path-traversal corpora, each a named
-   CI job with a documented case count. Gitleaks and RustSec on every PR.
-   `pnpm reference:scan:strict` already in `pnpm check` — keep it blocking.
-2. **Dependency zero-state.** No known High/Critical across npm, Go modules,
-   PyPI, and cargo. SBOM generation (CycloneDX) for all four ecosystems — a
-   four-language SBOM is harder than AGENTseo's and should not be left to the
-   last week.
+1. **Procure code-signing identities on day one** — weeks of lead time.
+2. **Dependency zero-state and SBOM.** No known High/Critical across npm, Go
+   modules, PyPI and cargo. CycloneDX SBOM for all four ecosystems; a
+   four-language SBOM is harder than a single-language one and should not be left
+   to the last week.
 3. **Signed desktop distribution (B8).** Notarized macOS DMG, signed Windows MSI,
    deb, AppImage. Tauri updater `latest.json`, hash-verified per target, attested
    and attached before the release goes public. Destructive lifecycle tests:
-   install → background start → single-instance → stop → upgrade from the Sprint 1
-   baseline tag → uninstall → verify cleanup with user data retained.
-4. **Package publication.** SDK, MCP, contracts, and adapters to npm with OIDC
-   provenance. Go install path for the CLI.
-5. **Plugin marketplace submission,** per the Sprint 1 license outcome.
+   install → background start → single-instance → stop → upgrade from
+   `v0.2.0-alpha.0` → uninstall → verify cleanup with user data retained.
+4. **Package publication.** SDK, MCP, contracts and adapters to npm with OIDC
+   provenance. A `go install` path for the CLI.
+5. **Marketplace submission** to Claude Code and Codex.
 6. **Docs 1.0.** Publish a docs site. Rewrite `README.md` for a shipped product:
    what it does, three-command install, dashboard screenshot, and an honest
-   limits section naming the three connectors and the deferred phases. The current
-   README is an excellent engineering status document and a poor product front
-   page.
+   limits section naming the three connectors and the deferred phases. The
+   current README is an excellent engineering status document and a poor product
+   front page.
 7. **Model cards and metric catalog** updated for real data — the fixture-era
-   `MODEL_CARD.md` and metric catalog will not describe live-source behavior.
-8. **Legal review** of the final license, trademarks, and CLA.
-9. **Rewrite `docs/status.md`** from a phase boundary into a released-state
-   record: 1.0.0 ships three connectors, and Phases 3–6 are the post-1.0 roadmap.
-   Then tag `v1.0.0`.
+   `MODEL_CARD.md` will not describe live-source behaviour.
+8. **Rewrite `docs/status.md`** from a phase boundary into a released-state
+   record: 1.0.0 ships three connectors, Phases 3–6 are the post-1.0 roadmap.
+9. **Tag `v1.0.0`.**
 
 **Exit criteria**
 
-- All security corpora blocking and green; zero known High/Critical advisories.
-- SBOM covering Go, npm, PyPI, and cargo.
 - Signed artifacts for every supported target; updater verified end to end;
   lifecycle matrix green on real signed builds.
-- Packages published with provenance.
-- Docs site live; README rewritten; model cards accurate for live sources.
+- SBOM covering Go, npm, PyPI and cargo; zero known High/Critical advisories.
+- Packages published with provenance; docs site live; README rewritten.
 - `v1.0.0` tagged; `docs/status.md` describes a shipped release.
 
 ---
 
 ## 4. Risk register
 
-| Risk                                                        | Impact                                                                                     | Mitigation                                                                                                                                       |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Three real connectors underestimated                        | Sprint 2 slips and everything downstream stalls, since Sprints 3–5 all depend on real data | Ship Website/RSS first and independently; if only one connector is ready by end of Sprint 2, cut 1.0.0 to that one rather than delaying          |
-| AGPL derivation claim from the reference corpus             | Existential legal risk to the release                                                      | Sprint 1 clean-room record; drop any connector whose design cannot be defended                                                                   |
-| Product boundary vs. corpus contents read as bad faith      | Reputational, on day one of a public release                                               | Written reconciliation in Sprint 1; corpus moved out of the tree                                                                                 |
-| Four-language CI and SBOM harder than the AGENTseo template | Sprint 1 and 5 both slip                                                                   | Build CI incrementally in Sprint 1 — Go first, then Python, then TS, then Rust                                                                   |
-| Platform ToS change on YouTube or Reddit                    | A shipped connector becomes non-compliant                                                  | Kill switch per source, already in the Sprint 2 bar                                                                                              |
-| Dashboard built from one page in one sprint                 | Sprint 3 slips                                                                             | Port AGENTseo's component patterns rather than authoring new ones; Projects/Runs/Evidence are mandatory, Watchlists/Reports can slip to post-1.0 |
-| Python sandbox deferred                                     | Ship with a weaker boundary than users assume                                              | Sprint 4 decision point: enforce or document, never leave implied                                                                                |
+| Risk                                                           | Impact                                                                            | Mitigation                                                                                                            |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Three real connectors underestimated                           | Sprint 2 slips and everything downstream stalls, since Sprints 3–5 need real data | Ship Website/RSS first and independently. If only one connector is ready, cut 1.0.0 to that one rather than delaying. |
+| GPL/AGPL derivation claim from the reference corpus            | Existential legal risk to the release                                             | Sprint 1 clean-room record; drop any connector whose design cannot be defended                                        |
+| Corpus contents read as bad faith next to the product boundary | Reputational, on day one of a public release                                      | Written reconciliation in Sprint 1; corpus moved outside the working tree                                             |
+| Four-language CI and SBOM harder than the template             | Sprints 1 and 5 both slip                                                         | Build CI incrementally — Go, then Python, then TS, then Rust                                                          |
+| Platform ToS change on YouTube or Reddit                       | A shipped connector becomes non-compliant                                         | Per-source kill switch, already in the Sprint 2 bar                                                                   |
+| Dashboard from one page in one sprint                          | Sprint 3 slips                                                                    | Port AGENTseo's component patterns; Projects/Runs/Evidence mandatory, Watchlists/Reports may slip                     |
+| Python sandbox deferred again                                  | Ship with a weaker boundary than users assume                                     | Sprint 4 decision point: enforce or document, never leave implied                                                     |
+| Code-signing certificates not procured in time                 | No 1.0 installers                                                                 | Procure at the start of Sprint 5 at the latest; earlier is better                                                     |
 
 ## 5. Explicitly out of scope for 1.0.0
 
-Meta, TikTok, Trends, and licensed-provider connectors; the AGENTseo bridge;
+Meta, TikTok, Trends and licensed-provider connectors; the AGENTseo bridge;
 licensed creator discovery and campaign history; registries, filings, products,
-funding, and hiring signals; cross-source semantic clustering and coordination
-networks; aggregate workforce intelligence; and all hosted GolemWorkers
-storage/workers/tenancy/RBAC/billing. These are roadmap Phases 3–6 and stay there.
+funding and hiring signals; cross-source semantic clustering and coordination
+networks; aggregate workforce intelligence; and all hosted storage, workers,
+tenancy, RBAC and billing. These are roadmap Phases 3–6 and stay there.
 
 The product boundary in `README.md` — no authentication bypass, CAPTCHA evasion,
 stolen sessions, private-account access, breach data, biometric correlation,
