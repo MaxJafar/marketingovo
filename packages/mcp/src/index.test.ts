@@ -71,6 +71,27 @@ function stubClient(status: string, workflowId = "audit") {
       get: vi.fn(async () => ({ id: "run-1", status, workflowId })),
       issues,
       list: vi.fn(async () => []),
+      evidence: vi.fn(async () => ({
+        section: "crawl",
+        version: 1,
+        items: [{ url: "https://example.com/a" }],
+        total: 1,
+        offset: 0,
+        limit: 50,
+      })),
+      links: vi.fn(async () => ({
+        linkGraphVersion: 1,
+        available: true,
+        items: [{ target: "https://example.com/b", anchor: "b" }],
+        total: 1,
+        offset: 0,
+        limit: 50,
+      })),
+      compare: vi.fn(async () => ({
+        version: "regression-v1",
+        newIssues: [],
+        resolvedIssues: [],
+      })),
     },
     schedules: { list: vi.fn(async () => []) },
     reports: {
@@ -87,7 +108,7 @@ describe("AGENTseo MCP public contract", () => {
     expect(createAgentSeoMcpServer).toBe(createAgentSeoMcpServer);
   });
 
-  it("registers exactly the six approved workflow tools", async () => {
+  it("registers exactly the nine approved workflow tools", async () => {
     const { client } = stubClient("running");
     const server = await createAgentSeoMcpServer({ client });
 
@@ -97,11 +118,85 @@ describe("AGENTseo MCP public contract", () => {
     expect(PUBLIC_TOOL_NAMES).toEqual([
       "agentseo_audit_start",
       "agentseo_run_get",
+      "agentseo_run_evidence",
+      "agentseo_run_links",
+      "agentseo_run_compare",
       "agentseo_compare_start",
       "agentseo_keyword_research_start",
       "agentseo_content_plan_start",
       "agentseo_monitoring_status",
     ]);
+  });
+
+  it("passes evidence pagination through untouched and defaults the section", async () => {
+    const { client } = stubClient("succeeded");
+    const server = await createAgentSeoMcpServer({ client });
+    const tool = registeredTools(server).agentseo_run_evidence;
+
+    await tool.handler({ run_id: "run-1" });
+    expect(client.runs.evidence).toHaveBeenCalledWith("run-1", {
+      section: "crawl",
+    });
+
+    await tool.handler({
+      run_id: "run-1",
+      section: "redirects",
+      search: "/pricing",
+      limit: 10,
+      offset: 20,
+    });
+    expect(client.runs.evidence).toHaveBeenLastCalledWith("run-1", {
+      section: "redirects",
+      search: "/pricing",
+      limit: 10,
+      offset: 20,
+    });
+  });
+
+  it("rejects an evidence section the API does not serve", async () => {
+    const { client } = stubClient("succeeded");
+    const server = await createAgentSeoMcpServer({ client });
+    const tool = registeredTools(server).agentseo_run_evidence;
+
+    expect(
+      tool.inputSchema.safeParse({ run_id: "run-1", section: "sitemaps" })
+        .success,
+    ).toBe(false);
+  });
+
+  it("requires an http page URL for the link explorer", async () => {
+    const { client } = stubClient("succeeded");
+    const server = await createAgentSeoMcpServer({ client });
+    const tool = registeredTools(server).agentseo_run_links;
+
+    expect(
+      tool.inputSchema.safeParse({
+        run_id: "run-1",
+        page_url: "file:///etc/passwd",
+      }).success,
+    ).toBe(false);
+
+    await tool.handler({
+      run_id: "run-1",
+      page_url: "https://example.com/a",
+    });
+    expect(client.runs.links).toHaveBeenCalledWith("run-1", {
+      pageUrl: "https://example.com/a",
+      direction: "inlinks",
+    });
+  });
+
+  it("delegates run comparison to the server instead of recomputing it", async () => {
+    const { client } = stubClient("succeeded");
+    const server = await createAgentSeoMcpServer({ client });
+    const tool = registeredTools(server).agentseo_run_compare;
+
+    const result = await tool.handler({
+      run_id: "run-2",
+      baseline_run_id: "run-1",
+    });
+    expect(client.runs.compare).toHaveBeenCalledWith("run-2", "run-1");
+    expect(result.content[0].text).toContain("regression-v1");
   });
 
   it("exposes project context as a read-only resource without expanding the tool surface", async () => {

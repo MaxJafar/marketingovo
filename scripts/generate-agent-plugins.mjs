@@ -203,6 +203,58 @@ for (const config of editorConfigs) {
   outputs.set(config.file, json(config.body));
 }
 
+// ---------------------------------------------------------------------------
+// OpenClaw plugin manifest. Its tool list and per-tool metadata are derived
+// from the registry; only the connection config is adapter-specific.
+// ---------------------------------------------------------------------------
+
+outputs.set(
+  "adapters/openclaw/openclaw.plugin.json",
+  json({
+    id: "agentseo",
+    name: "AGENTseo",
+    description:
+      "Run local SEO audits, comparisons, keyword research, content plans, evidence inspection, and monitoring through bounded workflow-level tools.",
+    version,
+    configSchema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        serverUrl: {
+          type: "string",
+          default: "http://127.0.0.1:3210/api/v1",
+          description: "AGENTseo loopback API URL.",
+        },
+        tokenFile: {
+          type: "string",
+          description: "Path to the local AGENTseo service-token file.",
+        },
+        timeoutMs: {
+          type: "number",
+          minimum: 1000,
+          maximum: 120000,
+          default: 30000,
+          description: "Request timeout in milliseconds.",
+        },
+      },
+    },
+    uiHints: {
+      serverUrl: { label: "Local API URL" },
+      tokenFile: { label: "Service token file", sensitive: false },
+      timeoutMs: { label: "Request timeout (ms)" },
+    },
+    activation: { onStartup: true },
+    contracts: {
+      tools: PUBLIC_AGENT_TOOL_CONTRACTS.map((contract) => contract.name),
+    },
+    toolMetadata: Object.fromEntries(
+      PUBLIC_AGENT_TOOL_CONTRACTS.filter((contract) => contract.optional).map(
+        (contract) => [contract.name, { optional: true }],
+      ),
+    ),
+  }),
+);
+
 // The canonical skills live once and are copied into each host bundle.
 const sharedSkills = resolve(root, "plugins/shared/skills");
 for (const skill of await readdir(sharedSkills, { withFileTypes: true })) {

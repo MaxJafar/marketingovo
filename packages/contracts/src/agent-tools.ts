@@ -1,4 +1,5 @@
 import { Type, type Static, type TSchema } from "@sinclair/typebox";
+import { RunEvidenceSectionSchema } from "./index.js";
 
 /**
  * Agent adapters deliberately expose workflow-level operations only. This is
@@ -56,6 +57,39 @@ export const AgentMonitoringStatusInputSchema = strictObject({
   project_id: Type.Optional(Type.String({ minLength: 1 })),
 });
 
+/**
+ * The three read tools below expose stored evidence that agents previously
+ * could not reach at all: the paginated evidence workbench, the internal-link
+ * graph, and the server-computed run comparison. They read immutable per-run
+ * snapshots, so they are idempotent and never touch the network.
+ */
+
+export const AgentRunEvidenceInputSchema = strictObject({
+  run_id: Type.String({ minLength: 1 }),
+  // Reuses the authoritative section union rather than restating it, so an agent
+  // cannot be offered a section the evidence API does not serve.
+  section: Type.Optional(RunEvidenceSectionSchema),
+  search: Type.Optional(Type.String({ maxLength: 240 })),
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 200, default: 50 })),
+  offset: Type.Optional(Type.Integer({ minimum: 0, default: 0 })),
+});
+
+export const AgentRunLinksInputSchema = strictObject({
+  run_id: Type.String({ minLength: 1 }),
+  page_url: Type.String({ format: "uri", pattern: "^https?://" }),
+  direction: Type.Union([Type.Literal("inlinks"), Type.Literal("outlinks")], {
+    default: "inlinks",
+  }),
+  search: Type.Optional(Type.String({ maxLength: 240 })),
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 200, default: 50 })),
+  offset: Type.Optional(Type.Integer({ minimum: 0, default: 0 })),
+});
+
+export const AgentRunCompareInputSchema = strictObject({
+  run_id: Type.String({ minLength: 1 }),
+  baseline_run_id: Type.String({ minLength: 1 }),
+});
+
 export type AgentAuditStartInput = Static<typeof AgentAuditStartInputSchema>;
 export type AgentRunGetInput = Static<typeof AgentRunGetInputSchema>;
 export type AgentCompareStartInput = Static<
@@ -70,6 +104,9 @@ export type AgentContentPlanStartInput = Static<
 export type AgentMonitoringStatusInput = Static<
   typeof AgentMonitoringStatusInputSchema
 >;
+export type AgentRunEvidenceInput = Static<typeof AgentRunEvidenceInputSchema>;
+export type AgentRunLinksInput = Static<typeof AgentRunLinksInputSchema>;
+export type AgentRunCompareInput = Static<typeof AgentRunCompareInputSchema>;
 
 export interface AgentToolSafetyAnnotations {
   readonly readOnlyHint?: boolean;
@@ -177,9 +214,57 @@ export const AgentMonitoringStatusTool = agentTool({
   },
 } as const);
 
+export const AgentRunEvidenceTool = agentTool({
+  name: "agentseo_run_evidence",
+  title: "Read run evidence",
+  description:
+    "Read one paginated evidence section of a finished run: crawl paths, redirect chains, reciprocal hreflang, or captured extraction results. Reads an immutable snapshot; safe to replay.",
+  optional: false,
+  inputSchema: AgentRunEvidenceInputSchema,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+} as const);
+
+export const AgentRunLinksTool = agentTool({
+  name: "agentseo_run_links",
+  title: "Read internal links for a page",
+  description:
+    "Read the inlinks or outlinks recorded for one page URL in a finished run, with anchor text, placement, follow state, and resolved or broken targets. Unavailable for runs crawled before the link graph existed.",
+  optional: false,
+  inputSchema: AgentRunLinksInputSchema,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+} as const);
+
+export const AgentRunCompareTool = agentTool({
+  name: "agentseo_run_compare",
+  title: "Compare two runs",
+  description:
+    "Read the server-computed comparison between two completed audits: new and worsened issues, resolved and reduced findings, HTTP and indexability changes, link-graph deltas, and configuration drift. Never recomputed client-side.",
+  optional: false,
+  inputSchema: AgentRunCompareInputSchema,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+} as const);
+
 export const PUBLIC_AGENT_TOOL_CONTRACTS = [
   AgentAuditStartTool,
   AgentRunGetTool,
+  AgentRunEvidenceTool,
+  AgentRunLinksTool,
+  AgentRunCompareTool,
   AgentCompareStartTool,
   AgentKeywordResearchStartTool,
   AgentContentPlanStartTool,

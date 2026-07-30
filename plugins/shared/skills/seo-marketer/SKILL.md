@@ -42,6 +42,23 @@ intent, SERP evidence, business value, and the site's own historical baseline.
 6. If a run id already exists, call `agentseo_run_get`; do not start a
    duplicate job.
 
+Once a run is terminal, three read tools open its stored evidence. Prefer them
+over restating a summary, and cite what they return:
+
+- `agentseo_run_evidence` — one paginated section at a time: `crawl` paths,
+  `redirects` chains, `hreflang` reciprocity, or captured `extractions`. Use it to
+  show the exact rows behind a finding instead of describing them.
+- `agentseo_run_links` — the recorded inlinks or outlinks for one page URL, with
+  anchor text, placement, follow state, and resolved or broken targets. Use it
+  for click-depth, orphan, and internal-link arguments. Runs crawled before the
+  link graph existed report the data as unavailable; say so rather than treating
+  an empty result as "no links".
+- `agentseo_run_compare` — the server-computed comparison between two completed
+  audits. Use it for every "did this get fixed?" question. Never recompute a
+  regression by diffing two summaries yourself; the runtime already separates new
+  and worsened issues from resolved and reduced ones, and accounts for
+  configuration drift and reviewed-noise exclusions.
+
 Use goal-specific sequences when one run cannot answer the question:
 
 - **Organic decline:** inspect the latest run and source freshness first; start
@@ -56,9 +73,11 @@ Use goal-specific sequences when one run cannot answer the question:
 - **Competitive gap:** run a fair technical comparison first. Add keyword
   research only for specific topics; do not infer backlink or market-share gaps
   from crawl evidence.
-- **Change verification:** retrieve the existing run. A green current page is
-  not proof of a fix unless the affected URL cohort was rechecked and the prior
-  issue fingerprint disappeared.
+- **Change verification:** retrieve the existing run, then call
+  `agentseo_run_compare` against the baseline audit. A green current page is not
+  proof of a fix unless the affected URL cohort was rechecked and the prior issue
+  fingerprint disappeared. Report a finding that moved because configuration
+  changed as configuration drift, not as a fix.
 
 Find the intended project through the available `agentseo://projects/...`
 resources. If several projects plausibly match, ask which site the user means.

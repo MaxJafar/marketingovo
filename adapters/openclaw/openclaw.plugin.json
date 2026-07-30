@@ -1,7 +1,7 @@
 {
   "id": "agentseo",
   "name": "AGENTseo",
-  "description": "Run local SEO audits, comparisons, keyword research, content plans, and monitoring through six workflow-level tools.",
+  "description": "Run local SEO audits, comparisons, keyword research, content plans, evidence inspection, and monitoring through bounded workflow-level tools.",
   "version": "0.12.0-alpha.0",
   "configSchema": {
     "type": "object",
@@ -26,15 +26,27 @@
     }
   },
   "uiHints": {
-    "serverUrl": { "label": "Local API URL" },
-    "tokenFile": { "label": "Service token file", "sensitive": false },
-    "timeoutMs": { "label": "Request timeout (ms)" }
+    "serverUrl": {
+      "label": "Local API URL"
+    },
+    "tokenFile": {
+      "label": "Service token file",
+      "sensitive": false
+    },
+    "timeoutMs": {
+      "label": "Request timeout (ms)"
+    }
   },
-  "activation": { "onStartup": true },
+  "activation": {
+    "onStartup": true
+  },
   "contracts": {
     "tools": [
       "agentseo_audit_start",
       "agentseo_run_get",
+      "agentseo_run_evidence",
+      "agentseo_run_links",
+      "agentseo_run_compare",
       "agentseo_compare_start",
       "agentseo_keyword_research_start",
       "agentseo_content_plan_start",
@@ -42,9 +54,17 @@
     ]
   },
   "toolMetadata": {
-    "agentseo_audit_start": { "optional": true },
-    "agentseo_compare_start": { "optional": true },
-    "agentseo_keyword_research_start": { "optional": true },
-    "agentseo_content_plan_start": { "optional": true }
+    "agentseo_audit_start": {
+      "optional": true
+    },
+    "agentseo_compare_start": {
+      "optional": true
+    },
+    "agentseo_keyword_research_start": {
+      "optional": true
+    },
+    "agentseo_content_plan_start": {
+      "optional": true
+    }
   }
 }

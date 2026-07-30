@@ -5,16 +5,19 @@ import {
 } from "./agent-tools.js";
 
 describe("public agent tool contracts", () => {
-  it("keeps exactly six unique workflow-level tools", () => {
+  it("keeps exactly nine unique workflow-level tools", () => {
     expect(PUBLIC_AGENT_TOOL_NAMES).toEqual([
       "agentseo_audit_start",
       "agentseo_run_get",
+      "agentseo_run_evidence",
+      "agentseo_run_links",
+      "agentseo_run_compare",
       "agentseo_compare_start",
       "agentseo_keyword_research_start",
       "agentseo_content_plan_start",
       "agentseo_monitoring_status",
     ]);
-    expect(new Set(PUBLIC_AGENT_TOOL_NAMES).size).toBe(6);
+    expect(new Set(PUBLIC_AGENT_TOOL_NAMES).size).toBe(9);
     expect(
       PUBLIC_AGENT_TOOL_NAMES.every((toolName) =>
         toolName.startsWith("agentseo_"),

@@ -8,13 +8,19 @@ import {
   AgentContentPlanStartTool,
   AgentKeywordResearchStartTool,
   AgentMonitoringStatusTool,
+  AgentRunCompareTool,
+  AgentRunEvidenceTool,
   AgentRunGetTool,
+  AgentRunLinksTool,
   type AgentAuditStartInput,
   type AgentCompareStartInput,
   type AgentContentPlanStartInput,
   type AgentKeywordResearchStartInput,
   type AgentMonitoringStatusInput,
+  type AgentRunCompareInput,
+  type AgentRunEvidenceInput,
   type AgentRunGetInput,
+  type AgentRunLinksInput,
 } from "@agentseoapp/contracts/agent-tools";
 import { AgentSeoClient } from "@agentseoapp/sdk";
 
@@ -26,6 +32,15 @@ const auditStartInputSchema = toOpenClawInputSchema<AgentAuditStartInput>(
 );
 const runGetInputSchema = toOpenClawInputSchema<AgentRunGetInput>(
   AgentRunGetTool.inputSchema,
+);
+const runEvidenceInputSchema = toOpenClawInputSchema<AgentRunEvidenceInput>(
+  AgentRunEvidenceTool.inputSchema,
+);
+const runLinksInputSchema = toOpenClawInputSchema<AgentRunLinksInput>(
+  AgentRunLinksTool.inputSchema,
+);
+const runCompareInputSchema = toOpenClawInputSchema<AgentRunCompareInput>(
+  AgentRunCompareTool.inputSchema,
 );
 const compareStartInputSchema = toOpenClawInputSchema<AgentCompareStartInput>(
   AgentCompareStartTool.inputSchema,
@@ -108,7 +123,7 @@ export default defineToolPlugin({
   id: "agentseo",
   name: "AGENTseo",
   description:
-    "Run local SEO audits, comparisons, keyword research, content plans, and monitoring through six workflow-level tools.",
+    "Run local SEO audits, comparisons, keyword research, content plans, evidence inspection, and monitoring through bounded workflow-level tools.",
   configSchema,
   tools: (tool) => [
     tool({
@@ -149,6 +164,50 @@ export default defineToolPlugin({
           run,
           issues: includeIssues ? await api.runs.issues(params.run_id) : [],
         };
+      },
+    }),
+    tool({
+      name: AgentRunEvidenceTool.name,
+      label: AgentRunEvidenceTool.title,
+      description: AgentRunEvidenceTool.description,
+      optional: AgentRunEvidenceTool.optional,
+      parameters: runEvidenceInputSchema,
+      async execute(params, config) {
+        return (await client(config)).runs.evidence(params.run_id, {
+          section: params.section ?? "crawl",
+          ...(params.search === undefined ? {} : { search: params.search }),
+          ...(params.limit === undefined ? {} : { limit: params.limit }),
+          ...(params.offset === undefined ? {} : { offset: params.offset }),
+        });
+      },
+    }),
+    tool({
+      name: AgentRunLinksTool.name,
+      label: AgentRunLinksTool.title,
+      description: AgentRunLinksTool.description,
+      optional: AgentRunLinksTool.optional,
+      parameters: runLinksInputSchema,
+      async execute(params, config) {
+        return (await client(config)).runs.links(params.run_id, {
+          pageUrl: params.page_url,
+          direction: params.direction ?? "inlinks",
+          ...(params.search === undefined ? {} : { search: params.search }),
+          ...(params.limit === undefined ? {} : { limit: params.limit }),
+          ...(params.offset === undefined ? {} : { offset: params.offset }),
+        });
+      },
+    }),
+    tool({
+      name: AgentRunCompareTool.name,
+      label: AgentRunCompareTool.title,
+      description: AgentRunCompareTool.description,
+      optional: AgentRunCompareTool.optional,
+      parameters: runCompareInputSchema,
+      async execute(params, config) {
+        return (await client(config)).runs.compare(
+          params.run_id,
+          params.baseline_run_id,
+        );
       },
     }),
     tool({

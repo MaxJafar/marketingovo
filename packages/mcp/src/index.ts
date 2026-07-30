@@ -8,14 +8,20 @@ import {
   AgentContentPlanStartTool,
   AgentKeywordResearchStartTool,
   AgentMonitoringStatusTool,
+  AgentRunCompareTool,
+  AgentRunEvidenceTool,
   AgentRunGetTool,
+  AgentRunLinksTool,
   PUBLIC_AGENT_TOOL_NAMES,
   type AgentAuditStartInput,
   type AgentCompareStartInput,
   type AgentContentPlanStartInput,
   type AgentKeywordResearchStartInput,
   type AgentMonitoringStatusInput,
+  type AgentRunCompareInput,
+  type AgentRunEvidenceInput,
   type AgentRunGetInput,
+  type AgentRunLinksInput,
 } from "@agentseoapp/contracts/agent-tools";
 import { AgentSeoClient } from "@agentseoapp/sdk";
 import { resolveMcpConnectionEnvironment } from "./compatibility.js";
@@ -32,6 +38,15 @@ const auditStartInputSchema = toMcpInputSchema<AgentAuditStartInput>(
 );
 const runGetInputSchema = toMcpInputSchema<AgentRunGetInput>(
   AgentRunGetTool.inputSchema,
+);
+const runEvidenceInputSchema = toMcpInputSchema<AgentRunEvidenceInput>(
+  AgentRunEvidenceTool.inputSchema,
+);
+const runLinksInputSchema = toMcpInputSchema<AgentRunLinksInput>(
+  AgentRunLinksTool.inputSchema,
+);
+const runCompareInputSchema = toMcpInputSchema<AgentRunCompareInput>(
+  AgentRunCompareTool.inputSchema,
 );
 const compareStartInputSchema = toMcpInputSchema<AgentCompareStartInput>(
   AgentCompareStartTool.inputSchema,
@@ -155,6 +170,66 @@ export async function createAgentSeoMcpServer(
         ...(result === null ? {} : { result }),
       });
     },
+  );
+
+  server.registerTool(
+    AgentRunEvidenceTool.name,
+    {
+      title: AgentRunEvidenceTool.title,
+      description: AgentRunEvidenceTool.description,
+      inputSchema: runEvidenceInputSchema,
+      annotations: {
+        title: AgentRunEvidenceTool.title,
+        ...AgentRunEvidenceTool.annotations,
+      },
+    },
+    async ({ run_id, section, search, limit, offset }) =>
+      textResult(
+        await client.runs.evidence(run_id, {
+          section: section ?? "crawl",
+          ...(search === undefined ? {} : { search }),
+          ...(limit === undefined ? {} : { limit }),
+          ...(offset === undefined ? {} : { offset }),
+        }),
+      ),
+  );
+
+  server.registerTool(
+    AgentRunLinksTool.name,
+    {
+      title: AgentRunLinksTool.title,
+      description: AgentRunLinksTool.description,
+      inputSchema: runLinksInputSchema,
+      annotations: {
+        title: AgentRunLinksTool.title,
+        ...AgentRunLinksTool.annotations,
+      },
+    },
+    async ({ run_id, page_url, direction, search, limit, offset }) =>
+      textResult(
+        await client.runs.links(run_id, {
+          pageUrl: page_url,
+          direction: direction ?? "inlinks",
+          ...(search === undefined ? {} : { search }),
+          ...(limit === undefined ? {} : { limit }),
+          ...(offset === undefined ? {} : { offset }),
+        }),
+      ),
+  );
+
+  server.registerTool(
+    AgentRunCompareTool.name,
+    {
+      title: AgentRunCompareTool.title,
+      description: AgentRunCompareTool.description,
+      inputSchema: runCompareInputSchema,
+      annotations: {
+        title: AgentRunCompareTool.title,
+        ...AgentRunCompareTool.annotations,
+      },
+    },
+    async ({ run_id, baseline_run_id }) =>
+      textResult(await client.runs.compare(run_id, baseline_run_id)),
   );
 
   server.registerTool(

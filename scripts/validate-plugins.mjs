@@ -9,11 +9,26 @@ const { PUBLIC_AGENT_TOOL_CONTRACTS, PUBLIC_AGENT_TOOL_NAMES } = await import(
 );
 const expectedTools = [...PUBLIC_AGENT_TOOL_NAMES];
 
-assert.equal(PUBLIC_AGENT_TOOL_CONTRACTS.length, 6);
+assert.equal(PUBLIC_AGENT_TOOL_CONTRACTS.length, 9);
 assert.equal(new Set(expectedTools).size, expectedTools.length);
 for (const contract of PUBLIC_AGENT_TOOL_CONTRACTS) {
   assert.equal(contract.inputSchema.type, "object");
   assert.equal(contract.inputSchema.additionalProperties, false);
+  // A tool that only reads stored snapshots must say so, and must not claim it
+  // reaches the network. This is the property that lets the command gate below
+  // exempt read tools.
+  if (contract.annotations.readOnlyHint === true) {
+    assert.equal(
+      contract.annotations.idempotentHint,
+      true,
+      `${contract.name} is read-only but not idempotent`,
+    );
+    assert.equal(
+      contract.annotations.openWorldHint,
+      false,
+      `${contract.name} is read-only but claims open-world access`,
+    );
+  }
 }
 
 const openClaw = JSON.parse(
@@ -81,9 +96,15 @@ for (const file of commandFiles) {
     referenced.add(name);
   }
 }
-// Every start-shaped tool needs a way in; the read tools are reachable from them.
+// Every start-shaped tool needs a way in. Read-only tools are reachable from the
+// run they describe, so they are exempt by annotation rather than by name.
+const readOnly = new Set(
+  PUBLIC_AGENT_TOOL_CONTRACTS.filter(
+    (contract) => contract.annotations.readOnlyHint === true,
+  ).map((contract) => contract.name),
+);
 for (const name of expectedTools) {
-  if (name === "agentseo_run_get") continue;
+  if (readOnly.has(name)) continue;
   assert.ok(referenced.has(name), `no slash command reaches ${name}`);
 }
 
