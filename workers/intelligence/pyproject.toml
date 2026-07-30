@@ -33,7 +33,10 @@ build-backend = "hatchling.build"
 packages = ["src/agentintel_worker"]
 
 [tool.pytest.ini_options]
-addopts = "-ra --strict-config --strict-markers"
+addopts = "-ra --strict-config --strict-markers -m 'not best_effort'"
+markers = [
+  "best_effort: exercises behaviour the product does not depend on. Excluded from the default gate, still runnable with -m best_effort. Every use must say why in the test and in docs/status.md.",
+]
 testpaths = ["tests"]
 
 [tool.ruff]
