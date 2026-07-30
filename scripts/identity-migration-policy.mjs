@@ -28,10 +28,15 @@ const IDENTITY_TEXT_ROOTS = Object.freeze([
   "adapters/",
   "apps/",
   "benchmarks/",
+  // Documentation was previously outside the sentinel, which let old-brand
+  // prose survive a rebrand unnoticed. Published docs are product surface.
+  "docs/",
   "e2e/",
+  "launch/",
   "migrations/",
   "packages/",
   "plugins/",
+  "release/",
   "scripts/",
 ]);
 const IDENTITY_ROOT_TEXT_FILES = new Set([
@@ -208,6 +213,11 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
     "apps/desktop/src-tauri/Cargo.toml",
     "apps/desktop/src-tauri/tauri.conf.json",
     "apps/docs/",
+    // Docs and launch copy describe the separate hosted commercial service by
+    // name. The sentinel now scans them, so the company reference is authorized
+    // explicitly rather than by being outside the scan.
+    "docs/",
+    "launch/",
     "packages/cli/src/cli.ts",
     "packages/cli/src/service-definition.test.ts",
     "packages/cli/src/service-definition.ts",
