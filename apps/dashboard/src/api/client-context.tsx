@@ -11,22 +11,30 @@ const ClientContext = createContext<AgentIntelClient | null>(null);
 export const dashboardFetch = window.fetch.bind(window);
 
 interface IntelClientProviderProps extends PropsWithChildren {
-  csrfToken: string;
+  csrfToken?: string;
+  /**
+   * Supplying a client replaces the one this provider would build. Only tests
+   * do that; the application always passes a csrfToken and lets the provider
+   * own construction, so the loopback credential boundary stays in one place.
+   */
+  client?: AgentIntelClient;
 }
 
 export function IntelClientProvider({
   csrfToken,
+  client: injected,
   children,
 }: IntelClientProviderProps): React.JSX.Element {
   const client = useMemo(
     () =>
+      injected ??
       new AgentIntelClient({
         baseUrl: import.meta.env.VITE_AGENTINTEL_API_URL ?? "",
-        csrfToken,
+        csrfToken: csrfToken ?? "",
         credentials: "same-origin",
         fetch: dashboardFetch,
       }),
-    [csrfToken],
+    [csrfToken, injected],
   );
   return (
     <ClientContext.Provider value={client}>{children}</ClientContext.Provider>

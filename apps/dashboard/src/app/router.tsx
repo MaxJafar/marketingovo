@@ -6,7 +6,9 @@ import {
   createRouter,
 } from "@tanstack/react-router";
 import { AppShell } from "../components/AppShell.js";
+import { EvidencePage } from "../pages/EvidencePage.js";
 import { ResearchPage } from "../pages/ResearchPage.js";
+import { RunsPage } from "../pages/RunsPage.js";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -22,8 +24,20 @@ const researchRoute = createRoute({
   component: ResearchPage,
 });
 
+const runsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/runs",
+  component: RunsPage,
+});
+
+const evidenceRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/evidence",
+  component: EvidencePage,
+});
+
 const router = createRouter({
-  routeTree: rootRoute.addChildren([researchRoute]),
+  routeTree: rootRoute.addChildren([researchRoute, runsRoute, evidenceRoute]),
 });
 
 declare module "@tanstack/react-router" {

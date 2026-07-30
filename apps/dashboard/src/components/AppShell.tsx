@@ -1,5 +1,13 @@
 import type { PropsWithChildren } from "react";
 
+// Workspaces with a route are linked; the rest are declared as not yet built
+// rather than hidden, so the boundary of the product is visible in the product.
+const routes: Partial<Record<(typeof workspaces)[number], string>> = {
+  Research: "/",
+  "Reports & Runs": "/runs",
+  "Datasets & Evidence": "/evidence",
+};
+
 const workspaces = [
   "Briefing",
   "Research",
@@ -22,7 +30,7 @@ export function AppShell({ children }: PropsWithChildren): React.JSX.Element {
       <aside className="sidebar">
         <div className="sidebar-brand">
           <span className="brand-mark small" aria-hidden="true">
-            G
+            A
           </span>
           <span>
             <strong>AGENTintel</strong>
@@ -31,20 +39,30 @@ export function AppShell({ children }: PropsWithChildren): React.JSX.Element {
         </div>
         <nav aria-label="Intelligence workspaces">
           <ul className="workspace-list">
-            {workspaces.map((workspace) => (
-              <li key={workspace}>
-                {workspace === "Research" ? (
-                  <a href="/" aria-current="page" className="active">
-                    <span>{workspace}</span>
-                  </a>
-                ) : (
-                  <span className="future" aria-disabled="true">
-                    <span>{workspace}</span>
-                    <small>soon</small>
-                  </span>
-                )}
-              </li>
-            ))}
+            {workspaces.map((workspace) => {
+              const href = routes[workspace];
+              const current =
+                typeof window !== "undefined" &&
+                window.location.pathname === href;
+              return (
+                <li key={workspace}>
+                  {href ? (
+                    <a
+                      href={href}
+                      className={current ? "active" : undefined}
+                      {...(current ? { "aria-current": "page" as const } : {})}
+                    >
+                      <span>{workspace}</span>
+                    </a>
+                  ) : (
+                    <span className="future" aria-disabled="true">
+                      <span>{workspace}</span>
+                      <small>soon</small>
+                    </span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </nav>
         <div className="policy-state">
