@@ -1,8 +1,8 @@
-# Golem Intel — handoff текущей сессии
+# AGENTintel — handoff текущей сессии
 
 Дата фиксации: **2026-07-16**  
-Рабочий каталог: `/Users/maxjafarov/Desktop/golem/golem-intel-main`  
-Связанный SEO-проект: `/Users/maxjafarov/Desktop/golem/golem-seo-main`
+Рабочий каталог: `/Users/maxjafarov/Desktop/golem/agentintel-main`  
+Связанный SEO-проект: `/Users/maxjafarov/Desktop/golem/agentseo-main`
 
 Этот документ нужен для переноса разработки в новую Codex-сессию. Он описывает
 не только замысел, но и фактическое состояние workspace, принятые границы,
@@ -11,7 +11,7 @@
 
 ## 1. Задача и долгосрочное видение
 
-Golem Intel задуман как evidence-first центр бизнес-разведки для маркетинга,
+AGENTintel задуман как evidence-first центр бизнес-разведки для маркетинга,
 продаж и разрешенных HR-сценариев: competitive intelligence, creator analytics,
 company research, публичные профессиональные данные, тренды, метрики и
 воспроизводимые исследовательские досье. Цель — конкурировать по качеству
@@ -71,7 +71,7 @@ flowchart TB
   UI["React command center"]
   Agents["CLI · MCP stdio/HTTP · Codex · OpenClaw"]
   SDK["Generated TypeScript SDK"]
-  Daemon["golem-inteld · Go authority"]
+  Daemon["agentinteld · Go authority"]
   SQLite["SQLite WAL control plane"]
   Fixture["Synthetic fixture input"]
   Python["Pinned Python intelligence worker"]
@@ -114,7 +114,7 @@ flowchart TB
 
 Основные файлы:
 
-- [`cmd/golem-inteld/main.go`](../cmd/golem-inteld/main.go)
+- [`cmd/agentinteld/main.go`](../cmd/agentinteld/main.go)
 - [`internal/api/server.go`](../internal/api/server.go)
 - [`internal/jobs/manager.go`](../internal/jobs/manager.go)
 - [`internal/storage`](../internal/storage)
@@ -155,9 +155,9 @@ coupling, но не защищают от намеренно вредоносн�
 - generated SDK с exact-origin restriction, no redirects, защищенным чтением
   token file и SSE cursor/reconnect/dedup/cancellation;
 - ровно шесть policy-safe MCP tools:
-  `golem_intel_research_start`, `golem_intel_compare_start`,
-  `golem_intel_run_get`, `golem_intel_search`, `golem_intel_entity_get`,
-  `golem_intel_monitoring_status`;
+  `agentintel_research_start`, `agentintel_compare_start`,
+  `agentintel_run_get`, `agentintel_search`, `agentintel_entity_get`,
+  `agentintel_monitoring_status`;
 - MCP stdio и authenticated loopback Streamable HTTP из одной server factory;
 - Codex plugin bundle, Claude Code/Cursor/Antigravity manifests и OpenClaw
   adapter из общих schemas.
@@ -191,8 +191,8 @@ Codex plugin создавался и проверялся по `plugin-creator` 
 
 ### Контракты и reference laboratory
 
-- HTTP source of truth: [`golem-intel.openapi.yaml`](../contracts/openapi/golem-intel.openapi.yaml)
-- Worker source of truth: [`worker.proto`](../contracts/proto/golem/intel/v1/worker.proto)
+- HTTP source of truth: [`agentintel.openapi.yaml`](../contracts/openapi/agentintel.openapi.yaml)
+- Worker source of truth: [`worker.proto`](../contracts/proto/agentintel/v1/worker.proto)
 - JSON/Arrow schemas: [`contracts/json-schema`](../contracts/json-schema) и
   [`schemas/arrow`](../schemas/arrow)
 - CI-style contract validator регенерирует bindings во временный каталог,
@@ -286,7 +286,7 @@ race detector и реальный cross-process acceptance. Нельзя исп�
 
 - website/RSS/sitemap/schema.org collector;
 - CSV/JSON/NDJSON/Parquet imports;
-- Golem SEO bridge;
+- AGENTseo bridge;
 - YouTube Data и authorized Analytics;
 - official Reddit API;
 - authorized Meta professional-account и TikTok Display adapters;
@@ -350,7 +350,7 @@ Clock/owner semantics должны тестироваться fake clock, а н�
 ### Шаг 4 — полный release gate
 
 ```bash
-cd /Users/maxjafarov/Desktop/golem/golem-intel-main
+cd /Users/maxjafarov/Desktop/golem/agentintel-main
 
 pnpm contracts:lint
 pnpm reference:validate
@@ -360,9 +360,9 @@ pnpm typecheck
 pnpm lint
 pnpm test
 
-GOCACHE=/tmp/golem-intel-go-cache go vet ./...
-GOCACHE=/tmp/golem-intel-go-cache go test -race -count=1 ./...
-GOCACHE=/tmp/golem-intel-go-cache go build ./cmd/...
+GOCACHE=/tmp/agentintel-go-cache go vet ./...
+GOCACHE=/tmp/agentintel-go-cache go test -race -count=1 ./...
+GOCACHE=/tmp/agentintel-go-cache go build ./cmd/...
 
 cd workers/intelligence
 .venv/bin/ruff check .
@@ -382,8 +382,8 @@ PATH=/Users/maxjafarov/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH 
 Для real Python Go E2E используется opt-in переменная:
 
 ```bash
-GOLEM_INTEL_REAL_WORKER_E2E=1 \
-GOCACHE=/tmp/golem-intel-go-cache \
+AGENTINTEL_REAL_WORKER_E2E=1 \
+GOCACHE=/tmp/agentintel-go-cache \
 go test -count=1 ./internal/api -run TestRealPythonWorkerThroughHTTPAndGoAuthority
 ```
 
@@ -403,7 +403,7 @@ go test -count=1 ./internal/api -run TestRealPythonWorkerThroughHTTPAndGoAuthori
 
 ```bash
 NPM_CONFIG_CACHE=/tmp/golem-npm-cache \
-npx --yes --package @playwright/cli playwright-cli -s=golem-intel ...
+npx --yes --package @playwright/cli playwright-cli -s=agentintel ...
 ```
 
 ## 8. Важные operational notes
@@ -415,19 +415,19 @@ npx --yes --package @playwright/cli playwright-cli -s=golem-intel ...
 - Не выводить содержимое quarantined files и token files в terminal/tool output.
 - Workspace находится внутри более крупного `/Users/maxjafarov/Desktop/golem`,
   где есть несвязанные пользовательские изменения. На момент handoff каталог
-  `golem-intel-main` отображался родительским Git как untracked (`?? ./` изнутри
+  `agentintel-main` отображался родительским Git как untracked (`?? ./` изнутри
   каталога). Нельзя делать массовый `git add`, reset или commit в родительском
   репозитории, пока не проверена intended repository boundary.
 - Не удалять и не перезаписывать пользовательские изменения в соседних
-  `golem-workers-ui-main`, `golem-seo-main` и других каталогах.
+  `golem-workers-ui-main`, `agentseo-main` и других каталогах.
 - Внешний web research в этой сессии не выполнялся; все выводы основаны на
   локальном workspace и запущенных тестах.
 
 ## 9. Короткий prompt для новой сессии
 
 ```text
-Продолжай разработку Golem Intel в
-/Users/maxjafarov/Desktop/golem/golem-intel-main.
+Продолжай разработку AGENTintel в
+/Users/maxjafarov/Desktop/golem/agentintel-main.
 
 Сначала полностью прочитай:
 - docs/session-handoff-2026-07-16.md

@@ -1,14 +1,16 @@
-# Golem Intel
+# AGENTintel
 
-Golem Intel is an evidence-first, local business-intelligence research center
+AGENTintel is an evidence-first, local business-intelligence research center
 for competitive marketing and creator analysis. It is designed for the agentic
 era without turning a language model into an unrestricted scraper: the daemon
 owns policy, credentials, durable state and evidence publication; agents receive
 six bounded workflow tools and cited results.
 
-This repository is the **ELv2 source-available Community edition**. It is not an
-OSI-approved open-source distribution and may not be offered as a competing
-hosted service under the license terms.
+This repository is **open source** under the [Apache License 2.0](LICENSE), an
+OSI-approved license that grants patent rights and permits commercial use,
+modification, and redistribution. See
+[ADR 0003](docs/adr/0003-apache-2-0-relicense.md) for why the project moved off
+the Elastic License, and what that means for the reference corpus below.
 
 ## What is implemented now
 
@@ -16,7 +18,7 @@ The repository currently proves a hardened **Phase 1 walking skeleton** over a
 synthetic fixture:
 
 1. the React/TypeScript command center starts a synthetic three-brand comparison;
-2. `golem-inteld` validates a one-time dashboard session and schedules a durable
+2. `agentinteld` validates a one-time dashboard session and schedules a durable
    SQLite-backed job;
 3. a Go fixture connector snapshots bounded source evidence;
 4. Go supervises Python through length-delimited Protobuf control messages;
@@ -74,13 +76,13 @@ Buf/Protobuf. Rust stable is needed only for the desktop shell.
 
 ```bash
 pnpm install
-UV_CACHE_DIR=.golem-intel/cache/uv uv sync --project workers/intelligence --frozen
+UV_CACHE_DIR=.agentintel/cache/uv uv sync --project workers/intelligence --frozen
 pnpm contracts:generate
 pnpm build
-go build -o bin/golem-inteld ./cmd/golem-inteld
-go build -o bin/golem-intel ./cmd/golem-intel
-./bin/golem-inteld serve \
-  --data-dir .golem-intel/dev \
+go build -o bin/agentinteld ./cmd/agentinteld
+go build -o bin/agentintel ./cmd/agentintel
+./bin/agentinteld serve \
+  --data-dir .agentintel/dev \
   --python-worker "$(pwd)/workers/intelligence" \
   --uv-command "$(command -v uv)"
 ```
@@ -99,8 +101,8 @@ same-site session, and keeps the CSRF token only in memory. The persistent
 In another terminal:
 
 ```bash
-./bin/golem-intel \
-  --token-file .golem-intel/dev/service-token \
+./bin/agentintel \
+  --token-file .agentintel/dev/service-token \
   compare \
   --project competitive-pulse-demo \
   --target northstar-labs \
@@ -127,7 +129,7 @@ environment.
 
 ## Product boundary
 
-Golem Intel supports public-and-permitted, user-authorized, first-party and
+AGENTintel supports public-and-permitted, user-authorized, first-party and
 contractually licensed business evidence. It does not ship authentication
 bypass, CAPTCHA evasion, stolen sessions, private-account access, breach data,
 biometric correlation, protected-trait inference, covert identity enumeration,

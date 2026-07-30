@@ -1,16 +1,32 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://golemworkers.com/schemas/intel/connector-manifest-v1.json",
-  "title": "Golem Intel connector manifest",
+  "title": "AGENTintel connector manifest",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "version", "acquisition_modes", "allowed_hosts", "data_classes", "cost_model"],
+  "required": [
+    "id",
+    "version",
+    "acquisition_modes",
+    "allowed_hosts",
+    "data_classes",
+    "cost_model"
+  ],
   "properties": {
     "id": { "type": "string", "pattern": "^[a-z][a-z0-9.-]+$" },
     "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+" },
     "acquisition_modes": {
       "type": "array",
-      "items": { "enum": ["public_web", "official_api", "authorized_account", "licensed_provider", "user_import", "fixture"] },
+      "items": {
+        "enum": [
+          "public_web",
+          "official_api",
+          "authorized_account",
+          "licensed_provider",
+          "user_import",
+          "fixture"
+        ]
+      },
       "minItems": 1
     },
     "allowed_hosts": {
@@ -20,13 +36,18 @@
     },
     "data_classes": {
       "type": "array",
-      "items": { "enum": ["public", "first_party", "licensed_business_contact"] },
+      "items": {
+        "enum": ["public", "first_party", "licensed_business_contact"]
+      },
       "minItems": 1,
       "uniqueItems": true
     },
     "cost_model": { "enum": ["free", "provider_reported", "not_reported"] },
     "credential_scope": { "type": ["string", "null"] },
-    "default_retention_days": { "type": "integer", "minimum": 1, "maximum": 3650 }
+    "default_retention_days": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3650
+    }
   }
 }
-

@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GolemWorkers/golem-intel/internal/domain"
-	"github.com/GolemWorkers/golem-intel/internal/policy"
+	"github.com/GolemWorkers/agentintel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/policy"
 	"github.com/apache/arrow-go/v18/arrow"
 	arrowarray "github.com/apache/arrow-go/v18/arrow/array"
 	"github.com/apache/arrow-go/v18/arrow/ipc"

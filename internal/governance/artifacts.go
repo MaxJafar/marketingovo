@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GolemWorkers/golem-intel/internal/domain"
-	"github.com/GolemWorkers/golem-intel/internal/policy"
+	"github.com/GolemWorkers/agentintel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/policy"
 )
 
 const DefaultMaximumArtifactBytes int64 = 128 << 20

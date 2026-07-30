@@ -12,16 +12,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GolemWorkers/golem-intel/internal/connectors"
-	"github.com/GolemWorkers/golem-intel/internal/domain"
-	"github.com/GolemWorkers/golem-intel/internal/governance"
-	"github.com/GolemWorkers/golem-intel/internal/jobs"
-	"github.com/GolemWorkers/golem-intel/internal/storage"
+	"github.com/GolemWorkers/agentintel/internal/connectors"
+	"github.com/GolemWorkers/agentintel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/governance"
+	"github.com/GolemWorkers/agentintel/internal/jobs"
+	"github.com/GolemWorkers/agentintel/internal/storage"
 )
 
 func TestRealPythonWorkerThroughHTTPAndGoAuthority(t *testing.T) {
-	if os.Getenv("GOLEM_INTEL_REAL_WORKER_E2E") != "1" {
-		t.Skip("set GOLEM_INTEL_REAL_WORKER_E2E=1 to run the pinned real-Python HTTP/authority acceptance")
+	if os.Getenv("AGENTINTEL_REAL_WORKER_E2E") != "1" {
+		t.Skip("set AGENTINTEL_REAL_WORKER_E2E=1 to run the pinned real-Python HTTP/authority acceptance")
 	}
 	uv, err := exec.LookPath("uv")
 	if err != nil {
@@ -103,8 +103,8 @@ func TestRealPythonWorkerThroughHTTPAndGoAuthority(t *testing.T) {
 }
 
 func TestRealPythonImportedCSVThroughHTTPAndGoAuthority(t *testing.T) {
-	if os.Getenv("GOLEM_INTEL_REAL_WORKER_E2E") != "1" {
-		t.Skip("set GOLEM_INTEL_REAL_WORKER_E2E=1 to run the pinned real-Python HTTP/authority acceptance")
+	if os.Getenv("AGENTINTEL_REAL_WORKER_E2E") != "1" {
+		t.Skip("set AGENTINTEL_REAL_WORKER_E2E=1 to run the pinned real-Python HTTP/authority acceptance")
 	}
 	uv, err := exec.LookPath("uv")
 	if err != nil {
@@ -169,7 +169,7 @@ func TestRealPythonImportedCSVThroughHTTPAndGoAuthority(t *testing.T) {
 	}
 	request.Header.Set("Authorization", "Bearer "+serviceToken)
 	request.Header.Set("Content-Type", "text/csv; charset=utf-8")
-	request.Header.Set("X-Golem-Import-Attestation", "public-permitted-brand-competitive-research.v1")
+	request.Header.Set("X-AgentIntel-Import-Attestation", "public-permitted-brand-competitive-research.v1")
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		t.Fatal(err)

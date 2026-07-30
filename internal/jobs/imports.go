@@ -12,9 +12,9 @@ import (
 	"slices"
 	"time"
 
-	"github.com/GolemWorkers/golem-intel/internal/connectors"
-	"github.com/GolemWorkers/golem-intel/internal/domain"
-	"github.com/GolemWorkers/golem-intel/internal/policy"
+	"github.com/GolemWorkers/agentintel/internal/connectors"
+	"github.com/GolemWorkers/agentintel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/policy"
 )
 
 const (

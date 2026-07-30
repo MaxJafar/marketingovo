@@ -2,7 +2,7 @@ import { constants, type Stats } from "node:fs";
 import { lstat, open } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { GolemIntelClient, type ClientOptions } from "./client.js";
+import { AgentIntelClient, type ClientOptions } from "./client.js";
 
 export const MAX_SERVICE_TOKEN_FILE_BYTES = 128;
 const SERVICE_TOKEN = /^[A-Za-z0-9_-]{43}$/u;
@@ -10,7 +10,7 @@ const SERVICE_TOKEN = /^[A-Za-z0-9_-]{43}$/u;
 export function validateServiceToken(value: string): string {
   if (!SERVICE_TOKEN.test(value)) {
     throw new Error(
-      "Golem Intel service token must be exactly 43 base64url characters",
+      "AGENTintel service token must be exactly 43 base64url characters",
     );
   }
   return value;
@@ -19,17 +19,15 @@ export function validateServiceToken(value: string): string {
 function validateTokenFileStat(tokenFile: string, stat: Stats): void {
   if (!stat.isFile() || stat.isSymbolicLink()) {
     throw new Error(
-      `Golem Intel service token must be a regular non-symlink file: ${tokenFile}`,
+      `AGENTintel service token must be a regular non-symlink file: ${tokenFile}`,
     );
   }
   if (stat.size > MAX_SERVICE_TOKEN_FILE_BYTES) {
-    throw new Error(
-      `Golem Intel service token file is too large: ${tokenFile}`,
-    );
+    throw new Error(`AGENTintel service token file is too large: ${tokenFile}`);
   }
   if (process.platform !== "win32" && (stat.mode & 0o077) !== 0) {
     throw new Error(
-      `Golem Intel service token permissions must be 0600 or stricter: ${tokenFile}`,
+      `AGENTintel service token permissions must be 0600 or stricter: ${tokenFile}`,
     );
   }
 }
@@ -48,7 +46,7 @@ export async function readServiceTokenFile(tokenFile: string): Promise<string> {
       (pathStat.dev !== openStat.dev || pathStat.ino !== openStat.ino)
     ) {
       throw new Error(
-        `Golem Intel service token file changed while opening: ${tokenFile}`,
+        `AGENTintel service token file changed while opening: ${tokenFile}`,
       );
     }
     const buffer = Buffer.alloc(MAX_SERVICE_TOKEN_FILE_BYTES + 1);
@@ -65,7 +63,7 @@ export async function readServiceTokenFile(tokenFile: string): Promise<string> {
     }
     if (bytesRead > MAX_SERVICE_TOKEN_FILE_BYTES) {
       throw new Error(
-        `Golem Intel service token file is too large: ${tokenFile}`,
+        `AGENTintel service token file is too large: ${tokenFile}`,
       );
     }
     const raw = buffer.subarray(0, bytesRead).toString("utf8");
@@ -76,26 +74,26 @@ export async function readServiceTokenFile(tokenFile: string): Promise<string> {
   }
 }
 
-export function defaultGolemIntelDataDirectory(): string {
+export function defaultAgentIntelDataDirectory(): string {
   if (process.platform === "darwin") {
-    return join(homedir(), "Library", "Application Support", "Golem Intel");
+    return join(homedir(), "Library", "Application Support", "AGENTintel");
   }
   if (process.platform === "win32") {
     return join(
       process.env.LOCALAPPDATA ?? process.env.APPDATA ?? homedir(),
-      "Golem Intel",
+      "AGENTintel",
     );
   }
   return join(
     process.env.XDG_DATA_HOME ?? join(homedir(), ".local", "share"),
-    "golem-intel",
+    "agentintel",
   );
 }
 
 export async function clientFromTokenFile(
-  tokenFile = join(defaultGolemIntelDataDirectory(), "service-token"),
+  tokenFile = join(defaultAgentIntelDataDirectory(), "service-token"),
   options: Omit<ClientOptions, "token"> = {},
-): Promise<GolemIntelClient> {
+): Promise<AgentIntelClient> {
   const token = await readServiceTokenFile(tokenFile);
-  return new GolemIntelClient({ ...options, token });
+  return new AgentIntelClient({ ...options, token });
 }

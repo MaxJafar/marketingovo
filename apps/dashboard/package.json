@@ -1,5 +1,5 @@
 {
-  "name": "@golem-intel/dashboard",
+  "name": "@agentintel/dashboard",
   "version": "0.1.0-alpha.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@golem-intel/sdk": "workspace:*",
+    "@agentintel/sdk": "workspace:*",
     "@tanstack/react-query": "^5.66.0",
     "@tanstack/react-router": "^1.114.0",
     "echarts": "^6.0.0",
@@ -31,4 +31,3 @@
     "vitest": "^3.2.4"
   }
 }
-

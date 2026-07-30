@@ -1,6 +1,6 @@
-# Golem Intel intelligence worker
+# AGENTintel intelligence worker
 
-This process is the bounded Python analytics boundary for the Golem Intel
+This process is the bounded Python analytics boundary for the AGENTintel
 walking skeleton. It does not collect data, hold credentials, open network
 connections, or mutate the control plane. The Go daemon gives it one verified
 NDJSON spool and one output directory; the worker emits schema-exact Arrow,
@@ -12,7 +12,7 @@ The Go daemon launches one worker process per analysis and sends a
 `StartAnalysis` inside a `WorkerEnvelope`:
 
 ```console
-uv run --project workers/intelligence python -m golem_intel_worker protocol
+uv run --project workers/intelligence python -m agentintel_worker protocol
 ```
 
 Both directions use a four-byte unsigned big-endian length followed by a
@@ -46,7 +46,7 @@ zero fill or source-order selection.
 ## Diagnostic adapter
 
 ```console
-uv run --project workers/intelligence golem-intel-worker analyze \
+uv run --project workers/intelligence agentintel-worker analyze \
   --run-id demo-001 \
   --project-id demo \
   --workspace-path "$PWD" \

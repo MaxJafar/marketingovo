@@ -6,15 +6,14 @@ const manifest = JSON.parse(
   readFileSync(resolve(root, "openclaw.plugin.json"), "utf8"),
 );
 const expected = [
-  "golem_intel_research_start",
-  "golem_intel_compare_start",
-  "golem_intel_run_get",
-  "golem_intel_search",
-  "golem_intel_entity_get",
-  "golem_intel_monitoring_status",
+  "agentintel_research_start",
+  "agentintel_compare_start",
+  "agentintel_run_get",
+  "agentintel_search",
+  "agentintel_entity_get",
+  "agentintel_monitoring_status",
 ];
-if (manifest.id !== "golem-intel") throw new Error("OpenClaw id drifted");
+if (manifest.id !== "agentintel") throw new Error("OpenClaw id drifted");
 if (JSON.stringify(manifest.contracts.tools) !== JSON.stringify(expected)) {
   throw new Error("OpenClaw public tool contract drifted");
 }
-

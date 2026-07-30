@@ -17,8 +17,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GolemWorkers/golem-intel/internal/domain"
-	"github.com/GolemWorkers/golem-intel/internal/governance"
+	"github.com/GolemWorkers/agentintel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/governance"
 )
 
 const FixtureID = "fixture.competitive-pulse"

@@ -61,7 +61,7 @@ export interface EntityGetInput {
 export type MonitoringStatusInput = Record<string, never>;
 
 export const AgentResearchStartTool: AgentTool<ResearchStartInput> = {
-  name: "golem_intel_research_start",
+  name: "agentintel_research_start",
   title: "Start cited research",
   description:
     "Start an asynchronous public-source research run. Returns immediately with a run id; retrieve it until terminal.",
@@ -87,7 +87,7 @@ export const AgentResearchStartTool: AgentTool<ResearchStartInput> = {
 };
 
 export const AgentCompareStartTool: AgentTool<CompareStartInput> = {
-  name: "golem_intel_compare_start",
+  name: "agentintel_compare_start",
   title: "Start competitive comparison",
   description:
     "Compare approved fixture evidence or an opaque human-approved imported dataset and return a durable run id.",
@@ -119,7 +119,7 @@ export const AgentCompareStartTool: AgentTool<CompareStartInput> = {
 };
 
 export const AgentRunGetTool: AgentTool<RunGetInput> = {
-  name: "golem_intel_run_get",
+  name: "agentintel_run_get",
   title: "Get research run",
   description:
     "Read durable run state, ordered progress events, committed artifacts, and the cited report when available.",
@@ -136,7 +136,7 @@ export const AgentRunGetTool: AgentTool<RunGetInput> = {
 };
 
 export const AgentSearchTool: AgentTool<SearchInput> = {
-  name: "golem_intel_search",
+  name: "agentintel_search",
   title: "Search local intelligence",
   description:
     "Search committed entities, observations, claims, and reports. Results do not trigger new collection.",
@@ -153,7 +153,7 @@ export const AgentSearchTool: AgentTool<SearchInput> = {
 };
 
 export const AgentEntityGetTool: AgentTool<EntityGetInput> = {
-  name: "golem_intel_entity_get",
+  name: "agentintel_entity_get",
   title: "Get evidence-backed entity",
   description:
     "Read an entity header and its observed identifiers without resolving or merging identities.",
@@ -167,7 +167,7 @@ export const AgentEntityGetTool: AgentTool<EntityGetInput> = {
 };
 
 export const AgentMonitoringStatusTool: AgentTool<MonitoringStatusInput> = {
-  name: "golem_intel_monitoring_status",
+  name: "agentintel_monitoring_status",
   title: "Inspect collection health",
   description:
     "Read daemon, worker, queue, and connector availability. Missing providers remain unavailable, never zero.",

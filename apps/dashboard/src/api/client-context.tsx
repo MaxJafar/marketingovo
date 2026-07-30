@@ -1,7 +1,12 @@
-import { createContext, useContext, useMemo, type PropsWithChildren } from "react";
-import { GolemIntelClient } from "@golem-intel/sdk";
+import {
+  createContext,
+  useContext,
+  useMemo,
+  type PropsWithChildren,
+} from "react";
+import { AgentIntelClient } from "@agentintel/sdk";
 
-const ClientContext = createContext<GolemIntelClient | null>(null);
+const ClientContext = createContext<AgentIntelClient | null>(null);
 
 export const dashboardFetch = window.fetch.bind(window);
 
@@ -15,8 +20,8 @@ export function IntelClientProvider({
 }: IntelClientProviderProps): React.JSX.Element {
   const client = useMemo(
     () =>
-      new GolemIntelClient({
-        baseUrl: import.meta.env.VITE_GOLEM_INTEL_API_URL ?? "",
+      new AgentIntelClient({
+        baseUrl: import.meta.env.VITE_AGENTINTEL_API_URL ?? "",
         csrfToken,
         credentials: "same-origin",
         fetch: dashboardFetch,
@@ -28,7 +33,7 @@ export function IntelClientProvider({
   );
 }
 
-export function useIntelClient(): GolemIntelClient {
+export function useIntelClient(): AgentIntelClient {
   const client = useContext(ClientContext);
   if (!client) throw new Error("IntelClientProvider is missing");
   return client;

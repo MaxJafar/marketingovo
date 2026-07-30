@@ -11,13 +11,12 @@ if (!target || !supported.has(target)) {
   const root = resolve(import.meta.dirname, "..");
   const config = {
     mcpServers: {
-      "golem-intel": {
+      agentintel: {
         command: "node",
         args: [resolve(root, "packages/mcp/dist/stdio.js")],
-        env: { GOLEM_INTEL_API_URL: "http://127.0.0.1:7465" },
+        env: { AGENTINTEL_API_URL: "http://127.0.0.1:7465" },
       },
     },
   };
   process.stdout.write(`${JSON.stringify(config, null, 2)}\n`);
 }
-

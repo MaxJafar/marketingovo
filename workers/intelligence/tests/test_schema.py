@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pyarrow as pa
 
-from golem_intel_worker.schema import OBSERVATION_SCHEMA
+from agentintel_worker.schema import OBSERVATION_SCHEMA
 
 
 def _arrow_type(name: str) -> pa.DataType:

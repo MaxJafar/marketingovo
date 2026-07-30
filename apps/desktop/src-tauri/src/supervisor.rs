@@ -42,7 +42,7 @@ impl ChildSupervisor {
             if existing.child.try_wait()?.is_none() {
                 return Err(io::Error::new(
                     io::ErrorKind::AlreadyExists,
-                    "the Golem Intel daemon is already running",
+                    "the AGENTintel daemon is already running",
                 ));
             }
             slot.take();

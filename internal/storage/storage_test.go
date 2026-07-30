@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/GolemWorkers/golem-intel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/domain"
 )
 
 func TestDurableRunCancellationReplayAndRecovery(t *testing.T) {

@@ -1,6 +1,6 @@
 # Security Policy
 
-Golem Intel is an evidence-first research platform. “Publicly reachable” is not the same as authorized to collect, retain, infer from, or redistribute. Security review covers both conventional software risk and the effect a connector can have on data subjects, platform accounts, and source systems.
+AGENTintel is an evidence-first research platform. “Publicly reachable” is not the same as authorized to collect, retain, infer from, or redistribute. Security review covers both conventional software risk and the effect a connector can have on data subjects, platform accounts, and source systems.
 
 ## Reporting a vulnerability
 
@@ -60,7 +60,7 @@ Agents may propose and plan research, but high-risk collection, new authenticati
 
 ## People and HR safety boundary
 
-Golem Intel must not be used to make or recommend hiring, firing, promotion, compensation, discipline, eligibility, insurance, credit, housing, immigration, or other high-impact decisions about a person. It must not infer protected or sensitive traits, health, religion, politics, sexuality, ethnicity, disability, pregnancy, union status, or precise location.
+AGENTintel must not be used to make or recommend hiring, firing, promotion, compensation, discipline, eligibility, insurance, credit, housing, immigration, or other high-impact decisions about a person. It must not infer protected or sensitive traits, health, religion, politics, sexuality, ethnicity, disability, pregnancy, union status, or precise location.
 
 Public professional information may support company-level research or an explicitly authorized business-contact workflow only when the privacy controls in `PRIVACY.md` are met. A human must review identity matches and material conclusions; ambiguous records stay separate.
 

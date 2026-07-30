@@ -14,9 +14,9 @@ import {
   type ResearchStartInput,
   type RunGetInput,
   type SearchInput,
-} from "@golem-intel/contracts/agent-tools";
-import { type GolemIntelClient } from "@golem-intel/sdk";
-import { clientFromTokenFile } from "@golem-intel/sdk/node";
+} from "@agentintel/contracts/agent-tools";
+import { type AgentIntelClient } from "@agentintel/sdk";
+import { clientFromTokenFile } from "@agentintel/sdk/node";
 
 export const PUBLIC_TOOL_NAMES = PUBLIC_AGENT_TOOL_NAMES;
 
@@ -38,8 +38,8 @@ const monitoringSchema = toZod<MonitoringStatusInput>(
   AgentMonitoringStatusTool.inputSchema,
 );
 
-export interface GolemIntelMcpOptions {
-  client?: GolemIntelClient;
+export interface AgentIntelMcpOptions {
+  client?: AgentIntelClient;
   baseUrl?: string;
   tokenFile?: string;
 }
@@ -48,7 +48,7 @@ const textResult = (value: unknown) => ({
   content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }],
 });
 
-export function createGolemIntelMcpToolHandlers(client: GolemIntelClient) {
+export function createAgentIntelMcpToolHandlers(client: AgentIntelClient) {
   return {
     researchStart: async ({
       project_id,
@@ -105,23 +105,23 @@ export function createGolemIntelMcpToolHandlers(client: GolemIntelClient) {
   };
 }
 
-export async function createGolemIntelMcpServer(
-  options: GolemIntelMcpOptions = {},
+export async function createAgentIntelMcpServer(
+  options: AgentIntelMcpOptions = {},
 ): Promise<McpServer> {
   const client =
     options.client ??
     (await clientFromTokenFile(options.tokenFile, {
-      baseUrl: options.baseUrl ?? process.env.GOLEM_INTEL_API_URL,
+      baseUrl: options.baseUrl ?? process.env.AGENTINTEL_API_URL,
     }));
 
   const server = new McpServer(
-    { name: "golem-intel", version: "0.1.0-alpha.0" },
+    { name: "agentintel", version: "0.1.0-alpha.0" },
     {
       instructions:
-        "Golem Intel is an evidence system. Start collection only for public, user-authorized, or licensed business sources. Poll asynchronous runs until terminal. Distinguish observed, derived, estimated, unavailable, and contradictory evidence; cite source records and exact metric definitions. Never request credentials, reveal contacts, change policy, perform outreach, merge people by name, or make employment decisions through these tools.",
+        "AGENTintel is an evidence system. Start collection only for public, user-authorized, or licensed business sources. Poll asynchronous runs until terminal. Distinguish observed, derived, estimated, unavailable, and contradictory evidence; cite source records and exact metric definitions. Never request credentials, reveal contacts, change policy, perform outreach, merge people by name, or make employment decisions through these tools.",
     },
   );
-  const handlers = createGolemIntelMcpToolHandlers(client);
+  const handlers = createAgentIntelMcpToolHandlers(client);
 
   server.registerTool(
     AgentResearchStartTool.name,
@@ -190,17 +190,17 @@ export async function createGolemIntelMcpServer(
   );
 
   server.registerResource(
-    "golem-intel-run",
-    new ResourceTemplate("golem-intel://runs/{id}", {
+    "agentintel-run",
+    new ResourceTemplate("agentintel://runs/{id}", {
       list: async () => ({
         resources: (await client.runs.list()).slice(0, 100).map((run) => ({
-          uri: `golem-intel://runs/${run.id}`,
+          uri: `agentintel://runs/${run.id}`,
           name: `${run.workflow} — ${run.status}`,
         })),
       }),
     }),
     {
-      title: "Golem Intel run",
+      title: "AGENTintel run",
       description: "Durable run state and committed evidence inventory",
       mimeType: "application/json",
     },

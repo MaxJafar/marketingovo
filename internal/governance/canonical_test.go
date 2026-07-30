@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GolemWorkers/golem-intel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/domain"
 	"github.com/apache/arrow-go/v18/arrow"
 )
 

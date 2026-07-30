@@ -20,6 +20,8 @@ __pycache__/
 bin/
 target/
 
+.agentintel/
+# Local data written under the previous product name; never a build input.
 .golem-intel/
 data/*
 !data/.gitkeep

@@ -4,7 +4,7 @@
 
 - Model ID: `competitive-pulse-baseline@0.1.0`
 - Type: deterministic descriptive analytics; no trained parameters
-- Owner: Golem Intel Community
+- Owner: AGENTintel Community
 - Inputs: validated `golem.observations.v1` evidence selected by target ID
 - Outputs: `golem.comparison-report.v1` for the legacy fixture and
   `golem.comparison-report.v2` for validated Competitive Pulse CSV v1 imports
@@ -20,7 +20,7 @@ an audience-authenticity classifier, forecasting system, or decision engine.
 ## Method
 
 - Follower change is `latest observed follower count - earliest observed
-  follower count` within the selected platform and metric-definition version.
+follower count` within the selected platform and metric-definition version.
   Imported rows are grouped by exact observation time. Conflicting timestamp
   groups remain cited evidence but are excluded from numeric boundaries; fewer
   than two unambiguous timestamps produces an explicit insufficient or

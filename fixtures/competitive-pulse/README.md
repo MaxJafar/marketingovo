@@ -7,4 +7,3 @@ cannot accidentally contact a live service.
 The fixture deliberately includes one account with a declining public follower
 count. Product language must describe that observation as follower change—not
 customer retention, churn, or business performance.
-

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
-import { createGolemIntelMcpServer } from "./index.js";
+import { createAgentIntelMcpServer } from "./index.js";
 
 async function main(): Promise<void> {
-  const server = await createGolemIntelMcpServer();
+  const server = await createAgentIntelMcpServer();
   const transport = new StdioServerTransport();
   process.once(
     "SIGINT",
@@ -14,8 +14,7 @@ async function main(): Promise<void> {
 
 main().catch((error) => {
   process.stderr.write(
-    `golem-intel-mcp: ${error instanceof Error ? error.message : String(error)}\n`,
+    `agentintel-mcp: ${error instanceof Error ? error.message : String(error)}\n`,
   );
   process.exitCode = 1;
 });
-

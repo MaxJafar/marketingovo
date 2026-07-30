@@ -18,9 +18,9 @@ use std::path::{Path, PathBuf};
 use thiserror::Error;
 use zeroize::{Zeroize, Zeroizing};
 
-const SERVICE: &str = "com.golemworkers.golem-intel";
+const SERVICE: &str = "com.golemworkers.agentintel";
 const VAULT_FILE: &str = "credentials.v1.json";
-const VAULT_AAD: &[u8] = b"golem-intel/master-password-vault/v1";
+const VAULT_AAD: &[u8] = b"agentintel/master-password-vault/v1";
 const MAX_VAULT_BYTES: u64 = 16 * 1024 * 1024;
 const MAX_SECRET_BYTES: usize = 1024 * 1024;
 const MINIMUM_MASTER_PASSWORD_BYTES: usize = 16;

@@ -126,18 +126,18 @@ func DefaultDataDir() (string, error) {
 	}
 	switch runtime.GOOS {
 	case "darwin":
-		return filepath.Join(home, "Library", "Application Support", "Golem Intel"), nil
+		return filepath.Join(home, "Library", "Application Support", "AGENTintel"), nil
 	case "windows":
 		root := os.Getenv("LOCALAPPDATA")
 		if root == "" {
 			return "", fmt.Errorf("LOCALAPPDATA is not set")
 		}
-		return filepath.Join(root, "Golem Intel"), nil
+		return filepath.Join(root, "AGENTintel"), nil
 	default:
 		root := os.Getenv("XDG_DATA_HOME")
 		if root == "" {
 			root = filepath.Join(home, ".local", "share")
 		}
-		return filepath.Join(root, "golem-intel"), nil
+		return filepath.Join(root, "agentintel"), nil
 	}
 }

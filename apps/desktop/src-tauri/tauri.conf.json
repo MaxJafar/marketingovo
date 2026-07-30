@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Golem Intel",
+  "productName": "AGENTintel",
   "version": "0.1.0-alpha.0",
-  "identifier": "com.golemworkers.golem-intel",
+  "identifier": "com.golemworkers.agentintel",
   "build": {
     "frontendDist": "../shell"
   },
@@ -11,7 +11,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Golem Intel — Starting",
+        "title": "AGENTintel — Starting",
         "url": "index.html",
         "width": 1440,
         "height": 920,
@@ -33,7 +33,7 @@
     "publisher": "GolemWorkers",
     "homepage": "https://golemworkers.com/intel",
     "copyright": "Copyright 2026 GolemWorkers",
-    "license": "Elastic-2.0",
+    "license": "Apache-2.0",
     "licenseFile": "../../../LICENSE",
     "icon": ["icons/icon.png"],
     "shortDescription": "Evidence-first competitive and creator intelligence",
@@ -56,9 +56,9 @@
   "plugins": {
     "updater": {
       "endpoints": [
-        "https://github.com/GolemWorkers/golem-intel/releases/latest/download/latest.json"
+        "https://github.com/GolemWorkers/agentintel/releases/latest/download/latest.json"
       ],
-      "pubkey": "__GOLEM_INTEL_UPDATER_PUBLIC_KEY__",
+      "pubkey": "__AGENTINTEL_UPDATER_PUBLIC_KEY__",
       "windows": {
         "installMode": "passive"
       }

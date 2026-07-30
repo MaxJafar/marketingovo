@@ -1,10 +1,10 @@
 # Privacy and People-Data Policy
 
-This policy governs Golem Intel development and default product behavior. Deployers may have additional legal duties, but they may not weaken these product guardrails.
+This policy governs AGENTintel development and default product behavior. Deployers may have additional legal duties, but they may not weaken these product guardrails.
 
 ## Purpose and source limitation
 
-Golem Intel is for company, market, creator, and campaign research using evidence from public, authorized, or licensed sources. Collection must have a documented purpose before it starts. “Collect everything” is not a valid purpose.
+AGENTintel is for company, market, creator, and campaign research using evidence from public, authorized, or licensed sources. Collection must have a documented purpose before it starts. “Collect everything” is not a valid purpose.
 
 Permitted source classes are:
 

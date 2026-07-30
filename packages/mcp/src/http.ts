@@ -4,11 +4,11 @@ import {
   type McpHttpHandler,
 } from "@modelcontextprotocol/server";
 import {
-  type GolemIntelClient,
+  type AgentIntelClient,
   validateLoopbackBaseUrl,
-} from "@golem-intel/sdk";
-import { validateServiceToken } from "@golem-intel/sdk/node";
-import { createGolemIntelMcpServer } from "./index.js";
+} from "@agentintel/sdk";
+import { validateServiceToken } from "@agentintel/sdk/node";
+import { createAgentIntelMcpServer } from "./index.js";
 
 export interface AuthorizedMcpHttpOptions {
   origin: string;
@@ -36,10 +36,10 @@ function bearerMatches(header: string | null, expected: string): boolean {
   return supplied.length === wanted.length && timingSafeEqual(supplied, wanted);
 }
 
-export function createGolemIntelMcpHttpHandler(
-  client: GolemIntelClient,
+export function createAgentIntelMcpHttpHandler(
+  client: AgentIntelClient,
 ): McpHttpHandler {
-  return createMcpHandler(() => createGolemIntelMcpServer({ client }), {
+  return createMcpHandler(() => createAgentIntelMcpServer({ client }), {
     legacy: "stateless",
     responseMode: "auto",
   });

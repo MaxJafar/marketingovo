@@ -1,4 +1,4 @@
-module github.com/GolemWorkers/golem-intel
+module github.com/GolemWorkers/agentintel
 
 go 1.26.0
 

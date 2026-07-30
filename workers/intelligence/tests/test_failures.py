@@ -10,11 +10,11 @@ from pathlib import Path
 
 import pytest
 
-from golem_intel_worker.constants import FIXTURE_INPUT_SCHEMA_ID
-from golem_intel_worker.errors import WorkerError
-from golem_intel_worker.events import EventEmitter
-from golem_intel_worker.models import AnalysisRequest
-from golem_intel_worker.pipeline import run_analysis
+from agentintel_worker.constants import FIXTURE_INPUT_SCHEMA_ID
+from agentintel_worker.errors import WorkerError
+from agentintel_worker.events import EventEmitter
+from agentintel_worker.models import AnalysisRequest
+from agentintel_worker.pipeline import run_analysis
 
 
 def _request(
@@ -132,7 +132,7 @@ def test_slow_cli_handles_termination_as_cancellation(
     command = [
         sys.executable,
         "-m",
-        "golem_intel_worker",
+        "agentintel_worker",
         "analyze",
         "--run-id",
         "cancel-test",

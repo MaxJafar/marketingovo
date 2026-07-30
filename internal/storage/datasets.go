@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/GolemWorkers/golem-intel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/domain"
 )
 
 // CreateDataset persists only an opaque projection and a daemon-created

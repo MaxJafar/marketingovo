@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GolemWorkers/golem-intel/internal/domain"
-	"github.com/GolemWorkers/golem-intel/internal/governance"
+	"github.com/GolemWorkers/agentintel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/governance"
 )
 
 func TestFixtureReportProducesGoldenFollowerDeltas(t *testing.T) {

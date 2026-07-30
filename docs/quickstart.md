@@ -7,11 +7,11 @@ loopback listeners.
 
 ```bash
 pnpm install
-UV_CACHE_DIR=.golem-intel/cache/uv uv sync --project workers/intelligence --frozen
+UV_CACHE_DIR=.agentintel/cache/uv uv sync --project workers/intelligence --frozen
 pnpm contracts:generate
 pnpm build
-go build -o bin/golem-inteld ./cmd/golem-inteld
-go build -o bin/golem-intel ./cmd/golem-intel
+go build -o bin/agentinteld ./cmd/agentinteld
+go build -o bin/agentintel ./cmd/agentintel
 ```
 
 `pnpm contracts:generate` requires `buf`, `protoc-gen-go`, and the workspace
@@ -22,9 +22,9 @@ result byte-for-byte, and validates representative OpenAPI response samples.
 ## Start in developer mode
 
 ```bash
-./bin/golem-inteld serve \
+./bin/agentinteld serve \
   --listen 127.0.0.1:7465 \
-  --data-dir .golem-intel/dev \
+  --data-dir .agentintel/dev \
   --python-worker "$(pwd)/workers/intelligence" \
   --uv-command "$(command -v uv)" \
   --dashboard-dir "$(pwd)/apps/dashboard/dist" \
@@ -53,9 +53,9 @@ stdin. A manual managed launch has the same argument shape:
 ```bash
 BOOTSTRAP_TICKET="$(openssl rand -base64 32 | tr '+/' '-_' | tr -d '=[:space:]')"
 test "${#BOOTSTRAP_TICKET}" -eq 43
-printf '%s\n' "$BOOTSTRAP_TICKET" | ./bin/golem-inteld serve \
+printf '%s\n' "$BOOTSTRAP_TICKET" | ./bin/agentinteld serve \
   --listen 127.0.0.1:7465 \
-  --data-dir /absolute/private/golem-intel-data \
+  --data-dir /absolute/private/agentintel-data \
   --python-worker /absolute/verified/python-worker \
   --python-command /absolute/non-symlink/verified/python \
   --dashboard-bootstrap-token-stdin \
@@ -75,8 +75,8 @@ intentionally rejected.
 ## Run the golden comparison
 
 ```bash
-./bin/golem-intel \
-  --token-file .golem-intel/dev/service-token \
+./bin/agentintel \
+  --token-file .agentintel/dev/service-token \
   compare \
   --project competitive-pulse-demo \
   --target northstar-labs \
@@ -89,15 +89,15 @@ The terminal result contains a run id. Read the report or replay the recorded
 immutable input snapshot:
 
 ```bash
-./bin/golem-intel --token-file .golem-intel/dev/service-token report RUN_ID
-./bin/golem-intel --token-file .golem-intel/dev/service-token replay RUN_ID
+./bin/agentintel --token-file .agentintel/dev/service-token report RUN_ID
+./bin/agentintel --token-file .agentintel/dev/service-token replay RUN_ID
 ```
 
 A research run uses the same synthetic fixture in Phase 1; `source-budget` is a
 hard scope bound, not a claim that the uncollected slots were used:
 
 ```bash
-./bin/golem-intel --token-file .golem-intel/dev/service-token research \
+./bin/agentintel --token-file .agentintel/dev/service-token research \
   --project competitive-pulse-demo \
   --question "How did the monitored public engagement signals change?" \
   --source-budget 4 \
@@ -111,18 +111,18 @@ hard scope bound, not a claim that the uncollected slots were used:
 Use a separate project/data directory for destructive acceptance checks.
 
 ```bash
-./bin/golem-intel --token-file .golem-intel/dev/service-token compare \
+./bin/agentintel --token-file .agentintel/dev/service-token compare \
   --target northstar-labs --target orbit-coffee \
   --simulate source_failure --wait
 
-./bin/golem-intel --token-file .golem-intel/dev/service-token compare \
+./bin/agentintel --token-file .agentintel/dev/service-token compare \
   --target northstar-labs --target orbit-coffee \
   --simulate corrupt_artifact --wait
 
-./bin/golem-intel --token-file .golem-intel/dev/service-token compare \
+./bin/agentintel --token-file .agentintel/dev/service-token compare \
   --target northstar-labs --target orbit-coffee \
   --simulate slow
-./bin/golem-intel --token-file .golem-intel/dev/service-token cancel \
+./bin/agentintel --token-file .agentintel/dev/service-token cancel \
   --reason "acceptance test" RUN_ID
 ```
 
@@ -132,7 +132,7 @@ must terminate the supervised worker and persist a `cancelled` run.
 
 ## Agent surfaces
 
-- Codex bundle: `plugins/codex/golem-intel`
+- Codex bundle: `plugins/codex/agentintel`
 - MCP stdio binary: `packages/mcp/dist/stdio.js`
 - authenticated loopback Streamable HTTP binary:
   `packages/mcp/dist/http-cli.js`
@@ -149,7 +149,7 @@ daemon's hardened token file:
 node packages/mcp/dist/http-cli.js \
   --listen 127.0.0.1:7467 \
   --api-url http://127.0.0.1:7465 \
-  --token-file .golem-intel/dev/service-token
+  --token-file .agentintel/dev/service-token
 ```
 
 The endpoint is `http://127.0.0.1:7467/mcp`. It requires the service token in an

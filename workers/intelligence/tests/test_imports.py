@@ -10,24 +10,24 @@ from types import SimpleNamespace
 
 import pyarrow.ipc as ipc
 
-from golem_intel_worker.constants import (
+from agentintel_worker.constants import (
     CSV_INPUT_SCHEMA_ID,
     CSV_PARSER_VERSION,
     METRIC_CATALOG_VERSION,
 )
-from golem_intel_worker.events import EventEmitter
-from golem_intel_worker.imports import validate_csv_import
-from golem_intel_worker.models import AnalysisRequest
-from golem_intel_worker.normalize import parse_csv_import
-from golem_intel_worker.pipeline import run_analysis
-from golem_intel_worker.protocol import (
+from agentintel_worker.events import EventEmitter
+from agentintel_worker.imports import validate_csv_import
+from agentintel_worker.models import AnalysisRequest
+from agentintel_worker.normalize import parse_csv_import
+from agentintel_worker.pipeline import run_analysis
+from agentintel_worker.protocol import (
     PROTOCOL_VERSION,
     _analysis_request,
     load_worker_pb2,
     read_delimited,
     run_protocol,
 )
-from golem_intel_worker.schema import OBSERVATION_SCHEMA
+from agentintel_worker.schema import OBSERVATION_SCHEMA
 
 VALIDATED_AT = "2026-07-16T12:00:00Z"
 
@@ -228,7 +228,7 @@ def test_absent_metric_rows_remain_missing_not_zero(repository_root: Path) -> No
         )
         + "\n"
     ).encode()
-    from golem_intel_worker.normalize import parse_authority_timestamp
+    from agentintel_worker.normalize import parse_authority_timestamp
 
     parsed = parse_csv_import(
         without_north_engagement,
@@ -252,7 +252,7 @@ def test_source_reference_conformance_cases(repository_root: Path) -> None:
             repository_root / "fixtures/competitive-pulse-import-v1/source-url-policy.json"
         ).read_text()
     )
-    from golem_intel_worker.normalize import validate_source_url
+    from agentintel_worker.normalize import validate_source_url
 
     for case in fixture["cases"]:
         diagnostic = validate_source_url(case["source_url"], record=2)
@@ -313,7 +313,7 @@ def test_out_of_order_is_normalized_and_follower_conflict_is_retained(
 ) -> None:
     payload = _golden(repository_root)
     digest = hashlib.sha256(payload).hexdigest()
-    from golem_intel_worker.normalize import parse_authority_timestamp
+    from agentintel_worker.normalize import parse_authority_timestamp
 
     ordered = parse_csv_import(
         payload,

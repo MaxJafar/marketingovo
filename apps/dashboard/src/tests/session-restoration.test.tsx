@@ -8,7 +8,7 @@ vi.mock("../app/router.js", () => ({
 vi.mock("../api/client-context.js", () => ({
   IntelClientProvider: ({ children }: { children: React.ReactNode }) =>
     children,
-  dashboardFetch: function(this: any, ...args: Parameters<typeof fetch>) {
+  dashboardFetch: function (this: any, ...args: Parameters<typeof fetch>) {
     return fetch.apply(window, args);
   },
 }));
@@ -39,12 +39,14 @@ describe("dashboard session lifecycle", () => {
   });
 
   it("restores the HttpOnly session after bootstrap and a full reload", async () => {
-    const bootstrapFetch = vi
-      .fn<typeof fetch>()
-      .mockImplementation(function (this: any, ...args) {
-        if (this !== window && this !== globalThis) throw new TypeError("Illegal invocation");
-        return Promise.resolve(jsonResponse(session));
-      });
+    const bootstrapFetch = vi.fn<typeof fetch>().mockImplementation(function (
+      this: any,
+      ...args
+    ) {
+      if (this !== window && this !== globalThis)
+        throw new TypeError("Illegal invocation");
+      return Promise.resolve(jsonResponse(session));
+    });
     vi.stubGlobal("fetch", bootstrapFetch);
     window.history.replaceState(null, "", `/#token=${ticket}`);
 
@@ -63,12 +65,14 @@ describe("dashboard session lifecycle", () => {
     first.unmount();
 
     vi.resetModules();
-    const restoreFetch = vi
-      .fn<typeof fetch>()
-      .mockImplementation(function (this: any, ...args) {
-        if (this !== window && this !== globalThis) throw new TypeError("Illegal invocation");
-        return Promise.resolve(jsonResponse(session));
-      });
+    const restoreFetch = vi.fn<typeof fetch>().mockImplementation(function (
+      this: any,
+      ...args
+    ) {
+      if (this !== window && this !== globalThis)
+        throw new TypeError("Illegal invocation");
+      return Promise.resolve(jsonResponse(session));
+    });
     vi.stubGlobal("fetch", restoreFetch);
     const reloadedModule = await import("../app/App.js");
     render(<reloadedModule.App />);
@@ -87,12 +91,14 @@ describe("dashboard session lifecycle", () => {
   });
 
   it("shows the ticket gate only after session restoration returns 401", async () => {
-    const fetcher = vi
-      .fn<typeof fetch>()
-      .mockImplementation(function (this: any, ...args) {
-        if (this !== window && this !== globalThis) throw new TypeError("Illegal invocation");
-        return Promise.resolve(jsonResponse({ code: "unauthorized" }, 401));
-      });
+    const fetcher = vi.fn<typeof fetch>().mockImplementation(function (
+      this: any,
+      ...args
+    ) {
+      if (this !== window && this !== globalThis)
+        throw new TypeError("Illegal invocation");
+      return Promise.resolve(jsonResponse({ code: "unauthorized" }, 401));
+    });
     vi.stubGlobal("fetch", fetcher);
     const module = await import("../app/App.js");
     render(<module.App />);

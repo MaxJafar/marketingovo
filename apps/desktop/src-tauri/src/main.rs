@@ -1,3 +1,3 @@
 fn main() {
-    golem_intel_desktop_lib::run();
+    agentintel_desktop_lib::run();
 }

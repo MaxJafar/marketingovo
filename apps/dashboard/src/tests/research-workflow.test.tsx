@@ -1,7 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, fireEvent, cleanup } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  fireEvent,
+  cleanup,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { GolemIntelClient } from "@golem-intel/sdk";
+import type { AgentIntelClient } from "@agentintel/sdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -22,8 +28,8 @@ vi.mock("../api/client-context.js", () => ({
         cancel: vi.fn(),
         replay: mocks.runReplay,
       },
-    }) as unknown as GolemIntelClient,
-  dashboardFetch: function(this: any, ...args: Parameters<typeof fetch>) {
+    }) as unknown as AgentIntelClient,
+  dashboardFetch: function (this: any, ...args: Parameters<typeof fetch>) {
     return fetch.apply(window, args);
   },
 }));
@@ -123,7 +129,9 @@ describe("Research workspace", () => {
     const file = new File(["test"], "test.csv", { type: "text/csv" });
     await user.upload(fileInput, file);
 
-    await waitFor(() => expect(screen.getByText("Dataset Reference")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText("Dataset Reference")).toBeInTheDocument(),
+    );
 
     // Select targets (keyboard path)
     const t1 = screen.getByLabelText(/T1/i);
@@ -136,7 +144,9 @@ describe("Research workspace", () => {
     await user.keyboard(" ");
 
     // Check confirmation
-    const confirmation = screen.getByLabelText(/I confirm the validation results/i);
+    const confirmation = screen.getByLabelText(
+      /I confirm the validation results/i,
+    );
     await user.click(confirmation);
     expect(confirmation).toBeChecked();
 
@@ -146,7 +156,9 @@ describe("Research workspace", () => {
 
     // Workflow change invalidates preview confirmation
     await user.selectOptions(screen.getByLabelText("Source"), "demo");
-    expect(screen.queryByLabelText(/I confirm the validation results/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText(/I confirm the validation results/i),
+    ).not.toBeInTheDocument();
     await user.selectOptions(screen.getByLabelText("Source"), "import");
 
     // Re-attest since we unchecked it earlier
@@ -155,14 +167,18 @@ describe("Research workspace", () => {
     // File input is reset on workflow change, need to re-upload to see confirmation
     const file2 = new File(["test2"], "test2.csv", { type: "text/csv" });
     await user.upload(screen.getByLabelText("Select CSV"), file2);
-    await waitFor(() => expect(screen.getByText("Dataset Reference")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText("Dataset Reference")).toBeInTheDocument(),
+    );
     const t1New = screen.getByLabelText(/T1/i);
     const t2New = screen.getByLabelText(/T2/i);
     t1New.focus();
     await user.keyboard(" ");
     t2New.focus();
     await user.keyboard(" ");
-    const confirmationNew = screen.getByLabelText(/I confirm the validation results/i);
+    const confirmationNew = screen.getByLabelText(
+      /I confirm the validation results/i,
+    );
     await user.click(confirmationNew);
 
     // Re-check for submission
@@ -185,9 +201,15 @@ describe("Research workspace", () => {
     });
 
     // Test Replay
-    await waitFor(() => expect(screen.getByRole("button", { name: "Replay run" })).toBeInTheDocument());
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Replay run" }),
+      ).toBeInTheDocument(),
+    );
     await user.click(screen.getByRole("button", { name: "Replay run" }));
-    await waitFor(() => expect(mocks.runReplay).toHaveBeenCalledWith("run-import"));
+    await waitFor(() =>
+      expect(mocks.runReplay).toHaveBeenCalledWith("run-import"),
+    );
 
     queryClient.clear();
   });
@@ -222,7 +244,9 @@ describe("Research workspace", () => {
     });
 
     // Start comparison should be disabled
-    expect(screen.getByRole("button", { name: "Start comparison" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Start comparison" }),
+    ).toBeDisabled();
     queryClient.clear();
   });
 

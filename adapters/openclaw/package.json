@@ -1,8 +1,8 @@
 {
-  "name": "@golem-intel/openclaw",
+  "name": "@agentintel/openclaw",
   "version": "0.1.0-alpha.0",
-  "description": "OpenClaw adapter for Golem Intel workflow-level tools",
-  "license": "Elastic-2.0",
+  "description": "OpenClaw adapter for AGENTintel workflow-level tools",
+  "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
@@ -22,8 +22,8 @@
     "test": "node scripts/validate.mjs && vitest run"
   },
   "dependencies": {
-    "@golem-intel/contracts": "workspace:*",
-    "@golem-intel/sdk": "workspace:*",
+    "@agentintel/contracts": "workspace:*",
+    "@agentintel/sdk": "workspace:*",
     "typebox": "1.1.39"
   },
   "devDependencies": {

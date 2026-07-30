@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import {
   bootstrapDashboardSession,
-  GolemIntelApiError,
-  GolemIntelClient,
+  AgentIntelApiError,
+  AgentIntelClient,
   type DashboardSession,
-} from "@golem-intel/sdk";
+} from "@agentintel/sdk";
 import { queryClient } from "./query-client.js";
 import { AppRouter } from "./router.js";
 import { IntelClientProvider, dashboardFetch } from "../api/client-context.js";
@@ -13,7 +13,7 @@ import { SessionHandshake } from "../components/SessionHandshake.js";
 import { TokenGate } from "../components/TokenGate.js";
 
 function apiBaseUrl(): string {
-  return import.meta.env.VITE_GOLEM_INTEL_API_URL ?? "";
+  return import.meta.env.VITE_AGENTINTEL_API_URL ?? "";
 }
 
 export function consumeBootstrapToken(): string {
@@ -31,7 +31,10 @@ let initialRestore: Promise<DashboardSession> | undefined;
 
 function exchangeTicket(ticket: string): Promise<DashboardSession> {
   if (activeExchange?.ticket === ticket) return activeExchange.promise;
-  const promise = bootstrapDashboardSession(ticket, { baseUrl: apiBaseUrl(), fetch: dashboardFetch });
+  const promise = bootstrapDashboardSession(ticket, {
+    baseUrl: apiBaseUrl(),
+    fetch: dashboardFetch,
+  });
   activeExchange = { ticket, promise };
   const clear = (): void => {
     if (activeExchange?.promise === promise) activeExchange = undefined;
@@ -41,7 +44,7 @@ function exchangeTicket(ticket: string): Promise<DashboardSession> {
 }
 
 function restoreSession(): Promise<DashboardSession> {
-  initialRestore ??= new GolemIntelClient({
+  initialRestore ??= new AgentIntelClient({
     baseUrl: apiBaseUrl(),
     credentials: "same-origin",
     fetch: dashboardFetch,
@@ -78,7 +81,7 @@ export function App(): React.JSX.Element {
       .catch((reason: unknown) => {
         if (
           !active ||
-          (reason instanceof GolemIntelApiError && reason.status === 401)
+          (reason instanceof AgentIntelApiError && reason.status === 401)
         ) {
           return;
         }

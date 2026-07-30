@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GolemWorkers/golem-intel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/domain"
 )
 
 type Client struct {

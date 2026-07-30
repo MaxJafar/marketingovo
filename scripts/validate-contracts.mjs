@@ -20,12 +20,12 @@ const env = {
   ...process.env,
   PATH: [goBin, bin, process.env.PATH].filter(Boolean).join(delimiter),
   BUF_CACHE_DIR:
-    process.env.BUF_CACHE_DIR ?? resolve(root, ".golem-intel/cache/buf"),
+    process.env.BUF_CACHE_DIR ?? resolve(root, ".agentintel/cache/buf"),
 };
 
 execFileSync("buf", ["lint"], { cwd: root, env, stdio: "inherit" });
 
-const openapiPath = resolve(root, "contracts/openapi/golem-intel.openapi.yaml");
+const openapiPath = resolve(root, "contracts/openapi/agentintel.openapi.yaml");
 const openapi = readFileSync(openapiPath, "utf8");
 const openapiDocument = parse(openapi);
 const agentContracts = readFileSync(
@@ -38,7 +38,7 @@ const generatedOpenAPIPath = resolve(
 );
 const generated = readFileSync(generatedOpenAPIPath, "utf8");
 const proto = readFileSync(
-  resolve(root, "contracts/proto/golem/intel/v1/worker.proto"),
+  resolve(root, "contracts/proto/agentintel/v1/worker.proto"),
   "utf8",
 );
 const arrowSchema = JSON.parse(
@@ -51,7 +51,7 @@ const evidenceManifestSchema = JSON.parse(
   ),
 );
 
-const temporary = mkdtempSync(join(tmpdir(), "golem-intel-contracts-"));
+const temporary = mkdtempSync(join(tmpdir(), "agentintel-contracts-"));
 try {
   execFileSync("buf", ["generate", "--output", temporary], {
     cwd: root,
@@ -106,12 +106,12 @@ for (const operation of operations) {
 }
 
 const publicTools = [
-  "golem_intel_research_start",
-  "golem_intel_compare_start",
-  "golem_intel_run_get",
-  "golem_intel_search",
-  "golem_intel_entity_get",
-  "golem_intel_monitoring_status",
+  "agentintel_research_start",
+  "agentintel_compare_start",
+  "agentintel_run_get",
+  "agentintel_search",
+  "agentintel_entity_get",
+  "agentintel_monitoring_status",
 ];
 for (const tool of publicTools) {
   if (!agentContracts.includes(`name: "${tool}"`)) {
@@ -139,10 +139,10 @@ if (evidenceManifestSchema.properties?.manifest_version?.const !== 1) {
 }
 
 const forbiddenAgentWords = [
-  "golem_intel_contact_reveal",
-  "golem_intel_delete",
-  "golem_intel_outreach",
-  "golem_intel_policy_set",
+  "agentintel_contact_reveal",
+  "agentintel_delete",
+  "agentintel_outreach",
+  "agentintel_policy_set",
 ];
 for (const tool of forbiddenAgentWords) {
   if (agentContracts.includes(tool)) {
@@ -203,7 +203,7 @@ function validateOpenAPISamples(document) {
     strict: false,
   });
   addFormats(ajv);
-  ajv.addSchema(document, "golem-intel-openapi");
+  ajv.addSchema(document, "agentintel-openapi");
 
   const runDetail = loadSample("run-detail.succeeded.json");
   const compareReport = loadSample("report.compare.json");
@@ -228,15 +228,38 @@ function validateOpenAPISamples(document) {
   assertValid(
     validateImportEvidence,
     {
-      observation_id: "obs-1", entity_id: "northstar-labs", entity_name: "Northstar Labs", platform: "youtube",
-      content_id: null, dimension: null, metric: "followers", metric_definition_version: "v1",
-      numerator: null, denominator: null, value: 100, unit: "followers", published_at: null,
-      observed_at: "2026-07-01T00:00:00Z", recorded_at: "2026-07-01T00:00:00Z",
-      valid_from: "2026-07-01T00:00:00Z", valid_to: null, source_url: "https://example.invalid/northstar",
-      native_id: "native-1", connector_version: "local.competitive-pulse-import@1.0.0", classification: "observed",
-      confidence: 1, artifact_hash: "a".repeat(64), extraction_pointer: "obs-1", freshness_seconds: 0,
-      availability: "available", coverage: 1, acquisition_mode: "user_import", data_class: "public",
-      permitted_purpose: "competitive_research", retention_until: "2026-10-01T00:00:00Z", rights_state: "permitted",
+      observation_id: "obs-1",
+      entity_id: "northstar-labs",
+      entity_name: "Northstar Labs",
+      platform: "youtube",
+      content_id: null,
+      dimension: null,
+      metric: "followers",
+      metric_definition_version: "v1",
+      numerator: null,
+      denominator: null,
+      value: 100,
+      unit: "followers",
+      published_at: null,
+      observed_at: "2026-07-01T00:00:00Z",
+      recorded_at: "2026-07-01T00:00:00Z",
+      valid_from: "2026-07-01T00:00:00Z",
+      valid_to: null,
+      source_url: "https://example.invalid/northstar",
+      native_id: "native-1",
+      connector_version: "local.competitive-pulse-import@1.0.0",
+      classification: "observed",
+      confidence: 1,
+      artifact_hash: "a".repeat(64),
+      extraction_pointer: "obs-1",
+      freshness_seconds: 0,
+      availability: "available",
+      coverage: 1,
+      acquisition_mode: "user_import",
+      data_class: "public",
+      permitted_purpose: "competitive_research",
+      retention_until: "2026-10-01T00:00:00Z",
+      rights_state: "permitted",
     },
     "typed imported evidence entry",
   );
@@ -261,7 +284,7 @@ function validateOpenAPISamples(document) {
 
   function compile(name) {
     return ajv.compile({
-      $ref: `golem-intel-openapi#/components/schemas/${name}`,
+      $ref: `agentintel-openapi#/components/schemas/${name}`,
     });
   }
 }

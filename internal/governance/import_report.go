@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GolemWorkers/golem-intel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/domain"
 )
 
 // importComparisonReport is deliberately separate from the legacy v1 domain

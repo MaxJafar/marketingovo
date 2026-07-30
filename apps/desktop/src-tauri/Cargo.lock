@@ -30,6 +30,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "agentintel-desktop"
+version = "0.1.0-alpha.0"
+dependencies = [
+ "argon2",
+ "base64 0.22.1",
+ "chacha20poly1305",
+ "keyring",
+ "libc",
+ "minisign-verify",
+ "rand",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-updater",
+ "tempfile",
+ "thiserror 2.0.18",
+ "url",
+ "walkdir",
+ "windows-sys 0.60.2",
+ "zeroize",
+]
+
+[[package]]
 name = "aho-corasick"
 version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1492,31 +1517,6 @@ dependencies = [
  "glib-sys",
  "libc",
  "system-deps",
-]
-
-[[package]]
-name = "golem-intel-desktop"
-version = "0.1.0-alpha.0"
-dependencies = [
- "argon2",
- "base64 0.22.1",
- "chacha20poly1305",
- "keyring",
- "libc",
- "minisign-verify",
- "rand",
- "serde",
- "serde_json",
- "sha2",
- "tauri",
- "tauri-build",
- "tauri-plugin-updater",
- "tempfile",
- "thiserror 2.0.18",
- "url",
- "walkdir",
- "windows-sys 0.60.2",
- "zeroize",
 ]
 
 [[package]]

@@ -1,26 +1,26 @@
 import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { GolemIntelClient } from "@golem-intel/sdk";
-import { GolemIntelClient as HttpClient } from "@golem-intel/sdk";
+import type { AgentIntelClient } from "@agentintel/sdk";
+import { AgentIntelClient as HttpClient } from "@agentintel/sdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   PUBLIC_TOOL_NAMES,
-  createGolemIntelMcpServer,
-  createGolemIntelMcpToolHandlers,
+  createAgentIntelMcpServer,
+  createAgentIntelMcpToolHandlers,
 } from "./index.js";
 import {
   createAuthorizedMcpFetch,
-  createGolemIntelMcpHttpHandler,
+  createAgentIntelMcpHttpHandler,
 } from "./http.js";
 
 const LOCKED_TOOLS = [
-  "golem_intel_research_start",
-  "golem_intel_compare_start",
-  "golem_intel_run_get",
-  "golem_intel_search",
-  "golem_intel_entity_get",
-  "golem_intel_monitoring_status",
+  "agentintel_research_start",
+  "agentintel_compare_start",
+  "agentintel_run_get",
+  "agentintel_search",
+  "agentintel_entity_get",
+  "agentintel_monitoring_status",
 ] as const;
 
 const temporaryDirectories: string[] = [];
@@ -54,7 +54,7 @@ function fakeClient() {
       search,
       entity,
       monitoringStatus,
-    } as unknown as GolemIntelClient,
+    } as unknown as AgentIntelClient,
     calls: {
       researchStart,
       compareStart,
@@ -71,10 +71,10 @@ function parsedText(result: { content: { text: string }[] }): unknown {
   return JSON.parse(result.content[0]?.text ?? "null") as unknown;
 }
 
-describe("Golem Intel MCP surface", () => {
+describe("AGENTintel MCP surface", () => {
   it("registers exactly the six locked high-level tools", async () => {
     const { client } = fakeClient();
-    const server = await createGolemIntelMcpServer({ client });
+    const server = await createAgentIntelMcpServer({ client });
     const registered = Object.keys(
       (
         server as unknown as {
@@ -92,7 +92,7 @@ describe("Golem Intel MCP surface", () => {
 
   it("maps research and comparison inputs to bounded SDK requests", async () => {
     const { client, calls } = fakeClient();
-    const handlers = createGolemIntelMcpToolHandlers(client);
+    const handlers = createAgentIntelMcpToolHandlers(client);
 
     expect(
       parsedText(
@@ -130,7 +130,7 @@ describe("Golem Intel MCP surface", () => {
 
   it("maps read tools and only retrieves an available requested report", async () => {
     const { client, calls } = fakeClient();
-    const handlers = createGolemIntelMcpToolHandlers(client);
+    const handlers = createAgentIntelMcpToolHandlers(client);
 
     expect(parsedText(await handlers.runGet({ run_id: "run-1" }))).toEqual({
       run: { id: "run-1", report_available: true },
@@ -176,7 +176,7 @@ describe("Golem Intel MCP surface", () => {
         });
       },
     });
-    await createGolemIntelMcpToolHandlers(client).search({ q: "market" });
+    await createAgentIntelMcpToolHandlers(client).search({ q: "market" });
     expect(requests[0]?.url).toBe(
       "http://127.0.0.1:7465/v1/search?q=market&limit=20",
     );
@@ -188,13 +188,13 @@ describe("Golem Intel MCP surface", () => {
   });
 
   it("fails closed when configured with a non-loopback API URL", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "golem-intel-mcp-"));
+    const directory = await mkdtemp(join(tmpdir(), "agentintel-mcp-"));
     temporaryDirectories.push(directory);
     const tokenFile = join(directory, "service-token");
     await writeFile(tokenFile, `${"T".repeat(43)}\n`, { mode: 0o600 });
     await chmod(tokenFile, 0o600);
     await expect(
-      createGolemIntelMcpServer({
+      createAgentIntelMcpServer({
         baseUrl: "http://attacker.invalid:7465",
         tokenFile,
       }),
@@ -204,7 +204,7 @@ describe("Golem Intel MCP surface", () => {
   it("serves the same surface over authenticated loopback Streamable HTTP", async () => {
     const { client } = fakeClient();
     const token = "H".repeat(43);
-    const handler = createGolemIntelMcpHttpHandler(client);
+    const handler = createAgentIntelMcpHttpHandler(client);
     const fetchMcp = createAuthorizedMcpFetch(handler, {
       origin: "http://127.0.0.1:7467",
       token,
@@ -258,7 +258,7 @@ describe("Golem Intel MCP surface", () => {
       );
       const payload = await initialized.text();
       expect(initialized.status).toBe(200);
-      expect(payload).toContain("golem-intel");
+      expect(payload).toContain("agentintel");
       expect(payload).not.toContain(token);
     } finally {
       await handler.close();

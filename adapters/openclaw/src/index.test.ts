@@ -1,24 +1,24 @@
 import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { GolemIntelClient } from "@golem-intel/sdk";
+import type { AgentIntelClient } from "@agentintel/sdk";
 import { getToolPluginMetadata } from "openclaw/plugin-sdk/tool-plugin";
 import type { TSchema } from "typebox";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import openClawPlugin, {
-  createGolemIntelOpenClawTools,
-  type GolemIntelOpenClawConfig,
-  type GolemIntelOpenClawExecutionContext,
-  type GolemIntelOpenClawToolBuilder,
+  createAgentIntelOpenClawTools,
+  type AgentIntelOpenClawConfig,
+  type AgentIntelOpenClawExecutionContext,
+  type AgentIntelOpenClawToolBuilder,
 } from "./index.js";
 
 const LOCKED_TOOLS = [
-  "golem_intel_research_start",
-  "golem_intel_compare_start",
-  "golem_intel_run_get",
-  "golem_intel_search",
-  "golem_intel_entity_get",
-  "golem_intel_monitoring_status",
+  "agentintel_research_start",
+  "agentintel_compare_start",
+  "agentintel_run_get",
+  "agentintel_search",
+  "agentintel_entity_get",
+  "agentintel_monitoring_status",
 ] as const;
 
 interface CapturedTool {
@@ -27,8 +27,8 @@ interface CapturedTool {
   parameters: TSchema;
   execute(
     params: Record<string, unknown>,
-    config: GolemIntelOpenClawConfig,
-    context: GolemIntelOpenClawExecutionContext,
+    config: AgentIntelOpenClawConfig,
+    context: AgentIntelOpenClawExecutionContext,
   ): unknown | Promise<unknown>;
 }
 
@@ -63,7 +63,7 @@ function fakeClient() {
       search,
       entity,
       monitoringStatus,
-    } as unknown as GolemIntelClient,
+    } as unknown as AgentIntelClient,
     calls: {
       researchStart,
       compareStart,
@@ -76,17 +76,17 @@ function fakeClient() {
   };
 }
 
-function captureTools(client: GolemIntelClient): {
+function captureTools(client: AgentIntelClient): {
   tools: CapturedTool[];
   resolveClient: ReturnType<typeof vi.fn>;
 } {
   const tools: CapturedTool[] = [];
-  const builder: GolemIntelOpenClawToolBuilder = (definition) => {
+  const builder: AgentIntelOpenClawToolBuilder = (definition) => {
     tools.push(definition as unknown as CapturedTool);
     return definition;
   };
   const resolveClient = vi.fn().mockResolvedValue(client);
-  createGolemIntelOpenClawTools(builder, resolveClient);
+  createAgentIntelOpenClawTools(builder, resolveClient);
   return { tools, resolveClient };
 }
 
@@ -99,7 +99,7 @@ function byName(tools: CapturedTool[], name: string): CapturedTool {
 async function privateTokenFile(
   content = `${"T".repeat(43)}\n`,
 ): Promise<string> {
-  const directory = await mkdtemp(join(tmpdir(), "golem-intel-openclaw-"));
+  const directory = await mkdtemp(join(tmpdir(), "agentintel-openclaw-"));
   temporaryDirectories.push(directory);
   const path = join(directory, "service-token");
   await writeFile(path, content, { mode: 0o600 });
@@ -107,10 +107,10 @@ async function privateTokenFile(
   return path;
 }
 
-describe("Golem Intel OpenClaw surface", () => {
+describe("AGENTintel OpenClaw surface", () => {
   it("publishes exactly the six locked high-level tools", () => {
     const metadata = getToolPluginMetadata(openClawPlugin);
-    expect(metadata?.id).toBe("golem-intel");
+    expect(metadata?.id).toBe("agentintel");
     expect(metadata?.tools.map((tool) => tool.name)).toEqual(LOCKED_TOOLS);
     const serializedSchemas = JSON.stringify(
       metadata?.tools.map((tool) => tool.parameters),
@@ -237,7 +237,7 @@ describe("Golem Intel OpenClaw surface", () => {
       .spyOn(console, "error")
       .mockImplementation(() => undefined);
     const definitions: CapturedTool[] = [];
-    createGolemIntelOpenClawTools((definition) => {
+    createAgentIntelOpenClawTools((definition) => {
       definitions.push(definition as unknown as CapturedTool);
       return definition;
     });
@@ -264,7 +264,7 @@ describe("Golem Intel OpenClaw surface", () => {
     const validTokenFile = await privateTokenFile();
     const malformedTokenFile = await privateTokenFile("not-a-service-token");
     const definitions: CapturedTool[] = [];
-    createGolemIntelOpenClawTools((definition) => {
+    createAgentIntelOpenClawTools((definition) => {
       definitions.push(definition as unknown as CapturedTool);
       return definition;
     });

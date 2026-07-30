@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	intelv1 "github.com/GolemWorkers/golem-intel/gen/go/golem/intel/v1"
-	"github.com/GolemWorkers/golem-intel/internal/domain"
+	intelv1 "github.com/GolemWorkers/agentintel/gen/go/agentintel/v1"
+	"github.com/GolemWorkers/agentintel/internal/domain"
 )
 
 func TestProtocolEnvelopeUsesBigEndianLengthPrefix(t *testing.T) {
@@ -47,7 +47,7 @@ func TestWorkerCommandsAndEnvironmentAreSealed(t *testing.T) {
 	}
 	runner := WorkerRunner{PythonCommand: python, ProjectDir: project}
 	command, args := runner.command()
-	if command != python || strings.Join(args, " ") != "-I -B -m golem_intel_worker protocol" {
+	if command != python || strings.Join(args, " ") != "-I -B -m agentintel_worker protocol" {
 		t.Fatalf("direct command = %q %q", command, args)
 	}
 	runner = WorkerRunner{UVCommand: python, ProjectDir: project}

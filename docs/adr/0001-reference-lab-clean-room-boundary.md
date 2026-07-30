@@ -8,7 +8,7 @@
 
 `TO REVERSE ENGINEEER/` contains 50 extracted source snapshots used to understand the behavior of OSINT, trend, social-management, and analytics products. The snapshots have no local Git history or verified commit provenance. They span permissive, reciprocal, platform-restricted, proprietary, conflicting, and missing licenses. Some also contain suspicious credential-bearing files.
 
-The Golem Intel product is distributed under Elastic-2.0. Treating these snapshots as a shared code library would create provenance, license, security, privacy, and maintenance risks that cannot be solved by attribution alone.
+The product was distributed under Elastic-2.0 when this ADR was accepted; it is now Apache-2.0 (see ADR 0003, which strengthens rather than relaxes this boundary). Treating these snapshots as a shared code library would create provenance, license, security, privacy, and maintenance risks that cannot be solved by attribution alone.
 
 ## Decision
 

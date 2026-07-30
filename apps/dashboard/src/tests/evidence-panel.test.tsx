@@ -1,8 +1,8 @@
 import { render, screen, cleanup } from "@testing-library/react";
-import type { ComparisonReport } from "@golem-intel/sdk";
+import type { ComparisonReport } from "@agentintel/sdk";
 import { describe, expect, it, afterEach } from "vitest";
 import { EvidencePanel } from "../components/EvidencePanel.js";
-import { components } from "@golem-intel/sdk/generated";
+import { components } from "@agentintel/sdk/generated";
 
 type ImportComparisonReport = components["schemas"]["ImportComparisonReport"];
 
@@ -67,7 +67,8 @@ const reportV2: ImportComparisonReport = {
   generated_at: "2026-07-16T00:00:00Z",
   dataset: {
     dataset_id: "dataset-12345",
-    input_sha256: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+    input_sha256:
+      "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
     input_size_bytes: 1024,
     metric_catalog_version: "competitive-pulse.v1",
     input_schema_id: "golem.competitive-pulse-import.v1",
@@ -91,7 +92,10 @@ const reportV2: ImportComparisonReport = {
           population: "entire_dataset",
           numerator: "test-num",
           denominator: "test-denom",
-          period: { start: "2026-01-01T00:00:00Z", end: "2026-01-31T00:00:00Z" },
+          period: {
+            start: "2026-01-01T00:00:00Z",
+            end: "2026-01-31T00:00:00Z",
+          },
           quality: {
             candidate_count: 100,
             included_count: 50,
@@ -187,6 +191,8 @@ describe("EvidencePanel", () => {
     expect(links.length).toBe(0);
 
     // Ensure exact source URL is printed
-    expect(screen.getByText("https://v2.example.invalid/source")).toBeInTheDocument();
+    expect(
+      screen.getByText("https://v2.example.invalid/source"),
+    ).toBeInTheDocument();
   });
 });

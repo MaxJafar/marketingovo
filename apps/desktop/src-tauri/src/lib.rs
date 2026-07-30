@@ -17,12 +17,12 @@ use supervisor::ChildSupervisor;
 use tauri::{Manager, Runtime};
 use zeroize::Zeroize;
 
-const BUILD_TARGET: &str = env!("GOLEM_INTEL_BUILD_TARGET");
+const BUILD_TARGET: &str = env!("AGENTINTEL_BUILD_TARGET");
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let mut updater_plugin = tauri_plugin_updater::Builder::new();
-    if let Some(public_key) = option_env!("GOLEM_INTEL_UPDATER_PUBLIC_KEY") {
+    if let Some(public_key) = option_env!("AGENTINTEL_UPDATER_PUBLIC_KEY") {
         updater_plugin = updater_plugin.pubkey(public_key);
     }
 
@@ -36,12 +36,12 @@ pub fn run() {
             let handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
                 if let Err(error) = updater::check_and_install(&handle).await {
-                    eprintln!("Golem Intel signed updater: {error}");
+                    eprintln!("AGENTintel signed updater: {error}");
                 }
                 if let Err(error) = launch_verified_runtime(&handle) {
-                    eprintln!("Golem Intel desktop launcher: {error}");
+                    eprintln!("AGENTintel desktop launcher: {error}");
                     if let Some(window) = handle.get_webview_window("main") {
-                        let _ = window.set_title("Golem Intel — Runtime unavailable");
+                        let _ = window.set_title("AGENTintel — Runtime unavailable");
                     }
                 }
             });
@@ -50,7 +50,7 @@ pub fn run() {
         // Deliberately no JavaScript command dispatcher: shell, filesystem,
         // updater and credentials are not callable from the webview.
         .build(tauri::generate_context!())
-        .expect("Golem Intel desktop shell failed to initialize");
+        .expect("AGENTintel desktop shell failed to initialize");
 
     app.run(|handle, event| {
         if matches!(event, tauri::RunEvent::Exit) {
@@ -65,7 +65,7 @@ fn launch_verified_runtime<R: Runtime>(handle: &tauri::AppHandle<R>) -> Result<(
         .resource_dir()
         .map_err(|error| format!("resolve resource directory: {error}"))?
         .join("runtime");
-    let sidecar_public_key = option_env!("GOLEM_INTEL_SIDECAR_PUBLIC_KEY")
+    let sidecar_public_key = option_env!("AGENTINTEL_SIDECAR_PUBLIC_KEY")
         .filter(|value| !value.trim().is_empty())
         .ok_or_else(|| {
             "sidecar signature public key is not compiled into this build".to_string()
@@ -113,7 +113,7 @@ fn start_daemon<R: Runtime>(
         .map_err(|error| format!("start signed Go daemon: {error}"))?;
     let thread_handle = handle.clone();
     std::thread::Builder::new()
-        .name("golem-intel-dashboard-bootstrap".to_string())
+        .name("agentintel-dashboard-bootstrap".to_string())
         .spawn(move || {
             let mut parser = DashboardOutputParser::default();
             let mut buffer = [0_u8; 8192];
@@ -125,7 +125,7 @@ fn start_daemon<R: Runtime>(
                     Ok(0) => break,
                     Ok(count) => count,
                     Err(error) => {
-                        eprintln!("Golem Intel daemon stdout: {error}");
+                        eprintln!("AGENTintel daemon stdout: {error}");
                         break;
                     }
                 };
@@ -143,7 +143,7 @@ fn start_daemon<R: Runtime>(
                     };
                     if let Some(window) = thread_handle.get_webview_window("main") {
                         if window.navigate(url).is_ok() {
-                            let _ = window.set_title("Golem Intel");
+                            let _ = window.set_title("AGENTintel");
                             let _ = window.set_focus();
                             dashboard_opened = true;
                             expected_token.take();
@@ -159,7 +159,7 @@ fn start_daemon<R: Runtime>(
             thread_handle.state::<ChildSupervisor>().reap_if_exited(pid);
             if !dashboard_opened {
                 if let Some(window) = thread_handle.get_webview_window("main") {
-                    let _ = window.set_title("Golem Intel — Local service unavailable");
+                    let _ = window.set_title("AGENTintel — Local service unavailable");
                 }
             }
         })

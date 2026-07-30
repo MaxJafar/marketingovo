@@ -22,7 +22,9 @@ const researchRoute = createRoute({
   component: ResearchPage,
 });
 
-const router = createRouter({ routeTree: rootRoute.addChildren([researchRoute]) });
+const router = createRouter({
+  routeTree: rootRoute.addChildren([researchRoute]),
+});
 
 declare module "@tanstack/react-router" {
   interface Register {
@@ -33,4 +35,3 @@ declare module "@tanstack/react-router" {
 export function AppRouter(): React.JSX.Element {
   return <RouterProvider router={router} />;
 }
-

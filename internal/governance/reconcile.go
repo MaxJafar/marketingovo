@@ -12,8 +12,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/GolemWorkers/golem-intel/internal/domain"
-	"github.com/GolemWorkers/golem-intel/internal/policy"
+	"github.com/GolemWorkers/agentintel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/policy"
 )
 
 func validateEvidenceSemantics(descriptors []domain.ArtifactDescriptor, allowLegacy bool, kindCounts map[string]int,

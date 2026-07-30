@@ -1,7 +1,7 @@
-# Golem Intel desktop boundary
+# AGENTintel desktop boundary
 
 This directory is the deliberately narrow Tauri 2 boundary around the local
-Golem Intel runtime. It is a launcher, verifier, updater and native credential
+AGENTintel runtime. It is a launcher, verifier, updater and native credential
 boundary—not a second application runtime.
 
 The launcher performs the following sequence:
@@ -71,8 +71,8 @@ with a Minisign key held outside the repository. Set both public keys when
 building:
 
 ```bash
-GOLEM_INTEL_SIDECAR_PUBLIC_KEY="$(cat release/sidecars.pub)" \
-GOLEM_INTEL_UPDATER_PUBLIC_KEY="$(cat release/updater.pub)" \
+AGENTINTEL_SIDECAR_PUBLIC_KEY="$(cat release/sidecars.pub)" \
+AGENTINTEL_UPDATER_PUBLIC_KEY="$(cat release/updater.pub)" \
   cargo build --locked --release --manifest-path apps/desktop/src-tauri/Cargo.toml
 ```
 
@@ -83,7 +83,7 @@ Never commit private signing material or use the example manifest in a release.
 
 ## Toolchain status
 
-The source-only workspace validation is `pnpm --filter @golem-intel/desktop
+The source-only workspace validation is `pnpm --filter @agentintel/desktop
 build`. Native verification requires stable Rust 1.85 or newer plus the Tauri 2
 system prerequisites for the target operating system:
 

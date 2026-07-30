@@ -797,7 +797,7 @@ mod tests {
 
     fn valid_manifest(root: &Path) -> Vec<u8> {
         let entries = [
-            ("bin/golem-inteld", b"daemon".as_slice(), true),
+            ("bin/agentinteld", b"daemon".as_slice(), true),
             ("python-runtime/bin/python3", b"python".as_slice(), true),
             (
                 "python-runtime/pyvenv.cfg",
@@ -805,7 +805,7 @@ mod tests {
                 false,
             ),
             (
-                "python-runtime/lib/site-packages/golem_intel.pth",
+                "python-runtime/lib/site-packages/agentintel.pth",
                 b"sealed-worker\n".as_slice(),
                 false,
             ),
@@ -816,12 +816,12 @@ mod tests {
             ),
             ("python-worker/uv.lock", b"version = 1\n".as_slice(), false),
             (
-                "python-worker/src/golem_intel_worker/__init__.py",
+                "python-worker/src/agentintel_worker/__init__.py",
                 b"VERSION='test'\n".as_slice(),
                 false,
             ),
             (
-                "python-generated/golem/intel/v1/worker_pb2.py",
+                "python-generated/agentintel/v1/worker_pb2.py",
                 b"# generated\n".as_slice(),
                 false,
             ),
@@ -838,7 +838,7 @@ mod tests {
         serde_json::to_vec(&json!({
             "schema_version": 2,
             "target_triple": "test-target",
-            "daemon": "bin/golem-inteld",
+            "daemon": "bin/agentinteld",
             "python_command": "python-runtime/bin/python3",
             "python_environment_root": "python-runtime",
             "python_worker_root": "python-worker",
@@ -857,7 +857,7 @@ mod tests {
             .expect("verified bundle");
         let snapshot_parent = temporary.path().join("snapshots");
         let sealed = verified.seal_into(&snapshot_parent).expect("sealed bundle");
-        assert!(sealed.daemon.ends_with("bin/golem-inteld"));
+        assert!(sealed.daemon.ends_with("bin/agentinteld"));
         assert!(sealed
             .python_command
             .ends_with("python-runtime/bin/python3"));
@@ -903,7 +903,7 @@ mod tests {
         let manifest = valid_manifest(temporary.path());
         let verified = verify_manifest_bytes(temporary.path(), "test-target", &manifest)
             .expect("verified bundle");
-        fs::write(temporary.path().join("bin/golem-inteld"), b"badbin").expect("tamper source");
+        fs::write(temporary.path().join("bin/agentinteld"), b"badbin").expect("tamper source");
         assert!(verified
             .seal_into(&temporary.path().join("snapshots"))
             .is_err());

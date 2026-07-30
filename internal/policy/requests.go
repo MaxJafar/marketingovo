@@ -7,7 +7,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/GolemWorkers/golem-intel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/domain"
 )
 
 var (

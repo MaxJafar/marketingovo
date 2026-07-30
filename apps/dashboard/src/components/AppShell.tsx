@@ -25,7 +25,7 @@ export function AppShell({ children }: PropsWithChildren): React.JSX.Element {
             G
           </span>
           <span>
-            <strong>Golem Intel</strong>
+            <strong>AGENTintel</strong>
             <small>Community · local</small>
           </span>
         </div>

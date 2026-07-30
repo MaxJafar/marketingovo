@@ -5,7 +5,10 @@ interface TokenGateProps {
   error?: string;
 }
 
-export function TokenGate({ onUnlock, error }: TokenGateProps): React.JSX.Element {
+export function TokenGate({
+  onUnlock,
+  error,
+}: TokenGateProps): React.JSX.Element {
   const [token, setToken] = useState("");
 
   function submit(event: FormEvent<HTMLFormElement>): void {
@@ -23,8 +26,9 @@ export function TokenGate({ onUnlock, error }: TokenGateProps): React.JSX.Elemen
         <p className="eyebrow">LOCAL INTELLIGENCE RUNTIME</p>
         <h1 id="unlock-title">Open the command center</h1>
         <p className="muted">
-          Paste the one-time ticket printed by <span className="mono">golem-inteld</span>.
-          It is exchanged for an HttpOnly session and never written to browser storage.
+          Paste the one-time ticket printed by{" "}
+          <span className="mono">agentinteld</span>. It is exchanged for an
+          HttpOnly session and never written to browser storage.
         </p>
         {error && <p className="error-banner gate-error">{error}</p>}
         <form onSubmit={submit} className="token-form">
@@ -40,11 +44,17 @@ export function TokenGate({ onUnlock, error }: TokenGateProps): React.JSX.Elemen
             onChange={(event) => setToken(event.target.value)}
             placeholder="gintel_…"
           />
-          <button className="primary-button" type="submit" disabled={!token.trim()}>
+          <button
+            className="primary-button"
+            type="submit"
+            disabled={!token.trim()}
+          >
             Enter workspace
           </button>
         </form>
-        <p className="security-note">Loopback only · HttpOnly session · CSRF protected</p>
+        <p className="security-note">
+          Loopback only · HttpOnly session · CSRF protected
+        </p>
       </section>
     </main>
   );

@@ -9,8 +9,8 @@ from pathlib import Path
 
 import pytest
 
-from golem_intel_worker.errors import WorkerError
-from golem_intel_worker.protocol import (
+from agentintel_worker.errors import WorkerError
+from agentintel_worker.protocol import (
     PROTOCOL_VERSION,
     _analysis_request,
     load_worker_pb2,
@@ -138,7 +138,7 @@ def test_protocol_cancel_message_interrupts_slow_analysis(
         ),
     )
     process = subprocess.Popen(
-        [sys.executable, "-m", "golem_intel_worker", "protocol"],
+        [sys.executable, "-m", "agentintel_worker", "protocol"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -188,7 +188,7 @@ def test_protocol_success_subprocess_exits_cleanly_after_result(
         ),
     )
     process = subprocess.Popen(
-        [sys.executable, "-m", "golem_intel_worker", "protocol"],
+        [sys.executable, "-m", "agentintel_worker", "protocol"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -236,7 +236,7 @@ def test_protocol_back_to_back_start_cancel_is_fast_and_cancelled(
         ),
     )
     process = subprocess.Popen(
-        [sys.executable, "-m", "golem_intel_worker", "protocol"],
+        [sys.executable, "-m", "agentintel_worker", "protocol"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

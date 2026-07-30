@@ -5,9 +5,11 @@ implementation instructions. They are Phase 0 triage summaries, not the planned
 per-project dissections of interfaces, algorithms, data sources, schemas,
 failure handling, tests and security. The source archives remain an isolated
 reference laboratory: no archive is a build input, and no production
-contributor may copy or translate its source. Decisions assume the product
-remains under its current Elastic-2.0 license and must be re-reviewed if that
-changes.
+contributor may copy or translate its source. Decisions were originally taken while the
+product was Elastic-2.0 licensed. The product relicensed to Apache-2.0 (ADR
+0003), which invites unrestricted redistribution and therefore _raises_ the cost
+of any GPL/AGPL derivation. Every rebuild decision below is consequently subject
+to the re-review this section always required; see CLEAN-ROOM.md.
 
 Decision meanings are defined in `provenance-ledger.json`. “Clean-room rebuild” means reproduce only an approved user-visible capability from this card, contracts, and independently authored tests.
 

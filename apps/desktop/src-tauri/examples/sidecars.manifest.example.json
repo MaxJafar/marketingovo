@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "target_triple": "aarch64-apple-darwin",
-  "daemon": "bin/golem-inteld",
+  "daemon": "bin/agentinteld",
   "python_command": "python-runtime/bin/python3",
   "python_environment_root": "python-runtime",
   "python_worker_root": "python-worker",
@@ -10,7 +10,7 @@
   "fixture": "fixtures/competitive-pulse/observations.ndjson",
   "files": [
     {
-      "path": "bin/golem-inteld",
+      "path": "bin/agentinteld",
       "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "size_bytes": 12345678,
       "executable": true
@@ -28,7 +28,7 @@
       "executable": false
     },
     {
-      "path": "python-runtime/lib/python3.13/site-packages/golem_intel_worker/__init__.py",
+      "path": "python-runtime/lib/python3.13/site-packages/agentintel_worker/__init__.py",
       "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
       "size_bytes": 1234,
       "executable": false
@@ -46,13 +46,13 @@
       "executable": false
     },
     {
-      "path": "python-worker/src/golem_intel_worker/__init__.py",
+      "path": "python-worker/src/agentintel_worker/__init__.py",
       "sha256": "abababababababababababababababababababababababababababababababab",
       "size_bytes": 1234,
       "executable": false
     },
     {
-      "path": "python-generated/golem/intel/v1/worker_pb2.py",
+      "path": "python-generated/agentintel/v1/worker_pb2.py",
       "sha256": "bcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbc",
       "size_bytes": 1234,
       "executable": false

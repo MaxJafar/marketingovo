@@ -8,10 +8,10 @@
     "Compare denominator-specific findings with observation-level citations."
   ],
   "derivation": {
-    "worker_version": "golem-intel-worker@0.1.0-alpha.0",
+    "worker_version": "agentintel-worker@0.1.0-alpha.0",
     "model_version": "competitive-pulse-baseline@0.1.0",
     "connector_version": "fixture.competitive-pulse@1",
-    "parser_version": "golem-intel-parser@0.1.0-alpha.0"
+    "parser_version": "agentintel-parser@0.1.0-alpha.0"
   },
   "generated_at": "2026-07-16T08:00:03Z",
   "title": "Competitive Pulse comparison",

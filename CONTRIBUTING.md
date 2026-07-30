@@ -1,4 +1,4 @@
-# Contributing to Golem Intel
+# Contributing to AGENTintel
 
 Contributions must preserve three boundaries: independently authored product code, public/authorized/licensed data access, and privacy-safe treatment of people.
 

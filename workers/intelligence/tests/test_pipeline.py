@@ -8,12 +8,12 @@ import pyarrow.ipc as ipc
 import pyarrow.parquet as pq
 import pytest
 
-from golem_intel_worker.constants import FIXTURE_INPUT_SCHEMA_ID
-from golem_intel_worker.events import EventEmitter
-from golem_intel_worker.io import sha256_file
-from golem_intel_worker.models import AnalysisRequest
-from golem_intel_worker.pipeline import run_analysis
-from golem_intel_worker.schema import OBSERVATION_SCHEMA
+from agentintel_worker.constants import FIXTURE_INPUT_SCHEMA_ID
+from agentintel_worker.events import EventEmitter
+from agentintel_worker.io import sha256_file
+from agentintel_worker.models import AnalysisRequest
+from agentintel_worker.pipeline import run_analysis
+from agentintel_worker.schema import OBSERVATION_SCHEMA
 
 
 def _request(

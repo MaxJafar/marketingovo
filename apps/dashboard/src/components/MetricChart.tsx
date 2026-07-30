@@ -9,7 +9,7 @@ import {
 } from "echarts/components";
 import { CanvasRenderer } from "echarts/renderers";
 import type { BarSeriesOption, ComposeOption } from "echarts";
-import type { ComparisonReport } from "@golem-intel/sdk";
+import type { ComparisonReport } from "@agentintel/sdk";
 
 echarts.use([BarChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
@@ -29,19 +29,22 @@ export function MetricChart({ report }: MetricChartProps): React.JSX.Element {
     if (!element) return;
     const chart = echarts.init(element, undefined, { renderer: "canvas" });
 
-    const chartData = report.schema_version === "golem.comparison-report.v2"
-      ? report.targets.map((target) => {
-          const metric = target.metrics.find((m) => m.id === "followers.delta");
-          const val = typeof metric?.value === "number" ? metric.value : "-";
-          return {
-            name: target.target_name,
-            value: val,
-          };
-        })
-      : report.targets.map((target) => ({
-          name: target.entity_name,
-          value: target.follower_delta,
-        }));
+    const chartData =
+      report.schema_version === "golem.comparison-report.v2"
+        ? report.targets.map((target) => {
+            const metric = target.metrics.find(
+              (m) => m.id === "followers.delta",
+            );
+            const val = typeof metric?.value === "number" ? metric.value : "-";
+            return {
+              name: target.target_name,
+              value: val,
+            };
+          })
+        : report.targets.map((target) => ({
+            name: target.entity_name,
+            value: target.follower_delta,
+          }));
 
     const option: ChartOption = {
       backgroundColor: "transparent",
@@ -71,7 +74,10 @@ export function MetricChart({ report }: MetricChartProps): React.JSX.Element {
           data: chartData.map((d) => ({
             value: d.value,
             itemStyle: {
-              color: typeof d.value === "number" && d.value >= 0 ? "#61e7b7" : "#ff7f91",
+              color:
+                typeof d.value === "number" && d.value >= 0
+                  ? "#61e7b7"
+                  : "#ff7f91",
               borderRadius: [5, 5, 0, 0],
             },
           })),

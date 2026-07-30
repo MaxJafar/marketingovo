@@ -11,7 +11,7 @@
 
 AGENTintel is the confirmed target product identity: an independent,
 local-first, evidence-first agent tool. The inherited repository still presents
-Golem Intel/GolemWorkers throughout code, contracts, persisted identifiers, and
+AGENTintel/GolemWorkers throughout code, contracts, persisted identifiers, and
 legal files, and remains Elastic-2.0 source-available rather than an
 OSI-approved open-source distribution. This ADR neither performs that migration
 nor makes an open-source release claim.
@@ -62,7 +62,7 @@ CI, packaging, licensing, or public-release completion claim.
 ### Identity and namespace boundary
 
 The user-facing name in this specification is AGENTintel. Existing `golem.*`,
-`golem_intel_*`, `golem-intel`, `X-Golem-*`, and `golem.intel.v1` values are
+`agentintel_*`, `agentintel`, `X-AgentIntel-*`, and `agentintel.v1` values are
 treated strictly as inherited compatibility identifiers. ZIL-155 does not
 rename or relicense them.
 
@@ -173,9 +173,9 @@ validation alone does not protect the host from malicious worker code.
    `dataset_id`, 2–5 selected `target_ids`, and an optional bounded display goal.
    It contains no path, bytes, token, source URL list, or new authority.
 3. The analyst gives that handoff to their MCP/Codex-compatible agent. The agent
-   calls the existing `golem_intel_compare_start`; the daemon rechecks every
+   calls the existing `agentintel_compare_start`; the daemon rechecks every
    policy and dataset invariant and returns a durable run ID.
-4. The agent uses the existing `golem_intel_run_get` to follow ordered state and
+4. The agent uses the existing `agentintel_run_get` to follow ordered state and
    retrieve the cited v2 report. It cannot expand targets, upload another file,
    add sources, invoke research planning, or fetch citations.
 5. Cancellation, replay, and destructive dataset deletion remain deliberate
@@ -219,23 +219,23 @@ bytes, path, bootstrap token, or service token is stored in browser storage.
 The frozen command journey is:
 
 ```text
-golem-intel import preview --file ./competitive-pulse.csv --confirm-permitted-public-brand
-golem-intel compare --dataset DATASET_ID --project local --target TARGET --target TARGET [--wait]
-golem-intel cancel RUN_ID [--reason TEXT]
-golem-intel report RUN_ID
-golem-intel replay RUN_ID
-golem-intel dataset delete DATASET_ID --yes
+agentintel import preview --file ./competitive-pulse.csv --confirm-permitted-public-brand
+agentintel compare --dataset DATASET_ID --project local --target TARGET --target TARGET [--wait]
+agentintel cancel RUN_ID [--reason TEXT]
+agentintel report RUN_ID
+agentintel replay RUN_ID
+agentintel dataset delete DATASET_ID --yes
 ```
 
 The CLI opens `--file` itself as a regular non-symlink file, streams its bytes,
 and does not serialize the argument or resolved path. `import preview` prints
-the same sanitized preview contract as the dashboard. `golem-intel` is the
+the same sanitized preview contract as the dashboard. `agentintel` is the
 current inherited binary name; this ADR does not choose its AGENTintel migration
 or alias.
 
 ### MCP and Codex
 
-`golem_intel_compare_start` gains an optional `dataset_id`. When it is present:
+`agentintel_compare_start` gains an optional `dataset_id`. When it is present:
 
 - `connector_ids` and simulations are forbidden;
 - `target_ids` is limited to 2–5 IDs present in that dataset;
@@ -246,7 +246,7 @@ or alias.
 The tool count remains six. There is no agent upload, path, file-read, dataset
 listing, dataset deletion, policy mutation, or general import tool. A human must
 create and deliberately provide the opaque dataset reference first. The current
-`golem_intel_*` tool names remain compatibility identifiers pending ZIL-175; the
+`agentintel_*` tool names remain compatibility identifiers pending ZIL-175; the
 user-facing product and handoff language says AGENTintel.
 
 ## CSV v1 media and grammar
@@ -590,7 +590,7 @@ canonical row exactly.
 - Parsed `Content-Type` is `text/csv` with required `charset=utf-8` and no
   other parameter.
 - `Content-Encoding` is absent or `identity`.
-- `X-Golem-Import-Attestation` is exactly
+- `X-AgentIntel-Import-Attestation` is exactly
   `public-permitted-brand-competitive-research.v1` and records that the targets
   are brands/organizations rather than natural people.
 - The body is the CSV bytes. Neither filename nor path is accepted.
@@ -848,11 +848,11 @@ required, bounded pre-Stage-2 slice of ZIL-159:
    worker behavior.
 2. Barbara then copies the field, type, tag, enum, presence, and timestamp
    decisions above verbatim into
-   `contracts/proto/golem/intel/v1/worker.proto` and runs
+   `contracts/proto/agentintel/v1/worker.proto` and runs
    `pnpm contracts:generate`. The only generated files allowed to change are
-   `gen/go/golem/intel/v1/worker.pb.go`,
-   `gen/python/golem/intel/v1/worker_pb2.py`, and
-   `gen/typescript/golem/intel/v1/worker_pb.ts`; they are mechanical output and
+   `gen/go/agentintel/v1/worker.pb.go`,
+   `gen/python/agentintel/v1/worker_pb2.py`, and
+   `gen/typescript/agentintel/v1/worker_pb.ts`; they are mechanical output and
    are never hand-edited. That seam PR contains exactly the Proto source and
    those three generated bindings. `pnpm contracts:lint`, Buf lint,
    generation-diff, and existing protocol tests must pass. No caller or worker

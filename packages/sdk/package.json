@@ -1,8 +1,8 @@
 {
-  "name": "@golem-intel/sdk",
+  "name": "@agentintel/sdk",
   "version": "0.1.0-alpha.0",
-  "description": "Generated-contract client for the Golem Intel local API",
-  "license": "Elastic-2.0",
+  "description": "Generated-contract client for the AGENTintel local API",
+  "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
@@ -24,4 +24,3 @@
     "vitest": "^3.2.4"
   }
 }
-

@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 import {
-  GolemIntelClient,
+  AgentIntelClient,
   bootstrapDashboardSession,
   importCitationPolicy,
   parseServerSentEvent,
 } from "./client.js";
 import type { ImportEvidenceEntry } from "./client.js";
 
-describe("GolemIntelClient", () => {
+describe("AgentIntelClient", () => {
   it("exposes complete inert imported evidence citations", () => {
     const evidence: ImportEvidenceEntry = {
       observation_id: "obs-1",
@@ -64,7 +64,7 @@ describe("GolemIntelClient", () => {
 
   it("sends the bearer token without exposing it in the URL", async () => {
     let request: Request | undefined;
-    const client = new GolemIntelClient({
+    const client = new AgentIntelClient({
       token: "local-secret",
       fetch: async (input, init) => {
         request = new Request(input, init);
@@ -109,7 +109,7 @@ describe("GolemIntelClient", () => {
 
   it("uses session CSRF only on mutations", async () => {
     const requests: Request[] = [];
-    const client = new GolemIntelClient({
+    const client = new AgentIntelClient({
       baseUrl: "http://127.0.0.1:7465",
       csrfToken: "session-csrf",
       fetch: async (input, init) => {
@@ -144,8 +144,8 @@ describe("GolemIntelClient", () => {
       connector_ids: ["fixture.competitive-pulse"],
       simulate: "none",
     });
-    expect(requests[0]?.headers.has("x-golem-csrf")).toBe(false);
-    expect(requests[1]?.headers.get("x-golem-csrf")).toBe("session-csrf");
+    expect(requests[0]?.headers.has("x-agentintel-csrf")).toBe(false);
+    expect(requests[1]?.headers.get("x-agentintel-csrf")).toBe("session-csrf");
   });
 
   it.each([
@@ -165,7 +165,7 @@ describe("GolemIntelClient", () => {
     const fetcher = vi.fn<typeof globalThis.fetch>();
     expect(
       () =>
-        new GolemIntelClient({
+        new AgentIntelClient({
           baseUrl,
           token: "sensitive-service-token",
           fetch: fetcher,
@@ -189,7 +189,7 @@ describe("GolemIntelClient", () => {
     const requests: Request[] = [];
     let call = 0;
     const encoder = new TextEncoder();
-    const client = new GolemIntelClient({
+    const client = new AgentIntelClient({
       fetch: async (input, init) => {
         requests.push(new Request(input, init));
         call += 1;
@@ -234,7 +234,7 @@ describe("GolemIntelClient", () => {
   it("cancels the reader when an event consumer stops early", async () => {
     let cancelled = false;
     const encoder = new TextEncoder();
-    const client = new GolemIntelClient({
+    const client = new AgentIntelClient({
       fetch: async () =>
         new Response(
           new ReadableStream<Uint8Array>({

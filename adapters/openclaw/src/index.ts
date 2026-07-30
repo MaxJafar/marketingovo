@@ -13,12 +13,12 @@ import {
   type ResearchStartInput,
   type RunGetInput,
   type SearchInput,
-} from "@golem-intel/contracts/agent-tools";
-import type { GolemIntelClient } from "@golem-intel/sdk";
+} from "@agentintel/contracts/agent-tools";
+import type { AgentIntelClient } from "@agentintel/sdk";
 import {
   clientFromTokenFile,
-  defaultGolemIntelDataDirectory,
-} from "@golem-intel/sdk/node";
+  defaultAgentIntelDataDirectory,
+} from "@agentintel/sdk/node";
 import { join } from "node:path";
 
 const unsafeSchema = <Value>(schema: unknown) =>
@@ -29,7 +29,7 @@ const configSchema = Type.Object(
     serverUrl: Type.Optional(
       Type.String({
         default: "http://127.0.0.1:7465",
-        description: "Golem Intel loopback API URL.",
+        description: "AGENTintel loopback API URL.",
       }),
     ),
     tokenFile: Type.Optional(
@@ -42,17 +42,17 @@ const configSchema = Type.Object(
   { additionalProperties: false },
 );
 
-export type GolemIntelOpenClawConfig = {
+export type AgentIntelOpenClawConfig = {
   serverUrl?: string;
   tokenFile?: string;
   timeoutMs?: number;
 };
 
-export interface GolemIntelOpenClawExecutionContext {
+export interface AgentIntelOpenClawExecutionContext {
   signal?: AbortSignal;
 }
 
-export interface GolemIntelOpenClawToolBuilder {
+export interface AgentIntelOpenClawToolBuilder {
   <ParametersSchema extends TSchema>(definition: {
     name: string;
     label?: string;
@@ -61,28 +61,28 @@ export interface GolemIntelOpenClawToolBuilder {
     parameters: ParametersSchema;
     execute(
       params: Static<ParametersSchema>,
-      config: GolemIntelOpenClawConfig,
-      context: GolemIntelOpenClawExecutionContext,
+      config: AgentIntelOpenClawConfig,
+      context: AgentIntelOpenClawExecutionContext,
     ): unknown | Promise<unknown>;
   }): unknown;
 }
 
-export type GolemIntelOpenClawClientFactory = (
-  config: GolemIntelOpenClawConfig,
-) => Promise<GolemIntelClient>;
+export type AgentIntelOpenClawClientFactory = (
+  config: AgentIntelOpenClawConfig,
+) => Promise<AgentIntelClient>;
 
-const defaultClient: GolemIntelOpenClawClientFactory = (config) =>
+const defaultClient: AgentIntelOpenClawClientFactory = (config) =>
   clientFromTokenFile(
-    config.tokenFile ?? join(defaultGolemIntelDataDirectory(), "service-token"),
+    config.tokenFile ?? join(defaultAgentIntelDataDirectory(), "service-token"),
     {
       baseUrl: config.serverUrl,
       timeoutMs: config.timeoutMs,
     },
   );
 
-export function createGolemIntelOpenClawTools(
-  tool: GolemIntelOpenClawToolBuilder,
-  resolveClient: GolemIntelOpenClawClientFactory = defaultClient,
+export function createAgentIntelOpenClawTools(
+  tool: AgentIntelOpenClawToolBuilder,
+  resolveClient: AgentIntelOpenClawClientFactory = defaultClient,
 ) {
   return [
     tool({
@@ -171,10 +171,10 @@ export function createGolemIntelOpenClawTools(
 }
 
 export default defineToolPlugin({
-  id: "golem-intel",
-  name: "Golem Intel",
+  id: "agentintel",
+  name: "AGENTintel",
   description:
     "Run evidence-backed competitive research through six safe workflow-level tools.",
   configSchema,
-  tools: (tool) => createGolemIntelOpenClawTools(tool),
+  tools: (tool) => createAgentIntelOpenClawTools(tool),
 });

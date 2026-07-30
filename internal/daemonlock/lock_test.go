@@ -56,10 +56,10 @@ func TestAcquireRejectsSymlinkLockFile(t *testing.T) {
 }
 
 func TestDaemonLockHelperProcess(t *testing.T) {
-	if os.Getenv("GOLEM_INTEL_LOCK_HELPER") != "1" {
+	if os.Getenv("AGENTINTEL_LOCK_HELPER") != "1" {
 		return
 	}
-	root := os.Getenv("GOLEM_INTEL_LOCK_ROOT")
+	root := os.Getenv("AGENTINTEL_LOCK_ROOT")
 	lock, err := Acquire(root)
 	if errors.Is(err, ErrAlreadyRunning) {
 		fmt.Fprint(os.Stdout, "unavailable")
@@ -80,7 +80,7 @@ func TestDaemonLockHelperProcess(t *testing.T) {
 func lockHelper(t *testing.T, root string) string {
 	t.Helper()
 	command := exec.Command(os.Args[0], "-test.run=^TestDaemonLockHelperProcess$")
-	command.Env = append(os.Environ(), "GOLEM_INTEL_LOCK_HELPER=1", "GOLEM_INTEL_LOCK_ROOT="+root)
+	command.Env = append(os.Environ(), "AGENTINTEL_LOCK_HELPER=1", "AGENTINTEL_LOCK_ROOT="+root)
 	output, err := command.CombinedOutput()
 	if err != nil {
 		t.Fatalf("run daemon lock helper: %v (%s)", err, output)

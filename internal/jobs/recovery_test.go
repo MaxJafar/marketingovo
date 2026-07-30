@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GolemWorkers/golem-intel/internal/connectors"
-	"github.com/GolemWorkers/golem-intel/internal/domain"
-	"github.com/GolemWorkers/golem-intel/internal/governance"
-	"github.com/GolemWorkers/golem-intel/internal/storage"
+	"github.com/GolemWorkers/agentintel/internal/connectors"
+	"github.com/GolemWorkers/agentintel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/governance"
+	"github.com/GolemWorkers/agentintel/internal/storage"
 )
 
 func TestManagerRecoversPublishedEvidenceBeforeWorkers(t *testing.T) {

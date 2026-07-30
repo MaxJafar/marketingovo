@@ -7,7 +7,7 @@ const UPDATE_CHECK_TIMEOUT: Duration = Duration::from_secs(8);
 pub fn should_check() -> bool {
     !cfg!(debug_assertions)
         && !std::env::args_os().any(|argument| argument == "--no-update")
-        && !std::env::var("GOLEM_INTEL_AUTO_UPDATE")
+        && !std::env::var("AGENTINTEL_AUTO_UPDATE")
             .ok()
             .is_some_and(|value| {
                 matches!(
@@ -21,7 +21,7 @@ pub async fn check_and_install(handle: &AppHandle) -> Result<(), String> {
     if !should_check() {
         return Ok(());
     }
-    set_title(handle, "Golem Intel — Checking signed updates");
+    set_title(handle, "AGENTintel — Checking signed updates");
     let updater = handle
         .updater_builder()
         .timeout(UPDATE_CHECK_TIMEOUT)
@@ -35,7 +35,7 @@ pub async fn check_and_install(handle: &AppHandle) -> Result<(), String> {
         return Ok(());
     };
 
-    set_title(handle, "Golem Intel — Installing signed update");
+    set_title(handle, "AGENTintel — Installing signed update");
     update
         .download_and_install(|_, _| {}, || {})
         .await

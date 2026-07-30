@@ -15,8 +15,8 @@ import (
 	"sync"
 	"time"
 
-	intelv1 "github.com/GolemWorkers/golem-intel/gen/go/golem/intel/v1"
-	"github.com/GolemWorkers/golem-intel/internal/domain"
+	intelv1 "github.com/GolemWorkers/agentintel/gen/go/agentintel/v1"
+	"github.com/GolemWorkers/agentintel/internal/domain"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -253,7 +253,7 @@ func (runner *WorkerRunner) ValidateImport(ctx context.Context, request ImportVa
 
 func (runner *WorkerRunner) command() (string, []string) {
 	if runner.PythonCommand != "" {
-		return runner.PythonCommand, []string{"-I", "-B", "-m", "golem_intel_worker", "protocol"}
+		return runner.PythonCommand, []string{"-I", "-B", "-m", "agentintel_worker", "protocol"}
 	}
 	command := runner.UVCommand
 	if command == "" {
@@ -261,7 +261,7 @@ func (runner *WorkerRunner) command() (string, []string) {
 	}
 	return command, []string{
 		"run", "--frozen", "--offline", "--no-dev", "--no-config", "--no-sync",
-		"--project", runner.ProjectDir, "python", "-I", "-B", "-m", "golem_intel_worker", "protocol",
+		"--project", runner.ProjectDir, "python", "-I", "-B", "-m", "agentintel_worker", "protocol",
 	}
 }
 

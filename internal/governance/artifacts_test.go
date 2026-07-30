@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GolemWorkers/golem-intel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/domain"
 )
 
 func TestCleanRelativePathRejectsTraversalAndAmbiguity(t *testing.T) {

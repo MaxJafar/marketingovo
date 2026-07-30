@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	browserSessionCookie = "golem_intel_session"
+	browserSessionCookie = "agentintel_session"
 	browserSessionTTL    = 8 * time.Hour
 )
 

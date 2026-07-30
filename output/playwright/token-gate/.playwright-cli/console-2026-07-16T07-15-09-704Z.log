@@ -69,6 +69,6 @@
 %s
  An error occurred in the <div> component. Consider adding an error boundary to your tree to customize error handling behavior.
 Visit https://react.dev/link/error-boundaries to learn more about error boundaries. @ http://127.0.0.1:7466/node_modules/.vite/deps/react-dom_client.js?v=5ba0e2b4:6965
-[  261385ms] [ERROR] [vite] SyntaxError: The requested module '/@fs/Users/maxjafarov/Desktop/golem/golem-intel-main/packages/sdk/dist/index.js' does not provide an export named 'bootstrapDashboardSession' @ http://127.0.0.1:7466/@vite/client:881
+[  261385ms] [ERROR] [vite] SyntaxError: The requested module '/@fs/Users/maxjafarov/Desktop/golem/agentintel-main/packages/sdk/dist/index.js' does not provide an export named 'bootstrapDashboardSession' @ http://127.0.0.1:7466/@vite/client:881
 [  261385ms] [ERROR] [vite] Failed to reload /src/main.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://127.0.0.1:7466/@vite/client:881
-[  261580ms] The requested module '/@fs/Users/maxjafarov/Desktop/golem/golem-intel-main/packages/sdk/dist/index.js' does not provide an export named 'bootstrapDashboardSession'
+[  261580ms] The requested module '/@fs/Users/maxjafarov/Desktop/golem/agentintel-main/packages/sdk/dist/index.js' does not provide an export named 'bootstrapDashboardSession'

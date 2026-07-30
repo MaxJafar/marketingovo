@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/GolemWorkers/golem-intel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/domain"
 )
 
 type AnalysisRequest struct {

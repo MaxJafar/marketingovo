@@ -11,8 +11,7 @@ export type ResearchStartRequest =
   components["schemas"]["ResearchStartRequest"];
 export type ImportPreview = components["schemas"]["ImportPreview"];
 export type ComparisonReport = components["schemas"]["ComparisonReport"];
-export type ImportEvidenceEntry =
-  components["schemas"]["ImportEvidenceEntry"];
+export type ImportEvidenceEntry = components["schemas"]["ImportEvidenceEntry"];
 export type SearchResult = components["schemas"]["SearchResult"];
 export type Entity = components["schemas"]["Entity"];
 export type MonitoringStatus = components["schemas"]["MonitoringStatus"];
@@ -45,7 +44,7 @@ export interface RunEventStreamOptions {
   reconnectDelayMs?: number;
 }
 
-export class GolemIntelApiError extends Error {
+export class AgentIntelApiError extends Error {
   constructor(
     message: string,
     readonly status: number,
@@ -53,7 +52,7 @@ export class GolemIntelApiError extends Error {
     readonly detail?: unknown,
   ) {
     super(message);
-    this.name = "GolemIntelApiError";
+    this.name = "AgentIntelApiError";
   }
 }
 
@@ -64,7 +63,7 @@ export function validateLoopbackBaseUrl(value: string): string {
   const port = match?.[1] ? Number(match[1]) : 0;
   if (!match || port < 1 || port > 65_535) {
     throw new TypeError(
-      "Golem Intel API URL must be an exact http://127.0.0.1:<port> origin",
+      "AGENTintel API URL must be an exact http://127.0.0.1:<port> origin",
     );
   }
   return value;
@@ -82,21 +81,21 @@ function resolveBaseUrl(value: string | undefined): string {
   return value ? validateLoopbackBaseUrl(value) : defaultBaseUrl();
 }
 
-function parseProblem(body: unknown, status: number): GolemIntelApiError {
+function parseProblem(body: unknown, status: number): AgentIntelApiError {
   if (body && typeof body === "object") {
     const problem = body as {
       title?: string;
       detail?: string;
       code?: string;
     };
-    return new GolemIntelApiError(
+    return new AgentIntelApiError(
       problem.detail ?? problem.title ?? `Request failed with ${status}`,
       status,
       problem.code,
       body,
     );
   }
-  return new GolemIntelApiError(`Request failed with ${status}`, status);
+  return new AgentIntelApiError(`Request failed with ${status}`, status);
 }
 
 function queryString(
@@ -168,7 +167,7 @@ export async function bootstrapDashboardSession(
   return body as DashboardSession;
 }
 
-export class GolemIntelClient {
+export class AgentIntelClient {
   readonly baseUrl: string;
   readonly timeoutMs: number;
   readonly token?: string;
@@ -196,7 +195,7 @@ export class GolemIntelClient {
     if (this.token) headers.set("Authorization", `Bearer ${this.token}`);
     const method = (init.method ?? "GET").toUpperCase();
     if (this.csrfToken && !["GET", "HEAD", "OPTIONS"].includes(method)) {
-      headers.set("X-Golem-CSRF", this.csrfToken);
+      headers.set("X-AgentIntel-CSRF", this.csrfToken);
     }
     try {
       const response = await this.fetcher(`${this.baseUrl}${path}`, {
@@ -213,15 +212,15 @@ export class GolemIntelClient {
       if (!response.ok) throw parseProblem(body, response.status);
       return body as T;
     } catch (error) {
-      if (error instanceof GolemIntelApiError) throw error;
+      if (error instanceof AgentIntelApiError) throw error;
       if (error instanceof DOMException && error.name === "AbortError") {
-        throw new GolemIntelApiError(
+        throw new AgentIntelApiError(
           "Request timed out or was cancelled",
           0,
           "aborted",
         );
       }
-      throw new GolemIntelApiError(
+      throw new AgentIntelApiError(
         error instanceof Error ? error.message : "Local API unavailable",
         0,
         "api_unavailable",
@@ -262,7 +261,7 @@ export class GolemIntelClient {
         method: "POST",
         headers: {
           "Content-Type": "text/csv; charset=utf-8",
-          "X-Golem-Import-Attestation":
+          "X-AgentIntel-Import-Attestation":
             "public-permitted-brand-competitive-research.v1",
         },
         body: input,
@@ -352,7 +351,7 @@ export class GolemIntelClient {
           },
         );
         if (!response.ok || !response.body) {
-          throw new GolemIntelApiError(
+          throw new AgentIntelApiError(
             `Event stream failed with ${response.status}`,
             response.status,
           );
@@ -378,7 +377,7 @@ export class GolemIntelClient {
         }
       } catch (error) {
         if (options.signal?.aborted) {
-          throw new GolemIntelApiError(
+          throw new AgentIntelApiError(
             "Event stream was cancelled",
             0,
             "aborted",
@@ -387,12 +386,12 @@ export class GolemIntelClient {
         if (
           !reconnect ||
           reconnects >= maximumReconnects ||
-          (error instanceof GolemIntelApiError &&
+          (error instanceof AgentIntelApiError &&
             error.status > 0 &&
             error.status < 500)
         ) {
-          if (error instanceof GolemIntelApiError) throw error;
-          throw new GolemIntelApiError(
+          if (error instanceof AgentIntelApiError) throw error;
+          throw new AgentIntelApiError(
             error instanceof Error ? error.message : "Event stream unavailable",
             0,
             "stream_unavailable",

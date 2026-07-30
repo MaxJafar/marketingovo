@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GolemWorkers/golem-intel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/domain"
 )
 
 func (store *Store) CompleteRun(ctx context.Context, runID string, artifacts []domain.Artifact, entities []domain.Entity, documents []domain.SearchDocument, partial bool) error {

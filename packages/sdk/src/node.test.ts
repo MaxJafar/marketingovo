@@ -9,7 +9,7 @@ const validToken = "A".repeat(43);
 let directory = "";
 
 beforeEach(async () => {
-  directory = await mkdtemp(join(tmpdir(), "golem-intel-sdk-"));
+  directory = await mkdtemp(join(tmpdir(), "agentintel-sdk-"));
 });
 
 afterEach(async () => {

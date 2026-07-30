@@ -1,6 +1,6 @@
 # Architecture
 
-Golem Intel is organized around one authority process and language-neutral
+AGENTintel is organized around one authority process and language-neutral
 contracts. The current repository is a walking skeleton, so this document
 separates the implemented topology from the intended Competitive Pulse system.
 
@@ -11,7 +11,7 @@ flowchart TB
   UI["React command center"]
   Agents["CLI · MCP stdio/HTTP · Codex · OpenClaw"]
   SDK["Generated TypeScript SDK"]
-  Daemon["golem-inteld · Go authority"]
+  Daemon["agentinteld · Go authority"]
   Control["SQLite WAL control plane"]
   Fixture["Synthetic Go fixture connector"]
   Python["Trusted Python intelligence worker"]
@@ -83,8 +83,8 @@ OS/container/Wasm boundary.
 
 ## Contract sources and gates
 
-1. `contracts/openapi/golem-intel.openapi.yaml` owns the public HTTP surface.
-2. `contracts/proto/golem/intel/v1/worker.proto` owns worker control messages.
+1. `contracts/openapi/agentintel.openapi.yaml` owns the public HTTP surface.
+2. `contracts/proto/agentintel/v1/worker.proto` owns worker control messages.
 3. `contracts/json-schema` and `schemas/arrow` own evidence and connector files.
 
 Go, Python and TypeScript bindings are generated. `pnpm contracts:lint`
@@ -99,7 +99,7 @@ baseline; none is silently assumed for the initial workspace.
 The planned system adds policy-governed Go collectors, a TypeScript browser
 worker behind the Go egress proxy, a Parquet evidence lake queried only through
 committed manifests, richer Python graph/model workers and a hosted MCP
-surface. Website/RSS, YouTube, Reddit, Golem SEO and licensed-provider bridges
+surface. Website/RSS, YouTube, Reddit, AGENTseo and licensed-provider bridges
 belong to Phase 2. Creator, company, workforce and hosted capabilities belong to
 Phases 3–6. They are architecture targets, not current connector claims.
 

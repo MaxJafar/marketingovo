@@ -1,14 +1,15 @@
 {
-  "name": "golem-intel-workspace",
+  "name": "agentintel-workspace",
   "version": "0.1.0-alpha.0",
   "private": true,
   "description": "Evidence-first local competitive and creator intelligence platform",
-  "license": "Elastic-2.0",
+  "license": "Apache-2.0",
   "packageManager": "pnpm@10.34.5",
   "engines": {
     "node": ">=24 <25"
   },
   "scripts": {
+    "doctor": "node scripts/doctor.mjs",
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
     "test": "turbo run test --concurrency=2",
@@ -18,15 +19,18 @@
     "lint:go": "go vet ./...",
     "test:go": "go test ./...",
     "test:python": "uv run --project workers/intelligence pytest workers/intelligence/tests",
+    "plugins:generate": "node scripts/generate-agent-plugins.mjs",
+    "validate:plugins": "node scripts/generate-agent-plugins.mjs --check && node scripts/validate-plugins.mjs",
     "contracts:generate": "node scripts/generate-contracts.mjs",
     "contracts:lint": "node scripts/validate-contracts.mjs",
     "contracts:breaking": "node scripts/check-proto-breaking.mjs",
+    "validate:no-nested-checkout": "node scripts/validate-no-nested-checkout.mjs",
     "reference:validate": "node scripts/reference-lab-validate.mjs",
     "reference:scan": "node scripts/scan-reference-secrets.mjs",
     "reference:scan:strict": "node scripts/scan-reference-secrets.mjs --fail-on-unquarantined",
-    "check": "pnpm reference:validate && pnpm reference:scan:strict && pnpm contracts:lint && pnpm build && pnpm typecheck && pnpm lint && pnpm test && pnpm test:go && pnpm test:python",
-    "intel:daemon": "go run ./cmd/golem-inteld",
-    "intel": "go run ./cmd/golem-intel"
+    "check": "pnpm validate:no-nested-checkout && pnpm reference:validate && pnpm reference:scan:strict && pnpm contracts:lint && pnpm build && pnpm typecheck && pnpm lint && pnpm test && pnpm test:go && pnpm test:python && pnpm validate:plugins",
+    "intel:daemon": "go run ./cmd/agentinteld",
+    "intel": "go run ./cmd/agentintel"
   },
   "devDependencies": {
     "@bufbuild/protoc-gen-es": "^2.9.0",

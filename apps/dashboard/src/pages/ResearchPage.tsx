@@ -4,7 +4,7 @@ import { useIntelClient } from "../api/client-context.js";
 import { useRunEventStream } from "../api/use-run-event-stream.js";
 import { EvidencePanel } from "../components/EvidencePanel.js";
 import { RunTimeline } from "../components/RunTimeline.js";
-import type { ImportPreview } from "@golem-intel/sdk";
+import type { ImportPreview } from "@agentintel/sdk";
 
 const LazyMetricChart = lazy(async () => {
   const module = await import("../components/MetricChart.js");
@@ -29,7 +29,9 @@ export function ResearchPage(): React.JSX.Element {
     "none" | "source_failure" | "corrupt_artifact" | "slow"
   >("none");
   const [preview, setPreview] = useState<ImportPreview>();
-  const [selectedTargets, setSelectedTargets] = useState<Set<string>>(new Set());
+  const [selectedTargets, setSelectedTargets] = useState<Set<string>>(
+    new Set(),
+  );
   const [attested, setAttested] = useState(false);
   const [previewConfirmed, setPreviewConfirmed] = useState(false);
 
@@ -138,7 +140,11 @@ export function ResearchPage(): React.JSX.Element {
   const isStartDisabled =
     start.isPending ||
     (workflow === "import" &&
-      (!attested || !preview?.valid || selectedTargets.size < 2 || selectedTargets.size > 5 || !previewConfirmed));
+      (!attested ||
+        !preview?.valid ||
+        selectedTargets.size < 2 ||
+        selectedTargets.size > 5 ||
+        !previewConfirmed));
 
   return (
     <div className="research-workspace">
@@ -166,9 +172,7 @@ export function ResearchPage(): React.JSX.Element {
             <span className="step-number">01</span>
             <div>
               <h2 id="launch-title">
-                {workflow === "import"
-                  ? "Import dataset"
-                  : "Synthetic Demo"}
+                {workflow === "import" ? "Import dataset" : "Synthetic Demo"}
               </h2>
               <p>
                 {workflow === "import"
@@ -212,7 +216,14 @@ export function ResearchPage(): React.JSX.Element {
               </>
             ) : (
               <>
-                <label style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "1rem" }}>
+                <label
+                  style={{
+                    display: "flex",
+                    gap: "0.5rem",
+                    alignItems: "center",
+                    marginBottom: "1rem",
+                  }}
+                >
                   <input
                     type="checkbox"
                     checked={attested}
@@ -221,7 +232,10 @@ export function ResearchPage(): React.JSX.Element {
                       if (!e.target.checked) setPreviewConfirmed(false);
                     }}
                   />
-                  <span>I attest I have the right to process this data for competitive research</span>
+                  <span>
+                    I attest I have the right to process this data for
+                    competitive research
+                  </span>
                 </label>
                 <label htmlFor="csv-upload">Select CSV</label>
                 <input
@@ -240,9 +254,7 @@ export function ResearchPage(): React.JSX.Element {
               type="submit"
               disabled={isStartDisabled}
             >
-              {start.isPending
-                ? "Scheduling…"
-                : "Start comparison"}
+              {start.isPending ? "Scheduling…" : "Start comparison"}
             </button>
           </div>
         </form>
@@ -253,14 +265,31 @@ export function ResearchPage(): React.JSX.Element {
         {start.error && <p className="error-banner">{start.error.message}</p>}
 
         {workflow === "import" && preview && (
-          <div className="preview-results" style={{ marginTop: "2rem", padding: "1.5rem", background: "var(--panel-raised)", borderRadius: "1rem" }}>
+          <div
+            className="preview-results"
+            style={{
+              marginTop: "2rem",
+              padding: "1.5rem",
+              background: "var(--panel-raised)",
+              borderRadius: "1rem",
+            }}
+          >
             {preview.diagnostics.length > 0 && (
               <div className="diagnostics" style={{ marginBottom: "1.5rem" }}>
-                <h3 style={{ margin: "0 0 1rem", color: "var(--danger)" }}>Validation Issues</h3>
-                <ul style={{ paddingLeft: "1.5rem", margin: 0, color: "var(--faint)" }}>
+                <h3 style={{ margin: "0 0 1rem", color: "var(--danger)" }}>
+                  Validation Issues
+                </h3>
+                <ul
+                  style={{
+                    paddingLeft: "1.5rem",
+                    margin: 0,
+                    color: "var(--faint)",
+                  }}
+                >
                   {preview.diagnostics.map((diag, i) => (
                     <li key={i} className={`diagnostic-${diag.severity}`}>
-                      {diag.message} {diag.record_number && `(Row ${diag.record_number})`}
+                      {diag.message}{" "}
+                      {diag.record_number && `(Row ${diag.record_number})`}
                     </li>
                   ))}
                 </ul>
@@ -268,14 +297,46 @@ export function ResearchPage(): React.JSX.Element {
             )}
 
             {preview.valid && preview.dataset_id && (
-              <div className="dataset-reference" style={{ marginBottom: "1.5rem" }}>
+              <div
+                className="dataset-reference"
+                style={{ marginBottom: "1.5rem" }}
+              >
                 <h3 style={{ margin: "0 0 0.5rem" }}>Dataset Reference</h3>
-                <p style={{ margin: "0 0 0.5rem", color: "var(--muted)" }}>Provide this opaque reference to your agent:</p>
-                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                  <code className="mono" style={{ background: "var(--canvas)", padding: "0.5rem", borderRadius: "0.25rem", userSelect: "all" }}>
+                <p style={{ margin: "0 0 0.5rem", color: "var(--muted)" }}>
+                  Provide this opaque reference to your agent:
+                </p>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "0.5rem",
+                    alignItems: "center",
+                  }}
+                >
+                  <code
+                    className="mono"
+                    style={{
+                      background: "var(--canvas)",
+                      padding: "0.5rem",
+                      borderRadius: "0.25rem",
+                      userSelect: "all",
+                    }}
+                  >
                     {preview.dataset_id}
                   </code>
-                  <button type="button" onClick={copyDatasetId} style={{ padding: "0.5rem 1rem", borderRadius: "0.25rem", border: "1px solid var(--line)", background: "transparent", color: "var(--faint)", cursor: "pointer" }}>Copy</button>
+                  <button
+                    type="button"
+                    onClick={copyDatasetId}
+                    style={{
+                      padding: "0.5rem 1rem",
+                      borderRadius: "0.25rem",
+                      border: "1px solid var(--line)",
+                      background: "transparent",
+                      color: "var(--faint)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Copy
+                  </button>
                 </div>
               </div>
             )}
@@ -283,28 +344,69 @@ export function ResearchPage(): React.JSX.Element {
             {preview.valid && preview.targets.length > 0 && (
               <div className="target-selection">
                 <h3 style={{ margin: "0 0 1rem" }}>Select Targets (2-5)</h3>
-                <div className="target-list" style={{ display: "grid", gap: "0.75rem", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
-                  {preview.targets.map(target => (
-                    <label key={target.target_id} style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem", border: "1px solid var(--line)", borderRadius: "0.5rem", cursor: "pointer", background: selectedTargets.has(target.target_id) ? "var(--mint-soft)" : "var(--canvas)" }}>
+                <div
+                  className="target-list"
+                  style={{
+                    display: "grid",
+                    gap: "0.75rem",
+                    gridTemplateColumns:
+                      "repeat(auto-fill, minmax(200px, 1fr))",
+                  }}
+                >
+                  {preview.targets.map((target) => (
+                    <label
+                      key={target.target_id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        padding: "0.75rem",
+                        border: "1px solid var(--line)",
+                        borderRadius: "0.5rem",
+                        cursor: "pointer",
+                        background: selectedTargets.has(target.target_id)
+                          ? "var(--mint-soft)"
+                          : "var(--canvas)",
+                      }}
+                    >
                       <input
                         type="checkbox"
                         checked={selectedTargets.has(target.target_id)}
                         onChange={() => toggleTarget(target.target_id)}
                       />
-                      <span>{target.target_name} ({target.row_count} rows)</span>
+                      <span>
+                        {target.target_name} ({target.row_count} rows)
+                      </span>
                     </label>
                   ))}
                 </div>
-                {preview.valid && preview.targets.length >= 2 && preview.targets.length <= 5 && (
-                  <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "1.5rem", padding: "1rem", background: "var(--canvas)", border: "1px solid var(--line)", borderRadius: "0.5rem", cursor: "pointer" }}>
-                    <input
-                      type="checkbox"
-                      checked={previewConfirmed}
-                      onChange={(e) => setPreviewConfirmed(e.target.checked)}
-                    />
-                    <strong>I confirm the validation results and selected targets for processing</strong>
-                  </label>
-                )}
+                {preview.valid &&
+                  preview.targets.length >= 2 &&
+                  preview.targets.length <= 5 && (
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        marginTop: "1.5rem",
+                        padding: "1rem",
+                        background: "var(--canvas)",
+                        border: "1px solid var(--line)",
+                        borderRadius: "0.5rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={previewConfirmed}
+                        onChange={(e) => setPreviewConfirmed(e.target.checked)}
+                      />
+                      <strong>
+                        I confirm the validation results and selected targets
+                        for processing
+                      </strong>
+                    </label>
+                  )}
               </div>
             )}
           </div>

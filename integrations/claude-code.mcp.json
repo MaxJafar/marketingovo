@@ -1,9 +1,12 @@
 {
   "mcpServers": {
-    "golem-intel": {
-      "command": "node",
-      "args": ["/absolute/path/to/golem-intel-main/packages/mcp/dist/stdio.js"]
+    "agentintel": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@agentintel/mcp",
+        "agentintel-mcp"
+      ]
     }
   }
 }
-

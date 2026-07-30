@@ -11,4 +11,3 @@ plugins:
     out: gen/typescript
     opt:
       - target=ts
-

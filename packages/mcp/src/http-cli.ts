@@ -5,14 +5,14 @@ import {
   type ServerResponse,
 } from "node:http";
 import { join } from "node:path";
-import { GolemIntelClient, validateLoopbackBaseUrl } from "@golem-intel/sdk";
+import { AgentIntelClient, validateLoopbackBaseUrl } from "@agentintel/sdk";
 import {
-  defaultGolemIntelDataDirectory,
+  defaultAgentIntelDataDirectory,
   readServiceTokenFile,
-} from "@golem-intel/sdk/node";
+} from "@agentintel/sdk/node";
 import {
   createAuthorizedMcpFetch,
-  createGolemIntelMcpHttpHandler,
+  createAgentIntelMcpHttpHandler,
 } from "./http.js";
 
 const MAX_REQUEST_BYTES = 4 * 1024 * 1024;
@@ -52,7 +52,7 @@ function argumentsFrom(argv: string[]): HttpArguments {
     ),
     tokenFile:
       values.get("--token-file") ??
-      join(defaultGolemIntelDataDirectory(), "service-token"),
+      join(defaultAgentIntelDataDirectory(), "service-token"),
   };
 }
 
@@ -117,8 +117,8 @@ async function main(): Promise<void> {
   const args = argumentsFrom(process.argv.slice(2));
   const origin = `http://${args.listen}`;
   const token = await readServiceTokenFile(args.tokenFile);
-  const client = new GolemIntelClient({ baseUrl: args.apiUrl, token });
-  const handler = createGolemIntelMcpHttpHandler(client);
+  const client = new AgentIntelClient({ baseUrl: args.apiUrl, token });
+  const handler = createAgentIntelMcpHttpHandler(client);
   const fetchMcp = createAuthorizedMcpFetch(handler, { origin, token });
   const [hostname, portText] = args.listen.split(":");
   const port = Number(portText);
@@ -159,7 +159,7 @@ async function main(): Promise<void> {
 
 main().catch((error) => {
   process.stderr.write(
-    `golem-intel-mcp-http: ${error instanceof Error ? error.message : String(error)}\n`,
+    `agentintel-mcp-http: ${error instanceof Error ? error.message : String(error)}\n`,
   );
   process.exitCode = 1;
 });

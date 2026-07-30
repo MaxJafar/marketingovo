@@ -59,7 +59,7 @@ Important limits:
 
 - developer Python is a trusted same-user process, not an OS or network sandbox;
 - only the synthetic fixture connector is enabled; no live social, website,
-  provider or Golem SEO connector ships in Phase 1;
+  provider or AGENTseo connector ships in Phase 1;
 - the local scheduler is single-daemon and does not yet provide the complete
   distributed lease/heartbeat/checkpoint/dead-letter design;
 - filesystem evidence publication and SQLite result finalization are separate
@@ -72,13 +72,13 @@ Important limits:
 
 ## Phases 2–6 — roadmap
 
-| Phase | Planned capability                                                                                             | Current status                                        |
-| ----- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| 2     | Website/RSS, YouTube, Reddit, imports, Golem SEO bridge, watchlists, polished reports and desktop distribution | Not implemented beyond contracts/fixture architecture |
-| 3     | Licensed creator discovery, campaign history, transparent anomaly models and governed business contacts        | Not implemented                                       |
-| 4     | Registries, filings, products, funding, hiring signals, role timelines and human-approved CRM export           | Not implemented                                       |
-| 5     | Cross-source trends, semantic clusters, coordination networks and aggregate workforce intelligence             | Not implemented                                       |
-| 6     | Hosted GolemWorkers storage/workers, tenancy, RBAC, billing and managed providers                              | Not implemented                                       |
+| Phase | Planned capability                                                                                            | Current status                                        |
+| ----- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| 2     | Website/RSS, YouTube, Reddit, imports, AGENTseo bridge, watchlists, polished reports and desktop distribution | Not implemented beyond contracts/fixture architecture |
+| 3     | Licensed creator discovery, campaign history, transparent anomaly models and governed business contacts       | Not implemented                                       |
+| 4     | Registries, filings, products, funding, hiring signals, role timelines and human-approved CRM export          | Not implemented                                       |
+| 5     | Cross-source trends, semantic clusters, coordination networks and aggregate workforce intelligence            | Not implemented                                       |
+| 6     | Hosted GolemWorkers storage/workers, tenancy, RBAC, billing and managed providers                             | Not implemented                                       |
 
 No roadmap connector should be inferred from a menu label, type definition,
 reference card or architecture diagram. A connector is shipped only after its

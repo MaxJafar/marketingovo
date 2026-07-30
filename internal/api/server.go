@@ -18,11 +18,11 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/GolemWorkers/golem-intel/internal/domain"
-	"github.com/GolemWorkers/golem-intel/internal/governance"
-	"github.com/GolemWorkers/golem-intel/internal/jobs"
-	"github.com/GolemWorkers/golem-intel/internal/policy"
-	"github.com/GolemWorkers/golem-intel/internal/storage"
+	"github.com/GolemWorkers/agentintel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/governance"
+	"github.com/GolemWorkers/agentintel/internal/jobs"
+	"github.com/GolemWorkers/agentintel/internal/policy"
+	"github.com/GolemWorkers/agentintel/internal/storage"
 )
 
 type ServerConfig struct {
@@ -142,18 +142,18 @@ func (server *Server) authenticate(next http.Handler) http.Handler {
 				next.ServeHTTP(writer, request)
 				return
 			}
-			writer.Header().Set("WWW-Authenticate", `Bearer realm="golem-intel"`)
+			writer.Header().Set("WWW-Authenticate", `Bearer realm="agentintel"`)
 			writeProblem(writer, request, http.StatusUnauthorized, "unauthorized", "The local bearer token is invalid")
 			return
 		}
 		session, ok := server.readBrowserSession(request, false)
 		if !ok {
-			writer.Header().Set("WWW-Authenticate", `Bearer realm="golem-intel"`)
+			writer.Header().Set("WWW-Authenticate", `Bearer realm="agentintel"`)
 			writeProblem(writer, request, http.StatusUnauthorized, "unauthorized", "A local bearer token or dashboard session is required")
 			return
 		}
 		if request.Method != http.MethodGet && request.Method != http.MethodHead && request.Method != http.MethodOptions {
-			provided := request.Header.Get("X-Golem-CSRF")
+			provided := request.Header.Get("X-AgentIntel-CSRF")
 			if len(provided) != len(session.CSRF) || subtle.ConstantTimeCompare([]byte(provided), []byte(session.CSRF)) != 1 || !requestHasSameOrigin(request) {
 				writeProblem(writer, request, http.StatusForbidden, "csrf_failed", "Dashboard mutation requires a valid same-origin CSRF token")
 				return
@@ -201,7 +201,7 @@ func (server *Server) previewDataset(writer http.ResponseWriter, request *http.R
 		writeProblem(writer, request, http.StatusBadRequest, "unsupported_content_encoding", "Content-Encoding must be absent or identity")
 		return
 	}
-	if request.Header.Get("X-Golem-Import-Attestation") != "public-permitted-brand-competitive-research.v1" {
+	if request.Header.Get("X-AgentIntel-Import-Attestation") != "public-permitted-brand-competitive-research.v1" {
 		writeProblem(writer, request, http.StatusBadRequest, "import_attestation_required", "The required import attestation is missing or invalid")
 		return
 	}
@@ -489,7 +489,7 @@ func writeProblem(writer http.ResponseWriter, request *http.Request, status int,
 	writer.Header().Set("Content-Type", "application/problem+json")
 	writer.WriteHeader(status)
 	_ = json.NewEncoder(writer).Encode(problem{
-		Type: "urn:golem-intel:problem:" + code, Title: http.StatusText(status), Status: status,
+		Type: "urn:agentintel:problem:" + code, Title: http.StatusText(status), Status: status,
 		Detail: detail, Instance: request.URL.Path, Code: code,
 	})
 }

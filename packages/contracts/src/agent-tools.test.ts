@@ -12,4 +12,3 @@ describe("public agent boundary", () => {
     expect(names).not.toMatch(/contact|delete|outreach|policy|credential/u);
   });
 });
-

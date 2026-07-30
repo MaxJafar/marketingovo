@@ -4,7 +4,13 @@
   "title": "Committed evidence manifest",
   "type": "object",
   "additionalProperties": false,
-  "required": ["manifest_version", "run_id", "committed_at", "provenance", "artifacts"],
+  "required": [
+    "manifest_version",
+    "run_id",
+    "committed_at",
+    "provenance",
+    "artifacts"
+  ],
   "properties": {
     "manifest_version": { "const": 1 },
     "run_id": { "type": "string", "minLength": 1 },
@@ -12,7 +18,12 @@
     "provenance": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["worker_version", "model_version", "connector_version", "parser_version"],
+      "required": [
+        "worker_version",
+        "model_version",
+        "connector_version",
+        "parser_version"
+      ],
       "properties": {
         "worker_version": { "type": "string", "minLength": 1 },
         "model_version": { "type": "string", "minLength": 1 },
@@ -25,7 +36,14 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["relative_path", "media_type", "sha256", "size_bytes", "schema_id", "data_class"],
+        "required": [
+          "relative_path",
+          "media_type",
+          "sha256",
+          "size_bytes",
+          "schema_id",
+          "data_class"
+        ],
         "properties": {
           "relative_path": { "type": "string", "pattern": "^[^/].*" },
           "media_type": { "type": "string" },
@@ -33,9 +51,22 @@
           "size_bytes": { "type": "integer", "minimum": 0 },
           "row_count": { "type": "integer", "minimum": 0 },
           "schema_id": { "type": "string" },
-          "minimum_observed_at": { "type": ["string", "null"], "format": "date-time" },
-          "maximum_observed_at": { "type": ["string", "null"], "format": "date-time" },
-          "data_class": { "enum": ["public", "first_party", "licensed_business_contact", "restricted"] }
+          "minimum_observed_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          },
+          "maximum_observed_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          },
+          "data_class": {
+            "enum": [
+              "public",
+              "first_party",
+              "licensed_business_contact",
+              "restricted"
+            ]
+          }
         }
       }
     }

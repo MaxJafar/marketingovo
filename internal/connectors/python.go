@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/GolemWorkers/golem-intel/internal/domain"
+	"github.com/GolemWorkers/agentintel/internal/domain"
 )
 
 const maximumWorkerControlBytes = 4 << 20
@@ -49,7 +49,7 @@ func (worker *PythonWorker) Analyze(ctx context.Context, request AnalysisRequest
 	}
 	args := []string{
 		"run", "--frozen", "--offline", "--no-dev", "--no-config", "--no-sync", "--project", worker.ProjectDir,
-		"python", "-I", "-B", "-m", "golem_intel_worker", "analyze",
+		"python", "-I", "-B", "-m", "agentintel_worker", "analyze",
 		"--run-id", request.RunID,
 		"--input", request.InputPath,
 		"--input-sha256", request.InputSHA256,

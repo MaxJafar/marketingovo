@@ -1,4 +1,4 @@
-import type { RunDetail } from "@golem-intel/sdk";
+import type { RunDetail } from "@agentintel/sdk";
 
 interface RunTimelineProps {
   run: RunDetail;
@@ -41,4 +41,3 @@ export function RunTimeline({ run }: RunTimelineProps): React.JSX.Element {
     </section>
   );
 }
-
