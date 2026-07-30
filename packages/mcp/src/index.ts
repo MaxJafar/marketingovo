@@ -89,7 +89,7 @@ export async function createAgentSeoMcpServer(
     );
   }
   const server = new McpServer(
-    { name: "agentseo", version: "0.11.0-alpha.0" },
+    { name: "agentseo", version: "0.12.0-alpha.0" },
     {
       instructions:
         "Use start tools only after identifying the project and reading its context resource. Runs are asynchronous: call agentseo_run_get until terminal, then summarize evidence, confidence, effort, and the five highest-value actions. Respect ignored and false-positive classifications exposed by the project issue-review resource. Never ask for or transmit credentials through tools.",

@@ -449,7 +449,7 @@ describe("local API trust boundary", () => {
         status: "ok",
         database: "ok",
         queue: "ok",
-        version: "0.11.0-alpha.0",
+        version: "0.12.0-alpha.0",
       }),
     );
     const client = createGeneratedAgentSeoClient({

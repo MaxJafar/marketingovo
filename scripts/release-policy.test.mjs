@@ -181,7 +181,7 @@ test("manifest validation rejects bytes changed after platform verification", as
   await writeFile(updater, "verified updater");
   await writeFile(`${updater}.sig`, "A".repeat(88));
   const target = "aarch64-apple-darwin";
-  const version = "0.11.0-alpha.0";
+  const version = "0.12.0-alpha.0";
   const artifacts = await collectReleaseArtifacts(root, target);
   const installer = artifacts.find(({ path }) => path.endsWith(".dmg"));
   const record = {
@@ -237,7 +237,7 @@ test("Windows verification records fail closed without the full installer lifecy
   await writeFile(msi, "installer");
   await writeFile(`${msi}.sig`, "A".repeat(88));
   const target = "x86_64-pc-windows-msvc";
-  const version = "0.11.0-alpha.0";
+  const version = "0.12.0-alpha.0";
   const artifacts = await collectReleaseArtifacts(root, target);
   const installer = artifacts.find(({ path }) => path.endsWith(".msi"));
   const record = {
@@ -298,7 +298,7 @@ test("Linux verification requires deb lifecycle and AppImage execution evidence"
   await writeFile(appImage, "appimage installer");
   await writeFile(`${appImage}.sig`, "A".repeat(88));
   const target = "x86_64-unknown-linux-gnu";
-  const version = "0.11.0-alpha.0";
+  const version = "0.12.0-alpha.0";
   const artifacts = await collectReleaseArtifacts(root, target);
   assert.deepEqual(
     artifacts.map(({ role }) => role).sort(),

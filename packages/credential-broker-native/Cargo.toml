@@ -1,6 +1,6 @@
 [package]
 name = "agentseo-credential-broker"
-version = "0.11.0-alpha.0"
+version = "0.12.0-alpha.0"
 description = "Native credential broker for AGENTseo Community Edition"
 authors = ["GolemWorkers"]
 edition = "2021"

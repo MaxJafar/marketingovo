@@ -17,7 +17,7 @@ function sortValue(value: unknown): unknown {
 const runtime = new AgentSeoLocalRuntime({
   // This is an ephemeral generator path, not a persisted-data migration.
   dataDir: mkdtempSync(join(tmpdir(), "agentseo-openapi-")),
-  version: "0.11.0-alpha.0",
+  version: "0.12.0-alpha.0",
 });
 const server = await createLocalServer({ runtime, port: 3210 });
 try {

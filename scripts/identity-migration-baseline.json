@@ -191,13 +191,13 @@
       "authorizedBy": "apps/desktop/src-tauri/tauri.conf.json",
       "authorizationHash": "sha256:9f6368914eac219df4a59ae1401d342167a691ea1b9847fb2e4242aea18b4253",
       "count": 5,
-      "contentHash": "sha256:71eec5c36c78e367352d3fc45a7fc0709b00090bfc9f8f205692ab2cfea31041",
+      "contentHash": "sha256:49ec442b4f5b30cd551f6c758ca95e81d502049511e5fa2d6acd362277bfff0e",
       "occurrenceHashes": [
         "sha256:2fe6fcf6392836956f7157ab809b37c70ca10f3d38252537a637f4691b86fdb9",
         "sha256:5bc274026fefeb221a057ae329819784eb2a565eb8aa452dc87da244f7ae75eb",
         "sha256:6a95c46ee5b89615d26012bb67d2cad3d7f75984842e1c1bdf00cc1364797200",
-        "sha256:d79a6f427e049a8ccb925ecd12e7e486ff5e622f959f76f56755ae5c99afe48f",
-        "sha256:dc44cad0c535192674b4ad191efe868874709f7c0fad8941a8c352c39ffa5212"
+        "sha256:7e1fd9905788d8a9b7d24edd04a42a18c88d5a009687af18fda3ff6878dc5b54",
+        "sha256:d79a6f427e049a8ccb925ecd12e7e486ff5e622f959f76f56755ae5c99afe48f"
       ]
     },
     {
@@ -1359,10 +1359,10 @@
       "authorizedBy": "scripts/updater-metadata-policy.test.mjs",
       "authorizationHash": "sha256:aa38512774dcd8b8e0ad70909dadc74161fcce5d9af498f12efb09ef3df5a476",
       "count": 2,
-      "contentHash": "sha256:07f86395aba4bcf87c9b55183390d612704c005ac3660805bb667ca5e6f1003a",
+      "contentHash": "sha256:2fcc4b4aae2e79a12ac8c14b3e24a6cad66f238fb24be1463b88d2d7668c6402",
       "occurrenceHashes": [
         "sha256:1de0d96759c525b99814818799126483d707f8cbba1affe563f72e96018cfee6",
-        "sha256:8fdaf33ed939644d9c4bab06573a7d2041a33e4a36f29270b091dde236aa339c"
+        "sha256:8851906d5af198bdf7144ea1409e5221829203ff7fabb44a27710660f34ffd9a"
       ]
     },
     {

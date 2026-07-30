@@ -1,6 +1,6 @@
 {
   "name": "agentseo",
-  "version": "0.11.0-alpha.0",
+  "version": "0.12.0-alpha.0",
   "description": "Turn local crawl, Search Console, GA4, performance, and SERP evidence into prioritized SEO actions.",
   "author": { "name": "AGENTseo" },
   "license": "Apache-2.0",
