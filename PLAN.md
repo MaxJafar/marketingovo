@@ -78,16 +78,21 @@ starts existing.
 
 ### What still blocks 1.0.0
 
-- **B1 — One synthetic connector.** No live source. This is the whole product gap.
+- **B1 — The live connector is built but not wired.** `internal/connectors/website.go`
+  reads a site's real RSS/Atom feed through a hardened egress policy, with robots
+  handling, honest cadence/freshness metrics and full test coverage including an
+  end-to-end fetch. What remains is integration: the daemon runs one
+  Python-supervising worker fed by a fixture path, so a live run needs source
+  selection in the job manager, URL-shaped target validation (targets are
+  currently fixture IDs), the API/contract change, and the Python input path.
+  Until that lands, no user can invoke it — the product still ships fixture-only.
 - **B2 — Dashboard is one page.** `apps/dashboard/src/pages/` contains only
   `ResearchPage.tsx`. A "GUI dashboard" claim needs projects, runs, an evidence
   browser, watchlists, reports and settings.
-- **B3 — No CI.** There is still no `.github/` directory: no workflows, no
-  CodeQL, no dependabot, no templates. `pnpm check` is comprehensive and has never
-  run in automation. For a four-language repository this is the highest-leverage
-  remaining gap.
-- **B4 — Governance docs absent.** No `CODE_OF_CONDUCT.md` or `SUPPORT.md`. (No
-  CLA or trademark policy is needed — Apache-2.0 alone governs contributions.)
+- ~~**B3 — No CI.**~~ Resolved: `ci.yml` runs quality, go, python, native and
+  contracts jobs; `codeql.yml` and dependabot across npm, gomod, cargo and uv.
+- ~~**B4 — Governance docs absent.**~~ Resolved: `CODE_OF_CONDUCT.md` and
+  `SUPPORT.md` are present.
 - **B5 — Reference corpus has no clean-room record.**
   `TO REVERSE ENGINEEER/` holds 820 MB of 49 third-party projects, retained
   deliberately for study. It is correctly gitignored and blocked from build
