@@ -124,7 +124,15 @@ func run(arguments []string) error {
 		return err
 	}
 	defer store.Close()
-	worker := &connectors.WorkerRunner{ProjectDir: workerProject, PythonCommand: pythonExecutable, UVCommand: uvExecutable}
+	// The Python-supervising runner stays the default path. Runs whose targets are
+	// live site URLs are routed to the website connector instead, which fetches
+	// through the shared egress policy. Selection is per run, so a fixture run and
+	// a live run can execute concurrently without affecting each other.
+	pythonRunner := &connectors.WorkerRunner{ProjectDir: workerProject, PythonCommand: pythonExecutable, UVCommand: uvExecutable}
+	worker := &connectors.SourceRouter{
+		Website:  connectors.NewWebsiteWorker(),
+		Fallback: pythonRunner,
+	}
 	manager, err := jobs.New(jobs.Config{
 		Store: store, DataRoot: root, FixturePath: fixture, Worker: worker, Concurrency: *concurrency,
 	})

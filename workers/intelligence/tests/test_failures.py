@@ -158,7 +158,11 @@ def test_slow_cli_handles_termination_as_cancellation(
         first_event = process.stderr.readline()
         assert "worker.validating" in first_event
         os.kill(process.pid, signal.SIGTERM)
-        stdout, _stderr = process.communicate(timeout=5)
+        # The assertion is that SIGTERM is handled as cancellation, not that the
+        # process exits within any particular wall-clock budget. Five seconds is
+        # ample on an idle machine and marginal on a loaded CI runner, which made
+        # this the one flaky test in the suite.
+        stdout, _stderr = process.communicate(timeout=30)
     finally:
         if process.poll() is None:
             process.kill()

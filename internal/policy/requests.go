@@ -15,7 +15,12 @@ var (
 	ErrUnsupportedSource = errors.New("unsupported connector")
 )
 
-const FixtureConnectorID = "fixture.competitive-pulse"
+const (
+	FixtureConnectorID = "fixture.competitive-pulse"
+	// WebsiteConnectorID reads a site's own RSS or Atom feed. It needs no
+	// credentials, so it is selectable without any configuration step.
+	WebsiteConnectorID = "website.rss"
+)
 
 func ValidateComparison(request domain.ComparisonStartRequest) error {
 	if request.DatasetID != "" {
@@ -38,9 +43,15 @@ func ValidateComparison(request domain.ComparisonStartRequest) error {
 		return fmt.Errorf("%w: connector_ids must contain at most 20 unique values", ErrInvalidRequest)
 	}
 	for _, connector := range connectors {
-		if connector != FixtureConnectorID {
+		if connector != FixtureConnectorID && connector != WebsiteConnectorID {
 			return fmt.Errorf("%w: %s", ErrUnsupportedSource, connector)
 		}
+	}
+	// Live targets are checked against the same egress policy that will fetch
+	// them, so an unreachable or unsafe source is refused when the run is
+	// requested rather than failing part-way through collection.
+	if err := validateLiveTargets(request.TargetIDs); err != nil {
+		return err
 	}
 	if !slices.Contains([]string{"", "none", "source_failure", "corrupt_artifact", "slow"}, request.Simulate) {
 		return fmt.Errorf("%w: unsupported simulation", ErrInvalidRequest)
@@ -118,6 +129,35 @@ func ValidateDataClass(value string) error {
 	return fmt.Errorf("%w: unsupported data class %q", ErrInvalidRequest, value)
 }
 
+// validateLiveTargets applies the egress rules to any URL-shaped target. A run
+// mixing live URLs with fixture identifiers is refused: half a comparison drawn
+// from live data and half from a fixture produces targets that are not
+// comparable, and nothing downstream would say so.
+func validateLiveTargets(targets []string) error {
+	live := 0
+	for _, target := range targets {
+		if !isLiveTarget(target) {
+			continue
+		}
+		live++
+		if _, err := ValidateEgressURL(target, DefaultEgressLimits("AGENTintel")); err != nil {
+			return fmt.Errorf("%w: %s is not a permitted source: %v",
+				ErrInvalidRequest, target, err)
+		}
+	}
+	if live > 0 && live != len(targets) {
+		return fmt.Errorf(
+			"%w: target_ids must be either all live site URLs or all fixture identifiers",
+			ErrInvalidRequest)
+	}
+	return nil
+}
+
+func isLiveTarget(target string) bool {
+	trimmed := strings.TrimSpace(target)
+	return strings.HasPrefix(trimmed, "http://") || strings.HasPrefix(trimmed, "https://")
+}
+
 func uniqueTargets(values []string, minimum, maximum int) error {
 	if len(values) < minimum || len(values) > maximum {
 		return fmt.Errorf("%w: target_ids must contain %d to %d values", ErrInvalidRequest, minimum, maximum)
@@ -129,7 +169,11 @@ func uniqueTargets(values []string, minimum, maximum int) error {
 		if value != strings.TrimSpace(value) {
 			return fmt.Errorf("%w: target_ids must not contain surrounding whitespace", ErrInvalidRequest)
 		}
-		if err := boundedText("target_id", value, 1, 100); err != nil {
+		limit := 100
+		if isLiveTarget(value) {
+			limit = 2000
+		}
+		if err := boundedText("target_id", value, 1, limit); err != nil {
 			return err
 		}
 	}

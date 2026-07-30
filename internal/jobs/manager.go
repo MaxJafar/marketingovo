@@ -508,7 +508,11 @@ func (manager *Manager) execute(run domain.Run) {
 		analysis.ImportContext = &connectors.ImportContext{DatasetID: run.DatasetID, ValidatedAt: *dataset.Preview.ValidatedAt,
 			InputParserVersion: dataset.InputParserVersion, MetricCatalogVersion: dataset.MetricCatalogVersion}
 	}
-	result, err := manager.worker.Analyze(ctx, analysis, func(event connectors.ProgressEvent) {
+	// The worker is resolved per run: a live-URL comparison uses the website
+	// connector while everything else keeps the fixture/Python path. Provenance
+	// below records the worker that actually ran, not the configured one.
+	selected := connectors.WorkerFor(manager.worker, analysis)
+	result, err := selected.Analyze(ctx, analysis, func(event connectors.ProgressEvent) {
 		progressCtx, progressCancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer progressCancel()
 		progress := 0.1 + event.Progress*0.75
@@ -528,16 +532,19 @@ func (manager *Manager) execute(run domain.Run) {
 	}
 	provenance := domain.Provenance{
 		WorkerVersion: result.WorkerVersion, ModelVersion: result.ModelVersion,
-		ConnectorVersion: manager.worker.ID(), ParserVersion: "agentintel-go-fixture.v1",
+		ConnectorVersion: selected.ID(), ParserVersion: "agentintel-go-fixture.v1",
 	}
 	if provenance.WorkerVersion == "" {
-		provenance.WorkerVersion = manager.worker.ID()
+		provenance.WorkerVersion = selected.ID()
 	}
 	if provenance.ModelVersion == "" {
 		provenance.ModelVersion = "none"
 	}
-	if manager.worker.ID() == "python.intelligence.protocol.v1" {
+	switch selected.ID() {
+	case "python.intelligence.protocol.v1":
 		provenance.ParserVersion = "agentintel-go-arrow-parquet.v1"
+	case connectors.WebsiteID:
+		provenance.ParserVersion = connectors.WebsiteParserVersion
 	}
 	if run.DatasetID != "" {
 		provenance.ConnectorVersion = "local.competitive-pulse-import@1.0.0"
@@ -559,7 +566,7 @@ func (manager *Manager) execute(run domain.Run) {
 	commit, err := governance.CommitEvidence(governance.CommitOptions{
 		DataRoot: manager.dataRoot, RunID: run.ID, StageDir: outputDir,
 		Descriptors: result.Artifacts, MaximumBytes: governance.DefaultMaximumArtifactBytes, Provenance: provenance,
-		AllowLegacyFixture: manager.worker.ID() == connectors.FixtureID,
+		AllowLegacyFixture: selected.ID() == connectors.FixtureID,
 	})
 	if err != nil {
 		manager.fail(run.ID, artifactErrorCode(err), err.Error())

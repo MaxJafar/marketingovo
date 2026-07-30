@@ -42,6 +42,8 @@ const (
 	WebsiteID               = "website.rss"
 	WebsiteConnectorVersion = "website.rss@1.0.0"
 	websiteUserAgent        = "AGENTintel/1.0 (+https://github.com/MaxJafar/AGENTintel)"
+	// Parser identity recorded in evidence provenance for live website runs.
+	WebsiteParserVersion = "agentintel-go-feed.v1"
 )
 
 // WebsiteWorker collects publication evidence from a site's own feed.
