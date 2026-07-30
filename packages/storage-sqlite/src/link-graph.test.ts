@@ -2,11 +2,11 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { AgentSeoDatabase } from "./database.js";
+import { MarketingovoDatabase } from "./database.js";
 
 describe("immutable internal-link graph", () => {
   it("normalizes aliases and serves bounded inlink and outlink evidence", () => {
-    const database = new AgentSeoDatabase({
+    const database = new MarketingovoDatabase({
       path: join(
         mkdtempSync(join(tmpdir(), "marketingovo-link-db-")),
         "marketingovo.db",

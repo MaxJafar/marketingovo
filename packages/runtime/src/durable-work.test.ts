@@ -2,7 +2,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import { AgentSeoDatabase } from "@marketingovo/storage-sqlite";
+import { MarketingovoDatabase } from "@marketingovo/storage-sqlite";
 import { nextCronOccurrence } from "./cron.js";
 import { DurableJobWorker, DurableScheduler } from "./durable-work.js";
 
@@ -29,7 +29,7 @@ describe("durable local work", () => {
 
   it("executes a leased job once", async () => {
     const root = mkdtempSync(join(tmpdir(), "marketingovo-worker-"));
-    const database = new AgentSeoDatabase({
+    const database = new MarketingovoDatabase({
       path: join(root, "marketingovo.db"),
     });
     const handler = vi.fn(async () => undefined);
@@ -46,7 +46,7 @@ describe("durable local work", () => {
 
   it("starts a due schedule with an idempotency cursor and advances it", async () => {
     const root = mkdtempSync(join(tmpdir(), "marketingovo-runtime-schedule-"));
-    const database = new AgentSeoDatabase({
+    const database = new MarketingovoDatabase({
       path: join(root, "marketingovo.db"),
     });
     const project = database.createProject({

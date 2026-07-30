@@ -2,7 +2,7 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Fragment>
     <DirectoryRef Id="INSTALLDIR">
-      <Component Id="AgentSeoBackgroundStartup" Guid="A39553B8-3D10-4CF7-A74E-5574BD3B1941" Win64="yes">
+      <Component Id="MarketingovoBackgroundStartup" Guid="A39553B8-3D10-4CF7-A74E-5574BD3B1941" Win64="yes">
         <RegistryKey
           Root="HKCU"
           Key="Software\Microsoft\Windows\CurrentVersion\Run"

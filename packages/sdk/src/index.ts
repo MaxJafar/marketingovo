@@ -41,7 +41,7 @@ import type {
   UpdateProjectContextInput,
 } from "@marketingovo/contracts";
 import type {
-  AgentSeoProjectBundleV2,
+  MarketingovoProjectBundleV2,
   ProjectImportResult,
 } from "@marketingovo/contracts/project-bundle";
 import {
@@ -51,13 +51,13 @@ import {
 
 export { validateLocalApiBaseUrl } from "./local-api.js";
 export {
-  createGeneratedAgentSeoClient,
-  createGeneratedAgentSeoClientFromTokenFile,
-  type GeneratedAgentSeoClientOptions,
-  type AgentSeoOpenApiPaths,
+  createGeneratedMarketingovoClient,
+  createGeneratedMarketingovoClientFromTokenFile,
+  type GeneratedMarketingovoClientOptions,
+  type MarketingovoOpenApiPaths,
 } from "./generated-client.js";
 
-export class AgentSeoApiError extends Error {
+export class MarketingovoApiError extends Error {
   readonly status: number;
   readonly problem: ProblemDetails | null;
   constructor(status: number, problem: ProblemDetails | null) {
@@ -66,26 +66,26 @@ export class AgentSeoApiError extends Error {
         problem?.title ??
         `Marketingovo API request failed (${status})`,
     );
-    this.name = "AgentSeoApiError";
+    this.name = "MarketingovoApiError";
     this.status = status;
     this.problem = problem;
   }
 }
 
-export interface AgentSeoClientOptions {
+export interface MarketingovoClientOptions {
   baseUrl?: string;
   token?: string;
   fetch?: typeof globalThis.fetch;
   timeoutMs?: number;
 }
 
-export class AgentSeoClient {
+export class MarketingovoClient {
   readonly baseUrl: string;
   private readonly token?: string;
   private readonly fetchImpl: typeof globalThis.fetch;
   private readonly timeoutMs: number;
 
-  constructor(options: AgentSeoClientOptions = {}) {
+  constructor(options: MarketingovoClientOptions = {}) {
     this.baseUrl = validateLocalApiBaseUrl(
       options.baseUrl ?? DEFAULT_LOCAL_API_BASE_URL,
     );
@@ -96,15 +96,15 @@ export class AgentSeoClient {
 
   static async fromTokenFile(
     path: string,
-    options: Omit<AgentSeoClientOptions, "token"> = {},
-  ): Promise<AgentSeoClient> {
+    options: Omit<MarketingovoClientOptions, "token"> = {},
+  ): Promise<MarketingovoClient> {
     // Validate the destination before reading token material from disk.
     const baseUrl = validateLocalApiBaseUrl(
       options.baseUrl ?? DEFAULT_LOCAL_API_BASE_URL,
     );
     const token = (await readFile(path, "utf8")).trim();
     if (!token) throw new Error("Marketingovo service token file is empty");
-    return new AgentSeoClient({ ...options, baseUrl, token });
+    return new MarketingovoClient({ ...options, baseUrl, token });
   }
 
   private async request<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -132,7 +132,7 @@ export class AgentSeoClient {
         } catch {
           /* response is not JSON */
         }
-        throw new AgentSeoApiError(response.status, problem);
+        throw new MarketingovoApiError(response.status, problem);
       }
       if (response.status === 204) return undefined as T;
       return (await response.json()) as T;
@@ -166,7 +166,7 @@ export class AgentSeoClient {
         } catch {
           /* response is not JSON */
         }
-        throw new AgentSeoApiError(response.status, problem);
+        throw new MarketingovoApiError(response.status, problem);
       }
       return new Uint8Array(await response.arrayBuffer());
     } finally {
@@ -470,7 +470,7 @@ export class AgentSeoClient {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ projectId }),
     });
-  importProject = (bundle: Uint8Array | string | AgentSeoProjectBundleV2) =>
+  importProject = (bundle: Uint8Array | string | MarketingovoProjectBundleV2) =>
     this.request<ProjectImportResult>("/import", {
       method: "POST",
       headers: {
@@ -491,7 +491,7 @@ export class AgentSeoClient {
       { headers, redirect: "error" },
     );
     if (!response.ok || !response.body)
-      throw new AgentSeoApiError(response.status, null);
+      throw new MarketingovoApiError(response.status, null);
     const reader = response.body
       .pipeThrough(new TextDecoderStream())
       .getReader();

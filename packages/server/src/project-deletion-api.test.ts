@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { AgentSeoLocalRuntime } from "@marketingovo/runtime";
+import { MarketingovoLocalRuntime } from "@marketingovo/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 const HOST = "127.0.0.1:3210";
@@ -15,7 +15,7 @@ describe("project deletion API", () => {
   });
 
   async function setup() {
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-project-delete-api-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });

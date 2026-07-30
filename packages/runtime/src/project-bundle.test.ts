@@ -6,9 +6,9 @@ import { describe, expect, it } from "vitest";
 import type { Action, IssueInstance } from "@marketingovo/contracts";
 import {
   MARKETINGOVO_PROJECT_BUNDLE_LIMITS,
-  type AgentSeoProjectBundleV2,
+  type MarketingovoProjectBundleV2,
 } from "@marketingovo/contracts/project-bundle";
-import { AgentSeoLocalRuntime, ProjectBundleError } from "./index.js";
+import { MarketingovoLocalRuntime, ProjectBundleError } from "./index.js";
 
 const hash = (value: string | Uint8Array): string =>
   createHash("sha256").update(value).digest("hex");
@@ -24,7 +24,7 @@ function stableJson(value: unknown): string {
     .join(",")}}`;
 }
 
-function resign(bundle: AgentSeoProjectBundleV2): void {
+function resign(bundle: MarketingovoProjectBundleV2): void {
   const { integrity, ...payload } = bundle;
   integrity.bundleSha256 = hash(stableJson(payload));
 }
@@ -42,7 +42,7 @@ async function createBundle(
   sourceProjectId: string;
 }> {
   const dataDir = mkdtempSync(join(tmpdir(), "marketingovo-bundle-source-"));
-  const runtime = new AgentSeoLocalRuntime({ dataDir });
+  const runtime = new MarketingovoLocalRuntime({ dataDir });
   try {
     const project = runtime.database.createProject({
       name: "Transfer fixture",
@@ -310,7 +310,7 @@ describe(".marketingovo project bundles", () => {
   it("round-trips history and embedded reports while remapping every local id", async () => {
     const source = await createBundle();
     const serialized = Buffer.from(source.bytes).toString("utf8");
-    const bundle = JSON.parse(serialized) as AgentSeoProjectBundleV2;
+    const bundle = JSON.parse(serialized) as MarketingovoProjectBundleV2;
     expect(bundle.version).toBe(2);
     expect(bundle.secretsIncluded).toBe(false);
     expect(bundle.runConfigurations).toEqual([
@@ -371,7 +371,7 @@ describe(".marketingovo project bundles", () => {
     expect(serialized).not.toContain("/Users/example/private");
     expect(serialized).not.toContain('"secretRef"');
 
-    const destination = new AgentSeoLocalRuntime({
+    const destination = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-bundle-destination-")),
     });
     try {
@@ -542,7 +542,7 @@ describe(".marketingovo project bundles", () => {
     });
     const bundle = JSON.parse(
       Buffer.from(source.bytes).toString("utf8"),
-    ) as AgentSeoProjectBundleV2;
+    ) as MarketingovoProjectBundleV2;
     expect(Array.from(bundle.issues[0]!.issue.title)).toHaveLength(240);
     expect(Array.from(bundle.issues[0]!.issue.evidence[0]!.label)).toHaveLength(
       240,
@@ -550,7 +550,7 @@ describe(".marketingovo project bundles", () => {
     expect(Array.from(bundle.actions[0]!.title)).toHaveLength(240);
     expect(Array.from(bundle.actions[0]!.whyNow)).toHaveLength(2_000);
 
-    const destination = new AgentSeoLocalRuntime({
+    const destination = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-bundle-bounded-")),
     });
     try {
@@ -566,14 +566,14 @@ describe(".marketingovo project bundles", () => {
     const source = await createBundle();
     const bundle = JSON.parse(
       Buffer.from(source.bytes).toString("utf8"),
-    ) as AgentSeoProjectBundleV2;
+    ) as MarketingovoProjectBundleV2;
     delete bundle.issueAdjudications;
     delete bundle.projectContext;
     delete bundle.extractionRuleVersions;
     delete bundle.runConfigurations;
     resign(bundle);
 
-    const destination = new AgentSeoLocalRuntime({
+    const destination = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-bundle-v2-compat-")),
     });
     try {
@@ -602,8 +602,8 @@ describe(".marketingovo project bundles", () => {
     const source = await createBundle();
     const valid = JSON.parse(
       Buffer.from(source.bytes).toString("utf8"),
-    ) as AgentSeoProjectBundleV2;
-    const destination = new AgentSeoLocalRuntime({
+    ) as MarketingovoProjectBundleV2;
+    const destination = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-bundle-malicious-")),
     });
     try {
@@ -710,7 +710,7 @@ describe(".marketingovo project bundles", () => {
   });
 
   it("uses a typed error for absent projects", async () => {
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-bundle-absent-")),
     });
     try {
@@ -724,7 +724,7 @@ describe(".marketingovo project bundles", () => {
 
   it("fails export instead of silently dropping an unreadable custom-rule source", async () => {
     const dataDir = mkdtempSync(join(tmpdir(), "marketingovo-bundle-rule-io-"));
-    const runtime = new AgentSeoLocalRuntime({ dataDir });
+    const runtime = new MarketingovoLocalRuntime({ dataDir });
     try {
       const project = runtime.database.createProject({
         name: "Unreadable rules",

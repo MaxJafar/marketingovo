@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ProjectContextProfile } from "@marketingovo/contracts";
-import { AgentSeoDatabase } from "./database.js";
+import { MarketingovoDatabase } from "./database.js";
 
 const profile = (
   summary: string,
@@ -22,7 +22,7 @@ const profile = (
 describe("project context storage", () => {
   it("keeps profile revisions and journal entries immutable, ordered, scoped, and out of audit payloads", () => {
     const root = mkdtempSync(join(tmpdir(), "marketingovo-project-context-"));
-    const database = new AgentSeoDatabase({
+    const database = new MarketingovoDatabase({
       path: join(root, "marketingovo.db"),
     });
     const project = database.createProject({

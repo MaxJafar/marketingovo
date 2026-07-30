@@ -642,16 +642,16 @@ function asJob(row: Row): DurableJob {
   };
 }
 
-export interface AgentSeoDatabaseOptions {
+export interface MarketingovoDatabaseOptions {
   path: string;
   busyTimeoutMs?: number;
 }
 
-export class AgentSeoDatabase {
+export class MarketingovoDatabase {
   readonly path: string;
   readonly db: DatabaseSync;
 
-  constructor(options: AgentSeoDatabaseOptions) {
+  constructor(options: MarketingovoDatabaseOptions) {
     this.path = resolve(options.path);
     mkdirSync(dirname(this.path), { recursive: true, mode: 0o700 });
     try {

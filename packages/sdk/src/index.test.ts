@@ -3,15 +3,15 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
-  AgentSeoClient,
-  createGeneratedAgentSeoClient,
+  MarketingovoClient,
+  createGeneratedMarketingovoClient,
   validateLocalApiBaseUrl,
 } from "./index.js";
 
 describe("local API trust boundary", () => {
   it("exposes the canonical SDK surface", () => {
-    expect(typeof AgentSeoClient).toBe("function");
-    expect(typeof createGeneratedAgentSeoClient).toBe("function");
+    expect(typeof MarketingovoClient).toBe("function");
+    expect(typeof createGeneratedMarketingovoClient).toBe("function");
   });
 
   it.each([1, 80, 3210, 65_535])(
@@ -45,7 +45,7 @@ describe("local API trust boundary", () => {
   it("rejects a token-file destination before reading or fetching", async () => {
     const fetchImpl = vi.fn<typeof fetch>();
     await expect(
-      AgentSeoClient.fromTokenFile("/path/that/must/not/be/read", {
+      MarketingovoClient.fromTokenFile("/path/that/must/not/be/read", {
         baseUrl: "https://attacker.test/api/v1",
         fetch: fetchImpl,
       }),
@@ -60,7 +60,7 @@ describe("local API trust boundary", () => {
     const fetchImpl = vi.fn<typeof fetch>(async () =>
       Response.json({ status: "ok" }),
     );
-    const client = await AgentSeoClient.fromTokenFile(tokenFile, {
+    const client = await MarketingovoClient.fromTokenFile(tokenFile, {
       baseUrl: "http://127.0.0.1:3210/api/v1",
       fetch: fetchImpl,
     });
@@ -79,7 +79,7 @@ describe("local API trust boundary", () => {
     const fetchImpl = vi.fn<typeof fetch>(async () =>
       Response.json({ runId: "verification-run", verificationState: "queued" }),
     );
-    const client = new AgentSeoClient({
+    const client = new MarketingovoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -119,7 +119,7 @@ describe("local API trust boundary", () => {
           adjudication: { status: "ignored" },
         }),
       );
-    const client = new AgentSeoClient({
+    const client = new MarketingovoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -179,7 +179,7 @@ describe("local API trust boundary", () => {
           sequence: 1,
         }),
       );
-    const client = new AgentSeoClient({
+    const client = new MarketingovoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -260,7 +260,7 @@ describe("local API trust boundary", () => {
           fields: [],
         }),
       );
-    const client = new AgentSeoClient({
+    const client = new MarketingovoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -323,7 +323,7 @@ describe("local API trust boundary", () => {
         globalCredentialsRetained: true,
       }),
     );
-    const client = new AgentSeoClient({
+    const client = new MarketingovoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -352,7 +352,7 @@ describe("local API trust boundary", () => {
         items: [],
       }),
     );
-    const client = new AgentSeoClient({
+    const client = new MarketingovoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -380,7 +380,7 @@ describe("local API trust boundary", () => {
         items: [],
       }),
     );
-    const client = new AgentSeoClient({
+    const client = new MarketingovoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -408,7 +408,7 @@ describe("local API trust boundary", () => {
         run: { id: "replay-one" },
       }),
     );
-    const client = new AgentSeoClient({
+    const client = new MarketingovoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -430,7 +430,7 @@ describe("local API trust boundary", () => {
     const fetchImpl = vi.fn<typeof fetch>(async () =>
       Response.json({ scoreVersion: "regression-v1" }),
     );
-    const client = new AgentSeoClient({
+    const client = new MarketingovoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -452,7 +452,7 @@ describe("local API trust boundary", () => {
         version: "1.0.0",
       }),
     );
-    const client = createGeneratedAgentSeoClient({
+    const client = createGeneratedMarketingovoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "generated-client-secret",
       fetch: fetchImpl,

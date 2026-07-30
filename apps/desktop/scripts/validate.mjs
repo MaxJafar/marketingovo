@@ -115,10 +115,10 @@ assert.deepEqual(config.bundle.windows.wix.fragmentPaths, [
   "./windows/fragments/background-startup.wxs",
 ]);
 assert.deepEqual(config.bundle.windows.wix.componentRefs, [
-  "AgentSeoBackgroundStartup",
+  "MarketingovoBackgroundStartup",
 ]);
 assert.match(startupFragment, /DirectoryRef Id="INSTALLDIR"/u);
-assert.match(startupFragment, /Component Id="AgentSeoBackgroundStartup"/u);
+assert.match(startupFragment, /Component Id="MarketingovoBackgroundStartup"/u);
 assert.match(startupFragment, /Action="createAndRemoveOnUninstall"/u);
 assert.match(startupFragment, /Value="&quot;\[#Path\]&quot; --background"/u);
 assert.doesNotMatch(

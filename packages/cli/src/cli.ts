@@ -24,14 +24,14 @@ import {
 } from "@marketingovo/credentials";
 import { importLegacyData } from "@marketingovo/legacy-import";
 import {
-  AgentSeoLocalRuntime,
+  MarketingovoLocalRuntime,
   defaultDataDirectory,
 } from "@marketingovo/runtime";
-import { AgentSeoClient } from "@marketingovo/sdk";
+import { MarketingovoClient } from "@marketingovo/sdk";
 import { createLocalServer, type LocalServer } from "@marketingovo/server";
 import {
   createDatabaseBackup,
-  AgentSeoDatabase,
+  MarketingovoDatabase,
   restoreDatabaseBackup,
 } from "@marketingovo/storage-sqlite";
 import {
@@ -266,7 +266,7 @@ async function serve(args: ParsedArgs): Promise<void> {
       findExisting: () => findExistingDashboard(root, port),
       waitForExisting: () => waitForExistingDashboard(root, port),
       start: async () => {
-        const runtime = new AgentSeoLocalRuntime({
+        const runtime = new MarketingovoLocalRuntime({
           dataDir: root,
           credentialStore: vaultFor(root, args.flags),
           version: VERSION,
@@ -313,9 +313,9 @@ async function serve(args: ParsedArgs): Promise<void> {
 
 async function clientFor(
   flags: Map<string, string | boolean>,
-): Promise<AgentSeoClient> {
+): Promise<MarketingovoClient> {
   const connection = connectionOptions(flags);
-  return AgentSeoClient.fromTokenFile(connection.serviceTokenFile, {
+  return MarketingovoClient.fromTokenFile(connection.serviceTokenFile, {
     baseUrl: connection.apiUrl,
   });
 }
@@ -817,9 +817,9 @@ async function backupCommand(args: ParsedArgs): Promise<void> {
     throw new Error("No Marketingovo database exists in this data directory");
   }
   const lease = offlineLease(args);
-  let database: AgentSeoDatabase | undefined;
+  let database: MarketingovoDatabase | undefined;
   try {
-    database = new AgentSeoDatabase({ path: databasePath });
+    database = new MarketingovoDatabase({ path: databasePath });
     json(await createDatabaseBackup(database, resolve(destination)));
   } finally {
     database?.close();

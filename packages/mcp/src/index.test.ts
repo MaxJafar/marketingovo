@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ZodType } from "zod/v4";
-import type { AgentSeoClient } from "@marketingovo/sdk";
-import { createAgentSeoMcpServer, PUBLIC_TOOL_NAMES } from "./index.js";
+import type { MarketingovoClient } from "@marketingovo/sdk";
+import { createMarketingovoMcpServer, PUBLIC_TOOL_NAMES } from "./index.js";
 
 type RegisteredTool = {
   inputSchema: ZodType;
@@ -21,7 +21,7 @@ type RegisteredResourceTemplate = {
 };
 
 function registeredTools(
-  server: Awaited<ReturnType<typeof createAgentSeoMcpServer>>,
+  server: Awaited<ReturnType<typeof createMarketingovoMcpServer>>,
 ): Record<string, RegisteredTool> {
   return (
     server as unknown as { _registeredTools: Record<string, RegisteredTool> }
@@ -29,7 +29,7 @@ function registeredTools(
 }
 
 function registeredResourceTemplates(
-  server: Awaited<ReturnType<typeof createAgentSeoMcpServer>>,
+  server: Awaited<ReturnType<typeof createMarketingovoMcpServer>>,
 ): Record<string, RegisteredResourceTemplate> {
   return (
     server as unknown as {
@@ -99,18 +99,18 @@ function stubClient(status: string, workflowId = "audit") {
         new TextEncoder().encode(JSON.stringify({ profile: { seed: "seo" } })),
       ),
     },
-  } as unknown as AgentSeoClient;
+  } as unknown as MarketingovoClient;
   return { client, issues };
 }
 
 describe("Marketingovo MCP public contract", () => {
   it("makes the canonical server factory primary while retaining its 1.x alias", () => {
-    expect(createAgentSeoMcpServer).toBe(createAgentSeoMcpServer);
+    expect(createMarketingovoMcpServer).toBe(createMarketingovoMcpServer);
   });
 
   it("registers exactly the nine approved workflow tools", async () => {
     const { client } = stubClient("running");
-    const server = await createAgentSeoMcpServer({ client });
+    const server = await createMarketingovoMcpServer({ client });
 
     expect(Object.keys(registeredTools(server))).toEqual([
       ...PUBLIC_TOOL_NAMES,
@@ -130,7 +130,7 @@ describe("Marketingovo MCP public contract", () => {
 
   it("passes evidence pagination through untouched and defaults the section", async () => {
     const { client } = stubClient("succeeded");
-    const server = await createAgentSeoMcpServer({ client });
+    const server = await createMarketingovoMcpServer({ client });
     const tool = registeredTools(server).marketingovo_run_evidence;
 
     await tool.handler({ run_id: "run-1" });
@@ -155,7 +155,7 @@ describe("Marketingovo MCP public contract", () => {
 
   it("rejects an evidence section the API does not serve", async () => {
     const { client } = stubClient("succeeded");
-    const server = await createAgentSeoMcpServer({ client });
+    const server = await createMarketingovoMcpServer({ client });
     const tool = registeredTools(server).marketingovo_run_evidence;
 
     expect(
@@ -166,7 +166,7 @@ describe("Marketingovo MCP public contract", () => {
 
   it("requires an http page URL for the link explorer", async () => {
     const { client } = stubClient("succeeded");
-    const server = await createAgentSeoMcpServer({ client });
+    const server = await createMarketingovoMcpServer({ client });
     const tool = registeredTools(server).marketingovo_run_links;
 
     expect(
@@ -188,7 +188,7 @@ describe("Marketingovo MCP public contract", () => {
 
   it("delegates run comparison to the server instead of recomputing it", async () => {
     const { client } = stubClient("succeeded");
-    const server = await createAgentSeoMcpServer({ client });
+    const server = await createMarketingovoMcpServer({ client });
     const tool = registeredTools(server).marketingovo_run_compare;
 
     const result = await tool.handler({
@@ -201,7 +201,7 @@ describe("Marketingovo MCP public contract", () => {
 
   it("exposes project context as a read-only resource without expanding the tool surface", async () => {
     const { client } = stubClient("running");
-    const server = await createAgentSeoMcpServer({ client });
+    const server = await createMarketingovoMcpServer({ client });
     const resources = registeredResourceTemplates(server);
 
     expect(Object.keys(registeredTools(server))).toEqual([
@@ -230,7 +230,9 @@ describe("Marketingovo MCP public contract", () => {
 
   it("projects strict canonical JSON Schemas into MCP runtime validation", async () => {
     const { client } = stubClient("running");
-    const tools = registeredTools(await createAgentSeoMcpServer({ client }));
+    const tools = registeredTools(
+      await createMarketingovoMcpServer({ client }),
+    );
 
     expect(
       tools.marketingovo_audit_start.inputSchema.parse({
@@ -276,7 +278,7 @@ describe("Marketingovo MCP public contract", () => {
 
   it("does not read issues while an asynchronous run is unfinished", async () => {
     const { client, issues } = stubClient("running");
-    const server = await createAgentSeoMcpServer({ client });
+    const server = await createMarketingovoMcpServer({ client });
 
     const result = await registeredTools(server).marketingovo_run_get.handler({
       run_id: "run-1",
@@ -294,7 +296,7 @@ describe("Marketingovo MCP public contract", () => {
     "returns canonical issues for a %s run",
     async (status) => {
       const { client, issues } = stubClient(status);
-      const server = await createAgentSeoMcpServer({ client });
+      const server = await createMarketingovoMcpServer({ client });
 
       const result = await registeredTools(server).marketingovo_run_get.handler(
         {
@@ -312,7 +314,7 @@ describe("Marketingovo MCP public contract", () => {
 
   it("returns persisted research output for a terminal research workflow", async () => {
     const { client } = stubClient("succeeded", "keyword-research");
-    const server = await createAgentSeoMcpServer({ client });
+    const server = await createMarketingovoMcpServer({ client });
 
     const result = await registeredTools(server).marketingovo_run_get.handler({
       run_id: "run-1",

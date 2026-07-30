@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
-import { createAgentSeoMcpServer } from "./index.js";
+import { createMarketingovoMcpServer } from "./index.js";
 
 async function main(): Promise<void> {
-  const server = await createAgentSeoMcpServer();
+  const server = await createMarketingovoMcpServer();
   const transport = new StdioServerTransport();
   process.once(
     "SIGINT",

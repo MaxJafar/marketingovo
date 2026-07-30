@@ -1686,7 +1686,7 @@ export interface SystemService {
   capabilities(): Promise<Capabilities>;
 }
 
-export interface AgentSeoRuntime {
+export interface MarketingovoRuntime {
   projects: ProjectService;
   context: ProjectContextService;
   extractionRules: ExtractionRuleService;

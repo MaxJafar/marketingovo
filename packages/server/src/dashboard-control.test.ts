@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { Action } from "@marketingovo/contracts";
-import { AgentSeoLocalRuntime } from "@marketingovo/runtime";
+import { MarketingovoLocalRuntime } from "@marketingovo/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 const HOST = "127.0.0.1:3210";
@@ -20,7 +20,7 @@ describe("dashboard control panel API", () => {
     const dataDir = mkdtempSync(
       join(tmpdir(), "marketingovo-dashboard-controls-"),
     );
-    const runtime = new AgentSeoLocalRuntime({ dataDir });
+    const runtime = new MarketingovoLocalRuntime({ dataDir });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
     const token = readFileSync(server.serviceTokenPath, "utf8").trim();
@@ -37,7 +37,7 @@ describe("dashboard control panel API", () => {
   }
 
   function saveResearchArtifact(
-    runtime: AgentSeoLocalRuntime,
+    runtime: MarketingovoLocalRuntime,
     dataDir: string,
     runId: string,
     value: unknown,

@@ -30,7 +30,7 @@ Capabilities report the edition, product version, API version, telemetry state, 
 
 The CLI prints a dashboard URL containing a one-time token in the URL fragment. The dashboard exchanges it for an HttpOnly, SameSite session cookie, stores the returned CSRF value only in memory, and removes the fragment from the address bar.
 
-Browser mutations require the same origin and the `X-AgentSeo-CSRF` header. The bootstrap token is one-time and is not a reusable API credential.
+Browser mutations require the same origin and the `X-Marketingovo-CSRF` header. The bootstrap token is one-time and is not a reusable API credential.
 
 ### Trusted local clients
 
@@ -150,9 +150,9 @@ Do not treat `202` as a completed audit. Read `/runs/:id`, stream `/runs/:id/eve
 ## Use the typed SDK
 
 ```ts
-import { AgentSeoClient } from "@marketingovo/sdk";
+import { MarketingovoClient } from "@marketingovo/sdk";
 
-const client = await AgentSeoClient.fromTokenFile(
+const client = await MarketingovoClient.fromTokenFile(
   "/private/path/to/service-token",
 );
 const projects = await client.projects.list();
@@ -208,9 +208,9 @@ OpenAPI document, while the runtime wrapper still refuses any token destination
 other than the canonical IPv4 loopback API.
 
 ```ts
-import { createGeneratedAgentSeoClientFromTokenFile } from "@marketingovo/sdk";
+import { createGeneratedMarketingovoClientFromTokenFile } from "@marketingovo/sdk";
 
-const api = await createGeneratedAgentSeoClientFromTokenFile(
+const api = await createGeneratedMarketingovoClientFromTokenFile(
   "/private/path/to/service-token",
 );
 const { data, error } = await api.GET("/api/v1/health");

@@ -2,12 +2,12 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { AgentSeoLocalRuntime } from "@marketingovo/runtime";
+import { MarketingovoLocalRuntime } from "@marketingovo/runtime";
 import { createLocalServer } from "./index.js";
 
 describe("internal-link explorer API", () => {
   it("keeps the page inventory on the latest audit and serves immutable edges", async () => {
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-link-api-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });

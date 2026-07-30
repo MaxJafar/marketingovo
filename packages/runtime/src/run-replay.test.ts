@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { Report as EngineReport } from "@marketingovo/core";
-import { AgentSeoLocalRuntime } from "./index.js";
+import { MarketingovoLocalRuntime } from "./index.js";
 
 function report(startUrl: string): EngineReport {
   return {
@@ -39,7 +39,7 @@ function report(startUrl: string): EngineReport {
   };
 }
 
-async function terminal(runtime: AgentSeoLocalRuntime, runId: string) {
+async function terminal(runtime: MarketingovoLocalRuntime, runId: string) {
   for (let attempt = 0; attempt < 100; attempt += 1) {
     const run = await runtime.runs.get(runId);
     if (
@@ -54,12 +54,12 @@ async function terminal(runtime: AgentSeoLocalRuntime, runId: string) {
 }
 
 describe("local run replay", () => {
-  let runtime: AgentSeoLocalRuntime | undefined;
+  let runtime: MarketingovoLocalRuntime | undefined;
   afterEach(() => runtime?.close());
 
   it("copies the stored configuration into one idempotent run without mutating its source", async () => {
     const crawlInputs: Array<Record<string, unknown>> = [];
-    runtime = new AgentSeoLocalRuntime({
+    runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-run-replay-")),
       engine: {
         crawl: async (input: Record<string, unknown>) => {
@@ -139,7 +139,7 @@ describe("local run replay", () => {
   });
 
   it("fails closed for missing, active, and unsupported source runs", async () => {
-    runtime = new AgentSeoLocalRuntime({
+    runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-run-replay-")),
     });
     const project = await runtime.projects.create({

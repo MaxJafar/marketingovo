@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { AgentSeoLocalRuntime } from "@marketingovo/runtime";
+import { MarketingovoLocalRuntime } from "@marketingovo/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 describe("run evidence API", () => {
@@ -12,7 +12,7 @@ describe("run evidence API", () => {
   });
 
   async function setup() {
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-run-evidence-api-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });

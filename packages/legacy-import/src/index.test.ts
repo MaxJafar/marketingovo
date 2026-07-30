@@ -15,7 +15,7 @@ import {
   MemoryCredentialStore,
   type CredentialRef,
 } from "@marketingovo/credentials";
-import { AgentSeoDatabase } from "@marketingovo/storage-sqlite";
+import { MarketingovoDatabase } from "@marketingovo/storage-sqlite";
 import { discoverLegacyData, importLegacyData } from "./index.js";
 
 const GSC_SECRET = "gsc-refresh-never-leak";
@@ -227,7 +227,7 @@ describe("legacy v0 importer", () => {
     }
 
     const databasePath = join(destination, "marketingovo.db");
-    const database = new AgentSeoDatabase({ path: databasePath });
+    const database = new MarketingovoDatabase({ path: databasePath });
     try {
       const projects = database.listProjects();
       expect(projects).toHaveLength(1);
@@ -330,7 +330,7 @@ describe("legacy v0 importer", () => {
       credentials: 0,
       customRuleFiles: 0,
     });
-    const reopened = new AgentSeoDatabase({ path: databasePath });
+    const reopened = new MarketingovoDatabase({ path: databasePath });
     try {
       expect(reopened.listProjects()).toHaveLength(1);
       expect(reopened.listRuns()).toHaveLength(2);

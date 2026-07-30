@@ -22,7 +22,7 @@ import {
   type AgentRunGetInput,
   type AgentRunLinksInput,
 } from "@marketingovo/contracts/agent-tools";
-import { AgentSeoClient } from "@marketingovo/sdk";
+import { MarketingovoClient } from "@marketingovo/sdk";
 
 const toOpenClawInputSchema = <Value>(schema: unknown) =>
   Type.Unsafe<Value>(schema as TSchema);
@@ -108,12 +108,12 @@ function defaultTokenFile(): string {
 }
 
 type Config = { serverUrl?: string; tokenFile?: string; timeoutMs?: number };
-function client(config: Config): Promise<AgentSeoClient> {
+function client(config: Config): Promise<MarketingovoClient> {
   const tokenFile = config.tokenFile ?? defaultTokenFile();
   const serverUrl = config.serverUrl ?? "http://127.0.0.1:3210/api/v1";
   // Read the service token for every invocation so rotation or deletion takes
   // effect without restarting the OpenClaw Gateway.
-  return AgentSeoClient.fromTokenFile(tokenFile, {
+  return MarketingovoClient.fromTokenFile(tokenFile, {
     baseUrl: serverUrl,
     timeoutMs: config.timeoutMs,
   });

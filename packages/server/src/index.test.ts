@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { AgentSeoLocalRuntime } from "@marketingovo/runtime";
+import { MarketingovoLocalRuntime } from "@marketingovo/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 const HOST = "127.0.0.1:3210";
@@ -29,7 +29,7 @@ describe("local Google desktop OAuth", () => {
     vi.stubEnv("GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID", "");
     vi.stubEnv("GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID", "");
     const dataDir = mkdtempSync(join(tmpdir(), "marketingovo-oauth-server-"));
-    const runtime = new AgentSeoLocalRuntime({ dataDir });
+    const runtime = new MarketingovoLocalRuntime({ dataDir });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
 
@@ -60,7 +60,7 @@ describe("local Google desktop OAuth", () => {
     vi.stubEnv("GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID", legacyClientId);
     vi.stubEnv("GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID", irregularClientId);
     const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-oauth-precedence-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
@@ -86,7 +86,7 @@ describe("local Google desktop OAuth", () => {
 
   it("uses a random loopback callback, persists safe metadata, and never serializes tokens", async () => {
     const dataDir = mkdtempSync(join(tmpdir(), "marketingovo-oauth-server-"));
-    const runtime = new AgentSeoLocalRuntime({ dataDir });
+    const runtime = new MarketingovoLocalRuntime({ dataDir });
     const now = Date.now();
     const accessToken = "access-token-must-never-leak";
     const refreshToken = "refresh-token-must-never-leak";
@@ -210,7 +210,7 @@ describe("local Google desktop OAuth", () => {
   });
 
   it("validates and isolates connector configuration for the selected project", async () => {
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-config-server-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
@@ -252,7 +252,7 @@ describe("local Google desktop OAuth", () => {
   });
 
   it("exposes the PageSpeed API key as optional to the dashboard", async () => {
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-pagespeed-dashboard-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
@@ -302,7 +302,7 @@ describe("local Google desktop OAuth", () => {
           { status: 200, headers: { "content-type": "application/json" } },
         ),
     );
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(
         join(tmpdir(), "marketingovo-provider-test-server-"),
       ),
@@ -407,7 +407,7 @@ describe("dashboard bootstrap tickets", () => {
     const dataDir = mkdtempSync(
       join(tmpdir(), "marketingovo-bootstrap-server-"),
     );
-    const runtime = new AgentSeoLocalRuntime({ dataDir });
+    const runtime = new MarketingovoLocalRuntime({ dataDir });
     let now = Date.now();
     const server = await createLocalServer({
       runtime,
@@ -503,7 +503,7 @@ describe("dashboard bootstrap tickets", () => {
   });
 
   it("accepts only the canonical dashboard identifiers and rejects the retired aliases", async () => {
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-session-identity-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
@@ -613,7 +613,7 @@ describe("dashboard bootstrap tickets", () => {
   });
 
   it("publishes exactly one canonical session security scheme", async () => {
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-openapi-identity-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
@@ -658,7 +658,7 @@ describe("dashboard bootstrap tickets", () => {
       join(dashboardDir, "index.html"),
       "<!doctype html><title>Marketingovo</title>",
     );
-    const runtime = new AgentSeoLocalRuntime({ dataDir });
+    const runtime = new MarketingovoLocalRuntime({ dataDir });
     const server = await createLocalServer({
       runtime,
       port: 3210,
@@ -690,7 +690,7 @@ describe("hosted service independence", () => {
       throw new Error(`Unexpected hosted request: ${String(input)}`);
     });
     vi.stubGlobal("fetch", hostedFetch);
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-local-server-")),
     });
     const server = await createLocalServer({

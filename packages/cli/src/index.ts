@@ -1,6 +1,6 @@
-export { AgentSeoClient, AgentSeoApiError } from "@marketingovo/sdk";
+export { MarketingovoClient, MarketingovoApiError } from "@marketingovo/sdk";
 export { createLocalServer } from "@marketingovo/server";
 export {
-  AgentSeoLocalRuntime,
+  MarketingovoLocalRuntime,
   defaultDataDirectory,
 } from "@marketingovo/runtime";

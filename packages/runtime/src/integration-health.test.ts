@@ -3,14 +3,17 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { MemoryCredentialStore } from "@marketingovo/credentials";
-import { AgentSeoLocalRuntime } from "./index.js";
+import { MarketingovoLocalRuntime } from "./index.js";
 
 function runtimeWith(
   fetchImpl: typeof fetch,
   credentialStore = new MemoryCredentialStore(),
-): { runtime: AgentSeoLocalRuntime; credentialStore: MemoryCredentialStore } {
+): {
+  runtime: MarketingovoLocalRuntime;
+  credentialStore: MemoryCredentialStore;
+} {
   return {
-    runtime: new AgentSeoLocalRuntime({
+    runtime: new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-integration-health-")),
       integrationFetch: fetchImpl,
       credentialStore,

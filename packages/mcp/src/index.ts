@@ -23,7 +23,7 @@ import {
   type AgentRunGetInput,
   type AgentRunLinksInput,
 } from "@marketingovo/contracts/agent-tools";
-import { AgentSeoClient } from "@marketingovo/sdk";
+import { MarketingovoClient } from "@marketingovo/sdk";
 import { resolveMcpConnectionEnvironment } from "./compatibility.js";
 
 export const PUBLIC_TOOL_NAMES = PUBLIC_AGENT_TOOL_NAMES;
@@ -64,8 +64,8 @@ const monitoringStatusInputSchema =
     AgentMonitoringStatusTool.inputSchema,
   );
 
-export interface AgentSeoMcpOptions {
-  client?: AgentSeoClient;
+export interface MarketingovoMcpOptions {
+  client?: MarketingovoClient;
   baseUrl?: string;
   tokenFile?: string;
 }
@@ -74,7 +74,7 @@ const textResult = (value: unknown) => ({
   content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }],
 });
 
-function defaultAgentSeoDataDirectory(): string {
+function defaultMarketingovoDataDirectory(): string {
   // Preserve the persisted 1.x data root until the storage migration owns the
   // default-path cutover. Connection environment variables remain canonical.
   if (process.platform === "darwin")
@@ -90,16 +90,16 @@ function defaultAgentSeoDataDirectory(): string {
   );
 }
 
-export async function createAgentSeoMcpServer(
-  options: AgentSeoMcpOptions = {},
+export async function createMarketingovoMcpServer(
+  options: MarketingovoMcpOptions = {},
 ): Promise<McpServer> {
   let client = options.client;
   if (!client) {
     const connectionEnvironment = resolveMcpConnectionEnvironment();
-    client = await AgentSeoClient.fromTokenFile(
+    client = await MarketingovoClient.fromTokenFile(
       options.tokenFile ??
         connectionEnvironment.tokenFile ??
-        join(defaultAgentSeoDataDirectory(), "service-token"),
+        join(defaultMarketingovoDataDirectory(), "service-token"),
       { baseUrl: options.baseUrl ?? connectionEnvironment.baseUrl },
     );
   }

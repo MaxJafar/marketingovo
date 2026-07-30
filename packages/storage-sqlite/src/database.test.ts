@@ -3,13 +3,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Action, IssueInstance } from "@marketingovo/contracts";
-import { AgentSeoDatabase } from "./database.js";
+import { MarketingovoDatabase } from "./database.js";
 
-describe("AgentSeoDatabase", () => {
+describe("MarketingovoDatabase", () => {
   it("persists projects, idempotent runs, events, and restart recovery", () => {
     const root = mkdtempSync(join(tmpdir(), "marketingovo-storage-"));
     const path = join(root, "marketingovo.db");
-    const database = new AgentSeoDatabase({ path });
+    const database = new MarketingovoDatabase({ path });
     const project = database.createProject({
       name: "Example",
       canonicalUrl: "https://example.com",
@@ -37,7 +37,7 @@ describe("AgentSeoDatabase", () => {
     expect(database.listRunEvents(first.id)).toHaveLength(1);
     database.close();
 
-    const reopened = new AgentSeoDatabase({ path });
+    const reopened = new MarketingovoDatabase({ path });
     expect(reopened.getProject(project.id)?.canonicalUrl).toBe(
       "https://example.com/",
     );
@@ -46,7 +46,7 @@ describe("AgentSeoDatabase", () => {
 
   it("projects per-run page counts and health without inventing missing health", () => {
     const root = mkdtempSync(join(tmpdir(), "marketingovo-run-statistics-"));
-    const database = new AgentSeoDatabase({
+    const database = new MarketingovoDatabase({
       path: join(root, "marketingovo.db"),
     });
     const project = database.createProject({
@@ -108,7 +108,7 @@ describe("AgentSeoDatabase", () => {
 
   it("upserts durable per-module execution metadata", () => {
     const root = mkdtempSync(join(tmpdir(), "marketingovo-run-modules-"));
-    const database = new AgentSeoDatabase({
+    const database = new MarketingovoDatabase({
       path: join(root, "marketingovo.db"),
     });
     const project = database.createProject({
@@ -156,7 +156,7 @@ describe("AgentSeoDatabase", () => {
 
   it("leases, heartbeats, retries and dead-letters jobs without duplicate claims", () => {
     const root = mkdtempSync(join(tmpdir(), "marketingovo-jobs-"));
-    const database = new AgentSeoDatabase({
+    const database = new MarketingovoDatabase({
       path: join(root, "marketingovo.db"),
     });
     const project = database.createProject({
@@ -229,7 +229,7 @@ describe("AgentSeoDatabase", () => {
 
   it("claims a due schedule once and advances its durable cursor", () => {
     const root = mkdtempSync(join(tmpdir(), "marketingovo-schedule-"));
-    const database = new AgentSeoDatabase({
+    const database = new MarketingovoDatabase({
       path: join(root, "marketingovo.db"),
     });
     const project = database.createProject({
@@ -269,7 +269,7 @@ describe("AgentSeoDatabase", () => {
 
   it("keeps non-secret connector configuration isolated per project", () => {
     const root = mkdtempSync(join(tmpdir(), "marketingovo-integrations-"));
-    const database = new AgentSeoDatabase({
+    const database = new MarketingovoDatabase({
       path: join(root, "marketingovo.db"),
     });
     const first = database.createProject({
@@ -308,7 +308,7 @@ describe("AgentSeoDatabase", () => {
   it("updates project identity and persists local reporting settings", () => {
     const root = mkdtempSync(join(tmpdir(), "marketingovo-settings-"));
     const path = join(root, "marketingovo.db");
-    const database = new AgentSeoDatabase({ path });
+    const database = new MarketingovoDatabase({ path });
     const project = database.createProject({
       name: "Original",
       canonicalUrl: "https://example.com",
@@ -339,7 +339,7 @@ describe("AgentSeoDatabase", () => {
     });
     database.close();
 
-    const reopened = new AgentSeoDatabase({ path });
+    const reopened = new MarketingovoDatabase({ path });
     expect(reopened.getProjectSettings(project.id)).toMatchObject({
       timezone: "Europe/London",
       reportingCurrency: "GBP",
@@ -354,7 +354,7 @@ describe("AgentSeoDatabase", () => {
   it("persists action evidence, checkpoints, and idempotent verification verdicts", () => {
     const root = mkdtempSync(join(tmpdir(), "marketingovo-flight-recorder-"));
     const path = join(root, "marketingovo.db");
-    const database = new AgentSeoDatabase({ path });
+    const database = new MarketingovoDatabase({ path });
     const project = database.createProject({
       name: "Flight recorder",
       canonicalUrl: "https://example.com",
@@ -548,7 +548,7 @@ describe("AgentSeoDatabase", () => {
     );
     database.close();
 
-    const reopened = new AgentSeoDatabase({ path });
+    const reopened = new MarketingovoDatabase({ path });
     expect(reopened.latestActionVerification(action.id)).toMatchObject({
       state: "verified",
       runId: verificationRun.id,
@@ -561,7 +561,7 @@ describe("AgentSeoDatabase", () => {
     const root = mkdtempSync(
       join(tmpdir(), "marketingovo-import-transaction-"),
     );
-    const database = new AgentSeoDatabase({
+    const database = new MarketingovoDatabase({
       path: join(root, "marketingovo.db"),
     });
     const at = "2026-07-15T10:00:00.000Z";

@@ -6,7 +6,7 @@ import {
   validateLocalApiBaseUrl,
 } from "./local-api.js";
 
-export interface GeneratedAgentSeoClientOptions {
+export interface GeneratedMarketingovoClientOptions {
   baseUrl?: string;
   token?: string;
   fetch?: typeof globalThis.fetch;
@@ -14,12 +14,12 @@ export interface GeneratedAgentSeoClientOptions {
 
 /**
  * Create the complete low-level client generated from the runtime OpenAPI
- * document. The ergonomic AgentSeoClient remains the recommended workflow
+ * document. The ergonomic MarketingovoClient remains the recommended workflow
  * surface; this client exposes every documented route without weakening the
  * localhost credential boundary.
  */
-export function createGeneratedAgentSeoClient(
-  options: GeneratedAgentSeoClientOptions = {},
+export function createGeneratedMarketingovoClient(
+  options: GeneratedMarketingovoClientOptions = {},
 ) {
   const apiBaseUrl = validateLocalApiBaseUrl(
     options.baseUrl ?? DEFAULT_LOCAL_API_BASE_URL,
@@ -56,16 +56,16 @@ export function createGeneratedAgentSeoClient(
   return createClient<paths>({ baseUrl: origin, fetch: guardedFetch });
 }
 
-export async function createGeneratedAgentSeoClientFromTokenFile(
+export async function createGeneratedMarketingovoClientFromTokenFile(
   path: string,
-  options: Omit<GeneratedAgentSeoClientOptions, "token"> = {},
+  options: Omit<GeneratedMarketingovoClientOptions, "token"> = {},
 ) {
   const baseUrl = validateLocalApiBaseUrl(
     options.baseUrl ?? DEFAULT_LOCAL_API_BASE_URL,
   );
   const token = (await readFile(path, "utf8")).trim();
   if (!token) throw new Error("Marketingovo service token file is empty");
-  return createGeneratedAgentSeoClient({ ...options, baseUrl, token });
+  return createGeneratedMarketingovoClient({ ...options, baseUrl, token });
 }
 
-export type AgentSeoOpenApiPaths = paths;
+export type MarketingovoOpenApiPaths = paths;

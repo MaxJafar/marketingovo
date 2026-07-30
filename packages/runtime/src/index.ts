@@ -43,7 +43,7 @@ import type {
   ActionCheckpoint,
   ActionEvidenceWorkspace,
   ActionOutcomeObservation,
-  AgentSeoRuntime,
+  MarketingovoRuntime,
   AppendProjectContextJournalInput,
   Capabilities,
   CreateProjectInput,
@@ -82,8 +82,8 @@ import type {
 } from "@marketingovo/contracts";
 import {
   MARKETINGOVO_PROJECT_BUNDLE_LIMITS,
-  AgentSeoProjectBundleV2Schema,
-  type AgentSeoProjectBundleV2,
+  MarketingovoProjectBundleV2Schema,
+  type MarketingovoProjectBundleV2,
   type ProjectBundleArtifact,
   type ProjectBundleConnector,
   type ProjectBundleCustomRule,
@@ -115,7 +115,7 @@ import {
   validateConnectorConfiguration,
 } from "@marketingovo/integrations";
 import {
-  AgentSeoDatabase,
+  MarketingovoDatabase,
   type PagePerformanceRecord,
   type PerformanceWindowRecord,
   type QueryPerformanceRecord,
@@ -466,7 +466,7 @@ function extractionConfigurationHash(rules: ExtractionRule[]): string {
 }
 
 function transferPayloadChecksum(
-  bundle: Omit<AgentSeoProjectBundleV2, "integrity">,
+  bundle: Omit<MarketingovoProjectBundleV2, "integrity">,
 ): string {
   return sha256(stableJson(bundle));
 }
@@ -773,10 +773,10 @@ if (!FormatRegistry.Has("uri")) {
 
 function validateProjectBundle(
   raw: unknown,
-): asserts raw is AgentSeoProjectBundleV2 {
+): asserts raw is MarketingovoProjectBundleV2 {
   rejectUnsafeTransferValue(raw);
-  if (!Value.Check(AgentSeoProjectBundleV2Schema, raw)) {
-    const detail = [...Value.Errors(AgentSeoProjectBundleV2Schema, raw)]
+  if (!Value.Check(MarketingovoProjectBundleV2Schema, raw)) {
+    const detail = [...Value.Errors(MarketingovoProjectBundleV2Schema, raw)]
       .slice(0, 8)
       .map((error) => `${error.path || "$"}: ${error.message}`)
       .join("; ");
@@ -2317,9 +2317,9 @@ export async function createPdf(
   return pdf.save();
 }
 
-export class AgentSeoLocalRuntime implements AgentSeoRuntime {
+export class MarketingovoLocalRuntime implements MarketingovoRuntime {
   readonly dataDir: string;
-  readonly database: AgentSeoDatabase;
+  readonly database: MarketingovoDatabase;
   readonly credentialStore: CredentialStore;
   readonly version: string;
   readonly events = new EventEmitter();
@@ -3795,7 +3795,7 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
     } catch {
       /* platform ACL may own this */
     }
-    this.database = new AgentSeoDatabase({
+    this.database = new MarketingovoDatabase({
       path: join(this.dataDir, "marketingovo.db"),
     });
     this.recoverDeletionStaging();
@@ -5702,7 +5702,7 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
       }
     }
 
-    const payload: Omit<AgentSeoProjectBundleV2, "integrity"> = {
+    const payload: Omit<MarketingovoProjectBundleV2, "integrity"> = {
       format: "marketingovo-project",
       version: 2,
       exportedAt: new Date().toISOString(),
@@ -5745,16 +5745,16 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
       projectContext: sanitizeTransferValue({
         versions: this.database.listProjectContextVersions(projectId),
         journal: this.database.listProjectContextJournal(projectId),
-      }) as AgentSeoProjectBundleV2["projectContext"],
+      }) as MarketingovoProjectBundleV2["projectContext"],
       extractionRuleVersions: sanitizeTransferValue(
         this.database.listExtractionRuleVersions(projectId),
-      ) as AgentSeoProjectBundleV2["extractionRuleVersions"],
+      ) as MarketingovoProjectBundleV2["extractionRuleVersions"],
       actions: this.database
         .listActions(projectId, { includeAdjudicated: true })
         .map((action) => actionForProjectBundle(action)),
       metrics: sanitizeTransferValue(
         this.database.listMetricHistory(projectId),
-      ) as ReturnType<AgentSeoDatabase["listMetricHistory"]>,
+      ) as ReturnType<MarketingovoDatabase["listMetricHistory"]>,
       schedules: sanitizeTransferValue(
         this.database.listSchedules(projectId),
       ) as Schedule[],
@@ -5762,7 +5762,7 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
       customRules,
       artifacts,
     };
-    const bundle: AgentSeoProjectBundleV2 = {
+    const bundle: MarketingovoProjectBundleV2 = {
       ...payload,
       integrity: {
         algorithm: "sha256",

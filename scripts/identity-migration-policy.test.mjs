@@ -39,6 +39,9 @@ test("the sentinel rejects forbidden package scopes and invented domains", () =>
     [
       "legacy-product-identity",
       "legacy-package-scope",
+      // The fixture's hostname is itself a retired identity, so the widened
+      // camelCase-aware rule fires on it too.
+      "retired-agentseo-identity",
       "invented-marketingovo-domain",
     ],
   );

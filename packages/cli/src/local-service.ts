@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { AgentSeoClient } from "@marketingovo/sdk";
+import { MarketingovoClient } from "@marketingovo/sdk";
 
 export interface LocalServiceResolution<T> {
   dashboardUrl: string;
@@ -24,7 +24,7 @@ export async function issueDashboardUrl(
   port: number,
   fetchImpl: typeof globalThis.fetch = globalThis.fetch,
 ): Promise<string> {
-  const client = await AgentSeoClient.fromTokenFile(
+  const client = await MarketingovoClient.fromTokenFile(
     join(dataDirectory, "service-token"),
     {
       baseUrl: localApiBaseUrl(port),

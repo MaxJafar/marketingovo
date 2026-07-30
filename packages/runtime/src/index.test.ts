@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { decodeOAuthCredential } from "@marketingovo/credentials";
 import type { Report as EngineReport } from "@marketingovo/core";
-import { AgentSeoLocalRuntime } from "./index.js";
+import { MarketingovoLocalRuntime } from "./index.js";
 
 function reportFixture(input: Record<string, unknown>): EngineReport {
   const summary = input.summary as
@@ -74,7 +74,7 @@ function reportFixture(input: Record<string, unknown>): EngineReport {
 
 describe("runtime independence capabilities", () => {
   it("advertises local-only operation without a hosted service", async () => {
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-capabilities-")),
     });
 
@@ -94,7 +94,7 @@ describe("runtime independence capabilities", () => {
 describe("runtime OAuth integration persistence", () => {
   it("persists health, scopes and absolute expiry while keeping tokens in CredentialStore", async () => {
     const dataDir = mkdtempSync(join(tmpdir(), "marketingovo-runtime-oauth-"));
-    const runtime = new AgentSeoLocalRuntime({ dataDir });
+    const runtime = new MarketingovoLocalRuntime({ dataDir });
     const accessToken = "runtime-access-secret";
     const refreshToken = "runtime-refresh-secret";
     const expiresAt = new Date(Date.now() + 3_600_000).toISOString();
@@ -137,7 +137,7 @@ describe("runtime OAuth integration persistence", () => {
   });
 
   it("persists expired health for an already-expired token set", async () => {
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-oauth-")),
     });
     try {
@@ -211,7 +211,7 @@ describe("runtime OAuth integration persistence", () => {
           { status: 200, headers: { "content-type": "application/json" } },
         ),
     );
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-bridge-")),
       engine,
       googleDesktopClientId: "desktop-client.apps.googleusercontent.com",
@@ -297,7 +297,7 @@ describe("runtime OAuth integration persistence", () => {
         },
       },
     };
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-research-")),
       engine,
     });
@@ -412,7 +412,7 @@ describe("runtime OAuth integration persistence", () => {
       reportToHtml: () => "<!doctype html><title>PSI report</title>",
       reportToCsv: () => "url,status\n",
     };
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir,
       engine,
       integrationFetch: providerFetch,
@@ -525,7 +525,10 @@ describe("runtime GA4 action exposure", () => {
     reportToCsv: () => "url,status\n",
   });
 
-  async function waitForTerminal(runtime: AgentSeoLocalRuntime, runId: string) {
+  async function waitForTerminal(
+    runtime: MarketingovoLocalRuntime,
+    runId: string,
+  ) {
     let current = await runtime.runs.get(runId);
     for (
       let attempt = 0;
@@ -541,7 +544,7 @@ describe("runtime GA4 action exposure", () => {
   }
 
   it("resolves relative pagePath rows against the project origin", async () => {
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-ga4-path-")),
       engine: engineFor([
         { page: "/pricing#ga4-fragment", keyEvents: 5 },
@@ -582,7 +585,7 @@ describe("runtime GA4 action exposure", () => {
       join(tmpdir(), "marketingovo-runtime-ga4-invalid-"),
     );
     const embeddedSecret = "ga4-provider-secret-must-not-leak";
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir,
       engine: engineFor([
         { page: "https://other.example/pricing", keyEvents: 100 },
@@ -651,7 +654,7 @@ describe("runtime issue reconciliation", () => {
       reportToHtml: () => "<!doctype html><title>Report</title>",
       reportToCsv: () => "url,status\n",
     };
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(
         join(tmpdir(), "marketingovo-runtime-exact-cohort-"),
       ),
@@ -742,7 +745,7 @@ describe("runtime issue reconciliation", () => {
       reportToHtml: () => "<!doctype html><title>Report</title>",
       reportToCsv: () => "url,status\n",
     };
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-issues-")),
       engine,
     });
@@ -839,7 +842,7 @@ describe("runtime issue reconciliation", () => {
       reportToHtml: () => "<!doctype html><title>Report</title>",
       reportToCsv: () => "url,status\n",
     };
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-action-key-")),
       engine,
     });
@@ -938,7 +941,7 @@ describe("runtime issue reconciliation", () => {
       reportToHtml: () => "<!doctype html><title>Report</title>",
       reportToCsv: () => "url,status\n",
     };
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-lifecycle-")),
       engine,
     });
@@ -1022,7 +1025,7 @@ describe("runtime issue reconciliation", () => {
       reportToHtml: () => "",
       reportToCsv: () => "",
     };
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-cancel-")),
       engine,
     });
@@ -1094,7 +1097,7 @@ describe("runtime issue reconciliation", () => {
     };
     const previous = process.env.MARKETINGOVO_ALLOW_PRIVATE;
     process.env.MARKETINGOVO_ALLOW_PRIVATE = "true";
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(
         join(tmpdir(), "marketingovo-runtime-private-policy-"),
       ),
@@ -1186,7 +1189,7 @@ describe("runtime issue reconciliation", () => {
       reportToHtml: () => "",
       reportToCsv: () => "",
     };
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-partial-")),
       engine,
     });

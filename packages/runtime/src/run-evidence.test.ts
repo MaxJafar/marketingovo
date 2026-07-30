@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { Report as EngineReport } from "@marketingovo/core";
-import { AgentSeoLocalRuntime } from "./index.js";
+import { MarketingovoLocalRuntime } from "./index.js";
 
 const generatedAt = "2026-07-15T12:00:00.000Z";
 
@@ -174,7 +174,10 @@ function evidenceReport(startUrl: string): EngineReport {
   };
 }
 
-async function waitForTerminal(runtime: AgentSeoLocalRuntime, runId: string) {
+async function waitForTerminal(
+  runtime: MarketingovoLocalRuntime,
+  runId: string,
+) {
   for (let attempt = 0; attempt < 100; attempt += 1) {
     const run = await runtime.runs.get(runId);
     if (run && ["succeeded", "partial", "failed"].includes(run.status))
@@ -185,7 +188,7 @@ async function waitForTerminal(runtime: AgentSeoLocalRuntime, runId: string) {
 }
 
 describe("run evidence runtime", () => {
-  let runtime: AgentSeoLocalRuntime | undefined;
+  let runtime: MarketingovoLocalRuntime | undefined;
   afterEach(() => runtime?.close());
 
   it("persists a versioned summary and paginates evidence without losing totals", async () => {
@@ -194,7 +197,7 @@ describe("run evidence runtime", () => {
     const fr = "https://example.com/fr";
     const redirected = "https://example.com/new";
     const report = evidenceReport("https://example.com/");
-    runtime = new AgentSeoLocalRuntime({
+    runtime = new MarketingovoLocalRuntime({
       dataDir,
       engine: {
         crawl: async () => ({ report, runId: "engine-run" }),
@@ -328,7 +331,7 @@ describe("run evidence runtime", () => {
   it("fails closed when the evidence artifact no longer matches its checksum", async () => {
     const dataDir = mkdtempSync(join(tmpdir(), "marketingovo-run-evidence-"));
     const report = evidenceReport("https://example.com/");
-    runtime = new AgentSeoLocalRuntime({
+    runtime = new MarketingovoLocalRuntime({
       dataDir,
       engine: {
         crawl: async () => ({ report, runId: "engine-run" }),

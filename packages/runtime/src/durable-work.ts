@@ -3,7 +3,7 @@ import type { StartRunInput } from "@marketingovo/contracts";
 import type {
   ClaimedSchedule,
   DurableJob,
-  AgentSeoDatabase,
+  MarketingovoDatabase,
 } from "@marketingovo/storage-sqlite";
 import { nextCronOccurrence } from "./cron.js";
 
@@ -13,7 +13,7 @@ export type DurableJobHandler = (
 ) => Promise<void>;
 
 export interface DurableJobWorkerOptions {
-  database: AgentSeoDatabase;
+  database: MarketingovoDatabase;
   handlers: ReadonlyMap<string, DurableJobHandler>;
   workerId?: string;
   concurrency?: number;
@@ -97,7 +97,7 @@ export class DurableJobWorker {
 }
 
 export interface DurableSchedulerOptions {
-  database: AgentSeoDatabase;
+  database: MarketingovoDatabase;
   startRun(input: StartRunInput, idempotencyKey: string): Promise<unknown>;
   workerId?: string;
   pollMs?: number;

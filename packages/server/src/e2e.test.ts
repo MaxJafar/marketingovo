@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { AgentSeoLocalRuntime } from "@marketingovo/runtime";
+import { MarketingovoLocalRuntime } from "@marketingovo/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 const HOST = "127.0.0.1:3210";
@@ -64,7 +64,7 @@ describe("local API end-to-end", () => {
       ],
       topUrls: [],
     };
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-server-e2e-")),
       engine: {
         crawl: async () => ({ report, runId: "engine-run" }),
@@ -239,7 +239,7 @@ describe("local API end-to-end", () => {
   });
 
   it("rejects non-loopback Host headers before authentication", async () => {
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-server-host-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });

@@ -31,7 +31,7 @@
       "wix": {
         "language": "en-US",
         "fragmentPaths": ["./windows/fragments/background-startup.wxs"],
-        "componentRefs": ["AgentSeoBackgroundStartup"]
+        "componentRefs": ["MarketingovoBackgroundStartup"]
       }
     },
     "linux": { "appimage": { "bundleMediaFramework": false } }

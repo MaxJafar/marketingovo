@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { IssueInstance, Severity } from "@marketingovo/contracts";
-import { AgentSeoLocalRuntime } from "./index.js";
+import { MarketingovoLocalRuntime } from "./index.js";
 
 const observedAt = "2026-07-16T09:00:00.000Z";
 
@@ -29,11 +29,11 @@ function issue(
 }
 
 describe("immutable audit comparison", () => {
-  let runtime: AgentSeoLocalRuntime | undefined;
+  let runtime: MarketingovoLocalRuntime | undefined;
   afterEach(() => runtime?.close());
 
   it("calculates reviewed issue, page, health, and configuration deltas without mutating history", async () => {
-    runtime = new AgentSeoLocalRuntime({
+    runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-audit-comparison-")),
     });
     const project = await runtime.projects.create({
@@ -328,7 +328,7 @@ describe("immutable audit comparison", () => {
   });
 
   it("rejects same-run, cross-project, active, and non-audit comparisons", async () => {
-    runtime = new AgentSeoLocalRuntime({
+    runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(
         join(tmpdir(), "marketingovo-audit-comparison-guard-"),
       ),

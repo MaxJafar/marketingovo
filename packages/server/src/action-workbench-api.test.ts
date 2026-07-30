@@ -7,7 +7,7 @@ import type {
   ActionService,
   IssueInstance,
 } from "@marketingovo/contracts";
-import { AgentSeoLocalRuntime } from "@marketingovo/runtime";
+import { MarketingovoLocalRuntime } from "@marketingovo/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 const HOST = "127.0.0.1:3210";
@@ -24,7 +24,7 @@ describe("action workbench API", () => {
     const dataDir = mkdtempSync(
       join(tmpdir(), "marketingovo-action-workbench-"),
     );
-    const runtime = new AgentSeoLocalRuntime({ dataDir });
+    const runtime = new MarketingovoLocalRuntime({ dataDir });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
     const token = readFileSync(server.serviceTokenPath, "utf8").trim();
@@ -44,7 +44,7 @@ describe("action workbench API", () => {
   }
 
   function seedAction(
-    runtime: AgentSeoLocalRuntime,
+    runtime: MarketingovoLocalRuntime,
     projectId: string,
     options: { successfulBaseline?: boolean } = {},
   ) {

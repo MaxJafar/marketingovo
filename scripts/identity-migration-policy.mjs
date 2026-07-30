@@ -85,6 +85,12 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
 
   {
     rule: "retired-agentseo-identity",
+    path: "scripts/identity-migration-policy.test.mjs",
+    reason:
+      "The gate's own tests must construct a retired identity in order to assert it is rejected.",
+  },
+  {
+    rule: "retired-agentseo-identity",
     path: "scripts/npm-release-policy.mjs",
     reason:
       "The npm release policy must name the retired package scope in order to forbid it.",
@@ -222,7 +228,7 @@ const TEXT_RULES = Object.freeze([
     // any occurrence is a leftover, not an alias.
     id: "retired-agentseo-identity",
     pattern:
-      /AGENTseo|AGENTSEO|agentseoapp|agentseo_[a-z_]+|agentseo:\/\/|\.agentseo\b/gu,
+      /agent-?seo(app)?|AGENTSEO|agentseo_[a-z_]+|agentseo:\/\/|\.agentseo\b/giu,
     sourceOnly: true,
   },
   {
@@ -363,6 +369,12 @@ function isIdentityTextSurface(path) {
 }
 
 function scanTextSource(path, source, allowlist = IDENTITY_ALLOWLIST) {
+  // The baseline records the exact matched text of every pinned occurrence, so
+  // scanning it makes it match itself and rewriting it changes what it matched.
+  // That is a fixpoint the gate cannot settle, so it is never scanned.
+  if (path === IDENTITY_BASELINE_PATH) {
+    return { unauthorized: [], groups: new Map() };
+  }
   const unauthorized = [];
   const groups = new Map();
   for (const rule of TEXT_RULES) {

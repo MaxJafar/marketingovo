@@ -7,14 +7,14 @@ import {
   restoreDatabaseBackup,
   validateDatabaseBackup,
 } from "./backup.js";
-import { AgentSeoDatabase } from "./database.js";
+import { MarketingovoDatabase } from "./database.js";
 
 describe("SQLite backup and restore", () => {
   it("creates a validated snapshot and restores it with a rollback copy", async () => {
     const root = mkdtempSync(join(tmpdir(), "marketingovo-backup-"));
     const databasePath = join(root, "marketingovo.db");
     const backupPath = join(root, "snapshots", "baseline.db");
-    const database = new AgentSeoDatabase({ path: databasePath });
+    const database = new MarketingovoDatabase({ path: databasePath });
     const original = database.createProject({
       name: "Original",
       canonicalUrl: "https://example.com/",
@@ -34,7 +34,7 @@ describe("SQLite backup and restore", () => {
       backup.sha256,
     );
     expect(restored.rollbackPath).toBeTruthy();
-    const reopened = new AgentSeoDatabase({ path: databasePath });
+    const reopened = new MarketingovoDatabase({ path: databasePath });
     expect(reopened.listProjects()).toEqual([original]);
     reopened.close();
   });
@@ -45,7 +45,9 @@ describe("SQLite backup and restore", () => {
     writeFileSync(malformed, "not sqlite");
     await expect(validateDatabaseBackup(malformed)).rejects.toThrow();
 
-    const database = new AgentSeoDatabase({ path: join(root, "source.db") });
+    const database = new MarketingovoDatabase({
+      path: join(root, "source.db"),
+    });
     database.createProject({
       name: "Project",
       canonicalUrl: "https://example.com/",
@@ -67,7 +69,9 @@ describe("SQLite backup and restore", () => {
 
   it("refuses to overwrite an existing backup destination", async () => {
     const root = mkdtempSync(join(tmpdir(), "marketingovo-backup-existing-"));
-    const database = new AgentSeoDatabase({ path: join(root, "source.db") });
+    const database = new MarketingovoDatabase({
+      path: join(root, "source.db"),
+    });
     const destination = join(root, "existing.db");
     writeFileSync(destination, "keep me");
     await expect(createDatabaseBackup(database, destination)).rejects.toThrow(

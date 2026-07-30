@@ -2,11 +2,11 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { AgentSeoDatabase } from "./database.js";
+import { MarketingovoDatabase } from "./database.js";
 
 describe("stored run evidence pagination", () => {
   it("filters versioned page evidence by section, search and stable offsets", () => {
-    const database = new AgentSeoDatabase({
+    const database = new MarketingovoDatabase({
       path: join(
         mkdtempSync(join(tmpdir(), "marketingovo-evidence-db-")),
         "marketingovo.db",

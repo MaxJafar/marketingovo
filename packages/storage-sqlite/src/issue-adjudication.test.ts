@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Action, IssueInstance } from "@marketingovo/contracts";
-import { AgentSeoDatabase } from "./database.js";
+import { MarketingovoDatabase } from "./database.js";
 
 function issue(at: string): IssueInstance {
   return {
@@ -32,7 +32,7 @@ function issue(at: string): IssueInstance {
 describe("issue adjudication storage", () => {
   it("keeps reviewed classifications sticky, reversible, scoped, and out of priorities", () => {
     const root = mkdtempSync(join(tmpdir(), "marketingovo-issue-review-"));
-    const database = new AgentSeoDatabase({
+    const database = new MarketingovoDatabase({
       path: join(root, "marketingovo.db"),
     });
     const project = database.createProject({
@@ -193,7 +193,7 @@ describe("issue adjudication storage", () => {
     const root = mkdtempSync(
       join(tmpdir(), "marketingovo-action-review-scope-"),
     );
-    const database = new AgentSeoDatabase({
+    const database = new MarketingovoDatabase({
       path: join(root, "marketingovo.db"),
     });
     const project = database.createProject({
@@ -288,7 +288,7 @@ describe("issue adjudication storage", () => {
 
   it("filters and paginates the review workspace without returning another site", () => {
     const root = mkdtempSync(join(tmpdir(), "marketingovo-issue-filters-"));
-    const database = new AgentSeoDatabase({
+    const database = new MarketingovoDatabase({
       path: join(root, "marketingovo.db"),
     });
     const project = database.createProject({

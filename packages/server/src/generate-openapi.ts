@@ -1,7 +1,7 @@
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { AgentSeoLocalRuntime } from "@marketingovo/runtime";
+import { MarketingovoLocalRuntime } from "@marketingovo/runtime";
 import { createLocalServer } from "./index.js";
 
 function sortValue(value: unknown): unknown {
@@ -14,7 +14,7 @@ function sortValue(value: unknown): unknown {
   );
 }
 
-const runtime = new AgentSeoLocalRuntime({
+const runtime = new MarketingovoLocalRuntime({
   // This is an ephemeral generator path, not a persisted-data migration.
   dataDir: mkdtempSync(join(tmpdir(), "marketingovo-openapi-")),
   version: "1.0.0",

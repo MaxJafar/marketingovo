@@ -252,7 +252,7 @@ export type ProjectBundleCustomRule = Static<
   typeof ProjectBundleCustomRuleSchema
 >;
 
-export const AgentSeoProjectBundleV2Schema = Type.Object(
+export const MarketingovoProjectBundleV2Schema = Type.Object(
   {
     format: Type.Literal("marketingovo-project"),
     version: Type.Literal(2),
@@ -318,10 +318,10 @@ export const AgentSeoProjectBundleV2Schema = Type.Object(
       { additionalProperties: false },
     ),
   },
-  { additionalProperties: false, $id: "AgentSeoProjectBundleV2" },
+  { additionalProperties: false, $id: "MarketingovoProjectBundleV2" },
 );
-export type AgentSeoProjectBundleV2 = Static<
-  typeof AgentSeoProjectBundleV2Schema
+export type MarketingovoProjectBundleV2 = Static<
+  typeof MarketingovoProjectBundleV2Schema
 >;
 
 export const ProjectImportResultSchema = Type.Object(

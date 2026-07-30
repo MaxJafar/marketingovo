@@ -4,7 +4,10 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Action, IssueInstance } from "@marketingovo/contracts";
 import type { Report } from "@marketingovo/core";
-import { ActionEvidenceCursorError, AgentSeoLocalRuntime } from "./index.js";
+import {
+  ActionEvidenceCursorError,
+  MarketingovoLocalRuntime,
+} from "./index.js";
 
 const observedAt = "2026-07-15T10:00:00.000Z";
 
@@ -64,7 +67,7 @@ function action(projectId: string, affectedUrls: string[]): Action {
 }
 
 function completeRun(
-  runtime: AgentSeoLocalRuntime,
+  runtime: MarketingovoLocalRuntime,
   projectId: string,
   id: string,
   issues: IssueInstance[],
@@ -206,7 +209,10 @@ function report(projectUrl: string): Report {
   };
 }
 
-async function waitForTerminal(runtime: AgentSeoLocalRuntime, runId: string) {
+async function waitForTerminal(
+  runtime: MarketingovoLocalRuntime,
+  runId: string,
+) {
   for (let attempt = 0; attempt < 150; attempt += 1) {
     const run = await runtime.runs.get(runId);
     if (run && ["succeeded", "partial", "failed"].includes(run.status)) {
@@ -219,7 +225,7 @@ async function waitForTerminal(runtime: AgentSeoLocalRuntime, runId: string) {
 
 describe("runtime Action Evidence service", () => {
   it("preserves the full URL history and paginates exact evidence", async () => {
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(
         join(tmpdir(), "marketingovo-action-evidence-history-"),
       ),
@@ -402,7 +408,7 @@ describe("runtime Action Evidence service", () => {
       join(tmpdir(), "marketingovo-action-checkpoint-"),
     );
     const engineReport = report("https://example.com/");
-    let runtime = new AgentSeoLocalRuntime({
+    let runtime = new MarketingovoLocalRuntime({
       dataDir,
       engine: {
         crawl: async () => ({ runId: "engine-run", report: engineReport }),
@@ -477,7 +483,7 @@ describe("runtime Action Evidence service", () => {
       ).toBe(run.id);
       runtime.close();
 
-      runtime = new AgentSeoLocalRuntime({ dataDir });
+      runtime = new MarketingovoLocalRuntime({ dataDir });
       const restored = await runtime.actions.evidence(storedAction!.id);
       expect(restored?.verification.checkpointId).not.toBeNull();
       expect(restored?.summary).toMatchObject({ clicks: 100, keyEvents: 12 });
@@ -489,7 +495,7 @@ describe("runtime Action Evidence service", () => {
   });
 
   it("returns null metrics instead of zeros when providers are unavailable", async () => {
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(
         join(tmpdir(), "marketingovo-action-evidence-missing-"),
       ),
@@ -561,7 +567,7 @@ describe("runtime Action Evidence service", () => {
       ],
     };
     let invocation = 0;
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(
         join(tmpdir(), "marketingovo-action-evidence-partial-"),
       ),

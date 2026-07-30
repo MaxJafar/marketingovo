@@ -76,7 +76,7 @@ describe("reportToHtml", () => {
     expect(html).toContain("priority-low");
     expect(html).toContain("Marketingovo");
     expect(html).toContain("Crawl evidence only");
-    expect(html).not.toContain("AgentSeo v0.2");
+    expect(html).not.toContain("Marketingovo v0.2");
   });
   it("escapes HTML in URLs and titles", () => {
     const html = reportToHtml(SAMPLE);

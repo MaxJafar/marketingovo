@@ -2,7 +2,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { AgentSeoLocalRuntime } from "./index.js";
+import { MarketingovoLocalRuntime } from "./index.js";
 import {
   assessEnginePageIndexability,
   summarizePageIndexability,
@@ -139,7 +139,7 @@ describe("runtime page indexability", () => {
       reportToHtml: () => "<!doctype html><title>Indexability</title>",
       reportToCsv: () => "url,status\n",
     };
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-indexability-")),
       engine,
     });

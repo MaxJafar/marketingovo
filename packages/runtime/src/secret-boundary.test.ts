@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { EncryptedFileCredentialStore } from "@marketingovo/credentials";
 import { ConsoleLogger, type Report as EngineReport } from "@marketingovo/core";
 import { createDatabaseBackup } from "@marketingovo/storage-sqlite";
-import { AgentSeoLocalRuntime } from "./index.js";
+import { MarketingovoLocalRuntime } from "./index.js";
 
 const CANARY = "psi-runtime-canary-Z9y8X7w6V5u4";
 const TEST_TIMEOUT_MS = 60_000;
@@ -70,7 +70,7 @@ function reportWithAccidentalCredentialEcho(apiKey: string): EngineReport {
 }
 
 async function waitForTerminalRun(
-  runtime: AgentSeoLocalRuntime,
+  runtime: MarketingovoLocalRuntime,
   runId: string,
 ): Promise<NonNullable<Awaited<ReturnType<typeof runtime.runs.get>>>> {
   for (let attempt = 0; attempt < 200; attempt += 1) {
@@ -103,7 +103,7 @@ describe("runtime secret serialization boundary", () => {
         "a strong boundary test password",
       );
       const renderedInputs: string[] = [];
-      const runtime = new AgentSeoLocalRuntime({
+      const runtime = new MarketingovoLocalRuntime({
         dataDir,
         credentialStore,
         engine: {

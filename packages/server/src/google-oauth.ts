@@ -6,7 +6,7 @@ import {
   GoogleOAuthError,
   isGoogleOAuthProvider,
 } from "@marketingovo/integrations";
-import type { AgentSeoLocalRuntime } from "@marketingovo/runtime";
+import type { MarketingovoLocalRuntime } from "@marketingovo/runtime";
 
 export interface GoogleOAuthStartResponse {
   provider: string;
@@ -29,7 +29,7 @@ export class OAuthBrokerProblem extends Error {
 }
 
 export interface GoogleDesktopOAuthBrokerOptions {
-  runtime: AgentSeoLocalRuntime;
+  runtime: MarketingovoLocalRuntime;
   clientId?: string;
   fetchImpl?: typeof fetch;
   transactionTtlMs?: number;
@@ -101,7 +101,7 @@ function callbackProblem(error: unknown): OAuthBrokerProblem {
 }
 
 export class GoogleDesktopOAuthBroker {
-  private readonly runtime: AgentSeoLocalRuntime;
+  private readonly runtime: MarketingovoLocalRuntime;
   private readonly clientId: string | undefined;
   private readonly fetchImpl: typeof fetch | undefined;
   private readonly transactionTtlMs: number;

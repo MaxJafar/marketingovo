@@ -63,14 +63,14 @@ import {
 } from "@marketingovo/contracts";
 import {
   MARKETINGOVO_PROJECT_BUNDLE_LIMITS,
-  AgentSeoProjectBundleV2Schema,
+  MarketingovoProjectBundleV2Schema,
   ProjectImportResultSchema,
 } from "@marketingovo/contracts/project-bundle";
 import { getConnectorManifest } from "@marketingovo/integrations";
 import {
   ActionCheckpointError,
   ActionEvidenceCursorError,
-  AgentSeoLocalRuntime,
+  MarketingovoLocalRuntime,
   ExtractionRulesError,
   IssueAdjudicationError,
   nextCronOccurrence,
@@ -113,7 +113,7 @@ export {
 } from "./google-oauth.js";
 
 export interface LocalServerOptions {
-  runtime: AgentSeoLocalRuntime;
+  runtime: MarketingovoLocalRuntime;
   host?: "127.0.0.1";
   port?: number;
   dashboardDir?: string;
@@ -133,7 +133,7 @@ export interface LocalServerOptions {
 
 export interface LocalServer {
   app: FastifyInstance;
-  runtime: AgentSeoLocalRuntime;
+  runtime: MarketingovoLocalRuntime;
   host: "127.0.0.1";
   port: number;
   serviceTokenPath: string;
@@ -3402,7 +3402,7 @@ export async function createLocalServer(
           "application/json",
         ],
         produces: ["application/json"],
-        body: AgentSeoProjectBundleV2Schema,
+        body: MarketingovoProjectBundleV2Schema,
         response: {
           201: ProjectImportResultSchema,
           ...StandardProblemResponses,

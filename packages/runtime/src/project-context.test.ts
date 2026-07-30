@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ProjectContextProfile } from "@marketingovo/contracts";
-import { AgentSeoLocalRuntime } from "./index.js";
+import { MarketingovoLocalRuntime } from "./index.js";
 
 const profile = (overrides: Partial<ProjectContextProfile> = {}) => ({
   summary: "  Turn crawl and search evidence into verified actions.  ",
@@ -19,7 +19,7 @@ const profile = (overrides: Partial<ProjectContextProfile> = {}) => ({
 
 describe("project context runtime boundary", () => {
   it("normalizes reusable context while preserving immutable revisions and linked journal evidence", async () => {
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-context-")),
     });
     try {
@@ -88,7 +88,7 @@ describe("project context runtime boundary", () => {
   });
 
   it("rejects malformed, secret-like, local-path, and cross-project material", async () => {
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(
         join(tmpdir(), "marketingovo-runtime-context-safety-"),
       ),

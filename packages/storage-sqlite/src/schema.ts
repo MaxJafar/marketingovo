@@ -508,4 +508,58 @@ export const migrations: readonly Migration[] = [
         ON page_links(run_id, target_page_url, source_url);
     `,
   },
+  {
+    version: 12,
+    name: "keyword-rank-tracking",
+    sql: `
+      CREATE TABLE tracked_keywords (
+        id TEXT PRIMARY KEY,
+        project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+        keyword TEXT NOT NULL,
+        -- A SERP position is only meaningful alongside where and how it was
+        -- asked. Storing the context with the keyword is what makes a recorded
+        -- position reproducible rather than an anecdote.
+        locale TEXT NOT NULL,
+        location TEXT,
+        device TEXT NOT NULL CHECK(device IN ('desktop','mobile')),
+        search_engine TEXT NOT NULL DEFAULT 'google',
+        created_at TEXT NOT NULL,
+        archived_at TEXT,
+        UNIQUE(project_id, keyword, locale, location, device, search_engine)
+      );
+      CREATE INDEX idx_tracked_keywords_project
+        ON tracked_keywords(project_id, archived_at);
+
+      CREATE TABLE keyword_positions (
+        id TEXT PRIMARY KEY,
+        keyword_id TEXT NOT NULL REFERENCES tracked_keywords(id) ON DELETE CASCADE,
+        observed_at TEXT NOT NULL,
+        -- Three states that must never collapse into each other:
+        --   ranked     the site was found, and position holds where
+        --   absent     the site was genuinely not in the results examined
+        --   unmeasured no usable answer was obtained at all
+        -- Recording "absent" as position 0 or 101 would turn an observation
+        -- into a fabricated number, and recording "unmeasured" as absent would
+        -- turn a provider outage into a ranking loss.
+        outcome TEXT NOT NULL CHECK(outcome IN ('ranked','absent','unmeasured')),
+        position INTEGER CHECK(position IS NULL OR position > 0),
+        ranking_url TEXT,
+        -- How deep the SERP actually went. "Not in the top 10" and "not in the
+        -- top 100" are different findings and must stay distinguishable.
+        results_examined INTEGER CHECK(results_examined IS NULL OR results_examined > 0),
+        provider TEXT NOT NULL,
+        provider_cost TEXT NOT NULL
+          CHECK(provider_cost IN ('provider-reported','not-reported','free')),
+        failure_reason TEXT,
+        CHECK(
+          (outcome = 'ranked' AND position IS NOT NULL AND results_examined IS NOT NULL)
+          OR (outcome = 'absent' AND position IS NULL AND results_examined IS NOT NULL)
+          OR (outcome = 'unmeasured' AND position IS NULL)
+        ),
+        UNIQUE(keyword_id, observed_at)
+      );
+      CREATE INDEX idx_keyword_positions_history
+        ON keyword_positions(keyword_id, observed_at DESC);
+    `,
+  },
 ];

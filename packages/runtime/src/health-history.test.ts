@@ -3,10 +3,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Report as EngineReport } from "@marketingovo/core";
-import { AgentSeoLocalRuntime } from "./index.js";
+import { MarketingovoLocalRuntime } from "./index.js";
 
 async function waitForTerminalRun(
-  runtime: AgentSeoLocalRuntime,
+  runtime: MarketingovoLocalRuntime,
   runId: string,
 ) {
   for (let attempt = 0; attempt < 100; attempt += 1) {
@@ -86,7 +86,7 @@ describe("run-specific SEO Health history", () => {
       reportToHtml: () => "<!doctype html><title>Health history</title>",
       reportToCsv: () => "url,status\n",
     };
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-health-history-")),
       engine,
     });

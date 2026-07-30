@@ -8,10 +8,10 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { AgentSeoLocalRuntime } from "./index.js";
+import { MarketingovoLocalRuntime } from "./index.js";
 
 describe("project deletion runtime", () => {
-  let runtime: AgentSeoLocalRuntime | undefined;
+  let runtime: MarketingovoLocalRuntime | undefined;
 
   afterEach(() => runtime?.close());
 
@@ -19,7 +19,7 @@ describe("project deletion runtime", () => {
     const dataDir = mkdtempSync(
       join(tmpdir(), "marketingovo-runtime-deletion-"),
     );
-    runtime = new AgentSeoLocalRuntime({ dataDir });
+    runtime = new MarketingovoLocalRuntime({ dataDir });
     const project = await runtime.projects.create({
       name: "Exact Project Name",
       canonicalUrl: "https://delete.example",
@@ -122,7 +122,7 @@ describe("project deletion runtime", () => {
     const dataDir = mkdtempSync(
       join(tmpdir(), "marketingovo-runtime-deletion-"),
     );
-    runtime = new AgentSeoLocalRuntime({ dataDir });
+    runtime = new MarketingovoLocalRuntime({ dataDir });
 
     await expect(
       runtime.projects.delete({
@@ -155,7 +155,7 @@ describe("project deletion runtime", () => {
       mode: 0o600,
     });
 
-    runtime = new AgentSeoLocalRuntime({ dataDir });
+    runtime = new MarketingovoLocalRuntime({ dataDir });
 
     expect(existsSync(join(dataDir, ".deletion-staging"))).toBe(false);
     await expect(runtime.system.health()).resolves.toMatchObject({
@@ -168,7 +168,7 @@ describe("project deletion runtime", () => {
     const dataDir = mkdtempSync(
       join(tmpdir(), "marketingovo-runtime-deletion-"),
     );
-    runtime = new AgentSeoLocalRuntime({ dataDir });
+    runtime = new MarketingovoLocalRuntime({ dataDir });
     const project = await runtime.projects.create({
       name: "Crash recovery project",
       canonicalUrl: "https://recovery.example",
@@ -194,7 +194,7 @@ describe("project deletion runtime", () => {
     renameSync(projectDirectory, join(stagingRoot, "project"));
     expect(existsSync(customRulesPath)).toBe(false);
 
-    runtime = new AgentSeoLocalRuntime({ dataDir });
+    runtime = new MarketingovoLocalRuntime({ dataDir });
 
     expect(runtime.database.getProject(project.id)).not.toBeNull();
     expect(existsSync(customRulesPath)).toBe(true);
@@ -218,7 +218,7 @@ describe("project deletion runtime", () => {
     const unknownFile = join(unknownStaging, "unknown-data");
     writeFileSync(unknownFile, "preserve me", { mode: 0o600 });
 
-    runtime = new AgentSeoLocalRuntime({ dataDir });
+    runtime = new MarketingovoLocalRuntime({ dataDir });
 
     expect(existsSync(unknownFile)).toBe(true);
     await expect(runtime.system.health()).resolves.toMatchObject({
@@ -231,7 +231,7 @@ describe("project deletion runtime", () => {
     const dataDir = mkdtempSync(
       join(tmpdir(), "marketingovo-runtime-deletion-"),
     );
-    runtime = new AgentSeoLocalRuntime({
+    runtime = new MarketingovoLocalRuntime({
       dataDir,
       engine: {
         crawl: async (options) =>

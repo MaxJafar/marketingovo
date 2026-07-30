@@ -8,7 +8,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { AgentSeoLocalRuntime } from "./index.js";
+import { MarketingovoLocalRuntime } from "./index.js";
 
 // Report artifacts live in two crash domains: the file on disk and the row in
 // SQLite that indexes it. A crash between them is unavoidable without a
@@ -31,7 +31,7 @@ const observedAt = "2026-07-15T10:00:00.000Z";
 
 async function runtimeWithRun(label: string) {
   const dataDir = mkdtempSync(join(tmpdir(), `marketingovo-${label}-`));
-  const runtime = new AgentSeoLocalRuntime({ dataDir });
+  const runtime = new MarketingovoLocalRuntime({ dataDir });
   const project = await runtime.projects.create({
     name: "Crash domains",
     canonicalUrl: "https://example.com/",

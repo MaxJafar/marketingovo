@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ExtractionRule } from "@marketingovo/contracts";
-import { ExtractionRulesError, AgentSeoLocalRuntime } from "./index.js";
+import { ExtractionRulesError, MarketingovoLocalRuntime } from "./index.js";
 
 const rule = (
   id: string,
@@ -82,7 +82,10 @@ function engine(crawls: Array<Record<string, unknown>>) {
   };
 }
 
-async function waitForTerminal(runtime: AgentSeoLocalRuntime, runId: string) {
+async function waitForTerminal(
+  runtime: MarketingovoLocalRuntime,
+  runId: string,
+) {
   const deadline = Date.now() + 10_000;
   while (Date.now() < deadline) {
     const run = await runtime.runs.get(runId);
@@ -97,13 +100,13 @@ async function waitForTerminal(runtime: AgentSeoLocalRuntime, runId: string) {
 }
 
 describe("versioned project extraction rules", () => {
-  const runtimes: AgentSeoLocalRuntime[] = [];
+  const runtimes: MarketingovoLocalRuntime[] = [];
   afterEach(() => runtimes.splice(0).forEach((runtime) => runtime.close()));
 
   function setup() {
     const crawls: Array<Record<string, unknown>> = [];
     const stub = engine(crawls);
-    const runtime = new AgentSeoLocalRuntime({
+    const runtime = new MarketingovoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "marketingovo-extraction-rules-")),
       engine: stub,
     });
