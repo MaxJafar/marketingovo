@@ -50,3 +50,44 @@ describe("audit PDF", () => {
     expect(pdf.getTitle()).toBe("Marketingovo audit");
   });
 });
+
+// Cold-start finding: an audit that failed reported "1 of 1 crawled page
+// requests failed" and nothing else, while the daemon log knew the cause was
+// the egress policy. For a product whose discipline is to say what it could not
+// measure and why, a bare count is the wrong failure.
+describe("audit failure reporting", () => {
+  it("carries the transport reason into the run error", async () => {
+    const { auditReportState } = await import("./index.js");
+    const state = auditReportState({
+      pages: [
+        {
+          url: "http://127.0.0.1:4599/",
+          status: 0,
+          error: "private/loopback address blocked: 127.0.0.1",
+        },
+      ],
+    } as never);
+    expect(state.status).toBe("failed");
+    expect(state.error).toContain("loopback address blocked");
+  });
+
+  it("bounds the reasons so one broken host cannot flood the message", async () => {
+    const { auditReportState } = await import("./index.js");
+    const state = auditReportState({
+      pages: Array.from({ length: 9 }, (_, i) => ({
+        url: `https://example.com/${i}`,
+        status: 0,
+        error: `distinct failure ${i}`,
+      })),
+    } as never);
+    expect(state.error).toMatch(/and 6 other reasons/);
+  });
+
+  it("still reports a count when no page carried a reason", async () => {
+    const { auditReportState } = await import("./index.js");
+    const state = auditReportState({
+      pages: [{ url: "https://example.com/", status: 0, error: null }],
+    } as never);
+    expect(state.error).toContain("1 of 1 crawled page requests failed");
+  });
+});

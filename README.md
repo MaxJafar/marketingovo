@@ -80,6 +80,11 @@ pnpm build
 pnpm marketingovo serve
 ```
 
+The crawler refuses private and loopback addresses by default, so a site on
+`localhost` or an internal host is not auditable until you approve that exact
+host for the run. This is deliberate: a crawler that follows discovered links is
+otherwise a route into your own network.
+
 Open the exact `Dashboard:` URL printed by the command. It includes a short-lived,
 one-time bootstrap token in the URL fragment; the dashboard exchanges it for an
 HttpOnly local session and removes it from the address bar. Opening bare

@@ -1654,7 +1654,8 @@ function exactAuditUrls(
   return [...new Set(urls)];
 }
 
-function auditReportState(report: EngineReport): {
+/** Exported for tests: a failed run must say why, not only how many. */
+export function auditReportState(report: EngineReport): {
   status: "succeeded" | "partial" | "failed";
   coverage: number;
   error: string | null;
@@ -1664,8 +1665,29 @@ function auditReportState(report: EngineReport): {
   const respondedPages = total - failedPages;
   const coverage = total === 0 ? 0 : respondedPages / total;
   const errors = [...(report.realData?.errors ?? [])];
-  if (failedPages > 0)
-    errors.push(`${failedPages} of ${total} crawled page requests failed`);
+  if (failedPages > 0) {
+    // A count alone leaves the operator with "failed" and nowhere to go. The
+    // per-page transport error already says why — blocked by egress policy,
+    // DNS failure, timeout — so the distinct reasons are carried up, bounded so
+    // one broken host cannot produce an unreadable message.
+    const reasons = [
+      ...new Set(
+        report.pages
+          .filter((page) => page.status === 0 && page.error)
+          .map((page) => String(page.error)),
+      ),
+    ];
+    const shown = reasons.slice(0, 3);
+    const suffix =
+      reasons.length > shown.length
+        ? `, and ${reasons.length - shown.length} other reason${reasons.length - shown.length === 1 ? "" : "s"}`
+        : "";
+    errors.push(
+      shown.length > 0
+        ? `${failedPages} of ${total} crawled page requests failed (${shown.join("; ")}${suffix})`
+        : `${failedPages} of ${total} crawled page requests failed`,
+    );
+  }
   if (total === 0 || respondedPages === 0) {
     if (total === 0) errors.push("The crawl returned no pages");
     return {
