@@ -137,3 +137,16 @@ export {
 } from "./content-gap.js";
 export { keywordResearchModule } from "./modules/keyword-research/index.js";
 export { topicClustersModule } from "./modules/topic-clusters/index.js";
+
+// Competitor publishing cadence from a site's own feed. A crawl shows what a
+// rival's pages look like; this shows how fast they ship.
+export {
+  collectPublishingCadence,
+  discoverFeedUrl,
+  parseFeed,
+  summarizeCadence,
+  type FeedItem,
+  type FeedOutcome,
+  type FeedUnavailableReason,
+  type PublishingCadence,
+} from "./integrations/feed.js";
