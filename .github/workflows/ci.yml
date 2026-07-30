@@ -126,6 +126,23 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           working-directory: apps/desktop/src-tauri
 
+  secret-scan:
+    name: Committed secret scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # Gitleaks needs the full history to scan a pull request's commits, not
+          # only the merge result. A secret that was added and then removed in the
+          # same branch is still published once the branch is pushed.
+          fetch-depth: 0
+      - name: Scan history for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_VERSION: 8.30.1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   desktop-native:
     runs-on: macos-14
     timeout-minutes: 35
