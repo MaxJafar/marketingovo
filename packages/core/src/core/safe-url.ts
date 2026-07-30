@@ -14,6 +14,36 @@ import { isIP } from "node:net";
 
 const ALLOWED_SCHEMES = new Set(["http:", "https:"]);
 
+// Ports whose well-known service is not a website. Deliberately a blocklist:
+// an allowlist of 80/443 would refuse legitimate sites served on 8000 or 3000
+// while adding nothing, since internal targets are already blocked by address.
+const BLOCKED_PORTS = new Set([
+  "22",
+  "23",
+  "25",
+  "110",
+  "143",
+  "445",
+  "465",
+  "587",
+  "993",
+  "995",
+  "1433",
+  "1521",
+  "3306",
+  "3389",
+  "5432",
+  "5984",
+  "6379",
+  "7001",
+  "8020",
+  "9042",
+  "9200",
+  "9300",
+  "11211",
+  "27017",
+]);
+
 export class UnsafeUrlError extends Error {
   constructor(message: string) {
     super(message);
@@ -41,6 +71,22 @@ export function normalizeUrl(input: string): NormalizedUrl {
   }
   if (!url.hostname) {
     throw new UnsafeUrlError("missing hostname");
+  }
+  // Credentials in a URL are sent to whatever the host resolves to and then
+  // persist in stored evidence, reports and logs. A crawl target never needs
+  // them, so they are refused rather than stripped: silently dropping them
+  // would change which resource was fetched without saying so.
+  if (url.username !== "" || url.password !== "") {
+    throw new UnsafeUrlError("credentials must not travel in a crawl URL");
+  }
+  // Speaking HTTP to a well-known non-HTTP service port is almost never a
+  // website. The private-address checks in resolveSafeAddresses already stop
+  // the common internal targets; this closes the case of a *public* host that
+  // exposes one of these services.
+  if (url.port !== "" && BLOCKED_PORTS.has(url.port)) {
+    throw new UnsafeUrlError(
+      `port ${url.port} is a well-known non-HTTP service`,
+    );
   }
   // Fragments never reach the HTTP server and must not create duplicate crawl
   // or verification entries for the same resource.
