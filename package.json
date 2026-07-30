@@ -1,6 +1,6 @@
 {
   "name": "agentintel-workspace",
-  "version": "0.2.0-alpha.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Evidence-first local competitive and creator intelligence platform",
   "license": "Apache-2.0",

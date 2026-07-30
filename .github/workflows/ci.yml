@@ -107,5 +107,5 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Run Buf breaking change gate
         env:
-          BUF_BREAKING_AGAINST: .git#tag=v0.2.0-alpha.0
+          BUF_BREAKING_AGAINST: .git#tag=v1.0.0
         run: pnpm contracts:breaking

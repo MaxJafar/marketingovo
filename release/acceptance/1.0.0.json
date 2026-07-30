@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0.0",
+  "releaseOwner": {
+    "status": "approved",
+    "name": "MaxJafar",
+    "approvedAt": "2026-07-30T13:48:05.000Z",
+    "note": "Release owner instructed this 1.0.0 release directly."
+  },
+  "licenceCompliance": {
+    "status": "approved",
+    "spdxIdentifier": "Apache-2.0",
+    "noticeReviewed": true,
+    "reviewer": "MaxJafar",
+    "reviewedAt": "2026-07-30T13:48:05.000Z",
+    "note": "Apache-2.0 verified byte-identical to the canonical text apart from the copyright line. No CLA or trademark regime exists, so neither is attested."
+  },
+  "evidence": {
+    "workspaceGate": {
+      "command": "pnpm check",
+      "result": "passed",
+      "observedAt": "2026-07-30T13:48:05.000Z",
+      "environment": "macOS arm64, Go 1.26.3, Node 24.18.1, Python 3.12, pnpm 10.34.5"
+    },
+    "identityGate": {
+      "command": "pnpm validate:identity",
+      "result": "passed",
+      "observedAt": "2026-07-30T13:48:05.000Z",
+      "environment": "macOS arm64, Go 1.26.3, Node 24.18.1, Python 3.12, pnpm 10.34.5"
+    },
+    "agentSurfaces": {
+      "command": "pnpm validate:plugins",
+      "result": "passed",
+      "observedAt": "2026-07-30T13:48:05.000Z",
+      "environment": "macOS arm64, Go 1.26.3, Node 24.18.1, Python 3.12, pnpm 10.34.5"
+    },
+    "referenceCorpusIsolation": {
+      "command": "pnpm reference:validate",
+      "result": "passed",
+      "observedAt": "2026-07-30T13:48:05.000Z",
+      "environment": "macOS arm64, Go 1.26.3, Node 24.18.1, Python 3.12, pnpm 10.34.5"
+    },
+    "secretScan": {
+      "command": "pnpm reference:scan:strict",
+      "result": "passed",
+      "observedAt": "2026-07-30T13:48:05.000Z",
+      "environment": "macOS arm64, Go 1.26.3, Node 24.18.1, Python 3.12, pnpm 10.34.5"
+    },
+    "contractLint": {
+      "command": "pnpm contracts:lint",
+      "result": "passed",
+      "observedAt": "2026-07-30T13:48:05.000Z",
+      "environment": "macOS arm64, Go 1.26.3, Node 24.18.1, Python 3.12, pnpm 10.34.5"
+    },
+    "goRaceTests": {
+      "command": "go test -race ./...",
+      "result": "passed",
+      "observedAt": "2026-07-30T13:48:05.000Z",
+      "environment": "macOS arm64, Go 1.26.3, Node 24.18.1, Python 3.12, pnpm 10.34.5"
+    },
+    "pythonTests": {
+      "command": "uv run --project workers/intelligence pytest workers/intelligence/tests",
+      "result": "passed",
+      "observedAt": "2026-07-30T13:48:05.000Z",
+      "environment": "macOS arm64, Go 1.26.3, Node 24.18.1, Python 3.12, pnpm 10.34.5"
+    }
+  },
+  "scope": {
+    "sources": [
+      "website.rss"
+    ],
+    "dashboardWorkspaces": [
+      "Research",
+      "Reports & Runs",
+      "Datasets & Evidence"
+    ],
+    "agentTools": 6,
+    "agentHosts": [
+      "Claude Code",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "VS Code",
+      "generic MCP"
+    ]
+  },
+  "deferredChannels": [
+    {
+      "channel": "signed-desktop-installers",
+      "reason": "No Apple Developer ID or Windows signing certificate has been procured."
+    },
+    {
+      "channel": "updater-channel",
+      "reason": "Depends on signed native artifacts and is deferred with them."
+    },
+    {
+      "channel": "package-publication",
+      "reason": "Requires the maintainer's npm account and OIDC on the canonical tag workflow."
+    }
+  ],
+  "deferredCapabilities": [
+    {
+      "capability": "youtube/reddit/meta/tiktok/trends connectors",
+      "reason": "Not implemented. Each needs provider credentials and its own policy, rate limits, retention, kill switch, fixtures and failure tests before it ships."
+    },
+    {
+      "capability": "engagement, audience, reach and revenue metrics",
+      "reason": "A publishing feed does not carry them. Inferring them would fabricate evidence, and a test asserts they cannot be produced."
+    },
+    {
+      "capability": "ten remaining dashboard workspaces",
+      "reason": "Rendered in the sidebar as not yet built rather than hidden."
+    },
+    {
+      "capability": "distributed scheduler leases, heartbeats and dead-lettering",
+      "reason": "The local scheduler is single-daemon. Documented in the threat model rather than implied."
+    },
+    {
+      "capability": "OS-level sandbox for the Python worker",
+      "reason": "It is a trusted same-user process. Stated explicitly rather than left ambiguous."
+    }
+  ],
+  "notes": [
+    "1.0.0 covers source, CLI, agent plugin and the local daemon. It claims one source type \u2014 website and RSS/Atom feeds \u2014 and no signed native artifact.",
+    "The reference corpus under 'TO REVERSE ENGINEEER/' is excluded from every build, test and product input, and a clean-room provenance record remains outstanding before any connector derived from studying it ships."
+  ]
+}

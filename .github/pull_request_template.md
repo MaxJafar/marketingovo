@@ -10,7 +10,7 @@
 - [ ] `cargo check --locked --manifest-path apps/desktop/src-tauri/Cargo.toml`
 - [ ] `cargo fmt --manifest-path apps/desktop/src-tauri/Cargo.toml -- --check`
 - [ ] `cargo clippy --locked --all-targets --manifest-path apps/desktop/src-tauri/Cargo.toml -- -D warnings`
-- [ ] `BUF_BREAKING_AGAINST=".git#tag=v0.2.0-alpha.0" pnpm contracts:breaking`
+- [ ] `BUF_BREAKING_AGAINST=".git#tag=v1.0.0" pnpm contracts:breaking`
 
 ## Gate integrity declaration
 

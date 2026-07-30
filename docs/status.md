@@ -1,74 +1,72 @@
 # Implementation status
 
-Status date: 2026-07-16. This file is the release-truth boundary for the initial
-portfolio workspace; the product vision describes later phases, not current
-capability.
+Status date: 2026-07-30. This file is the release-truth boundary. The product
+vision describes later phases, not current capability.
 
-## Phase 0 — quarantine baseline
+## 1.0.0 — released state
 
-Implemented:
+AGENTintel 1.0.0 declares a stable public surface: the REST API and its OpenAPI
+document, the generated TypeScript SDK, the six-tool agent contract registry, the
+CLI, the Protobuf worker protocol, and the evidence manifest and observation
+schema identifiers. Breaking changes to these now require a major version.
 
-- an inventory record for each of the 50 extracted local snapshots;
-- local license signals, risk categories, preliminary rebuild decisions and an
-  unconditional `build_input: false` / `code_copy_allowed: false` boundary;
-- a path-only quarantine manifest containing all 35 paths currently detected by
-  the strict secret heuristic;
-- validation that rejects archive references in product source/build inputs,
-  symlink escapes, missing inventory rows and unquarantined detected paths;
-- synthetic golden evidence independently authored for the walking skeleton.
+**Implemented and shipping**
 
-Not complete:
+- a live website connector reading each target's own RSS or Atom feed, behind a
+  fail-closed egress policy: scheme, port, userinfo and hostname rules; loopback,
+  link-local and RFC1918 space blocked; cloud metadata blocked by address even
+  when private hosts are approved; every dialled address re-checked after DNS;
+  every redirect hop re-validated;
+- per-run source routing, so live-URL runs use the website connector while
+  fixture and imported runs keep the existing path. A mixed target set is refused
+  rather than silently producing incomparable targets;
+- denominator-safe metrics: publication count, freshness, and cadence carrying
+  its numerator and denominator. Cadence is omitted entirely when there is one
+  dated item, and an undated feed yields a count and nothing else;
+- the full evidence chain: untrusted worker artifacts physically re-decoded,
+  row-compared, citation- and provenance-verified, hashed, and committed by
+  atomic rename;
+- three dashboard workspaces: Research, Reports & Runs, Datasets & Evidence;
+- six agent tools across Claude Code, Codex, OpenClaw, Cursor, VS Code and
+  generic MCP, generated from one contract registry with a drift gate;
+- CI across Go, Python, TypeScript and Rust, plus CodeQL and dependabot on all
+  four ecosystems.
 
-- restored upstream URL, exact commit/tag, archive hash, acquisition chain and
-  dependency provenance for every snapshot;
-- resolved license and platform-policy review for ambiguous entries;
-- one algorithm/interface/schema/failure/test/security card per project—the
-  current table is portfolio triage only;
-- independent behavioral acceptance suites for every approved rebuild;
-- operator-confirmed rotation or revocation of any credential that may have
-  appeared in Reddiment, Telegram Tracker or another quarantined path.
+**Explicitly not in 1.0.0**
 
-The quarantine manifest records paths and classifications only. It is not proof
-that a credential was valid, and repository automation has neither tested nor
-rotated any value.
+- YouTube, Reddit, Meta, TikTok, Trends and licensed-provider connectors;
+- engagement, audience, reach or revenue metrics — a feed does not carry them;
+- the ten remaining dashboard workspaces, which render as not yet built;
+- signed desktop installers, an updater channel, and published packages;
+- a distributed scheduler with leases, heartbeats and dead-lettering; the local
+  scheduler remains single-daemon;
+- an OS-level sandbox for the Python worker. It is a trusted same-user process,
+  and the threat model says so rather than implying otherwise.
 
-## Phase 1 — hardened walking skeleton
+## Known defect blocking a clean release gate
 
-Implemented:
+`test_slow_cli_handles_termination_as_cancellation` fails roughly one run in six,
+but only when the full 33-test Python suite runs; it passes 10/10 alone and 4/4
+for its own file. Established by measurement:
 
-- React command center → loopback Go API → durable SQLite run → synthetic Go
-  connector → Protobuf Python worker → Arrow/Parquet/report staging → committed
-  evidence manifest → SSE/UI result;
-- distinct compare and research control messages; research remains a bounded
-  synthesis of the same fixture rather than multi-source web research;
-- immutable input snapshot hash/schema/size, replay-of linkage and recorded
-  worker/model/connector/parser provenance;
-- cancellation, source-failure and corrupt-output paths;
-- authority-side Arrow IPC and Parquet decoding, exact 32-field schema checks,
-  decoded-row equivalence and report-citation matching;
-- denominator-specific engagement metrics, missing-not-zero semantics,
-  contradiction preservation, observation citations and explicit warnings that
-  follower change is not customer retention;
-- generated SDK types, the same six policy-safe MCP tools over stdio and
-  authenticated loopback Streamable HTTP, a Codex bundle and OpenClaw adapter;
-- narrow Tauri source boundary for verified sidecars and credentials;
-- OpenAPI response samples, clean temporary contract regeneration and an
-  explicit Buf compatibility gate.
+- the worker's SIGTERM handling is correct in isolation — 12 consecutive direct
+  invocations exited 130 in 0.02 s each;
+- on the failing runs the process does not exit within 30 s, and re-sending
+  SIGTERM every second for a further 30 s does not recover it. It becomes
+  genuinely unresponsive to SIGTERM rather than missing one delivery;
+- draining stderr concurrently removed a real pipe-buffer deadlock in the test
+  and fixed the isolated case, but not the whole-suite case.
 
-Important limits:
+This does not affect production cancellation. The Go supervisor cancels a run
+with `Process.Kill()`, which cannot be blocked, deferred, or lost. The affected
+path is graceful SIGTERM handling, which nothing in the product depends on.
 
-- developer Python is a trusted same-user process, not an OS or network sandbox;
-- only the synthetic fixture connector is enabled; no live social, website,
-  provider or AGENTseo connector ships in Phase 1;
-- the local scheduler is single-daemon and does not yet provide the complete
-  distributed lease/heartbeat/checkpoint/dead-letter design;
-- filesystem evidence publication and SQLite result finalization are separate
-  crash domains and require explicit reconciliation testing;
-- the research workflow is deterministic descriptive synthesis, not an LLM
-  research agent, contradiction adjudicator or broad source planner;
-- no signed public desktop release or updater channel has been published;
-- the million-observation benchmark, comprehensive security suites, SBOM,
-  CodeQL, model calibration corpus and signed provenance pipeline remain gates.
+It is recorded here rather than worked around. Making the gate green by skipping
+the test, marking it tolerant of failure, or asserting a weaker property would
+hide a real finding about worker responsiveness, most likely a C extension
+holding the interpreter without yielding to the Python-level signal handler.
+
+**Evidence recorded for this release** lives in `release/acceptance/1.0.0.json`.
 
 ## Phases 2–6 — roadmap
 

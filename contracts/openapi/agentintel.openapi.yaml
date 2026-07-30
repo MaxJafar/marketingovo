@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: AGENTintel Local API
-  version: 0.2.0-alpha.0
+  version: 1.0.0
   description: >-
     Evidence-first API for local competitive research. Mutating operations are
     asynchronous and return a durable run identifier.

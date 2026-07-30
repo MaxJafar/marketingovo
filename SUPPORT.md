@@ -10,7 +10,7 @@ AGENTintel is maintained by a single person, and no formal service-level agreeme
 
 ## What to include
 
-- Version (for example `0.2.0-alpha.0`)
+- Version (for example `1.0.0`)
 - Operating system and Python/Go/Node versions
 - Exact commands you ran
 - Short, sanitized repro steps and outputs

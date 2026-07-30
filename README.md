@@ -14,13 +14,16 @@ the Elastic License, and what that means for the reference corpus below.
 
 ## What is implemented now
 
-The repository currently proves a hardened **Phase 1 walking skeleton** over a
-synthetic fixture:
+AGENTintel 1.0.0 collects **public website and RSS/Atom publishing evidence** and
+turns it into cited, replayable research:
 
-1. the React/TypeScript command center starts a synthetic three-brand comparison;
+1. the React/TypeScript command center starts a comparison across sites, and
+   exposes stored run history and a committed-evidence search;
 2. `agentinteld` validates a one-time dashboard session and schedules a durable
    SQLite-backed job;
-3. a Go fixture connector snapshots bounded source evidence;
+3. the website connector fetches each target's own feed through a fail-closed
+   egress policy — robots-aware, SSRF-hardened, bounded in size, redirects and
+   time — and records what the publisher stated;
 4. Go supervises Python through length-delimited Protobuf control messages;
 5. Python normalizes an exact 32-field Arrow schema, writes Arrow and Parquet,
    queries DuckDB, and produces denominator-safe metrics with citations;
@@ -29,15 +32,28 @@ synthetic fixture:
    citations/provenance plus containment, hashes and policy, then publishes a
    manifest by filesystem rename and streams ordered SSE progress;
 7. the same run is available through the Go CLI, generated TypeScript SDK,
-   authenticated MCP stdio/Streamable HTTP, OpenClaw, and the installable Codex
-   plugin;
+   authenticated MCP stdio/Streamable HTTP, OpenClaw, Claude Code, Codex, Cursor
+   and VS Code;
 8. normal, source-failure, corrupt-artifact, slow/cancel and immutable-input
    replay paths have test coverage.
 
-The fixture is entirely synthetic and uses reserved `.invalid` URLs. No live
-platform is contacted by the implemented comparison or research workflow. The
-research endpoint currently plans and synthesizes only that committed fixture;
-it is not yet the multi-source deep-research product described in the roadmap.
+### What 1.0.0 does not do
+
+This is a deliberately narrow release, and the boundary is the point:
+
+- **One source type.** Website and RSS/Atom feeds only. YouTube, Reddit, Meta,
+  TikTok, Trends and licensed providers are not implemented. A menu label, type
+  definition or roadmap entry is not a shipped connector.
+- **What a feed states, nothing more.** Publication counts, freshness and cadence
+  — the last carrying its numerator and denominator. No engagement, audience,
+  reach or revenue is inferred, because a feed does not contain it.
+- **Three workspaces.** Research, Reports & Runs, and Datasets & Evidence. The
+  remaining workspaces are listed in the sidebar as not yet built rather than
+  hidden.
+- **No signed desktop installers or published packages.** Those need a signing
+  identity and a registry account that do not exist yet.
+
+The retained fixture connector still exists for tests and offline development.
 
 Phase 0 is a **quarantine baseline**, not a completed reverse-engineering
 program. The repository inventories 50 local snapshots, blocks every one from

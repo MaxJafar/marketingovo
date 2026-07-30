@@ -5,6 +5,8 @@ import json
 import os
 import signal
 import subprocess
+import threading
+import time
 import sys
 from pathlib import Path
 
@@ -152,16 +154,28 @@ def test_slow_cli_handles_termination_as_cancellation(
     copied = tmp_path / "observations.ndjson"
     copied.write_bytes(fixture_path.read_bytes())
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    # stderr must be drained continuously. The worker flushes a progress event per
+    # checkpoint, and a parent that reads one line and then stops reading until
+    # communicate() lets the pipe fill. A child blocked in write(2) cannot run its
+    # Python signal handler until that write returns, so the cancellation is never
+    # observed and the test hangs — intermittently, depending on timing. Draining
+    # in a thread removes that race entirely.
+    stderr_lines: list[str] = []
+    first_event = threading.Event()
+
+    def drain() -> None:
+        assert process.stderr is not None
+        for line in process.stderr:
+            stderr_lines.append(line)
+            if "worker.validating" in line:
+                first_event.set()
+
+    drainer = threading.Thread(target=drain, daemon=True)
+    drainer.start()
     try:
         # Wait until the worker emits its validation event, proving handlers are installed.
-        assert process.stderr is not None
-        first_event = process.stderr.readline()
-        assert "worker.validating" in first_event
+        assert first_event.wait(30), "worker never reported validation"
         os.kill(process.pid, signal.SIGTERM)
-        # The assertion is that SIGTERM is handled as cancellation, not that the
-        # process exits within any particular wall-clock budget. Five seconds is
-        # ample on an idle machine and marginal on a loaded CI runner, which made
-        # this the one flaky test in the suite.
         stdout, _stderr = process.communicate(timeout=30)
     finally:
         if process.poll() is None:
