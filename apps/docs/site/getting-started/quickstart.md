@@ -1,11 +1,11 @@
 ---
 title: Quickstart and onboarding
-description: Install AGENTseo Community Edition, open the local dashboard, and reach the first prioritized action.
+description: Install AGENTseo, open the local dashboard, and reach the first prioritized action.
 ---
 
 # Quickstart and onboarding
 
-This path uses Community Edition. It requires Node.js 24 LTS and Corepack. No account is required.
+This path uses AGENTseo. It requires Node.js 24 LTS and Corepack. No account is required.
 
 <div class="status-banner">
   <strong>Alpha guidance</strong>
@@ -15,7 +15,7 @@ This path uses Community Edition. It requires Node.js 24 LTS and Corepack. No ac
 ## Install from source
 
 ```bash
-git clone https://github.com/GolemWorkers/agentseo.git
+git clone https://github.com/MaxJafar/AGENTseo.git
 cd agentseo
 corepack enable
 pnpm install --frozen-lockfile
@@ -207,6 +207,6 @@ provider when required. Agents cannot delete projects.
 - [Set up BYOK integrations](/integrations/byok)
 
 <p class="source-note">
-  Canonical operational source: <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/quickstart.md">ten-minute quickstart</a>.
-  Confirm alpha limitations in <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/release-status.md">release status</a>.
+  Canonical operational source: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/docs/quickstart.md">ten-minute quickstart</a>.
+  Confirm alpha limitations in <a href="https://github.com/MaxJafar/AGENTseo/blob/main/docs/release-status.md">release status</a>.
 </p>

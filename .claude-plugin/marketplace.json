@@ -2,7 +2,7 @@
   "name": "agentseo",
   "owner": {
     "name": "AGENTseo",
-    "url": "https://golemworkers.com"
+    "url": "https://github.com/MaxJafar/AGENTseo"
   },
   "metadata": {
     "description": "Local-first, evidence-based SEO tooling for coding agents.",
@@ -16,9 +16,9 @@
       "version": "0.12.0-alpha.0",
       "author": {
         "name": "AGENTseo",
-        "url": "https://golemworkers.com"
+        "url": "https://github.com/MaxJafar/AGENTseo"
       },
-      "homepage": "https://golemworkers.com",
+      "homepage": "https://github.com/MaxJafar/AGENTseo",
       "license": "Apache-2.0",
       "keywords": [
         "seo",

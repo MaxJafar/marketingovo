@@ -26,8 +26,11 @@ const version = JSON.parse(
   await readFile(resolve(root, "plugins/codex/agentseo/package.json"), "utf8"),
 ).version;
 
-const AUTHOR = { name: "AGENTseo", url: "https://golemworkers.com" };
-const REPOSITORY = "https://github.com/GolemWorkers/agentseo";
+const AUTHOR = {
+  name: "AGENTseo",
+  url: "https://github.com/MaxJafar/AGENTseo",
+};
+const REPOSITORY = "https://github.com/MaxJafar/AGENTseo";
 const DESCRIPTION =
   "Turn local crawl, Search Console, GA4, performance, and SERP evidence into prioritized SEO actions.";
 
@@ -117,7 +120,7 @@ const claudePluginManifest = {
   version,
   description: DESCRIPTION,
   author: AUTHOR,
-  homepage: "https://golemworkers.com",
+  homepage: "https://github.com/MaxJafar/AGENTseo",
   repository: REPOSITORY,
   license: rootManifest.license,
   keywords: ["seo", "marketing", "crawler", "search-console", "analytics"],
@@ -140,7 +143,7 @@ const marketplaceManifest = {
       description: DESCRIPTION,
       version,
       author: AUTHOR,
-      homepage: "https://golemworkers.com",
+      homepage: "https://github.com/MaxJafar/AGENTseo",
       license: rootManifest.license,
       keywords: ["seo", "marketing", "crawler", "search-console", "analytics"],
     },

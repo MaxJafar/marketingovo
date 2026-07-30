@@ -5,7 +5,7 @@ description: Connect provider evidence while keeping credentials write-only and 
 
 # Integrations and BYOK
 
-Community Edition uses a bring-your-own-key model. You choose the provider, account, scopes, and local retention; the local daemon owns the credential boundary. GolemWorkers can instead provide managed credentials, provider credits, centralized billing, and hosted execution.
+AGENTseo uses a bring-your-own-key model. You choose the provider, account, scopes, and local retention; the local daemon owns the credential boundary. MaxJafar can instead provide managed credentials, provider credits, centralized billing, and hosted execution.
 
 ## Connector catalog in 0.11
 
@@ -135,9 +135,9 @@ Project exports omit secrets. Importing a project requires reconnecting integrat
 5. Treat provider data as unavailable until a successful test and fresh sync prove otherwise.
 
 <p class="source-note">
-  Canonical sources: <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/integrations/src/index.ts">connector manifests</a>,
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/PRIVACY.md">privacy policy</a>,
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/SECURITY.md">security policy</a>, and
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/desktop-release.md">desktop runtime configuration</a>, and
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/editions.md">edition comparison</a>.
+  Canonical sources: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/packages/integrations/src/index.ts">connector manifests</a>,
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/PRIVACY.md">privacy policy</a>,
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/SECURITY.md">security policy</a>, and
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/docs/desktop-release.md">desktop runtime configuration</a>, and
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/README.md">project overview</a>.
 </p>

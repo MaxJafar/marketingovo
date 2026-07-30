@@ -131,7 +131,7 @@ export function reportToHtml(r: Report): string {
       <h1>SEO evidence snapshot</h1>
       <div class="meta">A reproducible audit for prioritization and verification.</div>
     </div>
-    <span class="report-label">Community Edition</span>
+    <span class="report-label">AGENTseo</span>
   </header>
   <div class="meta">
     <div><strong>Site:</strong> <a href="${escapeHtml(r.startUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(r.startUrl)}</a></div>
@@ -171,7 +171,7 @@ export function reportToHtml(r: Report): string {
   }
 
   <div class="footer">
-    AGENTseo Community Edition &middot; report schema 0.11 &middot; pages: ${r.summary.pagesCrawled} &middot; request rate: ${r.config.requestsPerSecond}/s &middot; configured crawl scope: ${r.config.maxUrls} URLs
+    AGENTseo &middot; report schema 0.11 &middot; pages: ${r.summary.pagesCrawled} &middot; request rate: ${r.config.requestsPerSecond}/s &middot; configured crawl scope: ${r.config.maxUrls} URLs
   </div>
 </main>
 </body>

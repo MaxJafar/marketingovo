@@ -28,7 +28,7 @@ export interface Limits {
 }
 
 /**
- * Defensive configuration boundary, not a Community Edition entitlement or
+ * Defensive configuration boundary, not a AGENTseo entitlement or
  * audit quota. Users choose the crawl scope that fits their machine; this
  * rejects corrupt or accidentally unbounded numeric input before allocation.
  */

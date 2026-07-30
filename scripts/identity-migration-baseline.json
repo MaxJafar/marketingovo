@@ -3,45 +3,6 @@
   "fingerprintAlgorithm": "sha256(rule,path,line,column,previous-line,matched-line,next-line)-multiset-v2",
   "exceptions": [
     {
-      "id": "sha256:a248fdcb91cc038c4062bc8e6351899dc2b430f4f56dfe8e71863e6307220ffb",
-      "rule": "hosted-coupling",
-      "file": ".claude-plugin/marketplace.json",
-      "authorizedBy": ".claude-plugin/marketplace.json",
-      "authorizationHash": "sha256:dc5a3a926844469f7756ca94c01af77b90aa9d277ded447d7d068bfca5399aef",
-      "count": 3,
-      "contentHash": "sha256:455249fb4bd8dc59b902bd98118aca2b75beb327a97fcdf431a109c147464596",
-      "occurrenceHashes": [
-        "sha256:176c0570124ae7858611dfedc3b983b50292bf2cdcce666865daafeeb8d872c8",
-        "sha256:5cc24b3e45ea7f786e9e7adde477f92b752d722e2d493d7ee4d11e6b81cf6839",
-        "sha256:ff9d03205d3fdb54e9a3c8c0f2f3443bc974aee2e991ed3df4db561aee64eb30"
-      ]
-    },
-    {
-      "id": "sha256:37d0a420e1466bce2327e0dfad96a033c482a15b68bdddb75c45b986953acc94",
-      "rule": "hosted-coupling",
-      "file": ".github/ISSUE_TEMPLATE/config.yml",
-      "authorizedBy": ".github/ISSUE_TEMPLATE/config.yml",
-      "authorizationHash": "sha256:2d0ea75a982bac6f570d367633f640f7c42ce2f9978c55d01e82023824e38607",
-      "count": 2,
-      "contentHash": "sha256:1a7d051eccee836913d5cbf32c136c820add22cba7b610578536a3ddd4de9caa",
-      "occurrenceHashes": [
-        "sha256:5290df1bd821ed0af65e06a29bd3d7f177284573b20c86c69668f498f0e4a6a1",
-        "sha256:cae641a48c187e60140efd09d577d9aafc04cff108ef3955a4627a32ea62b00b"
-      ]
-    },
-    {
-      "id": "sha256:4fae862453f9c01dfcc0974fe9f6065fc722a5532ca2191b5792889c2569a471",
-      "rule": "hosted-coupling",
-      "file": ".github/pull_request_template.md",
-      "authorizedBy": ".github/pull_request_template.md",
-      "authorizationHash": "sha256:e6b19ee5287fbc8883132c86a31e6bd7c7f8129a131d9f0c34d60784d5793546",
-      "count": 1,
-      "contentHash": "sha256:c6f1369c881e2b7a63fa34639ecc0b5b41ad7390fff8e916b735e184505849c8",
-      "occurrenceHashes": [
-        "sha256:d4f9126a5c42fb72cafc27e1de6484298924761d78c1703e5bb381b14dfc2ad7"
-      ]
-    },
-    {
       "id": "sha256:87a2f748e09d70b67f611a3ec8e2a6b125dbca4fe5b8aa39f6fb6eef40bb6a09",
       "rule": "legacy-product",
       "file": "apps/dashboard/src/api/queries.ts",
@@ -92,18 +53,6 @@
       ]
     },
     {
-      "id": "sha256:7a6dab56f607ad78c2224e4fa4b4d339566d8e23aab4fe79c190f27c94d8c122",
-      "rule": "hosted-coupling",
-      "file": "apps/dashboard/src/tests/api-client.test.ts",
-      "authorizedBy": "apps/dashboard/src/tests/api-client.test.ts",
-      "authorizationHash": "sha256:07dd58616e5d5f5ae168b5a9ed1bebd558cbb4ea25628e2cc836af4703e7143c",
-      "count": 1,
-      "contentHash": "sha256:f1fc80510331f5f3051960bf7403c045ab97a46153d1b4b23236d28004c1faeb",
-      "occurrenceHashes": [
-        "sha256:559172670044cc9c787e95d6077db84b9aff1c758981aedb85dd66775c82f150"
-      ]
-    },
-    {
       "id": "sha256:64b0adef16cbaa00dae6564ed89375ef3100db03c9fb591aa2dd1d336fdf1f00",
       "rule": "legacy-product",
       "file": "apps/dashboard/src/tests/onboarding.test.tsx",
@@ -147,20 +96,6 @@
       ]
     },
     {
-      "id": "sha256:30c529fb6278becbf677363d50236a92372fe34252695ddcef784d74dee008ea",
-      "rule": "hosted-coupling",
-      "file": "apps/desktop/scripts/validate.mjs",
-      "authorizedBy": "apps/desktop/scripts/validate.mjs",
-      "authorizationHash": "sha256:802d7c0689307e9cfb080c6e8f9237ec53f3e07a6d13cda256be049e9c7670cb",
-      "count": 3,
-      "contentHash": "sha256:4b1329a2524c51f98a41b0c85129162eedb1e3526cce90f41fcb95007e883ff6",
-      "occurrenceHashes": [
-        "sha256:44355d9747c6d9399f5eeb49948480dea2f3e853db5f5d5d21b20ccc20f24229",
-        "sha256:8193907b00ed1bafba7c5615c64c52caef23fb2ef9d266fff20de4b6e2aeefcd",
-        "sha256:f6d9c787863f9c0bdf294b042b44559d07470bf22df7d8acb63806a4dfbb77c0"
-      ]
-    },
-    {
       "id": "sha256:08f41b9a7c29e6f4abb4caca59fd504d1cb0167289bc592e2016840bbb1c5c77",
       "rule": "legacy-product",
       "file": "apps/desktop/scripts/validate.mjs",
@@ -173,539 +108,42 @@
       ]
     },
     {
-      "id": "sha256:02d543b2f1ade597f85ac45abc4b83fd04725989b3fb4e30b5713187276e2746",
-      "rule": "hosted-coupling",
-      "file": "apps/desktop/src-tauri/Cargo.toml",
-      "authorizedBy": "apps/desktop/src-tauri/Cargo.toml",
-      "authorizationHash": "sha256:868d438a2a369e5d1825707582be0d2de1480fd9f3d3fb5d240cc20dc51f44d4",
-      "count": 1,
-      "contentHash": "sha256:64fbc6262051a702eb9e4cd0f40badf0454ca2ce447e2d1ff53647141adc3c7c",
-      "occurrenceHashes": [
-        "sha256:8bc090c6b5be01b2303d1f2e11b114c674d6f5aed4dc153f8b919a2ac95d9647"
-      ]
-    },
-    {
-      "id": "sha256:3207827f61bdb5db4f6649f8b2b90607d23b1ef08babfcf80039dd2a6c6b2dd7",
-      "rule": "hosted-coupling",
-      "file": "apps/desktop/src-tauri/tauri.conf.json",
-      "authorizedBy": "apps/desktop/src-tauri/tauri.conf.json",
-      "authorizationHash": "sha256:9f6368914eac219df4a59ae1401d342167a691ea1b9847fb2e4242aea18b4253",
-      "count": 5,
-      "contentHash": "sha256:49ec442b4f5b30cd551f6c758ca95e81d502049511e5fa2d6acd362277bfff0e",
-      "occurrenceHashes": [
-        "sha256:2fe6fcf6392836956f7157ab809b37c70ca10f3d38252537a637f4691b86fdb9",
-        "sha256:5bc274026fefeb221a057ae329819784eb2a565eb8aa452dc87da244f7ae75eb",
-        "sha256:6a95c46ee5b89615d26012bb67d2cad3d7f75984842e1c1bdf00cc1364797200",
-        "sha256:7e1fd9905788d8a9b7d24edd04a42a18c88d5a009687af18fda3ff6878dc5b54",
-        "sha256:d79a6f427e049a8ccb925ecd12e7e486ff5e622f959f76f56755ae5c99afe48f"
-      ]
-    },
-    {
-      "id": "sha256:c974fad68819448df6c0cfb196be2f135590975c8c044ef88525ccd7cd9d0258",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/README.md",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 2,
-      "contentHash": "sha256:24d625f877e2dd7936d121d45607d6367f2b6ead2b2f82b1fed775b450b13b99",
-      "occurrenceHashes": [
-        "sha256:4185d0741e76cc95e31e57c9f677776b0ec9981e2468038b36a565f55f032adb",
-        "sha256:abbb77d1185e637ba8ff8c35dcdbe3547d47602be2eba72029543e10c7de3290"
-      ]
-    },
-    {
-      "id": "sha256:6d11bb8cd544948991e6ff36d1147e51f2f40de0460dc70612b7781f3348c68e",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/scripts/validate.mjs",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 2,
-      "contentHash": "sha256:af713a695c7e6c08b8e78031125c78d3041a080439365d4da6bc5502ced3c04a",
-      "occurrenceHashes": [
-        "sha256:b10912d6889ef72c34098d2bddc0ac23f09505e1f9eed6830ed5ba2abbb9694d",
-        "sha256:c1f2848e6e2f319cf9acac8baa89d37e1f079478b55b32c34fe01b81537312e3"
-      ]
-    },
-    {
-      "id": "sha256:9fe120126ecc6b0420926ae640008caea291a943d7054e49398e7616b5aeba29",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/site/.vitepress/config.mts",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 4,
-      "contentHash": "sha256:d2e4be4409e5a32bb0b33eba4dffd375120d5d5e5d935020110d440651a89bc2",
-      "occurrenceHashes": [
-        "sha256:1469d01bd76af02479d8ec41e4ca31132b13dd2e84e2d0a3d04af67374639f87",
-        "sha256:cb3dc543114c9db60e65585220eb10edd27ef9e335ba061cc2dcd6a047617b81",
-        "sha256:e0ec2ad3652b991b6f78ae524ef030c7e54faf989b617d300cad8c945036e196",
-        "sha256:eb46636e0e1d653395679e8b7525360862173b7032c03f6049a5384e2d42ee97"
-      ]
-    },
-    {
-      "id": "sha256:d1dd699fd3eb1c54a33ba2fb55742248c1b92cbb5c0e4a9f394b5710773f0034",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/site/agents/agent-surfaces.md",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 4,
-      "contentHash": "sha256:34a4ddb7377d6a48c5891c89bdb8a4212501167785d74615c80a83b26c7da797",
-      "occurrenceHashes": [
-        "sha256:07e8c67101024f1e45f5f5749453eb15712142edd0afcd822880874d9de01464",
-        "sha256:a1c1b2c83e4ca2de8b6dfc6123e85f9b8f8f176bd50f42701aed1c3e2822cba3",
-        "sha256:bb72b485d6f39dff65e1eb6dada3dececb3426c0341c3e097969f63c8cb44ec6",
-        "sha256:d69f7db4990a471b7bf7bb21d79c925271749648b5b5f42c1ed6043d25056906"
-      ]
-    },
-    {
-      "id": "sha256:64a5e6893d24a4f202c4f9f016fb49a202bb8c23a3b88ee2104a580389c313fa",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/site/agents/rest-api.md",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 5,
-      "contentHash": "sha256:56b71865d30bc0ccc1cb43a7e369a30318e86991bd4f0d681ecc640fa8d5c9d5",
-      "occurrenceHashes": [
-        "sha256:3ba3c5ef9339a1e9c2c145126fb7424e2cb55093fac7c87872282a5eba31707e",
-        "sha256:4b4a0a3f6b7dbfce68921daa888e2bbb7f85323897e4187a2a26d5df981421d4",
-        "sha256:666a313dfc58157e88c55a890e46d76dc0463e5e515824b6aeb451ab74aecb0c",
-        "sha256:cc9bb98d479c528f5a5dc380e4a8582aad87e5f3abf4697808d1c61f6a60c7cd",
-        "sha256:deb3579dbfe6bd8adfd08d51750bd339d41d7257e5b8c30e9d63b66cb9610919"
-      ]
-    },
-    {
-      "id": "sha256:aa81f74c64cdd3190b8a962624e5aeae31b410987be9936852fed407c6c373cc",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/site/community/contributing.md",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 6,
-      "contentHash": "sha256:9384b22eee45a96f77d403579924945b1ead5d2abc090cae8f21e67174b8cb39",
-      "occurrenceHashes": [
-        "sha256:036de08110688eec565a250d8a68c4bab557d25ccb2add32d8df81ec8292276e",
-        "sha256:385518d6e80a367586d32d94b78ef6d4ee1f238cb4604f8da3e7dcbf71bbf50c",
-        "sha256:612698a1ae3fcdf953a353a7359e5bcaab7d5c3596c7043dd117dd58b92675be",
-        "sha256:a8efee52b138300b8656833d5a6d10a95c842c5eb960c53e61be08556c80f1b7",
-        "sha256:d615f22bbe2bc832236191ed16f28230e1fa7d85b7891b25176df1673f1e8d20",
-        "sha256:f4c127dc4d445d18284fac7a3882bd797b1a6ae6f701df4dad6239308bfce836"
-      ]
-    },
-    {
-      "id": "sha256:56243d726ff3482a3e4bf1578ac3b70b5c5fdaf1b4f47fda6ff676daa14f411b",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/site/getting-started/overview.md",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 6,
-      "contentHash": "sha256:aaf209478b4f89f7c253b04285e2b13fce626a436fb2e40a5410d7438fb8a10e",
-      "occurrenceHashes": [
-        "sha256:24b1b309840bda134785547ce4ad1ad49ef689dad063be76032d5b83d602b632",
-        "sha256:6985782afeda408903e85684b2b24152fee48ab6fceca426fdb8ae1035941cb9",
-        "sha256:7b723f115abd3943cbb5e6d3964cef71a1ab3fb9dffd68b0fb2d87e30fe8cdef",
-        "sha256:81c137e61069c82f788e590f025957443d877cb80a214b94b1093d10aad88034",
-        "sha256:a1b429fd1e171ffb1494cfb494becca3881325b8cc20ba21a4e8167bbced10ae",
-        "sha256:b3c551d91a896f9a67fd2480c4198ed65eed08a255f6557a221562eaaa38264f"
-      ]
-    },
-    {
-      "id": "sha256:565ae5205ab906fc9891a3b54d0a9a52bc3686451ff6226f4eae1280fb8a5801",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/site/getting-started/quickstart.md",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 3,
-      "contentHash": "sha256:2dfc397fa986498cf18949dd75c382cd61a505bf1880ae83cc75bb27b96c8b74",
-      "occurrenceHashes": [
-        "sha256:22c69f9d27f412394d89b704688af429d9e910e1a6634a347bcbcfa69bf3afc4",
-        "sha256:9cdb0d5a5d060516e6b791bd7b5693b59d4e79b0e9d62a1add2623e666925672",
-        "sha256:d7777a288eb0dcaead0d9f1b79270209361982799e02cc36940e938bdc361e9c"
-      ]
-    },
-    {
-      "id": "sha256:09ceb031377c562d6def9c42150cca56826275e09624f1947768f1d4f5d865e2",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/site/index.md",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 6,
-      "contentHash": "sha256:97a0882d18e52c8018f5fecab9636d5cb9fa8b9c74cef01fcf17f8f0596690ff",
-      "occurrenceHashes": [
-        "sha256:1a7a01a7974a83cf16305effab191135067308d9aeb459ee98d313aa69145be2",
-        "sha256:31a6f81091b2f7a708d950988350fbafd984c43859292ff115aa782faabeb5ea",
-        "sha256:4c7da72a694a77c13ab8db7d002089496a9572ac594c015016df0e61bdfb37dc",
-        "sha256:7d96fa1f7657f62da30d89abb4a92d14ae362a07a83b53cfbe4744dcb4b2e6ef",
-        "sha256:da39d9fca2e15b3fefb6cef9b0d17dd52f83a097182c8eed79ab91f2a2650b21",
-        "sha256:f497a18de93bc129a027add1aa82c20a0cc8901a773ea4b2c744ad3b7f32142e"
-      ]
-    },
-    {
-      "id": "sha256:3845a06ebbf603783671b553d306744862284a960636fef9b5a12cff37945103",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/site/integrations/byok.md",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 6,
-      "contentHash": "sha256:f14b9fcbfa79c4c057e049c66fb92d428a163c3b351b08629615094580321ef0",
-      "occurrenceHashes": [
-        "sha256:33722bf07ea58f91d7924c0343251f990a20091208b22b84b09c12052a348ff0",
-        "sha256:70f390f6328c2d8fc6417a81a4b994f2762dbbd470536d467401da1ccc5461cb",
-        "sha256:b9407f8a864324dd6fb63da294cb3ff0a47275a379932796eceb07415fd4932d",
-        "sha256:dd38d0bdafd3fa78ddbe9aafb894bfd05fbc69f26c89ca3ec1c0b75536111e7a",
-        "sha256:e1c8b60c403badc372453235e5a5b749e5cf0155bb7421ad2bf317a0329786fa",
-        "sha256:e519ef874ac993672136a7d7f0b0a77be5d5b85ae570d58fc5f707e270409b80"
-      ]
-    },
-    {
-      "id": "sha256:2e79be99d5b538bdbf58ee5388ee934f8e4f99a3d891118ae3fd5a97a4075d1a",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/site/product/dashboard-actions.md",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 3,
-      "contentHash": "sha256:01289c4f88cb874dbc5102f769b285bc434ba9ae7441179c9559349962769497",
-      "occurrenceHashes": [
-        "sha256:00d957d9291ce2008591f9e21a64d986f3d47ede335ff252ebd1dd1d67a941f0",
-        "sha256:8239ce682fdf32e985089f9fecf9776adf7d7ecc2490238def495a7dfc7dbe32",
-        "sha256:9ebbb535ac365419fd21c03df546b233fc3a179d73e27903acfbba58b1d0f615"
-      ]
-    },
-    {
-      "id": "sha256:fedad43e1ebd85ea011abac59a41192648296acd51079044c2fd8deb91bd468e",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/site/product/editions.md",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 11,
-      "contentHash": "sha256:b39ad4c332f10fcf3190848aad78d765e57d10a36312aaeb9eed9ebf52288c1e",
-      "occurrenceHashes": [
-        "sha256:1b741b60c2a2238c624fa22e71c1af7c8bd6b0efddb347786ff89f42d2071779",
-        "sha256:601d335c8037c38107c25faa2885bb28ba60178e8ec267467830ac6844b90f2d",
-        "sha256:81f2bdb20cad2ce9aad1f2d38ebae6246b368a19cd76c5e79814aaf8551f95d6",
-        "sha256:947123be0af53e19b41b68b888b02c7e55dbd069d62044064f72c5e414137d29",
-        "sha256:95d42d7344209e8643a4b7766fc6c3207cca78626911ec088ad284940d9351ef",
-        "sha256:9939e11131f66422245b089687edd00236c58b51fdeff2266b81f874e4bf9242",
-        "sha256:a0d89bc27f7190018254fb06dd13d15bd17f331f51d9720c9acd6ba25d040b8f",
-        "sha256:b424f17d8d438790e0794d9d61b967e2f625d3e3c94f7317bb75d77ac8603bd7",
-        "sha256:d4b98ab5c092b8eda98a73b2f84211779005c3d24fbafbe267a44882bf41b68a",
-        "sha256:e387b4c5a5c9cc4e3128cae8a3ce910fea8017fcd601b3af98e5b9fadd53e532",
-        "sha256:ec3bc55d395d95849e45059b7309bb20d0ec392fcf61a540f5a35a11ae873eb5"
-      ]
-    },
-    {
-      "id": "sha256:b2a209f2026d0daf6c6634a246a6cd6e55d7b7ed56609b3ad5a55e05c7dded70",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/site/product/project-context.md",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 3,
-      "contentHash": "sha256:5209296ebe130661cb34271ac4a165ed0dd17bf04e24e5a70d28377d7ea6945e",
-      "occurrenceHashes": [
-        "sha256:3037f046bcbd8cc902e1f81256707f7acfd03b53a77c263f7d60136f725b71ba",
-        "sha256:70d497a1a8ebd953d19e3decf2ccd80a726fac551a36a026ba099ec99e267bcb",
-        "sha256:f7d315f29811896aa172d0a2d1f286749110865b56dfde79687ee237eb7e6144"
-      ]
-    },
-    {
-      "id": "sha256:b42551a6ba8e802c8ad6c6eaea3af341dc6ee1fbf54a1a89d6d71c9198aad2af",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/site/product/reference-audit.md",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 1,
-      "contentHash": "sha256:40a4f7069c4e5beaec95e62567622f5e13e93af23742bee404c0f738447bc9e4",
-      "occurrenceHashes": [
-        "sha256:76da8b5f1fd8e81a90bde9e0689edb3d23e44d21a836a00b8db4160fe49d2883"
-      ]
-    },
-    {
-      "id": "sha256:5125547b2b2bc3ac88e33e86340ee259667fbbac581d3fa91f37f5bf27668332",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/site/product/release-status.md",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 4,
-      "contentHash": "sha256:ec0a564e370098054c7dff10fdc2fdc96e51b151d7f026d61e6d1643a4c5bfeb",
-      "occurrenceHashes": [
-        "sha256:3d2aed4ac6105d517d92e8dc04242c8e784583860e1cdd6de6ca978f2bc99a00",
-        "sha256:6206e666724b787eba7d994ddac9cdedf3a8078d4e3c99710df950c766ac4032",
-        "sha256:a58d8e7e43537bd1bd225fa3f06bcbb0dc43e0fbf143ed6fdbb9eafda9d60fec",
-        "sha256:f8d9c52bc424003df5faf80d5c185d03dd99690390a91a9ca480072893db8422"
-      ]
-    },
-    {
-      "id": "sha256:d790fa008073b57298ff346bb908f5f776a6cbdf46555a93d8a09b054ad5b6f5",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/site/trust/security-privacy.md",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 5,
-      "contentHash": "sha256:ceda8f60772299ad85895bf5ab992f5192b2cbb213c31fb9621b0dd146858245",
-      "occurrenceHashes": [
-        "sha256:184f3a124cc5f567afe2f5f88bfd9f7e7945f27cfb4e76ef6670d057b5625ebe",
-        "sha256:1b9c3f1d718d2fbddf8c66da1dfceb1c85aad71d275d2257def2db820288ff38",
-        "sha256:5f49426898caaa9542985a3f6b1f7b5f72e64ccc2b5d6a1b7e75d62f29c50b75",
-        "sha256:d610e2137a19f744217d834c9e0946c99a28245e2c11e9baca3568455c138759",
-        "sha256:edd31478ebfe2cd2c902148557e724b96a02833ccbdca7583d9a2c80022f8885"
-      ]
-    },
-    {
-      "id": "sha256:0235de20d0dbcd91ec2e9be28b2c63d47425dae8fa4d81975df9412bc848e0ea",
-      "rule": "hosted-coupling",
-      "file": "apps/docs/site/workflows/marketer-workflows.md",
-      "authorizedBy": "apps/docs/",
-      "authorizationHash": "sha256:fefff0dd516654f0778591766e87bec963b31c95bffb985965b38e54b4ddab5d",
-      "count": 3,
-      "contentHash": "sha256:5007438502096be60ca8ea33dbffddbb63b95a711d4881cf379e1d3c1d15984d",
-      "occurrenceHashes": [
-        "sha256:5c7314ca9298c1fe91a6ff8f39c0f48b4153470dd47a9a4eec12d1e2cddbbf70",
-        "sha256:5c933acba2f91150bf62699663343a67fdd2275c304cf95f7a837ea3635e061c",
-        "sha256:845fcc11b13490192e0420f7ff1457f5b1d5598e3a001387932eea9c221824b2"
-      ]
-    },
-    {
-      "id": "sha256:021f51b7ae731e889de2939d1af4dfa835a439813b0aaa76aabffeb27b117fe8",
-      "rule": "hosted-coupling",
-      "file": "docs/desktop-release.md",
-      "authorizedBy": "docs/",
-      "authorizationHash": "sha256:7ed437cbaabaadb08bd0e67ab48b779db85737e0e8df62cb6cd0b09119d03611",
-      "count": 1,
-      "contentHash": "sha256:16aead4ad0f58c5dfad696c4c2541f957b104a94865c948fa18465f766fc8714",
-      "occurrenceHashes": [
-        "sha256:120a02187f32ca7f67c2b509e30822877a2f7b916f9c40564b60d8a0218e88c2"
-      ]
-    },
-    {
-      "id": "sha256:072b1047ca9675f4d78771699b566a82a9fc4fc6f095ea0c93117c7da57e4032",
-      "rule": "hosted-coupling",
-      "file": "docs/editions.md",
-      "authorizedBy": "docs/",
-      "authorizationHash": "sha256:7ed437cbaabaadb08bd0e67ab48b779db85737e0e8df62cb6cd0b09119d03611",
-      "count": 3,
-      "contentHash": "sha256:bf16abe1a4879142ced299f29a8eefe9dd9887a6001ccb10bf2960d7c8df5789",
-      "occurrenceHashes": [
-        "sha256:02795b6242dbdcfd61f4b890889d3e50f997101960dbdb679e9b0637a4b1661a",
-        "sha256:041e05a46b7e3834d8e2b0ce7f29393714d2a86c81575099541034fa8c32c97d",
-        "sha256:c90c354300e6e7dad5830a76643c5a5147113670dabdd4bb4ea209e8d178fa37"
-      ]
-    },
-    {
-      "id": "sha256:f76dd82639250aceef74b2d92bc3c536e577b085aa4ed6c454faf34072046e34",
-      "rule": "hosted-coupling",
-      "file": "docs/npm-release.md",
-      "authorizedBy": "docs/",
-      "authorizationHash": "sha256:7ed437cbaabaadb08bd0e67ab48b779db85737e0e8df62cb6cd0b09119d03611",
-      "count": 1,
-      "contentHash": "sha256:b03aa5be44f87f974a3f80668097d4cf9ccc4b439110ecd61b13bd2871d34a68",
-      "occurrenceHashes": [
-        "sha256:6f609060be4ac9d7b554078029b5ce342b28cfb7d770a15b518e3eb9eb8021cf"
-      ]
-    },
-    {
-      "id": "sha256:3f4b51461d184ade8c74b91513d0bcd762293166d92ade6e6c374de8f0fdd825",
-      "rule": "hosted-coupling",
-      "file": "docs/quickstart.md",
-      "authorizedBy": "docs/",
-      "authorizationHash": "sha256:7ed437cbaabaadb08bd0e67ab48b779db85737e0e8df62cb6cd0b09119d03611",
-      "count": 1,
-      "contentHash": "sha256:3fd5270e6d5133bd6adf8d1b7545c25530b385e024c2b9201e60ff3936ea48bd",
-      "occurrenceHashes": [
-        "sha256:266c6027df8c84f181c9b177b0431db0b8a21eefd3e9af74b8232a837e3d4f2e"
-      ]
-    },
-    {
-      "id": "sha256:e8c3561f41a8791c9f6257705854335346b6be34fc57a3a8b0dd927b1f0b2d53",
-      "rule": "hosted-coupling",
-      "file": "docs/reference-tool-reverse-engineering.md",
-      "authorizedBy": "docs/",
-      "authorizationHash": "sha256:7ed437cbaabaadb08bd0e67ab48b779db85737e0e8df62cb6cd0b09119d03611",
-      "count": 1,
-      "contentHash": "sha256:48e97dc90befd8434b45b700eb21b8402a12c8efd76f643a6558a6b67a0726fa",
-      "occurrenceHashes": [
-        "sha256:95d726c659798d85676aac37ff9d3981a3cea09b4606df11e22fb37406e4cdb1"
-      ]
-    },
-    {
-      "id": "sha256:ece433ac62c700f058c5ba4f869bdd3f811637a30e0462f210e3bf3121dab9fa",
-      "rule": "hosted-coupling",
-      "file": "docs/release-status.md",
-      "authorizedBy": "docs/",
-      "authorizationHash": "sha256:7ed437cbaabaadb08bd0e67ab48b779db85737e0e8df62cb6cd0b09119d03611",
-      "count": 1,
-      "contentHash": "sha256:dae5f0063342b4df0d3101bc1cb566c17ecb868effc8c6726bb4eb8f078a5760",
-      "occurrenceHashes": [
-        "sha256:260b1dc71cbc2cc874d03a6ab7527ecc37e85920c499946da17bb887a8302bd4"
-      ]
-    },
-    {
-      "id": "sha256:38cdc5643922e489379539faad00d5000ccece0f8bb6eab3f61a4ed90a69a322",
-      "rule": "hosted-coupling",
-      "file": "launch/build-in-public-calendar.md",
-      "authorizedBy": "launch/",
-      "authorizationHash": "sha256:530b8205699b366d7261303f818dcb9f77b65a942bc5a67dd43e662f70116270",
-      "count": 1,
-      "contentHash": "sha256:0fa17b917c5542007f6e06dcc052308990ff9bec7bb867fd97d480b90c6842c8",
-      "occurrenceHashes": [
-        "sha256:dd8fdbf308c385ecc14ade5e6d05c2e3b8f5ed74b3ad33f1bcc1b54b095c19f1"
-      ]
-    },
-    {
-      "id": "sha256:a45acaa7273c73f0091b4c90ea6b2365c1c1fcba9f72bec807cd37a00e01cb7c",
-      "rule": "hosted-coupling",
-      "file": "launch/demo-script-storyboard.md",
-      "authorizedBy": "launch/",
-      "authorizationHash": "sha256:530b8205699b366d7261303f818dcb9f77b65a942bc5a67dd43e662f70116270",
-      "count": 4,
-      "contentHash": "sha256:818ceb20f83ed2d2de96f3e735fbc6fc644f9718fab9f9203b85b673f0d57379",
-      "occurrenceHashes": [
-        "sha256:5225f831b99e59c154f7b9ff47a4bb1f8449b6183c4fdc50ccab840d14bb35f8",
-        "sha256:75d62119e8e80630682c11ce7b1a34668fbb11ca9a4236f0d7b0c75130546a19",
-        "sha256:8e024b8cd55455d789ccde676ac097e5cafbef2031b61b88239de8dcb1ba9a32",
-        "sha256:e833007ae5621daffb2be2fe95019113cf0ad5113af82633ea3a27e7dded1b93"
-      ]
-    },
-    {
-      "id": "sha256:56aa7ad1ce2605870599d3f3b3ba9ef4a31624782dd6a862cf6fcd4443b5998a",
-      "rule": "hosted-coupling",
-      "file": "launch/engineering-deep-dive-outline.md",
-      "authorizedBy": "launch/",
-      "authorizationHash": "sha256:530b8205699b366d7261303f818dcb9f77b65a942bc5a67dd43e662f70116270",
-      "count": 5,
-      "contentHash": "sha256:78501c4f77aca85974a3322d03c05c4a6f04a5627a93ec31d8a2b0420158ca94",
-      "occurrenceHashes": [
-        "sha256:27e20ac15f765a086439242efccbecb88e4e68d916cc7ee78c4b58176c9bd4c7",
-        "sha256:7c681e08b46afe8e3f3df655b32afb4dffc5e3e77724851aa5d3dd9a7076cf2b",
-        "sha256:903da96c9ed67e1e081c95cb182c3ddd28d10a25a948f16cf37b8d9aefc295c3",
-        "sha256:a84aae1f8a19eefd3beb9e308711f1b8ee5fadd1dd7ddda745d8d705eca9e8d3",
-        "sha256:e87787b2ca57467cc5a3680c94c9538d94111fc186a28d6c4000b72fd70c236d"
-      ]
-    },
-    {
-      "id": "sha256:85fa523dee808a627a4ccfcd08d1cd8b59927551e85edf1f412aec607698a7a8",
-      "rule": "hosted-coupling",
-      "file": "launch/founder-linkedin-post.md",
-      "authorizedBy": "launch/",
-      "authorizationHash": "sha256:530b8205699b366d7261303f818dcb9f77b65a942bc5a67dd43e662f70116270",
-      "count": 4,
-      "contentHash": "sha256:f3e604678755cb7c24cbe212187c39e5eb85103dc9196695990a9a2408de3de3",
-      "occurrenceHashes": [
-        "sha256:02720790364e61a2531581a33dbaee949c5ccee36bb928049724370a17b48b74",
-        "sha256:39af3b6234de9b0a8932e82b3aa88893e294430dacc49d202ef05d77f86ef6f7",
-        "sha256:4edb07773326503f4ca779b5ce780b80552a604c2cd71ce312f69d5580d20302",
-        "sha256:e9785006fa988e89a5725b569f7444162f5b98fcfb4edfd3faa52bf126f35e71"
-      ]
-    },
-    {
-      "id": "sha256:49ee1a55a013868409b4e7d52d762939a02816d1d87a7f582d2c70192a10899f",
-      "rule": "hosted-coupling",
-      "file": "launch/linkedin-carousel.md",
-      "authorizedBy": "launch/",
-      "authorizationHash": "sha256:530b8205699b366d7261303f818dcb9f77b65a942bc5a67dd43e662f70116270",
-      "count": 5,
-      "contentHash": "sha256:e958996b48188d04df23dca89595df7e73130117d9e7816c63fb5b95d7ae54ed",
-      "occurrenceHashes": [
-        "sha256:094950280ab85d113062c4619c3969cea77801cb1079c52629183ffec69bdbe3",
-        "sha256:0df4360424c509aaffd5318c78fbc45657ab067b80eacdbead63f968752af5e2",
-        "sha256:3a7c33fbb594fe4d644af5e656fe6ab1293d60a4d625de3f503ebf2f90ba9573",
-        "sha256:814d8c8545d405a3592773c74338449a2141ce2e452d96a2fb7518ac82b66949",
-        "sha256:9a45b25fef6b4cdc1e3ca9fbefad1862a9d05896a405253325cc1c2a2b61f3c5"
-      ]
-    },
-    {
-      "id": "sha256:a5ad0a07c296bdbdc2d57ee248a09b72d7d7e57b017a87c0ff8ff331fcb91d34",
-      "rule": "hosted-coupling",
-      "file": "launch/marketer-case-study-template.md",
-      "authorizedBy": "launch/",
-      "authorizationHash": "sha256:530b8205699b366d7261303f818dcb9f77b65a942bc5a67dd43e662f70116270",
-      "count": 4,
-      "contentHash": "sha256:a9c834de6fb5688d72232ae77b2d015ec4fb4a64e2102ae443c0b6cc1916db0b",
-      "occurrenceHashes": [
-        "sha256:0798788525c62196fd49b6201e837caedc37f08b434a8595d104dd25cc41b6e3",
-        "sha256:41ac7b7d6b28a34d2b8a3acf202680fae4b17b502a3f04b19944c6e8f6920590",
-        "sha256:7407092c32b39a4561ee9e3686c7a520fd9fe7d3b802518a2646d08bfe8010f6",
-        "sha256:ea49d0be16aa74ab4dcf8199083c558e76878c766bd66727a6525be0f6496343"
-      ]
-    },
-    {
-      "id": "sha256:aa75b9390827fe490d549244948a0f420b8dfb3a183b4a1bbc8cce13d38afb09",
-      "rule": "hosted-coupling",
-      "file": "launch/README.md",
-      "authorizedBy": "launch/",
-      "authorizationHash": "sha256:530b8205699b366d7261303f818dcb9f77b65a942bc5a67dd43e662f70116270",
-      "count": 8,
-      "contentHash": "sha256:6e7213cd666a7428494c649dfbf5b54de952d00ad5c7950f803b4a9af02d097f",
-      "occurrenceHashes": [
-        "sha256:0131b25ba6fecca05710b73feae5a48dec6bae71cd8adf4a39366016a2b20dbb",
-        "sha256:03a08d9796ba23b3be613f12f474dcdecf6015ab18ccdd0aa9a669b684db7712",
-        "sha256:0c3bf4110044aa9fbfd06e0636f9148fc3072ade61d6fdb4deb3faab8ace2fde",
-        "sha256:3043460b288224e927974e675d2499844bbd9d5624176fd03771a7024b747d43",
-        "sha256:3a7127346f3e4fce66be72641962bbf6b918b28a417c4223cdb30bc551287c3e",
-        "sha256:529255da2954fe752d9c6c131dd1fe72e7c95dc6e7e2c18489976cff15f59786",
-        "sha256:6b7e38369349a17eb26470fc24d01a6f2b7c26b5cf70020fcc289081c28805f8",
-        "sha256:d3b3e7d831714b80578186af58898ae4987c4bac4add293fec348578c70118e8"
-      ]
-    },
-    {
-      "id": "sha256:8ce628a81c388dad46e6d64f2e58c3ef19aee2349fd8bdf955bd3c4b395e9f73",
-      "rule": "hosted-coupling",
-      "file": "launch/x-launch-thread.md",
-      "authorizedBy": "launch/",
-      "authorizationHash": "sha256:530b8205699b366d7261303f818dcb9f77b65a942bc5a67dd43e662f70116270",
-      "count": 3,
-      "contentHash": "sha256:15bfff06fd10397c463f1fa46394ebecf4d4f0bf32d0e2afe4a40a5a90c04303",
-      "occurrenceHashes": [
-        "sha256:18ff59bb2605eb631cf9fee801ff806e9912a9b4a2ff2bfd7019f15dba306083",
-        "sha256:1bc541e311fb9d3cfff9edf83d3c4481651d7b61b94f82f8ed7a1869f7fd382c",
-        "sha256:fb6cc00f4f97ae22b7d14f2f4441710797b40257a5347d610dc465fcee36e45f"
-      ]
-    },
-    {
-      "id": "sha256:3ebeba4849bf3c57debe7f24f4d2820eb468de2efc08fc9b2f4ebcef16ae0c40",
+      "id": "sha256:dc84e5893d0f971c7820ae9cef28b3d0d17c1218c4a9c5b737a1f2abeb51bdea",
       "rule": "legacy-product",
-      "file": "packages/cli/dashboard/assets/index-Ww78ADd9.js",
+      "file": "packages/cli/dashboard/assets/index-pTUVTO0B.js",
       "authorizedBy": "packages/cli/dashboard/",
       "authorizationHash": "sha256:d1d84760c9beffb7c5e7a84f32e295b10debb247372e7aed1924e93e933193e0",
       "count": 4,
-      "contentHash": "sha256:4ea613b10b3721e7b7891cce96b400246f7bba62b2e2aacb63dad8000a352001",
+      "contentHash": "sha256:fde5971afcbc6181ab6c09759e646ef7a9f2be07b02a7411bb7ce29cc788675e",
       "occurrenceHashes": [
-        "sha256:0a0282646398a2bd1c8d8f9963696c090115185e8d613d3ccb814b31fd8482ce",
-        "sha256:4d89ea88188262d6679f203aab07fb5b40a5f7e09ee2f0fc6681e3f643a12a6a",
-        "sha256:912b7cc9e2dd92d3030ad98f3a526cdcc4e51d7a3b1ec8f0a3b9658ae5d184ba",
-        "sha256:a52df2955706c7c7168c99dbc7d0f2c3e9099fb0c8ec6d4d5d824f00908065e6"
+        "sha256:3115fef2fb397cf626ffc26df5e365a52f9dd1cc634511a57b46afcc707cd300",
+        "sha256:58881938be24e317d12807a29ee4d5f57ced7415e39d622a457db8a9986e6c30",
+        "sha256:83e3e12361a073c1eaea9c5755d6323a7441f9a1ba9e7aa70feb5e3ac5bd4dd6",
+        "sha256:f304fd017185a5cf3065df2b28c11615d1f5fe1d78eb264de5287bcefd1cd6c8"
       ]
     },
     {
-      "id": "sha256:dc3240a9b1e80c958b8ed747cd53df5b5485bf7a53f387bace576ce4ebe17aea",
+      "id": "sha256:d4ce7cfdffd35380349ba8a186648358f84f19535751c83f1fcdd1385da7769d",
       "rule": "legacy-product",
-      "file": "packages/cli/dashboard/assets/onboarding-DD0KW-bj.js",
+      "file": "packages/cli/dashboard/assets/onboarding-PWdUIxcG.js",
       "authorizedBy": "packages/cli/dashboard/",
       "authorizationHash": "sha256:d1d84760c9beffb7c5e7a84f32e295b10debb247372e7aed1924e93e933193e0",
       "count": 1,
-      "contentHash": "sha256:06a0993527201a5d307a3826bfcd70e670be8b3903832d86d1833ea93912aeb3",
+      "contentHash": "sha256:339c5a66064f1e51e7f257c851a6395473987ab00bab08a4c135803a3cc9519b",
       "occurrenceHashes": [
-        "sha256:1989effcecd3bf55022a609adfc520bf69b7f0840c40b217e63db2bfcf26495c"
+        "sha256:25187451065864416b1abb079fb15cf0785d35be6c204f04ff43b173146741f1"
       ]
     },
     {
-      "id": "sha256:f1a3e05f63349a885f2dec75f7778c410ccb7e9721e0851cb38620c3b8102abc",
+      "id": "sha256:3654e6a6013b0ab5d4a180f4b68891c08acb59dcb451d148a003f62940dec81d",
       "rule": "legacy-product",
-      "file": "packages/cli/dashboard/assets/settings-bqRHzZ_a.js",
+      "file": "packages/cli/dashboard/assets/settings-B_6aM5D1.js",
       "authorizedBy": "packages/cli/dashboard/",
       "authorizationHash": "sha256:d1d84760c9beffb7c5e7a84f32e295b10debb247372e7aed1924e93e933193e0",
       "count": 1,
-      "contentHash": "sha256:ec34e1061ea526d790881b190705dfefe7809c16bee17258ac9c345fcbb716c0",
+      "contentHash": "sha256:0caa01320c625c87e03d4388b47155ad4242c03122c2ba02bfe1b21074ae55dc",
       "occurrenceHashes": [
-        "sha256:80497cbb8512a1bb1764b6d8eb9df1e54b721a21ca332616fbdf6e9192ccfc48"
-      ]
-    },
-    {
-      "id": "sha256:d6f3f7fb8c89adc67475988cb1c286f298fef35d38e43a5fcc47bc89d6974174",
-      "rule": "hosted-coupling",
-      "file": "packages/cli/src/cli.ts",
-      "authorizedBy": "packages/cli/src/cli.ts",
-      "authorizationHash": "sha256:ac7ccf027a9c669d948e6eb088d7c25fd504d9b637e3b172fb07270ea4d0bebf",
-      "count": 1,
-      "contentHash": "sha256:ec274174d9131e4c790e8681263b607c628f8eb746b8e9a64914dc3cd2167ed9",
-      "occurrenceHashes": [
-        "sha256:53f5297faf7a1d199ce1cd6cf67c6808e407fd9d5657ae946a2f35bffda40279"
+        "sha256:16cda4a2612679e7b774183da5d49f641c9d97101101a2c80d515257d9018bc3"
       ]
     },
     {
@@ -790,32 +228,6 @@
       ]
     },
     {
-      "id": "sha256:a0d9fc1100178716f08314b625ce1a2f45ce6580cbca73bbaa4c3a98bf080579",
-      "rule": "hosted-coupling",
-      "file": "packages/cli/src/service-definition.test.ts",
-      "authorizedBy": "packages/cli/src/service-definition.test.ts",
-      "authorizationHash": "sha256:3adc44d0adace872d6a6b9a2496ec3fcefdb8546453c0e55a003e7cad7de57f6",
-      "count": 1,
-      "contentHash": "sha256:cef4ec0194695e4c19fe38ffd2836daa430dadf395b204c774069a8a0f9e724d",
-      "occurrenceHashes": [
-        "sha256:33bc2a42fddf79d1e56d6f1264a4612be1836cadc67da1fef3e778fadf701b6d"
-      ]
-    },
-    {
-      "id": "sha256:9ed404733fbe241c3abdf6f415a769cee66bda60db1cb119951a361ecff0da03",
-      "rule": "hosted-coupling",
-      "file": "packages/cli/src/service-definition.ts",
-      "authorizedBy": "packages/cli/src/service-definition.ts",
-      "authorizationHash": "sha256:5a8bc39ebd1cbac0aa1c80727de017617337e5631281cd67b344cbef3e9bbfb5",
-      "count": 3,
-      "contentHash": "sha256:605f2bdf77e453fe8cdf059edbd992a2a5d063edc20d1a07f3f23e122acc96ed",
-      "occurrenceHashes": [
-        "sha256:1850f281ef6bf1f8051467fad7c6fc740bfceb2e23b95780d83841f588d209b3",
-        "sha256:2d02bacf14ab054cf1dd3eaa6f213ef9e78f17bb6058b44db58087a7c05596a8",
-        "sha256:524cf273ae5b9ebe9f356a5f8ef318e0b31fa304f882465690524b7e767459ae"
-      ]
-    },
-    {
       "id": "sha256:5a7529ea219589e90316f116ae1ba00eede84abc06dbae7b24d7dd14e8a049d6",
       "rule": "legacy-product",
       "file": "packages/core/src/core/store.ts",
@@ -853,18 +265,6 @@
       "contentHash": "sha256:1d3f7f21f15c368a4bd58822da8f81d0bdab131d67e7619cbbb609f23c0f88fe",
       "occurrenceHashes": [
         "sha256:e6dec2f961f709249f19d60b7d4373f37793d3765b1e7f87c9f9bad9a1386bee"
-      ]
-    },
-    {
-      "id": "sha256:7f0fc50a6f96b49365e8e2224190d68a17b6aad4673bc7ac13c0fbc4c44a16b9",
-      "rule": "hosted-coupling",
-      "file": "packages/core/tests/audit-full-integration.test.ts",
-      "authorizedBy": "packages/core/tests/audit-full-integration.test.ts",
-      "authorizationHash": "sha256:353bb1d7f51158fc835f6d4ef381283f76353bf4f1e22a3811f5ecc67df48b9e",
-      "count": 1,
-      "contentHash": "sha256:b7e4b542fc14a4b8af895cf2a53e8e3b03b9f5c6bf806b2784e35182854aafd2",
-      "occurrenceHashes": [
-        "sha256:9faa0072fd70b9fa8e597d645105626fd08bb3b02224b42c98fc184f444f5fe5"
       ]
     },
     {
@@ -935,21 +335,6 @@
       ]
     },
     {
-      "id": "sha256:b8d198d036b880f3c6150085fd6a17f06695e254a9866749f2ecc4658e6a5313",
-      "rule": "hosted-coupling",
-      "file": "packages/core/tests/paa.test.ts",
-      "authorizedBy": "packages/core/tests/paa.test.ts",
-      "authorizationHash": "sha256:55e8c264e3597c19972a185823fe0438982a0a467352d02a61ae400f26734232",
-      "count": 4,
-      "contentHash": "sha256:1efa17d5a9a89d9df12ec106934e920e44d75696f6e927ba3e4a843adf5f91a8",
-      "occurrenceHashes": [
-        "sha256:1d8843698155c667a53be562933fa18f201128eafbb11130b47566b4d865e4dd",
-        "sha256:2392e18d546ac5b57ed6a5b83c55deb3b36b3efa0e0f77bc576a8848143a51ad",
-        "sha256:321d4fbec2a1b6789cbd4c7a1f7fef02c12c72095fcdbacef75ba59e7a1f88ae",
-        "sha256:9ae06fd6f5542ab9a3248a520cc97feb4cb9b9dff5f54b3769bbafc26fecbdbf"
-      ]
-    },
-    {
       "id": "sha256:7d6c3d43f6fa4fe2ec26a38c483ba5eb83bb42bc8c62140fc7cc9824bcbf73b4",
       "rule": "legacy-product",
       "file": "packages/core/tests/watch.test.ts",
@@ -960,30 +345,6 @@
       "occurrenceHashes": [
         "sha256:50925aa553d72f439807a53959914dbbfdb72d027b5fc2f752368a8bc175c322",
         "sha256:bc21b74bcbde65ec1b31779c12f64c72fd77c1f9eeca39a2896b9af85a960cdf"
-      ]
-    },
-    {
-      "id": "sha256:680dac1323d25962b82231eae2bb28a54b43337a6388a5aea1b08f6760416126",
-      "rule": "hosted-coupling",
-      "file": "packages/credential-broker-native/Cargo.toml",
-      "authorizedBy": "packages/credential-broker-native/Cargo.toml",
-      "authorizationHash": "sha256:a9cd03f86afd2a91b09119ac39bd396278571543da9fc982ef90faabee4aea17",
-      "count": 1,
-      "contentHash": "sha256:50f3159bdf3ac7d007b89686bbc4216eafc3ab29f3a272b134629ab3eafaf151",
-      "occurrenceHashes": [
-        "sha256:06379da9d6d930bc127274fe3191c3c025286932b8f093aaba5972a57ce86eb2"
-      ]
-    },
-    {
-      "id": "sha256:7f0e865098f685cb4b8d67c4019100d258475ead20c41426157e3b0315b8ed00",
-      "rule": "hosted-coupling",
-      "file": "packages/credential-broker-native/src/main.rs",
-      "authorizedBy": "packages/credential-broker-native/src/main.rs",
-      "authorizationHash": "sha256:17559d9dfc3bcfc0ddbfa438fd335a636b51dcf7bafab87c44ea52f7fafae37e",
-      "count": 1,
-      "contentHash": "sha256:e306c27718b267ceb077f63c56c5be27a2023f1dc15db9b489ecaa9a335b0344",
-      "occurrenceHashes": [
-        "sha256:6015b445c59359831924a70d2a40fdc7d1760838df8cea38c15fe032242a1673"
       ]
     },
     {
@@ -1108,23 +469,6 @@
       ]
     },
     {
-      "id": "sha256:4db29da551bd514ae131145e270e169f70e8b79d758583a6465a9193f3aa90e8",
-      "rule": "hosted-coupling",
-      "file": "packages/server/src/index.test.ts",
-      "authorizedBy": "packages/server/src/index.test.ts",
-      "authorizationHash": "sha256:99968d5ed5b38e492e4b48d82203580faacf71a6fc0d2118f831540e583997ac",
-      "count": 6,
-      "contentHash": "sha256:91ac402fc57f371ed0f541a8c034f1d9b8c1f72439c09bee7347c8bb57c8adb8",
-      "occurrenceHashes": [
-        "sha256:71f20d46460494a412815f39c00baa04935bb39523f24f0a0703302fc1de2e36",
-        "sha256:8f939268a5b617be10b4cc46d6e1e7a6c6ceeabad05f6ee31681f49b54763da0",
-        "sha256:9371c69602c68706c64276c7366f62ea4d1066108b943320260fe12f01ff8218",
-        "sha256:97f22a242eeeecde02712878a1bd07340f6df7b2c46f2f81e222362323e5b0f9",
-        "sha256:980c6144bfce79d9334217db452a61020595107ecabbea4061998cfeae4b5d2d",
-        "sha256:cdbe459df4737f9d4935e887a469d335b7b011fb836061d3769585af85d578f3"
-      ]
-    },
-    {
       "id": "sha256:cd9a053227f691f362a43fad875f735603355dd44290f3e023ac96d4c270d804",
       "rule": "legacy-product",
       "file": "packages/server/src/index.test.ts",
@@ -1157,20 +501,6 @@
       ]
     },
     {
-      "id": "sha256:2ba14c3c88834a475db15efa4d28b3b199ce32400f9d365873822421f08fd9db",
-      "rule": "hosted-coupling",
-      "file": "plugins/claude/agentseo/.claude-plugin/plugin.json",
-      "authorizedBy": "plugins/claude/agentseo/",
-      "authorizationHash": "sha256:62f7756043946da03bd6956bd9b83d80efbc06bcb23f2cdf3ee6be4dc82e319e",
-      "count": 3,
-      "contentHash": "sha256:ff83caf3ad1fa48c81783b44ec9e3732f43c76cf4533aeb62f4bff00df8708a1",
-      "occurrenceHashes": [
-        "sha256:1a113b349f61e0fb6d587e66cd43134291b0ecd9420a96f0c22675cd059c9200",
-        "sha256:2f21b4ae8434cc63546e1b0c6af71a8136b788c5da73e5e9092ac69becdfb0d5",
-        "sha256:36446e7ee281a6a3dd326fa83bf0a02e3a2c817d1e56a92640399019eeb3332a"
-      ]
-    },
-    {
       "id": "sha256:95fc776e842ea760b9e2f315f3eb077e05a395f0a08ee8824198715cc5ba82d0",
       "rule": "legacy-product",
       "file": "scripts/desktop-runtime-config.mjs",
@@ -1184,41 +514,18 @@
       ]
     },
     {
-      "id": "sha256:918d1a69bfeb0e712dd2747c62c5968bc35c18ac5f30896221310da611a18fbe",
-      "rule": "hosted-coupling",
-      "file": "scripts/generate-agent-plugins.mjs",
-      "authorizedBy": "scripts/generate-agent-plugins.mjs",
-      "authorizationHash": "sha256:7c058dc4f049d3032d07fc2d284d6adb88479f3b1c41ccd981c6d1e64f06f193",
-      "count": 4,
-      "contentHash": "sha256:ec368149e9a57577fe59fcca39749e838296c328bf581fe6dc58254350759c22",
-      "occurrenceHashes": [
-        "sha256:1a7627b713b0a7410d5c7db0d053bdfba4e87fc7195cd124c50095b8f9309fe1",
-        "sha256:4842133bd45c0817c49bb6c3c2ebe8542a5a2853cb08c1e5dc8cb09710ca587c",
-        "sha256:8a7d63ddc25f1fdfc42468293d0564912958f9493b53fa72b764a05ba435242d",
-        "sha256:fd975556911e17da6fe50cfeb6bda5e941c185a1813782f9ceb3d6f7e2e20d9a"
-      ]
-    },
-    {
-      "id": "sha256:fdd548d464275ab302fbe96618162e9f74775a3a2d8c0fedc0d31fcfcd8a1fad",
-      "rule": "hosted-coupling",
+      "id": "sha256:2e9366b531d1390fbebf139d1cb58e3bd44988c7841c3cf1cc166652eb203b54",
+      "rule": "former-affiliation",
       "file": "scripts/identity-migration-policy.mjs",
       "authorizedBy": "scripts/identity-migration-policy.mjs",
-      "authorizationHash": "sha256:491ce0cd8fdcdd40816e1ced31487215d46dfcd3221d7d00444662fe467b51fe",
-      "count": 12,
-      "contentHash": "sha256:2e37fc42b63e21112da92e96b1d993af6ee58530a046b59fd3af7ad645239573",
+      "authorizationHash": "sha256:4a65b5328cc8ac971a1a9f40946720e40e266884c9256b77131313ae0335554c",
+      "count": 4,
+      "contentHash": "sha256:4dd59b5096cad83b4462c0b3059d18807c39c16118b69c7dc051676ee6b56ac3",
       "occurrenceHashes": [
-        "sha256:17dcc8fb14b3c0baea34927ea33545d4e8d7a1ef2cafdb3abdb8c85b8d109526",
-        "sha256:19781dd82384f2eca9e20253dd8070968152127b18199b8fcc8e74b7d7f56349",
-        "sha256:29a4eb4aedc5f701078fe271e96f20f9d7bcbb3c0e032e499989538bad30f1ee",
-        "sha256:4429ad9a073d2df861fa65ee73eace573eda06cd1953a0d46d444ea7a3e6fc8a",
-        "sha256:569bd5c667551e640f0c78277531e572c731c50e100e780c6005de48e8cd77a8",
-        "sha256:580c6150c4ad7bc1bf9a0704841d270cacce942e505f2a8f39912e6d4964c77e",
-        "sha256:6ba3c689ef9b68c355c3b6b452a96793fd92b7cff221179fdde35a1ba0a18283",
-        "sha256:7e975c96f508b170357fc9f8396f136778eb09973bd080e015b44c2cd674b5d2",
-        "sha256:9f1fad0368748cd1b0db6e432153aafc66bb0663a5a6a9b78aa9a369383d2be3",
-        "sha256:b4d01b6682d15042e05e76a80b6e57b19b475e98c8db69e3f4f1300fed2aaa45",
-        "sha256:d9cb75785b9b12921a536f38a2660edfc3ad9f57525be73d73074ecd9705959a",
-        "sha256:eb893b27e0983372249022269f20ef94d91ace03cc482df9b39f4a8545bc5068"
+        "sha256:0c5fe472bcce41bec867190ed8aa5b6ce608ba1625784f2cdd0ad42d574ef812",
+        "sha256:11d1550bc3fffd59497771d32fe1d932f317904eae82daefd5ae3a39df01d300",
+        "sha256:84dd1d09190061c9c9efae611493e66f4e819dde27b0dcf4da1c42a02cadf0f0",
+        "sha256:b662b3541abf13bbc7ebd799a44bf8b4be28641889dc6a2d7669be40d7b359eb"
       ]
     },
     {
@@ -1228,9 +535,9 @@
       "authorizedBy": "scripts/identity-migration-policy.mjs",
       "authorizationHash": "sha256:48eb4a0e91be10675d40da6c98facc65ec5e641ee0fe92d47e31058503dc75e3",
       "count": 1,
-      "contentHash": "sha256:81c2e2936f7173eadc26eab7cae56679894f979c5149d5ac8555215b4821b5d2",
+      "contentHash": "sha256:7d0c5ce46e7b40766989db34c74368c775c95cacfc8562f49754a6f8b691d374",
       "occurrenceHashes": [
-        "sha256:6bc8e2eface696c1a82f0ba315773587e74472c9a08f4f564f2745bacb727a66"
+        "sha256:70d870566b705e3ed9e3fd462712ca47a5fb1deb39b1ffd06092065792136f81"
       ]
     },
     {
@@ -1240,9 +547,9 @@
       "authorizedBy": "scripts/identity-migration-policy.mjs",
       "authorizationHash": "sha256:bea59ed8beba4e7a61e7f4e1b8f81d5077732f3450183267c5c0ed40d994039d",
       "count": 1,
-      "contentHash": "sha256:e80db5ab41720194b31812c3853e053459654d8793606a0d809e9ab866995bd4",
+      "contentHash": "sha256:976cdf4b692059ce0170697845fb3a15cf51874d2f85b9844583abb5d907698f",
       "occurrenceHashes": [
-        "sha256:20a705d71fac6b2b1b4a83699387f74950f3aafcf9fe3a9c7f05487be872b1dc"
+        "sha256:e3becdd2e9f92bb7b57f440fabb7780144224527f8f51a1c2991572e9a5bef7b"
       ]
     },
     {
@@ -1252,66 +559,42 @@
       "authorizedBy": "scripts/identity-migration-policy.mjs",
       "authorizationHash": "sha256:ca649cc249d840289bf03324c719a1fb2066c3d75134315d9d44a4cc9f9f7047",
       "count": 34,
-      "contentHash": "sha256:32ed4eb9df106e41316b94d30a7652bdce47d518d579128dd664837a97ed0950",
+      "contentHash": "sha256:475b2c9b0a21a21dfc87250943e30c0d357cb42ecfc7810f1e356ee50e1ce091",
       "occurrenceHashes": [
-        "sha256:087a1966d1872a70ad83d91d36243bac217a2f89c13a22aa43e874ef2d2229a6",
-        "sha256:0df4ee3c6c64406a64517a9c4771bbd30b65320067e8d7f1d1f0bd6b611c96e4",
-        "sha256:13d0dfd0d6ad258edda503f6f01fd99ca1adbc8b3116b3fbabcd29773bb09d49",
-        "sha256:2e5d715978d90e1faa9fa72d7012065332d2c523ce2291d2103762fc4d96fc49",
-        "sha256:36ab8f6eadff985b0960e75f81454d07a76659f9e8d609e4992b63b0e7a1945e",
-        "sha256:38af9f5e40d77853c12cf4d2f9860bd9da2b08a93ce22c175627922025edc01c",
-        "sha256:4e3ee7f0cbf15e71bf01fa81197b5fb584eab7a5ba734b5d4b8b8e4c468dda24",
-        "sha256:579ee42c6d943a0cf96d44a68e5265c630200acef08c7b003009565c2cb9a876",
-        "sha256:57b2625d0553734dcc63299b81df6ad7b67caaf6481ba30ea10514c8fe577370",
-        "sha256:5adf966ec77dab7c678de9cfc4e90ef8da21601e024f53b32265b972635652c1",
-        "sha256:8682e27f18d696eb51e9816266f0234d5859f820ec04e27958f7f113617331b1",
-        "sha256:8dbd17cbc73f283ea0295ce9f8e2cdb774a6a1572f98a9ec1c8c0f4f9eec53d0",
-        "sha256:92baa2640f7c889fbdc47d7057596e3e6c47ebf34f6f66484bf9db46203f0dec",
-        "sha256:95f51acfc56190180e138657c2dac9e690479fbfc5f5466f965ec5279f4ebd9d",
-        "sha256:96fc72e88759c9754f231e5e1940fcc6e01de73bfa0448075ef832077afed60c",
-        "sha256:a21b21199bd5df48c2eca814649cfabb824b8e5a80cbfcc702ce606637505e9d",
-        "sha256:a41bf5e4568c7ef62288ee0f9f23931204140bafc7b9897d2b84e1d074d2d388",
-        "sha256:a8f8e89d7bc46cdee39ab65ad76de97f8d8a5b4ba2a88dd2cd851c990dd7be01",
-        "sha256:b68aff6fa3f191c2359829cb732e5d608483c0c55efe1b02cada8b0211022093",
-        "sha256:ba9a2e6900355d4a0be97377f615982ae486e349e40c1a2932ff6f6a3d42ec26",
-        "sha256:bb3ccec2e47ed225139d723048c50252259986d30c2d95d136b8196c760dc2d4",
-        "sha256:bf15af7a6566e3fd74cb05832079ce982df0b61e52cb23fbfb3f153ca0ff27a2",
-        "sha256:bfd5d3370ed4c0a5ba6ef57e71189e0fc79f3344ebf042b29c6584bb123b88f3",
-        "sha256:c92e7f6e9f14d20fe72f40cf122193d58c56189a781b8bc84b8c55374141933a",
-        "sha256:de975cffb97c1c9e2ae07c2e4ce7fa996ce4095d01a00f299d6a2e432d5d4e2d",
-        "sha256:e09d43b239537a8826600a5eb7d3e9925fb231a918fa6fbfd345e014f6230d32",
-        "sha256:e0fe60196e16be8b19c404e6323da062999dec9376dfe6d0b8a5d17dee098762",
-        "sha256:e4419480fc573dc452660bf7e56a0e93d2579b9d1784cba684542d4b34f4205a",
-        "sha256:e485546b76c98e93473306d5485700bf10d16f14c77f1ce27e138e577f83c8b9",
-        "sha256:e8364b60b2922372f127ea75b966a65aeb0dca3b53d0d181960dcebdeed9912e",
-        "sha256:f0274cb78261f06d5a3f3b5bd25a28b5e30ca3d8de8fb07dba791942d22017df",
-        "sha256:f15839f62efc983e587cc1bca29e8917efeb14b843d2418a6047018a0be0048c",
-        "sha256:fa5a7cb6bf1b1f590be8f1d246398c8ee87bcd9c153dcf95ce50c4538ae90562",
-        "sha256:fbaa5f30fd23709f7698201776f40bb490b479dd84afcd75997116bad7821cad"
-      ]
-    },
-    {
-      "id": "sha256:ed727ddc8de9f6b28809a25999a1d4984caa36394ea327b4ac959abb5c59dc7f",
-      "rule": "hosted-coupling",
-      "file": "scripts/identity-migration-policy.test.mjs",
-      "authorizedBy": "scripts/identity-migration-policy.test.mjs",
-      "authorizationHash": "sha256:9121abd1d6a72bbb749f4968e0aefaef9c2eeb98f129a1f54c1cf13e096c64a4",
-      "count": 1,
-      "contentHash": "sha256:1e761b5075098af0efe55ddb982f159168fea87d6c9058d1c835904bfa1fdea9",
-      "occurrenceHashes": [
-        "sha256:fb2e82176624411ab260ad5aa97e5dcc36b607c6540d35dc325a3b7570196dd6"
-      ]
-    },
-    {
-      "id": "sha256:e098707c09d6e72fb3f431fc6fcfc78757d683653113fd7e6b5d9c47bf408a70",
-      "rule": "hosted-coupling",
-      "file": "scripts/npm-release-policy.mjs",
-      "authorizedBy": "scripts/npm-release-policy.mjs",
-      "authorizationHash": "sha256:4c0787bf8211a2cd99fe2094df46b50025df9ad3fbfa609579f0738b0a6a6f88",
-      "count": 1,
-      "contentHash": "sha256:f560c5388adbbb76f779a9630f0b5ce27cc53cee27c170da70aab398d3ec715d",
-      "occurrenceHashes": [
-        "sha256:46883e27de6b5419e96aceb19c8ff28ab2b0c3ef2571853b581865ab060a3bc0"
+        "sha256:03e540726441beb57538bc2d12eb23fca2ec6d73252fbeea7a72fa26a92898d5",
+        "sha256:0b4f0d6c5f3bd981e551822e38bcda1ae52b573f1c299bf3c4faf7a523359fbb",
+        "sha256:138921e048899fa785fe5cf1fccc1e3d7d7a7dca46f89432fbc9de2e3f6caaa9",
+        "sha256:19335a002d634b3cbdc7e57b0964d4e569a8d4a727a70b68089e0c372fa3f8bf",
+        "sha256:28ec1231e8545aa05202da25f0df3a7121af4f27bbb2f39dd0b665600fc20f0a",
+        "sha256:3b5e4380557bc017d240951e8899c97901374e4d4d03dbf9ba60444442384f14",
+        "sha256:3e70384e794a7b92eb133675acde1db519b5624927466cad594f53cff0493fec",
+        "sha256:6126573da69ca78e9331f8f8b2c73c7798ff51821042e004f9e56600b5062702",
+        "sha256:6138d87d7270461f04c8e1e37fdda41b60b59e4a69c0e673bdd39cbb2362ebd9",
+        "sha256:6c7ebaf503120ea98bfba0c10c38e9d469615c8ae18a1c25995da7298a54db03",
+        "sha256:7340219fbb880e8ae6abc8d88e6bb251eb8d15ceccf089ca5ee56884e28e83fc",
+        "sha256:75934e51d72111430086574a7d1b77a439f6216a3786ffecea66037971ceb845",
+        "sha256:840e85f49edbc3ab6ca3e8c36317fa1630841b08a7864d556dc89417e27d75b1",
+        "sha256:88ca202ce8396b6e596c27882aed6a3d36f6ef1b18f5211b23b0af9235080328",
+        "sha256:891efa2386b66291496f5cca469f0448efbf3da7ce24993aa2da49dc30239b37",
+        "sha256:8e323d50b777fa35d2937ae540d6a3f7dc727d00ff2ced7f03e722f840dd96fa",
+        "sha256:90d7759530b8192203563c17060982e87dbc55a8bf805fdf338e13066bffb4a1",
+        "sha256:90f668a5a008817459c1450b00ad78022d2f889d7e58973e6db9636c39f3a40f",
+        "sha256:9d919c053b4a399b9d80a4f5f6d4168e005d14606d36518ded98a9cdc0658a3d",
+        "sha256:9dae5e9c8f129a0db622b214a0a6cc424d2a9c82e247280f54a83531538af01d",
+        "sha256:9ea86af6afc3e75cd84bb58da902d90da7cb6006a345dd56f4cf068fc38e973b",
+        "sha256:a44e84d6082af483721c5eea75e339552b536a66fa13df6864b7520111e82b1f",
+        "sha256:ac172e8d0a4188277756da17f7114bc6cc9a15c2beb6f198c2f7a038a9231f6b",
+        "sha256:b5e5d31f0b0f39bba5c570a3fb3d9248178c0b75e778b32353c59d649c0ac4b5",
+        "sha256:d39b97679bc15b46a9dbfdf6afba7c0d8bb7738967c1ee3c380f3017ce249d10",
+        "sha256:d709fb679938b6ce799ff087d4c4bb8e931e36b010ee73145fc155c7cf9b7886",
+        "sha256:d8fe0025cb3e781af6d373c17f7d52adb7aa18465e24145be99500e7330c21c6",
+        "sha256:d9abc238d0975aebe855d1b945fed0bb333daf69c2e3ccaa86e093e05a40bedd",
+        "sha256:dc4669713236ddf0eb1cfc036b1e8a2e424236336499ccae8dc94f4c2c819d5b",
+        "sha256:e1c33e7eeb0a122efe6ff7ccae423405fbaa5b711948f547cfd7dae4099a9131",
+        "sha256:eb0fa6b533d1286b3b7ad880d24b99dd43919cecd90f8df0a681b988d4154c2b",
+        "sha256:ecdc177af7b158c3be641d3069e9d340c9325e1c452adb16b608eebe080a059e",
+        "sha256:f60b87591029b712d23b2ac1b3dee44b718f08051a603b3c88818bb25552be86",
+        "sha256:f9eae300f763a812a8e7dbd17639a091e79f2741009cc4a787dcc019ba0754df"
       ]
     },
     {
@@ -1338,56 +621,6 @@
         "sha256:1207f1f351fb5d1e05747367c2f82e7a3ede2a02036fd9ce3c57e8953f49d154",
         "sha256:4f4c1907dcd3b5930f48aae629b178be0684532c980c4c723677b077bb5f5272",
         "sha256:74e65028d0368c60ddca33e237846ad171b0b8987fcd24cc91dad1b5ddf8c38a"
-      ]
-    },
-    {
-      "id": "sha256:2f04ab56a1b89b40b035a4059526113948259e57c3bd589c092b931ed7ab5510",
-      "rule": "hosted-coupling",
-      "file": "scripts/release-policy.mjs",
-      "authorizedBy": "scripts/release-policy.mjs",
-      "authorizationHash": "sha256:cf64adb1358756bb92ceca5670a5d560a95a7733da2efe29bc3bf161f608bb72",
-      "count": 1,
-      "contentHash": "sha256:b12da9a4745364fdea16a54d50bf431fce3685c318738b2e183093bdfc5f082d",
-      "occurrenceHashes": [
-        "sha256:fbef0a364d7ebed653764f4528652c8fbfc7a2b5c991de2a857180d7f04f8201"
-      ]
-    },
-    {
-      "id": "sha256:fcc1ab6ba97eee53baea82a76a8c087e11cac82688a95256371fff8d688fb1df",
-      "rule": "hosted-coupling",
-      "file": "scripts/updater-metadata-policy.test.mjs",
-      "authorizedBy": "scripts/updater-metadata-policy.test.mjs",
-      "authorizationHash": "sha256:aa38512774dcd8b8e0ad70909dadc74161fcce5d9af498f12efb09ef3df5a476",
-      "count": 2,
-      "contentHash": "sha256:2fcc4b4aae2e79a12ac8c14b3e24a6cad66f238fb24be1463b88d2d7668c6402",
-      "occurrenceHashes": [
-        "sha256:1de0d96759c525b99814818799126483d707f8cbba1affe563f72e96018cfee6",
-        "sha256:8851906d5af198bdf7144ea1409e5221829203ff7fabb44a27710660f34ffd9a"
-      ]
-    },
-    {
-      "id": "sha256:b5b7343911d0a137808745ee279ebb7b2788ce7a15c57dec88897ea653ff5d9f",
-      "rule": "hosted-coupling",
-      "file": "scripts/validate-contracts.mjs",
-      "authorizedBy": "scripts/validate-contracts.mjs",
-      "authorizationHash": "sha256:7553f47c9771c85e2bb5a2922db06be0f3921b379934e2c0c467715a8c688244",
-      "count": 2,
-      "contentHash": "sha256:31448fb5d7530beb7e6462f80576230731019e325c2aa4a0e680be4c7658e3ce",
-      "occurrenceHashes": [
-        "sha256:1353cc09309804e9ff7aa45229b824c6c10a4c2695219e10d4f4ac26cef0d8c2",
-        "sha256:5dc77c3a84c881a77382b3226f51e342ab0d167471fe3a54cc3897a9214adda5"
-      ]
-    },
-    {
-      "id": "sha256:f8a48d8a842c714bfecf855284b4a8f72595de23438b6c4f32d47339243a899a",
-      "rule": "hosted-coupling",
-      "file": "scripts/verify-unix-installer-lifecycle.mjs",
-      "authorizedBy": "scripts/verify-unix-installer-lifecycle.mjs",
-      "authorizationHash": "sha256:fc5cc556378f0f09d36942f8a3ceebb9f88a483e76176867901bd5cec6c66be9",
-      "count": 1,
-      "contentHash": "sha256:0de16ec87dd47d6bc06aac78490a1d5bfdf8f16e23fb18b5550eeb0d4ed7d91c",
-      "occurrenceHashes": [
-        "sha256:20603bee585b8736972fa5a83958bbe5f292cc4e82f56eedbd86cfbe4c54bf34"
       ]
     }
   ]

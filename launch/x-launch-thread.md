@@ -28,7 +28,7 @@ Unavailable, stale, or failed sources are shown explicitly. AGENTseo does not si
 
 ## 5/9
 
-Community Edition runs locally, needs no product account, and has telemetry off by default. Credentials are write-only and excluded from project exports.
+AGENTseo runs locally, needs no product account, and has telemetry off by default. Credentials are write-only and excluded from project exports.
 
 It is open source under the Apache License 2.0.
 
@@ -52,13 +52,13 @@ Try the local workflow:
 
 Then add one site, run one audit, inspect the Top 5 Actions, fix one item, and re-run to verify it.
 
-Source + docs: https://github.com/GolemWorkers/agentseo
+Source + docs: https://github.com/MaxJafar/AGENTseo
 
 ## 9/9
 
 Need always-on monitoring, portfolio views, managed integrations, teams/RBAC, hosted reports, and commercial support?
 
-That is GolemWorkers Full, a separate proprietary service: https://golemworkers.com/seo
+That is AGENTseo, a separate proprietary service: https://github.com/MaxJafar/AGENTseo
 
 What would make this useful in your weekly SEO workflow?
 

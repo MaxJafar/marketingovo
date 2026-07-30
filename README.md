@@ -8,10 +8,9 @@
 performance, and SERP data into verified actions.**
 
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-5b63ff)](LICENSE)
-[![Community Edition](https://img.shields.io/badge/edition-Community-20b486)](docs/editions.md)
 [![Telemetry](https://img.shields.io/badge/telemetry-off%20by%20default-242b36)](PRIVACY.md)
 
-AGENTseo Community Edition runs on your machine, requires no account, and
+AGENTseo runs on your machine, requires no account, and
 keeps projects and credentials under your control. It does more than produce an
 issue dump: it connects technical evidence to organic exposure, conversion
 exposure, reach, confidence, and effort so a marketer can decide what to fix
@@ -59,7 +58,7 @@ first and verify the result after the next audit.
 - **Extensible and reproducible.** Custom rules, connector contracts, fixtures,
   and benchmark inputs are inspectable.
 - **No artificial local limits.** Projects and audits are limited only by the
-  resources of the machine running Community Edition.
+  resources of the machine running AGENTseo.
 
 ## Quick start
 
@@ -99,20 +98,15 @@ See [the ten-minute quickstart](docs/quickstart.md) and
 [current release status](docs/release-status.md) before using an alpha build on
 production sites.
 
-## Community and GolemWorkers
+## Portable projects
 
-Community Edition is a strong single-user, local-first product. AGENTseo on
-Golem Workers adds hosted infrastructure and collaboration: always-on workers,
-teams and RBAC, managed credentials and provider credits, portfolio views,
-hosted reports, integrations, AI-assisted approval workflows, retention, and
-support. Analysis is not intentionally crippled locally.
+There is no paid tier and no hosted edition. Every capability in this repository
+is available to everyone, and nothing is withheld to sell later.
 
 Projects can be exported as `.agentseo` bundles. Secrets are never exported and
 must be reconnected after import. Issue fingerprints, review decisions, and
 bounded review reasons are preserved together with Project Context revisions
-and the append-only marketer journal. See the full
-[capability comparison](docs/editions.md) or visit
-[golemworkers.com/seo](https://golemworkers.com/seo).
+and the append-only marketer journal.
 
 ## Product surfaces
 
@@ -167,7 +161,6 @@ shown as unavailable; they are never silently converted to zero.
 ## Documentation
 
 - [Quickstart](docs/quickstart.md)
-- [Community vs GolemWorkers](docs/editions.md)
 - [Architecture](docs/architecture.md)
 - [Project Context and marketer journal](docs/project-context.md)
 - [Desktop runtime and release configuration](docs/desktop-release.md)
@@ -177,8 +170,6 @@ shown as unavailable; they are never silently converted to zero.
 - [Reference-tool reverse engineering](docs/reference-tool-reverse-engineering.md)
 - [Security policy](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
-- [Governance](GOVERNANCE.md)
-- [Commercial edition](COMMERCIAL.md)
 - [Launch kit](launch/README.md)
 
 ## Honest scope
@@ -196,6 +187,5 @@ modification, and redistribution. See
 [ADR 0001](docs/adr/0001-apache-2-0-relicense.md) for why the project moved off
 the Elastic License.
 
-The license does not grant rights to the AGENTseo and GolemWorkers names and
-marks, which are governed separately by [TRADEMARKS.md](TRADEMARKS.md).
-Contributions require the lightweight [CLA](CLA.md).
+Contributions are accepted under the same license; there is no separate
+contributor agreement. See [CONTRIBUTING.md](CONTRIBUTING.md).

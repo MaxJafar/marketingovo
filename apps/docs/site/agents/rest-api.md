@@ -230,9 +230,9 @@ Measurements use explicit source state. A metric can be `available`, `unavailabl
 The versioned route is `/api/v1`, but `0.11` remains an alpha. Route contract changes should update TypeBox schemas, runtime validation, OpenAPI, generated SDK types, tests, and documentation together. The six agent tools use a separate canonical TypeBox registry that MCP and OpenClaw project into their native schema dialects.
 
 <p class="source-note">
-  Canonical sources: <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/contracts/src/index.ts">public API TypeBox contracts</a>,
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/contracts/src/agent-tools.ts">agent tool contracts</a>,
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/server/src/index.ts">local server</a>,
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/sdk/src/index.ts">typed SDK</a>, and
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/architecture.md">architecture</a>.
+  Canonical sources: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/packages/contracts/src/index.ts">public API TypeBox contracts</a>,
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/packages/contracts/src/agent-tools.ts">agent tool contracts</a>,
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/packages/server/src/index.ts">local server</a>,
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/packages/sdk/src/index.ts">typed SDK</a>, and
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/docs/architecture.md">architecture</a>.
 </p>

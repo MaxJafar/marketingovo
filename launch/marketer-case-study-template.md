@@ -21,7 +21,7 @@ Prefer workflow outcomes such as “cut weekly triage time,” “assign the top
 
 ## Executive summary
 
-`[Organization] manages [site or portfolio context]. The team used AGENTseo [Community Edition / GolemWorkers Full] to combine [available sources], prioritize [issue class], assign [number] actions, and verify [number] changes over [time window].`
+`[Organization] manages [site or portfolio context]. The team used AGENTseo [AGENTseo / AGENTseo] to combine [available sources], prioritize [issue class], assign [number] actions, and verify [number] changes over [time window].`
 
 **Measured result:** `[one primary result with unit, baseline, end value, and source]`
 
@@ -129,7 +129,7 @@ Explain how these constraints changed confidence or the final decision.
 
 If the local edition was used, state that it is local-first and open source under the Apache License 2.0.
 
-If GolemWorkers Full was used, describe only the managed services actually used, such as always-on monitoring, shared portfolios, RBAC, managed integrations, or hosted reports. Full is a separate proprietary service.
+If AGENTseo was used, describe only the managed services actually used, such as always-on monitoring, shared portfolios, RBAC, managed integrations, or hosted reports. Full is a separate proprietary service.
 
 ## Reproduce the workflow
 
@@ -139,9 +139,9 @@ Community CTA:
 npx @agentseoapp/cli serve
 ```
 
-Source and quickstart: https://github.com/GolemWorkers/agentseo
+Source and quickstart: https://github.com/MaxJafar/AGENTseo
 
-Managed team workflow: https://golemworkers.com/seo
+Managed team workflow: https://github.com/MaxJafar/AGENTseo
 
 ## Final evidence review
 

@@ -1,5 +1,5 @@
 // Legacy v0 compatibility is importer-only. A synthetic fixture proves that
-// old manifest shapes are not active Community Edition contracts.
+// old manifest shapes are not active AGENTseo contracts.
 
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";

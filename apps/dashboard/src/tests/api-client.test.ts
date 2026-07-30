@@ -199,7 +199,7 @@ describe("apiRequest session flow", () => {
       .mockResolvedValueOnce(
         jsonResponse(
           {
-            type: "https://golemworkers.com/problems/source-unavailable",
+            type: "https://github.com/MaxJafar/AGENTseo/problems/source-unavailable",
             title: "Source unavailable",
             status: 503,
             detail: "Search Console did not respond",

@@ -3,7 +3,6 @@ import { useOverview, useStartAudit } from "../api/queries";
 import { useSite } from "../context/site-context";
 import { ActionCard } from "../components/action-card";
 import { FreshnessNotice, QueryState } from "../components/data-state";
-import { EditionCards } from "../components/edition-cards";
 import { Icon } from "../components/icon";
 import { TrendChart } from "../components/trend-chart";
 import {
@@ -224,7 +223,6 @@ export function OverviewPage() {
                 )}
               </Card>
             </div>
-            <EditionCards />
           </>
         ) : null}
       </QueryState>

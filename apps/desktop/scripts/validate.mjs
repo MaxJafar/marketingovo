@@ -28,11 +28,11 @@ const startupFragmentPath = resolve(
 );
 const startupFragment = await readFile(startupFragmentPath, "utf8");
 assert.equal(config.productName, "AGENTseo");
-assert.equal(config.identifier, "com.golemworkers.agentseo");
+assert.equal(config.identifier, "io.github.maxjafar.agentseo");
 assert.equal(config.bundle.active, true);
 assert.equal(config.bundle.createUpdaterArtifacts, true);
-assert.equal(config.bundle.publisher, "GolemWorkers");
-assert.equal(config.bundle.homepage, "https://golemworkers.com/seo");
+assert.equal(config.bundle.publisher, "MaxJafar");
+assert.equal(config.bundle.homepage, "https://github.com/MaxJafar/AGENTseo");
 assert.equal(config.bundle.license, "Apache-2.0");
 assert.equal(config.bundle.licenseFile, "../../../LICENSE");
 assert.deepEqual(config.bundle.externalBin, ["binaries/agentseo-node"]);

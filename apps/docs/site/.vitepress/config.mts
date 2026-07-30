@@ -1,6 +1,6 @@
 import { defineConfig } from "vitepress";
 
-const repository = "https://github.com/GolemWorkers/agentseo";
+const repository = "https://github.com/MaxJafar/AGENTseo";
 
 export default defineConfig({
   lang: "en-US",
@@ -41,7 +41,6 @@ export default defineConfig({
           { text: "MCP, Codex, and OpenClaw", link: "/agents/agent-surfaces" },
         ],
       },
-      { text: "Community vs GolemWorkers", link: "/product/editions" },
       { text: "0.11 alpha", link: "/product/release-status" },
     ],
     sidebar: [
@@ -81,7 +80,6 @@ export default defineConfig({
         text: "Trust and product boundary",
         items: [
           { text: "Security and privacy", link: "/trust/security-privacy" },
-          { text: "Community vs GolemWorkers", link: "/product/editions" },
           { text: "Release status", link: "/product/release-status" },
           { text: "Reference-tool audit", link: "/product/reference-audit" },
         ],
@@ -104,7 +102,7 @@ export default defineConfig({
     },
     footer: {
       message: "AGENTseo is open source under the Apache License 2.0.",
-      copyright: "Copyright © 2026 GolemWorkers",
+      copyright: "Copyright © 2026 MaxJafar",
     },
     docFooter: {
       prev: "Previous guide",

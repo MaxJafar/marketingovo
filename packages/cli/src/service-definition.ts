@@ -110,7 +110,7 @@ export function serviceDefinitionPath(
       homeDirectory,
       "Library",
       "LaunchAgents",
-      "com.golemworkers.agentseo.plist",
+      "io.github.maxjafar.agentseo.plist",
     );
   }
   if (platform === "linux") {
@@ -174,7 +174,7 @@ export function createServiceDefinition(
 <plist version="1.0">
   <dict>
     <key>Label</key>
-    <string>com.golemworkers.agentseo</string>
+    <string>io.github.maxjafar.agentseo</string>
     <key>ProgramArguments</key>
     <array>
 ${programArguments}
@@ -237,7 +237,7 @@ WantedBy=default.target
   const content = `<?xml version="1.0" encoding="UTF-8"?>
 <Task version="1.4" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
-    <Author>GolemWorkers</Author>
+    <Author>MaxJafar</Author>
     <Description>Runs the local AGENTseo daemon for durable audits and schedules.</Description>
   </RegistrationInfo>
   <Triggers>

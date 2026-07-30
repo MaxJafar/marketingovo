@@ -1,8 +1,8 @@
 # AGENTseo documentation site
 
 This VitePress workspace publishes the English product documentation for
-Community Edition, marketer workflows, product surfaces, trust boundaries, and
-the GolemWorkers edition boundary.
+AGENTseo, marketer workflows, product surfaces, trust boundaries, and
+the MaxJafar edition boundary.
 
 ```bash
 pnpm --filter @agentseoapp/docs dev
@@ -18,4 +18,4 @@ policies. Link policy, security, privacy, release, architecture, and license
 claims back to their canonical root documents.
 
 Canonical documentation index:
-[repository README](https://github.com/GolemWorkers/agentseo/blob/main/README.md).
+[repository README](https://github.com/MaxJafar/AGENTseo/blob/main/README.md).

@@ -235,7 +235,7 @@ reported as a completed public release.
 - the canonical tag workflow must produce signed/notarized installers, updater
   signatures, `latest.json`, checksums, attestations and native lifecycle
   evidence on every supported target from the canonical
-  `GolemWorkers/agentseo` repository;
+  `MaxJafar/AGENTseo` repository;
 - the newly enforced DMG/MSI/deb/AppImage lifecycle jobs must run successfully
   on canonical signed artifacts; the local source tests do not substitute for
   that target-native evidence, and a published prerelease must be selected as

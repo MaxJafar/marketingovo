@@ -127,8 +127,8 @@ pnpm --filter @agentseoapp/openclaw test
 - a queued or running job described as completed.
 
 <p class="source-note">
-  Canonical sources: <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/contracts/src/agent-tools.ts">agent tool contracts</a>,
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/mcp/src/index.ts">MCP implementation</a>,
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/plugins/codex/agentseo/skills/seo-marketer/SKILL.md">Codex marketer skill</a>, and
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/adapters/openclaw/README.md">OpenClaw adapter boundary</a>.
+  Canonical sources: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/packages/contracts/src/agent-tools.ts">agent tool contracts</a>,
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/packages/mcp/src/index.ts">MCP implementation</a>,
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/plugins/codex/agentseo/skills/seo-marketer/SKILL.md">Codex marketer skill</a>, and
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/adapters/openclaw/README.md">OpenClaw adapter boundary</a>.
 </p>

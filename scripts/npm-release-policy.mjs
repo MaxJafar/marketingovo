@@ -9,7 +9,7 @@ export const NPM_PUBLICATION_ENABLED = false;
 // Repository/domain ownership and public release are separate human gates.
 // Keep this legacy coordinate only for validating old release artifacts; it is
 // not AGENTseo product identity and must not authorize publication.
-export const SOURCE_REPOSITORY = "GolemWorkers/agentseo";
+export const SOURCE_REPOSITORY = "MaxJafar/AGENTseo";
 
 export const PRIVATE_PACKABLE_WORKSPACE_DIRECTORIES = Object.freeze([
   "packages/contracts",

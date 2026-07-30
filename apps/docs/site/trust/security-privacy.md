@@ -69,7 +69,7 @@ See [Integrations and BYOK](/integrations/byok) for current alpha setup behavior
 
 ## Privacy model
 
-Community Edition is local-first. Product telemetry is disabled by default and requires explicit opt-in. Calls made to a configured provider to perform an audit are product functionality, not telemetry.
+AGENTseo is local-first. Product telemetry is disabled by default and requires explicit opt-in. Calls made to a configured provider to perform an audit are product functionality, not telemetry.
 
 The first signed desktop process makes one HTTPS update check before the local
 daemon starts, whether it was opened by the user or by login startup. Its path
@@ -103,7 +103,7 @@ blocked, cleanup is retried on service restart. A recovery manifest restores
 files when a crash happened before the SQLite commit; unknown staging is kept
 and system health becomes degraded rather than deleting data. Project deletion
 is a UI/CLI/API operation and is not an agent tool.
-GolemWorkers has a separate privacy policy for its hosted service.
+MaxJafar has a separate privacy policy for its hosted service.
 
 ## Exports and backups
 
@@ -130,12 +130,12 @@ A fully compromised operating system or administrator-level attacker is outside 
 
 ## Report a vulnerability
 
-Email `security@golemworkers.com` with the affected version, impact, and minimal reproduction. Do not open a public issue for a working exploit, credential leak, or bypass of local authorization, egress, credential, entitlement, or update-signature controls.
+Email `security@github.com/MaxJafar/AGENTseo` with the affected version, impact, and minimal reproduction. Do not open a public issue for a working exploit, credential leak, or bypass of local authorization, egress, credential, entitlement, or update-signature controls.
 
 The project aims to acknowledge a report within two business days, provide a status update within five, and coordinate disclosure after a fix is available.
 
 <p class="source-note">
-  Normative sources: <a href="https://github.com/GolemWorkers/agentseo/blob/main/SECURITY.md">security policy</a>,
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/PRIVACY.md">privacy policy</a>, and
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/threat-model.md">threat model</a>.
+  Normative sources: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/SECURITY.md">security policy</a>,
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/PRIVACY.md">privacy policy</a>, and
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/docs/threat-model.md">threat model</a>.
 </p>

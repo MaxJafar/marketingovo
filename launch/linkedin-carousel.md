@@ -104,7 +104,7 @@ Compare “0 clicks” with “GSC unavailable”; highlight why they are differ
 
 “A comparison between a measured zero and unavailable Search Console data.”
 
-## Slide 6 — Local-first Community Edition
+## Slide 6 — Local-first AGENTseo
 
 **Headline**
 
@@ -132,11 +132,11 @@ A local dashboard and terminal connected to a private project store.
 
 Local power or managed collaboration.
 
-**Community Edition**
+**AGENTseo**
 
 Single-user, local-first analysis, BYOK integrations, local reports, and local scheduling while the service runs.
 
-**GolemWorkers Full**
+**AGENTseo**
 
 Always-on execution, portfolios, teams and RBAC, managed integrations, hosted artifacts, retention, and commercial support.
 
@@ -146,7 +146,7 @@ Full is a separate proprietary service. Local analysis is not deliberately weake
 
 **Alt text**
 
-“A side-by-side comparison of AGENTseo Community Edition and GolemWorkers Full.”
+“A side-by-side comparison of AGENTseo and AGENTseo.”
 
 ## Slide 8 — Try the alpha
 
@@ -160,11 +160,11 @@ Turn one audit into one verified action.
 
 Star and inspect:
 
-github.com/GolemWorkers/agentseo
+github.com/MaxJafar/AGENTseo
 
 Need managed team workflows?
 
-golemworkers.com/seo
+github.com/MaxJafar/AGENTseo/seo
 
 **Footer**
 
@@ -172,4 +172,4 @@ golemworkers.com/seo
 
 **Alt text**
 
-“AGENTseo alpha call to action with local install, GitHub, and GolemWorkers Full links.”
+“AGENTseo alpha call to action with local install, GitHub, and AGENTseo links.”

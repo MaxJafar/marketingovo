@@ -1,12 +1,12 @@
 # Ten-minute quickstart
 
-This guide uses the Community Edition local service. It requires Node.js 24 LTS
+This guide uses AGENTseo local service. It requires Node.js 24 LTS
 and Corepack; no account is required.
 
 ## Install from source
 
 ```bash
-git clone https://github.com/GolemWorkers/agentseo.git
+git clone https://github.com/MaxJafar/AGENTseo.git
 cd agentseo
 corepack enable
 pnpm install --frozen-lockfile

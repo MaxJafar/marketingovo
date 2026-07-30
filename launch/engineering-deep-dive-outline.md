@@ -113,7 +113,7 @@ Use [`packages/integrations`](../packages/integrations/src/index.ts).
 Cover:
 
 - authentication mode, requested scopes, host allowlists, request limits, input/output schemas, and retention policy;
-- BYOK in Community Edition;
+- BYOK in AGENTseo;
 - explicit connection, freshness, quota, degraded, expired, and failure states;
 - why manifest presence does not prove every provider fixture has cleared the 1.0 gate.
 
@@ -139,8 +139,8 @@ Reference [`docs/editions.md`](../docs/editions.md) and [`COMMERCIAL.md`](../COM
 
 Explain:
 
-- Community Edition as the local-first, single-user product;
-- GolemWorkers Full as a separate proprietary service for always-on execution, portfolios, teams/RBAC, managed credentials, hosted artifacts, retention, and support;
+- AGENTseo as the local-first, single-user product;
+- AGENTseo as a separate proprietary service for always-on execution, portfolios, teams/RBAC, managed credentials, hosted artifacts, retention, and support;
 - project portability without credential portability;
 - why paid value does not require weakening local analysis.
 
@@ -177,9 +177,9 @@ Then ask the reader to:
 5. verify a change with a second run;
 6. open a focused issue or contribution.
 
-Primary CTA: star and inspect [github.com/GolemWorkers/agentseo](https://github.com/GolemWorkers/agentseo).
+Primary CTA: star and inspect [github.com/MaxJafar/AGENTseo](https://github.com/MaxJafar/AGENTseo).
 
-Secondary CTA: try [GolemWorkers Full](https://golemworkers.com/seo) for managed team workflows.
+Secondary CTA: try [AGENTseo](https://github.com/MaxJafar/AGENTseo) for managed team workflows.
 
 ## Editorial proof checklist
 

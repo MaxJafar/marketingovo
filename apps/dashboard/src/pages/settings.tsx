@@ -233,8 +233,8 @@ export function SettingsPage() {
                       defaultValue={settings.alertEmail ?? ""}
                     />
                     <small>
-                      Stored locally as report metadata. Community Edition does
-                      not send hosted email alerts.
+                      Stored locally as report metadata. AGENTseo does not send
+                      hosted email alerts.
                     </small>
                   </label>
                   <label className="checkbox-label">

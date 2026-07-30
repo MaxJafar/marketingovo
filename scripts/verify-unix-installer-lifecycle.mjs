@@ -116,7 +116,10 @@ function launcherProcesses(layout) {
 
 function serviceDefinition(platform) {
   return platform === "macos"
-    ? resolve(homedir(), "Library/LaunchAgents/com.golemworkers.agentseo.plist")
+    ? resolve(
+        homedir(),
+        "Library/LaunchAgents/io.github.maxjafar.agentseo.plist",
+      )
     : resolve(homedir(), ".config/systemd/user/agentseo.service");
 }
 

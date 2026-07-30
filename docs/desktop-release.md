@@ -89,7 +89,7 @@ Release bundles enable Tauri v2 updater artifacts. The release signing key
 therefore produces a detached `.sig` beside the supported updater payloads;
 the desktop updater reads metadata only over HTTPS and validates the selected
 payload with the embedded public key. The installed application reads a static
-`https://github.com/GolemWorkers/agentseo/releases/latest/download/latest.json`
+`https://github.com/MaxJafar/AGENTseo/releases/latest/download/latest.json`
 channel. GitHub's `latest` release resolves only the stable channel: alpha and
 release-candidate builds remain manual design-partner upgrades until a stable
 release exists, while an installed prerelease can move to that verified stable

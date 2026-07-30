@@ -39,13 +39,13 @@ const capturedModernPaaHtml = `<!doctype html>
 const capturedHistoricalPaaHtml = `<!doctype html>
 <html><body>
 <div class="related-question-pair">
-  <span>what is golemworkers</span>
+  <span>what is maxjafar</span>
 </div>
 <div class="related-question-pair">
-  <span>golemworkers vs zapier</span>
+  <span>maxjafar vs zapier</span>
 </div>
 <div class="related-question-pair">
-  <span>is golemworkers free</span>
+  <span>is maxjafar free</span>
 </div>
 </body></html>`;
 
@@ -71,7 +71,7 @@ describe("parsePaaFromHtml (captured HTML shapes)", () => {
   it("strategy 2 — historical related-question class", () => {
     const r = parsePaaFromHtml(capturedHistoricalPaaHtml);
     expect(r.length).toBeGreaterThanOrEqual(3);
-    expect(r).toContain("golemworkers vs zapier");
+    expect(r).toContain("maxjafar vs zapier");
   });
 
   it("strategy 3 — h3 ending with ?", () => {

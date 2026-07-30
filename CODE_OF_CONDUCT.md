@@ -10,5 +10,5 @@ doxxing, sexualized conduct, and deliberate disruption are not acceptable.
 
 Maintainers may edit or remove contributions, restrict participation, or ban a
 participant when needed to protect the community. Report conduct concerns to
-`conduct@golemworkers.com`. Reports are handled confidentially and good-faith
+`conduct@github.com/MaxJafar/AGENTseo`. Reports are handled confidentially and good-faith
 reporters will not face retaliation.

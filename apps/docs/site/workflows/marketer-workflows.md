@@ -71,7 +71,7 @@ Before producing a brief:
 
 ## Monitoring and verification
 
-Community schedules execute while the local service is running. GolemWorkers adds always-on monitored workers.
+Community schedules execute while the local service is running. MaxJafar adds always-on monitored workers.
 
 Use stable issue fingerprints and action verification states:
 
@@ -102,6 +102,6 @@ Next verification
 ```
 
 <p class="source-note">
-  Canonical workflow guidance: <a href="https://github.com/GolemWorkers/agentseo/blob/main/plugins/codex/agentseo/skills/seo-marketer/SKILL.md">SEO marketer skill</a>.
-  Product scope follows the <a href="https://github.com/GolemWorkers/agentseo/blob/main/README.md">repository README</a>.
+  Canonical workflow guidance: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/plugins/codex/agentseo/skills/seo-marketer/SKILL.md">SEO marketer skill</a>.
+  Product scope follows the <a href="https://github.com/MaxJafar/AGENTseo/blob/main/README.md">repository README</a>.
 </p>

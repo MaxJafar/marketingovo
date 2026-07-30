@@ -698,22 +698,22 @@ describe("hosted service independence", () => {
     const responses = await Promise.all([
       server.app.inject({
         method: "GET",
-        url: "/api/v1/golemworkers/device/status",
+        url: "/api/v1/maxjafar/device/status",
         headers,
       }),
       server.app.inject({
         method: "POST",
-        url: "/api/v1/golemworkers/device/start",
+        url: "/api/v1/maxjafar/device/start",
         headers,
       }),
       server.app.inject({
         method: "DELETE",
-        url: "/api/v1/golemworkers/device",
+        url: "/api/v1/maxjafar/device",
         headers,
       }),
       server.app.inject({
         method: "POST",
-        url: "/api/v1/golemworkers/import",
+        url: "/api/v1/maxjafar/import",
         headers,
         payload: { projectId: "legacy-project" },
       }),
@@ -724,7 +724,7 @@ describe("hosted service independence", () => {
     ]);
     expect(
       await runtime.credentialStore.status({
-        provider: "golemworkers",
+        provider: "maxjafar",
         account: "default",
         kind: "device",
       }),
@@ -750,7 +750,7 @@ describe("hosted service independence", () => {
       headers: { host: HOST },
     });
     expect(openApi.statusCode).toBe(200);
-    expect(openApi.body).not.toContain("/api/v1/golemworkers");
+    expect(openApi.body).not.toContain("/api/v1/maxjafar");
     expect(hostedFetch).not.toHaveBeenCalled();
   });
 });

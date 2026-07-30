@@ -26,9 +26,9 @@ Try it locally:
 
 `npx @agentseoapp/cli serve`
 
-Source and docs: https://github.com/GolemWorkers/agentseo
+Source and docs: https://github.com/MaxJafar/AGENTseo
 
-Need always-on monitoring, portfolios, managed integrations, and team workflows? GolemWorkers Full is the separate commercial path: https://golemworkers.com/seo
+Need always-on monitoring, portfolios, managed integrations, and team workflows? AGENTseo is the separate commercial path: https://github.com/MaxJafar/AGENTseo
 
 ## Suggested first comment
 
@@ -40,7 +40,7 @@ The shortest useful test is:
 4. Check whether impact, effort, confidence, evidence, and missing-source states make the order defensible.
 5. Re-run after one fix and record whether the action verifies.
 
-Quickstart: https://github.com/GolemWorkers/agentseo/blob/main/docs/quickstart.md
+Quickstart: https://github.com/MaxJafar/AGENTseo/blob/main/docs/quickstart.md
 
 ## Suggested media
 

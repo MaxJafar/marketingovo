@@ -154,7 +154,7 @@ The dashboard adapter currently labels scores `80+` critical, `60+` high, `35+` 
 6. Re-run the narrowest workflow that can prove resolution.
 
 <p class="source-note">
-  Canonical sources: <a href="https://github.com/GolemWorkers/agentseo/blob/main/README.md">priority model summary</a>,
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/application/src/priority.ts">priority-v1 implementation</a>, and
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/contracts/src/index.ts">public action contracts</a>.
+  Canonical sources: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/README.md">priority model summary</a>,
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/packages/application/src/priority.ts">priority-v1 implementation</a>, and
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/packages/contracts/src/index.ts">public action contracts</a>.
 </p>

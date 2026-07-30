@@ -69,7 +69,7 @@ includes the complete version and journal history, remaps linked run and entry
 identifiers on import, and never carries provider credentials.
 
 <p class="source-note">
-  Canonical sources: <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/project-context.md">Project Context contract</a>,
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/contracts/src/index.ts">public schemas</a>, and
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/runtime/src/index.ts">runtime boundary</a>.
+  Canonical sources: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/docs/project-context.md">Project Context contract</a>,
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/packages/contracts/src/index.ts">public schemas</a>, and
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/packages/runtime/src/index.ts">runtime boundary</a>.
 </p>

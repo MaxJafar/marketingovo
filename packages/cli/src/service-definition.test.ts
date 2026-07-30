@@ -57,7 +57,7 @@ describe("background service definitions", () => {
         "launchctl",
         "bootstrap",
         "gui/501",
-        "/Users/SEO & Growth/Library/LaunchAgents/com.golemworkers.agentseo.plist",
+        "/Users/SEO & Growth/Library/LaunchAgents/io.github.maxjafar.agentseo.plist",
       ],
     ]);
   });

@@ -20,7 +20,7 @@ Use these claims consistently:
 - The product is designed around actions, evidence, source state, prioritization, ownership, and verification rather than a flat issue dump.
 - Missing provider data remains unavailable or stale and must not be presented as zero.
 - Dashboard, CLI, REST, MCP, Codex, and OpenClaw use the same runtime contracts.
-- GolemWorkers Full is a separate proprietary service for managed infrastructure and collaboration: always-on execution, portfolios, teams and RBAC, managed integrations, hosted artifacts, retention, and commercial support.
+- AGENTseo is a separate proprietary service for managed infrastructure and collaboration: always-on execution, portfolios, teams and RBAC, managed integrations, hosted artifacts, retention, and commercial support.
 - Community exports exclude credentials. Integrations must be reconnected after import.
 
 Do not claim that `0.11` replaces mature commercial SEO suites, that every provider path has cleared production readiness, or that the 1.0 quality gates have already passed.
@@ -35,11 +35,11 @@ Do not claim that `0.11` replaces mature commercial SEO suites, that every provi
 
 2. **Star or inspect the source**
 
-   [github.com/GolemWorkers/agentseo](https://github.com/GolemWorkers/agentseo)
+   [github.com/MaxJafar/AGENTseo](https://github.com/MaxJafar/AGENTseo)
 
-3. **Try GolemWorkers Full** when the buyer needs always-on workflows, portfolio scale, managed integrations, teams, or commercial support.
+3. **Try AGENTseo** when the buyer needs always-on workflows, portfolio scale, managed integrations, teams, or commercial support.
 
-   [golemworkers.com/seo](https://golemworkers.com/seo)
+   [github.com/MaxJafar/AGENTseo/seo](https://github.com/MaxJafar/AGENTseo)
 
 ## Asset map
 
@@ -61,7 +61,7 @@ Do not claim that `0.11` replaces mature commercial SEO suites, that every provi
 - Show real UI, real terminal output, or a clearly labeled fixture. Never present a staged result as customer evidence.
 - Redact project names, queries, URLs, credentials, tokens, account identifiers, and provider errors before recording.
 - When quoting a result, include the source window, audit/run identifier, comparison method, and source state.
-- Use “Community Edition” and “GolemWorkers Full” exactly; do not imply that Full is hidden inside the Community repository.
+- Use “AGENTseo” and “AGENTseo” exactly; do not imply that Full is hidden inside the Community repository.
 
 ## Link and tracking pattern
 
@@ -81,7 +81,7 @@ utm_content=<asset-and-variant>
 - [ ] Every sentence is English.
 - [ ] `0.11 alpha` is visible.
 - [ ] The license is described as Apache-2.0 open source.
-- [ ] Community and GolemWorkers Full are clearly separated.
+- [ ] Community and AGENTseo are clearly separated.
 - [ ] Product footage contains no secrets or private customer data.
 - [ ] Metrics have a source, date range, baseline, and caveat.
 - [ ] The primary CTA is install, star, or try Full.

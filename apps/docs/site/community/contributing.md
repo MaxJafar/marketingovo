@@ -1,6 +1,6 @@
 ---
 title: Contributing
-description: Contribute focused, tested changes to AGENTseo Community Edition and its documentation.
+description: Contribute focused, tested changes to AGENTseo and its documentation.
 ---
 
 # Contributing
@@ -32,7 +32,7 @@ pnpm check
 - Zero, missing, stale, unavailable, and provider failure are distinct.
 - Every network hop follows the egress policy.
 - Secrets are write-only and represented outside the credential store only by a `secretRef`.
-- Proprietary GolemWorkers implementations do not belong in this repository.
+- Proprietary MaxJafar implementations do not belong in this repository.
 - Schema, API, workflow, module, and connector changes require the review level defined by governance.
 
 Security and credential changes require two maintainer reviews.
@@ -63,7 +63,7 @@ Documentation changes should:
 
 - link to the canonical repository policy or implementation;
 - distinguish current alpha behavior from roadmap intent;
-- preserve the Community and GolemWorkers boundary;
+- preserve the Community and MaxJafar boundary;
 - avoid unsupported replacement, performance, or revenue claims;
 - explain unavailable data rather than implying a zero;
 - update navigation when adding a new guide.
@@ -73,8 +73,6 @@ Documentation changes should:
 Maintainers decide release readiness, security response, contract acceptance, and product-boundary questions according to the governance policy. All participation is covered by the Code of Conduct.
 
 <p class="source-note">
-  Normative sources: <a href="https://github.com/GolemWorkers/agentseo/blob/main/CONTRIBUTING.md">contribution guide</a>,
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/CLA.md">CLA</a>,
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/GOVERNANCE.md">governance</a>, and
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>.
+  Normative sources: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/CONTRIBUTING.md">contribution guide</a>,
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>.
 </p>

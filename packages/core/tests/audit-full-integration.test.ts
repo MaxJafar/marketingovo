@@ -9,7 +9,7 @@
 //      status: 'completed'
 //   6. <projectRoot>/audits.json is written and readable
 //
-// This is the Sprint 4 sanity gate (replaces the G2 golemworkers.com
+// This is the Sprint 4 sanity gate (replaces the G2 github.com/MaxJafar/AGENTseo
 // run, which needs explicit Max go-ahead to hit the live site). When
 // the real G2 runs, we'll add a separate integration test that
 // compares the fixture-baseline issue list against the live-site

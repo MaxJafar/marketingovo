@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
 const workspaceRoot = resolve(root, "../..");
-const canonicalPrefix = "https://github.com/GolemWorkers/agentseo/blob/main/";
+const canonicalPrefix = "https://github.com/MaxJafar/AGENTseo/blob/main/";
 const requiredPages = [
   "site/index.md",
   "site/getting-started/overview.md",
@@ -15,7 +15,6 @@ const requiredPages = [
   "site/agents/rest-api.md",
   "site/agents/agent-surfaces.md",
   "site/trust/security-privacy.md",
-  "site/product/editions.md",
   "site/community/contributing.md",
   "site/product/release-status.md",
   "site/product/reference-audit.md",
@@ -28,7 +27,10 @@ for (const page of requiredPages) {
   }
 
   const canonicalLinks = content.matchAll(
-    /https:\/\/github\.com\/GolemWorkers\/agentseo\/blob\/main\/([^\s"')>]+)/g,
+    new RegExp(
+      `${canonicalPrefix.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}([^\\s"')>]+)`,
+      "gu",
+    ),
   );
   for (const link of canonicalLinks) {
     const repositoryPath = decodeURIComponent(link[1]);

@@ -17,7 +17,7 @@ hero:
       link: /workflows/marketer-workflows
     - theme: alt
       text: View source
-      link: https://github.com/GolemWorkers/agentseo
+      link: https://github.com/MaxJafar/AGENTseo
 
 features:
   - icon: ↗
@@ -51,8 +51,8 @@ features:
     link: /product/project-context
     linkText: Build shared context
   - icon: ◆
-    title: Source-available Community Edition
-    details: Run meaningful local analysis under the Apache License 2.0. Hosted collaboration and managed execution are a separate GolemWorkers service.
+    title: Source-available AGENTseo
+    details: Run meaningful local analysis under the Apache License 2.0. Hosted collaboration and managed execution are a separate MaxJafar service.
     link: /product/editions
     linkText: Compare editions
 ---
@@ -64,17 +64,17 @@ features:
 
 <div class="edition-callout">
   <a href="/getting-started/quickstart">
-    <strong>Community Edition</strong>
+    <strong>AGENTseo</strong>
     <span>Run locally, bring your own provider credentials, keep analysis and history on your machine, and use every product surface.</span>
   </a>
-  <a href="https://golemworkers.com/seo" target="_blank" rel="noreferrer">
-    <strong>GolemWorkers</strong>
+  <a href="https://github.com/MaxJafar/AGENTseo" target="_blank" rel="noreferrer">
+    <strong>MaxJafar</strong>
     <span>Add always-on workers, teams, managed providers, hosted delivery, approval workflows, and commercial support.</span>
   </a>
 </div>
 
 <p class="source-note">
   Product positioning and release claims follow the canonical
-  <a href="https://github.com/GolemWorkers/agentseo/blob/main/README.md">repository README</a>
-  and <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/release-status.md">release status</a>.
+  <a href="https://github.com/MaxJafar/AGENTseo/blob/main/README.md">repository README</a>
+  and <a href="https://github.com/MaxJafar/AGENTseo/blob/main/docs/release-status.md">release status</a>.
 </p>

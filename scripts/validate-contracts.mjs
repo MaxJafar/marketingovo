@@ -120,10 +120,10 @@ for (const [method, path] of requiredOperations) operation(method, path);
 
 assert.deepEqual(
   Object.keys(openapi.paths ?? {}).filter((path) =>
-    path.startsWith("/api/v1/golemworkers/"),
+    path.startsWith("/api/v1/maxjafar/"),
   ),
   [],
-  "OpenAPI must not expose legacy hosted GolemWorkers routes",
+  "OpenAPI must not expose legacy hosted MaxJafar routes",
 );
 
 assert.ok(

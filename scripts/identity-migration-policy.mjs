@@ -61,9 +61,9 @@ const IDENTITY_ROOT_TEXT_FILES = new Set([
 //      rejected;
 //   3. the sentinel itself, which has to name the patterns it detects.
 //
-// GolemWorkers remains the copyright holder and the name of the separate
-// commercial service, so `golemworkers-coupling` hits are expected wherever the
-// company, its domain, or the hosted product is legitimately referenced.
+// The project has no corporate affiliation and no paid tier. The former
+// company name, its domain, and the hosted-edition vocabulary are therefore
+// violations everywhere except in this gate, which has to name them.
 export const IDENTITY_ALLOWLIST = Object.freeze([
   {
     rule: "legacy-product-identity",
@@ -71,7 +71,7 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
     reason:
       "The sentinel must name the old-brand patterns and every reasoned exception in order to prevent unreviewed additions.",
   },
-  ...["legacy-agent-contract", "legacy-cli-alias", "golemworkers-coupling"].map(
+  ...["legacy-agent-contract", "legacy-cli-alias", "former-affiliation"].map(
     (rule) => ({
       rule,
       path: "scripts/identity-migration-policy.mjs",
@@ -79,12 +79,6 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
         "The sentinel must name the old-brand patterns it detects for every rule.",
     }),
   ),
-  {
-    rule: "golemworkers-coupling",
-    path: "scripts/identity-migration-policy.test.mjs",
-    reason:
-      "Sentinel tests construct legacy-identity fixtures to prove each rule still fires.",
-  },
 
   // 1. Compatibility surfaces.
   {
@@ -202,41 +196,6 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
   },
 
   // 3. GolemWorkers is the company and the separate commercial service.
-  ...[
-    ".github/ISSUE_TEMPLATE/config.yml",
-    ".github/pull_request_template.md",
-    ".claude-plugin/marketplace.json",
-    "plugins/claude/agentseo/",
-    "scripts/generate-agent-plugins.mjs",
-    "apps/dashboard/src/tests/api-client.test.ts",
-    "apps/desktop/scripts/validate.mjs",
-    "apps/desktop/src-tauri/Cargo.toml",
-    "apps/desktop/src-tauri/tauri.conf.json",
-    "apps/docs/",
-    // Docs and launch copy describe the separate hosted commercial service by
-    // name. The sentinel now scans them, so the company reference is authorized
-    // explicitly rather than by being outside the scan.
-    "docs/",
-    "launch/",
-    "packages/cli/src/cli.ts",
-    "packages/cli/src/service-definition.test.ts",
-    "packages/cli/src/service-definition.ts",
-    "packages/core/tests/audit-full-integration.test.ts",
-    "packages/core/tests/paa.test.ts",
-    "packages/credential-broker-native/Cargo.toml",
-    "packages/credential-broker-native/src/main.rs",
-    "packages/server/src/index.test.ts",
-    "scripts/npm-release-policy.mjs",
-    "scripts/release-policy.mjs",
-    "scripts/updater-metadata-policy.test.mjs",
-    "scripts/validate-contracts.mjs",
-    "scripts/verify-unix-installer-lifecycle.mjs",
-  ].map((path) => ({
-    rule: "golemworkers-coupling",
-    path,
-    reason:
-      "GolemWorkers is the copyright holder, the trademark owner, and the name of the separate hosted commercial service.",
-  })),
   ...["legacy-package-scope", "legacy-product-identity"].map((rule) => ({
     rule,
     path: "scripts/npm-release-policy.mjs",
@@ -258,7 +217,7 @@ const TEXT_RULES = Object.freeze([
     sourceOnly: true,
   },
   {
-    id: "golemworkers-coupling",
+    id: "former-affiliation",
     pattern: /\bGolemWorkers\b|golemworkers(?:[./_-]|[A-Z])/giu,
     sourceOnly: true,
   },
@@ -290,7 +249,7 @@ const TEXT_RULES = Object.freeze([
 const BASELINE_RULE_LABELS = Object.freeze({
   "legacy-product-identity": "legacy-product",
   "legacy-package-scope": "reserved-package-scope",
-  "golemworkers-coupling": "hosted-coupling",
+  "former-affiliation": "former-affiliation",
   "invented-agentseo-domain": "unapproved-domain",
   "legacy-agent-contract": "legacy-agent-contract",
   "legacy-cli-alias": "legacy-cli-alias",

@@ -59,7 +59,7 @@ condition.
 
 MIT projects can be adapted with their notices. AGPL and GPL projects were used
 only to understand observable behavior; no implementation code, tests, text, or
-assets from them were copied into Community Edition.
+assets from them were copied into AGENTseo.
 
 | Reference                                                       | License  | High-value behavior selected                                          |
 | --------------------------------------------------------------- | -------- | --------------------------------------------------------------------- |
@@ -79,4 +79,4 @@ issue fingerprint disappears.
 
 Read the complete commit-pinned matrix, adopted mechanics, deferred queue, and
 implementation contracts in the
-[canonical reverse-engineering record](https://github.com/GolemWorkers/agentseo/blob/main/docs/reference-tool-reverse-engineering.md).
+[canonical reverse-engineering record](https://github.com/MaxJafar/AGENTseo/blob/main/docs/reference-tool-reverse-engineering.md).

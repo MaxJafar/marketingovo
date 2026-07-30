@@ -50,7 +50,7 @@ test("the sentinel rejects new legacy hosted coupling", () => {
     `fetch("/${"golem"}workers/device/start");\n`,
   );
   assert.equal(violations.length, 1);
-  assert.equal(violations[0].rule, "golemworkers-coupling");
+  assert.equal(violations[0].rule, "former-affiliation");
 });
 
 test("the sentinel rejects old product identity outside a reasoned path", () => {
@@ -158,15 +158,24 @@ test("an extra old log prefix fails inside an already pinned store file", async 
   assert.equal(violations[0]?.rule, "identity-baseline-mismatch");
 });
 
-test("a new hosted string fails inside a directory allowed for hosted references", () => {
+test("a hosted reference now fails everywhere, including documentation", () => {
+  // The project has no corporate affiliation and no paid tier, so the former
+  // company name is a violation in every location rather than an authorized
+  // coupling in some of them.
   const hostedPath = `/${"golem"}workers/upgrade`;
-  const violations = validateTextSource(
+  for (const path of [
     "apps/docs/site/product/new-hosted-link.md",
-    `export const upgradePath = ${JSON.stringify(hostedPath)};\n`,
-    baseline,
-  );
-  assert.equal(violations.length, 1);
-  assert.equal(violations[0]?.rule, "identity-baseline-missing");
+    "packages/core/src/new-hosted-link.ts",
+    "launch/new-hosted-post.md",
+  ]) {
+    const violations = validateTextSource(
+      path,
+      `export const upgradePath = ${JSON.stringify(hostedPath)};\n`,
+      baseline,
+    );
+    assert.equal(violations.length, 1, path);
+    assert.equal(violations[0]?.rule, "former-affiliation", path);
+  }
 });
 
 test("the machine-readable baseline is canonical and contains no forbidden text", async () => {

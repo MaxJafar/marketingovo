@@ -4,10 +4,10 @@
   "description": "Turn local crawl, Search Console, GA4, performance, and SERP evidence into prioritized SEO actions.",
   "author": {
     "name": "AGENTseo",
-    "url": "https://golemworkers.com"
+    "url": "https://github.com/MaxJafar/AGENTseo"
   },
-  "homepage": "https://golemworkers.com",
-  "repository": "https://github.com/GolemWorkers/agentseo",
+  "homepage": "https://github.com/MaxJafar/AGENTseo",
+  "repository": "https://github.com/MaxJafar/AGENTseo",
   "license": "Apache-2.0",
   "keywords": [
     "seo",

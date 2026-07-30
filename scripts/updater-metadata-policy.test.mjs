@@ -85,7 +85,7 @@ test("static updater metadata covers every canonical target with verified bytes"
     assert.equal(platform.signature, "A".repeat(88));
     assert.match(
       platform.url,
-      /^https:\/\/github\.com\/GolemWorkers\/agentseo\/releases\/download\/v0\.12\.0-alpha\.0\//u,
+      /^https:\/\/github\.com\/MaxJafar\/AGENTseo\/releases\/download\/v0\.12\.0-alpha\.0\//u,
     );
   }
 });
@@ -141,6 +141,6 @@ test("updater metadata refuses a non-canonical publication repository", async ()
       repository: "fork/agentseo",
       tag: `v${version}`,
     }),
-    /can only target GolemWorkers\/agentseo/u,
+    /can only target MaxJafar\/AGENTseo/u,
   );
 });

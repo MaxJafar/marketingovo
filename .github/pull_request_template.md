@@ -9,7 +9,7 @@ Describe the marketer or platform outcome, not only the code change.
 - [ ] Contracts, OpenAPI, SDK and agent surfaces remain aligned.
 - [ ] No secret can enter logs, reports, exports or fixtures.
 - [ ] Security boundaries were reviewed when networking, browser or credentials changed.
-- [ ] Community and GolemWorkers edition boundaries remain honest.
+- [ ] Community and MaxJafar edition boundaries remain honest.
 - [ ] Documentation and screenshots were updated when the experience changed.
 
 ## Verification

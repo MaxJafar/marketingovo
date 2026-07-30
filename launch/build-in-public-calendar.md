@@ -2,7 +2,7 @@
 
 Cadence: three primary posts per week, one short community follow-up after each, and a Friday evidence review. Publish only completed work or clearly labeled experiments. Keep `0.11 alpha` visible throughout the cycle.
 
-Keep the edition boundary explicit: AGENTseo is Apache-2.0 open source, while GolemWorkers Full is a separate commercial service for managed infrastructure and collaboration.
+Keep the edition boundary explicit: AGENTseo is Apache-2.0 open source, while AGENTseo is a separate commercial service for managed infrastructure and collaboration.
 
 ## Weekly operating rhythm
 

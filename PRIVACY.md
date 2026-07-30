@@ -1,6 +1,6 @@
 # Privacy
 
-AGENTseo Community Edition is local-first. Product telemetry is disabled by
+AGENTseo is local-first. Product telemetry is disabled by
 default and requires explicit opt-in. Ordinary provider calls made to perform a
 requested audit are product functionality, not telemetry.
 

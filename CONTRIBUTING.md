@@ -1,7 +1,8 @@
 # Contributing to AGENTseo
 
 Thank you for helping build a trustworthy SEO operations system. Contributions
-must be in English and must agree to [CLA.md](CLA.md).
+must be in English. Contributions are accepted under the Apache License 2.0;
+there is no separate contributor agreement.
 
 ## Start here
 
@@ -29,4 +30,4 @@ data, credentials, tokens, cookies, local databases, or reports.
 - Do not add proprietary Full Edition implementations to this repository.
 
 Schema/API changes and new modules or connectors require an RFC. Security and
-credential changes require two maintainer reviews. See [GOVERNANCE.md](GOVERNANCE.md).
+credential changes require maintainer review.

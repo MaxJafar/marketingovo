@@ -52,7 +52,7 @@ The current branch is the production-foundation release. Its acceptance target i
   removal in Integrations, with provider-side revocation disclosed separately;
 - authenticated same-origin HTML, PDF, CSV, and JSON actions in Reports;
 - a native webview with no privileged Tauri command permissions;
-- Apache-2.0 open source and separate GolemWorkers product boundary;
+- Apache-2.0 open source and separate MaxJafar product boundary;
 - Audit Intelligence Pack with click-depth, inlink, markup, hreflang, exact
   cohort, provider-cost, and evidence-first agent improvements;
 
@@ -71,7 +71,7 @@ The current branch is the production-foundation release. Its acceptance target i
   gate.
 - Every operating-system matrix has not completed final validation.
 - Provider authorization and fixtures can have alpha-specific gaps.
-- Hosted GolemWorkers device-link and import calls report unavailable when no
+- Hosted MaxJafar device-link and import calls report unavailable when no
   hosted bridge is configured; Community never simulates hosted completion.
 - Community schedules require the local service to remain running. Native
   launchers support platform-specific background startup.
@@ -131,6 +131,6 @@ Use this language externally:
 Do not claim production certification, universal provider availability, or full replacement of a mature proprietary dataset.
 
 <p class="source-note">
-  Canonical status: <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/release-status.md">0.11 alpha and public 1.0 gates</a>.
-  Broader direction belongs in the <a href="https://github.com/GolemWorkers/agentseo/blob/main/README.md">product README</a> and project planning documents.
+  Canonical status: <a href="https://github.com/MaxJafar/AGENTseo/blob/main/docs/release-status.md">0.11 alpha and public 1.0 gates</a>.
+  Broader direction belongs in the <a href="https://github.com/MaxJafar/AGENTseo/blob/main/README.md">product README</a> and project planning documents.
 </p>

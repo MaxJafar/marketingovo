@@ -985,7 +985,7 @@ function service(args: ParsedArgs): void {
         ? [
             "launchctl",
             "print",
-            `gui/${process.getuid?.()}/com.golemworkers.agentseo`,
+            `gui/${process.getuid?.()}/io.github.maxjafar.agentseo`,
           ]
         : platform === "linux"
           ? ["systemctl", "--user", "status", "agentseo.service"]
