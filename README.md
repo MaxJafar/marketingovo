@@ -1,152 +1,52 @@
-# AGENTintel
+# AGENTintel — archived
 
-AGENTintel is an evidence-first, local business-intelligence research center
-for competitive marketing and creator analysis. It is designed for the agentic
-era without turning a language model into an unrestricted scraper: the daemon
-owns policy, credentials, durable state and evidence publication; agents receive
-six bounded workflow tools and cited results.
+**This project is archived. Its work continues in
+[Marketingovo](https://github.com/MaxJafar/marketingovo).**
 
-This repository is **open source** under the [Apache License 2.0](LICENSE), an
-OSI-approved license that grants patent rights and permits commercial use,
-modification, and redistribution. See
-[ADR 0003](docs/adr/0003-apache-2-0-relicense.md) for why the project moved off
-the Elastic License, and what that means for the reference corpus below.
+AGENTintel was a local, evidence-first competitive research daemon. It was
+merged into Marketingovo rather than shipped separately, because the two
+products answered overlapping questions — "how does my site compare" — and
+splitting them meant two installs, two dashboards, and half the value in each.
 
-## What is implemented now
+## Why it was archived rather than released
 
-AGENTintel 1.0.0 collects **public website and RSS/Atom publishing evidence** and
-turns it into cited, replayable research:
+A brief `v1.0.0` tag existed here. It was never pushed or published, and it is
+retracted: it claimed a standalone product that the merge had already absorbed.
+Keeping it would have meant publishing two 1.0.0 products, one of which was a
+shell. The last tag that describes something real is `v0.2.0-alpha.0`.
 
-1. the React/TypeScript command center starts a comparison across sites, and
-   exposes stored run history and a committed-evidence search;
-2. `agentinteld` validates a one-time dashboard session and schedules a durable
-   SQLite-backed job;
-3. the website connector fetches each target's own feed through a fail-closed
-   egress policy — robots-aware, SSRF-hardened, bounded in size, redirects and
-   time — and records what the publisher stated;
-4. Go supervises Python through length-delimited Protobuf control messages;
-5. Python normalizes an exact 32-field Arrow schema, writes Arrow and Parquet,
-   queries DuckDB, and produces denominator-safe metrics with citations;
-6. Go treats every worker artifact as untrusted, physically decodes the exact
-   32-field Arrow and Parquet schemas, compares their rows, verifies report
-   citations/provenance plus containment, hashes and policy, then publishes a
-   manifest by filesystem rename and streams ordered SSE progress;
-7. the same run is available through the Go CLI, generated TypeScript SDK,
-   authenticated MCP stdio/Streamable HTTP, OpenClaw, Claude Code, Codex, Cursor
-   and VS Code;
-8. normal, source-failure, corrupt-artifact, slow/cancel and immutable-input
-   replay paths have test coverage.
+## What moved to Marketingovo
 
-### What 1.0.0 does not do
+- **Competitor publishing cadence.** The RSS/Atom reader and its honest metrics
+  — cadence carrying its own numerator and denominator, no cadence at all from a
+  single dated post, a count and nothing else from an undated feed, and no
+  inferred engagement, audience or reach.
+- **The evidence discipline.** Typed unavailability instead of empty results, and
+  the rule that an absent measurement is never a zero.
+- **The SSRF corpus.** Marketingovo's egress guard turned out to be stronger than
+  this one — it validates the address dialled after DNS, which covers the numeric
+  shorthand family for free — so the code was not ported. The corpus that found
+  bypasses here now protects it, and closed two real gaps there: URL credentials
+  and well-known non-HTTP service ports.
 
-This is a deliberately narrow release, and the boundary is the point:
+## What did not move, and why
 
-- **One source type.** Website and RSS/Atom feeds only. YouTube, Reddit, Meta,
-  TikTok, Trends and licensed providers are not implemented. A menu label, type
-  definition or roadmap entry is not a shipped connector.
-- **What a feed states, nothing more.** Publication counts, freshness and cadence
-  — the last carrying its numerator and denominator. No engagement, audience,
-  reach or revenue is inferred, because a feed does not contain it.
-- **Three workspaces.** Research, Reports & Runs, and Datasets & Evidence. The
-  remaining workspaces are listed in the sidebar as not yet built rather than
-  hidden.
-- **No signed desktop installers or published packages.** Those need a signing
-  identity and a registry account that do not exist yet.
+- **The Go daemon and Python worker (~17,700 lines).** Marketingovo runs on Node
+  alone. Carrying a second and third runtime would have turned `npx marketingovo`
+  into a five-toolchain install, which was the single largest barrier to anyone
+  using it.
+- **The Arrow/Parquet/DuckDB analytics.** Genuinely capable, and the main thing
+  lost. If large local analysis becomes necessary, DuckDB has Node bindings and
+  can return without the runtime sprawl.
 
-The retained fixture connector still exists for tests and offline development.
+## Unresolved when archived
 
-Phase 0 is a **quarantine baseline**, not a completed reverse-engineering
-program. The repository inventories 50 local snapshots, blocks every one from
-product builds and tracks suspicious paths without exposing values. Exact
-upstream URLs, commits, archive hashes and dependency provenance are still
-unresolved for much of the corpus; the current behavioral table is triage, not
-one finished engineering card per project. Credential rotation/revocation is an
-external operator action and has not been performed by this repository.
+- **The reference corpus.** `TO REVERSE ENGINEEER/` holds third-party projects,
+  many under GPL or AGPL. It is excluded from version control and from every
+  build, test and product input, and nothing was copied from it. A clean-room
+  provenance record was planned and never written. Anyone reviving connector work
+  derived from studying that corpus needs to write it first.
+- **Worker SIGTERM responsiveness.** Documented in `docs/status.md`. It did not
+  affect production cancellation, which used `Process.Kill()`.
 
-Website/RSS, YouTube, Reddit, Meta, TikTok, Trends, licensed-provider and Golem
-SEO connectors; production watchlists; creator/company intelligence; hosted
-workers; and signed public desktop releases remain Phases 2–6. See the
-[implementation status](docs/status.md) for the exact boundary.
-
-## Language boundaries
-
-- **Go:** authoritative loopback daemon, sessions, jobs, connectors, artifact
-  governance, SQLite and CLI.
-- **Python:** Arrow/Polars normalization, DuckDB analytics, evidence-quality
-  checks and reproducible model/runtime tests.
-- **TypeScript:** React command center, generated SDK, MCP, Codex and OpenClaw
-  projections.
-- **Rust:** narrow Tauri 2 shell for signed sidecars, native credential storage,
-  lifecycle and updater verification.
-- **OpenAPI, Protobuf, JSON Schema, Arrow and Parquet:** shared contracts and
-  storage; handwritten duplicate runtime types are not the source of truth.
-
-See [architecture](docs/architecture.md), [threat model](docs/threat-model.md),
-[privacy policy](PRIVACY.md), and the
-[50-snapshot quarantine inventory](docs/reverse-engineering/README.md).
-
-## Quick start
-
-Prerequisites: Go 1.26, Node 24 with pnpm 10, Python 3.12/3.13 with `uv`, and
-Buf/Protobuf. Rust stable is needed only for the desktop shell.
-
-```bash
-pnpm install
-UV_CACHE_DIR=.agentintel/cache/uv uv sync --project workers/intelligence --frozen
-pnpm contracts:generate
-pnpm build
-go build -o bin/agentinteld ./cmd/agentinteld
-go build -o bin/agentintel ./cmd/agentintel
-./bin/agentinteld serve \
-  --data-dir .agentintel/dev \
-  --python-worker "$(pwd)/workers/intelligence" \
-  --uv-command "$(command -v uv)"
-```
-
-This developer launch uses the pinned `uv` environment. It is a trusted,
-same-user process boundary—not an operating-system sandbox. Packaged launches
-instead pass a manifest-verified, absolute, non-symlink interpreter through
-`--python-command` and supply the one-time dashboard ticket through
-`--dashboard-bootstrap-token-stdin`; the detailed quick start shows both modes.
-
-The daemon prints one `Dashboard:` URL containing a one-time fragment ticket.
-Open that URL. The dashboard removes the fragment, exchanges it for an HttpOnly
-same-site session, and keeps the CSRF token only in memory. The persistent
-`service-token` is separate, mode `0600`, and is used only by CLI/agent clients.
-
-In another terminal:
-
-```bash
-./bin/agentintel \
-  --token-file .agentintel/dev/service-token \
-  compare \
-  --project competitive-pulse-demo \
-  --target northstar-labs \
-  --target orbit-coffee \
-  --target vertex-studio \
-  --wait
-```
-
-See [the detailed quick start](docs/quickstart.md) for cancellation, replay,
-failure simulations and agent configuration.
-
-## Verification
-
-```bash
-pnpm check
-rustup run stable cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml
-```
-
-The reference archives under `TO REVERSE ENGINEEER/` are untrusted research
-material. CI may inventory paths and run value-suppressing secret heuristics,
-but the archives are never executed or used as product/build/test input, search
-content, embeddings or product data. Do not execute them from the product
-environment.
-
-## Product boundary
-
-AGENTintel supports public-and-permitted, user-authorized, first-party and
-contractually licensed business evidence. It does not ship authentication
-bypass, CAPTCHA evasion, stolen sessions, private-account access, breach data,
-biometric correlation, protected-trait inference, covert identity enumeration,
-candidate ranking, employee monitoring or automated employment decisions.
+The history is intact. Nothing here was published to any registry.

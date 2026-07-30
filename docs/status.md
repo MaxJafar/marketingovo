@@ -3,7 +3,15 @@
 Status date: 2026-07-30. This file is the release-truth boundary. The product
 vision describes later phases, not current capability.
 
-## 1.0.0 — released state
+## Archived
+
+This project was merged into Marketingovo and never released. The `v1.0.0` tag
+that briefly existed here is retracted; it claimed a standalone product the merge
+had already absorbed. See README.md.
+
+The record below describes the state at the point of archiving.
+
+## State at archiving
 
 AGENTintel 1.0.0 declares a stable public surface: the REST API and its OpenAPI
 document, the generated TypeScript SDK, the six-tool agent contract registry, the
