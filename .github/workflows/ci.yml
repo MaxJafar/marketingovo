@@ -30,6 +30,11 @@ jobs:
       - name: Build, lint, typecheck, test and validate public surfaces
         env:
           AGENTSEO_NPM_INSTALL_SMOKE: "1"
+          # The checked-in baseline is calibrated for developer hardware so a
+          # local `pnpm check` fails on a real slowdown. Shared runners are
+          # slower and declare their allowance here, where it is visible, rather
+          # than by loosening the default for everyone.
+          AGENTSEO_BENCHMARK_BASELINE_MS: "500"
         run: pnpm check
       - name: Reject high and critical dependency advisories
         run: pnpm audit:dependencies

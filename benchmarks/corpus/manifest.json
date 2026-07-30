@@ -2,9 +2,21 @@
   "name": "community-synthetic-v2",
   "version": 2,
   "expectedInstances": [
-    { "ruleId": "title-missing", "path": "/untitled", "priority": "High" },
-    { "ruleId": "h1-missing", "path": "/no-h1", "priority": "High" },
-    { "ruleId": "image-alt-missing", "path": "/image", "priority": "Medium" },
+    {
+      "ruleId": "title-missing",
+      "path": "/untitled",
+      "priority": "High"
+    },
+    {
+      "ruleId": "h1-missing",
+      "path": "/no-h1",
+      "priority": "High"
+    },
+    {
+      "ruleId": "image-alt-missing",
+      "path": "/image",
+      "priority": "Medium"
+    },
     {
       "ruleId": "image-dimensions-missing",
       "path": "/image",
@@ -45,13 +57,21 @@
       "path": "/long-description",
       "priority": "Low"
     },
-    { "ruleId": "h1-multiple", "path": "/multiple-h1", "priority": "Medium" },
+    {
+      "ruleId": "h1-multiple",
+      "path": "/multiple-h1",
+      "priority": "Medium"
+    },
     {
       "ruleId": "canonical-missing",
       "path": "/no-canonical",
       "priority": "Low"
     },
-    { "ruleId": "noindex", "path": "/noindex", "priority": "High" },
+    {
+      "ruleId": "noindex",
+      "path": "/noindex",
+      "priority": "High"
+    },
     {
       "ruleId": "viewport-missing-or-empty",
       "path": "/no-viewport",
@@ -67,9 +87,21 @@
       "path": "/bad-jsonld",
       "priority": "Medium"
     },
-    { "ruleId": "content-very-thin", "path": "/very-thin", "priority": "High" },
-    { "ruleId": "content-very-thin", "path": "/soft-404", "priority": "High" },
-    { "ruleId": "soft-404", "path": "/soft-404", "priority": "High" },
+    {
+      "ruleId": "content-very-thin",
+      "path": "/very-thin",
+      "priority": "High"
+    },
+    {
+      "ruleId": "content-very-thin",
+      "path": "/soft-404",
+      "priority": "High"
+    },
+    {
+      "ruleId": "soft-404",
+      "path": "/soft-404",
+      "priority": "High"
+    },
     {
       "ruleId": "picture-img-fallback-missing",
       "path": "/picture-no-fallback",
@@ -80,16 +112,33 @@
       "path": "/canonical-broken",
       "priority": "Medium"
     },
-    { "ruleId": "internal-4xx", "path": "/missing", "priority": "High" },
-    { "ruleId": "internal-5xx", "path": "/server-error", "priority": "High" },
-    { "ruleId": "internal-link-to-broken", "path": "/", "priority": "High" },
-    { "ruleId": "internal-link-to-redirect", "path": "/", "priority": "Medium" }
+    {
+      "ruleId": "internal-4xx",
+      "path": "/missing",
+      "priority": "High"
+    },
+    {
+      "ruleId": "internal-5xx",
+      "path": "/server-error",
+      "priority": "High"
+    },
+    {
+      "ruleId": "internal-link-to-broken",
+      "path": "/",
+      "priority": "High"
+    },
+    {
+      "ruleId": "internal-link-to-redirect",
+      "path": "/",
+      "priority": "Medium"
+    }
   ],
   "controlPaths": ["/healthy-a", "/healthy-b"],
   "minimumLabeledInstances": 26,
   "minimumControlPaths": 2,
   "minimumRecall": 0.95,
   "maximumHighSeverityFalsePositiveRate": 0.05,
-  "baselineElapsedMs": 500,
-  "maximumRegressionPercent": 20
+  "baselineElapsedMs": 90,
+  "maximumRegressionPercent": 20,
+  "baselineProvenance": "Median of five consecutive local runs was 58 ms (range 57-58) on macOS arm64, Node 24.18.1, 2026-07-30. The baseline is set to 90 ms: roughly 55% headroom over the observed median, which absorbs local noise while still failing on a 2x algorithmic regression. The previous 500 ms baseline was 8.6x the measured time, so the gate could not fail. Slower hardware must set AGENTSEO_BENCHMARK_BASELINE_MS rather than loosening this value."
 }

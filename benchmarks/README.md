@@ -15,8 +15,17 @@ Informational and deliberately unlabelled findings remain visible in the
 benchmark output, but cannot hide a missed defect, a severity mismatch, or a
 High-severity false positive.
 
-The default baseline is deliberately conservative for shared CI runners. A
-controlled release runner may set `AGENTSEO_BENCHMARK_BASELINE_MS` to its
-recorded median without changing the correctness corpus. Any baseline update
-must include the runner specification and benchmark evidence in the pull
-request; raising it only to make a regression pass is not accepted.
+The checked-in baseline is calibrated for developer hardware, not for the
+slowest runner. `baselineProvenance` in the corpus manifest records the
+measurement it came from, so the number is auditable rather than folkloric.
+
+This is deliberately the strict direction. A conservative default sized for
+shared CI cannot fail on a fast workstation — at 500 ms against a measured 58 ms
+median it had 8.6x of slack, so a doubling of crawl time would have passed
+`pnpm check` in silence. Slower environments therefore declare their own
+allowance through `AGENTSEO_BENCHMARK_BASELINE_MS`, which makes the looseness
+visible at the point that needs it; the shared-runner value lives in
+`.github/workflows/ci.yml`.
+
+Any baseline update must include the runner specification and benchmark evidence
+in the pull request. Raising it only to make a regression pass is not accepted.
