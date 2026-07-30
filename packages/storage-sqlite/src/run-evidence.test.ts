@@ -2,12 +2,15 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { GolemDatabase } from "./database.js";
+import { AgentSeoDatabase } from "./database.js";
 
 describe("stored run evidence pagination", () => {
   it("filters versioned page evidence by section, search and stable offsets", () => {
-    const database = new GolemDatabase({
-      path: join(mkdtempSync(join(tmpdir(), "golem-evidence-db-")), "golem.db"),
+    const database = new AgentSeoDatabase({
+      path: join(
+        mkdtempSync(join(tmpdir(), "agentseo-evidence-db-")),
+        "agentseo.db",
+      ),
     });
     try {
       const project = database.createProject({

@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { Report as EngineReport } from "@agentseoapp/core";
-import { GolemLocalRuntime } from "./index.js";
+import { AgentSeoLocalRuntime } from "./index.js";
 
 const generatedAt = "2026-07-15T12:00:00.000Z";
 
@@ -174,7 +174,7 @@ function evidenceReport(startUrl: string): EngineReport {
   };
 }
 
-async function waitForTerminal(runtime: GolemLocalRuntime, runId: string) {
+async function waitForTerminal(runtime: AgentSeoLocalRuntime, runId: string) {
   for (let attempt = 0; attempt < 100; attempt += 1) {
     const run = await runtime.runs.get(runId);
     if (run && ["succeeded", "partial", "failed"].includes(run.status))
@@ -185,16 +185,16 @@ async function waitForTerminal(runtime: GolemLocalRuntime, runId: string) {
 }
 
 describe("run evidence runtime", () => {
-  let runtime: GolemLocalRuntime | undefined;
+  let runtime: AgentSeoLocalRuntime | undefined;
   afterEach(() => runtime?.close());
 
   it("persists a versioned summary and paginates evidence without losing totals", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-run-evidence-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-run-evidence-"));
     const root = "https://example.com/";
     const fr = "https://example.com/fr";
     const redirected = "https://example.com/new";
     const report = evidenceReport("https://example.com/");
-    runtime = new GolemLocalRuntime({
+    runtime = new AgentSeoLocalRuntime({
       dataDir,
       engine: {
         crawl: async () => ({ report, runId: "engine-run" }),
@@ -326,9 +326,9 @@ describe("run evidence runtime", () => {
   });
 
   it("fails closed when the evidence artifact no longer matches its checksum", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-run-evidence-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-run-evidence-"));
     const report = evidenceReport("https://example.com/");
-    runtime = new GolemLocalRuntime({
+    runtime = new AgentSeoLocalRuntime({
       dataDir,
       engine: {
         crawl: async () => ({ report, runId: "engine-run" }),

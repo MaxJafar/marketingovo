@@ -3,9 +3,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Report as EngineReport } from "@agentseoapp/core";
-import { GolemLocalRuntime } from "./index.js";
+import { AgentSeoLocalRuntime } from "./index.js";
 
-async function waitForTerminalRun(runtime: GolemLocalRuntime, runId: string) {
+async function waitForTerminalRun(
+  runtime: AgentSeoLocalRuntime,
+  runId: string,
+) {
   for (let attempt = 0; attempt < 100; attempt += 1) {
     const run = await runtime.runs.get(runId);
     if (
@@ -83,8 +86,8 @@ describe("run-specific SEO Health history", () => {
       reportToHtml: () => "<!doctype html><title>Health history</title>",
       reportToCsv: () => "url,status\n",
     };
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-health-history-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-health-history-")),
       engine,
     });
     try {

@@ -88,7 +88,7 @@ for (const signature of artifacts.filter(({ role }) =>
     {
       env: {
         ...process.env,
-        GOLEMSEO_TAURI_UPDATER_PUBLIC_KEY: updaterPublicKey,
+        AGENTSEO_TAURI_UPDATER_PUBLIC_KEY: updaterPublicKey,
       },
     },
   );
@@ -190,13 +190,13 @@ async function verifyMacOS() {
 
 async function verifyWindows() {
   const expectedThumbprint =
-    process.env.GOLEMSEO_WINDOWS_CERTIFICATE_THUMBPRINT?.replaceAll(
+    process.env.AGENTSEO_WINDOWS_CERTIFICATE_THUMBPRINT?.replaceAll(
       /\s/gu,
       "",
     ).toUpperCase();
   if (!expectedThumbprint || !/^[0-9A-F]{40}$/u.test(expectedThumbprint)) {
     throw new Error(
-      "GOLEMSEO_WINDOWS_CERTIFICATE_THUMBPRINT is required for Authenticode verification",
+      "AGENTSEO_WINDOWS_CERTIFICATE_THUMBPRINT is required for Authenticode verification",
     );
   }
   const installers = artifacts.filter(
@@ -209,10 +209,10 @@ async function verifyWindows() {
   }
   const script = String.raw`
 $ErrorActionPreference = 'Stop'
-$signature = Get-AuthenticodeSignature -LiteralPath $env:GOLEMSEO_VERIFY_ARTIFACT
+$signature = Get-AuthenticodeSignature -LiteralPath $env:AGENTSEO_VERIFY_ARTIFACT
 if ($signature.Status -ne 'Valid') { throw "Authenticode status is $($signature.Status): $($signature.StatusMessage)" }
 if (-not $signature.SignerCertificate) { throw 'Authenticode signer certificate is missing' }
-if ($signature.SignerCertificate.Thumbprint -ne $env:GOLEMSEO_EXPECTED_THUMBPRINT) { throw 'Authenticode signer thumbprint does not match the imported release certificate' }
+if ($signature.SignerCertificate.Thumbprint -ne $env:AGENTSEO_EXPECTED_THUMBPRINT) { throw 'Authenticode signer thumbprint does not match the imported release certificate' }
 if (-not $signature.TimeStamperCertificate) { throw 'Authenticode timestamp certificate is missing' }
 [PSCustomObject]@{
   thumbprint = $signature.SignerCertificate.Thumbprint
@@ -227,8 +227,8 @@ if (-not $signature.TimeStamperCertificate) { throw 'Authenticode timestamp cert
       {
         env: {
           ...process.env,
-          GOLEMSEO_VERIFY_ARTIFACT: resolve(bundleRoot, path),
-          GOLEMSEO_EXPECTED_THUMBPRINT: expectedThumbprint,
+          AGENTSEO_VERIFY_ARTIFACT: resolve(bundleRoot, path),
+          AGENTSEO_EXPECTED_THUMBPRINT: expectedThumbprint,
         },
       },
     );

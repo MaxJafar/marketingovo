@@ -23,7 +23,7 @@ describe("SiteContext localStorage migration", () => {
     vi.restoreAllMocks();
   });
 
-  it("migrates legacy golem-seo selected-site key and deletes it", () => {
+  it("migrates the legacy golem-seo selected-site key and deletes it", () => {
     window.localStorage.setItem("golem-seo:selected-site:v1", "legacy-site-id");
 
     const client = new QueryClient();

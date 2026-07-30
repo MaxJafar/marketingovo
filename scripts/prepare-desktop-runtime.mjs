@@ -107,7 +107,7 @@ await assertExecutable(chromiumExecutable);
 const extension = process.platform === "win32" ? ".exe" : "";
 const nodeDestination = resolve(
   binaries,
-  `golem-seo-node-${target}${extension}`,
+  `agentseo-node-${target}${extension}`,
 );
 await copyFile(process.execPath, nodeDestination);
 if (process.platform !== "win32") await chmod(nodeDestination, 0o755);

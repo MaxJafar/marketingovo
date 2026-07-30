@@ -1,7 +1,7 @@
 # Legacy v0 migration
 
 The pre-monorepo crawler is preserved as the implementation base of
-`@golem-seo/core`; its old internal sprint notes and private operating logs are
+`@agentseoapp/core`; its old internal sprint notes and private operating logs are
 not part of the Community Edition documentation.
 
 The 0.11 migration path is non-destructive. The importer detects legacy
@@ -13,9 +13,9 @@ files are never changed or removed.
 The supported public history starts at `legacy-v0.10`. Release maintainers
 create that tag before publishing the reorganized Community repository.
 
-`plugin.json` is a synthetic, secret-free ELv2 fixture that preserves only the
+`plugin.json` is a synthetic, secret-free Apache-2.0 fixture that preserves only the
 shape needed to prove legacy manifests remain quarantined. The original private
 manifest, internal paths, provider configuration, and marketing copy are not
-part of the source-available Community repository. The fixture is not exported,
+part of the public repository. The fixture is not exported,
 packaged, or supported as an agent surface. Community exposes exactly six
 workflows through MCP, Codex, and OpenClaw.

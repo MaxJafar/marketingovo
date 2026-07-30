@@ -20,8 +20,8 @@ describe("core package public surface", () => {
     expect(packageJson.files).not.toContain("plugin.json");
   });
 
-  it("does not publish a duplicate golem-seo CLI binary", () => {
-    expect(packageJson.bin?.["golem-seo"]).toBeUndefined();
+  it("does not publish a duplicate agentseo CLI binary", () => {
+    expect(packageJson.bin?.["agentseo"]).toBeUndefined();
     expect(packageJson.scripts?.["start"]).toBeUndefined();
     expect(packageJson.scripts?.["demo"]).toBeUndefined();
   });

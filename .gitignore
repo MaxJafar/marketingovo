@@ -5,9 +5,9 @@ dist/
 coverage/
 *.tsbuildinfo
 
-# Local Golem SEO state and artifacts
-.golem-seo/
-*.golemseo
+# Local AGENTseo state and artifacts
+.agentseo/
+*.agentseo
 *.db
 *.db-wal
 *.db-shm

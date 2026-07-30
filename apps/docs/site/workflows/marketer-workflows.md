@@ -102,6 +102,6 @@ Next verification
 ```
 
 <p class="source-note">
-  Canonical workflow guidance: <a href="https://github.com/GolemWorkers/golem-seo/blob/main/plugins/codex/golem-seo/skills/seo-marketer/SKILL.md">SEO marketer skill</a>.
-  Product scope follows the <a href="https://github.com/GolemWorkers/golem-seo/blob/main/README.md">repository README</a>.
+  Canonical workflow guidance: <a href="https://github.com/GolemWorkers/agentseo/blob/main/plugins/codex/agentseo/skills/seo-marketer/SKILL.md">SEO marketer skill</a>.
+  Product scope follows the <a href="https://github.com/GolemWorkers/agentseo/blob/main/README.md">repository README</a>.
 </p>

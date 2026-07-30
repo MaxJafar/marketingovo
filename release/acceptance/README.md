@@ -3,7 +3,7 @@
 Stable releases fail closed until `VERSION.json` records:
 
 - approval from the release owner;
-- legal review of the Elastic License 2.0, trademark policy, and CLA;
+- legal review of the Apache License 2.0, trademark policy, and CLA;
 - at least three unique design partners that completed a real weekly workflow,
   produced a verified SEO improvement, approved the release, and granted
   permission for an attributable case study.

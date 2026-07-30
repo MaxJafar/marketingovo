@@ -55,18 +55,18 @@ if ($baseline.available) {
   }
 }
 
-$expectedThumbprint = ($env:GOLEMSEO_WINDOWS_CERTIFICATE_THUMBPRINT -replace "\s", "").ToUpperInvariant()
+$expectedThumbprint = ($env:AGENTSEO_WINDOWS_CERTIFICATE_THUMBPRINT -replace "\s", "").ToUpperInvariant()
 if ($expectedThumbprint -notmatch "^[0-9A-F]{40}$") {
-  throw "GOLEMSEO_WINDOWS_CERTIFICATE_THUMBPRINT is required for lifecycle verification."
+  throw "AGENTSEO_WINDOWS_CERTIFICATE_THUMBPRINT is required for lifecycle verification."
 }
 
 $runKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
-$runValueName = "Golem SEO"
+$runValueName = "AGENTseo"
 $healthUri = "http://127.0.0.1:3210/api/v1/health"
 $projectsUri = "http://127.0.0.1:3210/api/v1/projects"
-$installLog = Join-Path $env:RUNNER_TEMP "golem-seo-msi-install.log"
-$upgradeLog = Join-Path $env:RUNNER_TEMP "golem-seo-msi-upgrade.log"
-$uninstallLog = Join-Path $env:RUNNER_TEMP "golem-seo-msi-uninstall.log"
+$installLog = Join-Path $env:RUNNER_TEMP "agentseo-msi-install.log"
+$upgradeLog = Join-Path $env:RUNNER_TEMP "agentseo-msi-upgrade.log"
+$uninstallLog = Join-Path $env:RUNNER_TEMP "agentseo-msi-uninstall.log"
 $installedMsi = $null
 $backgroundProcess = $null
 
@@ -321,10 +321,10 @@ function Wait-ForUninstall {
 }
 
 if (Get-RunValue) {
-  throw "The ephemeral runner already contains a Golem SEO login registration."
+  throw "The ephemeral runner already contains a AGENTseo login registration."
 }
 if (Get-Health) {
-  throw "The ephemeral runner already has a service listening on the Golem SEO port."
+  throw "The ephemeral runner already has a service listening on the AGENTseo port."
 }
 
 try {
@@ -374,7 +374,7 @@ try {
   Invoke-Msi -Operation uninstall -Path $resolvedMsi -LogPath $uninstallLog
   $installedMsi = $null
   Wait-ForUninstall -InstallRoot $currentLauncher.Root -ExecutablePath $currentLauncher.Executable
-  if (-not (Test-Path -LiteralPath (Join-Path $dataDirectoryPath "golem-seo.db") -PathType Leaf)) {
+  if (-not (Test-Path -LiteralPath (Join-Path $dataDirectoryPath "agentseo.db") -PathType Leaf)) {
     throw "Uninstall unexpectedly removed the user's local project database."
   }
 

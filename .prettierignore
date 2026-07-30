@@ -25,3 +25,9 @@ apps/desktop/src-tauri/icons/android/**/*.xml
 # their producer's canonical format, not rewritten by Prettier.
 pnpm-lock.yaml
 migrations/legacy-v0/
+
+# Generated agent-host manifests. Their exact bytes are asserted by
+# `pnpm validate:plugins`, so a formatter pass here creates false drift.
+plugins/claude/
+.claude-plugin/
+integrations/*.mcp.json

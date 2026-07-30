@@ -14,7 +14,7 @@ Which five deserve attention this week?
 
 **Footer**
 
-Golem SEO `0.11` alpha
+AGENTseo `0.11` alpha
 
 **Visual direction**
 
@@ -116,7 +116,7 @@ No product account. Telemetry off by default. Write-only credentials. Secrets ex
 
 **Footer**
 
-Source-available under Elastic License 2.0.
+Open source under the Apache License 2.0.
 
 **Visual direction**
 
@@ -124,7 +124,7 @@ A local dashboard and terminal connected to a private project store.
 
 **Alt text**
 
-“A local Golem SEO dashboard connected to a private project database and credential boundary.”
+“A local AGENTseo dashboard connected to a private project database and credential boundary.”
 
 ## Slide 7 — Community and Full
 
@@ -146,7 +146,7 @@ Full is a separate proprietary service. Local analysis is not deliberately weake
 
 **Alt text**
 
-“A side-by-side comparison of Golem SEO Community Edition and GolemWorkers Full.”
+“A side-by-side comparison of AGENTseo Community Edition and GolemWorkers Full.”
 
 ## Slide 8 — Try the alpha
 
@@ -156,11 +156,11 @@ Turn one audit into one verified action.
 
 **Body**
 
-`npx @golem-seo/cli serve`
+`npx @agentseoapp/cli serve`
 
 Star and inspect:
 
-github.com/GolemWorkers/golem-seo
+github.com/GolemWorkers/agentseo
 
 Need managed team workflows?
 
@@ -172,4 +172,4 @@ golemworkers.com/seo
 
 **Alt text**
 
-“Golem SEO alpha call to action with local install, GitHub, and GolemWorkers Full links.”
+“AGENTseo alpha call to action with local install, GitHub, and GolemWorkers Full links.”

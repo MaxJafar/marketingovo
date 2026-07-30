@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ProjectContextProfile } from "@agentseoapp/contracts";
-import { GolemLocalRuntime } from "./index.js";
+import { AgentSeoLocalRuntime } from "./index.js";
 
 const profile = (overrides: Partial<ProjectContextProfile> = {}) => ({
   summary: "  Turn crawl and search evidence into verified actions.  ",
@@ -19,8 +19,8 @@ const profile = (overrides: Partial<ProjectContextProfile> = {}) => ({
 
 describe("project context runtime boundary", () => {
   it("normalizes reusable context while preserving immutable revisions and linked journal evidence", async () => {
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-runtime-context-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-context-")),
     });
     try {
       const project = await runtime.projects.create({
@@ -88,8 +88,8 @@ describe("project context runtime boundary", () => {
   });
 
   it("rejects malformed, secret-like, local-path, and cross-project material", async () => {
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-runtime-context-safety-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-context-safety-")),
     });
     try {
       const project = await runtime.projects.create({

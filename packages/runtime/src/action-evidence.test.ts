@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Action, IssueInstance } from "@agentseoapp/contracts";
 import type { Report } from "@agentseoapp/core";
-import { ActionEvidenceCursorError, GolemLocalRuntime } from "./index.js";
+import { ActionEvidenceCursorError, AgentSeoLocalRuntime } from "./index.js";
 
 const observedAt = "2026-07-15T10:00:00.000Z";
 
@@ -64,7 +64,7 @@ function action(projectId: string, affectedUrls: string[]): Action {
 }
 
 function completeRun(
-  runtime: GolemLocalRuntime,
+  runtime: AgentSeoLocalRuntime,
   projectId: string,
   id: string,
   issues: IssueInstance[],
@@ -206,7 +206,7 @@ function report(projectUrl: string): Report {
   };
 }
 
-async function waitForTerminal(runtime: GolemLocalRuntime, runId: string) {
+async function waitForTerminal(runtime: AgentSeoLocalRuntime, runId: string) {
   for (let attempt = 0; attempt < 150; attempt += 1) {
     const run = await runtime.runs.get(runId);
     if (run && ["succeeded", "partial", "failed"].includes(run.status)) {
@@ -219,8 +219,8 @@ async function waitForTerminal(runtime: GolemLocalRuntime, runId: string) {
 
 describe("runtime Action Evidence service", () => {
   it("preserves the full URL history and paginates exact evidence", async () => {
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-action-evidence-history-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-action-evidence-history-")),
     });
     try {
       const project = await runtime.projects.create({
@@ -396,9 +396,9 @@ describe("runtime Action Evidence service", () => {
   });
 
   it("persists comparison evidence and matched checkpoints across restart", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-action-checkpoint-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-action-checkpoint-"));
     const engineReport = report("https://example.com/");
-    let runtime = new GolemLocalRuntime({
+    let runtime = new AgentSeoLocalRuntime({
       dataDir,
       engine: {
         crawl: async () => ({ runId: "engine-run", report: engineReport }),
@@ -473,7 +473,7 @@ describe("runtime Action Evidence service", () => {
       ).toBe(run.id);
       runtime.close();
 
-      runtime = new GolemLocalRuntime({ dataDir });
+      runtime = new AgentSeoLocalRuntime({ dataDir });
       const restored = await runtime.actions.evidence(storedAction!.id);
       expect(restored?.verification.checkpointId).not.toBeNull();
       expect(restored?.summary).toMatchObject({ clicks: 100, keyEvents: 12 });
@@ -485,8 +485,8 @@ describe("runtime Action Evidence service", () => {
   });
 
   it("returns null metrics instead of zeros when providers are unavailable", async () => {
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-action-evidence-missing-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-action-evidence-missing-")),
     });
     try {
       const project = await runtime.projects.create({
@@ -555,8 +555,8 @@ describe("runtime Action Evidence service", () => {
       ],
     };
     let invocation = 0;
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-action-evidence-partial-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-action-evidence-partial-")),
       engine: {
         crawl: async () => ({
           runId: `partial-engine-${invocation}`,

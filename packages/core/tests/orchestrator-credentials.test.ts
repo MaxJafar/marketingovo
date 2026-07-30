@@ -43,7 +43,7 @@ describe("active orchestrator credential boundary", () => {
   });
 
   it("does not auto-load legacy Google token files during an audit", async () => {
-    const directory = mkdtempSync(join(tmpdir(), "golem-token-boundary-"));
+    const directory = mkdtempSync(join(tmpdir(), "agentseo-token-boundary-"));
     const tokenPath = join(directory, "gsc-token.json");
     const legacyAccessToken = "legacy-file-access-token-must-stay-unused";
     writeFileSync(
@@ -57,8 +57,8 @@ describe("active orchestrator credential boundary", () => {
       }),
       { mode: 0o600 },
     );
-    vi.stubEnv("GOLEMSEO_GSC_TOKEN", tokenPath);
-    vi.stubEnv("GOLEMSEO_ALLOW_PRIVATE", "1");
+    vi.stubEnv("AGENTSEO_GSC_TOKEN", tokenPath);
+    vi.stubEnv("AGENTSEO_ALLOW_PRIVATE", "1");
     const providerFetch = vi.fn<typeof fetch>(
       async () =>
         new Response(JSON.stringify({ rows: [] }), {

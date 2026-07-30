@@ -63,15 +63,15 @@ function defaultAgentSeoDataDirectory(): string {
   // Preserve the persisted 1.x data root until the storage migration owns the
   // default-path cutover. Connection environment variables remain canonical.
   if (process.platform === "darwin")
-    return join(homedir(), "Library", "Application Support", "Golem SEO");
+    return join(homedir(), "Library", "Application Support", "AGENTseo");
   if (process.platform === "win32")
     return join(
       process.env.LOCALAPPDATA ?? process.env.APPDATA ?? homedir(),
-      "Golem SEO",
+      "AGENTseo",
     );
   return join(
     process.env.XDG_DATA_HOME ?? join(homedir(), ".local", "share"),
-    "golem-seo",
+    "agentseo",
   );
 }
 
@@ -392,12 +392,3 @@ export async function createAgentSeoMcpServer(
 
   return server;
 }
-
-/**
- * @deprecated Use {@link createAgentSeoMcpServer}. The public tool IDs remain
- * unchanged through AGENTseo 1.x, but new integrations should use the
- * canonical server factory and agentseo:// resources.
- */
-export const createGolemSeoMcpServer = createAgentSeoMcpServer;
-/** @deprecated Use {@link AgentSeoMcpOptions}. */
-export type GolemSeoMcpOptions = AgentSeoMcpOptions;

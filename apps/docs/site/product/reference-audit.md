@@ -1,11 +1,11 @@
 ---
 title: Reference-tool audit
-description: See how Golem SEO evaluates public SEO tools, preserves license boundaries, and turns proven workflows into testable product behavior.
+description: See how AGENTseo evaluates public SEO tools, preserves license boundaries, and turns proven workflows into testable product behavior.
 ---
 
 # Reference-tool audit
 
-Golem SEO studies public products to identify durable workflow mechanics, not to
+AGENTseo studies public products to identify durable workflow mechanics, not to
 assemble a clone. Every candidate is screened for marketer value, evidence
 quality, architectural fit, security, and license compatibility.
 
@@ -79,4 +79,4 @@ issue fingerprint disappears.
 
 Read the complete commit-pinned matrix, adopted mechanics, deferred queue, and
 implementation contracts in the
-[canonical reverse-engineering record](https://github.com/GolemWorkers/golem-seo/blob/main/docs/reference-tool-reverse-engineering.md).
+[canonical reverse-engineering record](https://github.com/GolemWorkers/agentseo/blob/main/docs/reference-tool-reverse-engineering.md).

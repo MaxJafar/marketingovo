@@ -142,7 +142,7 @@ try {
   const elapsedMs = Math.round(performance.now() - startedAt);
   const correctness = assessCorpus(manifest, result.report.issues);
   const configuredBaseline = Number(
-    process.env.GOLEMSEO_BENCHMARK_BASELINE_MS ?? manifest.baselineElapsedMs,
+    process.env.AGENTSEO_BENCHMARK_BASELINE_MS ?? manifest.baselineElapsedMs,
   );
   if (!Number.isFinite(configuredBaseline) || configuredBaseline <= 0)
     throw new Error("Benchmark baseline must be a positive number");

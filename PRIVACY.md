@@ -1,21 +1,21 @@
 # Privacy
 
-Golem SEO Community Edition is local-first. Product telemetry is disabled by
+AGENTseo Community Edition is local-first. Product telemetry is disabled by
 default and requires explicit opt-in. Ordinary provider calls made to perform a
 requested audit are product functionality, not telemetry.
 
 The first signed desktop process makes one HTTPS release check before starting
 the local service, whether it was opened by the user or by login startup. The
-request uses the fixed `latest.json` asset on the canonical Golem SEO GitHub
+request uses the fixed `latest.json` asset on the canonical AGENTseo GitHub
 release. It does not put a project URL, account, credential, usage event, or
-Golem SEO device identifier in the URL. As with any HTTPS request, GitHub can
+AGENTseo device identifier in the URL. As with any HTTPS request, GitHub can
 receive ordinary transport metadata such as the source IP address and request
-headers. Golem SEO does not attach a product telemetry identifier. When a newer
+headers. AGENTseo does not attach a product telemetry identifier. When a newer
 release is available, the desktop launcher downloads it and installs it only
 after the embedded updater key verifies its detached signature. Secondary
 desktop activations reuse the existing launcher and npm CLI services never make
 this check. A desktop user can disable it with `--no-update` or
-`GOLEMSEO_AUTO_UPDATE=off`.
+`AGENTSEO_AUTO_UPDATE=off`.
 
 Projects may contain confidential marketing data: search queries, landing-page
 metrics, conversion metrics, crawl snapshots, competitor inputs, and custom
@@ -42,5 +42,5 @@ system temporarily prevents final file removal, the isolated deletion staging
 directory is retried at the next service start. If the process stopped before
 the database commit, the manifest causes those files to be restored because
 the project still exists. Unrecognized or conflicting staging is preserved and
-system health is degraded instead of deleting unknown data. Golem SEO on Golem
+system health is degraded instead of deleting unknown data. AGENTseo on Golem
 Workers has a separate privacy policy appropriate to its hosted service.

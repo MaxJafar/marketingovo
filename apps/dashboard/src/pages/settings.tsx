@@ -297,7 +297,7 @@ export function SettingsPage() {
                   id="project-import-file"
                   className="sr-only"
                   type="file"
-                  accept=".agentseo,.golemseo,application/vnd.golemseo.project+json"
+                  accept=".agentseo,.golemseo,application/vnd.agentseo.project+json"
                   aria-describedby="project-import-help"
                   onChange={importBundle}
                   disabled={importProject.isPending}

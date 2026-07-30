@@ -2,12 +2,12 @@
 layout: home
 
 hero:
-  name: Golem SEO
+  name: AGENTseo
   text: Evidence into action.
   tagline: A local-first SEO operations system that connects crawl, search, analytics, performance, and research signals to a transparent action queue.
   image:
     src: /brand-mark.svg
-    alt: Golem SEO brand mark
+    alt: AGENTseo brand mark
   actions:
     - theme: brand
       text: Start in ten minutes
@@ -17,7 +17,7 @@ hero:
       link: /workflows/marketer-workflows
     - theme: alt
       text: View source
-      link: https://github.com/GolemWorkers/golem-seo
+      link: https://github.com/GolemWorkers/agentseo
 
 features:
   - icon: ↗
@@ -52,7 +52,7 @@ features:
     linkText: Build shared context
   - icon: ◆
     title: Source-available Community Edition
-    details: Run meaningful local analysis under Elastic License 2.0. Hosted collaboration and managed execution belong to GolemWorkers.
+    details: Run meaningful local analysis under the Apache License 2.0. Hosted collaboration and managed execution are a separate GolemWorkers service.
     link: /product/editions
     linkText: Compare editions
 ---
@@ -75,6 +75,6 @@ features:
 
 <p class="source-note">
   Product positioning and release claims follow the canonical
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/README.md">repository README</a>
-  and <a href="https://github.com/GolemWorkers/golem-seo/blob/main/docs/release-status.md">release status</a>.
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/README.md">repository README</a>
+  and <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/release-status.md">release status</a>.
 </p>

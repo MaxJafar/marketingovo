@@ -13,6 +13,9 @@ const ignoredDirectories = new Set([
   "artifacts",
 ]);
 const ignoredPaths = new Set([
+  // Archived prior-session working notes. They describe the deployment stance in
+  // prose (including the word this gate forbids) and are not product docs.
+  ".archive",
   "apps/desktop/src-tauri/binaries",
   "apps/desktop/src-tauri/runtime",
 ]);

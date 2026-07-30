@@ -4,5 +4,5 @@ contact_links:
     url: https://golemworkers.com/security
     about: Follow SECURITY.md and do not open a public issue.
   - name: Product discussion
-    url: https://github.com/GolemWorkers/golem-seo/discussions
+    url: https://github.com/GolemWorkers/agentseo/discussions
     about: Ask workflow questions and share reproducible benchmarks.

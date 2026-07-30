@@ -15,16 +15,16 @@ import {
 } from "./updater-metadata-policy.mjs";
 
 async function fixture() {
-  const assetRoot = await mkdtemp(join(tmpdir(), "golem-updater-metadata-"));
+  const assetRoot = await mkdtemp(join(tmpdir(), "agentseo-updater-metadata-"));
   const version = "0.11.0-alpha.0";
   const records = [];
   for (const specification of UPDATER_TARGETS) {
     const payloadPath =
       specification.platform === "macos"
-        ? "macos/Golem SEO.app.tar.gz"
+        ? "macos/AGENTseo.app.tar.gz"
         : specification.platform === "windows"
-          ? "msi/Golem SEO.msi"
-          : "appimage/Golem SEO.AppImage";
+          ? "msi/AGENTseo.msi"
+          : "appimage/AGENTseo.AppImage";
     const signaturePath = `${payloadPath}.sig`;
     const payloadName = releaseAssetName(specification.target, payloadPath);
     const signatureName = releaseAssetName(specification.target, signaturePath);
@@ -85,7 +85,7 @@ test("static updater metadata covers every canonical target with verified bytes"
     assert.equal(platform.signature, "A".repeat(88));
     assert.match(
       platform.url,
-      /^https:\/\/github\.com\/GolemWorkers\/golem-seo\/releases\/download\/v0\.11\.0-alpha\.0\//u,
+      /^https:\/\/github\.com\/GolemWorkers\/agentseo\/releases\/download\/v0\.11\.0-alpha\.0\//u,
     );
   }
 });
@@ -138,9 +138,9 @@ test("updater metadata refuses a non-canonical publication repository", async ()
     buildUpdaterMetadata({
       records,
       assetRoot,
-      repository: "fork/golem-seo",
+      repository: "fork/agentseo",
       tag: `v${version}`,
     }),
-    /can only target GolemWorkers\/golem-seo/u,
+    /can only target GolemWorkers\/agentseo/u,
   );
 });

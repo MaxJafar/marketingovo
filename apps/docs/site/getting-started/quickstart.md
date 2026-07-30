@@ -1,6 +1,6 @@
 ---
 title: Quickstart and onboarding
-description: Install Golem SEO Community Edition, open the local dashboard, and reach the first prioritized action.
+description: Install AGENTseo Community Edition, open the local dashboard, and reach the first prioritized action.
 ---
 
 # Quickstart and onboarding
@@ -15,18 +15,18 @@ This path uses Community Edition. It requires Node.js 24 LTS and Corepack. No ac
 ## Install from source
 
 ```bash
-git clone https://github.com/GolemWorkers/golem-seo.git
-cd golem-seo
+git clone https://github.com/GolemWorkers/agentseo.git
+cd agentseo
 corepack enable
 pnpm install --frozen-lockfile
 pnpm build
-pnpm golem-seo serve
+pnpm agentseo serve
 ```
 
 The published-package route described by the project is:
 
 ```bash
-npx @golem-seo/cli serve
+npx @agentseoapp/cli serve
 ```
 
 The daemon binds to `127.0.0.1:3210`. Keep it on loopback. Current `0.11` builds print a one-time dashboard URL; open that exact URL so the fragment token can be exchanged for the HttpOnly local session and removed from the address bar.
@@ -41,7 +41,7 @@ on the next start.
 In the current CLI alpha, the credential vault is locked unless the daemon receives either:
 
 - `--master-password-file /absolute/path/to/password-file`, or
-- `GOLEM_SEO_MASTER_PASSWORD` in the daemon environment.
+- `AGENTSEO_MASTER_PASSWORD` in the daemon environment.
 
 The password must contain at least 12 characters. Protect a password file with owner-only permissions. Without a master password, connections are memory-only for that process and must be entered again after restart.
 
@@ -84,9 +84,9 @@ Use a focused goal such as technical health, organic quick wins, competitor comp
 Long work returns a run ID. The UI can follow progress; the CLI can inspect the same state:
 
 ```bash
-pnpm golem-seo run list --project PROJECT_ID
-pnpm golem-seo run watch RUN_ID
-pnpm golem-seo run replay RUN_ID
+pnpm agentseo run list --project PROJECT_ID
+pnpm agentseo run watch RUN_ID
+pnpm agentseo run replay RUN_ID
 ```
 
 Wait for `succeeded`, `partial`, `failed`, or `cancelled`. A partial run may still be useful, but its unavailable sources must remain part of the conclusion.
@@ -147,13 +147,13 @@ the project rules change.
 Trusted local clients can inspect the same versioned catalog:
 
 ```bash
-golem-seo extraction templates
+agentseo extraction templates
 ```
 
 ## Check local health
 
 ```bash
-pnpm golem-seo doctor
+pnpm agentseo doctor
 ```
 
 Doctor reports the resolved data directory, dashboard assets, local API health, database state, and service-token location. The service-token file is for trusted non-browser clients; never paste it into the dashboard or an agent prompt.
@@ -164,7 +164,7 @@ Stop the local daemon before either operation. Backup creates a consistent
 SQLite snapshot, refuses to overwrite an existing file, and prints its SHA-256:
 
 ```bash
-golem-seo backup /safe/location/golem-seo-backup.db
+agentseo backup /safe/location/agentseo-backup.db
 ```
 
 Restore validates integrity, schema compatibility, and the optional expected
@@ -172,7 +172,7 @@ checksum before replacing the database. It keeps the previous database as a
 dated rollback file and requires explicit confirmation:
 
 ```bash
-golem-seo restore /safe/location/golem-seo-backup.db \
+agentseo restore /safe/location/agentseo-backup.db \
   --expected-sha256 PRINTED_SHA256 \
   --confirm
 ```
@@ -191,7 +191,7 @@ For CLI deletion, create a private text file containing only the exact project
 name, then run:
 
 ```bash
-golem-seo project delete PROJECT_ID --confirm-name-file ./project-name.txt
+agentseo project delete PROJECT_ID --confirm-name-file ./project-name.txt
 ```
 
 The receipt reports deleted record counts and file cleanup state. Global BYOK
@@ -207,6 +207,6 @@ provider when required. Agents cannot delete projects.
 - [Set up BYOK integrations](/integrations/byok)
 
 <p class="source-note">
-  Canonical operational source: <a href="https://github.com/GolemWorkers/golem-seo/blob/main/docs/quickstart.md">ten-minute quickstart</a>.
-  Confirm alpha limitations in <a href="https://github.com/GolemWorkers/golem-seo/blob/main/docs/release-status.md">release status</a>.
+  Canonical operational source: <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/quickstart.md">ten-minute quickstart</a>.
+  Confirm alpha limitations in <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/release-status.md">release status</a>.
 </p>

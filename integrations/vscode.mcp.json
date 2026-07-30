@@ -1,0 +1,13 @@
+{
+  "servers": {
+    "agentseo": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@agentseoapp/mcp",
+        "agentseo-mcp"
+      ]
+    }
+  }
+}

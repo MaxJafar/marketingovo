@@ -237,16 +237,10 @@ async function postWebhook(
       "content-type": "application/json",
       "x-agentseo-event-id": eventId,
       "x-agentseo-timestamp": timestamp,
-      // These headers are a deliberate 1.x webhook compatibility boundary.
-      // Mirror canonical values exactly so legacy verifiers never observe a
-      // different event identity or signed timestamp during migration.
-      "x-golemseo-event-id": eventId,
-      "x-golemseo-timestamp": timestamp,
     };
     if (secret) {
       const signature = `sha256=${createHmac("sha256", secret).update(`${timestamp}.${body}`).digest("hex")}`;
       headers["x-agentseo-signature"] = signature;
-      headers["x-golemseo-signature"] = signature;
     }
     if (fetchImpl) {
       const res = await fetchImpl(parsed.toString(), {

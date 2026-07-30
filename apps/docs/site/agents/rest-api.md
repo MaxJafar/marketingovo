@@ -30,11 +30,11 @@ Capabilities report the edition, product version, API version, telemetry state, 
 
 The CLI prints a dashboard URL containing a one-time token in the URL fragment. The dashboard exchanges it for an HttpOnly, SameSite session cookie, stores the returned CSRF value only in memory, and removes the fragment from the address bar.
 
-Browser mutations require the same origin and the `X-Golem-CSRF` header. The bootstrap token is one-time and is not a reusable API credential.
+Browser mutations require the same origin and the `X-AgentSeo-CSRF` header. The bootstrap token is one-time and is not a reusable API credential.
 
 ### Trusted local clients
 
-The CLI, SDK, MCP bridge, and adapters use the service-token file created in the private Golem SEO data directory. Prefer the typed SDK or official adapter so the token is read from the file rather than copied into shell history or configuration text.
+The CLI, SDK, MCP bridge, and adapters use the service-token file created in the private AGENTseo data directory. Prefer the typed SDK or official adapter so the token is read from the file rather than copied into shell history or configuration text.
 
 Do not paste the service token into the dashboard, an agent prompt, a report, or a support request.
 
@@ -91,9 +91,9 @@ as a default mutation tool.
 The CLI mirrors this boundary:
 
 ```bash
-golem-seo issue list PROJECT_ID --status open --severity high
-golem-seo issue review PROJECT_ID FINGERPRINT false-positive --reason-file ./review-reason.txt
-golem-seo issue review PROJECT_ID FINGERPRINT open
+agentseo issue list PROJECT_ID --status open --severity high
+agentseo issue review PROJECT_ID FINGERPRINT false-positive --reason-file ./review-reason.txt
+agentseo issue review PROJECT_ID FINGERPRINT open
 ```
 
 Mutation reasons use a file so they do not become a shell-history argument.
@@ -103,9 +103,9 @@ The CLI mirrors Project Context without placing profile or journal prose in
 shell history:
 
 ```bash
-golem-seo context show PROJECT_ID
-golem-seo context update PROJECT_ID --profile-file ./context.json --change-summary-file ./change.txt
-golem-seo context append PROJECT_ID decision --title-file ./title.txt --detail-file ./detail.txt --source-run RUN_ID
+agentseo context show PROJECT_ID
+agentseo context update PROJECT_ID --profile-file ./context.json --change-summary-file ./change.txt
+agentseo context append PROJECT_ID decision --title-file ./title.txt --detail-file ./detail.txt --source-run RUN_ID
 ```
 
 Project Context is also a deliberate human write boundary. A profile update
@@ -118,7 +118,7 @@ Extraction templates are read-only catalog data. The response declares
 `importMode: "review_required"` and includes every selector, capture mode,
 recommended page, and assumption. Clients must create fresh rule IDs and show
 the proposed fields before adding them to an unsaved draft. The CLI exposes the
-same catalog with `golem-seo extraction templates`; saving remains an explicit
+same catalog with `agentseo extraction templates`; saving remains an explicit
 project-scoped operation.
 
 Project deletion is deliberately outside the agent surface. `DELETE
@@ -150,9 +150,9 @@ Do not treat `202` as a completed audit. Read `/runs/:id`, stream `/runs/:id/eve
 ## Use the typed SDK
 
 ```ts
-import { GolemSeoClient } from "@golem-seo/sdk";
+import { AgentSeoClient } from "@agentseoapp/sdk";
 
-const client = await GolemSeoClient.fromTokenFile(
+const client = await AgentSeoClient.fromTokenFile(
   "/private/path/to/service-token",
 );
 const projects = await client.projects.list();
@@ -192,7 +192,7 @@ Use the service-token path printed by the local CLI; keep the file private. Prod
 The same immutable graph is available without writing code:
 
 ```bash
-pnpm golem-seo run links RUN_ID \
+pnpm agentseo run links RUN_ID \
   --url https://example.com/pricing \
   --direction outlinks \
   --limit 50
@@ -208,9 +208,9 @@ OpenAPI document, while the runtime wrapper still refuses any token destination
 other than the canonical IPv4 loopback API.
 
 ```ts
-import { createGeneratedGolemSeoClientFromTokenFile } from "@golem-seo/sdk";
+import { createGeneratedAgentSeoClientFromTokenFile } from "@agentseoapp/sdk";
 
-const api = await createGeneratedGolemSeoClientFromTokenFile(
+const api = await createGeneratedAgentSeoClientFromTokenFile(
   "/private/path/to/service-token",
 );
 const { data, error } = await api.GET("/api/v1/health");
@@ -230,9 +230,9 @@ Measurements use explicit source state. A metric can be `available`, `unavailabl
 The versioned route is `/api/v1`, but `0.11` remains an alpha. Route contract changes should update TypeBox schemas, runtime validation, OpenAPI, generated SDK types, tests, and documentation together. The six agent tools use a separate canonical TypeBox registry that MCP and OpenClaw project into their native schema dialects.
 
 <p class="source-note">
-  Canonical sources: <a href="https://github.com/GolemWorkers/golem-seo/blob/main/packages/contracts/src/index.ts">public API TypeBox contracts</a>,
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/packages/contracts/src/agent-tools.ts">agent tool contracts</a>,
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/packages/server/src/index.ts">local server</a>,
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/packages/sdk/src/index.ts">typed SDK</a>, and
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/docs/architecture.md">architecture</a>.
+  Canonical sources: <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/contracts/src/index.ts">public API TypeBox contracts</a>,
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/contracts/src/agent-tools.ts">agent tool contracts</a>,
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/server/src/index.ts">local server</a>,
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/sdk/src/index.ts">typed SDK</a>, and
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/architecture.md">architecture</a>.
 </p>

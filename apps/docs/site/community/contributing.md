@@ -1,11 +1,11 @@
 ---
 title: Contributing
-description: Contribute focused, tested changes to Golem SEO Community Edition and its documentation.
+description: Contribute focused, tested changes to AGENTseo Community Edition and its documentation.
 ---
 
 # Contributing
 
-Contributions are welcome when they strengthen a trustworthy SEO operations system and respect the source-available product boundary.
+Contributions are welcome when they strengthen a trustworthy SEO operations system and respect the open-source product boundary.
 
 All contributions and repository communication must be in English. Contributors must agree to the lightweight CLA.
 
@@ -53,10 +53,10 @@ Never commit:
 The docs workspace is `apps/docs` and uses VitePress.
 
 ```bash
-pnpm --filter @golem-seo/docs dev
-pnpm --filter @golem-seo/docs test
-pnpm --filter @golem-seo/docs typecheck
-pnpm --filter @golem-seo/docs build
+pnpm --filter @agentseoapp/docs dev
+pnpm --filter @agentseoapp/docs test
+pnpm --filter @agentseoapp/docs typecheck
+pnpm --filter @agentseoapp/docs build
 ```
 
 Documentation changes should:
@@ -73,8 +73,8 @@ Documentation changes should:
 Maintainers decide release readiness, security response, contract acceptance, and product-boundary questions according to the governance policy. All participation is covered by the Code of Conduct.
 
 <p class="source-note">
-  Normative sources: <a href="https://github.com/GolemWorkers/golem-seo/blob/main/CONTRIBUTING.md">contribution guide</a>,
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/CLA.md">CLA</a>,
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/GOVERNANCE.md">governance</a>, and
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>.
+  Normative sources: <a href="https://github.com/GolemWorkers/agentseo/blob/main/CONTRIBUTING.md">contribution guide</a>,
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/CLA.md">CLA</a>,
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/GOVERNANCE.md">governance</a>, and
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>.
 </p>

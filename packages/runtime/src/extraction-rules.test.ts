@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ExtractionRule } from "@agentseoapp/contracts";
-import { ExtractionRulesError, GolemLocalRuntime } from "./index.js";
+import { ExtractionRulesError, AgentSeoLocalRuntime } from "./index.js";
 
 const rule = (
   id: string,
@@ -82,7 +82,7 @@ function engine(crawls: Array<Record<string, unknown>>) {
   };
 }
 
-async function waitForTerminal(runtime: GolemLocalRuntime, runId: string) {
+async function waitForTerminal(runtime: AgentSeoLocalRuntime, runId: string) {
   const deadline = Date.now() + 10_000;
   while (Date.now() < deadline) {
     const run = await runtime.runs.get(runId);
@@ -97,14 +97,14 @@ async function waitForTerminal(runtime: GolemLocalRuntime, runId: string) {
 }
 
 describe("versioned project extraction rules", () => {
-  const runtimes: GolemLocalRuntime[] = [];
+  const runtimes: AgentSeoLocalRuntime[] = [];
   afterEach(() => runtimes.splice(0).forEach((runtime) => runtime.close()));
 
   function setup() {
     const crawls: Array<Record<string, unknown>> = [];
     const stub = engine(crawls);
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-extraction-rules-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-extraction-rules-")),
       engine: stub,
     });
     runtimes.push(runtime);

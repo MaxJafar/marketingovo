@@ -1222,8 +1222,6 @@ export type paths = {
         header: {
           "idempotency-key": string;
           "x-agentseo-client"?: "dashboard";
-          /** @description Deprecated 1.x dashboard compatibility alias for x-agentseo-client. */
-          "x-golem-client"?: "dashboard";
         };
         path: {
           id: string;
@@ -1665,7 +1663,7 @@ export type paths = {
         };
       };
       responses: {
-        /** @description A portable Golem SEO project bundle. Credentials and secret references are never included. */
+        /** @description A portable AGENTseo project bundle. Credentials and secret references are never included. */
         200: {
           headers: {
             /** @description Attachment filename for the project bundle. */
@@ -1673,7 +1671,7 @@ export type paths = {
             [name: string]: unknown;
           };
           content: {
-            "application/vnd.golemseo.project+json": string;
+            "application/vnd.agentseo.project+json": string;
           };
         };
         /** @description The request is invalid. */
@@ -2177,7 +2175,7 @@ export type paths = {
               }[];
             }[];
             /** @enum {string} */
-            format: "golemseo-project";
+            format: "agentseo-project";
             integrity: {
               /** @enum {string} */
               algorithm: "sha256";
@@ -2354,7 +2352,7 @@ export type paths = {
             /** @enum {number} */
             version: 2;
           };
-          "application/vnd.golemseo.project+json": {
+          "application/vnd.agentseo.project+json": {
             actions: {
               affectedUrls: string[];
               confidence: number;
@@ -2460,7 +2458,7 @@ export type paths = {
               }[];
             }[];
             /** @enum {string} */
-            format: "golemseo-project";
+            format: "agentseo-project";
             integrity: {
               /** @enum {string} */
               algorithm: "sha256";
@@ -7455,8 +7453,6 @@ export type paths = {
         header: {
           "idempotency-key": string;
           "x-agentseo-client"?: "dashboard";
-          /** @description Deprecated 1.x dashboard compatibility alias for x-agentseo-client. */
-          "x-golem-client"?: "dashboard";
         };
         path?: never;
         cookie?: never;
@@ -9658,8 +9654,6 @@ export type paths = {
         header: {
           "idempotency-key": string;
           "x-agentseo-client"?: "dashboard";
-          /** @description Deprecated 1.x dashboard compatibility alias for x-agentseo-client. */
-          "x-golem-client"?: "dashboard";
         };
         path: {
           id: string;

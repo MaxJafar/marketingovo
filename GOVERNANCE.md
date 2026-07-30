@@ -1,6 +1,6 @@
 # Governance
 
-Golem SEO uses a product-owner model while the maintainer group is small.
+AGENTseo uses a product-owner model while the maintainer group is small.
 GolemWorkers is the steward of product direction, releases, trademarks, and the
 Community/Full boundary. Technical decisions remain visible and challengeable
 through Issues, Discussions, and RFCs.

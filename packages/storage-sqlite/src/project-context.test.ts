@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ProjectContextProfile } from "@agentseoapp/contracts";
-import { GolemDatabase } from "./database.js";
+import { AgentSeoDatabase } from "./database.js";
 
 const profile = (
   summary: string,
@@ -21,8 +21,8 @@ const profile = (
 
 describe("project context storage", () => {
   it("keeps profile revisions and journal entries immutable, ordered, scoped, and out of audit payloads", () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-project-context-"));
-    const database = new GolemDatabase({ path: join(root, "golem-seo.db") });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-project-context-"));
+    const database = new AgentSeoDatabase({ path: join(root, "agentseo.db") });
     const project = database.createProject({
       name: "Context fixture",
       canonicalUrl: "https://example.com",

@@ -1,6 +1,6 @@
 # Security policy
 
-Security is a release gate for Golem SEO, especially around crawled content,
+Security is a release gate for AGENTseo, especially around crawled content,
 localhost authorization, browser isolation, SSRF, credentials, and exports.
 
 ## Supported versions

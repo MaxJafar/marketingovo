@@ -28,16 +28,16 @@ const startupFragmentPath = resolve(
 );
 const startupFragment = await readFile(startupFragmentPath, "utf8");
 assert.equal(config.productName, "AGENTseo");
-assert.equal(config.identifier, "com.golemworkers.golem-seo");
+assert.equal(config.identifier, "com.golemworkers.agentseo");
 assert.equal(config.bundle.active, true);
 assert.equal(config.bundle.createUpdaterArtifacts, true);
 assert.equal(config.bundle.publisher, "GolemWorkers");
 assert.equal(config.bundle.homepage, "https://golemworkers.com/seo");
-assert.equal(config.bundle.license, "Elastic-2.0");
+assert.equal(config.bundle.license, "Apache-2.0");
 assert.equal(config.bundle.licenseFile, "../../../LICENSE");
-assert.deepEqual(config.bundle.externalBin, ["binaries/golem-seo-node"]);
+assert.deepEqual(config.bundle.externalBin, ["binaries/agentseo-node"]);
 assert.ok(
-  launcher.includes('.sidecar("golem-seo-node")'),
+  launcher.includes('.sidecar("agentseo-node")'),
   "desktop launcher must use the product-scoped Node sidecar name",
 );
 assert.ok(
@@ -45,7 +45,7 @@ assert.ok(
   "desktop launcher must never use a system-conflicting generic sidecar name",
 );
 assert.deepEqual(config.bundle.resources, ["runtime/**/*"]);
-assert.equal(config.plugins.updater.pubkey, "__GOLEM_SEO_UPDATER_PUBLIC_KEY__");
+assert.equal(config.plugins.updater.pubkey, "__AGENTSEO_UPDATER_PUBLIC_KEY__");
 assert.deepEqual(config.plugins.updater.endpoints, [
   CANONICAL_UPDATER_ENDPOINT,
 ]);
@@ -69,7 +69,7 @@ assert.ok(
   "desktop users must have an explicit update-check opt-out",
 );
 assert.ok(
-  launcher.includes('std::env::var("GOLEMSEO_AUTO_UPDATE")'),
+  launcher.includes('std::env::var("AGENTSEO_AUTO_UPDATE")'),
   "desktop services must expose a documented update-check policy override",
 );
 assert.match(startupShell, /id="startup-status"/u);
@@ -109,10 +109,10 @@ assert.deepEqual(config.bundle.windows.wix.fragmentPaths, [
   "./windows/fragments/background-startup.wxs",
 ]);
 assert.deepEqual(config.bundle.windows.wix.componentRefs, [
-  "GolemSeoBackgroundStartup",
+  "AgentSeoBackgroundStartup",
 ]);
 assert.match(startupFragment, /DirectoryRef Id="INSTALLDIR"/u);
-assert.match(startupFragment, /Component Id="GolemSeoBackgroundStartup"/u);
+assert.match(startupFragment, /Component Id="AgentSeoBackgroundStartup"/u);
 assert.match(startupFragment, /Action="createAndRemoveOnUninstall"/u);
 assert.match(startupFragment, /Value="&quot;\[#Path\]&quot; --background"/u);
 assert.doesNotMatch(
@@ -150,6 +150,11 @@ assert.throws(() =>
   validateGoogleDesktopClientId("not-a-google-client", { required: true }),
 );
 assert.doesNotThrow(() => rejectGoogleClientSecrets({}));
+assert.throws(() =>
+  rejectGoogleClientSecrets({
+    AGENTSEO_GOOGLE_DESKTOP_CLIENT_SECRET: "forbidden",
+  }),
+);
 assert.throws(() =>
   rejectGoogleClientSecrets({
     GOLEMSEO_GOOGLE_DESKTOP_CLIENT_SECRET: "forbidden",

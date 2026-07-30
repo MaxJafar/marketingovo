@@ -46,7 +46,7 @@ export function validatePublicReleaseAcceptance(
     !validPastTimestamp(legal?.approvedAt, now)
   ) {
     throw new Error(
-      "Stable release acceptance requires legal approval of ELv2, trademarks and CLA",
+      "Stable release acceptance requires legal approval of Apache-2.0, trademarks and CLA",
     );
   }
   if (

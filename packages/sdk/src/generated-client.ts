@@ -69,13 +69,3 @@ export async function createGeneratedAgentSeoClientFromTokenFile(
 }
 
 export type AgentSeoOpenApiPaths = paths;
-
-/** @deprecated Use {@link GeneratedAgentSeoClientOptions}. */
-export type GeneratedGolemSeoClientOptions = GeneratedAgentSeoClientOptions;
-/** @deprecated Use {@link createGeneratedAgentSeoClient}. */
-export const createGeneratedGolemSeoClient = createGeneratedAgentSeoClient;
-/** @deprecated Use {@link createGeneratedAgentSeoClientFromTokenFile}. */
-export const createGeneratedGolemSeoClientFromTokenFile =
-  createGeneratedAgentSeoClientFromTokenFile;
-/** @deprecated Use {@link AgentSeoOpenApiPaths}. */
-export type GolemSeoOpenApiPaths = AgentSeoOpenApiPaths;

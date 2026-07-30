@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Action, IssueInstance } from "@agentseoapp/contracts";
-import { GolemDatabase } from "./database.js";
+import { AgentSeoDatabase } from "./database.js";
 
 const observedAt = "2026-07-15T12:00:00.000Z";
 
@@ -25,8 +25,8 @@ function issue(fingerprint: string, canonicalUrl: string): IssueInstance {
 
 describe("project deletion storage", () => {
   it("deletes one complete project graph while preserving shared issue definitions and global credentials", () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-project-deletion-"));
-    const database = new GolemDatabase({ path: join(root, "golem-seo.db") });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-project-deletion-"));
+    const database = new AgentSeoDatabase({ path: join(root, "agentseo.db") });
     const first = database.createProject({
       name: "Delete me",
       canonicalUrl: "https://delete.example",

@@ -43,7 +43,7 @@ describe("OnboardingPage localStorage migration", () => {
     vi.restoreAllMocks();
   });
 
-  it("migrates legacy golem-seo onboarding preferences key and deletes it", async () => {
+  it("migrates the legacy golem-seo onboarding preferences key and deletes it", async () => {
     const legacyPrefs = {
       goal: "technical_health",
       crawlOnly: true,

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "agentseo": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@agentseoapp/mcp",
+        "agentseo-mcp"
+      ]
+    }
+  }
+}

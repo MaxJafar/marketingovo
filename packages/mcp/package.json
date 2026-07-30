@@ -2,7 +2,7 @@
   "name": "@agentseoapp/mcp",
   "version": "0.11.0-alpha.0",
   "description": "Bundled stdio MCP bridge for AGENTseo",
-  "license": "Elastic-2.0",
+  "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
@@ -14,8 +14,7 @@
     }
   },
   "bin": {
-    "agentseo-mcp": "./dist/stdio.js",
-    "golem-seo-mcp": "./dist/golem-seo-stdio.js"
+    "agentseo-mcp": "./dist/stdio.js"
   },
   "files": [
     "dist",

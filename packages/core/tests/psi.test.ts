@@ -106,7 +106,7 @@ const SAMPLE_PSI = {
 describe("psi client (parsePsiResponse + issuesFromReport)", () => {
   it("uses only the explicit vault key and keeps redirects disabled", async () => {
     let request: { url: URL; init: RequestInit } | undefined;
-    vi.stubEnv("GOLEMSEO_PSI_KEY", "legacy-env-key-must-not-be-used");
+    vi.stubEnv("AGENTSEO_PSI_KEY", "legacy-env-key-must-not-be-used");
     const report = await psiReport("https://example.com/landing?a=1", {
       strategy: "desktop",
       apiKey: "vault-psi-key",

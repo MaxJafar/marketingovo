@@ -39,7 +39,7 @@ const BASE_LIMITS: Limits = {
   requestTimeoutMs: 2000,
   maxBodyBytes: 1024 * 1024,
   maxRedirects: 1,
-  userAgent: "golem-seo-test",
+  userAgent: "agentseo-test",
   allowPrivate: true,
   ignoreRobots: true,
   renderMode: "static",
@@ -48,7 +48,7 @@ const BASE_LIMITS: Limits = {
 
 let tmp: string;
 beforeEach(() => {
-  tmp = mkdtempSync(join(tmpdir(), "golem-seo-audit-"));
+  tmp = mkdtempSync(join(tmpdir(), "agentseo-audit-"));
 });
 afterEach(() => {
   rmSync(tmp, { recursive: true, force: true });
@@ -614,10 +614,10 @@ describe("composer (T-033)", () => {
     const module: Module = {
       ...fakeModule({ id: "needs-key" as ModuleId }),
       requirements: [
-        { kind: "environment", keys: ["GOLEMSEO_TEST_REQUIRED_KEY"] },
+        { kind: "environment", keys: ["AGENTSEO_TEST_REQUIRED_KEY"] },
       ],
     };
-    delete process.env.GOLEMSEO_TEST_REQUIRED_KEY;
+    delete process.env.AGENTSEO_TEST_REQUIRED_KEY;
     const result = await runComposer({
       startUrl: "https://x/",
       registry: [module],

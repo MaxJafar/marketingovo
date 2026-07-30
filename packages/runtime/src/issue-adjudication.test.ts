@@ -3,12 +3,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Action, IssueInstance } from "@agentseoapp/contracts";
-import { GolemLocalRuntime } from "./index.js";
+import { AgentSeoLocalRuntime } from "./index.js";
 
 describe("issue adjudication runtime boundary", () => {
   it("requires an evidence-based note and rejects secret-like material", async () => {
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-runtime-issue-review-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-issue-review-")),
     });
     try {
       const project = await runtime.projects.create({
@@ -72,8 +72,8 @@ describe("issue adjudication runtime boundary", () => {
   });
 
   it("re-scores the remaining action scope and suppresses only a fully reviewed group", async () => {
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-runtime-action-scope-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-runtime-action-scope-")),
     });
     try {
       const project = await runtime.projects.create({

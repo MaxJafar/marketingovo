@@ -5,7 +5,7 @@ import { validateUpgradeLifecycleEvidence } from "./upgrade-baseline-policy.mjs"
 
 export const RELEASE_VERIFICATION_SCHEMA_VERSION = 2;
 
-export const CANONICAL_RELEASE_REPOSITORY = "GolemWorkers/golem-seo";
+export const CANONICAL_RELEASE_REPOSITORY = "GolemWorkers/agentseo";
 
 export function releasePlatform(target) {
   if (/apple-darwin$/u.test(target)) return "macos";

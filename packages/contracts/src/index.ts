@@ -1698,9 +1698,3 @@ export interface AgentSeoRuntime {
   reports: ReportService;
   system: SystemService;
 }
-
-/**
- * @deprecated Use {@link AgentSeoRuntime}. This migration alias remains part of
- * the 1.x compatibility boundary and can be removed only with a major release.
- */
-export type GolemSeoRuntime = AgentSeoRuntime;

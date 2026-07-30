@@ -1,6 +1,6 @@
 # Desktop runtime and release configuration
 
-Golem SEO native installers are assembled on the same operating system and
+AGENTseo native installers are assembled on the same operating system and
 architecture they target. Each installer contains four versioned runtime
 parts:
 
@@ -15,7 +15,7 @@ so neither workflow depends on a system Chrome installation or a per-user
 browser cache. The browser smoke test launches that exact executable with the
 Chromium sandbox enabled before an installer is built.
 
-Every native bundle also carries the Elastic License 2.0 plus the project
+Every native bundle also carries the Apache License 2.0 plus the project
 NOTICE, privacy policy, and trademark policy under its packaged legal
 resources. Platform signing and notarization attest the executable; they do not
 replace these license notices.
@@ -30,13 +30,13 @@ Google OAuth client secret.
 Configure the public client ID at build time:
 
 ```bash
-export GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID=YOUR_PUBLIC_ID.apps.googleusercontent.com
+export AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID=YOUR_PUBLIC_ID.apps.googleusercontent.com
 node scripts/prepare-desktop-runtime.mjs \
   --target TARGET_TRIPLE \
   --require-google-client-id
 ```
 
-The signed release workflow reads `GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID` from a
+The signed release workflow reads `AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID` from a
 GitHub Actions repository variable. Runtime assembly rejects malformed IDs,
 fails when the required value is absent, and rejects client-secret environment
 variables. Only the validated public ID is written to
@@ -81,7 +81,7 @@ node scripts/verify-desktop-runtime.mjs \
 The check proves target and Node-version consistency, validates the public
 configuration, finds the deployed Playwright package, launches packaged
 Chromium, and exercises a smoke page without disabling the sandbox.
-The Node sidecar is installed as `golem-seo-node`, never the generic `node`
+The Node sidecar is installed as `agentseo-node`, never the generic `node`
 name, so a Linux package cannot collide with or replace the operating system's
 Node executable.
 
@@ -89,7 +89,7 @@ Release bundles enable Tauri v2 updater artifacts. The release signing key
 therefore produces a detached `.sig` beside the supported updater payloads;
 the desktop updater reads metadata only over HTTPS and validates the selected
 payload with the embedded public key. The installed application reads a static
-`https://github.com/GolemWorkers/golem-seo/releases/latest/download/latest.json`
+`https://github.com/GolemWorkers/agentseo/releases/latest/download/latest.json`
 channel. GitHub's `latest` release resolves only the stable channel: alpha and
 release-candidate builds remain manual design-partner upgrades until a stable
 release exists, while an installed prerelease can move to that verified stable
@@ -100,7 +100,7 @@ payload, installs it, and restarts. Failure falls back to the already installed
 version. Login startup follows the same pre-daemon path, while Tauri's
 [single-instance boundary](https://v2.tauri.app/plugin/single-instance/) turns later desktop launches into dashboard
 activations instead of concurrent update/runtime owners. Debug builds do not
-make update requests; `--no-update` and `GOLEMSEO_AUTO_UPDATE=off` provide an
+make update requests; `--no-update` and `AGENTSEO_AUTO_UPDATE=off` provide an
 explicit opt-out. Before any bundle is uploaded, the release gate follows the
 [Tauri updater lifecycle](https://v2.tauri.app/plugin/updater/) and:
 
@@ -139,8 +139,8 @@ The CLI installs a launchd agent on macOS, a systemd user unit on Linux, or a
 least-privilege per-user Task Scheduler login task on Windows:
 
 ```bash
-golem-seo service install \
-  --credential-broker /absolute/path/to/golem-seo-credential-broker
+agentseo service install \
+  --credential-broker /absolute/path/to/agentseo-credential-broker
 ```
 
 The broker must resolve to an executable regular file. Its validated canonical
@@ -167,8 +167,8 @@ AppImage. Every platform creates a real local project before an upgrade and
 requires the same project ID afterward. User data must survive uninstall while
 the service definition, package, executable and owned processes must not.
 
-Set the repository variable `GOLEMSEO_UPGRADE_BASELINE_TAG` to an older,
-published Golem SEO tag such as `v1.0.0-rc.1`. The workflow downloads that
+Set the repository variable `AGENTSEO_UPGRADE_BASELINE_TAG` to an older,
+published AGENTseo tag such as `v1.0.0-rc.1`. The workflow downloads that
 release's target verification record and target-prefixed installer, checks its
 recorded hash, and cryptographically verifies the detached release-key signature
 on Windows and Linux. macOS validates the older installed app against the same
@@ -182,7 +182,7 @@ single-instance execution, restart-on-failure, and an Exec action without a
 command interpreter. It follows Microsoft's documented
 [Task Scheduler XML logon-trigger model](https://learn.microsoft.com/en-us/windows/win32/taskschd/logon-trigger-example--xml-).
 
-Use `golem-seo service status` to inspect the CLI-managed platform service and
-`golem-seo service uninstall` to stop and remove it. Signed lifecycle evidence
+Use `agentseo service status` to inspect the CLI-managed platform service and
+`agentseo service uninstall` to stop and remove it. Signed lifecycle evidence
 from every canonical target remains mandatory for 1.0 even though its
 fail-closed source policy and local contract tests pass.

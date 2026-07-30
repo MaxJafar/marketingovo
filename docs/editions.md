@@ -31,7 +31,7 @@ The card must not interrupt an audit or conceal Community functionality.
 
 ## Portable projects
 
-Community can export a versioned `.golemseo` bundle with project configuration,
+Community can export a versioned `.agentseo` bundle with project configuration,
 Project Context revisions, marketer journal history, issue fingerprints, review
 decisions and reasons, actions, metrics, and artifact metadata. Secret values
 are never included. Import into Golem Workers requires authentication and

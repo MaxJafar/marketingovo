@@ -62,8 +62,8 @@ import {
   type Run,
 } from "@agentseoapp/contracts";
 import {
-  GOLEMSEO_PROJECT_BUNDLE_LIMITS,
-  GolemSeoProjectBundleV2Schema,
+  AGENTSEO_PROJECT_BUNDLE_LIMITS,
+  AgentSeoProjectBundleV2Schema,
   ProjectImportResultSchema,
 } from "@agentseoapp/contracts/project-bundle";
 import { getConnectorManifest } from "@agentseoapp/integrations";
@@ -151,43 +151,31 @@ interface BootstrapTicket {
 }
 
 const AGENTSEO_SESSION_COOKIE = "agentseo_session";
-const LEGACY_SESSION_COOKIE = "golem_session";
 const AGENTSEO_CLIENT_HEADER = "x-agentseo-client";
-const LEGACY_CLIENT_HEADER = "x-golem-client";
 const AGENTSEO_CSRF_HEADER = "x-agentseo-csrf";
-const LEGACY_CSRF_HEADER = "x-golem-csrf";
 
-// This is the local API's deliberate 1.x compatibility boundary. Canonical
-// identifiers always win when both forms are supplied, so a stale legacy value
-// cannot override a canonical session, client identity, or CSRF token. The
-// aliases may be removed only with a major release and a migrated dashboard.
-function preferredHeader(
+// Exactly one accepted name per credential. The rebrand deliberately did not
+// carry a second accepted session cookie or CSRF header forward: the session is
+// same-origin and short lived, so a rename costs one re-login, while a second
+// accepted auth name is a permanent widening of the authenticated surface.
+function headerValue(
   request: FastifyRequest,
-  canonicalName: string,
-  legacyName: string,
+  name: string,
 ): string | undefined {
-  const canonical = request.headers[canonicalName];
-  const selected =
-    canonical !== undefined ? canonical : request.headers[legacyName];
-  return typeof selected === "string" ? selected : undefined;
+  const value = request.headers[name];
+  return typeof value === "string" ? value : undefined;
 }
 
 function requestSessionId(request: FastifyRequest): string | undefined {
-  const canonical = request.cookies[AGENTSEO_SESSION_COOKIE];
-  return canonical !== undefined
-    ? canonical
-    : request.cookies[LEGACY_SESSION_COOKIE];
+  return request.cookies[AGENTSEO_SESSION_COOKIE];
 }
 
 function requestCsrfToken(request: FastifyRequest): string | undefined {
-  return preferredHeader(request, AGENTSEO_CSRF_HEADER, LEGACY_CSRF_HEADER);
+  return headerValue(request, AGENTSEO_CSRF_HEADER);
 }
 
 function isDashboardRequest(request: FastifyRequest): boolean {
-  return (
-    preferredHeader(request, AGENTSEO_CLIENT_HEADER, LEGACY_CLIENT_HEADER) ===
-    "dashboard"
-  );
+  return headerValue(request, AGENTSEO_CLIENT_HEADER) === "dashboard";
 }
 
 function setSessionCookies(reply: FastifyReply, sessionId: string): void {
@@ -199,20 +187,10 @@ function setSessionCookies(reply: FastifyReply, sessionId: string): void {
     maxAge: 12 * 60 * 60,
   };
   reply.setCookie(AGENTSEO_SESSION_COOKIE, sessionId, options);
-  // The un-migrated dashboard still reads this alias. Emit the same opaque
-  // value and attributes through 1.x; never create a separate legacy session.
-  reply.setCookie(LEGACY_SESSION_COOKIE, sessionId, options);
 }
 
 const DashboardClientHeaderSchemaProperties = {
   [AGENTSEO_CLIENT_HEADER]: Type.Optional(Type.Literal("dashboard")),
-  [LEGACY_CLIENT_HEADER]: Type.Optional(
-    Type.Literal("dashboard", {
-      deprecated: true,
-      description:
-        "Deprecated 1.x dashboard compatibility alias for x-agentseo-client.",
-    }),
-  ),
 };
 
 const terminalStatuses = new Set([
@@ -1060,7 +1038,7 @@ export async function createLocalServer(
     trustProxy: false,
   });
   app.addContentTypeParser(
-    "application/vnd.golemseo.project+json",
+    "application/vnd.agentseo.project+json",
     { parseAs: "string" },
     (_request, body, done) => {
       try {
@@ -1128,20 +1106,9 @@ export async function createLocalServer(
             in: "cookie",
             name: AGENTSEO_SESSION_COOKIE,
           },
-          legacyLocalSession: {
-            type: "apiKey",
-            in: "cookie",
-            name: LEGACY_SESSION_COOKIE,
-            description:
-              "Deprecated 1.x compatibility alias for agentseo_session.",
-          },
         },
       },
-      security: [
-        { localServiceToken: [] },
-        { localSession: [] },
-        { legacyLocalSession: [] },
-      ],
+      security: [{ localServiceToken: [] }, { localSession: [] }],
     },
   });
 
@@ -3383,7 +3350,7 @@ export async function createLocalServer(
         response: {
           200: {
             description:
-              "A portable Golem SEO project bundle. Credentials and secret references are never included.",
+              "A portable AGENTseo project bundle. Credentials and secret references are never included.",
             headers: {
               "content-disposition": {
                 description: "Attachment filename for the project bundle.",
@@ -3391,7 +3358,7 @@ export async function createLocalServer(
               },
             },
             content: {
-              "application/vnd.golemseo.project+json": {
+              "application/vnd.agentseo.project+json": {
                 schema: Type.String({ contentEncoding: "binary" }),
               },
             },
@@ -3412,10 +3379,10 @@ export async function createLocalServer(
         });
       const bytes = await options.runtime.exportProject(projectId);
       return reply
-        .type("application/vnd.golemseo.project+json")
+        .type("application/vnd.agentseo.project+json")
         .header(
           "content-disposition",
-          `attachment; filename=\"${projectId}.golemseo\"`,
+          `attachment; filename=\"${projectId}.agentseo\"`,
         )
         .send(Buffer.from(bytes));
     },
@@ -3423,15 +3390,15 @@ export async function createLocalServer(
   app.post(
     "/api/v1/import",
     {
-      bodyLimit: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxBytes,
+      bodyLimit: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxBytes,
       // Keep the exact parsed object for the signed canonical checksum. The
       // runtime performs the same TypeBox validation plus semantic, secret,
       // relationship and checksum checks without AJV coercion/removal.
       validatorCompiler: () => () => true,
       schema: {
-        consumes: ["application/vnd.golemseo.project+json", "application/json"],
+        consumes: ["application/vnd.agentseo.project+json", "application/json"],
         produces: ["application/json"],
-        body: GolemSeoProjectBundleV2Schema,
+        body: AgentSeoProjectBundleV2Schema,
         response: {
           201: ProjectImportResultSchema,
           ...StandardProblemResponses,
@@ -3448,6 +3415,9 @@ export async function createLocalServer(
         .toLowerCase();
       if (
         mediaType !== "application/json" &&
+        mediaType !== "application/vnd.agentseo.project+json" &&
+        // Accepted for compatibility with bundles exported under the previous
+        // product name. Exports always emit the canonical type above.
         mediaType !== "application/vnd.golemseo.project+json"
       ) {
         return reply.code(415).type("application/problem+json").send({
@@ -3455,7 +3425,7 @@ export async function createLocalServer(
           title: "Unsupported project bundle media type",
           status: 415,
           detail:
-            "Use application/vnd.golemseo.project+json or application/json.",
+            "Use application/vnd.agentseo.project+json or application/json.",
           code: "unsupported_bundle_media_type",
         });
       }

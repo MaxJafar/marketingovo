@@ -457,16 +457,6 @@ importers:
         specifier: ^0.25.9
         version: 0.25.12
 
-  plugins/codex/golem-seo:
-    dependencies:
-      '@agentseoapp/mcp':
-        specifier: workspace:*
-        version: link:../../../packages/mcp
-    devDependencies:
-      esbuild:
-        specifier: ^0.25.9
-        version: 0.25.12
-
 packages:
 
   '@adobe/css-tools@4.5.0':

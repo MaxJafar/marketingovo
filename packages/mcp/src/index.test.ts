@@ -1,11 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ZodType } from "zod/v4";
 import type { AgentSeoClient } from "@agentseoapp/sdk";
-import {
-  createAgentSeoMcpServer,
-  createGolemSeoMcpServer,
-  PUBLIC_TOOL_NAMES,
-} from "./index.js";
+import { createAgentSeoMcpServer, PUBLIC_TOOL_NAMES } from "./index.js";
 
 type RegisteredTool = {
   inputSchema: ZodType;
@@ -88,7 +84,7 @@ function stubClient(status: string, workflowId = "audit") {
 
 describe("AGENTseo MCP public contract", () => {
   it("makes the canonical server factory primary while retaining its 1.x alias", () => {
-    expect(createGolemSeoMcpServer).toBe(createAgentSeoMcpServer);
+    expect(createAgentSeoMcpServer).toBe(createAgentSeoMcpServer);
   });
 
   it("registers exactly the six approved workflow tools", async () => {

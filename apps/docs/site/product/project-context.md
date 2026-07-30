@@ -57,19 +57,19 @@ POST /api/v1/projects/:id/context/journal
 
 The typed SDK exposes `client.context.get`, `client.context.update`, and
 `client.context.append`. MCP exposes the read-only
-`golem-seo://projects/{id}/context` resource. Project Context does not create an
+`agentseo://projects/{id}/context` resource. Project Context does not create an
 additional public workflow tool, and official agents cannot silently rewrite
 the operator's memory.
 
 ## Safety and transfer
 
 The runtime rejects secret-like text and local filesystem paths. Audit events
-store structural metadata, not profile or journal content. A `.golemseo` export
+store structural metadata, not profile or journal content. A `.agentseo` export
 includes the complete version and journal history, remaps linked run and entry
 identifiers on import, and never carries provider credentials.
 
 <p class="source-note">
-  Canonical sources: <a href="https://github.com/GolemWorkers/golem-seo/blob/main/docs/project-context.md">Project Context contract</a>,
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/packages/contracts/src/index.ts">public schemas</a>, and
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/packages/runtime/src/index.ts">runtime boundary</a>.
+  Canonical sources: <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/project-context.md">Project Context contract</a>,
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/contracts/src/index.ts">public schemas</a>, and
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/runtime/src/index.ts">runtime boundary</a>.
 </p>

@@ -1,17 +1,17 @@
-# Golem SEO
+# AGENTseo
 
 <p align="center">
-  <img src="assets/brand/golem-seo-icon.png" width="132" height="132" alt="Golem SEO product mark">
+  <img src="assets/brand/agentseo-icon.png" width="132" height="132" alt="AGENTseo product mark">
 </p>
 
 **A local-first SEO operations system that turns crawl, Search Console, GA4,
 performance, and SERP data into verified actions.**
 
-[![License: ELv2](https://img.shields.io/badge/license-Elastic%202.0-5b63ff)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-5b63ff)](LICENSE)
 [![Community Edition](https://img.shields.io/badge/edition-Community-20b486)](docs/editions.md)
 [![Telemetry](https://img.shields.io/badge/telemetry-off%20by%20default-242b36)](PRIVACY.md)
 
-Golem SEO Community Edition runs on your machine, requires no account, and
+AGENTseo Community Edition runs on your machine, requires no account, and
 keeps projects and credentials under your control. It does more than produce an
 issue dump: it connects technical evidence to organic exposure, conversion
 exposure, reach, confidence, and effort so a marketer can decide what to fix
@@ -20,7 +20,7 @@ first and verify the result after the next audit.
 > Status: active `0.11` alpha development. The engine is usable; the local
 > platform and native packaging are being hardened toward the 1.0 quality gates.
 
-## Why Golem SEO
+## Why AGENTseo
 
 - **Actions, not noise.** Every prioritized action explains impact, effort,
   confidence, affected URLs, evidence, and verification state.
@@ -69,7 +69,7 @@ Requirements: Node.js 24 LTS and Corepack.
 corepack enable
 pnpm install
 pnpm build
-pnpm golem-seo serve
+pnpm agentseo serve
 ```
 
 Open the exact `Dashboard:` URL printed by the command. It includes a short-lived,
@@ -88,7 +88,7 @@ Verified tagged releases also provide an npm route that does not require
 cloning the repository:
 
 ```bash
-npx @golem-seo/cli serve
+npx @agentseoapp/cli serve
 ```
 
 The current source version is not evidence that the same version has already
@@ -101,13 +101,13 @@ production sites.
 
 ## Community and GolemWorkers
 
-Community Edition is a strong single-user, local-first product. Golem SEO on
+Community Edition is a strong single-user, local-first product. AGENTseo on
 Golem Workers adds hosted infrastructure and collaboration: always-on workers,
 teams and RBAC, managed credentials and provider credits, portfolio views,
 hosted reports, integrations, AI-assisted approval workflows, retention, and
 support. Analysis is not intentionally crippled locally.
 
-Projects can be exported as `.golemseo` bundles. Secrets are never exported and
+Projects can be exported as `.agentseo` bundles. Secrets are never exported and
 must be reconnected after import. Issue fingerprints, review decisions, and
 bounded review reasons are preserved together with Project Context revisions
 and the append-only marketer journal. See the full
@@ -183,15 +183,19 @@ shown as unavailable; they are never silently converted to zero.
 
 ## Honest scope
 
-Golem SEO is not marketed as a complete Ahrefs, Semrush, or Screaming Frog
+AGENTseo is not marketed as a complete Ahrefs, Semrush, or Screaming Frog
 replacement. Those products have mature proprietary datasets and workflows.
 Our claim is narrower and testable: local-first evidence from several sources
 becomes a transparent action queue that can be re-audited and verified.
 
 ## License and marks
 
-The Community Edition is **source-available**, not OSI-approved open source. It
-is licensed under the [Elastic License 2.0](LICENSE), including its restriction
-on offering a competing hosted or managed service. The Golem SEO and
-GolemWorkers names and marks are governed separately by [TRADEMARKS.md](TRADEMARKS.md).
+AGENTseo is **open source** under the [Apache License 2.0](LICENSE), an
+OSI-approved license that grants patent rights and permits commercial use,
+modification, and redistribution. See
+[ADR 0001](docs/adr/0001-apache-2-0-relicense.md) for why the project moved off
+the Elastic License.
+
+The license does not grant rights to the AGENTseo and GolemWorkers names and
+marks, which are governed separately by [TRADEMARKS.md](TRADEMARKS.md).
 Contributions require the lightweight [CLA](CLA.md).

@@ -1,3 +1,3 @@
 fn main() {
-    golem_seo_desktop_lib::run();
+    agentseo_desktop_lib::run();
 }

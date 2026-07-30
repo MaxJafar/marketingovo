@@ -7,7 +7,7 @@ is neither required nor enabled.
 ```bash
 corepack enable
 pnpm install
-pnpm --filter @agentseo/dashboard dev
+pnpm --filter @agentseoapp/dashboard dev
 ```
 
 The Vite server listens on `127.0.0.1:4318` and proxies `/api` to the local

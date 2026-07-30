@@ -2,12 +2,15 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { GolemDatabase } from "./database.js";
+import { AgentSeoDatabase } from "./database.js";
 
 describe("immutable internal-link graph", () => {
   it("normalizes aliases and serves bounded inlink and outlink evidence", () => {
-    const database = new GolemDatabase({
-      path: join(mkdtempSync(join(tmpdir(), "golem-link-db-")), "golem.db"),
+    const database = new AgentSeoDatabase({
+      path: join(
+        mkdtempSync(join(tmpdir(), "agentseo-link-db-")),
+        "agentseo.db",
+      ),
     });
     try {
       const project = database.createProject({

@@ -9,25 +9,25 @@ Use this template for an attributable design-partner or customer story. Replace 
 - Approval owner: `[name and date]`
 - Measurement window: `[start date]` to `[end date]`
 - Comparison window: `[start date]` to `[end date]`
-- Golem SEO version: `[version]`
+- AGENTseo version: `[version]`
 - Evidence owner: `[person responsible for source verification]`
 - Confidentiality notes: `[queries, URLs, revenue, or provider data that must remain private]`
 
 ## Headline
 
-`How [team] used Golem SEO to [verified workflow outcome] across [scope]`
+`How [team] used AGENTseo to [verified workflow outcome] across [scope]`
 
 Prefer workflow outcomes such as “cut weekly triage time,” “assign the top five technical actions,” or “verify a canonical cleanup.” Do not use a traffic or revenue headline unless attribution and comparison controls support it.
 
 ## Executive summary
 
-`[Organization] manages [site or portfolio context]. The team used Golem SEO [Community Edition / GolemWorkers Full] to combine [available sources], prioritize [issue class], assign [number] actions, and verify [number] changes over [time window].`
+`[Organization] manages [site or portfolio context]. The team used AGENTseo [Community Edition / GolemWorkers Full] to combine [available sources], prioritize [issue class], assign [number] actions, and verify [number] changes over [time window].`
 
 **Measured result:** `[one primary result with unit, baseline, end value, and source]`
 
 **Why it matters:** `[one sentence in the participant’s language]`
 
-## Before Golem SEO
+## Before AGENTseo
 
 Describe the workflow, not a caricature of another tool.
 
@@ -71,7 +71,7 @@ Examples of guardrails:
 1. **Baseline audit:** `[date, run ID, scope, terminal state]`
 2. **Triage:** `[how Top 5 Actions were reviewed and challenged]`
 3. **Assignment:** `[owner, due date, acceptance condition]`
-4. **Change:** `[what was changed outside Golem SEO]`
+4. **Change:** `[what was changed outside AGENTseo]`
 5. **Verification audit:** `[date, run ID, comparable scope]`
 6. **Decision:** `[verified, still present, regressed, or inconclusive]`
 
@@ -127,7 +127,7 @@ Explain how these constraints changed confidence or the final decision.
 
 ## Edition context
 
-If Community Edition was used, state that it is local-first and source-available under Elastic License 2.0.
+If the local edition was used, state that it is local-first and open source under the Apache License 2.0.
 
 If GolemWorkers Full was used, describe only the managed services actually used, such as always-on monitoring, shared portfolios, RBAC, managed integrations, or hosted reports. Full is a separate proprietary service.
 
@@ -136,10 +136,10 @@ If GolemWorkers Full was used, describe only the managed services actually used,
 Community CTA:
 
 ```bash
-npx @golem-seo/cli serve
+npx @agentseoapp/cli serve
 ```
 
-Source and quickstart: https://github.com/GolemWorkers/golem-seo
+Source and quickstart: https://github.com/GolemWorkers/agentseo
 
 Managed team workflow: https://golemworkers.com/seo
 

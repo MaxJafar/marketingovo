@@ -84,8 +84,8 @@ await copyFile(
   resolve(output, lifecycleName),
 );
 await copyFile(
-  resolve(root, "artifacts/golem-seo.cdx.json"),
-  resolve(output, `golem-seo-${target}.cdx.json`),
+  resolve(root, "artifacts/agentseo.cdx.json"),
+  resolve(output, `agentseo-${target}.cdx.json`),
 );
 await copyFile(
   resolve(root, "LICENSE"),

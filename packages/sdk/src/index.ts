@@ -41,7 +41,7 @@ import type {
   UpdateProjectContextInput,
 } from "@agentseoapp/contracts";
 import type {
-  GolemSeoProjectBundleV2,
+  AgentSeoProjectBundleV2,
   ProjectImportResult,
 } from "@agentseoapp/contracts/project-bundle";
 import {
@@ -55,14 +55,6 @@ export {
   createGeneratedAgentSeoClientFromTokenFile,
   type GeneratedAgentSeoClientOptions,
   type AgentSeoOpenApiPaths,
-  /** @deprecated Use createGeneratedAgentSeoClient. */
-  createGeneratedGolemSeoClient,
-  /** @deprecated Use createGeneratedAgentSeoClientFromTokenFile. */
-  createGeneratedGolemSeoClientFromTokenFile,
-  /** @deprecated Use GeneratedAgentSeoClientOptions. */
-  type GeneratedGolemSeoClientOptions,
-  /** @deprecated Use AgentSeoOpenApiPaths. */
-  type GolemSeoOpenApiPaths,
 } from "./generated-client.js";
 
 export class AgentSeoApiError extends Error {
@@ -478,11 +470,11 @@ export class AgentSeoClient {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ projectId }),
     });
-  importProject = (bundle: Uint8Array | string | GolemSeoProjectBundleV2) =>
+  importProject = (bundle: Uint8Array | string | AgentSeoProjectBundleV2) =>
     this.request<ProjectImportResult>("/import", {
       method: "POST",
       headers: {
-        "content-type": "application/vnd.golemseo.project+json",
+        "content-type": "application/vnd.agentseo.project+json",
       },
       body:
         bundle instanceof Uint8Array
@@ -536,10 +528,3 @@ export class AgentSeoClient {
     }
   }
 }
-
-/** @deprecated Use {@link AgentSeoApiError}. */
-export { AgentSeoApiError as GolemSeoApiError };
-/** @deprecated Use {@link AgentSeoClientOptions}. */
-export type GolemSeoClientOptions = AgentSeoClientOptions;
-/** @deprecated Use {@link AgentSeoClient}. */
-export { AgentSeoClient as GolemSeoClient };

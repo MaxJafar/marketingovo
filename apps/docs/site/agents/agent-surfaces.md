@@ -9,28 +9,28 @@ All official agent surfaces connect to the existing local daemon. They do not st
 
 ## Six public tools
 
-| Tool                               | Mode                   | Purpose                                                              |
-| ---------------------------------- | ---------------------- | -------------------------------------------------------------------- |
-| `golem_seo_audit_start`            | Starts network work    | Audit an existing project with bounded static or JavaScript settings |
-| `golem_seo_run_get`                | Read-only, replay-safe | Read run state and canonical issues                                  |
-| `golem_seo_compare_start`          | Starts network work    | Compare a project with one to five public competitor URLs            |
-| `golem_seo_keyword_research_start` | Starts provider work   | Expand a seed, classify intent, and evaluate momentum                |
-| `golem_seo_content_plan_start`     | Starts provider work   | Build profiles and clusters for up to ten seed topics                |
-| `golem_seo_monitoring_status`      | Read-only, replay-safe | Read health, schedules, and recent runs                              |
+| Tool                              | Mode                   | Purpose                                                              |
+| --------------------------------- | ---------------------- | -------------------------------------------------------------------- |
+| `agentseo_audit_start`            | Starts network work    | Audit an existing project with bounded static or JavaScript settings |
+| `agentseo_run_get`                | Read-only, replay-safe | Read run state and canonical issues                                  |
+| `agentseo_compare_start`          | Starts network work    | Compare a project with one to five public competitor URLs            |
+| `agentseo_keyword_research_start` | Starts provider work   | Expand a seed, classify intent, and evaluate momentum                |
+| `agentseo_content_plan_start`     | Starts provider work   | Build profiles and clusters for up to ten seed topics                |
+| `agentseo_monitoring_status`      | Read-only, replay-safe | Read health, schedules, and recent runs                              |
 
-Start tools return a run ID. The agent must call `golem_seo_run_get` until the run is terminal before describing the work as complete.
+Start tools return a run ID. The agent must call `agentseo_run_get` until the run is terminal before describing the work as complete.
 
 The start tools are marked optional in the OpenClaw adapter so an operator can allowlist network-initiating behavior. Read-only inspection remains separate.
 
-Names, descriptions, strict input objects, defaults, limits, and safety annotations live in one `@golem-seo/contracts` registry. MCP converts that JSON Schema to Zod for runtime validation; OpenClaw projects the same schema into its TypeBox dialect. Neither adapter maintains a second field definition.
+Names, descriptions, strict input objects, defaults, limits, and safety annotations live in one `@agentseoapp/contracts` registry. MCP converts that JSON Schema to Zod for runtime validation; OpenClaw projects the same schema into its TypeBox dialect. Neither adapter maintains a second field definition.
 
 ## MCP bridge
 
-The bundled stdio MCP server reads the service token from the platform-specific Golem SEO data directory by default. Override only when the local daemon uses a custom location:
+The bundled stdio MCP server reads the service token from the platform-specific AGENTseo data directory by default. Override only when the local daemon uses a custom location:
 
 ```text
-GOLEM_SEO_API_URL=http://127.0.0.1:3210/api/v1
-GOLEM_SEO_SERVICE_TOKEN_FILE=/private/path/to/service-token
+AGENTSEO_API_URL=http://127.0.0.1:3210/api/v1
+AGENTSEO_SERVICE_TOKEN_FILE=/private/path/to/service-token
 ```
 
 For a source checkout that has already been built, an MCP client can launch the workspace binary:
@@ -38,36 +38,36 @@ For a source checkout that has already been built, an MCP client can launch the 
 ```json
 {
   "mcpServers": {
-    "golem-seo": {
+    "agentseo": {
       "command": "pnpm",
       "args": [
         "--dir",
-        "/absolute/path/to/golem-seo",
+        "/absolute/path/to/agentseo",
         "--filter",
-        "@golem-seo/mcp",
+        "@agentseoapp/mcp",
         "exec",
-        "golem-seo-mcp"
+        "agentseo-mcp"
       ]
     }
   }
 }
 ```
 
-The package binary is named `golem-seo-mcp`. Confirm the current release channel before assuming a registry package is published.
+The package binary is named `agentseo-mcp`. Confirm the current release channel before assuming a registry package is published.
 
 ### Read-only MCP resources
 
-- `golem-seo://runs/{id}` — canonical run plus issues;
-- `golem-seo://runs/{id}/report` — run summary with top issues;
-- `golem-seo://projects/{id}/overview` — project metrics and prioritized actions;
-- `golem-seo://projects/{id}/issues` — latest evidence, occurrence counts, and
+- `agentseo://runs/{id}` — canonical run plus issues;
+- `agentseo://runs/{id}/report` — run summary with top issues;
+- `agentseo://projects/{id}/overview` — project metrics and prioritized actions;
+- `agentseo://projects/{id}/issues` — latest evidence, occurrence counts, and
   marketer adjudications;
-- `golem-seo://projects/{id}/context` — versioned business/SEO profile and the
+- `agentseo://projects/{id}/context` — versioned business/SEO profile and the
   append-only marketer journal.
 
 ## Codex bundle
 
-The repository includes an installable Codex bundle at `plugins/codex/golem-seo`. It contains:
+The repository includes an installable Codex bundle at `plugins/codex/agentseo`. It contains:
 
 - the bundled MCP bridge;
 - an MCP server manifest;
@@ -79,13 +79,13 @@ The skill routes questions into audit, comparison, keyword, content-plan, run-in
 Use the Codex plugin installation flow for a local plugin directory in the Codex version you run. Build and validate the bundle from the workspace before installing it:
 
 ```bash
-pnpm --filter @golem-seo/codex-plugin build
-pnpm --filter @golem-seo/codex-plugin test
+pnpm --filter @agentseoapp/codex-plugin build
+pnpm --filter @agentseoapp/codex-plugin test
 ```
 
 ## OpenClaw adapter
 
-The official adapter is `@golem-seo/openclaw` and currently declares compatibility with OpenClaw `2026.5.17` or newer.
+The official adapter is `@agentseoapp/openclaw` and currently declares compatibility with OpenClaw `2026.5.17` or newer.
 
 Its configuration contains only:
 
@@ -102,8 +102,8 @@ Its configuration contains only:
 Install through the OpenClaw plugin workflow supported by your runtime version, then validate the repository adapter:
 
 ```bash
-pnpm --filter @golem-seo/openclaw build
-pnpm --filter @golem-seo/openclaw test
+pnpm --filter @agentseoapp/openclaw build
+pnpm --filter @agentseoapp/openclaw test
 ```
 
 ## Safe operating pattern
@@ -127,8 +127,8 @@ pnpm --filter @golem-seo/openclaw test
 - a queued or running job described as completed.
 
 <p class="source-note">
-  Canonical sources: <a href="https://github.com/GolemWorkers/golem-seo/blob/main/packages/contracts/src/agent-tools.ts">agent tool contracts</a>,
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/packages/mcp/src/index.ts">MCP implementation</a>,
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/plugins/codex/golem-seo/skills/seo-marketer/SKILL.md">Codex marketer skill</a>, and
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/adapters/openclaw/README.md">OpenClaw adapter boundary</a>.
+  Canonical sources: <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/contracts/src/agent-tools.ts">agent tool contracts</a>,
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/packages/mcp/src/index.ts">MCP implementation</a>,
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/plugins/codex/agentseo/skills/seo-marketer/SKILL.md">Codex marketer skill</a>, and
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/adapters/openclaw/README.md">OpenClaw adapter boundary</a>.
 </p>

@@ -37,9 +37,9 @@ let tmpRoot: string;
 
 beforeAll(async () => {
   process.env.SCREAMINGCLAW_ALLOW_PRIVATE = "1";
-  process.env.GOLEMSEO_ALLOW_PRIVATE = "1";
+  process.env.AGENTSEO_ALLOW_PRIVATE = "1";
   site = await startFixtureSite();
-  tmpRoot = mkdtempSync(join(tmpdir(), "golem-seo-audit-full-"));
+  tmpRoot = mkdtempSync(join(tmpdir(), "agentseo-audit-full-"));
 }, 30_000);
 
 afterAll(async () => {

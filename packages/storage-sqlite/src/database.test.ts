@@ -3,13 +3,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Action, IssueInstance } from "@agentseoapp/contracts";
-import { GolemDatabase } from "./database.js";
+import { AgentSeoDatabase } from "./database.js";
 
-describe("GolemDatabase", () => {
+describe("AgentSeoDatabase", () => {
   it("persists projects, idempotent runs, events, and restart recovery", () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-seo-storage-"));
-    const path = join(root, "golem-seo.db");
-    const database = new GolemDatabase({ path });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-storage-"));
+    const path = join(root, "agentseo.db");
+    const database = new AgentSeoDatabase({ path });
     const project = database.createProject({
       name: "Example",
       canonicalUrl: "https://example.com",
@@ -37,7 +37,7 @@ describe("GolemDatabase", () => {
     expect(database.listRunEvents(first.id)).toHaveLength(1);
     database.close();
 
-    const reopened = new GolemDatabase({ path });
+    const reopened = new AgentSeoDatabase({ path });
     expect(reopened.getProject(project.id)?.canonicalUrl).toBe(
       "https://example.com/",
     );
@@ -45,8 +45,8 @@ describe("GolemDatabase", () => {
   });
 
   it("projects per-run page counts and health without inventing missing health", () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-seo-run-statistics-"));
-    const database = new GolemDatabase({ path: join(root, "golem-seo.db") });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-run-statistics-"));
+    const database = new AgentSeoDatabase({ path: join(root, "agentseo.db") });
     const project = database.createProject({
       name: "Run statistics",
       canonicalUrl: "https://example.com",
@@ -105,8 +105,8 @@ describe("GolemDatabase", () => {
   });
 
   it("upserts durable per-module execution metadata", () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-seo-run-modules-"));
-    const database = new GolemDatabase({ path: join(root, "golem-seo.db") });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-run-modules-"));
+    const database = new AgentSeoDatabase({ path: join(root, "agentseo.db") });
     const project = database.createProject({
       name: "Modules",
       canonicalUrl: "https://example.com",
@@ -151,8 +151,8 @@ describe("GolemDatabase", () => {
   });
 
   it("leases, heartbeats, retries and dead-letters jobs without duplicate claims", () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-seo-jobs-"));
-    const database = new GolemDatabase({ path: join(root, "golem-seo.db") });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-jobs-"));
+    const database = new AgentSeoDatabase({ path: join(root, "agentseo.db") });
     const project = database.createProject({
       name: "Jobs",
       canonicalUrl: "https://example.com",
@@ -222,8 +222,8 @@ describe("GolemDatabase", () => {
   });
 
   it("claims a due schedule once and advances its durable cursor", () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-seo-schedule-"));
-    const database = new GolemDatabase({ path: join(root, "golem-seo.db") });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-schedule-"));
+    const database = new AgentSeoDatabase({ path: join(root, "agentseo.db") });
     const project = database.createProject({
       name: "Schedule",
       canonicalUrl: "https://example.com",
@@ -260,8 +260,8 @@ describe("GolemDatabase", () => {
   });
 
   it("keeps non-secret connector configuration isolated per project", () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-seo-integrations-"));
-    const database = new GolemDatabase({ path: join(root, "golem-seo.db") });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-integrations-"));
+    const database = new AgentSeoDatabase({ path: join(root, "agentseo.db") });
     const first = database.createProject({
       name: "First",
       canonicalUrl: "https://one.example",
@@ -296,9 +296,9 @@ describe("GolemDatabase", () => {
   });
 
   it("updates project identity and persists local reporting settings", () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-seo-settings-"));
-    const path = join(root, "golem-seo.db");
-    const database = new GolemDatabase({ path });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-settings-"));
+    const path = join(root, "agentseo.db");
+    const database = new AgentSeoDatabase({ path });
     const project = database.createProject({
       name: "Original",
       canonicalUrl: "https://example.com",
@@ -329,7 +329,7 @@ describe("GolemDatabase", () => {
     });
     database.close();
 
-    const reopened = new GolemDatabase({ path });
+    const reopened = new AgentSeoDatabase({ path });
     expect(reopened.getProjectSettings(project.id)).toMatchObject({
       timezone: "Europe/London",
       reportingCurrency: "GBP",
@@ -342,9 +342,9 @@ describe("GolemDatabase", () => {
   });
 
   it("persists action evidence, checkpoints, and idempotent verification verdicts", () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-seo-flight-recorder-"));
-    const path = join(root, "golem-seo.db");
-    const database = new GolemDatabase({ path });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-flight-recorder-"));
+    const path = join(root, "agentseo.db");
+    const database = new AgentSeoDatabase({ path });
     const project = database.createProject({
       name: "Flight recorder",
       canonicalUrl: "https://example.com",
@@ -538,7 +538,7 @@ describe("GolemDatabase", () => {
     );
     database.close();
 
-    const reopened = new GolemDatabase({ path });
+    const reopened = new AgentSeoDatabase({ path });
     expect(reopened.latestActionVerification(action.id)).toMatchObject({
       state: "verified",
       runId: verificationRun.id,
@@ -548,8 +548,8 @@ describe("GolemDatabase", () => {
   });
 
   it("rolls back every imported row when a late bundle insert conflicts", () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-seo-import-transaction-"));
-    const database = new GolemDatabase({ path: join(root, "golem-seo.db") });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-import-transaction-"));
+    const database = new AgentSeoDatabase({ path: join(root, "agentseo.db") });
     const at = "2026-07-15T10:00:00.000Z";
     const fingerprint = "a".repeat(64);
     const action = {

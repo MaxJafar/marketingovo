@@ -2,7 +2,7 @@
 
 ## Working title
 
-**From SEO findings to verifiable actions: the contracts behind Golem SEO**
+**From SEO findings to verifiable actions: the contracts behind AGENTseo**
 
 ## Audience and promise
 
@@ -144,7 +144,7 @@ Explain:
 - project portability without credential portability;
 - why paid value does not require weakening local analysis.
 
-Use the phrase “source-available under Elastic License 2.0” for Community Edition.
+Use the phrase “open source under the Apache License 2.0” for AGENTseo.
 
 ## 10. What the alpha does not prove yet
 
@@ -165,7 +165,7 @@ This section is required. It turns limitations into an inspectable engineering a
 End with:
 
 ```bash
-npx @golem-seo/cli serve
+npx @agentseoapp/cli serve
 ```
 
 Then ask the reader to:
@@ -177,7 +177,7 @@ Then ask the reader to:
 5. verify a change with a second run;
 6. open a focused issue or contribution.
 
-Primary CTA: star and inspect [github.com/GolemWorkers/golem-seo](https://github.com/GolemWorkers/golem-seo).
+Primary CTA: star and inspect [github.com/GolemWorkers/agentseo](https://github.com/GolemWorkers/agentseo).
 
 Secondary CTA: try [GolemWorkers Full](https://golemworkers.com/seo) for managed team workflows.
 
@@ -188,4 +188,4 @@ Secondary CTA: try [GolemWorkers Full](https://golemworkers.com/seo) for managed
 - No benchmark number appears without a public corpus and method.
 - No provider is called production-ready solely because its manifest exists.
 - The alpha qualifier appears in the introduction and limitations section.
-- Community is called source-available under ELv2.
+- AGENTseo is called open source under Apache-2.0.

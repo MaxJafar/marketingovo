@@ -5,7 +5,7 @@ description: Understand localhost authorization, egress controls, credential han
 
 # Security and privacy
 
-Security is a release gate because Golem SEO processes hostile crawled pages, confidential marketing evidence, browser sessions, and provider credentials.
+Security is a release gate because AGENTseo processes hostile crawled pages, confidential marketing evidence, browser sessions, and provider credentials.
 
 <div class="status-banner">
   <strong>0.11 pre-release</strong>
@@ -76,11 +76,11 @@ daemon starts, whether it was opened by the user or by login startup. Its path
 contains the current version, operating-system target, and CPU architecture,
 but no stable device identifier, project URL, account, credential, or usage
 event. The release host can still receive ordinary HTTPS transport metadata,
-including the source IP address and request headers; Golem SEO attaches no
+including the source IP address and request headers; AGENTseo attaches no
 product telemetry identifier. New payloads are installed only after
 detached-signature verification. Secondary desktop activations reuse the
 existing launcher and npm CLI services do not check; desktop users can opt out
-with `--no-update` or `GOLEMSEO_AUTO_UPDATE=off`.
+with `--no-update` or `AGENTSEO_AUTO_UPDATE=off`.
 
 Projects can contain:
 
@@ -107,7 +107,7 @@ GolemWorkers has a separate privacy policy for its hosted service.
 
 ## Exports and backups
 
-A `.golemseo` project bundle can contain configuration, run history, Project
+A `.agentseo` project bundle can contain configuration, run history, Project
 Context revisions, marketer journal entries, issue fingerprints, actions,
 metrics, and artifact metadata. It never contains secret values. Context writes
 reject secret-like text and local filesystem paths; reconnect each provider
@@ -135,7 +135,7 @@ Email `security@golemworkers.com` with the affected version, impact, and minimal
 The project aims to acknowledge a report within two business days, provide a status update within five, and coordinate disclosure after a fix is available.
 
 <p class="source-note">
-  Normative sources: <a href="https://github.com/GolemWorkers/golem-seo/blob/main/SECURITY.md">security policy</a>,
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/PRIVACY.md">privacy policy</a>, and
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/docs/threat-model.md">threat model</a>.
+  Normative sources: <a href="https://github.com/GolemWorkers/agentseo/blob/main/SECURITY.md">security policy</a>,
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/PRIVACY.md">privacy policy</a>, and
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/threat-model.md">threat model</a>.
 </p>

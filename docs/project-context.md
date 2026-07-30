@@ -50,9 +50,9 @@ between the journal and current measurements.
   `POST /api/v1/projects/:id/context/journal`.
 - SDK: `client.context.get`, `client.context.update`, and
   `client.context.append`.
-- CLI: `golem-seo context show|update|append`; mutation text is read from
+- CLI: `agentseo context show|update|append`; mutation text is read from
   bounded local files instead of command-line arguments.
-- MCP: `golem-seo://projects/{id}/context` is read-only. It does not add a
+- MCP: `agentseo://projects/{id}/context` is read-only. It does not add a
   seventh public agent tool.
 
 The Codex marketer workflow reads Project Context before overview and issue
@@ -65,7 +65,7 @@ runtime. Secret-like values and local filesystem paths are rejected before a
 write. Audit events record revision, sequence, kind, and presence metadata, not
 the profile or journal text.
 
-All revisions and entries are included in a `.golemseo` transfer bundle.
+All revisions and entries are included in a `.agentseo` transfer bundle.
 Project identifiers, entry identifiers, and linked run identifiers are remapped
 on import. Secrets are never included, imported schedules remain disabled, and
 integrations must be reconnected.

@@ -2,7 +2,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import { GolemDatabase } from "@agentseoapp/storage-sqlite";
+import { AgentSeoDatabase } from "@agentseoapp/storage-sqlite";
 import { nextCronOccurrence } from "./cron.js";
 import { DurableJobWorker, DurableScheduler } from "./durable-work.js";
 
@@ -28,8 +28,8 @@ describe("durable local work", () => {
   });
 
   it("executes a leased job once", async () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-worker-"));
-    const database = new GolemDatabase({ path: join(root, "golem-seo.db") });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-worker-"));
+    const database = new AgentSeoDatabase({ path: join(root, "agentseo.db") });
     const handler = vi.fn(async () => undefined);
     database.enqueueJob({ type: "test", payload: { ok: true } });
     const worker = new DurableJobWorker({
@@ -43,8 +43,8 @@ describe("durable local work", () => {
   });
 
   it("starts a due schedule with an idempotency cursor and advances it", async () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-runtime-schedule-"));
-    const database = new GolemDatabase({ path: join(root, "golem-seo.db") });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-runtime-schedule-"));
+    const database = new AgentSeoDatabase({ path: join(root, "agentseo.db") });
     const project = database.createProject({
       name: "Example",
       canonicalUrl: "https://example.com",

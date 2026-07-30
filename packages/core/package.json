@@ -3,7 +3,7 @@
   "version": "0.11.0-alpha.0",
   "private": true,
   "description": "Crawler, checks, rule engine and reporting primitives for AGENTseo",
-  "license": "Elastic-2.0",
+  "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

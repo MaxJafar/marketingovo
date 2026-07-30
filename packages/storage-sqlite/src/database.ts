@@ -642,16 +642,16 @@ function asJob(row: Row): DurableJob {
   };
 }
 
-export interface GolemDatabaseOptions {
+export interface AgentSeoDatabaseOptions {
   path: string;
   busyTimeoutMs?: number;
 }
 
-export class GolemDatabase {
+export class AgentSeoDatabase {
   readonly path: string;
   readonly db: DatabaseSync;
 
-  constructor(options: GolemDatabaseOptions) {
+  constructor(options: AgentSeoDatabaseOptions) {
     this.path = resolve(options.path);
     mkdirSync(dirname(this.path), { recursive: true, mode: 0o700 });
     try {
@@ -3949,7 +3949,7 @@ export class GolemDatabase {
           input.project.id,
           input.importedAt,
           JSON.stringify({
-            format: "golemseo-project",
+            format: "agentseo-project",
             version: 2,
             sourceProjectId: input.sourceProjectId,
           }),

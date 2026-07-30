@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { GolemLocalRuntime } from "@agentseoapp/runtime";
+import { AgentSeoLocalRuntime } from "@agentseoapp/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 const HOST = "127.0.0.1:3210";
@@ -28,8 +28,8 @@ describe("local Google desktop OAuth", () => {
     vi.stubEnv("AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID", "");
     vi.stubEnv("GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID", "");
     vi.stubEnv("GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID", "");
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-oauth-server-"));
-    const runtime = new GolemLocalRuntime({ dataDir });
+    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-oauth-server-"));
+    const runtime = new AgentSeoLocalRuntime({ dataDir });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
 
@@ -60,7 +60,7 @@ describe("local Google desktop OAuth", () => {
     vi.stubEnv("GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID", legacyClientId);
     vi.stubEnv("GOLEM_SEO_GOOGLE_DESKTOP_CLIENT_ID", irregularClientId);
     const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const runtime = new GolemLocalRuntime({
+    const runtime = new AgentSeoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "agentseo-oauth-precedence-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
@@ -85,8 +85,8 @@ describe("local Google desktop OAuth", () => {
   });
 
   it("uses a random loopback callback, persists safe metadata, and never serializes tokens", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-oauth-server-"));
-    const runtime = new GolemLocalRuntime({ dataDir });
+    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-oauth-server-"));
+    const runtime = new AgentSeoLocalRuntime({ dataDir });
     const now = Date.now();
     const accessToken = "access-token-must-never-leak";
     const refreshToken = "refresh-token-must-never-leak";
@@ -193,7 +193,7 @@ describe("local Google desktop OAuth", () => {
     const dashboardResponse = await server.app.inject({
       method: "GET",
       url: "/api/v1/integrations",
-      headers: { ...headers, "x-golem-client": "dashboard" },
+      headers: { ...headers, "x-agentseo-client": "dashboard" },
     });
     for (const serialized of [
       integrationsResponse.body,
@@ -204,14 +204,14 @@ describe("local Google desktop OAuth", () => {
       expect(serialized).not.toContain("authorization-code");
       expect(serialized).not.toContain("secretRef");
     }
-    const databaseBytes = readFileSync(join(dataDir, "golem-seo.db"));
+    const databaseBytes = readFileSync(join(dataDir, "agentseo.db"));
     expect(databaseBytes.includes(Buffer.from(accessToken))).toBe(false);
     expect(databaseBytes.includes(Buffer.from(refreshToken))).toBe(false);
   });
 
   it("validates and isolates connector configuration for the selected project", async () => {
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-config-server-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-config-server-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
@@ -252,8 +252,8 @@ describe("local Google desktop OAuth", () => {
   });
 
   it("exposes the PageSpeed API key as optional to the dashboard", async () => {
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-pagespeed-dashboard-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-pagespeed-dashboard-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
@@ -263,7 +263,7 @@ describe("local Google desktop OAuth", () => {
       url: "/api/v1/integrations",
       headers: {
         ...(await authenticatedHeaders(server)),
-        "x-golem-client": "dashboard",
+        "x-agentseo-client": "dashboard",
       },
     });
 
@@ -302,8 +302,8 @@ describe("local Google desktop OAuth", () => {
           { status: 200, headers: { "content-type": "application/json" } },
         ),
     );
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-provider-test-server-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-provider-test-server-")),
       integrationFetch: providerFetch,
     });
     const server = await createLocalServer({ runtime, port: 3210 });
@@ -402,8 +402,8 @@ describe("dashboard bootstrap tickets", () => {
   });
 
   it("requires the service token to issue short-lived, one-time tickets", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-bootstrap-server-"));
-    const runtime = new GolemLocalRuntime({ dataDir });
+    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-bootstrap-server-"));
+    const runtime = new AgentSeoLocalRuntime({ dataDir });
     let now = Date.now();
     const server = await createLocalServer({
       runtime,
@@ -450,7 +450,7 @@ describe("dashboard bootstrap tickets", () => {
       setCookies.some((cookie) => cookie.startsWith("agentseo_session=")),
     ).toBe(true);
     expect(
-      setCookies.some((cookie) => cookie.startsWith("golem_session=")),
+      setCookies.some((cookie) => cookie.startsWith("agentseo_session=")),
     ).toBe(true);
     const session = exchanged.json() as { csrf: string };
     const cookie = setCookies
@@ -498,9 +498,9 @@ describe("dashboard bootstrap tickets", () => {
     expect(expired.json()).toMatchObject({ code: "bootstrap_rejected" });
   });
 
-  it("accepts canonical and legacy dashboard identifiers with canonical-first security precedence", async () => {
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "agentseo-session-compatibility-")),
+  it("accepts only the canonical dashboard identifiers and rejects the retired aliases", async () => {
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-session-identity-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
@@ -526,40 +526,46 @@ describe("dashboard bootstrap tickets", () => {
     const setCookies = Array.isArray(rawSetCookie)
       ? rawSetCookie
       : [String(rawSetCookie)];
-    const cookieValue = (name: string) =>
-      setCookies
-        .find((value) => value.startsWith(`${name}=`))!
-        .split(";", 1)[0]!
-        .slice(name.length + 1);
-    const canonicalValue = cookieValue("agentseo_session");
-    const legacyValue = cookieValue("golem_session");
-    expect(legacyValue).toBe(canonicalValue);
+
+    // Exactly one session cookie is issued, under the canonical name.
+    expect(
+      setCookies.filter((value) => value.includes("_session=")),
+    ).toHaveLength(1);
+    expect(
+      setCookies.some((value) => value.startsWith("agentseo_session=")),
+    ).toBe(true);
+    expect(setCookies.some((value) => value.startsWith("golem_session="))).toBe(
+      false,
+    );
+
+    const sessionValue = setCookies
+      .find((value) => value.startsWith("agentseo_session="))!
+      .split(";", 1)[0]!
+      .slice("agentseo_session=".length);
 
     const canonicalSession = await server.app.inject({
       method: "GET",
       url: "/api/v1/session",
-      headers: {
-        host: HOST,
-        cookie: `agentseo_session=${canonicalValue}`,
-      },
-    });
-    const legacySession = await server.app.inject({
-      method: "GET",
-      url: "/api/v1/session",
-      headers: { host: HOST, cookie: `golem_session=${legacyValue}` },
+      headers: { host: HOST, cookie: `agentseo_session=${sessionValue}` },
     });
     expect(canonicalSession.statusCode).toBe(200);
-    expect(legacySession.json()).toEqual(canonicalSession.json());
+
+    // The retired cookie name is not a credential.
+    const retiredSession = await server.app.inject({
+      method: "GET",
+      url: "/api/v1/session",
+      headers: { host: HOST, cookie: `golem_session=${sessionValue}` },
+    });
+    expect(retiredSession.statusCode).toBe(401);
 
     const canonicalMutation = await server.app.inject({
       method: "POST",
       url: "/api/v1/projects",
       headers: {
         host: HOST,
-        cookie: `agentseo_session=${canonicalValue}; golem_session=${legacyValue}`,
+        cookie: `agentseo_session=${sessionValue}`,
         origin: "http://127.0.0.1:3210",
         "x-agentseo-csrf": session.csrf,
-        "x-golem-csrf": "ignored-legacy-conflict",
       },
       payload: {
         name: "Canonical session project",
@@ -568,30 +574,14 @@ describe("dashboard bootstrap tickets", () => {
     });
     expect(canonicalMutation.statusCode).toBe(201);
 
-    const legacyMutation = await server.app.inject({
+    // The retired CSRF header does not satisfy the CSRF requirement.
+    const retiredCsrf = await server.app.inject({
       method: "POST",
       url: "/api/v1/projects",
       headers: {
         host: HOST,
-        cookie: `golem_session=${legacyValue}`,
+        cookie: `agentseo_session=${sessionValue}`,
         origin: "http://127.0.0.1:3210",
-        "x-golem-csrf": session.csrf,
-      },
-      payload: {
-        name: "Legacy session project",
-        canonicalUrl: "https://legacy.example.com",
-      },
-    });
-    expect(legacyMutation.statusCode).toBe(201);
-
-    const conflictingCsrf = await server.app.inject({
-      method: "POST",
-      url: "/api/v1/projects",
-      headers: {
-        host: HOST,
-        cookie: `agentseo_session=${canonicalValue}`,
-        origin: "http://127.0.0.1:3210",
-        "x-agentseo-csrf": "invalid-canonical-conflict",
         "x-golem-csrf": session.csrf,
       },
       payload: {
@@ -599,51 +589,27 @@ describe("dashboard bootstrap tickets", () => {
         canonicalUrl: "https://rejected.example.com",
       },
     });
-    expect(conflictingCsrf.statusCode).toBe(403);
-    expect(conflictingCsrf.json()).toMatchObject({ code: "csrf_rejected" });
+    expect(retiredCsrf.statusCode).toBe(403);
+    expect(retiredCsrf.json()).toMatchObject({ code: "csrf_rejected" });
 
-    const conflictingSession = await server.app.inject({
-      method: "GET",
-      url: "/api/v1/session",
-      headers: {
-        host: HOST,
-        cookie: `agentseo_session=invalid-canonical-conflict; golem_session=${legacyValue}`,
-      },
-    });
-    expect(conflictingSession.statusCode).toBe(401);
-
+    // Dashboard identity comes only from the canonical client header.
     const canonicalDashboard = await server.app.inject({
       method: "GET",
       url: "/api/v1/runs",
-      headers: {
-        ...serviceHeaders,
-        "x-agentseo-client": "dashboard",
-        "x-golem-client": "legacy-conflict",
-      },
+      headers: { ...serviceHeaders, "x-agentseo-client": "dashboard" },
     });
     expect(canonicalDashboard.json()).toHaveProperty("meta");
 
-    const legacyDashboard = await server.app.inject({
+    const retiredDashboard = await server.app.inject({
       method: "GET",
       url: "/api/v1/runs",
       headers: { ...serviceHeaders, "x-golem-client": "dashboard" },
     });
-    expect(legacyDashboard.json()).toHaveProperty("meta");
-
-    const canonicalNonDashboard = await server.app.inject({
-      method: "GET",
-      url: "/api/v1/runs",
-      headers: {
-        ...serviceHeaders,
-        "x-agentseo-client": "sdk",
-        "x-golem-client": "dashboard",
-      },
-    });
-    expect(canonicalNonDashboard.json()).toEqual([]);
+    expect(retiredDashboard.json()).toEqual([]);
   });
 
-  it("publishes canonical API identity while documenting the 1.x session alias", async () => {
-    const runtime = new GolemLocalRuntime({
+  it("publishes exactly one canonical session security scheme", async () => {
+    const runtime = new AgentSeoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "agentseo-openapi-identity-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
@@ -672,22 +638,21 @@ describe("dashboard bootstrap tickets", () => {
     expect(document.components.securitySchemes.localSession).toMatchObject({
       name: "agentseo_session",
     });
-    expect(
-      document.components.securitySchemes.legacyLocalSession,
-    ).toMatchObject({
-      name: "golem_session",
-      description: expect.stringContaining("Deprecated 1.x"),
-    });
+    expect(document.components.securitySchemes).not.toHaveProperty(
+      "legacyLocalSession",
+    );
   });
 
   it("serves the bundled dashboard index without registering the root route twice", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-dashboard-server-"));
-    const dashboardDir = mkdtempSync(join(tmpdir(), "golem-dashboard-assets-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-dashboard-server-"));
+    const dashboardDir = mkdtempSync(
+      join(tmpdir(), "agentseo-dashboard-assets-"),
+    );
     writeFileSync(
       join(dashboardDir, "index.html"),
-      "<!doctype html><title>Golem SEO</title>",
+      "<!doctype html><title>AGENTseo</title>",
     );
-    const runtime = new GolemLocalRuntime({ dataDir });
+    const runtime = new AgentSeoLocalRuntime({ dataDir });
     const server = await createLocalServer({
       runtime,
       port: 3210,
@@ -702,7 +667,7 @@ describe("dashboard bootstrap tickets", () => {
       headers: { host: HOST },
     });
     expect(response.statusCode).toBe(200);
-    expect(response.body).toContain("<title>Golem SEO</title>");
+    expect(response.body).toContain("<title>AGENTseo</title>");
   });
 });
 
@@ -719,7 +684,7 @@ describe("hosted service independence", () => {
       throw new Error(`Unexpected hosted request: ${String(input)}`);
     });
     vi.stubGlobal("fetch", hostedFetch);
-    const runtime = new GolemLocalRuntime({
+    const runtime = new AgentSeoLocalRuntime({
       dataDir: mkdtempSync(join(tmpdir(), "agentseo-local-server-")),
     });
     const server = await createLocalServer({

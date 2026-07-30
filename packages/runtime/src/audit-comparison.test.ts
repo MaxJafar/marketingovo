@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { IssueInstance, Severity } from "@agentseoapp/contracts";
-import { GolemLocalRuntime } from "./index.js";
+import { AgentSeoLocalRuntime } from "./index.js";
 
 const observedAt = "2026-07-16T09:00:00.000Z";
 
@@ -29,12 +29,12 @@ function issue(
 }
 
 describe("immutable audit comparison", () => {
-  let runtime: GolemLocalRuntime | undefined;
+  let runtime: AgentSeoLocalRuntime | undefined;
   afterEach(() => runtime?.close());
 
   it("calculates reviewed issue, page, health, and configuration deltas without mutating history", async () => {
-    runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-audit-comparison-")),
+    runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-audit-comparison-")),
     });
     const project = await runtime.projects.create({
       name: "Comparison",
@@ -328,8 +328,8 @@ describe("immutable audit comparison", () => {
   });
 
   it("rejects same-run, cross-project, active, and non-audit comparisons", async () => {
-    runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-audit-comparison-guard-")),
+    runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-audit-comparison-guard-")),
     });
     const firstProject = await runtime.projects.create({
       name: "First",

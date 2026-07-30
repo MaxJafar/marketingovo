@@ -7,14 +7,14 @@ import {
   restoreDatabaseBackup,
   validateDatabaseBackup,
 } from "./backup.js";
-import { GolemDatabase } from "./database.js";
+import { AgentSeoDatabase } from "./database.js";
 
 describe("SQLite backup and restore", () => {
   it("creates a validated snapshot and restores it with a rollback copy", async () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-backup-"));
-    const databasePath = join(root, "golem-seo.db");
+    const root = mkdtempSync(join(tmpdir(), "agentseo-backup-"));
+    const databasePath = join(root, "agentseo.db");
     const backupPath = join(root, "snapshots", "baseline.db");
-    const database = new GolemDatabase({ path: databasePath });
+    const database = new AgentSeoDatabase({ path: databasePath });
     const original = database.createProject({
       name: "Original",
       canonicalUrl: "https://example.com/",
@@ -34,18 +34,18 @@ describe("SQLite backup and restore", () => {
       backup.sha256,
     );
     expect(restored.rollbackPath).toBeTruthy();
-    const reopened = new GolemDatabase({ path: databasePath });
+    const reopened = new AgentSeoDatabase({ path: databasePath });
     expect(reopened.listProjects()).toEqual([original]);
     reopened.close();
   });
 
   it("rejects a checksum mismatch, malformed file and symbolic link", async () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-backup-invalid-"));
+    const root = mkdtempSync(join(tmpdir(), "agentseo-backup-invalid-"));
     const malformed = join(root, "not-a-database.db");
     writeFileSync(malformed, "not sqlite");
     await expect(validateDatabaseBackup(malformed)).rejects.toThrow();
 
-    const database = new GolemDatabase({ path: join(root, "source.db") });
+    const database = new AgentSeoDatabase({ path: join(root, "source.db") });
     database.createProject({
       name: "Project",
       canonicalUrl: "https://example.com/",
@@ -66,8 +66,8 @@ describe("SQLite backup and restore", () => {
   });
 
   it("refuses to overwrite an existing backup destination", async () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-backup-existing-"));
-    const database = new GolemDatabase({ path: join(root, "source.db") });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-backup-existing-"));
+    const database = new AgentSeoDatabase({ path: join(root, "source.db") });
     const destination = join(root, "existing.db");
     writeFileSync(destination, "keep me");
     await expect(createDatabaseBackup(database, destination)).rejects.toThrow(

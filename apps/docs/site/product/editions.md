@@ -5,7 +5,7 @@ description: Compare local-first Community capabilities with hosted infrastructu
 
 # Community Edition and GolemWorkers
 
-Community Edition is the strong local, single-user product in this repository. Golem SEO on GolemWorkers is a separate proprietary service for managed infrastructure and collaboration.
+Community Edition is the strong local, single-user product in this repository. AGENTseo on GolemWorkers is a separate proprietary service for managed infrastructure and collaboration.
 
 Paid value comes from running and coordinating the system for teams—not from deliberately weakening local analysis.
 
@@ -50,7 +50,7 @@ Paid value comes from running and coordinating the system for teams—not from d
 
 ## Portable projects
 
-Community can export a versioned `.golemseo` bundle containing project
+Community can export a versioned `.agentseo` bundle containing project
 configuration, Project Context revisions, marketer journal history, issue
 fingerprints, review decisions and reasons, actions, metrics, and artifact
 metadata. Secrets are excluded. Import into GolemWorkers requires authentication
@@ -61,17 +61,17 @@ Portability is for project data, not a transfer of provider authorization.
 ## Source and license boundary
 
 <div class="license-note">
-  Community Edition is source-available under Elastic License 2.0, not OSI-approved open source. The license includes a restriction on offering substantial product functionality to third parties as a hosted or managed service. Read the full license for the operative terms.
+  AGENTseo is open source under the Apache License 2.0, an OSI-approved license. It grants patent rights and permits commercial use, modification, and redistribution. Read the full license for the operative terms.
 </div>
 
-Commercial code and entitlements are not included in this repository as dormant or downloadable implementations. The Golem SEO and GolemWorkers names and marks are governed separately.
+Commercial code and entitlements are not included in this repository as dormant or downloadable implementations. The AGENTseo and GolemWorkers names and marks are governed separately.
 
 ## Upgrade presentation
 
 The Community dashboard may show a quiet capability card for always-on monitoring, teams, managed integrations, and approval-gated execution. It must not interrupt an audit, conceal a local capability, or imply that missing provider data can be repaired only by upgrading.
 
 <p class="source-note">
-  Canonical sources: <a href="https://github.com/GolemWorkers/golem-seo/blob/main/docs/editions.md">edition comparison</a>,
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/COMMERCIAL.md">commercial boundary</a>, and
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/LICENSE">Elastic License 2.0</a>.
+  Canonical sources: <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/editions.md">edition comparison</a>,
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/COMMERCIAL.md">commercial boundary</a>, and
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/LICENSE">Apache License 2.0</a>.
 </p>

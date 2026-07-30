@@ -29,7 +29,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build, lint, typecheck, test and validate public surfaces
         env:
-          GOLEMSEO_NPM_INSTALL_SMOKE: "1"
+          AGENTSEO_NPM_INSTALL_SMOKE: "1"
         run: pnpm check
       - name: Reject high and critical dependency advisories
         run: pnpm audit:dependencies
@@ -40,7 +40,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: community-sbom
-          path: artifacts/golem-seo.cdx.json
+          path: artifacts/agentseo.cdx.json
           if-no-files-found: error
           retention-days: 14
 
@@ -131,7 +131,7 @@ jobs:
           node-version: 24.15.0
       - name: Assemble the native desktop inputs
         env:
-          GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID: ci-public-desktop.apps.googleusercontent.com
+          AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID: ci-public-desktop.apps.googleusercontent.com
         run: |
           corepack enable
           corepack prepare pnpm@10.34.5 --activate

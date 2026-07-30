@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::io::{self, BufRead, Write};
 use zeroize::Zeroize;
 
-const SERVICE: &str = "com.golemworkers.golem-seo";
+const SERVICE: &str = "com.golemworkers.agentseo";
 
 #[derive(Deserialize)]
 #[serde(tag = "operation", rename_all = "snake_case")]

@@ -1,12 +1,12 @@
-# Golem SEO launch kit
+# AGENTseo launch kit
 
-This directory contains the English launch narrative for Golem SEO `0.11` alpha. The assets are ready to adapt for GitHub, LinkedIn, X, a short product demo, engineering content, marketer case studies, and a six-week build-in-public cycle.
+This directory contains the English launch narrative for AGENTseo `0.11` alpha. The assets are ready to adapt for GitHub, LinkedIn, X, a short product demo, engineering content, marketer case studies, and a six-week build-in-public cycle.
 
 ## Launch thesis
 
 SEO audits are easy to generate. Deciding what deserves attention, explaining why, assigning the work, and verifying the result are the harder parts.
 
-Golem SEO is a local-first SEO operations system that turns crawl and connected marketing evidence into a transparent action queue. Each action can carry impact, effort, confidence, affected URLs, evidence, and a verification state.
+AGENTseo is a local-first SEO operations system that turns crawl and connected marketing evidence into a transparent action queue. Each action can carry impact, effort, confidence, affected URLs, evidence, and a verification state.
 
 The current release is `0.11` alpha. It is intended for design partners and contributors while installation, migrations, security corpora, accessibility, packaging, and the public correctness benchmark move toward the 1.0 gates.
 
@@ -14,7 +14,7 @@ The current release is `0.11` alpha. It is intended for design partners and cont
 
 Use these claims consistently:
 
-- Golem SEO Community Edition is **source-available under Elastic License 2.0**.
+- AGENTseo is **open source under the Apache License 2.0**.
 - Community is local-first, requires no product account, and has telemetry off by default.
 - Community analysis is not intentionally limited; project and audit scale depends on the machine running it.
 - The product is designed around actions, evidence, source state, prioritization, ownership, and verification rather than a flat issue dump.
@@ -30,12 +30,12 @@ Do not claim that `0.11` replaces mature commercial SEO suites, that every provi
 1. **Install and run locally**
 
    ```bash
-   npx @golem-seo/cli serve
+   npx @agentseoapp/cli serve
    ```
 
 2. **Star or inspect the source**
 
-   [github.com/GolemWorkers/golem-seo](https://github.com/GolemWorkers/golem-seo)
+   [github.com/GolemWorkers/agentseo](https://github.com/GolemWorkers/agentseo)
 
 3. **Try GolemWorkers Full** when the buyer needs always-on workflows, portfolio scale, managed integrations, teams, or commercial support.
 
@@ -70,7 +70,7 @@ Use the canonical links above. Add channel-specific UTM parameters only at publi
 Suggested campaign values:
 
 ```text
-utm_campaign=golem-seo-alpha-launch
+utm_campaign=agentseo-alpha-launch
 utm_source=linkedin | x | github | demo
 utm_medium=organic-social | repository | video
 utm_content=<asset-and-variant>
@@ -80,7 +80,7 @@ utm_content=<asset-and-variant>
 
 - [ ] Every sentence is English.
 - [ ] `0.11 alpha` is visible.
-- [ ] The license is described as source-available under ELv2.
+- [ ] The license is described as Apache-2.0 open source.
 - [ ] Community and GolemWorkers Full are clearly separated.
 - [ ] Product footage contains no secrets or private customer data.
 - [ ] Metrics have a source, date range, baseline, and caveat.

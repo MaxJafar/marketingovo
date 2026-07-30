@@ -1,11 +1,11 @@
 ---
-title: What is Golem SEO?
+title: What is AGENTseo?
 description: Understand the local-first SEO operations model, product boundaries, and core evidence loop.
 ---
 
-# What is Golem SEO?
+# What is AGENTseo?
 
-Golem SEO is a local-first SEO operations system. It combines technical crawl observations with available search, analytics, performance, and research signals, then turns them into prioritized actions that a marketer can inspect and verify.
+AGENTseo is a local-first SEO operations system. It combines technical crawl observations with available search, analytics, performance, and research signals, then turns them into prioritized actions that a marketer can inspect and verify.
 
 The product is deliberately narrower than a claim to replace every mature SEO suite. Its testable promise is that evidence from several sources becomes one explainable action queue.
 
@@ -50,7 +50,7 @@ The commercial value is infrastructure and collaboration—not deliberately inco
 ## License boundary
 
 <div class="license-note">
-  Community Edition is <strong>source-available under Elastic License 2.0</strong>. It is not OSI-approved open source. The license permits use, copying, distribution, and modification subject to its terms, including the restriction on providing substantial product functionality to third parties as a hosted or managed service.
+  AGENTseo is <strong>open source under the Apache License 2.0</strong>, an OSI-approved license. It grants patent rights and permits use, copying, distribution, modification, and commercial use, including offering it as a hosted or managed service.
 </div>
 
 Read the license itself before relying on a summary. Product names and marks have separate terms.
@@ -64,8 +64,8 @@ Read the license itself before relying on a summary. Product names and marks hav
 - [Compare Community and GolemWorkers](/product/editions)
 
 <p class="source-note">
-  Canonical sources: <a href="https://github.com/GolemWorkers/golem-seo/blob/main/README.md">product README</a>,
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/docs/architecture.md">architecture</a>,
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/LICENSE">Elastic License 2.0</a>, and
-  <a href="https://github.com/GolemWorkers/golem-seo/blob/main/TRADEMARKS.md">trademark policy</a>.
+  Canonical sources: <a href="https://github.com/GolemWorkers/agentseo/blob/main/README.md">product README</a>,
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/docs/architecture.md">architecture</a>,
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/LICENSE">Apache License 2.0</a>, and
+  <a href="https://github.com/GolemWorkers/agentseo/blob/main/TRADEMARKS.md">trademark policy</a>.
 </p>

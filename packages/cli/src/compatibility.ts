@@ -1,6 +1,5 @@
 import { join, resolve } from "node:path";
 
-export const LEGACY_CLI_ALIAS = "golem-seo";
 export const CANONICAL_CLI_NAME = "agentseo";
 
 type Environment = Readonly<Record<string, string | undefined>>;
@@ -176,12 +175,4 @@ export function readCompatibleEnvironmentVariable(
     return legacyValue;
   }
   return undefined;
-}
-
-export function warnLegacyCliInvocation(
-  warn: Warn = (message) => process.stderr.write(message),
-): void {
-  warn(
-    `Warning: ${LEGACY_CLI_ALIAS} is deprecated; use ${CANONICAL_CLI_NAME}. The legacy alias remains supported through AGENTseo 1.x.\n`,
-  );
 }

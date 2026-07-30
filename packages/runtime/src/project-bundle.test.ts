@@ -5,10 +5,10 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Action, IssueInstance } from "@agentseoapp/contracts";
 import {
-  GOLEMSEO_PROJECT_BUNDLE_LIMITS,
-  type GolemSeoProjectBundleV2,
+  AGENTSEO_PROJECT_BUNDLE_LIMITS,
+  type AgentSeoProjectBundleV2,
 } from "@agentseoapp/contracts/project-bundle";
-import { GolemLocalRuntime, ProjectBundleError } from "./index.js";
+import { AgentSeoLocalRuntime, ProjectBundleError } from "./index.js";
 
 const hash = (value: string | Uint8Array): string =>
   createHash("sha256").update(value).digest("hex");
@@ -24,7 +24,7 @@ function stableJson(value: unknown): string {
     .join(",")}}`;
 }
 
-function resign(bundle: GolemSeoProjectBundleV2): void {
+function resign(bundle: AgentSeoProjectBundleV2): void {
   const { integrity, ...payload } = bundle;
   integrity.bundleSha256 = hash(stableJson(payload));
 }
@@ -41,8 +41,8 @@ async function createBundle(
   fingerprint: string;
   sourceProjectId: string;
 }> {
-  const dataDir = mkdtempSync(join(tmpdir(), "golem-bundle-source-"));
-  const runtime = new GolemLocalRuntime({ dataDir });
+  const dataDir = mkdtempSync(join(tmpdir(), "agentseo-bundle-source-"));
+  const runtime = new AgentSeoLocalRuntime({ dataDir });
   try {
     const project = runtime.database.createProject({
       name: "Transfer fixture",
@@ -306,11 +306,11 @@ async function createBundle(
   }
 }
 
-describe(".golemseo project bundles", () => {
+describe(".agentseo project bundles", () => {
   it("round-trips history and embedded reports while remapping every local id", async () => {
     const source = await createBundle();
     const serialized = Buffer.from(source.bytes).toString("utf8");
-    const bundle = JSON.parse(serialized) as GolemSeoProjectBundleV2;
+    const bundle = JSON.parse(serialized) as AgentSeoProjectBundleV2;
     expect(bundle.version).toBe(2);
     expect(bundle.secretsIncluded).toBe(false);
     expect(bundle.runConfigurations).toEqual([
@@ -371,8 +371,8 @@ describe(".golemseo project bundles", () => {
     expect(serialized).not.toContain("/Users/example/private");
     expect(serialized).not.toContain('"secretRef"');
 
-    const destination = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-bundle-destination-")),
+    const destination = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-bundle-destination-")),
     });
     try {
       const first = await destination.importProject(source.bytes);
@@ -542,7 +542,7 @@ describe(".golemseo project bundles", () => {
     });
     const bundle = JSON.parse(
       Buffer.from(source.bytes).toString("utf8"),
-    ) as GolemSeoProjectBundleV2;
+    ) as AgentSeoProjectBundleV2;
     expect(Array.from(bundle.issues[0]!.issue.title)).toHaveLength(240);
     expect(Array.from(bundle.issues[0]!.issue.evidence[0]!.label)).toHaveLength(
       240,
@@ -550,8 +550,8 @@ describe(".golemseo project bundles", () => {
     expect(Array.from(bundle.actions[0]!.title)).toHaveLength(240);
     expect(Array.from(bundle.actions[0]!.whyNow)).toHaveLength(2_000);
 
-    const destination = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-bundle-bounded-")),
+    const destination = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-bundle-bounded-")),
     });
     try {
       await expect(
@@ -566,15 +566,15 @@ describe(".golemseo project bundles", () => {
     const source = await createBundle();
     const bundle = JSON.parse(
       Buffer.from(source.bytes).toString("utf8"),
-    ) as GolemSeoProjectBundleV2;
+    ) as AgentSeoProjectBundleV2;
     delete bundle.issueAdjudications;
     delete bundle.projectContext;
     delete bundle.extractionRuleVersions;
     delete bundle.runConfigurations;
     resign(bundle);
 
-    const destination = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-bundle-v2-compat-")),
+    const destination = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-bundle-v2-compat-")),
     });
     try {
       const imported = await destination.importProject(bundle);
@@ -602,9 +602,9 @@ describe(".golemseo project bundles", () => {
     const source = await createBundle();
     const valid = JSON.parse(
       Buffer.from(source.bytes).toString("utf8"),
-    ) as GolemSeoProjectBundleV2;
-    const destination = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-bundle-malicious-")),
+    ) as AgentSeoProjectBundleV2;
+    const destination = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-bundle-malicious-")),
     });
     try {
       await expect(
@@ -614,7 +614,7 @@ describe(".golemseo project bundles", () => {
       });
       await expect(
         destination.importProject(
-          new Uint8Array(GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxBytes + 1),
+          new Uint8Array(AGENTSEO_PROJECT_BUNDLE_LIMITS.maxBytes + 1),
         ),
       ).rejects.toMatchObject({ code: "bundle_too_large", status: 413 });
 
@@ -710,8 +710,8 @@ describe(".golemseo project bundles", () => {
   });
 
   it("uses a typed error for absent projects", async () => {
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-bundle-absent-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-bundle-absent-")),
     });
     try {
       await expect(runtime.exportProject("missing")).rejects.toBeInstanceOf(
@@ -723,8 +723,8 @@ describe(".golemseo project bundles", () => {
   });
 
   it("fails export instead of silently dropping an unreadable custom-rule source", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-bundle-rule-io-"));
-    const runtime = new GolemLocalRuntime({ dataDir });
+    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-bundle-rule-io-"));
+    const runtime = new AgentSeoLocalRuntime({ dataDir });
     try {
       const project = runtime.database.createProject({
         name: "Unreadable rules",

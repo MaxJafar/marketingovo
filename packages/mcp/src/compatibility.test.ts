@@ -1,19 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  resolveMcpConnectionEnvironment,
-  warnLegacyMcpInvocation,
-} from "./compatibility.js";
+import { resolveMcpConnectionEnvironment } from "./compatibility.js";
 
 describe("MCP connection environment compatibility", () => {
-  it("warns when the deprecated executable alias is invoked", () => {
-    const warn = vi.fn();
-    warnLegacyMcpInvocation(warn);
-    expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining("golem-seo-mcp is deprecated"),
-    );
-    expect(warn.mock.calls[0]![0]).toContain("agentseo-mcp");
-  });
-
   it("prefers canonical connection variables", () => {
     const warn = vi.fn();
     expect(

@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { Action } from "@agentseoapp/contracts";
-import { GolemLocalRuntime } from "@agentseoapp/runtime";
+import { AgentSeoLocalRuntime } from "@agentseoapp/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 const HOST = "127.0.0.1:3210";
@@ -17,15 +17,15 @@ describe("dashboard control panel API", () => {
   });
 
   async function setup() {
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-dashboard-controls-"));
-    const runtime = new GolemLocalRuntime({ dataDir });
+    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-dashboard-controls-"));
+    const runtime = new AgentSeoLocalRuntime({ dataDir });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
     const token = readFileSync(server.serviceTokenPath, "utf8").trim();
     const headers = {
       host: HOST,
       authorization: `Bearer ${token}`,
-      "x-golem-client": "dashboard",
+      "x-agentseo-client": "dashboard",
     };
     const project = await runtime.projects.create({
       name: "Example",
@@ -35,7 +35,7 @@ describe("dashboard control panel API", () => {
   }
 
   function saveResearchArtifact(
-    runtime: GolemLocalRuntime,
+    runtime: AgentSeoLocalRuntime,
     dataDir: string,
     runId: string,
     value: unknown,

@@ -135,13 +135,13 @@ assert.ok(
   "OpenAPI is missing the HttpOnly local-session scheme",
 );
 assert.ok(
-  openapi.components?.securitySchemes?.legacyLocalSession,
-  "OpenAPI is missing the deprecated 1.x local-session compatibility scheme",
+  !openapi.components?.securitySchemes?.legacyLocalSession,
+  "OpenAPI must not expose a second accepted session cookie; the rebrand retired the legacy scheme rather than widening the authenticated surface",
 );
 assert.deepEqual(
   openapi.security,
-  [{ localServiceToken: [] }, { localSession: [] }, { legacyLocalSession: [] }],
-  "OpenAPI must require the local token, canonical local session, or deprecated 1.x session alias by default",
+  [{ localServiceToken: [] }, { localSession: [] }],
+  "OpenAPI must require the local service token or the canonical local session by default",
 );
 
 const publicOperations = [
@@ -269,14 +269,14 @@ assert.ok(
 const exportOperation = operation("post", "/api/v1/export");
 assert.deepEqual(
   Object.keys(exportOperation.responses?.["200"]?.content ?? {}),
-  ["application/vnd.golemseo.project+json"],
-  "Project export must use the versioned Golem SEO bundle media type",
+  ["application/vnd.agentseo.project+json"],
+  "Project export must use the versioned AGENTseo bundle media type",
 );
 const importOperation = operation("post", "/api/v1/import");
 assert.deepEqual(
   Object.keys(importOperation.requestBody?.content ?? {}).sort(),
-  ["application/json", "application/vnd.golemseo.project+json"],
-  "Project import must accept JSON and the Golem SEO bundle media type",
+  ["application/json", "application/vnd.agentseo.project+json"],
+  "Project import must accept JSON and the AGENTseo bundle media type",
 );
 assert.ok(
   importOperation.responses?.["201"],

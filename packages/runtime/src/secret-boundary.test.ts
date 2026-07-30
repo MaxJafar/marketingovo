@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { EncryptedFileCredentialStore } from "@agentseoapp/credentials";
 import { ConsoleLogger, type Report as EngineReport } from "@agentseoapp/core";
 import { createDatabaseBackup } from "@agentseoapp/storage-sqlite";
-import { GolemLocalRuntime } from "./index.js";
+import { AgentSeoLocalRuntime } from "./index.js";
 
 const CANARY = "psi-runtime-canary-Z9y8X7w6V5u4";
 const TEST_TIMEOUT_MS = 60_000;
@@ -70,7 +70,7 @@ function reportWithAccidentalCredentialEcho(apiKey: string): EngineReport {
 }
 
 async function waitForTerminalRun(
-  runtime: GolemLocalRuntime,
+  runtime: AgentSeoLocalRuntime,
   runId: string,
 ): Promise<NonNullable<Awaited<ReturnType<typeof runtime.runs.get>>>> {
   for (let attempt = 0; attempt < 200; attempt += 1) {
@@ -94,14 +94,14 @@ describe("runtime secret serialization boundary", () => {
   it(
     "keeps a run credential only in the decryptable vault and out of DB, events, reports, exports, backups, and logs",
     async () => {
-      const dataDir = mkdtempSync(join(tmpdir(), "golem-secret-boundary-"));
+      const dataDir = mkdtempSync(join(tmpdir(), "agentseo-secret-boundary-"));
       const vaultPath = join(dataDir, "vault", "credentials.json");
       const credentialStore = new EncryptedFileCredentialStore(
         vaultPath,
         "a strong boundary test password",
       );
       const renderedInputs: string[] = [];
-      const runtime = new GolemLocalRuntime({
+      const runtime = new AgentSeoLocalRuntime({
         dataDir,
         credentialStore,
         engine: {
@@ -210,9 +210,9 @@ describe("runtime secret serialization boundary", () => {
         );
         expectFileNotToContain(backup.path, CANARY);
         for (const databaseFile of [
-          join(dataDir, "golem-seo.db"),
-          join(dataDir, "golem-seo.db-wal"),
-          join(dataDir, "golem-seo.db-shm"),
+          join(dataDir, "agentseo.db"),
+          join(dataDir, "agentseo.db-wal"),
+          join(dataDir, "agentseo.db-shm"),
         ]) {
           if (existsSync(databaseFile))
             expectFileNotToContain(databaseFile, CANARY);

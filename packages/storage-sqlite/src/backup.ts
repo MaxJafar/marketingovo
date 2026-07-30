@@ -12,7 +12,7 @@ import {
 } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { backup, DatabaseSync } from "node:sqlite";
-import type { GolemDatabase } from "./database.js";
+import type { AgentSeoDatabase } from "./database.js";
 import { migrations } from "./schema.js";
 
 export interface DatabaseBackupMetadata {
@@ -140,7 +140,7 @@ export async function validateDatabaseBackup(
  * accident.
  */
 export async function createDatabaseBackup(
-  database: Pick<GolemDatabase, "db" | "path">,
+  database: Pick<AgentSeoDatabase, "db" | "path">,
   destination: string,
 ): Promise<DatabaseBackupMetadata> {
   const target = resolve(destination);

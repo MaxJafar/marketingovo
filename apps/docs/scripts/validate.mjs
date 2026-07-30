@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
 const workspaceRoot = resolve(root, "../..");
-const canonicalPrefix = "https://github.com/GolemWorkers/golem-seo/blob/main/";
+const canonicalPrefix = "https://github.com/GolemWorkers/agentseo/blob/main/";
 const requiredPages = [
   "site/index.md",
   "site/getting-started/overview.md",
@@ -28,7 +28,7 @@ for (const page of requiredPages) {
   }
 
   const canonicalLinks = content.matchAll(
-    /https:\/\/github\.com\/GolemWorkers\/golem-seo\/blob\/main\/([^\s"')>]+)/g,
+    /https:\/\/github\.com\/GolemWorkers\/agentseo\/blob\/main\/([^\s"')>]+)/g,
   );
   for (const link of canonicalLinks) {
     const repositoryPath = decodeURIComponent(link[1]);

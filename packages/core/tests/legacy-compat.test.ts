@@ -25,7 +25,7 @@ describe("legacy v0 quarantine", () => {
     expect(manifest.private).toBe(false);
     expect(manifest.quarantined).toBe(true);
     expect(manifest.synthetic).toBe(true);
-    expect(manifest.license).toBe("Elastic-2.0");
+    expect(manifest.license).toBe("Apache-2.0");
     expect(manifest.tools?.length).toBeGreaterThan(6);
   });
 });

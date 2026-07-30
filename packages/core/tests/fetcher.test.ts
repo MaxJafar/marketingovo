@@ -35,7 +35,7 @@ const limits: Limits = {
   requestTimeoutMs: 5_000,
   maxBodyBytes: 1_024,
   maxRedirects: 2,
-  userAgent: "GolemSEO/test",
+  userAgent: "AgentSeo/test",
   allowPrivate: false,
   ignoreRobots: false,
   renderMode: "static",

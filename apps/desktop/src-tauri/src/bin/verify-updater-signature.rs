@@ -13,8 +13,8 @@ fn decode_armored(value: &[u8], label: &str) -> Result<String, String> {
 }
 
 fn verify(payload: PathBuf, signature_path: PathBuf) -> Result<(), String> {
-    let public_key = env::var("GOLEMSEO_TAURI_UPDATER_PUBLIC_KEY")
-        .map_err(|_| "GOLEMSEO_TAURI_UPDATER_PUBLIC_KEY is required".to_string())?;
+    let public_key = env::var("AGENTSEO_TAURI_UPDATER_PUBLIC_KEY")
+        .map_err(|_| "AGENTSEO_TAURI_UPDATER_PUBLIC_KEY is required".to_string())?;
     let public_key = decode_armored(public_key.as_bytes(), "updater public key")?;
     let public_key = PublicKey::decode(&public_key)
         .map_err(|error| format!("invalid updater public key: {error}"))?;

@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { GolemLocalRuntime } from "@agentseoapp/runtime";
+import { AgentSeoLocalRuntime } from "@agentseoapp/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 function replayEngine() {
@@ -37,8 +37,8 @@ describe("run replay API", () => {
   });
 
   async function setup() {
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-run-replay-api-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-run-replay-api-")),
       engine: replayEngine(),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
@@ -102,7 +102,7 @@ describe("run replay API", () => {
       headers: {
         ...headers,
         "idempotency-key": "dashboard-replay-request",
-        "x-golem-client": "dashboard",
+        "x-agentseo-client": "dashboard",
       },
     });
     expect(dashboard.statusCode).toBe(202);

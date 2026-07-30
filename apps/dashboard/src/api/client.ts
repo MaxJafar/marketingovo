@@ -192,7 +192,7 @@ export async function apiDownload(
 ): Promise<Blob> {
   await ensureSession();
   const headers = new Headers(init.headers);
-  headers.set("Accept", "application/vnd.golemseo.project+json");
+  headers.set("Accept", "application/vnd.agentseo.project+json");
   headers.set("X-AGENTseo-Client", "dashboard");
   const method = (init.method ?? "GET").toUpperCase();
   if (!["GET", "HEAD", "OPTIONS"].includes(method) && csrfToken) {

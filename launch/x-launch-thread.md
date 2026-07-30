@@ -6,7 +6,7 @@ Nine-post launch thread. Publish the GitHub link in post 8 and the Full link in 
 
 An SEO audit can find 1,000 issues and still fail to answer one question: what should we fix first?
 
-Today we are sharing Golem SEO `0.11` alpha — a local-first SEO operations system built around actions, evidence, priority, and verification. 🧵
+Today we are sharing AGENTseo `0.11` alpha — a local-first SEO operations system built around actions, evidence, priority, and verification. 🧵
 
 ## 2/9
 
@@ -24,13 +24,13 @@ Priority is inspectable.
 
 Missing data stays missing.
 
-Unavailable, stale, or failed sources are shown explicitly. Golem SEO does not silently turn missing Search Console or analytics exposure into zero and pretend the score is complete.
+Unavailable, stale, or failed sources are shown explicitly. AGENTseo does not silently turn missing Search Console or analytics exposure into zero and pretend the score is complete.
 
 ## 5/9
 
 Community Edition runs locally, needs no product account, and has telemetry off by default. Credentials are write-only and excluded from project exports.
 
-It is source-available under Elastic License 2.0.
+It is open source under the Apache License 2.0.
 
 ## 6/9
 
@@ -48,11 +48,11 @@ Installation, migrations, accessibility, security corpora, packaging, and the pu
 
 Try the local workflow:
 
-`npx @golem-seo/cli serve`
+`npx @agentseoapp/cli serve`
 
 Then add one site, run one audit, inspect the Top 5 Actions, fix one item, and re-run to verify it.
 
-Source + docs: https://github.com/GolemWorkers/golem-seo
+Source + docs: https://github.com/GolemWorkers/agentseo
 
 ## 9/9
 
@@ -66,4 +66,4 @@ What would make this useful in your weekly SEO workflow?
 
 Attach the short demo to post 1 or a four-frame crop of carousel slides 1, 3, 5, and 8.
 
-Alt text: “Golem SEO alpha demo showing a local site audit, explicit data-source states, a transparent priority score, and a Top 5 Actions queue.”
+Alt text: “AGENTseo alpha demo showing a local site audit, explicit data-source states, a transparent priority score, and a Top 5 Actions queue.”

@@ -283,7 +283,7 @@ describe("apiRequest session flow", () => {
       .mockResolvedValueOnce(
         new Response('{"version":2}', {
           status: 200,
-          headers: { "content-type": "application/vnd.golemseo.project+json" },
+          headers: { "content-type": "application/vnd.agentseo.project+json" },
         }),
       );
     vi.stubGlobal("fetch", fetchMock);
@@ -295,10 +295,10 @@ describe("apiRequest session flow", () => {
     });
 
     expect(bundle.size).toBeGreaterThan(0);
-    expect(bundle.type).toBe("application/vnd.golemseo.project+json");
+    expect(bundle.type).toBe("application/vnd.agentseo.project+json");
     const init = fetchMock.mock.calls[1]?.[1] as RequestInit;
     const headers = new Headers(init.headers);
-    expect(headers.get("Accept")).toBe("application/vnd.golemseo.project+json");
+    expect(headers.get("Accept")).toBe("application/vnd.agentseo.project+json");
     expect(headers.get("X-AGENTseo-CSRF")).toBe("csrf-export");
     expect(headers.get("Content-Type")).toBe("application/json");
   });

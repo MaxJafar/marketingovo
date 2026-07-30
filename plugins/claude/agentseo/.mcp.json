@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "agentseo": {
+      "command": "node",
+      "args": [
+        "./dist/agentseo-mcp.mjs"
+      ],
+      "cwd": "."
+    }
+  }
+}

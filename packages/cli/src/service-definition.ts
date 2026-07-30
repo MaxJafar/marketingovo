@@ -4,7 +4,7 @@ import { join, win32 as windowsPath } from "node:path";
 
 export type ServicePlatform = "darwin" | "linux" | "win32";
 
-export const WINDOWS_TASK_NAME = "Golem SEO Local Service";
+export const WINDOWS_TASK_NAME = "AGENTseo Local Service";
 
 export interface ServiceDefinitionOptions {
   platform: ServicePlatform;
@@ -110,7 +110,7 @@ export function serviceDefinitionPath(
       homeDirectory,
       "Library",
       "LaunchAgents",
-      "com.golemworkers.golem-seo.plist",
+      "com.golemworkers.agentseo.plist",
     );
   }
   if (platform === "linux") {
@@ -119,14 +119,14 @@ export function serviceDefinitionPath(
       ".config",
       "systemd",
       "user",
-      "golem-seo.service",
+      "agentseo.service",
     );
   }
   return windowsPath.join(
     dataDirectory ??
-      windowsPath.join(homeDirectory, "AppData", "Local", "Golem SEO"),
+      windowsPath.join(homeDirectory, "AppData", "Local", "AGENTseo"),
     "service",
-    "golem-seo-login-task.xml",
+    "agentseo-login-task.xml",
   );
 }
 
@@ -174,7 +174,7 @@ export function createServiceDefinition(
 <plist version="1.0">
   <dict>
     <key>Label</key>
-    <string>com.golemworkers.golem-seo</string>
+    <string>com.golemworkers.agentseo</string>
     <key>ProgramArguments</key>
     <array>
 ${programArguments}
@@ -199,7 +199,7 @@ ${programArguments}
 
   if (options.platform === "linux") {
     const content = `[Unit]
-Description=Golem SEO local service
+Description=AGENTseo local service
 After=network-online.target
 
 [Service]
@@ -216,7 +216,7 @@ WantedBy=default.target
       content,
       installCommands: [
         ["systemctl", "--user", "daemon-reload"],
-        ["systemctl", "--user", "enable", "--now", "golem-seo.service"],
+        ["systemctl", "--user", "enable", "--now", "agentseo.service"],
       ],
     };
   }
@@ -238,7 +238,7 @@ WantedBy=default.target
 <Task version="1.4" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
     <Author>GolemWorkers</Author>
-    <Description>Runs the local Golem SEO daemon for durable audits and schedules.</Description>
+    <Description>Runs the local AGENTseo daemon for durable audits and schedules.</Description>
   </RegistrationInfo>
   <Triggers>
     <LogonTrigger>

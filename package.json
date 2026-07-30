@@ -3,7 +3,7 @@
   "version": "0.11.0-alpha.0",
   "private": true,
   "description": "AGENTseo monorepo",
-  "license": "Elastic-2.0",
+  "license": "Apache-2.0",
   "packageManager": "pnpm@10.34.5",
   "engines": {
     "node": ">=24 <25"
@@ -14,6 +14,7 @@
     }
   },
   "scripts": {
+    "doctor": "node scripts/doctor.mjs",
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
     "test": "turbo run test --concurrency=2 -- --maxWorkers=2",
@@ -25,7 +26,8 @@
     "format:check": "prettier --check .",
     "validate:no-containers": "node scripts/validate-no-containers.mjs",
     "validate:contracts": "node scripts/validate-contracts.mjs",
-    "validate:plugins": "node scripts/validate-plugins.mjs",
+    "plugins:generate": "node scripts/generate-agent-plugins.mjs",
+    "validate:plugins": "node scripts/generate-agent-plugins.mjs --check && node scripts/validate-plugins.mjs",
     "validate:licenses": "node scripts/validate-licenses.mjs",
     "audit:dependencies": "node scripts/audit-dependencies.mjs",
     "sbom": "node scripts/generate-sbom.mjs",

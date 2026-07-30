@@ -800,6 +800,7 @@ export function useImportProject() {
       const lowerName = file.name.toLowerCase();
       if (
         !lowerName.endsWith(".agentseo") &&
+        // Accepted for bundles exported under the previous product name.
         !lowerName.endsWith(".golemseo")
       ) {
         throw new Error(
@@ -809,7 +810,7 @@ export function useImportProject() {
       return apiRequest<ProjectImportResult>("/import", {
         method: "POST",
         headers: {
-          "Content-Type": "application/vnd.golemseo.project+json",
+          "Content-Type": "application/vnd.agentseo.project+json",
         },
         body: await file.text(),
       });

@@ -207,7 +207,7 @@ export class EncryptedFileCredentialStore implements CredentialStore {
       parsed.kdf?.name !== "argon2id" ||
       !parsed.entries
     ) {
-      throw new Error("Unsupported or corrupt Golem SEO vault");
+      throw new Error("Unsupported or corrupt AGENTseo vault");
     }
     return parsed;
   }

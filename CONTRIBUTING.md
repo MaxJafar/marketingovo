@@ -1,4 +1,4 @@
-# Contributing to Golem SEO
+# Contributing to AGENTseo
 
 Thank you for helping build a trustworthy SEO operations system. Contributions
 must be in English and must agree to [CLA.md](CLA.md).

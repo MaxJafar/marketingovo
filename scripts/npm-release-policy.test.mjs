@@ -16,7 +16,8 @@ const root = resolve(import.meta.dirname, "..");
 test("the frozen workspace graph uses only private AGENTseo package identities", async () => {
   const workspace = await readNpmReleaseWorkspace(root);
   assert.equal(workspace.packages.length, 13);
-  assert.equal(workspace.versioned.length, 18);
+  // 17 after the never-published legacy Codex plugin workspace was removed.
+  assert.equal(workspace.versioned.length, 17);
   assert.equal(
     workspace.versioned.find(({ directory }) => directory === "packages/cli")
       ?.manifest.name,

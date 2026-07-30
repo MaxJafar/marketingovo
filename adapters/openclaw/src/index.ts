@@ -76,18 +76,18 @@ function defaultTokenFile(): string {
       homedir(),
       "Library",
       "Application Support",
-      "Golem SEO",
+      "AGENTseo",
       "service-token",
     );
   if (process.platform === "win32")
     return join(
       process.env.LOCALAPPDATA ?? process.env.APPDATA ?? homedir(),
-      "Golem SEO",
+      "AGENTseo",
       "service-token",
     );
   return join(
     process.env.XDG_DATA_HOME ?? join(homedir(), ".local", "share"),
-    "golem-seo",
+    "agentseo",
     "service-token",
   );
 }

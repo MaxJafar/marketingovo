@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { CANONICAL_RELEASE_REPOSITORY } from "./release-policy.mjs";
 import { CANONICAL_UPDATER_ENDPOINT } from "./updater-metadata-policy.mjs";
 
-const placeholder = "__GOLEM_SEO_UPDATER_PUBLIC_KEY__";
+const placeholder = "__AGENTSEO_UPDATER_PUBLIC_KEY__";
 const publicKey = process.env.TAURI_UPDATER_PUBLIC_KEY?.trim();
 if (!publicKey || publicKey === placeholder || publicKey.length < 32) {
   throw new Error(
@@ -38,13 +38,13 @@ config.plugins.updater.pubkey = publicKey;
 
 if (process.platform === "win32") {
   const thumbprint =
-    process.env.GOLEMSEO_WINDOWS_CERTIFICATE_THUMBPRINT?.replaceAll(
+    process.env.AGENTSEO_WINDOWS_CERTIFICATE_THUMBPRINT?.replaceAll(
       /\s/gu,
       "",
     ).toUpperCase();
   if (!thumbprint || !/^[0-9A-F]{40}$/u.test(thumbprint)) {
     throw new Error(
-      "GOLEMSEO_WINDOWS_CERTIFICATE_THUMBPRINT must contain the imported Windows signing certificate thumbprint",
+      "AGENTSEO_WINDOWS_CERTIFICATE_THUMBPRINT must contain the imported Windows signing certificate thumbprint",
     );
   }
   config.bundle.windows = {

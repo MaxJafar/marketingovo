@@ -81,9 +81,9 @@ import type {
   UpdateProjectContextInput,
 } from "@agentseoapp/contracts";
 import {
-  GOLEMSEO_PROJECT_BUNDLE_LIMITS,
-  GolemSeoProjectBundleV2Schema,
-  type GolemSeoProjectBundleV2,
+  AGENTSEO_PROJECT_BUNDLE_LIMITS,
+  AgentSeoProjectBundleV2Schema,
+  type AgentSeoProjectBundleV2,
   type ProjectBundleArtifact,
   type ProjectBundleConnector,
   type ProjectBundleCustomRule,
@@ -115,7 +115,7 @@ import {
   validateConnectorConfiguration,
 } from "@agentseoapp/integrations";
 import {
-  GolemDatabase,
+  AgentSeoDatabase,
   type PagePerformanceRecord,
   type PerformanceWindowRecord,
   type QueryPerformanceRecord,
@@ -213,15 +213,15 @@ export interface LocalRuntimeOptions {
 
 export function defaultDataDirectory(): string {
   if (process.platform === "darwin")
-    return join(homedir(), "Library", "Application Support", "Golem SEO");
+    return join(homedir(), "Library", "Application Support", "AGENTseo");
   if (process.platform === "win32")
     return join(
       process.env.LOCALAPPDATA ?? process.env.APPDATA ?? homedir(),
-      "Golem SEO",
+      "AGENTseo",
     );
   return join(
     process.env.XDG_DATA_HOME ?? join(homedir(), ".local", "share"),
-    "golem-seo",
+    "agentseo",
   );
 }
 
@@ -464,7 +464,7 @@ function extractionConfigurationHash(rules: ExtractionRule[]): string {
 }
 
 function transferPayloadChecksum(
-  bundle: Omit<GolemSeoProjectBundleV2, "integrity">,
+  bundle: Omit<AgentSeoProjectBundleV2, "integrity">,
 ): string {
   return sha256(stableJson(bundle));
 }
@@ -771,15 +771,15 @@ if (!FormatRegistry.Has("uri")) {
 
 function validateProjectBundle(
   raw: unknown,
-): asserts raw is GolemSeoProjectBundleV2 {
+): asserts raw is AgentSeoProjectBundleV2 {
   rejectUnsafeTransferValue(raw);
-  if (!Value.Check(GolemSeoProjectBundleV2Schema, raw)) {
-    const detail = [...Value.Errors(GolemSeoProjectBundleV2Schema, raw)]
+  if (!Value.Check(AgentSeoProjectBundleV2Schema, raw)) {
+    const detail = [...Value.Errors(AgentSeoProjectBundleV2Schema, raw)]
       .slice(0, 8)
       .map((error) => `${error.path || "$"}: ${error.message}`)
       .join("; ");
     throw new ProjectBundleError(
-      `The file does not match .golemseo format version 2${detail ? `: ${detail}` : "."}`,
+      `The file does not match .agentseo format version 2${detail ? `: ${detail}` : "."}`,
       "invalid_project_bundle",
     );
   }
@@ -1124,7 +1124,7 @@ function validateProjectBundle(
   }
   if (
     embeddedBytes !== raw.integrity.embeddedArtifactBytes ||
-    embeddedBytes > GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxEmbeddedArtifactBytes
+    embeddedBytes > AGENTSEO_PROJECT_BUNDLE_LIMITS.maxEmbeddedArtifactBytes
   ) {
     throw new ProjectBundleError(
       "The embedded artifact byte count is invalid.",
@@ -2193,7 +2193,7 @@ async function createPdf(report: EngineReport): Promise<Uint8Array> {
 
 export class AgentSeoLocalRuntime implements AgentSeoRuntime {
   readonly dataDir: string;
-  readonly database: GolemDatabase;
+  readonly database: AgentSeoDatabase;
   readonly credentialStore: CredentialStore;
   readonly version: string;
   readonly events = new EventEmitter();
@@ -3668,8 +3668,8 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
     } catch {
       /* platform ACL may own this */
     }
-    this.database = new GolemDatabase({
-      path: join(this.dataDir, "golem-seo.db"),
+    this.database = new AgentSeoDatabase({
+      path: join(this.dataDir, "agentseo.db"),
     });
     this.recoverDeletionStaging();
     this.credentialStore =
@@ -5523,9 +5523,9 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
         omittedReason: reason,
       });
       if (
-        artifact.sizeBytes > GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxArtifactBytes ||
+        artifact.sizeBytes > AGENTSEO_PROJECT_BUNDLE_LIMITS.maxArtifactBytes ||
         embeddedArtifactBytes + artifact.sizeBytes >
-          GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxEmbeddedArtifactBytes
+          AGENTSEO_PROJECT_BUNDLE_LIMITS.maxEmbeddedArtifactBytes
       ) {
         artifacts.push(omitted("size_limit"));
         continue;
@@ -5574,8 +5574,8 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
       }
     }
 
-    const payload: Omit<GolemSeoProjectBundleV2, "integrity"> = {
-      format: "golemseo-project",
+    const payload: Omit<AgentSeoProjectBundleV2, "integrity"> = {
+      format: "agentseo-project",
       version: 2,
       exportedAt: new Date().toISOString(),
       secretsIncluded: false,
@@ -5617,16 +5617,16 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
       projectContext: sanitizeTransferValue({
         versions: this.database.listProjectContextVersions(projectId),
         journal: this.database.listProjectContextJournal(projectId),
-      }) as GolemSeoProjectBundleV2["projectContext"],
+      }) as AgentSeoProjectBundleV2["projectContext"],
       extractionRuleVersions: sanitizeTransferValue(
         this.database.listExtractionRuleVersions(projectId),
-      ) as GolemSeoProjectBundleV2["extractionRuleVersions"],
+      ) as AgentSeoProjectBundleV2["extractionRuleVersions"],
       actions: this.database
         .listActions(projectId, { includeAdjudicated: true })
         .map((action) => actionForProjectBundle(action)),
       metrics: sanitizeTransferValue(
         this.database.listMetricHistory(projectId),
-      ) as ReturnType<GolemDatabase["listMetricHistory"]>,
+      ) as ReturnType<AgentSeoDatabase["listMetricHistory"]>,
       schedules: sanitizeTransferValue(
         this.database.listSchedules(projectId),
       ) as Schedule[],
@@ -5634,7 +5634,7 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
       customRules,
       artifacts,
     };
-    const bundle: GolemSeoProjectBundleV2 = {
+    const bundle: AgentSeoProjectBundleV2 = {
       ...payload,
       integrity: {
         algorithm: "sha256",
@@ -5644,9 +5644,9 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
     };
     validateProjectBundle(bundle);
     const bytes = Buffer.from(JSON.stringify(bundle, null, 2));
-    if (bytes.byteLength > GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxBytes) {
+    if (bytes.byteLength > AGENTSEO_PROJECT_BUNDLE_LIMITS.maxBytes) {
       throw new ProjectBundleError(
-        `The project export is ${bytes.byteLength} bytes; the safe .golemseo limit is ${GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxBytes} bytes.`,
+        `The project export is ${bytes.byteLength} bytes; the safe .agentseo limit is ${AGENTSEO_PROJECT_BUNDLE_LIMITS.maxBytes} bytes.`,
         "bundle_too_large",
         413,
       );
@@ -5663,9 +5663,9 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
         typeof input === "string"
           ? Buffer.byteLength(input, "utf8")
           : input.byteLength;
-      if (bytes > GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxBytes)
+      if (bytes > AGENTSEO_PROJECT_BUNDLE_LIMITS.maxBytes)
         throw new ProjectBundleError(
-          "The .golemseo file exceeds the 25 MiB import limit.",
+          "The .agentseo file exceeds the 25 MiB import limit.",
           "bundle_too_large",
           413,
         );
@@ -5677,7 +5677,7 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
         ) as unknown;
       } catch {
         throw new ProjectBundleError(
-          "The .golemseo file is not valid JSON.",
+          "The .agentseo file is not valid JSON.",
           "invalid_bundle_json",
         );
       }
@@ -5693,15 +5693,15 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
       }
       if (encoded === undefined)
         throw new ProjectBundleError(
-          "A .golemseo project bundle is required.",
+          "A .agentseo project bundle is required.",
           "invalid_bundle_json",
         );
       if (
         Buffer.byteLength(encoded, "utf8") >
-        GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxBytes
+        AGENTSEO_PROJECT_BUNDLE_LIMITS.maxBytes
       )
         throw new ProjectBundleError(
-          "The .golemseo file exceeds the 25 MiB import limit.",
+          "The .agentseo file exceeds the 25 MiB import limit.",
           "bundle_too_large",
           413,
         );
@@ -5946,10 +5946,3 @@ export class AgentSeoLocalRuntime implements AgentSeoRuntime {
     this.database.close();
   }
 }
-
-/**
- * @deprecated Use {@link AgentSeoLocalRuntime}. This is an exact constructor
- * alias, retained through 1.x so migrated consumers keep both runtime and type
- * compatibility without creating a second implementation.
- */
-export { AgentSeoLocalRuntime as GolemLocalRuntime };

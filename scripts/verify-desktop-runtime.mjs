@@ -83,7 +83,7 @@ const deployedChromiumResolver = resolve(
   "app/node_modules/.pnpm/node_modules/@agentseoapp/core/dist/chromium-runtime.js",
 );
 await access(deployedChromiumResolver);
-process.env.GOLEMSEO_CHROME_PATH = chromiumExecutable;
+process.env.AGENTSEO_CHROME_PATH = chromiumExecutable;
 const { resolveChromiumExecutablePath } = await import(
   pathToFileURL(deployedChromiumResolver).href
 );
@@ -95,7 +95,7 @@ const extension = process.platform === "win32" ? ".exe" : "";
 const nodeExecutable = resolve(
   tauriRoot,
   "binaries",
-  `golem-seo-node-${target}${extension}`,
+  `agentseo-node-${target}${extension}`,
 );
 await assertExecutable(nodeExecutable);
 const bundledNodeVersion = execFileSync(nodeExecutable, ["--version"], {
@@ -111,7 +111,7 @@ if (process.argv.includes("--require-broker")) {
   const broker = resolve(
     runtimeRoot,
     "broker",
-    `golem-seo-credential-broker${extension}`,
+    `agentseo-credential-broker${extension}`,
   );
   await assertExecutable(broker);
 }
@@ -146,9 +146,9 @@ if (process.argv.includes("--launch-browser")) {
   try {
     const page = await browser.newPage();
     await page.setContent(
-      "<!doctype html><title>Golem SEO runtime smoke</title>",
+      "<!doctype html><title>AGENTseo runtime smoke</title>",
     );
-    if ((await page.title()) !== "Golem SEO runtime smoke")
+    if ((await page.title()) !== "AGENTseo runtime smoke")
       throw new Error("Bundled Chromium smoke page failed");
     await page.close();
   } finally {

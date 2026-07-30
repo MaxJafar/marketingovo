@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { GolemLocalRuntime } from "@agentseoapp/runtime";
+import { AgentSeoLocalRuntime } from "@agentseoapp/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 describe("run evidence API", () => {
@@ -12,8 +12,8 @@ describe("run evidence API", () => {
   });
 
   async function setup() {
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-run-evidence-api-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-run-evidence-api-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
     servers.push(server);
@@ -87,7 +87,7 @@ describe("run evidence API", () => {
     const dashboard = await server.app.inject({
       method: "GET",
       url: `/api/v1/runs/${run.id}/evidence?section=crawl`,
-      headers: { ...headers, "x-golem-client": "dashboard" },
+      headers: { ...headers, "x-agentseo-client": "dashboard" },
     });
     expect(dashboard.statusCode).toBe(200);
     expect(dashboard.json()).toMatchObject({

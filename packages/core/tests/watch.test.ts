@@ -64,7 +64,7 @@ function runCli(args: string[]): Promise<CliResult> {
 }
 
 beforeAll(async () => {
-  tmpRoot = mkdtempSync(join(tmpdir(), "golem-seo-watch-"));
+  tmpRoot = mkdtempSync(join(tmpdir(), "agentseo-watch-"));
   site = await startFixtureSite();
 }, 30_000);
 

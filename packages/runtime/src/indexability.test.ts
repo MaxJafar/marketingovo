@@ -2,7 +2,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { GolemLocalRuntime } from "./index.js";
+import { AgentSeoLocalRuntime } from "./index.js";
 import {
   assessEnginePageIndexability,
   summarizePageIndexability,
@@ -139,8 +139,8 @@ describe("runtime page indexability", () => {
       reportToHtml: () => "<!doctype html><title>Indexability</title>",
       reportToCsv: () => "url,status\n",
     };
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-indexability-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-indexability-")),
       engine,
     });
     try {

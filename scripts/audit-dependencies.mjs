@@ -55,7 +55,7 @@ const response = await fetch(endpoint, {
   headers: {
     accept: "application/json",
     "content-type": "application/json",
-    "user-agent": "Golem-SEO-dependency-audit/0.11",
+    "user-agent": "AGENTseo-dependency-audit/0.11",
   },
   body: JSON.stringify(payload),
   redirect: "error",

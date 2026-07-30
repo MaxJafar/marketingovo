@@ -15,7 +15,7 @@ import {
   MemoryCredentialStore,
   type CredentialRef,
 } from "@agentseoapp/credentials";
-import { GolemDatabase } from "@agentseoapp/storage-sqlite";
+import { AgentSeoDatabase } from "@agentseoapp/storage-sqlite";
 import { discoverLegacyData, importLegacyData } from "./index.js";
 
 const GSC_SECRET = "gsc-refresh-never-leak";
@@ -226,8 +226,8 @@ describe("legacy v0 importer", () => {
       if (process.platform !== "win32") expect(mode(path)).toBe(original.mode);
     }
 
-    const databasePath = join(destination, "golem-seo.db");
-    const database = new GolemDatabase({ path: databasePath });
+    const databasePath = join(destination, "agentseo.db");
+    const database = new AgentSeoDatabase({ path: databasePath });
     try {
       const projects = database.listProjects();
       expect(projects).toHaveLength(1);
@@ -330,7 +330,7 @@ describe("legacy v0 importer", () => {
       credentials: 0,
       customRuleFiles: 0,
     });
-    const reopened = new GolemDatabase({ path: databasePath });
+    const reopened = new AgentSeoDatabase({ path: databasePath });
     try {
       expect(reopened.listProjects()).toHaveLength(1);
       expect(reopened.listRuns()).toHaveLength(2);

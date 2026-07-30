@@ -2,13 +2,13 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { GolemLocalRuntime } from "@agentseoapp/runtime";
+import { AgentSeoLocalRuntime } from "@agentseoapp/runtime";
 import { createLocalServer } from "./index.js";
 
 describe("internal-link explorer API", () => {
   it("keeps the page inventory on the latest audit and serves immutable edges", async () => {
-    const runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-link-api-")),
+    const runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-link-api-")),
     });
     const server = await createLocalServer({ runtime, port: 3210 });
     try {
@@ -128,7 +128,7 @@ describe("internal-link explorer API", () => {
       const inventory = await server.app.inject({
         method: "GET",
         url: `/api/v1/pages?siteId=${project.id}`,
-        headers: { ...headers, "x-golem-client": "dashboard" },
+        headers: { ...headers, "x-agentseo-client": "dashboard" },
       });
       expect(inventory.statusCode).toBe(200);
       expect(inventory.json().data.items).toEqual([

@@ -65,11 +65,11 @@ try {
     );
     assert.ok(
       entries.includes("package/LICENSE"),
-      `${archive} is missing the Elastic License 2.0 terms`,
+      `${archive} is missing the Apache-2.0 license terms`,
     );
     assert.ok(
       entries.includes("package/NOTICE"),
-      `${archive} is missing the Golem SEO source-available notice`,
+      `${archive} is missing the AGENTseo attribution notice`,
     );
     assert.ok(
       entries.some((entry) => /^package\/dist\/.+\.js$/u.test(entry)),
@@ -120,7 +120,7 @@ try {
   const installTarballs =
     process.env.CI === "true" ||
     process.env.AGENTSEO_NPM_INSTALL_SMOKE === "1" ||
-    process.env.GOLEMSEO_NPM_INSTALL_SMOKE === "1";
+    process.env.AGENTSEO_NPM_INSTALL_SMOKE === "1";
   if (installTarballs) {
     const installed = spawnSync(
       "pnpm",

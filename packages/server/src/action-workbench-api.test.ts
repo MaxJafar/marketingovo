@@ -7,7 +7,7 @@ import type {
   ActionService,
   IssueInstance,
 } from "@agentseoapp/contracts";
-import { GolemLocalRuntime } from "@agentseoapp/runtime";
+import { AgentSeoLocalRuntime } from "@agentseoapp/runtime";
 import { createLocalServer, type LocalServer } from "./index.js";
 
 const HOST = "127.0.0.1:3210";
@@ -21,8 +21,8 @@ describe("action workbench API", () => {
   });
 
   async function setup() {
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-action-workbench-"));
-    const runtime = new GolemLocalRuntime({ dataDir });
+    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-action-workbench-"));
+    const runtime = new AgentSeoLocalRuntime({ dataDir });
     const server = await createLocalServer({ runtime, port: 3210 });
     activeServers.push(server);
     const token = readFileSync(server.serviceTokenPath, "utf8").trim();
@@ -32,7 +32,7 @@ describe("action workbench API", () => {
     };
     const headers = {
       ...serviceHeaders,
-      "x-golem-client": "dashboard",
+      "x-agentseo-client": "dashboard",
     };
     const project = await runtime.projects.create({
       name: "Action evidence fixture",
@@ -42,7 +42,7 @@ describe("action workbench API", () => {
   }
 
   function seedAction(
-    runtime: GolemLocalRuntime,
+    runtime: AgentSeoLocalRuntime,
     projectId: string,
     options: { successfulBaseline?: boolean } = {},
   ) {

@@ -17,7 +17,7 @@ import type {
   RunStatus,
 } from "@agentseoapp/contracts";
 import type { CredentialRef, CredentialStore } from "@agentseoapp/credentials";
-import { GolemDatabase } from "@agentseoapp/storage-sqlite";
+import { AgentSeoDatabase } from "@agentseoapp/storage-sqlite";
 
 interface LegacyAuditIssue {
   id?: string;
@@ -94,7 +94,7 @@ export interface LegacyImportReceipt {
 export interface LegacyImportOptions {
   sourceDirectory: string;
   destinationDirectory: string;
-  database?: GolemDatabase;
+  database?: AgentSeoDatabase;
   credentialStore?: CredentialStore;
   environment?: NodeJS.ProcessEnv;
 }
@@ -208,7 +208,7 @@ export function discoverLegacyData(
 }
 
 function projectFor(
-  database: GolemDatabase,
+  database: AgentSeoDatabase,
   cache: Map<string, Project>,
   url: string,
 ): Project {
@@ -272,7 +272,7 @@ function canonicalIssue(
 
 function importAuditFile(
   path: string,
-  database: GolemDatabase,
+  database: AgentSeoDatabase,
   projects: Map<string, Project>,
   receipt: LegacyImportReceipt,
 ): void {
@@ -334,7 +334,7 @@ function tableExists(database: DatabaseSync, name: string): boolean {
 
 function importCrawlDatabase(
   path: string,
-  database: GolemDatabase,
+  database: AgentSeoDatabase,
   projects: Map<string, Project>,
   receipt: LegacyImportReceipt,
 ): void {
@@ -441,7 +441,7 @@ function cronForInterval(minutes: number): string {
 
 function importSchedule(
   path: string,
-  database: GolemDatabase,
+  database: AgentSeoDatabase,
   projects: Map<string, Project>,
   receipt: LegacyImportReceipt,
 ): void {
@@ -516,7 +516,7 @@ export async function importLegacyData(
   }
   const ownedDatabase =
     options.database ??
-    new GolemDatabase({ path: join(destination, "golem-seo.db") });
+    new AgentSeoDatabase({ path: join(destination, "agentseo.db") });
   const receipt: LegacyImportReceipt = {
     id: randomUUID(),
     importedAt: new Date().toISOString(),

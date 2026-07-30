@@ -5,15 +5,13 @@ import { describe, expect, it, vi } from "vitest";
 import {
   AgentSeoClient,
   createGeneratedAgentSeoClient,
-  createGeneratedGolemSeoClient,
-  GolemSeoClient,
   validateLocalApiBaseUrl,
 } from "./index.js";
 
 describe("local API trust boundary", () => {
-  it("makes canonical SDK exports primary while retaining exact legacy aliases", () => {
-    expect(GolemSeoClient).toBe(AgentSeoClient);
-    expect(createGeneratedGolemSeoClient).toBe(createGeneratedAgentSeoClient);
+  it("exposes the canonical SDK surface", () => {
+    expect(typeof AgentSeoClient).toBe("function");
+    expect(typeof createGeneratedAgentSeoClient).toBe("function");
   });
 
   it.each([1, 80, 3210, 65_535])(
@@ -81,7 +79,7 @@ describe("local API trust boundary", () => {
     const fetchImpl = vi.fn<typeof fetch>(async () =>
       Response.json({ runId: "verification-run", verificationState: "queued" }),
     );
-    const client = new GolemSeoClient({
+    const client = new AgentSeoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -121,7 +119,7 @@ describe("local API trust boundary", () => {
           adjudication: { status: "ignored" },
         }),
       );
-    const client = new GolemSeoClient({
+    const client = new AgentSeoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -181,7 +179,7 @@ describe("local API trust boundary", () => {
           sequence: 1,
         }),
       );
-    const client = new GolemSeoClient({
+    const client = new AgentSeoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -262,7 +260,7 @@ describe("local API trust boundary", () => {
           fields: [],
         }),
       );
-    const client = new GolemSeoClient({
+    const client = new AgentSeoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -325,7 +323,7 @@ describe("local API trust boundary", () => {
         globalCredentialsRetained: true,
       }),
     );
-    const client = new GolemSeoClient({
+    const client = new AgentSeoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -354,7 +352,7 @@ describe("local API trust boundary", () => {
         items: [],
       }),
     );
-    const client = new GolemSeoClient({
+    const client = new AgentSeoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -382,7 +380,7 @@ describe("local API trust boundary", () => {
         items: [],
       }),
     );
-    const client = new GolemSeoClient({
+    const client = new AgentSeoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -410,7 +408,7 @@ describe("local API trust boundary", () => {
         run: { id: "replay-one" },
       }),
     );
-    const client = new GolemSeoClient({
+    const client = new AgentSeoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -432,7 +430,7 @@ describe("local API trust boundary", () => {
     const fetchImpl = vi.fn<typeof fetch>(async () =>
       Response.json({ scoreVersion: "regression-v1" }),
     );
-    const client = new GolemSeoClient({
+    const client = new AgentSeoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "local-service-secret",
       fetch: fetchImpl,
@@ -454,7 +452,7 @@ describe("local API trust boundary", () => {
         version: "0.11.0-alpha.0",
       }),
     );
-    const client = createGeneratedGolemSeoClient({
+    const client = createGeneratedAgentSeoClient({
       baseUrl: "http://127.0.0.1:3210/api/v1",
       token: "generated-client-secret",
       fetch: fetchImpl,

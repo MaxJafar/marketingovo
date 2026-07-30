@@ -6,7 +6,7 @@ const extension = process.platform === "win32" ? ".exe" : "";
 const source = resolve(
   root,
   "packages/credential-broker-native/target/release",
-  `golem-seo-credential-broker${extension}`,
+  `agentseo-credential-broker${extension}`,
 );
 const destinationDirectory = resolve(
   root,
@@ -14,7 +14,7 @@ const destinationDirectory = resolve(
 );
 const destination = resolve(
   destinationDirectory,
-  `golem-seo-credential-broker${extension}`,
+  `agentseo-credential-broker${extension}`,
 );
 await mkdir(destinationDirectory, { recursive: true, mode: 0o700 });
 await copyFile(source, destination);

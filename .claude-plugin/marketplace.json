@@ -1,0 +1,32 @@
+{
+  "name": "agentseo",
+  "owner": {
+    "name": "AGENTseo",
+    "url": "https://golemworkers.com"
+  },
+  "metadata": {
+    "description": "Local-first, evidence-based SEO tooling for coding agents.",
+    "version": "0.11.0-alpha.0"
+  },
+  "plugins": [
+    {
+      "name": "agentseo",
+      "source": "./plugins/claude/agentseo",
+      "description": "Turn local crawl, Search Console, GA4, performance, and SERP evidence into prioritized SEO actions.",
+      "version": "0.11.0-alpha.0",
+      "author": {
+        "name": "AGENTseo",
+        "url": "https://golemworkers.com"
+      },
+      "homepage": "https://golemworkers.com",
+      "license": "Apache-2.0",
+      "keywords": [
+        "seo",
+        "marketing",
+        "crawler",
+        "search-console",
+        "analytics"
+      ]
+    }
+  ]
+}

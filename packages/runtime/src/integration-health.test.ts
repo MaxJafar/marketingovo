@@ -3,15 +3,15 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { MemoryCredentialStore } from "@agentseoapp/credentials";
-import { GolemLocalRuntime } from "./index.js";
+import { AgentSeoLocalRuntime } from "./index.js";
 
 function runtimeWith(
   fetchImpl: typeof fetch,
   credentialStore = new MemoryCredentialStore(),
-): { runtime: GolemLocalRuntime; credentialStore: MemoryCredentialStore } {
+): { runtime: AgentSeoLocalRuntime; credentialStore: MemoryCredentialStore } {
   return {
-    runtime: new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-integration-health-")),
+    runtime: new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-integration-health-")),
       integrationFetch: fetchImpl,
       credentialStore,
     }),

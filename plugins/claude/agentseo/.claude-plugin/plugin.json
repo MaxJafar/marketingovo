@@ -1,0 +1,22 @@
+{
+  "name": "agentseo",
+  "version": "0.11.0-alpha.0",
+  "description": "Turn local crawl, Search Console, GA4, performance, and SERP evidence into prioritized SEO actions.",
+  "author": {
+    "name": "AGENTseo",
+    "url": "https://golemworkers.com"
+  },
+  "homepage": "https://golemworkers.com",
+  "repository": "https://github.com/GolemWorkers/agentseo",
+  "license": "Apache-2.0",
+  "keywords": [
+    "seo",
+    "marketing",
+    "crawler",
+    "search-console",
+    "analytics"
+  ],
+  "commands": "./commands/",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}

@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Action, IssueInstance } from "@agentseoapp/contracts";
-import { GolemDatabase } from "./database.js";
+import { AgentSeoDatabase } from "./database.js";
 
 function issue(at: string): IssueInstance {
   return {
@@ -31,8 +31,8 @@ function issue(at: string): IssueInstance {
 
 describe("issue adjudication storage", () => {
   it("keeps reviewed classifications sticky, reversible, scoped, and out of priorities", () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-issue-review-"));
-    const database = new GolemDatabase({ path: join(root, "golem-seo.db") });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-issue-review-"));
+    const database = new AgentSeoDatabase({ path: join(root, "agentseo.db") });
     const project = database.createProject({
       name: "Review fixture",
       canonicalUrl: "https://example.com",
@@ -188,8 +188,8 @@ describe("issue adjudication storage", () => {
   });
 
   it("narrows grouped actions per URL and hides them only when every live instance is reviewed", () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-action-review-scope-"));
-    const database = new GolemDatabase({ path: join(root, "golem-seo.db") });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-action-review-scope-"));
+    const database = new AgentSeoDatabase({ path: join(root, "agentseo.db") });
     const project = database.createProject({
       name: "Grouped review fixture",
       canonicalUrl: "https://example.com",
@@ -281,8 +281,8 @@ describe("issue adjudication storage", () => {
   });
 
   it("filters and paginates the review workspace without returning another site", () => {
-    const root = mkdtempSync(join(tmpdir(), "golem-issue-filters-"));
-    const database = new GolemDatabase({ path: join(root, "golem-seo.db") });
+    const root = mkdtempSync(join(tmpdir(), "agentseo-issue-filters-"));
+    const database = new AgentSeoDatabase({ path: join(root, "agentseo.db") });
     const project = database.createProject({
       name: "Filter fixture",
       canonicalUrl: "https://filters.example.com",

@@ -1,8 +1,6 @@
 type Environment = Readonly<Record<string, string | undefined>>;
 type Warn = (message: string) => void;
 const warnedLegacyNames = new Set<string>();
-export const LEGACY_MCP_EXECUTABLE = "golem-seo-mcp";
-export const CANONICAL_MCP_EXECUTABLE = "agentseo-mcp";
 
 function readCompatibleEnvironmentVariable(
   canonicalName: string,
@@ -54,12 +52,4 @@ export function resolveMcpConnectionEnvironment(
       warningState,
     ),
   };
-}
-
-export function warnLegacyMcpInvocation(
-  warn: Warn = (message) => process.stderr.write(message),
-): void {
-  warn(
-    `Warning: ${LEGACY_MCP_EXECUTABLE} is deprecated; use ${CANONICAL_MCP_EXECUTABLE}. The legacy alias remains supported through AGENTseo 1.x.\n`,
-  );
 }

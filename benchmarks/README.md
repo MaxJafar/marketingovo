@@ -16,7 +16,7 @@ benchmark output, but cannot hide a missed defect, a severity mismatch, or a
 High-severity false positive.
 
 The default baseline is deliberately conservative for shared CI runners. A
-controlled release runner may set `GOLEMSEO_BENCHMARK_BASELINE_MS` to its
+controlled release runner may set `AGENTSEO_BENCHMARK_BASELINE_MS` to its
 recorded median without changing the correctness corpus. Any baseline update
 must include the runner specification and benchmark evidence in the pull
 request; raising it only to make a regression pass is not accepted.

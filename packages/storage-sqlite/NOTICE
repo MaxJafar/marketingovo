@@ -1,15 +1,28 @@
-Golem SEO Community Edition
+AGENTseo
 Copyright 2026 GolemWorkers
 
-This product is source-available under the Elastic License 2.0. It is not an
-Open Source Initiative approved open-source product.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at
 
-The Elastic License 2.0 does not grant permission to use the Golem SEO,
-GolemWorkers, or related names, logos, trade dress, or marks. See TRADEMARKS.md.
+    https://www.apache.org/licenses/LICENSE-2.0
 
-Golem SEO on Golem Workers is a separate proprietary commercial product. The
-Community Edition does not contain dormant commercial implementations or a
-license-key bypass for that service. See COMMERCIAL.md.
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+
+AGENTseo is open-source software under an Open Source Initiative approved
+license. Apache-2.0 grants patent rights and permits commercial use,
+modification, distribution, and private use.
+
+Apache-2.0 does not grant permission to use the AGENTseo, GolemWorkers, or
+related names, logos, trade dress, or marks beyond the limited attribution use
+the License requires. See TRADEMARKS.md.
+
+AGENTseo on Golem Workers is a separate hosted commercial service. This
+repository does not contain dormant commercial implementations or a license-key
+bypass for that service. See COMMERCIAL.md.
 
 Third-party notices are generated for each release from the dependency lockfile
 and are distributed with release artifacts.

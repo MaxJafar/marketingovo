@@ -76,7 +76,7 @@ describe("reportToHtml", () => {
     expect(html).toContain("priority-low");
     expect(html).toContain("AGENTseo Community Edition");
     expect(html).toContain("Crawl evidence only");
-    expect(html).not.toContain("GolemSEO v0.2");
+    expect(html).not.toContain("AgentSeo v0.2");
   });
   it("escapes HTML in URLs and titles", () => {
     const html = reportToHtml(SAMPLE);

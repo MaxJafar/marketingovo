@@ -31,7 +31,7 @@ import { AgentSeoClient } from "@agentseoapp/sdk";
 import { createLocalServer, type LocalServer } from "@agentseoapp/server";
 import {
   createDatabaseBackup,
-  GolemDatabase,
+  AgentSeoDatabase,
   restoreDatabaseBackup,
 } from "@agentseoapp/storage-sqlite";
 import {
@@ -342,11 +342,11 @@ async function project(args: ParsedArgs): Promise<void> {
     const [projectId, output] = rest;
     if (!projectId || !output)
       throw new Error(
-        "usage: agentseo project export <project-id> <output.golemseo>",
+        "usage: agentseo project export <project-id> <output.agentseo>",
       );
     const destination = resolve(output);
-    if (!destination.endsWith(".golemseo"))
-      throw new Error("The export filename must end in .golemseo");
+    if (!destination.endsWith(".agentseo"))
+      throw new Error("The export filename must end in .agentseo");
     const bytes = await client.exportProject(projectId);
     writeFileSync(destination, bytes, { mode: 0o600, flag: "wx" });
     return json({ path: destination, bytes: bytes.byteLength });
@@ -354,10 +354,10 @@ async function project(args: ParsedArgs): Promise<void> {
   if (subcommand === "import") {
     const source = rest[0];
     if (!source)
-      throw new Error("usage: agentseo project import <project.golemseo>");
+      throw new Error("usage: agentseo project import <project.agentseo>");
     const path = resolve(source);
-    if (!path.endsWith(".golemseo"))
-      throw new Error("The import filename must end in .golemseo");
+    if (!path.endsWith(".agentseo"))
+      throw new Error("The import filename must end in .agentseo");
     if (!statSync(path).isFile())
       throw new Error("The import path is not a file");
     return json(await client.importProject(readFileSync(path)));
@@ -807,14 +807,14 @@ async function backupCommand(args: ParsedArgs): Promise<void> {
     );
   }
   const root = dataDirectory(args.flags);
-  const databasePath = join(root, "golem-seo.db");
+  const databasePath = join(root, "agentseo.db");
   if (!existsSync(databasePath)) {
     throw new Error("No AGENTseo database exists in this data directory");
   }
   const lease = offlineLease(args);
-  let database: GolemDatabase | undefined;
+  let database: AgentSeoDatabase | undefined;
   try {
-    database = new GolemDatabase({ path: databasePath });
+    database = new AgentSeoDatabase({ path: databasePath });
     json(await createDatabaseBackup(database, resolve(destination)));
   } finally {
     database?.close();
@@ -844,7 +844,7 @@ async function restoreCommand(args: ParsedArgs): Promise<void> {
     json(
       await restoreDatabaseBackup(
         resolve(source),
-        join(root, "golem-seo.db"),
+        join(root, "agentseo.db"),
         expected,
       ),
     );
@@ -955,7 +955,7 @@ function service(args: ParsedArgs): void {
     if (platform === "linux")
       execFileSync(
         "systemctl",
-        ["--user", "disable", "--now", "golem-seo.service"],
+        ["--user", "disable", "--now", "agentseo.service"],
         { stdio: "inherit" },
       );
     if (platform === "win32") {
@@ -985,10 +985,10 @@ function service(args: ParsedArgs): void {
         ? [
             "launchctl",
             "print",
-            `gui/${process.getuid?.()}/com.golemworkers.golem-seo`,
+            `gui/${process.getuid?.()}/com.golemworkers.agentseo`,
           ]
         : platform === "linux"
-          ? ["systemctl", "--user", "status", "golem-seo.service"]
+          ? ["systemctl", "--user", "status", "agentseo.service"]
           : [
               "schtasks.exe",
               "/Query",

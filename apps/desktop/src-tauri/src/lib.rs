@@ -145,9 +145,9 @@ fn runtime_entry(app: &tauri::App) -> Result<PathBuf, Box<dyn std::error::Error>
 
 fn broker_entry(app: &tauri::App) -> Result<PathBuf, Box<dyn std::error::Error>> {
     let name = if cfg!(target_os = "windows") {
-        "golem-seo-credential-broker.exe"
+        "agentseo-credential-broker.exe"
     } else {
-        "golem-seo-credential-broker"
+        "agentseo-credential-broker"
     };
     Ok(app
         .path()
@@ -484,15 +484,15 @@ async fn run_packaged_daemon(
     let args = desktop_daemon_args(&entry, &data_dir, &broker, &public_config);
     let command = handle
         .shell()
-        .sidecar("golem-seo-node")
+        .sidecar("agentseo-node")
         .map_err(|error| format!("could not initialize the packaged runtime: {error}"))?
         .args(args)
-        .env("GOLEM_SEO_CREDENTIAL_BROKER", &broker)
-        .env("GOLEMSEO_CHROME_PATH", &public_config.chromium_executable)
+        .env("AGENTSEO_CREDENTIAL_BROKER", &broker)
+        .env("AGENTSEO_CHROME_PATH", &public_config.chromium_executable)
         .env("PLAYWRIGHT_BROWSERS_PATH", &public_config.browser_directory)
         .env("PLAYWRIGHT_SKIP_BROWSER_GC", "1")
         .env(
-            "GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID",
+            "AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID",
             &public_config.google_desktop_client_id,
         );
     let (mut receiver, child) = command
@@ -588,7 +588,7 @@ pub fn run() {
         .setup(|app| {
             let background_mode = requested_background_mode();
             let arguments = std::env::args_os().collect::<Vec<_>>();
-            let update_setting = std::env::var("GOLEMSEO_AUTO_UPDATE").ok();
+            let update_setting = std::env::var("AGENTSEO_AUTO_UPDATE").ok();
             let check_updates = should_check_for_updates(
                 cfg!(debug_assertions),
                 &arguments,
@@ -753,7 +753,7 @@ mod tests {
         let args = desktop_daemon_args(
             Path::new("/runtime/app/dist/cli.js"),
             Path::new("/user/data"),
-            Path::new("/runtime/broker/golem-seo-credential-broker"),
+            Path::new("/runtime/broker/agentseo-credential-broker"),
             &config,
         );
 
@@ -764,7 +764,7 @@ mod tests {
         assert!(args.windows(2).any(|pair| pair
             == [
                 "--credential-broker",
-                "/runtime/broker/golem-seo-credential-broker"
+                "/runtime/broker/agentseo-credential-broker"
             ]));
         assert!(args
             .windows(2)

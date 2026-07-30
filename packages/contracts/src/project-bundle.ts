@@ -20,7 +20,7 @@ import {
  * Hard limits are part of the public transfer contract. They keep a local
  * import bounded before any rows or artifacts are written.
  */
-export const GOLEMSEO_PROJECT_BUNDLE_LIMITS = Object.freeze({
+export const AGENTSEO_PROJECT_BUNDLE_LIMITS = Object.freeze({
   maxBytes: 25 * 1024 * 1024,
   maxArtifactBytes: 4 * 1024 * 1024,
   maxEmbeddedArtifactBytes: 16 * 1024 * 1024,
@@ -134,10 +134,10 @@ export type ProjectBundleIssueAdjudication = Static<
 export const ProjectBundleContextSchema = Type.Object(
   {
     versions: Type.Array(ProjectContextVersionSchema, {
-      maxItems: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxContextVersions,
+      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxContextVersions,
     }),
     journal: Type.Array(ProjectContextJournalEntrySchema, {
-      maxItems: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxContextEntries,
+      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxContextEntries,
     }),
   },
   { additionalProperties: false },
@@ -179,13 +179,13 @@ const EmbeddedArtifactSchema = Type.Object(
     mediaType: Type.String({ minLength: 1, maxLength: 160 }),
     sizeBytes: Type.Integer({
       minimum: 0,
-      maximum: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxArtifactBytes,
+      maximum: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxArtifactBytes,
     }),
     sha256: Sha256Schema,
     contentIncluded: Type.Literal(true),
     contentBase64: Type.String({
       maxLength:
-        Math.ceil(GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxArtifactBytes / 3) * 4,
+        Math.ceil(AGENTSEO_PROJECT_BUNDLE_LIMITS.maxArtifactBytes / 3) * 4,
       pattern: "^[A-Za-z0-9+/]*={0,2}$",
     }),
   },
@@ -252,59 +252,59 @@ export type ProjectBundleCustomRule = Static<
   typeof ProjectBundleCustomRuleSchema
 >;
 
-export const GolemSeoProjectBundleV2Schema = Type.Object(
+export const AgentSeoProjectBundleV2Schema = Type.Object(
   {
-    format: Type.Literal("golemseo-project"),
+    format: Type.Literal("agentseo-project"),
     version: Type.Literal(2),
     exportedAt: IsoDateTimeSchema,
     secretsIncluded: Type.Literal(false),
     project: ProjectSchema,
     settings: Type.Union([ProjectBundleSettingsSchema, Type.Null()]),
     runs: Type.Array(RunSchema, {
-      maxItems: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxRuns,
+      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxRuns,
     }),
     runConfigurations: Type.Optional(
       Type.Array(ProjectBundleRunConfigurationSchema, {
-        maxItems: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxRunConfigurations,
+        maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxRunConfigurations,
       }),
     ),
     runModules: Type.Array(ProjectBundleRunModuleSchema, {
-      maxItems: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxRunModules,
+      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxRunModules,
     }),
     pages: Type.Array(ProjectBundlePageSchema, {
-      maxItems: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxPages,
+      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxPages,
     }),
     issues: Type.Array(ProjectBundleIssueSchema, {
-      maxItems: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxIssues,
+      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxIssues,
     }),
     issueAdjudications: Type.Optional(
       Type.Array(ProjectBundleIssueAdjudicationSchema, {
-        maxItems: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxIssueAdjudications,
+        maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxIssueAdjudications,
       }),
     ),
     projectContext: Type.Optional(ProjectBundleContextSchema),
     extractionRuleVersions: Type.Optional(
       Type.Array(ExtractionRuleSetVersionSchema, {
-        maxItems: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxExtractionRuleVersions,
+        maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxExtractionRuleVersions,
       }),
     ),
     actions: Type.Array(ActionSchema, {
-      maxItems: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxActions,
+      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxActions,
     }),
     metrics: Type.Array(ProjectBundleMetricSchema, {
-      maxItems: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxMetrics,
+      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxMetrics,
     }),
     schedules: Type.Array(ScheduleSchema, {
-      maxItems: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxSchedules,
+      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxSchedules,
     }),
     connectors: Type.Array(ProjectBundleConnectorSchema, {
-      maxItems: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxConnectors,
+      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxConnectors,
     }),
     customRules: Type.Array(ProjectBundleCustomRuleSchema, {
       maxItems: 500,
     }),
     artifacts: Type.Array(ProjectBundleArtifactSchema, {
-      maxItems: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxArtifacts,
+      maxItems: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxArtifacts,
     }),
     integrity: Type.Object(
       {
@@ -312,16 +312,16 @@ export const GolemSeoProjectBundleV2Schema = Type.Object(
         bundleSha256: Sha256Schema,
         embeddedArtifactBytes: Type.Integer({
           minimum: 0,
-          maximum: GOLEMSEO_PROJECT_BUNDLE_LIMITS.maxEmbeddedArtifactBytes,
+          maximum: AGENTSEO_PROJECT_BUNDLE_LIMITS.maxEmbeddedArtifactBytes,
         }),
       },
       { additionalProperties: false },
     ),
   },
-  { additionalProperties: false, $id: "GolemSeoProjectBundleV2" },
+  { additionalProperties: false, $id: "AgentSeoProjectBundleV2" },
 );
-export type GolemSeoProjectBundleV2 = Static<
-  typeof GolemSeoProjectBundleV2Schema
+export type AgentSeoProjectBundleV2 = Static<
+  typeof AgentSeoProjectBundleV2Schema
 >;
 
 export const ProjectImportResultSchema = Type.Object(

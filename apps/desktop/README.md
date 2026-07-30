@@ -14,12 +14,12 @@ installed, and followed by a restart. A failed or unavailable check never
 blocks the installed version. An official single-instance boundary routes later
 user launches to that process instead of creating another updater/runtime
 owner. Debug builds skip the network check; users can also pass `--no-update`
-or set `GOLEMSEO_AUTO_UPDATE=off`. The request contains only target,
+or set `AGENTSEO_AUTO_UPDATE=off`. The request contains only target,
 architecture, and current version—never project or credential data. The npm CLI
 does not self-update.
 
 Release jobs must place an official target-specific Node 24 executable at
-`src-tauri/binaries/golem-seo-node-<target-triple>` and the bundled runtime tree under
+`src-tauri/binaries/agentseo-node-<target-triple>` and the bundled runtime tree under
 `src-tauri/runtime/` before running `pnpm native:build`. Signing identities and
 the updater public key are injected only by the release environment.
 
@@ -27,7 +27,7 @@ the updater public key are injected only by the release environment.
 assembly. It deploys the production CLI graph, downloads the Chromium revision
 matched to the lockfile's Playwright version, records the exact executable in a
 public runtime manifest, and copies the current official Node 24 executable as
-the product-scoped `golem-seo-node` Tauri sidecar. The unique name prevents a
+the product-scoped `agentseo-node` Tauri sidecar. The unique name prevents a
 Linux installer from colliding with a system Node executable. The matching
 Chromium build is used for both JavaScript
 crawling and Lighthouse; the application does not depend on a browser already
@@ -40,14 +40,14 @@ macOS Keychain, Windows Credential Manager, and Linux Secret Service are used
 automatically by the installed application.
 
 Google's Desktop OAuth client ID is public configuration, not a client secret.
-Set `GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID` while assembling the runtime and use
+Set `AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID` while assembling the runtime and use
 `--require-google-client-id` for release builds. The release workflow reads it
 from the repository variable with the same name. Never configure or package a
 Google OAuth client secret: native authorization uses PKCE and a loopback
 callback.
 
 ```bash
-GOLEMSEO_GOOGLE_DESKTOP_CLIENT_ID=YOUR_PUBLIC_ID.apps.googleusercontent.com \
+AGENTSEO_GOOGLE_DESKTOP_CLIENT_ID=YOUR_PUBLIC_ID.apps.googleusercontent.com \
   node scripts/prepare-desktop-runtime.mjs \
   --target aarch64-apple-darwin \
   --require-google-client-id
@@ -75,7 +75,7 @@ configuration.
 
 Every release runner must install its real package, start the packaged
 background service, create a project canary, stop it, and prove clean package
-and service removal. When `GOLEMSEO_UPGRADE_BASELINE_TAG` points to an older
+and service removal. When `AGENTSEO_UPGRADE_BASELINE_TAG` points to an older
 published release, the runner installs that cryptographically verified
 baseline first and requires the canary to survive the upgrade. Stable releases
 fail closed without this baseline. Linux also executes the AppImage in an

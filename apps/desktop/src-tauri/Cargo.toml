@@ -1,14 +1,14 @@
 [package]
-name = "golem-seo-desktop"
+name = "agentseo-desktop"
 version = "0.11.0-alpha.0"
-description = "Golem SEO Community Edition desktop launcher"
+description = "AGENTseo Community Edition desktop launcher"
 authors = ["GolemWorkers"]
 edition = "2021"
-license = "Elastic-2.0"
-default-run = "golem-seo-desktop"
+license = "Apache-2.0"
+default-run = "agentseo-desktop"
 
 [lib]
-name = "golem_seo_desktop_lib"
+name = "agentseo_desktop_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

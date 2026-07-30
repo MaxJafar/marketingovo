@@ -8,16 +8,16 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { GolemLocalRuntime } from "./index.js";
+import { AgentSeoLocalRuntime } from "./index.js";
 
 describe("project deletion runtime", () => {
-  let runtime: GolemLocalRuntime | undefined;
+  let runtime: AgentSeoLocalRuntime | undefined;
 
   afterEach(() => runtime?.close());
 
   it("requires exact confirmation and removes deterministic project files without touching global credentials", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-runtime-deletion-"));
-    runtime = new GolemLocalRuntime({ dataDir });
+    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-runtime-deletion-"));
+    runtime = new AgentSeoLocalRuntime({ dataDir });
     const project = await runtime.projects.create({
       name: "Exact Project Name",
       canonicalUrl: "https://delete.example",
@@ -117,8 +117,8 @@ describe("project deletion runtime", () => {
   });
 
   it("returns a typed not-found error instead of making deletion idempotently ambiguous", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-runtime-deletion-"));
-    runtime = new GolemLocalRuntime({ dataDir });
+    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-runtime-deletion-"));
+    runtime = new AgentSeoLocalRuntime({ dataDir });
 
     await expect(
       runtime.projects.delete({
@@ -129,7 +129,7 @@ describe("project deletion runtime", () => {
   });
 
   it("retries isolated deletion staging at the next service start", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-runtime-deletion-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-runtime-deletion-"));
     const staleDirectory = join(
       dataDir,
       ".deletion-staging",
@@ -149,7 +149,7 @@ describe("project deletion runtime", () => {
       mode: 0o600,
     });
 
-    runtime = new GolemLocalRuntime({ dataDir });
+    runtime = new AgentSeoLocalRuntime({ dataDir });
 
     expect(existsSync(join(dataDir, ".deletion-staging"))).toBe(false);
     await expect(runtime.system.health()).resolves.toMatchObject({
@@ -159,8 +159,8 @@ describe("project deletion runtime", () => {
   });
 
   it("restores staged files after a crash when the SQLite project still exists", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-runtime-deletion-"));
-    runtime = new GolemLocalRuntime({ dataDir });
+    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-runtime-deletion-"));
+    runtime = new AgentSeoLocalRuntime({ dataDir });
     const project = await runtime.projects.create({
       name: "Crash recovery project",
       canonicalUrl: "https://recovery.example",
@@ -186,7 +186,7 @@ describe("project deletion runtime", () => {
     renameSync(projectDirectory, join(stagingRoot, "project"));
     expect(existsSync(customRulesPath)).toBe(false);
 
-    runtime = new GolemLocalRuntime({ dataDir });
+    runtime = new AgentSeoLocalRuntime({ dataDir });
 
     expect(runtime.database.getProject(project.id)).not.toBeNull();
     expect(existsSync(customRulesPath)).toBe(true);
@@ -198,7 +198,7 @@ describe("project deletion runtime", () => {
   });
 
   it("fails closed on unrecognized staging instead of deleting unknown files", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-runtime-deletion-"));
+    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-runtime-deletion-"));
     const unknownStaging = join(
       dataDir,
       ".deletion-staging",
@@ -208,7 +208,7 @@ describe("project deletion runtime", () => {
     const unknownFile = join(unknownStaging, "unknown-data");
     writeFileSync(unknownFile, "preserve me", { mode: 0o600 });
 
-    runtime = new GolemLocalRuntime({ dataDir });
+    runtime = new AgentSeoLocalRuntime({ dataDir });
 
     expect(existsSync(unknownFile)).toBe(true);
     await expect(runtime.system.health()).resolves.toMatchObject({
@@ -218,8 +218,8 @@ describe("project deletion runtime", () => {
   });
 
   it("cancels an executing project job before deleting its database graph", async () => {
-    const dataDir = mkdtempSync(join(tmpdir(), "golem-runtime-deletion-"));
-    runtime = new GolemLocalRuntime({
+    const dataDir = mkdtempSync(join(tmpdir(), "agentseo-runtime-deletion-"));
+    runtime = new AgentSeoLocalRuntime({
       dataDir,
       engine: {
         crawl: async (options) =>

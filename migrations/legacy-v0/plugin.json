@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "id": "golem-seo-legacy-v0-synthetic-fixture",
-  "name": "Golem SEO legacy v0 migration fixture",
+  "id": "agentseo-legacy-v0-synthetic-fixture",
+  "name": "AGENTseo legacy v0 migration fixture",
   "description": "Synthetic, secret-free fixture used only to verify that pre-0.11 agent manifests are quarantined and never exposed as Community tools.",
   "version": "0.10.0-fixture",
-  "license": "Elastic-2.0",
+  "license": "Apache-2.0",
   "private": false,
   "quarantined": true,
   "synthetic": true,

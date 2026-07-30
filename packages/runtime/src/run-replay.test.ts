@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import type { Report as EngineReport } from "@agentseoapp/core";
-import { GolemLocalRuntime } from "./index.js";
+import { AgentSeoLocalRuntime } from "./index.js";
 
 function report(startUrl: string): EngineReport {
   return {
@@ -39,7 +39,7 @@ function report(startUrl: string): EngineReport {
   };
 }
 
-async function terminal(runtime: GolemLocalRuntime, runId: string) {
+async function terminal(runtime: AgentSeoLocalRuntime, runId: string) {
   for (let attempt = 0; attempt < 100; attempt += 1) {
     const run = await runtime.runs.get(runId);
     if (
@@ -54,13 +54,13 @@ async function terminal(runtime: GolemLocalRuntime, runId: string) {
 }
 
 describe("local run replay", () => {
-  let runtime: GolemLocalRuntime | undefined;
+  let runtime: AgentSeoLocalRuntime | undefined;
   afterEach(() => runtime?.close());
 
   it("copies the stored configuration into one idempotent run without mutating its source", async () => {
     const crawlInputs: Array<Record<string, unknown>> = [];
-    runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-run-replay-")),
+    runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-run-replay-")),
       engine: {
         crawl: async (input: Record<string, unknown>) => {
           crawlInputs.push(input);
@@ -139,8 +139,8 @@ describe("local run replay", () => {
   });
 
   it("fails closed for missing, active, and unsupported source runs", async () => {
-    runtime = new GolemLocalRuntime({
-      dataDir: mkdtempSync(join(tmpdir(), "golem-run-replay-")),
+    runtime = new AgentSeoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "agentseo-run-replay-")),
     });
     const project = await runtime.projects.create({
       name: "Replay guard",

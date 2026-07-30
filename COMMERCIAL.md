@@ -1,7 +1,7 @@
-# Golem SEO on Golem Workers
+# AGENTseo on Golem Workers
 
-Golem SEO Community Edition is the local-first, single-user product in this
-repository. Golem SEO on Golem Workers is a separate proprietary service at
+AGENTseo Community Edition is the local-first, single-user product in this
+repository. AGENTseo on Golem Workers is a separate proprietary service at
 [golemworkers.com/seo](https://golemworkers.com/seo).
 
 The commercial edition provides infrastructure and collaboration rather than

@@ -185,7 +185,7 @@ export async function buildUpdaterMetadata({
   }
   return {
     version,
-    notes: `Golem SEO ${version}. Platform-verified Community Edition release.`,
+    notes: `AGENTseo ${version}. Platform-verified Community Edition release.`,
     platforms,
   };
 }

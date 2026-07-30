@@ -89,10 +89,10 @@ published and cryptographically verified baseline when configured, create a
 real project, stop the packaged service, upgrade, prove the same project and
 release version remain healthy, uninstall, and verify process/package/service
 cleanup while retaining user data. Stable tags require
-`GOLEMSEO_UPGRADE_BASELINE_TAG`; prereleases can only use an explicit
+`AGENTSEO_UPGRADE_BASELINE_TAG`; prereleases can only use an explicit
 not-tested waiver. The separate npm CLI
 uses a least-privilege per-user Task Scheduler task when the user explicitly
-runs `golem-seo service install`.
+runs `agentseo service install`.
 
 The npm release path now version-locks all JavaScript and native surfaces,
 packs 13 public packages in dependency order, rejects unresolved `workspace:`
@@ -138,15 +138,15 @@ reported as a completed public release.
   REST/OpenAPI/SDK/CLI parity, draft-only import, label conflicts, and the
   50-rule boundary have dedicated coverage;
 - Issue Review now preserves project-scoped adjudications across audits and
-  `.golemseo` transfers, narrows grouped Action scope and recalculates priority
+  `.agentseo` transfers, narrows grouped Action scope and recalculates priority
   per reviewed URL, hides fully reviewed groups without deleting evidence,
   rejects secret-like reasons, and exposes only read access to MCP agents;
 - Project Context now preserves normalized business/SEO profiles as immutable
   revisions and human observations, decisions, constraints, and experiments as
   an append-only journal; cross-project run links, secret-like text, and local
-  paths are rejected, while `.golemseo` import remaps the complete history;
+  paths are rejected, while `.agentseo` import remaps the complete history;
 - MCP and OpenClaw now derive all six tool names, descriptions, input schemas,
-  limits and safety annotations from one `@golem-seo/contracts` registry;
+  limits and safety annotations from one `@agentseoapp/contracts` registry;
   contract and bundled-plugin tests reject schema or manifest drift;
 - the previously recorded packaged Playwright journey completes onboarding, a real crawl, audit
   history, immutable configuration replay, audit-to-audit regression and fix
@@ -172,7 +172,7 @@ reported as a completed public release.
 - the credential broker passes Rust formatting and `clippy -D warnings`; the
   Tauri launcher passes locked native compilation, formatting,
   `clippy -D warnings`, and all eight Rust policy tests on macOS arm64;
-- the native release policy uses the product-scoped `golem-seo-node` sidecar,
+- the native release policy uses the product-scoped `agentseo-node` sidecar,
   validates older-release selection and signatures, and rejects stable records
   without install, background start, single-instance activation, stop,
   data-preserving upgrade, uninstall, and AppImage evidence as applicable;
@@ -235,7 +235,7 @@ reported as a completed public release.
 - the canonical tag workflow must produce signed/notarized installers, updater
   signatures, `latest.json`, checksums, attestations and native lifecycle
   evidence on every supported target from the canonical
-  `GolemWorkers/golem-seo` repository;
+  `GolemWorkers/agentseo` repository;
 - the newly enforced DMG/MSI/deb/AppImage lifecycle jobs must run successfully
   on canonical signed artifacts; the local source tests do not substitute for
   that target-native evidence, and a published prerelease must be selected as

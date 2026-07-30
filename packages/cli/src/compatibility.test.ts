@@ -3,7 +3,6 @@ import { join, resolve } from "node:path";
 import {
   readCompatibleEnvironmentVariable,
   resolveCliConnectionOptions,
-  warnLegacyCliInvocation,
 } from "./compatibility.js";
 
 describe("CLI identity compatibility", () => {
@@ -105,14 +104,6 @@ describe("CLI identity compatibility", () => {
       ).toBe("/legacy/broker");
     }
     expect(warn).toHaveBeenCalledOnce();
-  });
-
-  it("warns when the legacy executable alias is used", () => {
-    const warn = vi.fn();
-    warnLegacyCliInvocation(warn);
-    expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining("golem-seo is deprecated; use agentseo"),
-    );
   });
 });
 

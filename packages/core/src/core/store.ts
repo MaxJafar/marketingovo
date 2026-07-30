@@ -10,17 +10,17 @@
 // All data is local. The file lives next to the project
 // configuration; the operator controls backups.
 //
-// Backward compat: the default file name is `golem-seo.db`. If a
-// legacy `screaming-claw.db` exists in the project root and the
-// new name does not, we read/write the legacy file (with a
-// one-time deprecation notice) so existing data is preserved.
+// Backward compat: the default file name is `agentseo.db`. If one of
+// the earlier names (`golem-seo.db`, `screaming-claw.db`) exists in the
+// project root and the new name does not, we read/write the legacy file
+// (with a one-time deprecation notice) so existing data is preserved.
 
 import { dirname, join } from "node:path";
 import { existsSync, mkdirSync, renameSync } from "node:fs";
 import type { CrawledPage, Issue } from "../checks/index.js";
 
 export interface ProjectStoreOptions {
-  projectRoot: string; // directory; store file is <root>/golem-seo.db
+  projectRoot: string; // directory; store file is <root>/agentseo.db
 }
 
 export interface DiffResult {
@@ -96,17 +96,25 @@ export class ProjectStore {
     if (this.db) return this.db;
     const { DatabaseSync } = await loadSqlite();
     mkdirSync(this.opts.projectRoot, { recursive: true });
-    const newPath = join(this.opts.projectRoot, "golem-seo.db");
-    const legacyPath = join(this.opts.projectRoot, "screaming-claw.db");
-    // Backward compat: prefer the new name; if absent and the legacy
+    const newPath = join(this.opts.projectRoot, "agentseo.db");
+    // Earlier store names, newest first. Each rename adds one entry rather
+    // than replacing the previous one, so no generation of local data is
+    // stranded by a product rename.
+    const legacyNames = ["golem-seo.db", "screaming-claw.db"];
+    // Backward compat: prefer the new name; if absent and a legacy
     // file exists, use it (read/write) so existing data is preserved.
     let dbPath = newPath;
-    if (!existsSync(newPath) && existsSync(legacyPath)) {
-      dbPath = legacyPath;
-      // eslint-disable-next-line no-console
-      console.warn(
-        `[agentseo] using legacy store file ${legacyPath}; it will be migrated to ${newPath} on next write.`,
-      );
+    if (!existsSync(newPath)) {
+      const legacyPath = legacyNames
+        .map((name) => join(this.opts.projectRoot, name))
+        .find((candidate) => existsSync(candidate));
+      if (legacyPath) {
+        dbPath = legacyPath;
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[agentseo] using legacy store file ${legacyPath}; it will be migrated to ${newPath} on next write.`,
+        );
+      }
     }
     const db = new DatabaseSync(dbPath);
     db.exec("PRAGMA journal_mode = WAL;");

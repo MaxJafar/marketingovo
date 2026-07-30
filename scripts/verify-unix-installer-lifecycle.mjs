@@ -116,11 +116,8 @@ function launcherProcesses(layout) {
 
 function serviceDefinition(platform) {
   return platform === "macos"
-    ? resolve(
-        homedir(),
-        "Library/LaunchAgents/com.golemworkers.golem-seo.plist",
-      )
-    : resolve(homedir(), ".config/systemd/user/golem-seo.service");
+    ? resolve(homedir(), "Library/LaunchAgents/com.golemworkers.agentseo.plist")
+    : resolve(homedir(), ".config/systemd/user/agentseo.service");
 }
 
 async function serviceLayout(runtimeRoot, sidecar) {
@@ -142,7 +139,7 @@ async function serviceLayout(runtimeRoot, sidecar) {
     runtimeRoot,
     sidecar: await regularExecutable(sidecar),
     cli: resolve(runtimeRoot, "app/dist/cli.js"),
-    broker: resolve(runtimeRoot, "broker/golem-seo-credential-broker"),
+    broker: resolve(runtimeRoot, "broker/agentseo-credential-broker"),
     browserDirectory: resolve(runtimeRoot, publicConfig.browserDirectory),
     chromiumExecutable: resolve(runtimeRoot, publicConfig.chromiumExecutable),
     googleDesktopClientId: publicConfig.googleDesktopClientId,
@@ -325,14 +322,14 @@ function verifyMacApplication(applicationPath) {
 async function macLayout(applicationPath) {
   const layout = await serviceLayout(
     resolve(applicationPath, "Contents/Resources/runtime"),
-    resolve(applicationPath, "Contents/MacOS/golem-seo-node"),
+    resolve(applicationPath, "Contents/MacOS/agentseo-node"),
   );
   const executableDirectory = resolve(applicationPath, "Contents/MacOS");
   const launchers = [];
   for (const entry of await readdir(executableDirectory, {
     withFileTypes: true,
   })) {
-    if (!entry.isFile() || entry.name === "golem-seo-node") continue;
+    if (!entry.isFile() || entry.name === "agentseo-node") continue;
     const candidate = resolve(executableDirectory, entry.name);
     const metadata = await stat(candidate);
     if ((metadata.mode & 0o111) !== 0) launchers.push(candidate);
@@ -347,7 +344,7 @@ async function macLayout(applicationPath) {
 
 function linuxPackageName(debPath) {
   const name = run("dpkg-deb", ["-f", debPath, "Package"]).trim();
-  if (!/^golem-seo(?:-desktop)?$/u.test(name)) {
+  if (!/^agentseo(?:-desktop)?$/u.test(name)) {
     throw new Error(`Unexpected Linux package name: ${name}`);
   }
   return name;
@@ -374,9 +371,9 @@ async function linuxLayout(packageName) {
   const configFiles = files.filter((path) =>
     path.endsWith("/runtime/config/public-runtime.json"),
   );
-  const sidecars = files.filter((path) => basename(path) === "golem-seo-node");
+  const sidecars = files.filter((path) => basename(path) === "agentseo-node");
   const launchers = files.filter(
-    (path) => basename(path) === "golem-seo-desktop",
+    (path) => basename(path) === "agentseo-desktop",
   );
   if (
     configFiles.length !== 1 ||
@@ -600,7 +597,7 @@ if (!runnerTemporaryValue) {
 const runnerTemporary = resolve(runnerTemporaryValue);
 const temporaryRoot = resolve(
   runnerTemporary,
-  `golem-seo-native-lifecycle-${target}`,
+  `agentseo-native-lifecycle-${target}`,
 );
 if (relative(runnerTemporary, temporaryRoot).startsWith(`..${sep}`)) {
   throw new Error("Unsafe lifecycle temporary directory");
@@ -610,13 +607,11 @@ await mkdir(temporaryRoot, { recursive: true, mode: 0o700 });
 const dataDirectory = resolve(temporaryRoot, "data");
 const definition = serviceDefinition(platform);
 if ((await health()) !== null) {
-  throw new Error("Golem SEO port is already occupied on the ephemeral runner");
+  throw new Error("AGENTseo port is already occupied on the ephemeral runner");
 }
 try {
   await access(definition);
-  throw new Error(
-    "A Golem SEO background service already exists on the runner",
-  );
+  throw new Error("A AGENTseo background service already exists on the runner");
 } catch (error) {
   if (error?.code !== "ENOENT") throw error;
 }
@@ -629,14 +624,14 @@ let currentHealth = null;
 let processCount = 0;
 let canaryProjectId = null;
 let appImageHealth = null;
-const applicationPath = "/Applications/Golem SEO.app";
+const applicationPath = "/Applications/AGENTseo.app";
 const mountPoint = resolve(temporaryRoot, "mounted-dmg");
 
 try {
   if (platform === "macos") {
     try {
       await access(applicationPath);
-      throw new Error("Golem SEO is already installed on the ephemeral runner");
+      throw new Error("AGENTseo is already installed on the ephemeral runner");
     } catch (error) {
       if (error?.code !== "ENOENT") throw error;
     }
@@ -651,7 +646,7 @@ try {
   } else {
     packageName = linuxPackageName(baselineInstaller ?? currentInstaller);
     if (linuxPackageInstalled(packageName)) {
-      throw new Error("Golem SEO package is already installed on the runner");
+      throw new Error("AGENTseo package is already installed on the runner");
     }
     installLinux(baselineInstaller ?? currentInstaller);
     installed = true;
@@ -721,7 +716,7 @@ try {
   if ((await health()) !== null) {
     throw new Error("Background service remains reachable after uninstall");
   }
-  await access(resolve(dataDirectory, "golem-seo.db"));
+  await access(resolve(dataDirectory, "agentseo.db"));
 
   const evidence = {
     schemaVersion: 2,

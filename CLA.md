@@ -1,4 +1,4 @@
-# Golem SEO Contributor License Agreement
+# AGENTseo Contributor License Agreement
 
 By submitting a contribution to this repository, you certify that you have the
 right to submit it and agree to the following terms.
@@ -12,7 +12,7 @@ right to submit it and agree to the following terms.
    necessarily infringed by your contribution alone or in combination with the
    project.
 3. GolemWorkers may use and relicense your contribution in the Community
-   Edition and in proprietary products and services, including Golem SEO on
+   Edition and in proprietary products and services, including AGENTseo on
    Golem Workers.
 4. You retain ownership of your contribution. Except for the licenses above,
    you provide it as-is, without warranties or support obligations.

@@ -158,10 +158,10 @@ test("an extra old log prefix fails inside an already pinned store file", async 
   assert.equal(violations[0]?.rule, "identity-baseline-mismatch");
 });
 
-test("a new hosted string fails inside an allowed generated UI directory", () => {
+test("a new hosted string fails inside a directory allowed for hosted references", () => {
   const hostedPath = `/${"golem"}workers/upgrade`;
   const violations = validateTextSource(
-    "packages/cli/dashboard/assets/new-hosted-link.js",
+    "apps/docs/site/product/new-hosted-link.md",
     `export const upgradePath = ${JSON.stringify(hostedPath)};\n`,
     baseline,
   );

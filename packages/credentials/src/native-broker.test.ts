@@ -6,11 +6,11 @@ import { NativeBrokerCredentialStore } from "./native-broker.js";
 
 describe("NativeBrokerCredentialStore", () => {
   it("round-trips opaque bytes over the private line protocol", async () => {
-    const directory = mkdtempSync(join(tmpdir(), "golem-broker-test-"));
+    const directory = mkdtempSync(join(tmpdir(), "agentseo-broker-test-"));
     const binary = join(directory, "broker.mjs");
     const previousDbus = process.env.DBUS_SESSION_BUS_ADDRESS;
     process.env.DBUS_SESSION_BUS_ADDRESS =
-      "unix:path=/private/golem-seo-test-bus";
+      "unix:path=/private/agentseo-test-bus";
     writeFileSync(
       binary,
       `#!/usr/bin/env node
@@ -18,7 +18,7 @@ import { createInterface } from "node:readline";
 const entries = new Map();
 createInterface({ input: process.stdin }).on("line", (line) => {
   const request = JSON.parse(line);
-  if (process.env.DBUS_SESSION_BUS_ADDRESS !== "unix:path=/private/golem-seo-test-bus") {
+  if (process.env.DBUS_SESSION_BUS_ADDRESS !== "unix:path=/private/agentseo-test-bus") {
     process.stdout.write(JSON.stringify({ request_id: request.request_id, ok: false, error: "missing_os_session" }) + "\\n");
     return;
   }

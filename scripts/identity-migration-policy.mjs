@@ -43,6 +43,22 @@ const IDENTITY_ROOT_TEXT_FILES = new Set([
   "turbo.json",
 ]);
 
+// Authorized legacy-identity exceptions after the completed AGENTseo rebrand.
+//
+// The rebrand removed every cosmetic occurrence of the old product name. What
+// remains falls into three groups, and nothing else may be added without a
+// stated reason:
+//
+//   1. compatibility surfaces that must keep reading or accepting a value an
+//      earlier install wrote (env vars, store filenames, bundle extension and
+//      media type, localStorage keys);
+//   2. tests that prove those surfaces work, or prove a retired name is now
+//      rejected;
+//   3. the sentinel itself, which has to name the patterns it detects.
+//
+// GolemWorkers remains the copyright holder and the name of the separate
+// commercial service, so `golemworkers-coupling` hits are expected wherever the
+// company, its domain, or the hosted product is legitimately referenced.
 export const IDENTITY_ALLOWLIST = Object.freeze([
   {
     rule: "legacy-product-identity",
@@ -50,494 +66,172 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
     reason:
       "The sentinel must name the old-brand patterns and every reasoned exception in order to prevent unreviewed additions.",
   },
+  ...["legacy-agent-contract", "legacy-cli-alias", "golemworkers-coupling"].map(
+    (rule) => ({
+      rule,
+      path: "scripts/identity-migration-policy.mjs",
+      reason:
+        "The sentinel must name the old-brand patterns it detects for every rule.",
+    }),
+  ),
+  {
+    rule: "golemworkers-coupling",
+    path: "scripts/identity-migration-policy.test.mjs",
+    reason:
+      "Sentinel tests construct legacy-identity fixtures to prove each rule still fires.",
+  },
+
+  // 1. Compatibility surfaces.
   {
     rule: "legacy-product-identity",
-    path: "apps/dashboard/",
+    path: "packages/core/src/env.ts",
     reason:
-      "Dashboard identity and hosted-upsell removal belong to the Stage 3 UI slice; generated and source assets migrate together.",
+      "The shared environment reader derives the GOLEMSEO_*/GOLEM_SEO_* alias chain so configuration written before the rename still resolves.",
   },
   {
     rule: "legacy-product-identity",
-    path: "apps/docs/",
+    path: "packages/core/src/core/store.ts",
     reason:
-      "Documentation identity is owned by the staged documentation migration and must not be partially rewritten in foundation code.",
+      "The store keeps golem-seo.db and screaming-claw.db in its fallback chain so no generation of local SQLite data is stranded.",
   },
   {
     rule: "legacy-product-identity",
-    path: "packages/cli/dashboard/",
+    path: "packages/cli/src/cli.ts",
     reason:
-      "Bundled dashboard files are generated Stage 3 UI output and must be regenerated instead of hand-edited in this slice.",
+      "Credential-broker and master-password environment aliases stay readable with a one-time deprecation warning.",
   },
   {
     rule: "legacy-product-identity",
-    path: "packages/sdk/src/generated/openapi.ts",
+    path: "packages/cli/src/compatibility.ts",
     reason:
-      "This deterministic OpenAPI projection may retain compatibility names and is never hand-edited; final reconciliation belongs to integration.",
-  },
-  ...[
-    ".github/ISSUE_TEMPLATE/config.yml",
-    ".github/workflows/ci.yml",
-    ".github/workflows/release.yml",
-  ].map((path) => ({
-    rule: "legacy-product-identity",
-    path,
-    reason:
-      "Repository administration and release artifact names remain frozen behind the explicit human repository/public-release gate.",
-  })),
-  {
-    rule: "legacy-product-identity",
-    path: "benchmarks/run.mjs",
-    reason:
-      "The benchmark retains a legacy environment fixture to measure compatibility behavior, not active product identity.",
+      "CLI data-directory, service-token and API-URL environment aliases stay readable with a one-time deprecation warning.",
   },
   {
     rule: "legacy-product-identity",
-    path: "e2e/community.spec.ts",
+    path: "packages/mcp/src/compatibility.ts",
     reason:
-      "End-to-end coverage retains persisted compatibility paths and legacy bundle behavior only.",
+      "MCP keeps the retired environment aliases so existing agent host configuration keeps working.",
   },
   {
     rule: "legacy-product-identity",
-    path: "migrations/legacy-v0/plugin.json",
+    path: "packages/runtime/src/google-oauth-env.ts",
     reason:
-      "This immutable fixture represents a legacy plugin accepted only as a tested migration input.",
+      "The Google desktop client ID accepts its two retired environment names, canonical value first.",
   },
   {
     rule: "legacy-product-identity",
-    path: "packages/core/tests/fetcher.test.ts",
+    path: "packages/server/src/google-oauth.ts",
     reason:
-      "The test-only user-agent fixture verifies arbitrary caller input and is not AGENTseo's canonical default user agent.",
-  },
-  ...[
-    "packages/legacy-import/src/index.test.ts",
-    "packages/legacy-import/src/index.ts",
-  ].map((path) => ({
-    rule: "legacy-product-identity",
-    path,
-    reason:
-      "Legacy names, paths, and environment variables are intentionally accepted here only as tested migration inputs.",
-  })),
-  ...[
-    "packages/storage-sqlite/src/backup.test.ts",
-    "packages/storage-sqlite/src/database.test.ts",
-    "packages/storage-sqlite/src/issue-adjudication.test.ts",
-    "packages/storage-sqlite/src/project-context.test.ts",
-    "packages/storage-sqlite/src/project-deletion.test.ts",
-  ].map((path) => ({
-    rule: "legacy-product-identity",
-    path,
-    reason:
-      "Data-layer tests pin the existing golem-seo.db filename so the independence migration never strands persisted SQLite state.",
-  })),
-  {
-    rule: "legacy-product-identity",
-    path: "packages/storage-sqlite/src/database.ts",
-    reason:
-      "The persisted .golemseo project-bundle media type remains an accepted 1.x wire value so existing exports stay importable.",
-  },
-  {
-    rule: "legacy-product-identity",
-    path: "plugins/codex/golem-seo/.codex-plugin/plugin.json",
-    reason:
-      "Legacy plugin display/publisher metadata remains with the Stage 3 atomic agent-surface and human release-identity gates.",
-  },
-  {
-    rule: "legacy-product-identity",
-    path: "pnpm-lock.yaml",
-    reason:
-      "The deterministic lockfile retains only the legacy plugin workspace directory path, while all package coordinates use frozen private identities.",
-  },
-  ...[
-    "adapters/openclaw/src/index.ts",
-    "packages/mcp/package.json",
-    "packages/mcp/src/compatibility.test.ts",
-    "packages/mcp/src/compatibility.ts",
-    "packages/mcp/src/index.test.ts",
-    "packages/mcp/src/index.ts",
-    "packages/sdk/src/generated-client.ts",
-    "packages/sdk/src/index.test.ts",
-    "packages/sdk/src/index.ts",
-    "plugins/codex/golem-seo/scripts/validate.mjs",
-    "scripts/validate-plugins.mjs",
-  ].map((path) => ({
-    rule: "legacy-product-identity",
-    path,
-    reason:
-      "The public agent/SDK identifier remains a tested 1.x compatibility surface until Stage 3 migrates every consumer atomically.",
-  })),
-  ...[
-    "packages/cli/package.json",
-    "packages/cli/src/cli.ts",
-    "packages/cli/src/compatibility.test.ts",
-    "packages/cli/src/compatibility.ts",
-    "packages/cli/src/index.ts",
-    "packages/cli/src/service-definition.test.ts",
-    "packages/cli/src/service-definition.ts",
-  ].map((path) => ({
-    rule: "legacy-product-identity",
-    path,
-    reason:
-      "CLI legacy executable, environment, database, SDK symbol, and OS-service identifiers are warned migration aliases through 1.x.",
-  })),
-  {
-    rule: "legacy-product-identity",
-    path: "packages/contracts/src/index.ts",
-    reason:
-      "GolemSeoRuntime is an exact deprecated type alias for AgentSeoRuntime through 1.x so downstream TypeScript consumers keep compiling.",
-  },
-  {
-    rule: "legacy-product-identity",
-    path: "packages/runtime/src/index.ts",
-    reason:
-      "GolemLocalRuntime is an exact deprecated AgentSeoLocalRuntime alias through 1.x; frozen data roots, DB names, and .golemseo bundles also remain readable.",
-  },
-  {
-    rule: "legacy-product-identity",
-    path: "packages/runtime/src/runtime-identity.test.ts",
-    reason:
-      "This regression test proves canonical and deprecated runtime constructor/type aliases are exactly identical through 1.x.",
+      "The not-configured problem detail names the retired environment aliases so operators can find their existing value.",
   },
   {
     rule: "legacy-product-identity",
     path: "packages/server/src/index.ts",
     reason:
-      "Canonical session/client/CSRF identity takes precedence while golem_session, x-golem-client, and x-golem-csrf remain exact 1.x aliases; .golemseo wire identity stays frozen.",
-  },
-  {
-    rule: "legacy-product-identity",
-    path: "packages/server/src/index.test.ts",
-    reason:
-      "Tests prove canonical-first session/client/CSRF behavior and exact legacy aliases while preserving DB and dashboard fixture compatibility.",
+      "Project import still accepts the application/vnd.golemseo.project+json media type; exports always emit the canonical type.",
   },
   ...[
-    "packages/server/src/action-workbench-api.test.ts",
-    "packages/server/src/dashboard-control.test.ts",
-    "packages/server/src/extraction-rules-api.test.ts",
-    "packages/server/src/issue-review-api.test.ts",
-    "packages/server/src/link-explorer-api.test.ts",
-    "packages/server/src/project-context-api.test.ts",
-    "packages/server/src/project-deletion-api.test.ts",
-    "packages/server/src/run-comparison-api.test.ts",
-    "packages/server/src/run-evidence-api.test.ts",
-    "packages/server/src/run-replay-api.test.ts",
+    "apps/dashboard/src/api/queries.ts",
+    "apps/dashboard/src/pages/settings.tsx",
   ].map((path) => ({
     rule: "legacy-product-identity",
     path,
     reason:
-      "API tests exercise the exact x-golem-client 1.x compatibility header while canonical x-agentseo-client remains primary.",
+      "Project import accepts the .golemseo bundle extension alongside .agentseo; export only writes .agentseo.",
   })),
-  {
-    rule: "legacy-product-identity",
-    path: "packages/core/src/integrations/notify.ts",
-    reason:
-      "Canonical AGENTseo webhook headers are primary while exact x-golemseo event, timestamp, and signature aliases remain through 1.x.",
-  },
-  {
-    rule: "legacy-product-identity",
-    path: "packages/core/tests/notify.test.ts",
-    reason:
-      "Tests prove canonical-first webhook/environment behavior and exact value parity for the deprecated x-golemseo header aliases.",
-  },
   ...[
-    "packages/contracts/src/project-bundle.ts",
-    "packages/core/src/core/store.ts",
-    "packages/credentials/src/index.ts",
-    "packages/runtime/src/durable-work.test.ts",
-    "packages/runtime/src/index.test.ts",
-    "packages/runtime/src/project-bundle.test.ts",
-    "packages/runtime/src/secret-boundary.test.ts",
-    "packages/server/src/e2e.test.ts",
-    "scripts/validate-contracts.mjs",
+    "apps/dashboard/src/context/site-context.tsx",
+    "apps/dashboard/src/pages/onboarding.tsx",
   ].map((path) => ({
     rule: "legacy-product-identity",
     path,
     reason:
-      "Persisted database names, .golemseo bundles, report filenames, exported symbols, and wire contracts stay readable through 1.x.",
+      "One-time localStorage migration reads the golem-seo:* key, rewrites it under the canonical key, and deletes the original.",
   })),
-  ...[
-    "packages/core/src/env.ts",
-    "packages/core/tests/audit-full-cli.test.ts",
-    "packages/core/tests/audit-full-integration.test.ts",
-    "packages/core/tests/audit-full.test.ts",
-    "packages/core/tests/change-detection.test.ts",
-    "packages/core/tests/env.test.ts",
-    "packages/core/tests/html-csv.test.ts",
-    "packages/core/tests/lighthouse.test.ts",
-    "packages/core/tests/limits.test.ts",
-    "packages/core/tests/orchestrator-credentials.test.ts",
-    "packages/core/tests/plugin-tools.test.ts",
-    "packages/core/tests/private-policy.test.ts",
-    "packages/core/tests/psi.test.ts",
-    "packages/core/tests/watch.test.ts",
-    "packages/credentials/src/native-broker.test.ts",
-    "packages/runtime/src/google-oauth-env.test.ts",
-    "packages/runtime/src/google-oauth-env.ts",
-    "packages/server/src/google-oauth.ts",
-  ].map((path) => ({
+  {
     rule: "legacy-product-identity",
-    path,
-    reason:
-      "Canonical AGENTSEO variables take precedence while value-safe tests preserve GOLEMSEO, GOLEM_SEO, and applicable historical aliases.",
-  })),
-  ...[
-    "apps/desktop/scripts/validate.mjs",
-    "apps/desktop/src-tauri/Cargo.toml",
-    "apps/desktop/src-tauri/src/bin/verify-updater-signature.rs",
-    "apps/desktop/src-tauri/src/lib.rs",
-    "apps/desktop/src-tauri/tauri.conf.json",
-    "packages/credential-broker-native/Cargo.toml",
-    "packages/credential-broker-native/src/main.rs",
-    "scripts/configure-desktop-release.mjs",
-    "scripts/copy-native-broker.mjs",
-    "scripts/create-release-manifest.mjs",
-    "scripts/desktop-runtime-config.mjs",
-    "scripts/generate-sbom.mjs",
-    "scripts/prepare-desktop-runtime.mjs",
-    "scripts/prepare-upgrade-baseline.mjs",
-    "scripts/release-policy.mjs",
-    "scripts/release-policy.test.mjs",
-    "scripts/updater-metadata-policy.mjs",
-    "scripts/updater-metadata-policy.test.mjs",
-    "scripts/verify-desktop-runtime.mjs",
-    "scripts/verify-release-artifacts.mjs",
-    "scripts/verify-unix-installer-lifecycle.mjs",
-  ].map((path) => ({
-    rule: "legacy-product-identity",
-    path,
-    reason:
-      "Legacy desktop artifact, updater, signing, service, and publisher identifiers remain frozen behind separate human release gates.",
-  })),
-  ...["scripts/npm-release-policy.mjs", "scripts/package-smoke.mjs"].map(
-    (path) => ({
-      rule: "legacy-product-identity",
-      path,
-      reason:
-        "Historical artifact labels and compatibility env aliases remain inspectable while the explicit npm publication gate stays closed.",
-    }),
-  ),
-  {
-    rule: "golemworkers-coupling",
-    path: "scripts/identity-migration-policy.mjs",
-    reason:
-      "The sentinel must name the forbidden legacy coupling pattern and its reasoned exceptions in policy data.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "scripts/identity-migration-policy.test.mjs",
-    reason:
-      "The sentinel regression test asserts the named coupling rule after constructing a forbidden sample dynamically.",
-  },
-  {
-    rule: "legacy-agent-contract",
-    path: "scripts/identity-migration-policy.mjs",
-    reason:
-      "The sentinel must name the frozen Stage 3 agent-contract pattern in order to detect new occurrences.",
-  },
-  {
-    rule: "legacy-cli-alias",
-    path: "scripts/identity-migration-policy.mjs",
-    reason:
-      "The sentinel must encode the exact warned legacy executable pattern that is permitted through 1.x.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: ".github/ISSUE_TEMPLATE/config.yml",
-    reason:
-      "Existing repository support links remain frozen until a human approves replacement domains and repository ownership.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "apps/dashboard/src/tests/api-client.test.ts",
-    reason:
-      "Existing hosted Problem Details fixture remains with its Stage 3 UI/API contract cleanup owner.",
-  },
-  {
-    rule: "golemworkers-coupling",
     path: "packages/cli/dashboard/",
     reason:
-      "Generated dashboard assets mirror the Stage 3 UI and must be regenerated by that owner rather than hand-edited.",
+      "Generated dashboard bundle. It contains only the three compatibility strings above and is regenerated, never hand-edited.",
   },
   {
-    rule: "golemworkers-coupling",
-    path: "apps/desktop/scripts/validate.mjs",
+    rule: "legacy-product-identity",
+    path: "scripts/desktop-runtime-config.mjs",
     reason:
-      "Legacy desktop publisher and reverse-domain checks remain frozen until the human-controlled release identity gate opens.",
+      "The PKCE guard rejects a packaged Google client secret under the canonical name and both retired names.",
   },
-  {
-    rule: "golemworkers-coupling",
-    path: "apps/desktop/src-tauri/Cargo.toml",
+  ...[
+    "packages/legacy-import/src/index.ts",
+    "packages/legacy-import/src/index.test.ts",
+  ].map((path) => ({
+    rule: "legacy-product-identity",
+    path,
     reason:
-      "Legacy author metadata remains frozen because legal and publisher identity are outside this migration slice.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "apps/desktop/src-tauri/tauri.conf.json",
+      "The pre-0.11 importer discovers file names and environment variables a previous install wrote; these are historical facts, not current identity.",
+  })),
+
+  // 2. Tests covering those surfaces, including retired-name rejection.
+  ...[
+    "packages/core/tests/env.test.ts",
+    "packages/core/tests/limits.test.ts",
+    "packages/core/tests/audit-full-cli.test.ts",
+    "packages/core/tests/watch.test.ts",
+    "packages/cli/src/compatibility.test.ts",
+    "packages/mcp/src/compatibility.test.ts",
+    "packages/runtime/src/google-oauth-env.test.ts",
+    "apps/dashboard/src/tests/queries-import.test.tsx",
+    "apps/dashboard/src/tests/onboarding.test.tsx",
+    "apps/dashboard/src/tests/site-context.test.tsx",
+    "apps/desktop/scripts/validate.mjs",
+  ].map((path) => ({
+    rule: "legacy-product-identity",
+    path,
     reason:
-      "Legacy desktop signing, updater, domain, and publisher identifiers require separate human release approval.",
-  },
+      "Coverage proves each retired name still resolves, warns once, and never leaks its value.",
+  })),
   {
-    rule: "golemworkers-coupling",
-    path: "apps/docs/scripts/validate.mjs",
-    reason:
-      "The existing repository link checker remains until repository ownership is explicitly approved and migrated.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "packages/cli/src/cli.ts",
-    reason:
-      "Legacy launchd service identifiers are accepted migration aliases through 1.x and cannot be renamed without service migration.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "packages/cli/src/service-definition.ts",
-    reason:
-      "Legacy OS service identifiers are compatibility inputs through 1.x and need a tested service migration before replacement.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "packages/cli/src/service-definition.test.ts",
-    reason:
-      "Tests pin the legacy OS service compatibility identifiers that remain supported through 1.x.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "packages/credential-broker-native/Cargo.toml",
-    reason:
-      "Legacy author metadata is a legal and publisher identity concern outside this foundation slice.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "packages/credential-broker-native/src/main.rs",
-    reason:
-      "The native keychain service identifier is persisted compatibility state and needs a dedicated credential migration.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "packages/core/tests/audit-full-integration.test.ts",
-    reason:
-      "Historical test commentary records the replaced reference fixture and has no runtime coupling.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "packages/core/tests/paa.test.ts",
-    reason:
-      "Search-result fixture text intentionally exercises arbitrary third-party query terms and has no runtime coupling.",
-  },
-  {
-    rule: "golemworkers-coupling",
+    rule: "legacy-product-identity",
     path: "packages/server/src/index.test.ts",
     reason:
-      "A negative regression assertion intentionally names the removed hosted route to prove it is absent.",
+      "Coverage proves the retired session cookie, CSRF header and client header are now rejected rather than accepted.",
   },
-  {
-    rule: "golemworkers-coupling",
-    path: "scripts/npm-release-policy.mjs",
-    reason:
-      "The old repository coordinate validates historical artifacts only; npm publication is unconditionally disabled.",
-  },
-  {
-    rule: "legacy-package-scope",
-    path: "scripts/npm-release-policy.mjs",
-    reason:
-      "The private-package policy must name all forbidden collision-prone legacy scopes so it can reject them.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "scripts/release-policy.mjs",
-    reason:
-      "Legacy release artifact verification remains frozen until repository ownership and public release are approved.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "scripts/updater-metadata-policy.test.mjs",
-    reason:
-      "Tests pin legacy updater artifacts while updater identity remains a separate human-controlled release gate.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "scripts/validate-contracts.mjs",
-    reason:
-      "A negative contract assertion intentionally names the legacy hosted route prefix to prove OpenAPI no longer exposes it.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: "scripts/verify-unix-installer-lifecycle.mjs",
-    reason:
-      "Installer verification retains the legacy launchd identifier until a dedicated service migration is implemented.",
-  },
+
+  // 3. GolemWorkers is the company and the separate commercial service.
   ...[
-    "packages/mcp/package.json",
-    "packages/mcp/src/compatibility.test.ts",
-    "packages/mcp/src/compatibility.ts",
+    ".github/ISSUE_TEMPLATE/config.yml",
+    ".github/pull_request_template.md",
+    ".claude-plugin/marketplace.json",
+    "plugins/claude/agentseo/",
+    "scripts/generate-agent-plugins.mjs",
+    "apps/dashboard/src/tests/api-client.test.ts",
+    "apps/desktop/scripts/validate.mjs",
+    "apps/desktop/src-tauri/Cargo.toml",
+    "apps/desktop/src-tauri/tauri.conf.json",
+    "apps/docs/",
+    "packages/cli/src/cli.ts",
+    "packages/cli/src/service-definition.test.ts",
+    "packages/cli/src/service-definition.ts",
+    "packages/core/tests/audit-full-integration.test.ts",
+    "packages/core/tests/paa.test.ts",
+    "packages/credential-broker-native/Cargo.toml",
+    "packages/credential-broker-native/src/main.rs",
+    "packages/server/src/index.test.ts",
+    "scripts/npm-release-policy.mjs",
+    "scripts/release-policy.mjs",
+    "scripts/updater-metadata-policy.test.mjs",
+    "scripts/validate-contracts.mjs",
+    "scripts/verify-unix-installer-lifecycle.mjs",
   ].map((path) => ({
-    rule: "legacy-agent-contract",
+    rule: "golemworkers-coupling",
     path,
     reason:
-      "The deprecated golem-seo-mcp executable remains a tested compatibility entry point; the six public tool IDs are canonical AGENTseo names.",
+      "GolemWorkers is the copyright holder, the trademark owner, and the name of the separate hosted commercial service.",
   })),
-  {
-    rule: "legacy-cli-alias",
-    path: "packages/cli/package.json",
-    reason:
-      "The warned golem-seo executable alias remains available through 1.x without publishing a legacy package.",
-  },
-  {
-    rule: "legacy-cli-alias",
-    path: "packages/cli/src/compatibility.test.ts",
-    reason:
-      "Tests prove the old executable alias warns and points users to the canonical agentseo command.",
-  },
-  {
-    rule: "golemworkers-coupling",
-    path: ".github/pull_request_template.md",
-    reason:
-      "Repository contribution links remain frozen until the human repository-ownership and public-release gate approves replacements.",
-  },
-  {
-    rule: "legacy-package-scope",
-    path: "apps/dashboard/README.md",
-    reason:
-      "Dashboard development documentation migrates with the Stage 3 UI package and generated assets rather than independently.",
-  },
-  ...[
-    "apps/desktop/README.md",
-    "apps/desktop/src-tauri/Cargo.lock",
-    "apps/desktop/src-tauri/windows/fragments/background-startup.wxs",
-    "packages/credential-broker-native/Cargo.lock",
-    "scripts/verify-windows-installer-lifecycle.ps1",
-  ].map((path) => ({
-    rule: "legacy-product-identity",
-    path,
-    reason:
-      "Legacy desktop packaging, installer, and service identities remain frozen behind the separate human-controlled release gate.",
-  })),
-  ...[
-    "legacy-package-scope",
-    "golemworkers-coupling",
-    "legacy-agent-contract",
-  ].map((rule) => ({
+  ...["legacy-package-scope", "legacy-product-identity"].map((rule) => ({
     rule,
-    path: "apps/docs/",
+    path: "scripts/npm-release-policy.mjs",
     reason:
-      "Documentation identity and hosted or agent-surface references migrate atomically in the separately owned Stage 3 documentation slice.",
-  })),
-  {
-    rule: "legacy-product-identity",
-    path: "benchmarks/README.md",
-    reason:
-      "Benchmark documentation retains the exact legacy environment fixture used to measure compatibility behavior.",
-  },
-  ...["legacy-product-identity", "legacy-package-scope"].map((rule) => ({
-    rule,
-    path: "migrations/legacy-v0/README.md",
-    reason:
-      "The immutable legacy migration fixture documents old package input that remains accepted only for tested import compatibility.",
-  })),
-  ...["legacy-product-identity", "legacy-package-scope"].map((rule) => ({
-    rule,
-    path: "packages/credential-broker-native/README.md",
-    reason:
-      "Native broker documentation retains the legacy credential package reference until its separately owned migration is complete.",
+      "The publication policy must name the forbidden legacy and squatting scopes it rejects.",
   })),
 ]);
 
@@ -560,8 +254,13 @@ const TEXT_RULES = Object.freeze([
   },
   {
     id: "invented-agentseo-domain",
+    // The product is now named agentseo, so this rule must distinguish a
+    // hostname from an ordinary dotted identifier. `agentseo.db`,
+    // `agentseo.service`, `agentseo.cdx.json`, and `vnd.agentseo.project+json`
+    // are file names and media types, not domains. Only flag a match that is
+    // either in an explicit URL/email context or ends in a real TLD.
     pattern:
-      /\b(?:https?:\/\/|mailto:)?(?:[A-Za-z0-9-]+\.)*agent-?seo(?:app)?\.[A-Za-z]{2,63}\b/giu,
+      /(?:(?:https?:\/\/|mailto:|\/\/)(?:[A-Za-z0-9-]+\.)*agent-?seo(?:app)?\.[A-Za-z]{2,63}\b)|(?:\b(?:[A-Za-z0-9-]+\.)*agent-?seo(?:app)?\.(?:com|net|org|io|ai|dev|co|sh|xyz|cloud|tools|so|me|info|biz|tech|site|online|store|page|link|email)\b)/giu,
     sourceOnly: false,
   },
   {
@@ -970,18 +669,19 @@ async function validateCanonicalIdentity(repositoryRoot) {
   const cliManifest = JSON.parse(
     await readFile(resolve(repositoryRoot, cliManifestPath), "utf8"),
   );
+  // Exactly one bin. The retired golem-seo entry was never published, so it is
+  // removed rather than carried as a deprecated alias.
   if (
     cliManifest.name !== "agentseo" ||
     cliManifest.private !== true ||
     cliManifest.bin?.agentseo !== "./dist/cli.js" ||
-    cliManifest.bin?.["golem-seo"] !== "./dist/golem-seo.js"
+    Object.keys(cliManifest.bin ?? {}).length !== 1
   ) {
     violations.push({
       rule: "canonical-cli-identity",
       path: cliManifestPath,
       line: 1,
-      match:
-        "expected private agentseo package with canonical and warned legacy bins",
+      match: "expected private agentseo package with exactly one canonical bin",
     });
   }
 
