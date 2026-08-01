@@ -1,9 +1,0 @@
-{
-  "default": {
-    "identifier": "default",
-    "description": "The local and localhost webviews receive no privileged Tauri command access.",
-    "local": true,
-    "windows": ["main"],
-    "permissions": []
-  }
-}

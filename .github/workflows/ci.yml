@@ -49,6 +49,38 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  go:
+    name: Intelligence daemon (Go)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: services/intel-daemon/go.mod
+      - name: Build Go packages
+        run: go -C services/intel-daemon build ./...
+      - name: Go vet
+        run: go -C services/intel-daemon vet ./...
+      - name: Run Go tests with race detector
+        run: go -C services/intel-daemon test -race ./...
+
+  python:
+    name: Intelligence worker (Python)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+      - name: Create deterministic worker environment
+        run: uv sync --project services/intelligence-worker --dev --frozen
+      - name: Run Python lints
+        run: uv run --project services/intelligence-worker ruff check services/intelligence-worker
+      - name: Run Python tests
+        run: uv run --project services/intelligence-worker pytest services/intelligence-worker/tests
+
   credential-broker:
     name: Native credential broker (${{ matrix.os }})
     strategy:

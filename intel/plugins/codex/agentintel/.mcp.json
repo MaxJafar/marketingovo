@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "agentintel": {
-      "command": "node",
-      "args": ["./dist/agentintel-mcp.mjs"],
-      "cwd": "."
-    }
-  }
-}

@@ -1,0 +1,150 @@
+syntax = "proto3";
+
+package agentintel.v1;
+
+option go_package = "github.com/MaxJafar/marketingovo/services/intel-daemon/gen/go/agentintel/v1;intelv1";
+
+// WorkerEnvelope is a length-delimited control message. Bulk evidence never
+// travels inside Protobuf; it moves through hash-addressed Arrow spool files.
+message WorkerEnvelope {
+  uint32 protocol_version = 1;
+  oneof message {
+    StartAnalysis start_analysis = 10;
+    CancelAnalysis cancel_analysis = 11;
+    WorkerEvent worker_event = 12;
+    AnalysisResult analysis_result = 13;
+    ValidateImport validate_import = 14;
+    ImportValidationResult import_validation_result = 15;
+  }
+}
+
+message StartAnalysis {
+  string run_id = 1;
+  string project_id = 2;
+  string workspace_path = 3;
+  string input_path = 4;
+  string input_sha256 = 5;
+  string input_schema_id = 6;
+  string output_directory = 7;
+  repeated string target_ids = 8;
+  map<string, string> options = 9;
+  AnalysisWorkflow workflow = 10;
+  string research_question = 11;
+  uint32 source_budget = 12;
+  ImportContext import_context = 13;
+}
+
+message ValidateImport {
+  string request_id = 1;
+  string input_path = 2;
+  string input_sha256 = 3;
+  string input_schema_id = 4;
+  string validated_at = 5;
+}
+
+message ImportValidationResult {
+  string request_id = 1;
+  bool valid = 2;
+  ImportInputSummary input = 3;
+  ImportFilePolicySummary file_policy = 4;
+  optional string platform = 5;
+  repeated ImportTargetSummary targets = 6;
+  repeated ImportDiagnostic diagnostics = 7;
+  bool diagnostics_truncated = 8;
+}
+
+message ImportInputSummary {
+  string schema_id = 1;
+  string sha256 = 2;
+  uint64 size_bytes = 3;
+  optional uint64 row_count = 4;
+}
+
+message ImportFilePolicySummary {
+  optional string target_scope = 1;
+  optional string data_class = 2;
+  optional string permitted_purpose = 3;
+  optional uint32 retention_days = 4;
+  optional string rights_state = 5;
+}
+
+message ImportTargetSummary {
+  string target_id = 1;
+  string target_name = 2;
+  uint64 row_count = 3;
+  map<string, ImportMetricAvailability> metric_availability = 4;
+}
+
+enum ImportMetricAvailability {
+  IMPORT_METRIC_AVAILABILITY_UNSPECIFIED = 0;
+  IMPORT_METRIC_AVAILABILITY_MISSING = 1;
+  IMPORT_METRIC_AVAILABILITY_INSUFFICIENT = 2;
+  IMPORT_METRIC_AVAILABILITY_CONTRADICTORY = 3;
+  IMPORT_METRIC_AVAILABILITY_AVAILABLE = 4;
+}
+
+message ImportDiagnostic {
+  ImportDiagnosticSeverity severity = 1;
+  string code = 2;
+  optional uint32 record_number = 3;
+  optional string column = 4;
+  string message = 5;
+}
+
+enum ImportDiagnosticSeverity {
+  IMPORT_DIAGNOSTIC_SEVERITY_UNSPECIFIED = 0;
+  IMPORT_DIAGNOSTIC_SEVERITY_ERROR = 1;
+  IMPORT_DIAGNOSTIC_SEVERITY_WARNING = 2;
+}
+
+message ImportContext {
+  string dataset_id = 1;
+  string validated_at = 2;
+  string input_parser_version = 3;
+  string metric_catalog_version = 4;
+}
+
+enum AnalysisWorkflow {
+  ANALYSIS_WORKFLOW_UNSPECIFIED = 0;
+  ANALYSIS_WORKFLOW_COMPARE = 1;
+  ANALYSIS_WORKFLOW_RESEARCH = 2;
+}
+
+message CancelAnalysis {
+  string run_id = 1;
+  string reason = 2;
+}
+
+message WorkerEvent {
+  string run_id = 1;
+  uint64 sequence = 2;
+  string stage = 3;
+  string level = 4;
+  string message = 5;
+  double progress = 6;
+  string recorded_at = 7;
+}
+
+message ArtifactDescriptor {
+  string relative_path = 1;
+  string media_type = 2;
+  string sha256 = 3;
+  uint64 size_bytes = 4;
+  uint64 row_count = 5;
+  string schema_id = 6;
+  string minimum_observed_at = 7;
+  string maximum_observed_at = 8;
+  string data_class = 9;
+}
+
+message AnalysisResult {
+  string run_id = 1;
+  bool succeeded = 2;
+  string error_code = 3;
+  string error_message = 4;
+  repeated ArtifactDescriptor artifacts = 5;
+  string report_relative_path = 6;
+  string report_sha256 = 7;
+  string model_version = 8;
+  string worker_version = 9;
+}

@@ -95,6 +95,17 @@ export const IDENTITY_ALLOWLIST = Object.freeze([
     reason:
       "The npm release policy must name the retired package scope in order to forbid it.",
   },
+  ...[
+    "docs/intel/PLAN.md",
+    "docs/intel/architecture.md",
+    "docs/intel/status.md",
+    "docs/intel/adr/0003-apache-2-0-relicense.md",
+  ].map((path) => ({
+    rule: "retired-agentseo-identity",
+    path,
+    reason:
+      "Archived AGENTintel planning record, absorbed by the monorepo merge. It named the sibling repository as it was actually called at the time; rewriting the name would falsify a historical document rather than complete a rename. Superseded by docs/intel/ARCHIVE-NOTE.md.",
+  })),
 
   // 1. Compatibility surfaces.
   {

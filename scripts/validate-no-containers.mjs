@@ -11,6 +11,13 @@ const ignoredDirectories = new Set([
   "target",
   "coverage",
   "artifacts",
+  // The intelligence worker's uv-managed environment and tool caches. Third-party
+  // wheels and licence texts are not this project's deployment stance.
+  ".venv",
+  "__pycache__",
+  ".pytest_cache",
+  ".ruff_cache",
+  ".hypothesis",
 ]);
 const ignoredPaths = new Set([
   // Archived prior-session working notes. They describe the deployment stance in
@@ -18,8 +25,21 @@ const ignoredPaths = new Set([
   ".archive",
   "apps/desktop/src-tauri/binaries",
   "apps/desktop/src-tauri/runtime",
+  // Third-party projects kept only to be read. Many ship the deployment style
+  // this gate forbids; that is their choice, not a claim about Marketingovo.
+  // Never a build, test or product input — see scripts/reference-lab-validate.mjs.
+  "TO REVERSE ENGINEEER",
+  // The ledger and quarantine manifest describe that corpus, so they quote the
+  // very paths this gate scans for.
+  "docs/intel/reverse-engineering",
 ]);
-const ignoredFiles = new Set(["pnpm-lock.yaml", "validate-no-containers.mjs"]);
+const ignoredFiles = new Set([
+  "pnpm-lock.yaml",
+  "validate-no-containers.mjs",
+  // These guard the reference corpus, so they must name the patterns they detect.
+  "reference-lab-validate.mjs",
+  "scan-reference-secrets.mjs",
+]);
 const textExtensions = new Set([
   "",
   ".cjs",

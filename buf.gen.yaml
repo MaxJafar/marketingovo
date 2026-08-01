@@ -1,0 +1,13 @@
+version: v2
+clean: true
+plugins:
+  - local: protoc-gen-go
+    out: services/intel-daemon/gen/go
+    opt:
+      - paths=source_relative
+  - protoc_builtin: python
+    out: gen/python
+  - local: protoc-gen-es
+    out: gen/typescript
+    opt:
+      - target=ts

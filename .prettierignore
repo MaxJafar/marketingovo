@@ -31,3 +31,19 @@ migrations/legacy-v0/
 plugins/claude/
 .claude-plugin/
 integrations/*.mcp.json
+
+# Generated contract projections. Their exact bytes are asserted by
+# `pnpm validate:contracts`, so a formatter pass here creates false drift.
+gen/
+packages/sdk/src/generated/
+
+# Python intelligence-worker environment, lockfile and tool caches. Owned by
+# uv, ruff and pytest in their canonical formats.
+uv.lock
+**/.venv/
+**/.pytest_cache/
+**/.ruff_cache/
+.hypothesis/
+
+# Untrusted third-party reference material, never a build or tooling input.
+TO REVERSE ENGINEEER/
