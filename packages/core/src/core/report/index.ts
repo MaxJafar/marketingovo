@@ -14,6 +14,10 @@ import {
 import type { SitemapCrawlSnapshot } from "../../checks/sitemap.js";
 import type { LighthouseReport } from "../../integrations/lighthouse.js";
 import type { PsiReport } from "../../integrations/psi.js";
+import {
+  assessBrandPresence,
+  type BrandProfilePresence,
+} from "../../integrations/brand-presence.js";
 import type { TrendsReport } from "../../integrations/trends.js";
 
 export interface GscPageStat {
@@ -125,6 +129,11 @@ export interface Report {
   /** Exact sitemap snapshot used by the sitemap checks in this crawl. */
   sitemap?: SitemapCrawlSnapshot;
   issues: Issue[];
+  /**
+   * Present only when the workspace declared brand profiles. Absent means the
+   * check did not run, which is different from "no profile is linked".
+   */
+  brandPresence?: BrandProfilePresence[];
   pages: Array<{
     url: string;
     finalUrl: string;
@@ -252,7 +261,29 @@ export function buildReport(
   realData?: RealDataSummary,
   lighthouse?: LighthouseReport[],
   sitemap?: SitemapCrawlSnapshot | null,
+  brandProfiles?: readonly { label: string; url: string }[],
 ): Report {
+  // Brand presence is derived here rather than in the runtime because it needs
+  // each page's external links and JSON-LD, and the report deliberately drops
+  // both to stay small. Computing it at the one point where the parsed pages
+  // are still in hand costs no extra requests.
+  const brandPresence =
+    brandProfiles && brandProfiles.length > 0
+      ? assessBrandPresence(
+          brandProfiles,
+          Array.from(index.pages.values()).flatMap((page) =>
+            page.parsed
+              ? [
+                  {
+                    url: page.url,
+                    externalLinks: page.parsed.externalLinks,
+                    jsonLd: page.parsed.jsonLd,
+                  },
+                ]
+              : [],
+          ),
+        )
+      : undefined;
   const byPriority: Record<Priority, number> = { High: 0, Medium: 0, Low: 0 };
   const byCategory: Record<string, number> = {};
   for (const i of issues) {
@@ -292,6 +323,7 @@ export function buildReport(
     },
     issues,
     realData,
+    ...(brandPresence ? { brandPresence } : {}),
     ...(sitemap ? { sitemap: structuredClone(sitemap) } : {}),
     pages: Array.from(index.pages.values()).map((p) => ({
       url: p.url,

@@ -116,6 +116,7 @@ describe("project deletion storage", () => {
         conversionGoals: [],
         priorityTopics: [],
         competitors: [],
+        brandProfiles: [],
         constraints: [],
       },
       "Initial context",

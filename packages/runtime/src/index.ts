@@ -179,6 +179,13 @@ interface EngineModule {
     }>;
   }>;
   compareSites?(options: Record<string, unknown>): Promise<unknown>;
+  /** Competitor publishing cadence from a site's own feed. */
+  collectCadenceForTarget?(
+    target: string,
+    options: { privateHostAllowlist?: string[]; signal?: AbortSignal },
+  ): Promise<unknown>;
+  /** Topics the references cover that the target does not. */
+  runContentGap?(options: Record<string, unknown>): Promise<unknown>;
   keywordResearchModule?: {
     invoke(
       input: Record<string, unknown>,
@@ -569,8 +576,40 @@ function normalizeProjectContextProfile(
     conversionGoals: normalizedContextList(value?.conversionGoals),
     priorityTopics: normalizedContextList(value?.priorityTopics),
     competitors: normalizedContextList(value?.competitors),
+    brandProfiles: normalizedBrandProfiles(value?.brandProfiles),
     constraints: normalizedContextList(value?.constraints),
   };
+}
+
+/**
+ * Trims and de-duplicates brand profiles by URL.
+ *
+ * A profile with an unparseable or non-HTTP URL is dropped rather than stored:
+ * every consumer treats these as fetchable targets, and keeping a value that can
+ * never be fetched would show as a permanent "unreachable" the user cannot fix
+ * from the workspace.
+ */
+function normalizedBrandProfiles(
+  value: ProjectContextProfile["brandProfiles"],
+): ProjectContextProfile["brandProfiles"] {
+  if (!Array.isArray(value)) return [];
+  const byUrl = new Map<string, { label: string; url: string }>();
+  for (const entry of value) {
+    const label = typeof entry?.label === "string" ? entry.label.trim() : "";
+    const raw = typeof entry?.url === "string" ? entry.url.trim() : "";
+    if (!label || !raw) continue;
+    let url: URL;
+    try {
+      url = new URL(raw);
+    } catch {
+      continue;
+    }
+    if (url.protocol !== "http:" && url.protocol !== "https:") continue;
+    url.hash = "";
+    const key = url.href.replace(/\/$/u, "").toLowerCase();
+    if (!byUrl.has(key)) byUrl.set(key, { label, url: url.href });
+  }
+  return [...byUrl.values()];
 }
 
 function assertSafeProjectContextText(values: readonly string[]): void {
@@ -601,6 +640,9 @@ function projectContextProfileText(profile: ProjectContextProfile): string[] {
     ...profile.conversionGoals,
     ...profile.priorityTopics,
     ...profile.competitors,
+    // Labels and URLs are user-supplied and stored verbatim, so they go through
+    // the same secret-material check as every other context string.
+    ...profile.brandProfiles.flatMap((entry) => [entry.label, entry.url]),
     ...profile.constraints,
   ];
 }
@@ -4550,9 +4592,17 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
         outputSchema: workflow.outputSchema,
         requirements: [],
         run: async () => {
+          // Brand profiles live in the workspace context, so the audit picks
+          // them up automatically once onboarding records them. No profiles
+          // means the report simply omits the section, which reads as "not
+          // checked" rather than "nothing is linked".
+          const brandProfiles =
+            this.database.getProjectContext(project.id)?.current?.profile
+              .brandProfiles ?? [];
           const outcome = await engine.crawl({
             startUrl: project.canonicalUrl,
             projectRoot,
+            ...(brandProfiles.length > 0 ? { brandProfiles } : {}),
             renderMode: options.renderMode === "js" ? "js" : "static",
             collectVitals: options.collectVitals === true,
             lighthouse:
@@ -4845,6 +4895,67 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
             signal,
             privateHostAllowlist: privateHostAllowlist(options),
           });
+          // A crawl shows what a rival's pages look like. It does not show how
+          // fast they ship, which is the question a content team actually asks.
+          // Cadence comes from each site's own feed, so a site without one is
+          // reported as unavailable rather than as a zero.
+          if (engine.collectCadenceForTarget) {
+            const cadence = [];
+            for (const target of [canonicalUrl, ...competitorUrls]) {
+              if (signal?.aborted) break;
+              try {
+                cadence.push(
+                  await engine.collectCadenceForTarget(target, {
+                    privateHostAllowlist: privateHostAllowlist(options),
+                    signal,
+                  }),
+                );
+              } catch (error) {
+                cadence.push({
+                  target,
+                  cadence: null,
+                  unavailable: "fetch-failed",
+                  detail: error instanceof Error ? error.message : undefined,
+                });
+              }
+            }
+            (output as { publishingCadence?: unknown }).publishingCadence =
+              cadence;
+          }
+          // The crawl says whether a rival's pages are technically sound; the
+          // gap says what they write about that we do not. That second question
+          // is the one a content team plans against, and it needs no provider
+          // key because it is derived from the pages themselves.
+          //
+          // Private access is granted only for the exact hosts the run
+          // authorised, never as a blanket opening of every private range, so a
+          // staging or internal comparison works without widening egress.
+          if (engine.runContentGap) {
+            const allowlist = privateHostAllowlist(options);
+            try {
+              (output as { contentGap?: unknown }).contentGap =
+                await engine.runContentGap({
+                  targetUrl: canonicalUrl,
+                  referenceUrls: competitorUrls,
+                  topN: 20,
+                  timeoutMs: 30_000,
+                  maxBodyBytes: 2_621_440,
+                  allowPrivate: allowlist.length > 0,
+                  privateHostAllowlist: allowlist,
+                  renderMode: "static",
+                });
+            } catch (error) {
+              (output as { contentGap?: unknown }).contentGap = {
+                targetUrl: canonicalUrl,
+                referenceUrls: competitorUrls,
+                missing: [],
+                perReference: [],
+                errors: [
+                  error instanceof Error ? error.message : "content gap failed",
+                ],
+              };
+            }
+          }
           partial =
             (
               output as { sites?: Array<{ error?: string | null }> }

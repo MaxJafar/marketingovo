@@ -20,6 +20,7 @@ export function CompetitorsPage() {
   const start = useStartWorkflow();
   const [domains, setDomains] = useState("");
   const competitors = query.data?.data.items ?? [];
+  const gapTerms = query.data?.data.contentGapTerms ?? [];
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -44,7 +45,7 @@ export function CompetitorsPage() {
       <PageHeader
         eyebrow="Market context"
         title="Competitors"
-        description="Compare technical crawl evidence fairly and keep keyword or content gaps explicitly unavailable until a supporting provider supplies them."
+        description="Crawl evidence, publishing cadence and content gaps, all gathered from each rival's own site — no provider key required. Keyword-level gaps stay explicitly unavailable until a supporting provider supplies them."
       />
       <Card className="schedule-editor">
         <form onSubmit={submit}>
@@ -104,6 +105,26 @@ export function CompetitorsPage() {
                 </div>
                 <dl>
                   <div>
+                    <dt>Publishes every</dt>
+                    <dd>
+                      {typeof competitor.cadenceDays === "number" ? (
+                        `${competitor.cadenceDays.toFixed(1)} days`
+                      ) : (
+                        <span title="No feed was found, or the feed carried too few dated posts to measure an interval.">
+                          Unavailable
+                        </span>
+                      )}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Last published</dt>
+                    <dd>
+                      {typeof competitor.freshnessSeconds === "number"
+                        ? `${Math.round(competitor.freshnessSeconds / 86400)} days ago`
+                        : "Unavailable"}
+                    </dd>
+                  </div>
+                  <div>
                     <dt>Technical health</dt>
                     <dd>
                       {competitor.technicalHealth === null ||
@@ -117,15 +138,26 @@ export function CompetitorsPage() {
                     <dd>
                       {competitor.technicalHealthChange === null ||
                       competitor.technicalHealthChange === undefined ? (
-                        "Unavailable"
+                        <span title="No earlier comparison includes this site, so there is no baseline to move against.">
+                          Unavailable
+                        </span>
                       ) : (
+                        // Health is a 0-100 score, so its movement is measured
+                        // in points. Labelling it "%" would read as a relative
+                        // change and overstate a move at the low end.
                         <StatusBadge
                           status={
-                            competitor.technicalHealthChange >= 0
-                              ? "healthy"
-                              : "degraded"
+                            competitor.technicalHealthChange === 0
+                              ? "unknown"
+                              : competitor.technicalHealthChange > 0
+                                ? "healthy"
+                                : "degraded"
                           }
-                          label={`${competitor.technicalHealthChange >= 0 ? "+" : ""}${formatNumber(competitor.technicalHealthChange)}%`}
+                          label={
+                            competitor.technicalHealthChange === 0
+                              ? "No change"
+                              : `${competitor.technicalHealthChange > 0 ? "+" : ""}${formatNumber(competitor.technicalHealthChange)} pts`
+                          }
                         />
                       )}
                     </dd>
@@ -139,8 +171,13 @@ export function CompetitorsPage() {
                     <dd>{formatNumber(competitor.keywordGaps)}</dd>
                   </div>
                   <div>
-                    <dt>Content gaps</dt>
-                    <dd>{formatNumber(competitor.contentGaps)}</dd>
+                    <dt>Covers gap topics</dt>
+                    <dd>
+                      {competitor.contentGaps === null ||
+                      competitor.contentGaps === undefined
+                        ? "Unavailable"
+                        : formatNumber(competitor.contentGaps)}
+                    </dd>
                   </div>
                 </dl>
               </Card>
@@ -152,6 +189,26 @@ export function CompetitorsPage() {
             description="Add competitor domains through the API or setup flow to unlock market context."
           />
         )}
+        {gapTerms.length > 0 ? (
+          <Card>
+            <SectionHeading
+              title="Topics they cover that you do not"
+              description="Derived from the pages themselves, so no keyword provider is required. Each term appears in the competitor pages at a materially higher density than on your site."
+            />
+            <ul className="gap-term-list">
+              {gapTerms.map((gap) => (
+                <li key={gap.term}>
+                  <span className="gap-term">{gap.term}</span>
+                  <small>
+                    on {formatNumber(gap.referencesCovering)} of{" "}
+                    {formatNumber(competitors.length)} compared{" "}
+                    {competitors.length === 1 ? "site" : "sites"}
+                  </small>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ) : null}
       </QueryState>
     </div>
   );

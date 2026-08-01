@@ -102,6 +102,7 @@ export class Fetcher {
     const addresses = await resolveSafeAddresses(
       normalized.host,
       this.limits.allowPrivate,
+      this.limits.privateHostAllowlist,
     );
     const address = addresses[0];
     if (!address) {

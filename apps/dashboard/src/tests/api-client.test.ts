@@ -316,3 +316,88 @@ describe("withQuery", () => {
     ).toBe("/pages?siteId=site+%26+one");
   });
 });
+
+// A bootstrap ticket is single-use, but it lives in the URL fragment, so any
+// reload, bookmark or re-pasted link replays a spent one. Before the fallback
+// existed this surfaced as "the local API is unavailable" against a service
+// that was running perfectly, which is the single worst first-run experience
+// the dashboard can give.
+describe("spent bootstrap ticket", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    window.history.replaceState(null, "", "/");
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("resumes the existing session when the ticket was already used", async () => {
+    window.history.replaceState(null, "", "/#token=" + "a".repeat(40));
+    const fetchMock = vi
+      .fn()
+      // The replayed ticket is rejected.
+      .mockResolvedValueOnce(
+        jsonResponse(
+          { title: "Bootstrap rejected", status: 401 },
+          401,
+          "application/problem+json",
+        ),
+      )
+      // The cookie session is still good.
+      .mockResolvedValueOnce(
+        jsonResponse({
+          csrf: "csrf-resumed",
+          expiresAt: "2026-07-16T00:00:00Z",
+        }),
+      )
+      .mockResolvedValueOnce(jsonResponse({ data: { value: 1 } }));
+    vi.stubGlobal("fetch", fetchMock);
+    const { apiRequest } = await loadClient();
+
+    const result = await apiRequest<{ value: number }>("/overview");
+    expect(result.data).toEqual({ value: 1 });
+
+    const calls = fetchMock.mock.calls.map((call) => String(call[0]));
+    expect(calls[0]).toContain("/session/bootstrap");
+    expect(calls[1]).toContain("/session");
+    expect(calls[1]).not.toContain("bootstrap");
+    // The dead ticket must not survive in the URL to fail again next reload.
+    expect(window.location.hash).toBe("");
+  });
+
+  it("still fails when the ticket is spent and no session exists", async () => {
+    window.history.replaceState(null, "", "/#token=" + "b".repeat(40));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse({ status: 401 }, 401, "application/problem+json"),
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({ status: 401 }, 401, "application/problem+json"),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    const { apiRequest } = await loadClient();
+
+    await expect(apiRequest("/overview")).rejects.toMatchObject({
+      status: 401,
+    });
+  });
+
+  it("does not retry a bootstrap rejected for a reason other than 401", async () => {
+    window.history.replaceState(null, "", "/#token=" + "c".repeat(40));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse({ status: 421 }, 421, "application/problem+json"),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    const { apiRequest } = await loadClient();
+
+    await expect(apiRequest("/overview")).rejects.toMatchObject({
+      status: 421,
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});

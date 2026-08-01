@@ -37,13 +37,96 @@ function keywordProfile(value: unknown): UnknownRecord | null {
   return record(candidate?.profile) ?? candidate;
 }
 
-export function keywordDashboardWorkspace(value: unknown): {
+/**
+ * Best on-site page for a keyword, drawn from the latest audit crawl.
+ *
+ * Answering "which of my pages should own this term" needs no keyword provider
+ * — the crawl already knows every page and its title. A page is a candidate
+ * only when it covers every content word in the keyword, so a partial overlap
+ * ("running" matching a shoe page for "running shoe nutrition") is reported as
+ * no target rather than a confident wrong one. Ties break toward the shortest
+ * URL, which is the closest thing the crawl has to a canonical page.
+ */
+const TARGET_STOPWORDS = new Set([
+  "a",
+  "an",
+  "and",
+  "for",
+  "in",
+  "of",
+  "on",
+  "or",
+  "the",
+  "to",
+  "with",
+]);
+
+function keywordTokens(value: string): string[] {
+  return value
+    .toLowerCase()
+    .split(/[^a-z0-9]+/u)
+    .filter((token) => token.length > 1 && !TARGET_STOPWORDS.has(token));
+}
+
+export function buildTargetUrlIndex(
+  auditArtifact: unknown,
+): (keyword: string) => string | null {
+  const pages = Array.isArray(record(auditArtifact)?.pages)
+    ? (record(auditArtifact)!.pages as unknown[])
+    : [];
+  const candidates: Array<{ url: string; haystack: Set<string> }> = [];
+  for (const item of pages) {
+    const page = record(item);
+    const url = text(page?.url);
+    if (!url || page?.error) continue;
+    let path = url;
+    try {
+      path = new URL(url).pathname;
+    } catch {
+      // Keep the raw string; a malformed URL still matches on its words.
+    }
+    candidates.push({
+      url,
+      haystack: new Set([
+        ...keywordTokens(text(page?.title) ?? ""),
+        ...keywordTokens(path),
+      ]),
+    });
+  }
+  if (candidates.length === 0) return () => null;
+
+  return (keyword: string): string | null => {
+    const tokens = keywordTokens(keyword);
+    if (tokens.length === 0) return null;
+    let best: { url: string; score: number } | null = null;
+    for (const candidate of candidates) {
+      if (!tokens.every((token) => candidate.haystack.has(token))) continue;
+      // Prefer the page that says the least besides the keyword, and break
+      // ties on the shorter URL.
+      const score = candidate.haystack.size;
+      if (
+        !best ||
+        score < best.score ||
+        (score === best.score && candidate.url.length < best.url.length)
+      ) {
+        best = { url: candidate.url, score };
+      }
+    }
+    return best?.url ?? null;
+  };
+}
+
+export function keywordDashboardWorkspace(
+  value: unknown,
+  auditArtifact?: unknown,
+): {
   opportunities: UnknownRecord[];
   clusters: UnknownRecord[];
   providerUsage: UnknownRecord | null;
 } {
   const root = record(value);
   if (!root) return { opportunities: [], clusters: [], providerUsage: null };
+  const targetFor = buildTargetUrlIndex(auditArtifact);
   const profiles = Array.isArray(root.keywordProfiles)
     ? root.keywordProfiles.map(keywordProfile).filter(Boolean)
     : [keywordProfile(root)].filter(Boolean);
@@ -67,7 +150,7 @@ export function keywordDashboardWorkspace(value: unknown): {
         difficulty: null,
         opportunityScore:
           strength === null ? null : Math.max(0, Math.min(100, strength)),
-        targetUrl: null,
+        targetUrl: targetFor(seed),
         cluster: seed,
       });
     }
@@ -86,7 +169,7 @@ export function keywordDashboardWorkspace(value: unknown): {
         volume: null,
         difficulty: null,
         opportunityScore: null,
-        targetUrl: null,
+        targetUrl: targetFor(term),
         cluster: seed,
       });
     }
@@ -156,17 +239,96 @@ export function keywordDashboardWorkspace(value: unknown): {
   return { opportunities: [...unique.values()], clusters, providerUsage };
 }
 
-export function competitorDashboardItems(value: unknown): UnknownRecord[] {
+/**
+ * Technical health per host from a comparison artifact, used as the baseline
+ * for the trend on a later one. Keyed by host including port, matching the
+ * cadence and content-gap joins.
+ */
+function healthByHost(value: unknown): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const { hostKey, row } of competitorRows(value)) {
+    const health =
+      typeof row.technicalHealth === "number" ? row.technicalHealth : null;
+    if (health !== null) out.set(hostKey, health);
+  }
+  return out;
+}
+
+/** The public projection. `hostKey` is a join key and never leaves the server. */
+export function competitorDashboardItems(
+  value: unknown,
+  baseline?: unknown,
+): UnknownRecord[] {
+  return competitorRows(value, baseline).map((entry) => entry.row);
+}
+
+function competitorRows(
+  value: unknown,
+  baseline?: unknown,
+): Array<{ hostKey: string; row: UnknownRecord }> {
   const root = record(value);
   const sites = Array.isArray(root?.sites) ? root.sites : [];
   const generatedAt = text(root?.generatedAt);
+
+  // A competitor's health number only means something as a trend. The previous
+  // comparison for this site is the baseline; a rival absent from that run has
+  // no baseline, so its change stays unavailable rather than reading as no
+  // movement.
+  const baselineHealth =
+    baseline === undefined ? new Map<string, number>() : healthByHost(baseline);
+
+  // Publishing cadence comes from each rival's own feed, keyed by host because
+  // the crawl's final URL may differ from the target after redirects. The key
+  // includes the port: two sites on the same hostname but different ports are
+  // different sites, and keying on hostname alone silently gave the second
+  // one's cadence to the first. A site with no feed is absent from this map and
+  // reads as unavailable — not a zero implying they never publish.
+  const cadenceByHost = new Map<string, Record<string, unknown>>();
+
+  // Per-reference content-gap coverage, keyed the same way. A competitor
+  // absent from this map was not analysed, which is why the count stays null
+  // rather than collapsing to zero — "covers none of our gap terms" and "was
+  // never measured" are opposite findings.
+  const gapByHost = new Map<string, number>();
+  const gapReport = record(root?.contentGap);
+  const perReference = Array.isArray(gapReport?.perReference)
+    ? gapReport.perReference
+    : [];
+  for (const item of perReference) {
+    const reference = record(item);
+    const url = text(reference?.url);
+    const matched = finite(reference?.matchedTermCount);
+    if (!url || matched === null) continue;
+    try {
+      gapByHost.set(new URL(url).host, matched);
+    } catch {
+      continue;
+    }
+  }
+  const outcomes = Array.isArray(root?.publishingCadence)
+    ? root.publishingCadence
+    : [];
+  for (const item of outcomes) {
+    const outcome = record(item);
+    const target = text(outcome?.target);
+    const cadence = record(outcome?.cadence);
+    if (!target || !cadence) continue;
+    try {
+      cadenceByHost.set(new URL(target).host, cadence);
+    } catch {
+      continue;
+    }
+  }
   return sites.slice(1).flatMap((item) => {
     const site = record(item);
     const url = text(site?.finalUrl) ?? text(site?.url);
     if (!site || !url) return [];
     let domain: string;
+    let hostKey: string;
     try {
-      domain = new URL(url).hostname;
+      const parsed = new URL(url);
+      domain = parsed.hostname;
+      hostKey = parsed.host;
     } catch {
       return [];
     }
@@ -183,16 +345,27 @@ export function competitorDashboardItems(value: unknown): UnknownRecord[] {
             0,
             Math.round((1 - weighted / Math.max(1, pages * 2)) * 100),
           );
+    const cadence = cadenceByHost.get(hostKey);
     return [
       {
-        id: stableId("competitor", domain),
-        domain,
-        technicalHealth,
-        technicalHealthChange: null,
-        sharedKeywords: null,
-        keywordGaps: null,
-        contentGaps: null,
-        lastUpdatedAt: generatedAt,
+        hostKey,
+        row: {
+          id: stableId("competitor", domain),
+          domain,
+          technicalHealth,
+          technicalHealthChange:
+            technicalHealth !== null && baselineHealth.has(hostKey)
+              ? technicalHealth - baselineHealth.get(hostKey)!
+              : null,
+          cadenceDays: finite(cadence?.cadenceDays),
+          freshnessSeconds: finite(cadence?.freshnessSeconds),
+          sharedKeywords: null,
+          keywordGaps: null,
+          contentGaps: gapByHost.has(hostKey)
+            ? (gapByHost.get(hostKey) ?? null)
+            : null,
+          lastUpdatedAt: generatedAt,
+        },
       },
     ];
   });
@@ -206,4 +379,70 @@ export function parseResearchArtifact(bytes: Uint8Array | null): unknown {
   } catch {
     return null;
   }
+}
+
+/**
+ * The topics references cover that the target does not.
+ *
+ * Returned separately from the per-competitor rows because a gap term belongs
+ * to the comparison as a whole, not to any single rival.
+ */
+export function contentGapTerms(value: unknown): UnknownRecord[] {
+  const gapReport = record(record(value)?.contentGap);
+  const missing = Array.isArray(gapReport?.missing) ? gapReport.missing : [];
+  return missing.flatMap((item) => {
+    const term = record(item);
+    const label = text(term?.term);
+    const refFreq = finite(term?.refFreq);
+    if (!label || refFreq === null) return [];
+    return [
+      {
+        term: label,
+        referencesCovering: refFreq,
+        referenceDensity: finite(term?.refDensity),
+        targetDensity: finite(term?.targetDensity),
+      },
+    ];
+  });
+}
+
+/**
+ * Brand presence rows from an audit artifact.
+ *
+ * The audit only emits this section when the workspace declared brand profiles,
+ * so an empty result means "not checked" and is reported by the caller as a
+ * missing state rather than as "nothing is linked".
+ */
+export function brandPresenceItems(auditArtifact: unknown): UnknownRecord[] {
+  const rows = Array.isArray(record(auditArtifact)?.brandPresence)
+    ? (record(auditArtifact)!.brandPresence as unknown[])
+    : [];
+  return rows.flatMap((item) => {
+    const entry = record(item);
+    const label = text(entry?.label);
+    const url = text(entry?.url);
+    if (!label || !url) return [];
+    const linkingPageCount = finite(entry?.linkingPageCount) ?? 0;
+    const reachability = text(entry?.reachability);
+    return [
+      {
+        id: stableId("brand", url.toLowerCase()),
+        label,
+        url,
+        linkingPageCount,
+        linkedFrom: Array.isArray(entry?.linkedFrom)
+          ? entry.linkedFrom.filter(
+              (value): value is string => typeof value === "string",
+            )
+          : [],
+        declaredInSameAs: entry?.declaredInSameAs === true,
+        reachability: ["reachable", "unreachable", "unchecked"].includes(
+          reachability ?? "",
+        )
+          ? reachability
+          : "unchecked",
+        reachabilityDetail: text(entry?.reachabilityDetail),
+      },
+    ];
+  });
 }

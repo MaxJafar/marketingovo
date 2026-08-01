@@ -300,3 +300,46 @@ export async function collectPublishingCadence(
     unavailable: null,
   };
 }
+
+/**
+ * Collects cadence for one target, assembling the same transport the crawler
+ * uses. This exists so a caller does not have to build a Fetcher, a renderer
+ * and a robots cache to ask one question — the absence of which is why the
+ * capability sat unreachable after it was written.
+ */
+export async function collectCadenceForTarget(
+  target: string,
+  options: {
+    privateHostAllowlist?: string[];
+    userAgent?: string;
+    signal?: AbortSignal;
+  } = {},
+): Promise<FeedOutcome> {
+  const { Fetcher } = await import("../fetcher.js");
+  const { RobotsCache } = await import("../core/robots.js");
+  const { createRenderer } = await import("../renderer.js");
+  const { loadLimits } = await import("../core/limits.js");
+
+  const allowlist: string[] = options.privateHostAllowlist ?? [];
+  const limits = {
+    ...loadLimits(),
+    allowPrivate: allowlist.length > 0,
+    renderMode: "static" as const,
+  };
+  const userAgent = options.userAgent ?? limits.userAgent;
+  const renderer = await createRenderer("static", limits);
+  const robots = new RobotsCache(renderer, userAgent, {
+    allowPrivate: allowlist.length > 0,
+    privateHostAllowlist: allowlist,
+    enforcePrivateHostAllowlist: allowlist.length > 0,
+    signal: options.signal,
+  });
+  const fetcher = new Fetcher(limits);
+  try {
+    return await collectPublishingCadence(fetcher, robots, target, {
+      maxBodyBytes: limits.maxBodyBytes,
+    });
+  } finally {
+    fetcher.close();
+  }
+}

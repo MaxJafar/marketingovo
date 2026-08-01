@@ -16,6 +16,7 @@ const profile = (
   conversionGoals: ["Qualified demo request"],
   priorityTopics: ["Technical SEO automation"],
   competitors: ["example-competitor.com"],
+  brandProfiles: [],
   constraints: ["Legal review is required for comparative claims"],
 });
 

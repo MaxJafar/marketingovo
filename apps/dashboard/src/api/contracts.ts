@@ -57,7 +57,26 @@ export interface ProjectContextProfile {
   conversionGoals: string[];
   priorityTopics: string[];
   competitors: string[];
+  /** Brand-owned public profiles checked against the crawl for linkage. */
+  brandProfiles: BrandProfile[];
   constraints: string[];
+}
+
+export interface BrandProfile {
+  label: string;
+  url: string;
+}
+
+/** One brand profile as the audit found it. */
+export interface BrandProfilePresence {
+  id: string;
+  label: string;
+  url: string;
+  linkingPageCount: number;
+  linkedFrom: string[];
+  declaredInSameAs: boolean;
+  reachability: "reachable" | "unreachable" | "unchecked";
+  reachabilityDetail?: string | null;
 }
 
 export interface ProjectContextVersion {
@@ -714,7 +733,25 @@ export interface Competitor {
   sharedKeywords?: number | null;
   keywordGaps?: number | null;
   contentGaps?: number | null;
+  /** Mean days between posts, from the site's own feed. Null when unmeasurable. */
+  cadenceDays?: number | null;
+  /** Seconds since their newest post. Null when unmeasurable. */
+  freshnessSeconds?: number | null;
   lastUpdatedAt?: string | null;
+}
+
+/** A topic the reference sites cover that this site does not. */
+export interface ContentGapTerm {
+  term: string;
+  referencesCovering: number;
+  referenceDensity?: number | null;
+  targetDensity?: number | null;
+}
+
+export interface CompetitorWorkspace {
+  items: Competitor[];
+  total?: number | null;
+  contentGapTerms: ContentGapTerm[];
 }
 
 export interface MonitoringSchedule {

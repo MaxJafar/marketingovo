@@ -29,6 +29,12 @@ export interface ContentGapCliOptions {
   maxBodyBytes: number;
   /** Allow private/loopback addresses (SSRF off). Off by default. */
   allowPrivate: boolean;
+  /**
+   * Exact private hosts authorized for this run. Supplying this narrows
+   * `allowPrivate` to these hosts instead of opening every private range, so an
+   * internal or staging target can be analysed without widening egress.
+   */
+  privateHostAllowlist?: readonly string[];
   /** Use a JS renderer (Playwright) for SPAs. Off by default. */
   renderMode: "static" | "js";
 }
@@ -45,6 +51,7 @@ export async function runContentGap(
     requestTimeoutMs: opts.timeoutMs || DEFAULT_TIMEOUT_MS,
     maxBodyBytes: opts.maxBodyBytes || DEFAULT_MAX_BODY,
     allowPrivate: !!opts.allowPrivate,
+    privateHostAllowlist: opts.privateHostAllowlist,
   };
   const fetcher = new Fetcher(limits);
   const errors: string[] = [];

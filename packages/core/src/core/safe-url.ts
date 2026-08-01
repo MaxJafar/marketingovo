@@ -202,19 +202,57 @@ function hostnameOnly(host: string): string {
   return value.replace(/:\d+$/, "");
 }
 
+/**
+ * Normalizes a host for allowlist comparison: strips IPv6 brackets, a trailing
+ * root dot, and case. Matches the renderer's normalization so a host authorized
+ * for browser subresources is authorized here and nowhere else differs.
+ */
+function normalizeAllowlistHost(host: string): string {
+  return host
+    .replace(/^\[|\]$/gu, "")
+    .replace(/\.$/u, "")
+    .toLowerCase();
+}
+
+/**
+ * Decides whether a private address may be reached for this host.
+ *
+ * `allowPrivate` alone opens every private range, which is the right default
+ * only for an operator who typed `--allow-private`. When a caller supplies an
+ * allowlist it is naming the exact hosts it authorized, so anything else stays
+ * blocked even though private access is nominally on. An empty or absent
+ * allowlist preserves the older blanket behaviour.
+ */
+function privateAccessPermitted(
+  hostOnly: string,
+  allowPrivate: boolean,
+  privateHostAllowlist: readonly string[] | undefined,
+): boolean {
+  if (!allowPrivate) return false;
+  if (!privateHostAllowlist || privateHostAllowlist.length === 0) return true;
+  const allowed = new Set(privateHostAllowlist.map(normalizeAllowlistHost));
+  return allowed.has(normalizeAllowlistHost(hostOnly));
+}
+
 export async function resolveSafeAddresses(
   host: string,
   allowPrivate: boolean,
+  privateHostAllowlist?: readonly string[],
 ): Promise<ResolvedAddress[]> {
   // Strip any port that may have been included in a raw host string.
   // URL parsing already does this, but a defensive call costs nothing.
   const hostOnly = hostnameOnly(host);
+  const privateAllowed = privateAccessPermitted(
+    hostOnly,
+    allowPrivate,
+    privateHostAllowlist,
+  );
   // If host is already an IP literal, validate it directly.
   if (isIP(hostOnly)) {
     if (isCloudMetadataIp(hostOnly)) {
       throw new UnsafeUrlError(`cloud metadata address blocked: ${hostOnly}`);
     }
-    if (!allowPrivate && isPrivateIp(hostOnly)) {
+    if (!privateAllowed && isPrivateIp(hostOnly)) {
       throw new UnsafeUrlError(`private/loopback address blocked: ${hostOnly}`);
     }
     return [{ address: hostOnly, family: isIP(hostOnly) as 4 | 6 }];
@@ -236,7 +274,7 @@ export async function resolveSafeAddresses(
         `cloud metadata address in DNS for ${hostOnly}: ${a.address}`,
       );
     }
-    if (!allowPrivate && isPrivateIp(a.address)) {
+    if (!privateAllowed && isPrivateIp(a.address)) {
       throw new UnsafeUrlError(
         `private/loopback address in DNS for ${hostOnly}: ${a.address}`,
       );
@@ -253,10 +291,15 @@ export async function resolveSafeAddresses(
 export async function resolveSafeEgressTarget(
   rawUrl: string,
   allowPrivate = false,
+  privateHostAllowlist?: readonly string[],
 ): Promise<SafeEgressTarget> {
   const url = normalizeUrl(rawUrl);
   const hostname = hostnameOnly(new URL(url.href).host);
-  const addresses = await resolveSafeAddresses(hostname, allowPrivate);
+  const addresses = await resolveSafeAddresses(
+    hostname,
+    allowPrivate,
+    privateHostAllowlist,
+  );
   return { url, addresses };
 }
 

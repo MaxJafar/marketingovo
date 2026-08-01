@@ -543,20 +543,54 @@ function asIssueReview(row: Row): IssueReviewItem {
   };
 }
 
+const EMPTY_PROJECT_CONTEXT_PROFILE: ProjectContextProfile = {
+  summary: null,
+  audiences: [],
+  markets: [],
+  languages: [],
+  conversionGoals: [],
+  priorityTopics: [],
+  competitors: [],
+  brandProfiles: [],
+  constraints: [],
+};
+
+/**
+ * Fills fields absent from a stored profile.
+ *
+ * Context rows are JSON, so a row written before a field existed parses into an
+ * object missing it — typed as an array but `undefined` at runtime, which throws
+ * on the first `.map()` far from here. Normalising on read keeps old revisions
+ * readable without a data migration, and keeps the type honest.
+ */
+function normalizeProjectContextProfile(
+  parsed: ProjectContextProfile,
+): ProjectContextProfile {
+  return {
+    ...EMPTY_PROJECT_CONTEXT_PROFILE,
+    ...parsed,
+    summary: parsed.summary ?? null,
+    audiences: parsed.audiences ?? [],
+    markets: parsed.markets ?? [],
+    languages: parsed.languages ?? [],
+    conversionGoals: parsed.conversionGoals ?? [],
+    priorityTopics: parsed.priorityTopics ?? [],
+    competitors: parsed.competitors ?? [],
+    brandProfiles: parsed.brandProfiles ?? [],
+    constraints: parsed.constraints ?? [],
+  };
+}
+
 function asProjectContextVersion(row: Row): ProjectContextVersion {
   return {
     projectId: String(row.project_id),
     revision: Number(row.revision),
-    profile: json<ProjectContextProfile>(row.profile_json, {
-      summary: null,
-      audiences: [],
-      markets: [],
-      languages: [],
-      conversionGoals: [],
-      priorityTopics: [],
-      competitors: [],
-      constraints: [],
-    }),
+    profile: normalizeProjectContextProfile(
+      json<ProjectContextProfile>(
+        row.profile_json,
+        EMPTY_PROJECT_CONTEXT_PROFILE,
+      ),
+    ),
     changeSummary: String(row.change_summary),
     actor: String(row.actor),
     createdAt: String(row.created_at),

@@ -158,3 +158,61 @@ describe("content-gap", () => {
     );
   });
 });
+
+// textContent flattens a subtree with no separator, so the last word of one
+// block fused with the first of the next. The fused string is not a word on any
+// page, yet it scored like one and was reported to the user as a topic their
+// competitors cover — a fabricated finding in the headline intel output.
+describe("block boundaries end a run of text", () => {
+  it("does not fuse the last word of a block with the first of the next", () => {
+    const { words, text } = extractMainContent(
+      "<html><body><main><h1>Marathon training</h1>" +
+        "<p>Marathon plans</p></main></body></html>",
+    );
+    expect(text).toBe("Marathon training Marathon plans");
+    expect(words).not.toContain("trainingmarathon");
+    expect(words).toEqual(["marathon", "training", "marathon", "plans"]);
+  });
+
+  it("separates list items from each other", () => {
+    const { words } = extractMainContent(
+      "<html><body><main><ul><li>tempo</li><li>runs</li></ul></main></body></html>",
+    );
+    expect(words).toEqual(["tempo", "runs"]);
+  });
+
+  it("separates table cells", () => {
+    const { words } = extractMainContent(
+      "<html><body><main><table><tr><td>alpha</td><td>beta</td></tr></table></main></body></html>",
+    );
+    expect(words).toEqual(["alpha", "beta"]);
+  });
+
+  // Splitting inline runs would be just as wrong in the other direction: a
+  // phrase interrupted by emphasis is still one phrase.
+  it("keeps inline elements joined to their surrounding sentence", () => {
+    const { text } = extractMainContent(
+      "<html><body><main><p>an <em>important</em> point</p></main></body></html>",
+    );
+    expect(text).toBe("an important point");
+  });
+
+  it("does not fabricate a gap term out of a fused word", () => {
+    const analysed = (url: string, html: string) => {
+      const doc = extractMainContent(html);
+      return { url, doc, vector: buildVector(doc) };
+    };
+    const target = analysed(
+      "https://ours.example/",
+      "<html><body><main><p>shoes</p></main></body></html>",
+    );
+    const reference = analysed(
+      "https://rival.example/",
+      "<html><body><main><h1>Marathon training</h1><p>Marathon plans</p></main></body></html>",
+    );
+    const report = computeContentGap(target, [reference], { topN: 10 });
+    for (const term of report.missing) {
+      expect(term.term).not.toBe("trainingmarathon");
+    }
+  });
+});

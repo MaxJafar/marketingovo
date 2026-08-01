@@ -83,11 +83,18 @@ export function extractMainContent(html: string): ExtractedContent {
       el.remove();
     }
   }
-  // Get all text, including from inline children.
-  let text = "";
-  const walker =
-    (scope as unknown as { textContent: string | null }).textContent ?? "";
-  text = normalizeWhitespace(walker);
+  // textContent concatenates descendants with no separator, so
+  // `<h1>Marathon training</h1><p>Marathon ...` yields "trainingMarathon" —
+  // a word that appears on no page, but which scores as a real term and
+  // surfaces in the content-gap report as a topic the site is "missing".
+  // Block elements end a run of text, so give each one an explicit boundary
+  // before flattening. Inline elements are left alone: splitting inside
+  // `an <em>important</em> point` would be just as wrong in the other
+  // direction.
+  separateBlocks(document, scope);
+  const text = normalizeWhitespace(
+    (scope as unknown as { textContent: string | null }).textContent ?? "",
+  );
   const words = tokenize(text);
   return {
     root: (root.tagName ?? "body").toLowerCase(),
@@ -95,6 +102,33 @@ export function extractMainContent(html: string): ExtractedContent {
     words,
     wordCount: words.length,
   };
+}
+
+/**
+ * Elements that end a run of text. Kept explicit rather than inferred from
+ * styling, because the parsed document has no layout to consult.
+ */
+const BLOCK_TAGS =
+  "address,article,aside,blockquote,br,dd,details,dialog,div,dl,dt," +
+  "fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hr," +
+  "li,main,nav,ol,p,pre,section,summary,table,tbody,td,tfoot,th,thead," +
+  "tr,ul";
+
+function separateBlocks(
+  document: ReturnType<typeof parseHTML>["document"],
+  scope: Element,
+): void {
+  const create = (
+    document as unknown as { createTextNode?: (data: string) => unknown }
+  ).createTextNode;
+  if (typeof create !== "function") return;
+  for (const element of Array.from(
+    scope.querySelectorAll(BLOCK_TAGS),
+  ) as Array<{
+    appendChild?: (node: unknown) => void;
+  }>) {
+    element.appendChild?.(create.call(document, " "));
+  }
 }
 
 function pickRoot(document: ReturnType<typeof parseHTML>["document"]): Element {

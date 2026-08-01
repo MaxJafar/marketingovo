@@ -138,7 +138,7 @@
   "minimumControlPaths": 2,
   "minimumRecall": 0.95,
   "maximumHighSeverityFalsePositiveRate": 0.05,
-  "baselineElapsedMs": 90,
-  "maximumRegressionPercent": 20,
-  "baselineProvenance": "Median of five consecutive local runs was 58 ms (range 57-58) on macOS arm64, Node 24.18.1, 2026-07-30. The baseline is set to 90 ms: roughly 55% headroom over the observed median, which absorbs local noise while still failing on a 2x algorithmic regression. The previous 500 ms baseline was 8.6x the measured time, so the gate could not fail. Slower hardware must set MARKETINGOVO_BENCHMARK_BASELINE_MS rather than loosening this value."
+  "baselineElapsedMs": 28,
+  "maximumRegressionPercent": 50,
+  "baselineProvenance": "Best-of-3 crawls, measured on macOS arm64, Node 24.18.1, 2026-07-31. Four consecutive gate runs produced 21, 24, 23, 23 ms. The baseline is 28 ms with a 50% ceiling (42 ms), which absorbs the residual few-ms jitter while still failing a 2x algorithmic regression. Single-sample timing was replaced because the crawl finishes in ~20 ms, so process noise dominated: the same commit measured anywhere from 44% under budget to 23% over, failing CI at random. Best-of-N reports what the machine can do with least interference and cannot be fooled by one lucky run, since a real regression appears in every attempt. Slower hardware must set MARKETINGOVO_BENCHMARK_BASELINE_MS rather than loosening this value; MARKETINGOVO_BENCHMARK_ATTEMPTS tunes the sample count."
 }

@@ -13,6 +13,7 @@ const profile = (overrides: Partial<ProjectContextProfile> = {}) => ({
   conversionGoals: ["Qualified demo request"],
   priorityTopics: ["Technical SEO automation"],
   competitors: ["example-competitor.com"],
+  brandProfiles: [],
   constraints: ["Legal review for comparative claims"],
   ...overrides,
 });

@@ -1408,6 +1408,149 @@ export type paths = {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/brand-presence": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: {
+          siteId?: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": {
+              data: {
+                items: {
+                  declaredInSameAs: boolean;
+                  id: string;
+                  label: string;
+                  linkedFrom: string[];
+                  linkingPageCount: number;
+                  reachability: "reachable" | "unreachable" | "unchecked";
+                  reachabilityDetail: string | null;
+                  url: string;
+                }[];
+                total: number;
+              };
+              meta: {
+                /** Format: date-time */
+                generatedAt: string;
+                state:
+                  "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                warnings: string[];
+              };
+            };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/capabilities": {
     parameters: {
       query?: never;
@@ -1522,9 +1665,17 @@ export type paths = {
           content: {
             "application/json": {
               data: {
+                contentGapTerms: {
+                  referenceDensity: number | null;
+                  referencesCovering: number;
+                  targetDensity: number | null;
+                  term: string;
+                }[];
                 items: {
+                  cadenceDays: number | null;
                   contentGaps: number | null;
                   domain: string;
+                  freshnessSeconds: number | null;
                   id: string;
                   keywordGaps: number | null;
                   lastUpdatedAt: string | null;
@@ -2271,6 +2422,11 @@ export type paths = {
                 createdAt: string;
                 profile: {
                   audiences: string[];
+                  brandProfiles: {
+                    label: string;
+                    /** Format: uri */
+                    url: string;
+                  }[];
                   competitors: string[];
                   constraints: string[];
                   conversionGoals: string[];
@@ -2554,6 +2710,11 @@ export type paths = {
                 createdAt: string;
                 profile: {
                   audiences: string[];
+                  brandProfiles: {
+                    label: string;
+                    /** Format: uri */
+                    url: string;
+                  }[];
                   competitors: string[];
                   constraints: string[];
                   conversionGoals: string[];
@@ -5601,6 +5762,11 @@ export type paths = {
                     createdAt: string;
                     profile: {
                       audiences: string[];
+                      brandProfiles: {
+                        label: string;
+                        /** Format: uri */
+                        url: string;
+                      }[];
                       competitors: string[];
                       constraints: string[];
                       conversionGoals: string[];
@@ -5619,6 +5785,11 @@ export type paths = {
                     createdAt: string;
                     profile: {
                       audiences: string[];
+                      brandProfiles: {
+                        label: string;
+                        /** Format: uri */
+                        url: string;
+                      }[];
                       competitors: string[];
                       constraints: string[];
                       conversionGoals: string[];
@@ -5654,6 +5825,11 @@ export type paths = {
                       createdAt: string;
                       profile: {
                         audiences: string[];
+                        brandProfiles: {
+                          label: string;
+                          /** Format: uri */
+                          url: string;
+                        }[];
                         competitors: string[];
                         constraints: string[];
                         conversionGoals: string[];
@@ -5672,6 +5848,11 @@ export type paths = {
                       createdAt: string;
                       profile: {
                         audiences: string[];
+                        brandProfiles: {
+                          label: string;
+                          /** Format: uri */
+                          url: string;
+                        }[];
                         competitors: string[];
                         constraints: string[];
                         conversionGoals: string[];
@@ -5830,6 +6011,11 @@ export type paths = {
             changeSummary: string;
             profile: {
               audiences: string[];
+              brandProfiles: {
+                label: string;
+                /** Format: uri */
+                url: string;
+              }[];
               competitors: string[];
               constraints: string[];
               conversionGoals: string[];
@@ -5857,6 +6043,11 @@ export type paths = {
                     createdAt: string;
                     profile: {
                       audiences: string[];
+                      brandProfiles: {
+                        label: string;
+                        /** Format: uri */
+                        url: string;
+                      }[];
                       competitors: string[];
                       constraints: string[];
                       conversionGoals: string[];
@@ -5875,6 +6066,11 @@ export type paths = {
                     createdAt: string;
                     profile: {
                       audiences: string[];
+                      brandProfiles: {
+                        label: string;
+                        /** Format: uri */
+                        url: string;
+                      }[];
                       competitors: string[];
                       constraints: string[];
                       conversionGoals: string[];
@@ -5910,6 +6106,11 @@ export type paths = {
                       createdAt: string;
                       profile: {
                         audiences: string[];
+                        brandProfiles: {
+                          label: string;
+                          /** Format: uri */
+                          url: string;
+                        }[];
                         competitors: string[];
                         constraints: string[];
                         conversionGoals: string[];
@@ -5928,6 +6129,11 @@ export type paths = {
                       createdAt: string;
                       profile: {
                         audiences: string[];
+                        brandProfiles: {
+                          label: string;
+                          /** Format: uri */
+                          url: string;
+                        }[];
                         competitors: string[];
                         constraints: string[];
                         conversionGoals: string[];

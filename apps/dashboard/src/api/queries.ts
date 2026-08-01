@@ -14,6 +14,7 @@ import type {
   ActionStatus,
   ActionVerificationRun,
   Competitor,
+  CompetitorWorkspace,
   CreateSiteInput,
   DashboardSettings,
   ExtractionPreview,
@@ -380,7 +381,7 @@ export const useKeywords = (siteId: string) =>
   );
 
 export const useCompetitors = (siteId: string) =>
-  useSiteQuery<ListResponse<Competitor>>(
+  useSiteQuery<CompetitorWorkspace>(
     queryKeys.competitors(siteId),
     "/competitors",
     siteId,

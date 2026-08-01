@@ -8,6 +8,8 @@ coverage/
 # Local Marketingovo state and artifacts
 .marketingovo/
 *.marketingovo
+.preview-data/
+service-token
 *.db
 *.db-wal
 *.db-shm

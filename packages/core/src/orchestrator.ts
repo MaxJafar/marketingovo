@@ -63,6 +63,12 @@ export interface CrawlOptions {
   projectRoot?: string;
   /** Validated caller-owned extraction rules. Falls back to the legacy env input. */
   extractors?: ExtractorRule[];
+  /**
+   * Brand-owned profile URLs from the workspace context. When supplied, the
+   * report gains a brandPresence section saying which are linked from the site
+   * and which are declared in schema.org sameAs.
+   */
+  brandProfiles?: readonly { label: string; url: string }[];
   /** GSC site URL (e.g. "sc-domain:example.com" or "https://example.com/"). Triggers real-world data enrichment. */
   gscSiteUrl?: string;
   /** GA4 property id (e.g. "123456789"). Triggers real-world traffic enrichment. */
@@ -259,6 +265,7 @@ export async function crawl(opts: CrawlOptions): Promise<CrawlOutcome> {
     allowPrivate,
     privateHostAllowlist,
     opts.signal,
+    opts.brandProfiles,
   );
   audit.info("crawl_done", {
     crawled: pages.size,
@@ -350,6 +357,7 @@ async function buildReportWithRealData(
   allowPrivate = false,
   privateHostAllowlist: readonly string[] = [],
   signal?: AbortSignal,
+  brandProfiles?: readonly { label: string; url: string }[],
 ): Promise<ReturnType<typeof buildReport>> {
   signal?.throwIfAborted();
   const sitemap = (() => {
@@ -375,7 +383,14 @@ async function buildReportWithRealData(
     lighthouseMode === "off" &&
     !hasTrends
   ) {
-    return buildReport(index, issues, undefined, undefined, sitemap);
+    return buildReport(
+      index,
+      issues,
+      undefined,
+      undefined,
+      sitemap,
+      brandProfiles,
+    );
   }
   const { GscClient } = await import("./integrations/google/gsc.js");
   const { Ga4Client } = await import("./integrations/google/ga4.js");
@@ -618,7 +633,14 @@ async function buildReportWithRealData(
     }
   }
 
-  return buildReport(index, issues, realData, lighthouse, sitemap);
+  return buildReport(
+    index,
+    issues,
+    realData,
+    lighthouse,
+    sitemap,
+    brandProfiles,
+  );
 }
 
 function mergeLimits(overrides?: Partial<Limits>): Limits {

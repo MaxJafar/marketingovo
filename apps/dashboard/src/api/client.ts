@@ -22,22 +22,53 @@ function bootstrapTokenFromFragment(): string | null {
   return fragment.get("token");
 }
 
+function clearBootstrapFragment(): void {
+  if (typeof window === "undefined") return;
+  window.history.replaceState(
+    null,
+    "",
+    `${window.location.pathname}${window.location.search}`,
+  );
+}
+
+async function requestSession(
+  bootstrapToken: string | null,
+): Promise<Response> {
+  const path = bootstrapToken ? "/session/bootstrap" : "/session";
+  return fetchApi(`${API_BASE_URL}${path}`, {
+    method: bootstrapToken ? "POST" : "GET",
+    credentials: "same-origin",
+    headers: bootstrapToken
+      ? { "Content-Type": "application/json", Accept: "application/json" }
+      : { Accept: "application/json" },
+    body: bootstrapToken
+      ? JSON.stringify({ token: bootstrapToken })
+      : undefined,
+  });
+}
+
 async function ensureSession(): Promise<void> {
   if (csrfToken) return;
   if (sessionPromise) return sessionPromise;
   sessionPromise = (async () => {
     const bootstrapToken = bootstrapTokenFromFragment();
-    const path = bootstrapToken ? "/session/bootstrap" : "/session";
-    const response = await fetchApi(`${API_BASE_URL}${path}`, {
-      method: bootstrapToken ? "POST" : "GET",
-      credentials: "same-origin",
-      headers: bootstrapToken
-        ? { "Content-Type": "application/json", Accept: "application/json" }
-        : { Accept: "application/json" },
-      body: bootstrapToken
-        ? JSON.stringify({ token: bootstrapToken })
-        : undefined,
-    });
+    let usedBootstrap = bootstrapToken !== null;
+    let response = await requestSession(bootstrapToken);
+
+    // Bootstrap tickets are deliberately single-use, but the token stays in the
+    // URL fragment — in history, in a bookmark, in a pasted link. Reopening that
+    // URL replays a ticket that was already spent establishing the session we
+    // are still holding a cookie for, and the 401 would otherwise present as
+    // "the local API is unavailable" on a service that is running fine.
+    //
+    // A spent ticket is therefore evidence that a session may already exist, so
+    // fall back to resuming it rather than failing the whole dashboard.
+    if (!response.ok && usedBootstrap && response.status === 401) {
+      clearBootstrapFragment();
+      usedBootstrap = false;
+      response = await requestSession(null);
+    }
+
     const body = (await parseResponseBody(response)) as
       { csrf?: string } | undefined;
     if (!response.ok) throw errorFromBody(body, response.status);
@@ -49,13 +80,7 @@ async function ensureSession(): Promise<void> {
       );
     }
     csrfToken = body.csrf;
-    if (bootstrapToken && typeof window !== "undefined") {
-      window.history.replaceState(
-        null,
-        "",
-        `${window.location.pathname}${window.location.search}`,
-      );
-    }
+    if (usedBootstrap) clearBootstrapFragment();
   })().finally(() => {
     sessionPromise = null;
   });

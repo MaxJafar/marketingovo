@@ -31,7 +31,7 @@ export function OverviewPage() {
     <div className="page-stack">
       <PageHeader
         eyebrow="Decision center"
-        title={site ? `${site.name} overview` : "Your SEO overview"}
+        title={site ? `${site.name} overview` : "Your marketing overview"}
         description="See what changed, what matters, and which move is most likely to improve results."
         actions={
           <Button

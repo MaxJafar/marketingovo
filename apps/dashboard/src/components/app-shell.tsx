@@ -16,8 +16,16 @@ const primaryNav: Array<{ to: string; label: string; icon: IconName }> = [
   { to: "/issues", label: "Issue review", icon: "issues" },
   { to: "/audits", label: "Audits", icon: "audits" },
   { to: "/pages", label: "Pages", icon: "pages" },
-  { to: "/keywords", label: "Keywords & content", icon: "keywords" },
+];
+
+// Market intel is its own group because it answers a different question from
+// the rest of the workspace: not "what is wrong with our site" but "what is the
+// market doing". Folding it in with the technical pages hid it — the
+// competitor and keyword surfaces read as SEO housekeeping rather than as the
+// research they are.
+const intelNav: Array<{ to: string; label: string; icon: IconName }> = [
   { to: "/competitors", label: "Competitors", icon: "competitors" },
+  { to: "/keywords", label: "Keywords & content", icon: "keywords" },
 ];
 
 const operationsNav: Array<{ to: string; label: string; icon: IconName }> = [
@@ -273,7 +281,7 @@ export function AppShell() {
             />
             <span>
               <strong>Marketingovo</strong>
-              <small>SEO control panel</small>
+              <small>Marketing control panel</small>
             </span>
           </Link>
           <button
@@ -289,6 +297,12 @@ export function AppShell() {
         <NavGroup
           label="Workspace"
           items={primaryNav}
+          pathname={pathname}
+          onNavigate={() => closeMobileNavigation(false)}
+        />
+        <NavGroup
+          label="Market intel"
+          items={intelNav}
           pathname={pathname}
           onNavigate={() => closeMobileNavigation(false)}
         />

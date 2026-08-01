@@ -141,6 +141,7 @@ export { topicClustersModule } from "./modules/topic-clusters/index.js";
 // Competitor publishing cadence from a site's own feed. A crawl shows what a
 // rival's pages look like; this shows how fast they ship.
 export {
+  collectCadenceForTarget,
   collectPublishingCadence,
   discoverFeedUrl,
   parseFeed,
@@ -150,6 +151,17 @@ export {
   type FeedUnavailableReason,
   type PublishingCadence,
 } from "./integrations/feed.js";
+export {
+  assessBrandPresence,
+  probeBrandReachability,
+  sameAsUrls,
+} from "./integrations/brand-presence.js";
+export type {
+  BrandProfileInput,
+  BrandPresencePage,
+  BrandProfilePresence,
+  BrandReachability,
+} from "./integrations/brand-presence.js";
 
 // The executive layer of a report, shared by every renderer so the HTML and PDF
 // can never disagree about what an audit found.

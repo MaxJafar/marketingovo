@@ -1225,6 +1225,20 @@ const ProjectContextListItemSchema = Type.String({
   maxLength: 240,
 });
 
+/**
+ * A public presence the brand owns: a social profile, a marketplace listing, a
+ * review page. Stored with the workspace context because "where does this brand
+ * exist" is the same class of fact as "who are its competitors".
+ */
+export const BrandProfileSchema = Type.Object(
+  {
+    label: Type.String({ minLength: 1, maxLength: 60 }),
+    url: Type.String({ minLength: 1, maxLength: 2_000, format: "uri" }),
+  },
+  { additionalProperties: false },
+);
+export type BrandProfile = Static<typeof BrandProfileSchema>;
+
 export const ProjectContextProfileSchema = Type.Object(
   {
     summary: Type.Union([
@@ -1239,6 +1253,7 @@ export const ProjectContextProfileSchema = Type.Object(
     }),
     priorityTopics: Type.Array(ProjectContextListItemSchema, { maxItems: 80 }),
     competitors: Type.Array(ProjectContextListItemSchema, { maxItems: 50 }),
+    brandProfiles: Type.Array(BrandProfileSchema, { maxItems: 30 }),
     constraints: Type.Array(ProjectContextListItemSchema, { maxItems: 50 }),
   },
   { additionalProperties: false },

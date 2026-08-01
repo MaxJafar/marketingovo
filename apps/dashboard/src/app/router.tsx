@@ -134,6 +134,16 @@ const routes = [
     getParentRoute: () => rootRoute,
     path: "/onboarding",
     component: lazyRouteComponent(
+      () => import("../pages/wizard"),
+      "WizardPage",
+    ),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    // The original checklist stays reachable: it tracks progress across a
+    // workspace's whole life, where the wizard only covers first setup.
+    path: "/setup-checklist",
+    component: lazyRouteComponent(
       () => import("../pages/onboarding"),
       "OnboardingPage",
     ),

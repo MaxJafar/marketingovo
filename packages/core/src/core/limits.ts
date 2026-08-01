@@ -20,6 +20,11 @@ export interface Limits {
   maxRedirects: number;
   userAgent: string;
   allowPrivate: boolean;
+  /**
+   * Exact private hosts this run authorized. When set, `allowPrivate` permits
+   * only these rather than every private range.
+   */
+  privateHostAllowlist?: readonly string[];
   ignoreRobots: boolean;
   renderMode: "static" | "js";
   customHeaders: Record<string, string>;

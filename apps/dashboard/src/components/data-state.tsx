@@ -19,7 +19,7 @@ export function QueryState({
   if (siteId !== undefined && !siteId) {
     return (
       <InlineNotice tone="info" title="Add a site to begin">
-        This workspace needs a site before it can load SEO data. Open onboarding
+        This workspace needs a site before it can load any data. Open onboarding
         to connect your first property.
       </InlineNotice>
     );

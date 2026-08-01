@@ -28,6 +28,7 @@ const emptyProfile: ProjectContextProfile = {
   languages: [],
   conversionGoals: [],
   priorityTopics: [],
+  brandProfiles: [],
   competitors: [],
   constraints: [],
 };
@@ -113,6 +114,10 @@ export function ProjectContextPage() {
     const summary = String(form.get("summary") ?? "").trim();
     update.mutate({
       profile: {
+        // This form does not edit brand profiles, so the current ones are
+        // carried through. Rebuilding the profile from form fields alone would
+        // silently delete whatever setup recorded.
+        brandProfiles: profile.brandProfiles,
         summary: summary || null,
         audiences: lines(form.get("audiences")),
         markets: lines(form.get("markets")),

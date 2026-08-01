@@ -102,7 +102,9 @@ import {
   storedIndexabilityReason,
 } from "./page-indexability.js";
 import {
+  brandPresenceItems,
   competitorDashboardItems,
+  contentGapTerms,
   keywordDashboardWorkspace,
   parseResearchArtifact,
 } from "./research-dashboard.js";
@@ -841,6 +843,34 @@ const DashboardProviderUsageSchema = Type.Object(
   { additionalProperties: false },
 );
 
+const DashboardBrandProfileSchema = Type.Object(
+  {
+    id: Type.String(),
+    label: Type.String(),
+    url: Type.String(),
+    linkingPageCount: Type.Integer({ minimum: 0 }),
+    linkedFrom: Type.Array(Type.String()),
+    declaredInSameAs: Type.Boolean(),
+    reachability: Type.Union([
+      Type.Literal("reachable"),
+      Type.Literal("unreachable"),
+      Type.Literal("unchecked"),
+    ]),
+    reachabilityDetail: Type.Union([Type.String(), Type.Null()]),
+  },
+  { additionalProperties: false },
+);
+
+const DashboardContentGapTermSchema = Type.Object(
+  {
+    term: Type.String(),
+    referencesCovering: Type.Integer({ minimum: 0 }),
+    referenceDensity: Type.Union([Type.Number(), Type.Null()]),
+    targetDensity: Type.Union([Type.Number(), Type.Null()]),
+  },
+  { additionalProperties: false },
+);
+
 const DashboardCompetitorSchema = Type.Object(
   {
     id: Type.String(),
@@ -850,6 +880,8 @@ const DashboardCompetitorSchema = Type.Object(
     sharedKeywords: Type.Union([Type.Number(), Type.Null()]),
     keywordGaps: Type.Union([Type.Number(), Type.Null()]),
     contentGaps: Type.Union([Type.Number(), Type.Null()]),
+    cadenceDays: Type.Union([Type.Number(), Type.Null()]),
+    freshnessSeconds: Type.Union([Type.Number(), Type.Null()]),
     lastUpdatedAt: Type.Union([
       Type.String({ format: "date-time" }),
       Type.Null(),
@@ -3656,7 +3688,75 @@ export async function createLocalServer(
           "unavailable",
           ["The latest keyword research artifact could not be read."],
         );
-      return envelope(keywordDashboardWorkspace(artifact));
+      // The latest audit supplies the on-site pages a keyword can point at.
+      // Absent an audit the target simply stays unavailable.
+      const auditRun = (await options.runtime.runs.list(siteId)).find(
+        (candidate) =>
+          candidate.workflowId === "audit" &&
+          ["succeeded", "partial"].includes(candidate.status),
+      );
+      const auditArtifact = auditRun
+        ? parseResearchArtifact(
+            await options.runtime.reports.get(auditRun.id, "json"),
+          )
+        : null;
+      return envelope(keywordDashboardWorkspace(artifact, auditArtifact));
+    },
+  );
+  app.get(
+    "/api/v1/brand-presence",
+    {
+      schema: {
+        querystring: Type.Object(
+          {
+            siteId: Type.Optional(
+              Type.String({ minLength: 1, maxLength: 160 }),
+            ),
+          },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: DashboardEnvelopeSchema(
+            Type.Object(
+              {
+                items: Type.Array(DashboardBrandProfileSchema),
+                total: Type.Integer({ minimum: 0 }),
+              },
+              { additionalProperties: false },
+            ),
+          ),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const empty = { items: [], total: 0 };
+      const siteId = (request.query as { siteId?: string }).siteId;
+      if (!siteId)
+        return envelope(empty, "unavailable", [
+          "Select a site to view brand presence.",
+        ]);
+      const run = (await options.runtime.runs.list(siteId)).find(
+        (candidate) =>
+          candidate.workflowId === "audit" &&
+          ["succeeded", "partial"].includes(candidate.status),
+      );
+      if (!run)
+        return envelope(empty, "missing", [
+          "Run an audit to check where your brand profiles are linked.",
+        ]);
+      const artifact = parseResearchArtifact(
+        await options.runtime.reports.get(run.id, "json"),
+      );
+      const items = artifact ? brandPresenceItems(artifact) : [];
+      // The audit omits the section entirely when no profiles are declared, so
+      // an empty result is reported as missing configuration rather than as a
+      // finding that nothing is linked.
+      if (items.length === 0)
+        return envelope(empty, "missing", [
+          "Add brand or social profiles in project context, then run an audit.",
+        ]);
+      return envelope({ items, total: items.length });
     },
   );
   app.get(
@@ -3677,6 +3777,7 @@ export async function createLocalServer(
               {
                 items: Type.Array(DashboardCompetitorSchema),
                 total: Type.Integer({ minimum: 0 }),
+                contentGapTerms: Type.Array(DashboardContentGapTermSchema),
               },
               { additionalProperties: false },
             ),
@@ -3686,29 +3787,43 @@ export async function createLocalServer(
       },
     },
     async (request) => {
+      const empty = { items: [], total: 0, contentGapTerms: [] };
       const siteId = (request.query as { siteId?: string }).siteId;
       if (!siteId)
-        return envelope({ items: [], total: 0 }, "unavailable", [
+        return envelope(empty, "unavailable", [
           "Select a site to view competitor research.",
         ]);
-      const run = (await options.runtime.runs.list(siteId)).find(
+      // Runs come back newest first, so the second completed comparison is the
+      // baseline the trend is measured against.
+      const comparisons = (await options.runtime.runs.list(siteId)).filter(
         (candidate) =>
           candidate.workflowId === "compare" &&
           ["succeeded", "partial"].includes(candidate.status),
       );
+      const run = comparisons[0];
       if (!run)
-        return envelope({ items: [], total: 0 }, "missing", [
+        return envelope(empty, "missing", [
           "Run a competitor comparison to populate this workspace.",
         ]);
       const artifact = parseResearchArtifact(
         await options.runtime.reports.get(run.id, "json"),
       );
       if (!artifact)
-        return envelope({ items: [], total: 0 }, "unavailable", [
+        return envelope(empty, "unavailable", [
           "The latest competitor comparison artifact could not be read.",
         ]);
-      const items = competitorDashboardItems(artifact);
-      return envelope({ items, total: items.length });
+      const previous = comparisons[1];
+      const baseline = previous
+        ? (parseResearchArtifact(
+            await options.runtime.reports.get(previous.id, "json"),
+          ) ?? undefined)
+        : undefined;
+      const items = competitorDashboardItems(artifact, baseline);
+      return envelope({
+        items,
+        total: items.length,
+        contentGapTerms: contentGapTerms(artifact),
+      });
     },
   );
   app.get("/api/v1/monitoring", async (request) => {
