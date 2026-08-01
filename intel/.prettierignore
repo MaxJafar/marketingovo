@@ -1,0 +1,22 @@
+# Generated contract projections. Their exact bytes are asserted by
+# `pnpm contracts:lint`, so a formatter pass here creates false drift.
+gen/
+packages/sdk/src/generated/
+
+# Generated agent-host manifests and bundles. Their exact bytes are asserted by
+# `pnpm validate:plugins`, so a formatter pass here creates false drift.
+plugins/claude/
+.claude-plugin/
+integrations/*.mcp.json
+plugins/*/*/dist/
+adapters/*/dist/
+
+# Untrusted local reference material, never a build or tooling input.
+TO REVERSE ENGINEEER/
+
+# Lockfiles and build output.
+pnpm-lock.yaml
+uv.lock
+**/dist/
+**/target/
+**/.venv/

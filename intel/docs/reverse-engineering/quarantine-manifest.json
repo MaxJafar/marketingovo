@@ -1,0 +1,378 @@
+{
+  "schema_version": 1,
+  "generated_on": "2026-07-16",
+  "scope": "reference-lab-only",
+  "handling": {
+    "copy_allowed": false,
+    "execute_allowed": false,
+    "build_input_allowed": false,
+    "display_values_allowed": false,
+    "log_values_allowed": false,
+    "required_action": "Treat any credential as compromised; verify ownership and rotate or revoke through an authorized operator before a separately approved deletion workflow."
+  },
+  "reason_definitions": {
+    "CREDENTIAL_BEARING_FILENAME": "The path is conventionally used for credentials or secrets.",
+    "POPULATED_CONFIGURATION_HEURISTIC": "A path-only static check indicated one or more non-empty credential-like assignments; no values were retained or reported.",
+    "UNVERIFIED_REFERENCE_ARCHIVE": "The file belongs to an extracted archive without verified commit provenance."
+  },
+  "entries": [
+    {
+      "path": "TO REVERSE ENGINEEER/Reddiment-main/junk/database/elastic-first-setup/.env",
+      "archive": "Reddiment-main",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/Reddiment-main/junk/database/elastic-first-setup/.env.exsample",
+      "archive": "Reddiment-main",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/Reddiment-main/junk/database/elastic-nodejs-client/.env",
+      "archive": "Reddiment-main",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/Reddiment-main/sys-src/.env",
+      "archive": "Reddiment-main",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/Reddiment-main/sys-src/finance-crawler/.env",
+      "archive": "Reddiment-main",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/Reddiment-main/sys-src/docker/secrets/backend_access_key.txt",
+      "archive": "Reddiment-main",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/Reddiment-main/sys-src/docker/secrets/backend_graphql_access_key.txt",
+      "archive": "Reddiment-main",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/Reddiment-main/sys-src/docker/secrets/elastic_password.txt",
+      "archive": "Reddiment-main",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/Reddiment-main/sys-src/docker/secrets/reddit_client_secret.txt",
+      "archive": "Reddiment-main",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/Reddiment-main/sys-src/docker/secrets/reddit_login_password.txt",
+      "archive": "Reddiment-main",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/Reddiment-main/sys-src/docker/secrets/sentiment_access_key.txt",
+      "archive": "Reddiment-main",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/telegram-tracker-main/config/config.ini",
+      "archive": "telegram-tracker-main",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/4cat-master/.env",
+      "archive": "4cat-master",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/4cat-master/common/config_manager.py",
+      "archive": "4cat-master",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/4cat-master/common/lib/config_definition.py",
+      "archive": "4cat-master",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/asyncpraw-main/docs/getting_started/configuration.rst",
+      "archive": "asyncpraw-main",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/IntelOwl-master/docker/.env",
+      "archive": "IntelOwl-master",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/IntelOwl-master/docker/flower.override.yml",
+      "archive": "IntelOwl-master",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/IntelOwl-master/docker/rabbitmq.override.yml",
+      "archive": "IntelOwl-master",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/IntelOwl-master/intel_owl/secrets.py",
+      "archive": "IntelOwl-master",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/maigret-main/maigret/resources/data.json",
+      "archive": "maigret-main",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/osintbuddy-main/backend/app/alembic.ini",
+      "archive": "osintbuddy-main",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/osintbuddy-main/backend/app/app/core/config.py",
+      "archive": "osintbuddy-main",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/osintbuddy-main/ob/_casdoor/init_data.json",
+      "archive": "osintbuddy-main",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/osintbuddy-main/ob/.env.alpha",
+      "archive": "osintbuddy-main",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/Osintgram-master/config/credentials.ini",
+      "archive": "Osintgram-master",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/postiz-app-main/docker-compose.yaml",
+      "archive": "postiz-app-main",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/praw-main/docs/getting_started/configuration.rst",
+      "archive": "praw-main",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/Socioboard-5.0-master/socioboard-api/Admin/config/default.json.json",
+      "archive": "Socioboard-5.0-master",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/Socioboard-5.0-master/socioboard-api/Admin/config/development.json",
+      "archive": "Socioboard-5.0-master",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/Socioboard-5.0-master/socioboard-api/Common/Sequelize-cli/config/config.json",
+      "archive": "Socioboard-5.0-master",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/Socioboard-5.0-master/socioboard-api/Feeds/resources/views/swagger.config.js",
+      "archive": "Socioboard-5.0-master",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/Socioboard-5.0-master/socioboard-api/User/resources/views/swagger.config.js",
+      "archive": "Socioboard-5.0-master",
+      "reason_ids": [
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/theHarvester-master/theHarvester/data/api-keys.yaml",
+      "archive": "theHarvester-master",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "POPULATED_CONFIGURATION_HEURISTIC",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    },
+    {
+      "path": "TO REVERSE ENGINEEER/TrendRadar-master/docker/.env",
+      "archive": "TrendRadar-master",
+      "reason_ids": [
+        "CREDENTIAL_BEARING_FILENAME",
+        "UNVERIFIED_REFERENCE_ARCHIVE"
+      ],
+      "status": "quarantined",
+      "build_input": false
+    }
+  ]
+}

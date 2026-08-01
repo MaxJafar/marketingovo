@@ -1,0 +1,56 @@
+{
+  "schema_version": "agentintel.comparison-report.v1",
+  "run_id": "run_sample_01",
+  "workflow": "compare",
+  "research_plan": [
+    "Use only the committed synthetic fixture snapshot.",
+    "Normalize eligible evidence and preserve contradictory source values.",
+    "Compare denominator-specific findings with observation-level citations."
+  ],
+  "derivation": {
+    "worker_version": "agentintel-worker@1.0.0",
+    "model_version": "competitive-pulse-baseline@0.1.0",
+    "connector_version": "fixture.competitive-pulse@1",
+    "parser_version": "agentintel-parser@1.0.0"
+  },
+  "generated_at": "2026-07-16T08:00:03Z",
+  "title": "Competitive Pulse comparison",
+  "summary": "Compared one synthetic target using validated fixture observations.",
+  "targets": [
+    {
+      "entity_id": "northstar-labs",
+      "entity_name": "Northstar Labs",
+      "follower_delta": 600,
+      "median_engagement_rate": 0.05332,
+      "posting_cadence_per_week": 1,
+      "content_format_mix": {
+        "video": 1
+      },
+      "confidence": 0.91,
+      "warnings": ["Follower change is not customer retention."],
+      "citations": [
+        {
+          "observation_id": "obs_northstar_followers_01",
+          "entity_id": "northstar-labs",
+          "source_url": "https://social.example.invalid/northstar-labs",
+          "native_id": "followers-01",
+          "observed_at": "2026-06-01T00:00:00Z",
+          "connector_version": "fixture.competitive-pulse@1",
+          "confidence": 1
+        }
+      ]
+    }
+  ],
+  "metric_definitions": [
+    {
+      "id": "followers.delta",
+      "version": "v1",
+      "label": "Observed follower change",
+      "numerator": "latest observed follower count minus earliest observed follower count",
+      "denominator": "none",
+      "period": "selected series observation window"
+    }
+  ],
+  "contradictions": [],
+  "limitations": ["The contract sample contains synthetic evidence only."]
+}

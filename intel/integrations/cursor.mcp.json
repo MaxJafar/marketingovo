@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "agentintel": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@agentintel/mcp",
+        "agentintel-mcp"
+      ]
+    }
+  }
+}

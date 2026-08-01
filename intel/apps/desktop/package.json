@@ -1,0 +1,16 @@
+{
+  "name": "@agentintel/desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Restricted Tauri 2 shell for the AGENTintel local runtime",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/validate.mjs",
+    "lint": "node scripts/validate.mjs",
+    "test": "node scripts/validate.mjs",
+    "typecheck": "node scripts/validate.mjs",
+    "native:check": "cargo check --manifest-path src-tauri/Cargo.toml",
+    "native:test": "cargo test --manifest-path src-tauri/Cargo.toml"
+  }
+}

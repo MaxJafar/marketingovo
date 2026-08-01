@@ -1,0 +1,164 @@
+{
+  "schema_version": "agentintel.source-reference-conformance.v1",
+  "policy_version": "source-reference.v1",
+  "navigation": {
+    "clickable": false,
+    "copyable": true
+  },
+  "cases": [
+    {
+      "id": "valid_public_path",
+      "source_url": "https://www.iana.org/domains/reserved",
+      "valid": true,
+      "diagnostic_code": null,
+      "source_host": "www.iana.org"
+    },
+    {
+      "id": "valid_percent_encoded_unicode_path",
+      "source_url": "https://www.iana.org/help/%E2%9C%93",
+      "valid": true,
+      "diagnostic_code": null,
+      "source_host": "www.iana.org"
+    },
+    {
+      "id": "valid_reserved_fixture_host",
+      "source_url": "https://example.invalid/northstar-labs/videos/01",
+      "valid": true,
+      "diagnostic_code": null,
+      "source_host": "example.invalid"
+    },
+    {
+      "id": "invalid_non_ascii_source",
+      "source_url": "https://www.iana.org/café",
+      "valid": false,
+      "diagnostic_code": "source_url_invalid",
+      "source_host": null
+    },
+    {
+      "id": "invalid_mixed_case_scheme",
+      "source_url": "HTTPS://www.iana.org/domains/reserved",
+      "valid": false,
+      "diagnostic_code": "source_url_scheme",
+      "source_host": null
+    },
+    {
+      "id": "invalid_http_scheme",
+      "source_url": "http://www.iana.org/domains/reserved",
+      "valid": false,
+      "diagnostic_code": "source_url_scheme",
+      "source_host": null
+    },
+    {
+      "id": "invalid_userinfo",
+      "source_url": "https://analyst:redacted@www.iana.org/domains/reserved",
+      "valid": false,
+      "diagnostic_code": "source_url_credentials",
+      "source_host": null
+    },
+    {
+      "id": "invalid_private_ipv4_literal",
+      "source_url": "https://127.0.0.1/source/1",
+      "valid": false,
+      "diagnostic_code": "source_url_host_forbidden",
+      "source_host": null
+    },
+    {
+      "id": "invalid_public_ipv4_literal",
+      "source_url": "https://192.0.43.8/source/1",
+      "valid": false,
+      "diagnostic_code": "source_url_host_forbidden",
+      "source_host": null
+    },
+    {
+      "id": "invalid_link_local_ipv6_literal",
+      "source_url": "https://[fe80::1]/source/1",
+      "valid": false,
+      "diagnostic_code": "source_url_host_forbidden",
+      "source_host": null
+    },
+    {
+      "id": "invalid_single_label_host",
+      "source_url": "https://intranet/source/1",
+      "valid": false,
+      "diagnostic_code": "source_url_host_forbidden",
+      "source_host": null
+    },
+    {
+      "id": "invalid_localhost",
+      "source_url": "https://localhost/source/1",
+      "valid": false,
+      "diagnostic_code": "source_url_host_forbidden",
+      "source_host": null
+    },
+    {
+      "id": "invalid_mdns_host",
+      "source_url": "https://brand.local/source/1",
+      "valid": false,
+      "diagnostic_code": "source_url_host_forbidden",
+      "source_host": null
+    },
+    {
+      "id": "invalid_home_arpa_host",
+      "source_url": "https://brand.home.arpa/source/1",
+      "valid": false,
+      "diagnostic_code": "source_url_host_forbidden",
+      "source_host": null
+    },
+    {
+      "id": "invalid_explicit_port",
+      "source_url": "https://www.iana.org:443/domains/reserved",
+      "valid": false,
+      "diagnostic_code": "source_url_port_forbidden",
+      "source_host": null
+    },
+    {
+      "id": "invalid_query_credentials",
+      "source_url": "https://www.iana.org/domains/reserved?token=redacted",
+      "valid": false,
+      "diagnostic_code": "source_url_query_forbidden",
+      "source_host": null
+    },
+    {
+      "id": "invalid_empty_query",
+      "source_url": "https://www.iana.org/domains/reserved?",
+      "valid": false,
+      "diagnostic_code": "source_url_query_forbidden",
+      "source_host": null
+    },
+    {
+      "id": "invalid_fragment",
+      "source_url": "https://www.iana.org/domains/reserved#section",
+      "valid": false,
+      "diagnostic_code": "source_url_fragment_forbidden",
+      "source_host": null
+    },
+    {
+      "id": "invalid_empty_fragment",
+      "source_url": "https://www.iana.org/domains/reserved#",
+      "valid": false,
+      "diagnostic_code": "source_url_fragment_forbidden",
+      "source_host": null
+    },
+    {
+      "id": "invalid_percent_encoded_newline",
+      "source_url": "https://www.iana.org/domains/%0Areserved",
+      "valid": false,
+      "diagnostic_code": "source_url_control_character",
+      "source_host": null
+    },
+    {
+      "id": "invalid_percent_encoded_backslash",
+      "source_url": "https://www.iana.org/domains/%5Creserved",
+      "valid": false,
+      "diagnostic_code": "source_url_control_character",
+      "source_host": null
+    },
+    {
+      "id": "invalid_malformed_percent_escape",
+      "source_url": "https://www.iana.org/domains/%GG",
+      "valid": false,
+      "diagnostic_code": "source_url_invalid",
+      "source_host": null
+    }
+  ]
+}

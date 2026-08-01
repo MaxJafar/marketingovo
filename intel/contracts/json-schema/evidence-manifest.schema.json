@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/MaxJafar/AGENTintel/schemas/intel/evidence-manifest-v1.json",
+  "title": "Committed evidence manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifest_version",
+    "run_id",
+    "committed_at",
+    "provenance",
+    "artifacts"
+  ],
+  "properties": {
+    "manifest_version": { "const": 1 },
+    "run_id": { "type": "string", "minLength": 1 },
+    "committed_at": { "type": "string", "format": "date-time" },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "worker_version",
+        "model_version",
+        "connector_version",
+        "parser_version"
+      ],
+      "properties": {
+        "worker_version": { "type": "string", "minLength": 1 },
+        "model_version": { "type": "string", "minLength": 1 },
+        "connector_version": { "type": "string", "minLength": 1 },
+        "parser_version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "relative_path",
+          "media_type",
+          "sha256",
+          "size_bytes",
+          "schema_id",
+          "data_class"
+        ],
+        "properties": {
+          "relative_path": { "type": "string", "pattern": "^[^/].*" },
+          "media_type": { "type": "string" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "size_bytes": { "type": "integer", "minimum": 0 },
+          "row_count": { "type": "integer", "minimum": 0 },
+          "schema_id": { "type": "string" },
+          "minimum_observed_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          },
+          "maximum_observed_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          },
+          "data_class": {
+            "enum": [
+              "public",
+              "first_party",
+              "licensed_business_contact",
+              "restricted"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

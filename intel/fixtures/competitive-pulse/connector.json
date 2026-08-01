@@ -1,0 +1,11 @@
+{
+  "$schema": "../../../contracts/json-schema/connector-manifest.schema.json",
+  "id": "fixture.competitive-pulse",
+  "version": "1.0.0",
+  "acquisition_modes": ["fixture"],
+  "allowed_hosts": [],
+  "data_classes": ["public"],
+  "cost_model": "free",
+  "credential_scope": null,
+  "default_retention_days": 365
+}

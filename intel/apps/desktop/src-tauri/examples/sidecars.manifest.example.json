@@ -1,0 +1,73 @@
+{
+  "schema_version": 2,
+  "target_triple": "aarch64-apple-darwin",
+  "daemon": "bin/agentinteld",
+  "python_command": "python-runtime/bin/python3",
+  "python_environment_root": "python-runtime",
+  "python_worker_root": "python-worker",
+  "python_generated_root": "python-generated",
+  "dashboard_root": "dashboard",
+  "fixture": "fixtures/competitive-pulse/observations.ndjson",
+  "files": [
+    {
+      "path": "bin/agentinteld",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "size_bytes": 12345678,
+      "executable": true
+    },
+    {
+      "path": "python-runtime/bin/python3",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "size_bytes": 12345678,
+      "executable": true
+    },
+    {
+      "path": "python-runtime/pyvenv.cfg",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "size_bytes": 256,
+      "executable": false
+    },
+    {
+      "path": "python-runtime/lib/python3.13/site-packages/agentintel_worker/__init__.py",
+      "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "size_bytes": 1234,
+      "executable": false
+    },
+    {
+      "path": "python-worker/pyproject.toml",
+      "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "size_bytes": 1234,
+      "executable": false
+    },
+    {
+      "path": "python-worker/uv.lock",
+      "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "size_bytes": 1234,
+      "executable": false
+    },
+    {
+      "path": "python-worker/src/agentintel_worker/__init__.py",
+      "sha256": "abababababababababababababababababababababababababababababababab",
+      "size_bytes": 1234,
+      "executable": false
+    },
+    {
+      "path": "python-generated/agentintel/v1/worker_pb2.py",
+      "sha256": "bcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbc",
+      "size_bytes": 1234,
+      "executable": false
+    },
+    {
+      "path": "dashboard/index.html",
+      "sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+      "size_bytes": 1234,
+      "executable": false
+    },
+    {
+      "path": "fixtures/competitive-pulse/observations.ndjson",
+      "sha256": "dededededededededededededededededededededededededededededededede",
+      "size_bytes": 1234,
+      "executable": false
+    }
+  ]
+}
