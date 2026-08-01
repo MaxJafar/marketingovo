@@ -172,10 +172,33 @@ effort_multiplier: low=1.0, medium=0.75, high=0.5
 Inputs are normalized to `0..1`. Missing integrations lower confidence and are
 shown as unavailable; they are never silently converted to zero.
 
+## Repository layout
+
+One repository, three runtimes. Node is the product; the other two are opt-in.
+
+| Path                            | Runtime | Contents                                                        |
+| ------------------------------- | ------- | --------------------------------------------------------------- |
+| `apps/`                         | Node    | Dashboard, desktop shell, documentation site                    |
+| `packages/`                     | Node    | Core engine, CLI, server, storage, SDK, MCP, contracts          |
+| `services/intel-daemon/`        | Go      | Scheduled collection, rights and retention policy, run recovery |
+| `services/intelligence-worker/` | Python  | Arrow/Parquet cohort analysis for large local observation sets  |
+| `contracts/`                    | —       | Protobuf, OpenAPI and JSON Schema contracts shared by all three |
+| `adapters/`, `plugins/`         | Node    | Agent-host surfaces                                             |
+
+`pnpm check` runs the Node gates and is what a normal contributor needs.
+`pnpm check:native` adds the Go and Python gates; `pnpm check:all` runs both.
+Installing Go and Python is not required to build, test or run Marketingovo
+itself.
+
+`TO REVERSE ENGINEEER/` holds third-party projects kept only to be read. It is
+excluded from version control and from every build, test and product input, and
+nothing is copied from it. `pnpm reference:validate` enforces that.
+
 ## Documentation
 
 - [Quickstart](docs/quickstart.md)
 - [Architecture](docs/architecture.md)
+- [Intelligence architecture (proposal)](docs/intelligence-architecture.md)
 - [Project Context and marketer journal](docs/project-context.md)
 - [Desktop runtime and release configuration](docs/desktop-release.md)
 - [npm release and provenance](docs/npm-release.md)
