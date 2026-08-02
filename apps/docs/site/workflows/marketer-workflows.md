@@ -71,7 +71,7 @@ Before producing a brief:
 
 ## Monitoring and verification
 
-Community schedules execute while the local service is running. MaxJafar adds always-on monitored workers.
+Schedules execute while the local service is running; the native launchers support platform-specific background startup.
 
 Use stable issue fingerprints and action verification states:
 

@@ -10,4 +10,5 @@ Community support is best effort. Maintainers aim to acknowledge security
 reports within two business days and triage well-formed bugs within five
 business days, but these are targets rather than an SLA.
 
-Commercial support and SLAs are available with Marketingovo on Marketingovo.
+There is no commercial support tier, no paid SLA, and no hosted edition to
+escalate to. Best effort is the whole offer.

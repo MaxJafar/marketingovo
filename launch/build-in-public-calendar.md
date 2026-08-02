@@ -1,8 +1,8 @@
 # Six-week build-in-public calendar
 
-Cadence: three primary posts per week, one short community follow-up after each, and a Friday evidence review. Publish only completed work or clearly labeled experiments. Keep `0.11 alpha` visible throughout the cycle.
+Cadence: three primary posts per week, one short community follow-up after each, and a Friday evidence review. Publish only completed work or clearly labeled experiments. Keep the current version and the “source install only” caveat visible throughout the cycle.
 
-Keep the edition boundary explicit: Marketingovo is Apache-2.0 open source, while Marketingovo is a separate commercial service for managed infrastructure and collaboration.
+Keep the licence framing explicit and honest: Marketingovo is Apache-2.0 open source with one edition — no paid tier, no hosted service, nothing withheld. Never imply otherwise.
 
 ## Weekly operating rhythm
 
@@ -11,7 +11,7 @@ Keep the edition boundary explicit: Marketingovo is Apache-2.0 open source, whil
 - **Friday — learning and invitation:** share what failed, what changed, and the next testable question.
 - **Daily follow-up:** answer substantive questions, record objections, and turn repeated confusion into documentation or a small issue.
 
-Track saves, qualified comments, GitHub stars, successful quickstart attempts, design-partner conversations, and Full inquiries. Treat impressions as distribution, not product proof.
+Track saves, qualified comments, GitHub stars, successful quickstart attempts, and contributor conversations. Treat impressions as distribution, not product proof.
 
 ## Week 1 — Launch the decision model
 
@@ -93,15 +93,15 @@ Friday review:
 - Reject metrics without a comparable baseline or source window.
 - Record qualitative feedback separately from measured workflow change.
 
-## Week 6 — Editions, alpha gates, and the next test
+## Week 6 — Licence, remaining gates, and the next test
 
-**Goal:** close the launch cycle with a clear Community/Full boundary and a public quality agenda.
+**Goal:** close the launch cycle with an honest statement of what shipped and a public quality agenda.
 
-| Day       | Channel and asset            | Post angle                                                       | Evidence to show                                                                          | Primary CTA                           |
-| --------- | ---------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------- |
-| Monday    | LinkedIn carousel slides 7–8 | Open source for local control; Full for managed collaboration    | Marketingovo shown as Apache-2.0 open source; Full shown as a separate commercial service | Install or try Full                   |
-| Wednesday | GitHub release-status update | What passed, what remains, and what changed over six weeks       | Linked tests, issues, and 1.0 gate status                                                 | Contribute to one gate                |
-| Friday    | Founder retrospective        | What the team believed, learned, changed, and still cannot claim | Before/after assumptions and unresolved risks                                             | Star, install, or request Full access |
+| Day       | Channel and asset            | Post angle                                                 | Evidence to show                                                  | Primary CTA            |
+| --------- | ---------------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------- | ---------------------- |
+| Monday    | LinkedIn carousel slides 7–8 | One edition, and what open source actually means here      | Apache-2.0; every capability in the repository, nothing held back | Install or star        |
+| Wednesday | GitHub release-status update | What passed, what remains, and what changed over six weeks | Linked tests, issues, and the deferred-channel list               | Contribute to one gate |
+| Friday    | Founder retrospective        | What I believed, learned, changed, and still cannot claim  | Before/after assumptions and unresolved risks                     | Star or install        |
 
 Friday review:
 
@@ -123,8 +123,8 @@ Use one prompt after the main post rather than stacking several asks:
 ## Six-week exit criteria
 
 - At least three complete quickstart observations with reproducible notes.
-- At least one attributable design-partner workflow approved for publication, or a documented reason the evidence is not ready.
+- At least one attributable contributor workflow approved for publication, or a documented reason the evidence is not ready.
 - A categorized list of setup, data, scoring, workflow, and trust objections.
 - Every confirmed defect linked to an issue or test.
 - Release-status language updated to match what actually passed.
-- A clear split between Community feedback and Full infrastructure/collaboration demand.
+- A categorized record of which deferred channels people actually asked for first.

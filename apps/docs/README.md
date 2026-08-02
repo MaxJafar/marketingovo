@@ -1,8 +1,7 @@
 # Marketingovo documentation site
 
 This VitePress workspace publishes the English product documentation for
-Marketingovo, marketer workflows, product surfaces, trust boundaries, and
-the MaxJafar edition boundary.
+Marketingovo: marketer workflows, product surfaces, and trust boundaries.
 
 ```bash
 pnpm --filter @marketingovo/docs dev

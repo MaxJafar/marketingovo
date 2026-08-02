@@ -1,17 +1,17 @@
 ---
 title: Release status
-description: Understand what the 0.11 alpha contains and which quality gates remain before public 1.0.
+description: What 1.1.0 contains, which gates were observed passing, and which channels are deliberately deferred.
 ---
 
 # Release status
 
-## 0.11 alpha
+## 1.1.0 — prepared, not approved
 
-The current branch is the production-foundation release. Its acceptance target is a clean local install, correct workflow execution, safe browser networking, durable SQLite history, a real dashboard, and working CLI, MCP, Codex, and OpenClaw surfaces.
+The REST API, OpenAPI document, SDK, nine-tool agent contract registry, CLI and `.marketingovo` bundle format are stable: breaking changes to them require a major version. 1.1.0 is additive on top of 1.0.0 and breaks no existing integration.
 
 <div class="status-banner">
-  <strong>Use with care</strong>
-  <p>Alpha builds are for design partners and contributors. They are not the public 1.0 candidate and should not be presented as fully hardened across every supported operating system.</p>
+  <strong>Not an approved release</strong>
+  <p>Every engineering gate passes and the evidence is recorded, but the release-owner and licence-compliance attestations are still pending. Nothing here should be read as a shipped release.</p>
 </div>
 
 ## Present in the current source
@@ -44,7 +44,7 @@ The current branch is the production-foundation release. Its acceptance target i
   and capacity safeguards;
 - CLI and typed REST SDK;
 - versioned `/api/v1`, OpenAPI, asynchronous runs, SSE events, and problem details;
-- six workflow-level MCP tools and read-only resources;
+- nine workflow-level agent tools and read-only resources, plus a separate five-tool terminal session registry;
 - Codex and OpenClaw bundles over the same local contracts;
 - connector manifests for GSC, GA4, PageSpeed Insights, Trends, SerpAPI, and DataForSEO;
 - BYOK credential boundary and encrypted CLI vault option;
@@ -52,13 +52,13 @@ The current branch is the production-foundation release. Its acceptance target i
   removal in Integrations, with provider-side revocation disclosed separately;
 - authenticated same-origin HTML, PDF, CSV, and JSON actions in Reports;
 - a native webview with no privileged Tauri command permissions;
-- Apache-2.0 open source and separate MaxJafar product boundary;
+- Apache-2.0 open source, one edition, no paid tier and no hosted service;
 - Audit Intelligence Pack with click-depth, inlink, markup, hreflang, exact
   cohort, provider-cost, and evidence-first agent improvements;
 
 “Present in source” is not the same as having cleared every public release corpus. Provider and operating-system readiness must still be checked against current fixtures and release artifacts.
 
-## Important alpha limitations
+## Known limits
 
 - Native installer signing and target-native automatic-update evidence remain
   release gates. The desktop source now performs a bounded foreground check,
@@ -70,11 +70,13 @@ The current branch is the production-foundation release. Its acceptance target i
   migration corpus. Signed operating-system upgrade evidence remains a 1.0
   gate.
 - Every operating-system matrix has not completed final validation.
-- Provider authorization and fixtures can have alpha-specific gaps.
-- Hosted MaxJafar device-link and import calls report unavailable when no
-  hosted bridge is configured; Community never simulates hosted completion.
-- Community schedules require the local service to remain running. Native
-  launchers support platform-specific background startup.
+- Provider authorization and fixtures are not equally exercised across providers.
+- The demo-flagged console panels — social mentions, brand sentiment, and the
+  mentions trend — have no connector behind them and say so in the interface.
+  Backlinks states plainly that crawling your own site cannot measure referring
+  domains.
+- Schedules require the local service to remain running. Native launchers
+  support platform-specific background startup.
 - The Windows MSI owns a removable HKCU login-start component for the signed
   desktop executable. macOS and Linux use the packaged CLI's launchd and
   systemd-user definitions. The release matrix installs the real DMG, MSI, and
@@ -87,7 +89,7 @@ The current branch is the production-foundation release. Its acceptance target i
   match registry integrity plus provenance after OIDC publication. This path is
   implemented but is not claimed released until the canonical tag workflow
   produces its evidence.
-- The exact-tag release blocks native builds on the full Community gate, live
+- The exact-tag release blocks native builds on the full workspace gate, live
   npm and RustSec advisory checks, packaged Playwright journey, Gitleaks,
   CodeQL, and SBOM evidence.
 - Claims of commercial-tool replacement require a reproducible public corpus.
@@ -96,20 +98,28 @@ The checked-in contract projection currently covers 20 public schemas and 38
 API operations. CI rejects drift between TypeBox contracts, OpenAPI, the typed
 SDK, CLI behavior, and dashboard consumers.
 
-## Public 1.0 gates
+## Acceptance gates
 
-The canonical release status requires, among other checks:
+Stable release acceptance requires each of the following to be observed
+passing and recorded with the command that produced it:
 
-- no known critical or high application or dependency vulnerability;
-- correct terminal and partial run states with no recursive workflows;
-- passing SSRF, redirect, DNS, browser, OAuth, and secret-leak corpora;
-- crash-safe scheduling without duplicated work;
-- correct GSC and GA4 pagination and field fixtures;
-- clean install, upgrade, package, MCP, Codex, and OpenClaw smoke tests;
-- WCAG 2.2 AA dashboard behavior with a first action reachable within 15 minutes;
-- at least 95% detection on a fixed correctness corpus with fewer than 5% high-severity false positives;
-- no unexplained benchmark regression above 20%;
-- three attributable weekly-workflow case studies approved by design partners.
+| Gate                                              | Command                   |
+| ------------------------------------------------- | ------------------------- |
+| Workspace gate across every workspace             | `pnpm check`              |
+| Correctness corpus and benchmark regression       | `pnpm benchmark`          |
+| Dependency advisories                             | `pnpm audit:dependencies` |
+| Dependency licence policy                         | `pnpm validate:licenses`  |
+| Agent host surfaces against the contract registry | `pnpm validate:plugins`   |
+| Instruction guardrails                            | `pnpm validate:skills`    |
+| Packaged real-browser journey with axe            | `pnpm test:e2e`           |
+
+Two further gates are human attestations rather than commands: a release-owner
+approval and a licence-compliance review. Both are pending for 1.1.0.
+
+Two requirements that earlier versions of this policy carried — an external
+legal review of the Elastic License, trademarks and a CLA, and three
+attributable design-partner case studies — were retired because their subjects
+no longer exist. See ADR 0002 for the reasoning.
 
 ## How to verify your checkout
 
@@ -126,11 +136,11 @@ Treat a failing gate as evidence, not an inconvenience to hide. Partial or unava
 
 Use this language externally:
 
-> Marketingovo 0.11 is an active alpha for design partners and contributors. The engine and product surfaces are usable, while signed cross-platform lifecycle evidence, provider matrices, external legal review, and design-partner acceptance are progressing toward the public 1.0 gates.
+> Marketingovo 1.1.0 declares a stable public surface: the REST API and its OpenAPI document, the generated SDK, the agent contract registry, the CLI, and the `.marketingovo` bundle format. It covers source, CLI, MCP plugin and npm-packable surfaces. It does not cover signed native installers, the updater channel, or npm registry publication, which are declared as deferred channels rather than left to be inferred.
 
 Do not claim production certification, universal provider availability, or full replacement of a mature proprietary dataset.
 
 <p class="source-note">
-  Canonical status: <a href="https://github.com/MaxJafar/marketingovo/blob/main/docs/release-status.md">0.11 alpha and public 1.0 gates</a>.
+  Canonical status: <a href="https://github.com/MaxJafar/marketingovo/blob/main/docs/release-status.md">release status</a>.
   Broader direction belongs in the <a href="https://github.com/MaxJafar/marketingovo/blob/main/README.md">product README</a> and project planning documents.
 </p>

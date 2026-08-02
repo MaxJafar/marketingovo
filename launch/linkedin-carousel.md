@@ -14,7 +14,7 @@ Which five deserve attention this week?
 
 **Footer**
 
-Marketingovo `0.11` alpha
+Marketingovo `1.1.0`
 
 **Visual direction**
 
@@ -126,29 +126,27 @@ A local dashboard and terminal connected to a private project store.
 
 “A local Marketingovo dashboard connected to a private project database and credential boundary.”
 
-## Slide 7 — Community and Full
+## Slide 7 — One edition
 
 **Headline**
 
-Local power or managed collaboration.
+Everything, on your machine.
 
-**Marketingovo**
+**Body**
 
 Single-user, local-first analysis, BYOK integrations, local reports, and local scheduling while the service runs.
 
-**Marketingovo**
-
-Always-on execution, portfolios, teams and RBAC, managed integrations, hosted artifacts, retention, and commercial support.
+No paid tier. No hosted service. No feature held back to sell later. Apache-2.0, and every capability in the repository is available to everyone.
 
 **Footer**
 
-Full is a separate proprietary service. Local analysis is not deliberately weakened.
+Open source means the whole product, not a sampler.
 
 **Alt text**
 
-“A side-by-side comparison of Marketingovo and Marketingovo.”
+“A single-column list of Marketingovo capabilities under an Apache-2.0 heading, with no paid column beside it.”
 
-## Slide 8 — Try the alpha
+## Slide 8 — Try it
 
 **Headline**
 
@@ -156,20 +154,20 @@ Turn one audit into one verified action.
 
 **Body**
 
-`npx @marketingovo/cli serve`
+```
+git clone https://github.com/MaxJafar/marketingovo
+corepack enable && pnpm install && pnpm build
+pnpm marketingovo serve
+```
 
 Star and inspect:
 
 github.com/MaxJafar/marketingovo
 
-Need managed team workflows?
-
-github.com/MaxJafar/marketingovo/seo
-
 **Footer**
 
-`0.11` is an alpha for design partners and contributors. Feedback is part of the build.
+Building from source is the only install route today — no signed installers or npm package yet.
 
 **Alt text**
 
-“Marketingovo alpha call to action with local install, GitHub, and Marketingovo links.”
+“Marketingovo call to action showing the source install commands and the GitHub repository link.”

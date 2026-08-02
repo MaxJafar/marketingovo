@@ -9,7 +9,7 @@ performance, and SERP data into verified actions.**
 
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-5b63ff)](LICENSE)
 [![Telemetry](https://img.shields.io/badge/telemetry-off%20by%20default-242b36)](PRIVACY.md)
-[![Version](https://img.shields.io/badge/version-1.0.0-20b486)](docs/release-status.md)
+[![Version](https://img.shields.io/badge/version-1.1.0-20b486)](docs/release-status.md)
 
 Marketingovo runs on your machine, requires no account, and
 keeps projects and credentials under your control. It does more than produce an
@@ -17,16 +17,19 @@ issue dump: it connects technical evidence to organic exposure, conversion
 exposure, reach, confidence, and effort so a marketer can decide what to fix
 first and verify the result after the next audit.
 
-> **Status: 1.0.0.** The REST API, OpenAPI document, SDK, nine-tool agent
-> contract registry, CLI and `.marketingovo` bundle format are stable; breaking
-> changes to them now require a major version.
+> **Status: 1.1.0, prepared but not approved.** The REST API, OpenAPI document,
+> SDK, nine-tool agent contract registry, CLI and `.marketingovo` bundle format
+> are stable; breaking changes to them require a major version. Every
+> engineering gate passes and the evidence is recorded in
+> [`release/acceptance/1.1.0.json`](release/acceptance/1.1.0.json), but the
+> release-owner and licence-compliance attestations are still pending, so this
+> is not a shipped release.
 >
 > Install from source or as an agent plugin. Signed desktop installers, the
 > updater channel, and npm registry publication are **not** part of this release
 > — they need a code-signing identity and a registry account that do not exist
-> yet, and are declared as deferred channels in
-> [`release/acceptance/1.0.0.json`](release/acceptance/1.0.0.json). See
-> [release status](docs/release-status.md) for exactly what was verified.
+> yet, and are declared as deferred channels rather than left to be inferred.
+> See [release status](docs/release-status.md) for exactly what was verified.
 
 ## Why Marketingovo
 
@@ -54,7 +57,7 @@ first and verify the result after the next audit.
   workflow and exact options with a new immutable run ID and configuration
   hash; the source result is never edited.
 - **Evidence-based audit comparison.** Compare any two completed audits from
-  the same project without starting another crawl. Golem separates new,
+  the same project without starting another crawl. Marketingovo separates new,
   resolved, and severity-changed issues from HTTP and indexability changes,
   exposes configuration drift and versioned internal-link deltas, and never
   converts missing health or graph evidence to zero.
@@ -97,19 +100,15 @@ Add site → establish context → connect data → choose goal → run audit
          → review evidence → act → verify
 ```
 
-Verified tagged releases also provide an npm route that does not require
-cloning the repository:
-
-```bash
-npx @marketingovo/cli serve
-```
-
-The current source version is not evidence that the same version has already
-been published. Use only a GitHub release that includes
-`npm-publication.json`, matching tarball integrity, and npm provenance.
+**Building from source is currently the only install route.** The release
+tooling supports publishing an `npx @marketingovo/cli serve` path, but nothing
+has been published to npm yet — npm registry publication is a declared deferred
+channel. When it ships, use only a GitHub release that includes
+`npm-publication.json`, matching tarball integrity, and npm provenance; the
+source version alone is never evidence that the same version was published.
 
 See [the ten-minute quickstart](docs/quickstart.md) and
-[current release status](docs/release-status.md) before using an alpha build on
+[current release status](docs/release-status.md) before running this against
 production sites.
 
 ## Portable projects

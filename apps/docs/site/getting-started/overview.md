@@ -43,9 +43,9 @@ The React dashboard, CLI, typed SDK, MCP bridge, Codex bundle, and OpenClaw adap
 
 ## Product boundary
 
-Marketingovo is a local, single-user product with analysis limited only by the resources of the machine and the provider access you bring. MaxJafar is a separate proprietary service for always-on execution, collaboration, managed providers, portfolio operations, hosted artifacts, approval workflows, and commercial support.
+Marketingovo is a local, single-user product with analysis limited only by the resources of the machine and the provider access you bring.
 
-The commercial value is infrastructure and collaboration—not deliberately incomplete local analysis.
+There is one edition. No paid tier, no hosted service, no feature held back to sell later. Every capability in the repository is available to everyone who runs it.
 
 ## License boundary
 

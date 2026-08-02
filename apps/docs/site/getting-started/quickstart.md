@@ -8,8 +8,8 @@ description: Install Marketingovo, open the local dashboard, and reach the first
 This path uses Marketingovo. It requires Node.js 24 LTS and Corepack. No account is required.
 
 <div class="status-banner">
-  <strong>Alpha guidance</strong>
-  <p>Use a non-critical project first, keep backups, and review the current release gates before relying on the 0.11 alpha for production operations.</p>
+  <strong>Before you start</strong>
+  <p>Use a non-critical project first, keep backups, and review the current release gates before relying on it for production operations.</p>
 </div>
 
 ## Install from source
@@ -29,7 +29,7 @@ The published-package route described by the project is:
 npx @marketingovo/cli serve
 ```
 
-The daemon binds to `127.0.0.1:3210`. Keep it on loopback. Current `0.11` builds print a one-time dashboard URL; open that exact URL so the fragment token can be exchanged for the HttpOnly local session and removed from the address bar.
+The daemon binds to `127.0.0.1:3210`. Keep it on loopback. The daemon prints a one-time dashboard URL; open that exact URL so the fragment token can be exchanged for the HttpOnly local session and removed from the address bar.
 
 One daemon owns each data directory. A second CLI reuses the authenticated
 owner instead of starting duplicate workers or schedules, including when it
@@ -38,7 +38,7 @@ on the next start.
 
 ## Decide whether credentials must survive a restart
 
-In the current CLI alpha, the credential vault is locked unless the daemon receives either:
+The credential vault stays locked unless the daemon receives either:
 
 - `--master-password-file /absolute/path/to/password-file`, or
 - `MARKETINGOVO_MASTER_PASSWORD` in the daemon environment.
@@ -73,7 +73,7 @@ Begin with the sources you already trust:
 - PageSpeed Insights or local browser runs for performance context;
 - Google Trends, SerpAPI, or DataForSEO for demand and market research.
 
-Provider readiness varies during the alpha. The Integrations screen is the authority for connection status. A source that is missing or stale remains visibly unavailable.
+Provider readiness varies. The Integrations screen is the authority for connection status. A source that is missing or stale remains visibly unavailable.
 
 ### 4. Choose the question
 
@@ -208,5 +208,5 @@ provider when required. Agents cannot delete projects.
 
 <p class="source-note">
   Canonical operational source: <a href="https://github.com/MaxJafar/marketingovo/blob/main/docs/quickstart.md">ten-minute quickstart</a>.
-  Confirm alpha limitations in <a href="https://github.com/MaxJafar/marketingovo/blob/main/docs/release-status.md">release status</a>.
+  Confirm current limitations in <a href="https://github.com/MaxJafar/marketingovo/blob/main/docs/release-status.md">release status</a>.
 </p>

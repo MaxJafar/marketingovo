@@ -41,7 +41,7 @@ export default defineConfig({
           { text: "MCP, Codex, and OpenClaw", link: "/agents/agent-surfaces" },
         ],
       },
-      { text: "0.11 alpha", link: "/product/release-status" },
+      { text: "1.1.0", link: "/product/release-status" },
     ],
     sidebar: [
       {

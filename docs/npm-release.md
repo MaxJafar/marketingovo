@@ -1,7 +1,7 @@
 # npm release and provenance
 
 The npm route is a verified release surface, not a best-effort workspace
-publish. The canonical tag workflow publishes 13 Community packages because
+publish. The canonical tag workflow publishes 13 packages because
 the CLI depends on the same public contracts, engine, runtime, storage,
 integrations, server, SDK, MCP, and adapter packages used by the other product
 surfaces.
@@ -13,8 +13,9 @@ Before publication, the release tooling:
 - requires the git tag to equal `v` plus the version shared by the root,
   publishable packages, private apps, Tauri configuration, desktop crate, and
   native credential-broker crate;
-- validates ELv2, canonical repository metadata, public access, notices, and
-  provenance configuration for every publishable package;
+- validates the Apache-2.0 SPDX identifier, canonical repository metadata,
+  public access, notices, and provenance configuration for every publishable
+  package;
 - orders packages topologically so dependencies are published first;
 - creates tarballs with `pnpm pack`, rejects remaining `workspace:` protocols,
   and requires local dependencies to resolve to the exact release version;

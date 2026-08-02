@@ -1,6 +1,6 @@
-# Community browser quality gate
+# Browser quality gate
 
-This suite exercises the packaged Community experience instead of mocking API
+This suite exercises the packaged product experience instead of mocking API
 responses. It starts the built CLI with an isolated temporary data directory,
 parses the exact one-time dashboard URL printed by the CLI, and serves the
 synthetic SEO corpus on a random loopback port.

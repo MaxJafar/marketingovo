@@ -5,7 +5,7 @@ repository has ever had.
 
 This document is the sprint plan from that tag to a public `1.0.0` release as an
 installable agent plugin with a GUI dashboard. It reads
-[`docs/status.md`](docs/status.md) as the release-truth boundary and does not
+[`status.md`](status.md) as the release-truth boundary and does not
 soften it.
 
 ---
@@ -49,7 +49,7 @@ starts existing.
 ### Resolved since the original audit
 
 - **Licensing.** Apache-2.0 throughout, copyright MaxJafar, recorded in
-  [ADR 0003](docs/adr/0003-apache-2-0-relicense.md). The ADR states plainly that
+  [ADR 0003](adr/0003-apache-2-0-relicense.md). The ADR states plainly that
   Apache-2.0 _raises_ rather than lowers the cost of GPL/AGPL derivation, because
   the project now invites unrestricted redistribution — which promotes the
   clean-room record from a nice-to-have to a release gate.

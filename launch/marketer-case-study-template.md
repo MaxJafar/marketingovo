@@ -55,7 +55,7 @@ Examples of guardrails:
 
 | Item                   | Recorded value                  |
 | ---------------------- | ------------------------------- |
-| Edition                | `[Community / Full]`            |
+| Version type           | `[release tag or commit]`       |
 | Version                | `[exact version]`               |
 | Project scope          | `[site count and URL scope]`    |
 | Crawl mode             | `[static / JavaScript / mixed]` |
@@ -125,23 +125,22 @@ Avoid scripting a result the participant did not independently confirm.
 
 Explain how these constraints changed confidence or the final decision.
 
-## Edition context
+## Product context
 
-If the local edition was used, state that it is local-first and open source under the Apache License 2.0.
+State that Marketingovo is local-first and open source under the Apache License 2.0, that there is one edition, and that the workflow ran entirely on the participant's own machine with their own provider credentials.
 
-If Marketingovo was used, describe only the managed services actually used, such as always-on monitoring, shared portfolios, RBAC, managed integrations, or hosted reports. Full is a separate proprietary service.
+Do not describe any managed, hosted, or supported service. None exists.
 
 ## Reproduce the workflow
 
-Community CTA:
-
 ```bash
-npx @marketingovo/cli serve
+git clone https://github.com/MaxJafar/marketingovo
+cd marketingovo
+corepack enable && pnpm install && pnpm build
+pnpm marketingovo serve
 ```
 
 Source and quickstart: https://github.com/MaxJafar/marketingovo
-
-Managed team workflow: https://github.com/MaxJafar/marketingovo
 
 ## Final evidence review
 
@@ -151,5 +150,5 @@ Managed team workflow: https://github.com/MaxJafar/marketingovo
 - [ ] Inference is separated from measurement.
 - [ ] Participant attribution and quote are approved.
 - [ ] Screenshots are redacted and marked if they use demo data.
-- [ ] Edition and license language is accurate.
+- [ ] Licence language is accurate and no paid or hosted tier is implied.
 - [ ] The story does not claim causation from a before/after observation alone.

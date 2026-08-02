@@ -1,6 +1,6 @@
 ---
 title: Security and privacy
-description: Understand localhost authorization, egress controls, credential handling, project data, and the alpha threat model.
+description: Understand localhost authorization, egress controls, credential handling, project data, and the threat model.
 ---
 
 # Security and privacy
@@ -8,8 +8,8 @@ description: Understand localhost authorization, egress controls, credential han
 Security is a release gate because Marketingovo processes hostile crawled pages, confidential marketing evidence, browser sessions, and provider credentials.
 
 <div class="status-banner">
-  <strong>0.11 pre-release</strong>
-  <p>Security fixes are best effort during private validation. Review the supported-version table and report a vulnerability privately before using the alpha with sensitive production data.</p>
+  <strong>1.1.0</strong>
+  <p>Security fixes land on the latest 1.x. Review the supported-version table and report a vulnerability privately rather than in a public issue.</p>
 </div>
 
 ## Trust boundaries
@@ -26,7 +26,7 @@ Dashboard + local daemon, one origin
             egress policy
 ```
 
-The daemon alone owns SQLite and the credential store. The current documented child-process boundary applies to browser and Lighthouse work; those workers receive scoped material and do not open the database or credential store directly. Connector manifests constrain provider hosts and credential shape, but separately isolated connector workers remain a release invariant to verify rather than an alpha guarantee.
+The daemon alone owns SQLite and the credential store. The current documented child-process boundary applies to browser and Lighthouse work; those workers receive scoped material and do not open the database or credential store directly. Connector manifests constrain provider hosts and credential shape, but separately isolated connector workers remain a release invariant to verify rather than a current guarantee.
 
 The native launcher keeps sidecar and updater control in Rust. Its dashboard
 webview has no Tauri shell, updater, or application command permissions and can
@@ -65,7 +65,7 @@ Authorization headers, cookies, and custom headers remain scoped to the exact or
   locked and credential writes are refused.
 - Credential connection, rotation, and deletion remain human-controlled UI or CLI actions, outside public agent tools.
 
-See [Integrations and BYOK](/integrations/byok) for current alpha setup behavior.
+See [Integrations and BYOK](/integrations/byok) for current setup behavior.
 
 ## Privacy model
 
@@ -103,7 +103,7 @@ blocked, cleanup is retried on service restart. A recovery manifest restores
 files when a crash happened before the SQLite commit; unknown staging is kept
 and system health becomes degraded rather than deleting data. Project deletion
 is a UI/CLI/API operation and is not an agent tool.
-MaxJafar has a separate privacy policy for its hosted service.
+There is no hosted edition and therefore no second privacy policy.
 
 ## Exports and backups
 
@@ -130,7 +130,7 @@ A fully compromised operating system or administrator-level attacker is outside 
 
 ## Report a vulnerability
 
-Email `security@github.com/MaxJafar/marketingovo` with the affected version, impact, and minimal reproduction. Do not open a public issue for a working exploit, credential leak, or bypass of local authorization, egress, credential, entitlement, or update-signature controls.
+Report privately through the **Report a vulnerability** button on the repository's [Security tab](https://github.com/MaxJafar/marketingovo/security/advisories/new), with the affected version, impact, and minimal reproduction. Do not open a public issue for a working exploit, credential leak, or bypass of local authorization, egress, credential, entitlement, or update-signature controls.
 
 The project aims to acknowledge a report within two business days, provide a status update within five, and coordinate disclosure after a fix is available.
 

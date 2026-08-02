@@ -227,7 +227,7 @@ Measurements use explicit source state. A metric can be `available`, `unavailabl
 
 ## Stability
 
-The versioned route is `/api/v1`, but `0.11` remains an alpha. Route contract changes should update TypeBox schemas, runtime validation, OpenAPI, generated SDK types, tests, and documentation together. The six agent tools use a separate canonical TypeBox registry that MCP and OpenClaw project into their native schema dialects.
+The versioned route is `/api/v1` and is stable as of 1.0.0: breaking changes to it require a major version. Route contract changes should update TypeBox schemas, runtime validation, OpenAPI, generated SDK types, tests, and documentation together. The six agent tools use a separate canonical TypeBox registry that MCP and OpenClaw project into their native schema dialects.
 
 <p class="source-note">
   Canonical sources: <a href="https://github.com/MaxJafar/marketingovo/blob/main/packages/contracts/src/index.ts">public API TypeBox contracts</a>,

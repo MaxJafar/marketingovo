@@ -51,5 +51,7 @@ system temporarily prevents final file removal, the isolated deletion staging
 directory is retried at the next service start. If the process stopped before
 the database commit, the manifest causes those files to be restored because
 the project still exists. Unrecognized or conflicting staging is preserved and
-system health is degraded instead of deleting unknown data. Marketingovo on Golem
-Workers has a separate privacy policy appropriate to its hosted service.
+system health is degraded instead of deleting unknown data.
+
+There is no hosted edition of Marketingovo and therefore no second privacy
+policy. Everything described here happens on the machine you run it on.

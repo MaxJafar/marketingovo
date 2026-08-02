@@ -51,25 +51,25 @@ features:
     link: /product/project-context
     linkText: Build shared context
   - icon: ◆
-    title: Source-available Marketingovo
-    details: Run meaningful local analysis under the Apache License 2.0. Hosted collaboration and managed execution are a separate MaxJafar service.
-    link: /product/editions
-    linkText: Compare editions
+    title: Open source, one edition
+    details: Everything runs locally under the Apache License 2.0. No paid tier, no hosted service, nothing held back.
+    link: /product/release-status
+    linkText: See what is verified
 ---
 
 <div class="status-banner">
-  <strong>0.11 alpha</strong>
-  <p>The engine is usable, while installation, migration coverage, native packaging, and the full operating-system matrix are still progressing through the public 1.0 gates.</p>
+  <strong>1.1.0</strong>
+  <p>The REST API, OpenAPI document, SDK, agent contract registry, CLI and <code>.marketingovo</code> bundle format are stable. Signed desktop installers, the updater channel, and npm registry publication are not part of this release.</p>
 </div>
 
 <div class="edition-callout">
   <a href="/getting-started/quickstart">
-    <strong>Marketingovo</strong>
-    <span>Run locally, bring your own provider credentials, keep analysis and history on your machine, and use every product surface.</span>
+    <strong>Run it locally</strong>
+    <span>Bring your own provider credentials, keep analysis and history on your machine, and use every product surface.</span>
   </a>
-  <a href="https://github.com/MaxJafar/marketingovo" target="_blank" rel="noreferrer">
-    <strong>MaxJafar</strong>
-    <span>Add always-on workers, teams, managed providers, hosted delivery, approval workflows, and commercial support.</span>
+  <a href="/product/release-status">
+    <strong>Check what is verified</strong>
+    <span>Every release gate is named with the command that produced it, and the deferred channels are declared rather than implied.</span>
   </a>
 </div>
 

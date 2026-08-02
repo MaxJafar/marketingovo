@@ -1,4 +1,4 @@
-# Community benchmark
+# Correctness benchmark
 
 `pnpm benchmark` runs the fixed `community-synthetic-v2` corpus against a
 loopback fixture. Version 2 contains 26 exact `ruleId + path` defect instances

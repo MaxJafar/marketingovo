@@ -1,40 +1,41 @@
 # Reference-tool reverse engineering
 
-This document records the license-safe behavioral audit used to improve Golem
-SEO Marketingovo. It is an engineering decision record, not a claim that
+This document records the license-safe behavioral audit used to improve
+Marketingovo. It is an engineering decision record, not a claim that
 the referenced projects endorse Marketingovo.
 
 Snapshot date: **2026-07-15**. Each repository was inspected at the exact commit
-listed below. Golem's implementation remains TypeScript/ELv2 and follows its
-local-first, same-origin, native-process architecture.
+listed below. Marketingovo's implementation remains TypeScript under
+Apache-2.0 and follows its local-first, same-origin, native-process
+architecture.
 
 ## Method and legal boundary
 
 We evaluated each product on five axes: marketer leverage, evidence quality,
-fit with Golem's canonical contracts, security and data correctness, and
+fit with Marketingovo's canonical contracts, security and data correctness, and
 license compatibility.
 
 - MIT references may be adapted with the required notice. The features in this
-  tranche were nevertheless implemented against Golem's own contracts rather
-  than copied file-for-file.
+  tranche were nevertheless implemented against Marketingovo's own contracts
+  rather than copied file-for-file.
 - AGPL and GPL references were used only to understand observable behavior and
   workflow design. No source, tests, text, or assets from those repositories
   were copied into Marketingovo.
 - Deployment-specific container and Cloudflare mechanics were excluded by product
   policy.
-- A heuristic from another tool is not automatically truth. Golem exposes the
-  threshold, evidence, affected cohort, and intent assumptions.
+- A heuristic from another tool is not automatically truth. Marketingovo exposes
+  the threshold, evidence, affected cohort, and intent assumptions.
 
 ## Reference matrix
 
-| Reference                                                                                                     | Snapshot and license | Strongest mechanics                                                                                                                                | Decision in Marketingovo                                                                                                                                                                                                                                                                                       |
-| ------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Open SEO](https://github.com/every-app/open-seo/tree/61c0b0c65791b855d83cdc5d0f299a8c7b87527d)               | `61c0b0c`, MIT       | Provider-centric research workflows, actual DataForSEO cost accounting, explicit data-source routing, reusable project context, agent/MCP surfaces | **Adopted now through Golem contracts:** provider economics and actual DataForSEO task cost; versioned business/SEO profiles; append-only marketer journal; read-only MCP context; secret-safe `.marketingovo` transfer. **Excluded:** original deployment and hosted billing code.                            |
-| [Seonaut](https://github.com/stjudewashere/seonaut/tree/880b312c28fab8b0bf7fe4f9449dc4746dbb82ff)             | `880b312`, MIT       | Persistent crawl/report model, small composable reporters, replay/archive workflow, deep technical rule coverage                                   | **Adopted now:** usable viewport, duplicate DOM id, large DOM, image dimensions/fallback, richer hreflang, click-depth diagnostics, idempotent local run replay, and evidence-based archive comparison with configuration provenance.                                                                          |
-| [Claude SEO](https://github.com/AgricIDaniel/claude-seo/tree/6cf1ea9fe4c2088b2ad3089797f846850fd66164)        | `6cf1ea9`, MIT       | Goal router, evidence-first audit discipline, layered outputs, quality gates, explicit limitations, dependency-aware action planning               | **Adopted now:** Golem's Codex marketer skill observes before scoring, states assumptions, challenges contradictory evidence, orders gating constraints, and defines success and failure conditions.                                                                                                           |
-| [SiteInspector](https://github.com/siteinspector/siteinspector/tree/7493e509cc11420f7f31ee17a959478d78ac580c) | `7493e50`, AGPL-3.0  | Custom rules, false-positive adjudication, crawl sessions/cancellation, content QA, shareable report links                                         | **Adopted now through a clean implementation:** durable, reversible issue adjudication with evidence, reasons, project isolation, audit events, future-run persistence, REST/SDK/dashboard/MCP surfaces, and `.marketingovo` transfer. Public share links remain a hosted MaxJafar capability.                 |
-| [Greenflare](https://github.com/beb7/gflare-tk/tree/4e6e90299c96071a6e1466d49eae21e181643d75)                 | `4e6e902`, GPL-3.0   | Desktop list crawl, include/exclude controls, custom extraction workbench, inlink inspection                                                       | **Adopted now through a clean implementation:** exact URL cohort audits use the durable runtime and dashboard Expert scope. Custom extraction has immutable project revisions, draft preview through the production egress policy, bounded paginated evidence, safe regex validation, and explicit truncation. |
-| [SEO Macroscope](https://github.com/nazuke/SEOMacroscope/tree/62e67130ecbe3062ad2bca2c43686c34a2ff49c1)       | `62e6713`, GPL-3.0   | Click-path analysis, redirect-chain workbench, inlink/outlink evidence, hreflang matrix, sitemap and spreadsheet artifacts                         | **Adopted now through a clean implementation:** crawler depth and first referrer, redirect paths, reciprocal hreflang matrix, sitemap coverage, and a page-level inlink/outlink explorer are backed by immutable run evidence.                                                                                 |
+| Reference                                                                                                     | Snapshot and license | Strongest mechanics                                                                                                                                | Decision in Marketingovo                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Open SEO](https://github.com/every-app/open-seo/tree/61c0b0c65791b855d83cdc5d0f299a8c7b87527d)               | `61c0b0c`, MIT       | Provider-centric research workflows, actual DataForSEO cost accounting, explicit data-source routing, reusable project context, agent/MCP surfaces | **Adopted now through Marketingovo contracts:** provider economics and actual DataForSEO task cost; versioned business/SEO profiles; append-only marketer journal; read-only MCP context; secret-safe `.marketingovo` transfer. **Excluded:** original deployment and hosted billing code.                           |
+| [Seonaut](https://github.com/stjudewashere/seonaut/tree/880b312c28fab8b0bf7fe4f9449dc4746dbb82ff)             | `880b312`, MIT       | Persistent crawl/report model, small composable reporters, replay/archive workflow, deep technical rule coverage                                   | **Adopted now:** usable viewport, duplicate DOM id, large DOM, image dimensions/fallback, richer hreflang, click-depth diagnostics, idempotent local run replay, and evidence-based archive comparison with configuration provenance.                                                                                |
+| [Claude SEO](https://github.com/AgricIDaniel/claude-seo/tree/6cf1ea9fe4c2088b2ad3089797f846850fd66164)        | `6cf1ea9`, MIT       | Goal router, evidence-first audit discipline, layered outputs, quality gates, explicit limitations, dependency-aware action planning               | **Adopted now:** Marketingovo's Codex marketer skill observes before scoring, states assumptions, challenges contradictory evidence, orders gating constraints, and defines success and failure conditions.                                                                                                          |
+| [SiteInspector](https://github.com/siteinspector/siteinspector/tree/7493e509cc11420f7f31ee17a959478d78ac580c) | `7493e50`, AGPL-3.0  | Custom rules, false-positive adjudication, crawl sessions/cancellation, content QA, shareable report links                                         | **Adopted now through a clean implementation:** durable, reversible issue adjudication with evidence, reasons, project isolation, audit events, future-run persistence, REST/SDK/dashboard/MCP surfaces, and `.marketingovo` transfer. Public share links are out of scope: there is no hosted service to host them. |
+| [Greenflare](https://github.com/beb7/gflare-tk/tree/4e6e90299c96071a6e1466d49eae21e181643d75)                 | `4e6e902`, GPL-3.0   | Desktop list crawl, include/exclude controls, custom extraction workbench, inlink inspection                                                       | **Adopted now through a clean implementation:** exact URL cohort audits use the durable runtime and dashboard Expert scope. Custom extraction has immutable project revisions, draft preview through the production egress policy, bounded paginated evidence, safe regex validation, and explicit truncation.       |
+| [SEO Macroscope](https://github.com/nazuke/SEOMacroscope/tree/62e67130ecbe3062ad2bca2c43686c34a2ff49c1)       | `62e6713`, GPL-3.0   | Click-path analysis, redirect-chain workbench, inlink/outlink evidence, hreflang matrix, sitemap and spreadsheet artifacts                         | **Adopted now through a clean implementation:** crawler depth and first referrer, redirect paths, reciprocal hreflang matrix, sitemap coverage, and a page-level inlink/outlink explorer are backed by immutable run evidence.                                                                                       |
 
 ## Integrated tranche: Audit Intelligence Pack
 
@@ -72,7 +73,7 @@ New issue contracts cover:
 - optional `x-default` review.
 
 Intent-sensitive directives are deliberately Low priority and carry
-`intentRequired: true`. Golem must not instruct a marketer to remove a valid
+`intentRequired: true`. Marketingovo must not instruct a marketer to remove a valid
 restriction without understanding the business intent.
 
 ### Transparent provider economics
@@ -275,7 +276,7 @@ a draft does not persist rules or create a run.
 
 ### Review-first extraction templates
 
-The Community dashboard now discovers a canonical
+The dashboard now discovers a canonical
 `extraction-template-catalog-v1` through the authenticated local API. The
 initial packs cover social previews, editorial articles, commerce products,
 and migration markers. Each pack carries a recommended page and explicit

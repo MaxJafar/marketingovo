@@ -2,7 +2,7 @@
 
 This deterministic site contains labeled SEO defects and no customer data. The
 public benchmark serves it on a random loopback port, audits it with the same
-Community engine, and reports detection recall, high-severity false positives,
+engine, and reports detection recall, high-severity false positives,
 runtime and the complete observed rule list.
 
 Version 2 labels 26 exact `rule + page + priority` instances across response,

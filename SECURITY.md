@@ -5,19 +5,24 @@ localhost authorization, browser isolation, SSRF, credentials, and exports.
 
 ## Supported versions
 
-| Version                   | Security fixes                        |
-| ------------------------- | ------------------------------------- |
-| Latest `1.x` stable       | Yes                                   |
-| Latest `0.11` pre-release | Best effort during private validation |
-| `0.10` and earlier        | No                                    |
+| Version             | Security fixes |
+| ------------------- | -------------- |
+| Latest `1.x` stable | Yes            |
+| `0.x` pre-releases  | No             |
 
 ## Reporting a vulnerability
 
-Email `security@github.com/MaxJafar/marketingovo` with a description, affected version, impact,
-and minimal reproduction. Encrypt sensitive material when possible and do not
-include real customer secrets. We aim to acknowledge a report within two
+Report privately through GitHub's **Report a vulnerability** button on the
+[Security tab](https://github.com/MaxJafar/marketingovo/security/advisories/new).
+That channel is private to the maintainer until an advisory is published.
+
+Include a description, affected version, impact, and a minimal reproduction. Do
+not include real customer secrets. We aim to acknowledge a report within two
 business days, provide a status update within five, and coordinate disclosure
 after a fix is available.
+
+Please do not open a public issue for a vulnerability, and do not publish a
+working exploit before a fix is available.
 
 Do not open a public issue for a working exploit, leaked credential, or bypass
 of the egress, vault, localhost session, entitlement, or update-signature

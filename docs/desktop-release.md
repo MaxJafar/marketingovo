@@ -5,7 +5,7 @@ architecture they target. Each installer contains four versioned runtime
 parts:
 
 - the Tauri desktop launcher;
-- the official Node 24 sidecar and production Community runtime;
+- the official Node 24 sidecar and production runtime;
 - the native operating-system credential broker;
 - the Chromium build matched to the lockfile's Playwright version.
 

@@ -32,7 +32,7 @@ pnpm check
 - Zero, missing, stale, unavailable, and provider failure are distinct.
 - Every network hop follows the egress policy.
 - Secrets are write-only and represented outside the credential store only by a `secretRef`.
-- Proprietary MaxJafar implementations do not belong in this repository.
+- Nothing is developed outside this repository and held back; there is no proprietary counterpart.
 - Schema, API, workflow, module, and connector changes require the review level defined by governance.
 
 Security and credential changes require two maintainer reviews.
@@ -62,8 +62,8 @@ pnpm --filter @marketingovo/docs build
 Documentation changes should:
 
 - link to the canonical repository policy or implementation;
-- distinguish current alpha behavior from roadmap intent;
-- preserve the Community and MaxJafar boundary;
+- distinguish current shipped behavior from roadmap intent;
+- never imply a paid tier, hosted edition, or withheld capability;
 - avoid unsupported replacement, performance, or revenue claims;
 - explain unavailable data rather than implying a zero;
 - update navigation when adding a new guide.

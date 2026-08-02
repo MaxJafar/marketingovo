@@ -6,7 +6,7 @@
 
 ## Audience and promise
 
-Audience: TypeScript engineers, agent-platform builders, technical SEOs, and contributors evaluating the `0.11` alpha.
+Audience: TypeScript engineers, agent-platform builders, technical SEOs, and contributors evaluating Marketingovo `1.1.0`.
 
 Promise: explain the product’s decision model, runtime boundaries, and honest data-state handling with reproducible code references. Do not frame the article as a production-readiness announcement.
 
@@ -133,30 +133,29 @@ Cover:
 
 Proof artifact: one MCP tool call and its corresponding REST request/response shape.
 
-## 9. Editions are an infrastructure boundary
+## 9. One edition, and why that is a design constraint
 
-Reference [`docs/editions.md`](../docs/editions.md) and [`COMMERCIAL.md`](../COMMERCIAL.md).
+Reference [`NOTICE`](../NOTICE) and [ADR 0002](../docs/adr/0002-stable-release-acceptance.md).
 
 Explain:
 
-- Marketingovo as the local-first, single-user product;
-- Marketingovo as a separate proprietary service for always-on execution, portfolios, teams/RBAC, managed credentials, hosted artifacts, retention, and support;
+- Marketingovo as a local-first, single-user product with one edition;
+- no paid tier, no hosted service, no capability withheld — and what that removes from the design space (no entitlement checks, no edition branching, no telemetry-driven upsell);
 - project portability without credential portability;
-- why paid value does not require weakening local analysis.
+- how the acceptance policy changed once the commercial framing was dropped: the ELv2/trademark/CLA legal review and the three design-partner case studies were retired because their subjects no longer exist.
 
 Use the phrase “open source under the Apache License 2.0” for Marketingovo.
 
-## 10. What the alpha does not prove yet
+## 10. What 1.1.0 does not prove yet
 
-Repeat the public 1.0 gates from [`docs/release-status.md`](../docs/release-status.md):
+Repeat the known limits from [`docs/release-status.md`](../docs/release-status.md):
 
-- security and dependency corpus;
-- scheduling crash recovery;
-- current provider fixtures and pagination;
-- clean install, upgrade, package, MCP, Codex, and OpenClaw smoke coverage;
-- WCAG 2.2 AA;
-- correctness and false-positive benchmark;
-- design-partner case studies.
+- no signed native installer, and therefore no verified upgrade from an older signed installer;
+- no npm registry publication, so the packaged consumer path rests on CI rather than a published tarball;
+- `cargo check` for the native credential broker rests on the CI matrix, not a local observation;
+- security coverage exists for SSRF, redirect, DNS-rebinding, browser and OAuth-callback paths, but not yet as separately named CI jobs with documented case counts;
+- a broader "no duplicate result under a mid-lease kill" scheduling proof;
+- the correctness corpus is small for the confidence it supports; claims about replacing commercial tools need a larger reproducible public corpus.
 
 This section is required. It turns limitations into an inspectable engineering agenda rather than hidden fine print.
 
@@ -165,7 +164,10 @@ This section is required. It turns limitations into an inspectable engineering a
 End with:
 
 ```bash
-npx @marketingovo/cli serve
+git clone https://github.com/MaxJafar/marketingovo
+cd marketingovo
+corepack enable && pnpm install && pnpm build
+pnpm marketingovo serve
 ```
 
 Then ask the reader to:
@@ -179,7 +181,7 @@ Then ask the reader to:
 
 Primary CTA: star and inspect [github.com/MaxJafar/marketingovo](https://github.com/MaxJafar/marketingovo).
 
-Secondary CTA: try [Marketingovo](https://github.com/MaxJafar/marketingovo) for managed team workflows.
+Secondary CTA: read the [release status](https://github.com/MaxJafar/marketingovo/blob/main/docs/release-status.md) to see which gates were observed passing and which channels are deferred.
 
 ## Editorial proof checklist
 

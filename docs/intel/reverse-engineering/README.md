@@ -1,8 +1,8 @@
 # Reference Laboratory Controls
 
 This directory documents the isolated source snapshots under
-`TO REVERSE ENGINEEER/`. The snapshots are research material, not part of Golem
-Intel and not product build inputs.
+`TO REVERSE ENGINEEER/`. The snapshots are research material, not part of
+Marketingovo and not product build inputs.
 
 This is a quarantine and triage baseline. It is not the completed Phase 0
 reference laboratory: most entries still lack a restored upstream URL, exact

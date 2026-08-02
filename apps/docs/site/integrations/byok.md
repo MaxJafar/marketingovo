@@ -5,9 +5,9 @@ description: Connect provider evidence while keeping credentials write-only and 
 
 # Integrations and BYOK
 
-Marketingovo uses a bring-your-own-key model. You choose the provider, account, scopes, and local retention; the local daemon owns the credential boundary. MaxJafar can instead provide managed credentials, provider credits, centralized billing, and hosted execution.
+Marketingovo uses a bring-your-own-key model. You choose the provider, account, scopes, and local retention; the local daemon owns the credential boundary. There is no managed-credential alternative — every provider call is made with a credential you supplied, from the machine you run it on.
 
-## Connector catalog in 0.11
+## Connector catalog
 
 The current source includes these connector manifests:
 
@@ -20,7 +20,7 @@ The current source includes these connector manifests:
 | SerpAPI               | API key                               | SERP results, people-also-ask, related searches       |
 | DataForSEO            | Login and password                    | SERP, keyword, content, and competitor data           |
 
-Connector presence does not mean every authorization broker and provider fixture has cleared the 1.0 gate. During `0.11` alpha, use the Integrations workspace and release status to confirm current readiness. The local API returns an explicit error when an authorization broker is not available.
+Connector presence does not mean every authorization broker and provider fixture is equally exercised. Use the Integrations workspace and release status to confirm current readiness. The local API returns an explicit error when an authorization broker is not available.
 
 PageSpeed Insights works without an API key for supported public-quota calls.
 The dashboard labels its key as optional, does not submit an empty credential,
