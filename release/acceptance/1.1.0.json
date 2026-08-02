@@ -80,6 +80,8 @@
   ],
   "notes": [
     "1.1.0 is additive: the nine-tool workflow registry, the REST surface it already published, the SDK, the CLI and the .marketingovo bundle format are unchanged. It adds ten agent-session REST routes, a separate five-tool terminal session registry, a client.terminal SDK surface, and the console dashboard.",
+    "Beyond the seven required gates, the native suites were also observed passing on the same host: pnpm build:go, lint:go, test:go, test:go:race, lint:python, test:python, and pnpm sbom. These are not part of REQUIRED_RELEASE_EVIDENCE and are recorded here as supporting evidence only.",
+    "One CI job was not reproduced locally: `cargo check` for packages/credential-broker-native. Rust is not installed on this host, so that gate rests on the CI matrix rather than on a local observation.",
     "The packaged browser journey did not pass on the branch before this release preparation: it navigated through a sidebar entry the monorepo consolidation had already removed. Fixing it surfaced eleven pre-existing WCAG AA contrast failures and two undefined design tokens, all repaired here.",
     "This record covers the source, CLI, MCP plugin and npm-packable surfaces. It deliberately does not claim any signed native artifact, and it deliberately does not claim an approval nobody gave."
   ]
