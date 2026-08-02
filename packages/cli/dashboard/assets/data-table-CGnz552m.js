@@ -1,4 +1,4 @@
-import{r as U,j as P}from"./index-CWVPyj-m.js";/**
+import{x as U,j as P}from"./index-CQ2Vfvb3.js";/**
    * table-core
    *
    * Copyright (c) TanStack

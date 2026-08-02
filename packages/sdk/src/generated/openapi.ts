@@ -1408,6 +1408,1378 @@ export type paths = {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/agent/sessions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": {
+              data: {
+                items: ({
+                  /** Format: date-time */
+                  createdAt: string;
+                  id: string;
+                  projectId: string | null;
+                  title: string;
+                  /** Format: date-time */
+                  updatedAt: string;
+                } & {
+                  presence: {
+                    agent: {
+                      agentId: string;
+                      /** Format: date-time */
+                      attachedAt: string;
+                      harness: string;
+                      label: string;
+                      /** Format: date-time */
+                      lastSeenAt: string;
+                    } | null;
+                    attached: boolean;
+                    busy: boolean;
+                  };
+                })[];
+              };
+              meta: unknown;
+            };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            projectId?: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": {
+              data: {
+                /** Format: date-time */
+                createdAt: string;
+                id: string;
+                projectId: string | null;
+                title: string;
+                /** Format: date-time */
+                updatedAt: string;
+              };
+              meta: unknown;
+            };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/agent/sessions/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: {
+          since?: number;
+        };
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": {
+              data: {
+                events: {
+                  /** Format: date-time */
+                  createdAt: string;
+                  id: string;
+                  kind: "message" | "thought" | "tool" | "error" | "status";
+                  role: "user" | "agent" | "system";
+                  seq: number;
+                  text: string;
+                  tool?: string;
+                }[];
+                presence: {
+                  agent: {
+                    agentId: string;
+                    /** Format: date-time */
+                    attachedAt: string;
+                    harness: string;
+                    label: string;
+                    /** Format: date-time */
+                    lastSeenAt: string;
+                  } | null;
+                  attached: boolean;
+                  busy: boolean;
+                };
+                session: {
+                  /** Format: date-time */
+                  createdAt: string;
+                  id: string;
+                  projectId: string | null;
+                  title: string;
+                  /** Format: date-time */
+                  updatedAt: string;
+                };
+              };
+              meta: unknown;
+            };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/agent/sessions/{id}/attach": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            harness: string;
+            label: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": {
+              data: unknown;
+              meta: unknown;
+            };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/agent/sessions/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/agent/sessions/{id}/detach": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            agentId: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/agent/sessions/{id}/emit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            agentId: string;
+            kind: "message" | "thought" | "tool" | "error";
+            text: string;
+            tool?: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": {
+              data: {
+                /** Format: date-time */
+                createdAt: string;
+                id: string;
+                kind: "message" | "thought" | "tool" | "error" | "status";
+                role: "user" | "agent" | "system";
+                seq: number;
+                text: string;
+                tool?: string;
+              };
+              meta: unknown;
+            };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/agent/sessions/{id}/messages": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            text: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": {
+              data: {
+                /** Format: date-time */
+                createdAt: string;
+                id: string;
+                kind: "message" | "thought" | "tool" | "error" | "status";
+                role: "user" | "agent" | "system";
+                seq: number;
+                text: string;
+                tool?: string;
+              };
+              meta: unknown;
+            };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/agent/sessions/{id}/stream": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content?: never;
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/agent/sessions/{id}/wait": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            agentId: string;
+            waitMs?: number;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": {
+              data: {
+                cancelRequested: boolean;
+                messages: {
+                  /** Format: date-time */
+                  createdAt: string;
+                  id: string;
+                  kind: "message" | "thought" | "tool" | "error" | "status";
+                  role: "user" | "agent" | "system";
+                  seq: number;
+                  text: string;
+                  tool?: string;
+                }[];
+              };
+              meta: unknown;
+            };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/brand-presence": {
     parameters: {
       query?: never;

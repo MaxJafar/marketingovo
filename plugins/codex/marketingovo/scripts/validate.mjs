@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const workspaceRoot = resolve(root, "../../..");
-const { PUBLIC_AGENT_TOOL_NAMES } = await import(
+const { PUBLIC_AGENT_TOOL_NAMES, TERMINAL_SESSION_TOOL_NAMES } = await import(
   pathToFileURL(
     resolve(workspaceRoot, "packages/contracts/dist/agent-tools.js"),
   ).href
@@ -19,7 +19,14 @@ const packageJson = JSON.parse(
 );
 const bundlePath = resolve(root, "dist/marketingovo-mcp.mjs");
 const skillPath = resolve(root, "skills/seo-marketer/SKILL.md");
-const expectedTools = [...PUBLIC_AGENT_TOOL_NAMES];
+// The bundle ships both registries: the workflow tools that do SEO work, and
+// the session tools that let this plugin answer the dashboard's terminal. Both
+// are checked against the contracts package so the bundle cannot silently gain
+// or lose a tool, and both must be documented in the skill.
+const expectedTools = [
+  ...PUBLIC_AGENT_TOOL_NAMES,
+  ...TERMINAL_SESSION_TOOL_NAMES,
+];
 
 if (manifest.name !== "marketingovo")
   throw new Error("Codex plugin name must match its directory");

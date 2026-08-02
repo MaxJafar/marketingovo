@@ -90,11 +90,32 @@ unavailable and is never converted to `$0`.
 
 ## Connect an agent
 
-The Codex and OpenClaw bundles connect to the same local API. They expose six
+The Codex and OpenClaw bundles connect to the same local API. They expose the
 workflow-level tools and read-only project/run/report resources. Agents read
 the versioned Project Context before interpreting issues, but cannot rewrite it
 through a default workflow tool. Authentication, credential deletion, and
 commercial billing remain deliberate UI/CLI actions.
+
+## Talk to your agent in the dashboard
+
+The prompt along the bottom of the dashboard is a real console. Marketingovo
+runs no model of its own: it hands what you type to an agent harness you started
+and answers with whatever that harness sends back.
+
+1. Type a question at `marketingovo:~$` and press Enter. The status light in the
+   command bar reads `no agent attached` until one arrives, and your turn waits.
+2. In your harness — Claude Code, Codex, or any MCP client with this plugin —
+   ask it to answer the dashboard terminal. It calls
+   `marketingovo_session_list`, then `marketingovo_session_attach`, and picks up
+   anything typed before it arrived.
+3. The transcript opens above the prompt as the agent narrates, reports the
+   tools it runs, and answers. `interrupt` abandons the current turn.
+
+Only one agent holds a session at a time, and the light reads `agent online`
+only while one is genuinely attached. If a harness crashes mid-answer its lease
+lapses after ninety seconds and the transcript says so rather than leaving a
+console that looks live. Nothing typed here is written to disk; the transcript
+lives in the daemon's memory and is discarded when the service stops.
 
 ## Local data
 

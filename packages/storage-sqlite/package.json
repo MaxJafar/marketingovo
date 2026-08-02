@@ -1,6 +1,6 @@
 {
   "name": "@marketingovo/storage-sqlite",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Single-writer SQLite storage and durable jobs for Marketingovo",
   "license": "Apache-2.0",
   "type": "module",

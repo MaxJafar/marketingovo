@@ -23,6 +23,15 @@ rules. Versioned Project Context can also contain audiences, markets,
 conversion goals, constraints, and a human decision journal. The local daemon
 owns that data and binds to loopback only.
 
+The agent terminal on the dashboard is a pipe, not a model. Marketingovo runs no
+inference and holds no model credential for it: what you type is delivered to an
+agent harness you started and authorized yourself, and that harness — not
+Marketingovo — decides whether anything reaches a model provider and which one.
+Read its privacy terms for that leg. On the Marketingovo side a transcript lives
+only in the daemon's memory for the life of the process. It is bounded, never
+written to SQLite, and never appears in project exports, backups, reports, or
+crash output. Closing the daemon discards it.
+
 Secrets are never included in API responses after write, reports, logs, exports,
 backups by default, crash output, or telemetry. Project exports contain data,
 context, and history but no credentials. Project Context writes reject

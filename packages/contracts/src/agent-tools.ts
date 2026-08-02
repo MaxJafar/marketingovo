@@ -277,3 +277,154 @@ export type PublicAgentToolName = PublicAgentToolContract["name"];
 
 export const PUBLIC_AGENT_TOOL_NAMES: readonly PublicAgentToolName[] =
   PUBLIC_AGENT_TOOL_CONTRACTS.map((contract) => contract.name);
+
+/**
+ * Terminal session tools are a separate group from the nine workflow tools
+ * above, and the split is intentional rather than tidiness.
+ *
+ * The workflow tools answer "do this SEO job". These answer "a human is typing
+ * at the dashboard console; be the thing that replies". A harness can hold one
+ * capability without the other: an operator may want an agent that audits but
+ * never speaks into the browser, or a conversational session that only reads.
+ * Keeping the registries apart lets an adapter allowlist them independently,
+ * and keeps the documented public workflow surface stable at nine.
+ *
+ * None of these tools touch the network beyond the loopback daemon, and none
+ * of them start crawls — so the whole group is closed-world.
+ */
+
+export const AgentSessionListInputSchema = strictObject({});
+
+export const AgentSessionAttachInputSchema = strictObject({
+  session_id: Type.String({ minLength: 1 }),
+  label: Type.String({ minLength: 1, maxLength: 80 }),
+  harness: Type.Optional(Type.String({ minLength: 1, maxLength: 80 })),
+});
+
+export const AgentSessionWaitInputSchema = strictObject({
+  session_id: Type.String({ minLength: 1 }),
+  agent_id: Type.String({ minLength: 1 }),
+  wait_ms: Type.Optional(
+    Type.Integer({ minimum: 0, maximum: 20_000, default: 20_000 }),
+  ),
+});
+
+export const AgentSessionSayInputSchema = strictObject({
+  session_id: Type.String({ minLength: 1 }),
+  agent_id: Type.String({ minLength: 1 }),
+  text: Type.String({ minLength: 1, maxLength: 20_000 }),
+  kind: Type.Optional(
+    Type.Union(
+      [
+        Type.Literal("message"),
+        Type.Literal("thought"),
+        Type.Literal("tool"),
+        Type.Literal("error"),
+      ],
+      { default: "message" },
+    ),
+  ),
+  tool: Type.Optional(Type.String({ minLength: 1, maxLength: 120 })),
+});
+
+export const AgentSessionDetachInputSchema = strictObject({
+  session_id: Type.String({ minLength: 1 }),
+  agent_id: Type.String({ minLength: 1 }),
+});
+
+export type AgentSessionListInput = Static<typeof AgentSessionListInputSchema>;
+export type AgentSessionAttachInput = Static<
+  typeof AgentSessionAttachInputSchema
+>;
+export type AgentSessionWaitInput = Static<typeof AgentSessionWaitInputSchema>;
+export type AgentSessionSayInput = Static<typeof AgentSessionSayInputSchema>;
+export type AgentSessionDetachInput = Static<
+  typeof AgentSessionDetachInputSchema
+>;
+
+export const AgentSessionListTool = agentTool({
+  name: "marketingovo_session_list",
+  title: "List terminal sessions",
+  description:
+    "List dashboard terminal sessions and whether an agent is already attached to each. Call this first to find the session a marketer is typing into.",
+  optional: false,
+  inputSchema: AgentSessionListInputSchema,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+} as const);
+
+export const AgentSessionAttachTool = agentTool({
+  name: "marketingovo_session_attach",
+  title: "Attach to a terminal session",
+  description:
+    "Claim a dashboard terminal session as its answering agent. Returns an agent_id required by every later session call, plus any turns the marketer typed before you arrived. Only one agent may hold a session at a time.",
+  optional: true,
+  inputSchema: AgentSessionAttachInputSchema,
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
+} as const);
+
+export const AgentSessionWaitTool = agentTool({
+  name: "marketingovo_session_wait",
+  title: "Wait for the next terminal turn",
+  description:
+    "Block until the marketer types into the terminal, or until wait_ms elapses. An empty result means nobody typed — call it again to keep listening. Also renews the session lease, so a session you stop polling is released for another agent. Check cancel_requested and abandon the current answer when it is true.",
+  optional: true,
+  inputSchema: AgentSessionWaitInputSchema,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
+} as const);
+
+export const AgentSessionSayTool = agentTool({
+  name: "marketingovo_session_say",
+  title: "Speak into the terminal",
+  description:
+    "Write a line into the marketer's terminal. Use kind 'message' for the answer, 'thought' for progress narration, 'tool' when reporting a tool you ran, and 'error' when you could not complete the request. Never write credentials or raw provider keys into a session.",
+  optional: true,
+  inputSchema: AgentSessionSayInputSchema,
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
+} as const);
+
+export const AgentSessionDetachTool = agentTool({
+  name: "marketingovo_session_detach",
+  title: "Detach from a terminal session",
+  description:
+    "Release a terminal session so another agent can answer it. Call this when you finish a conversation rather than leaving the lease to lapse.",
+  optional: true,
+  inputSchema: AgentSessionDetachInputSchema,
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+} as const);
+
+export const TERMINAL_SESSION_TOOL_CONTRACTS = [
+  AgentSessionListTool,
+  AgentSessionAttachTool,
+  AgentSessionWaitTool,
+  AgentSessionSayTool,
+  AgentSessionDetachTool,
+] as const;
+
+export type TerminalSessionToolContract =
+  (typeof TERMINAL_SESSION_TOOL_CONTRACTS)[number];
+export type TerminalSessionToolName = TerminalSessionToolContract["name"];
+
+export const TERMINAL_SESSION_TOOL_NAMES: readonly TerminalSessionToolName[] =
+  TERMINAL_SESSION_TOOL_CONTRACTS.map((contract) => contract.name);

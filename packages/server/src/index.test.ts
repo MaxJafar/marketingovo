@@ -633,7 +633,7 @@ describe("dashboard bootstrap tickets", () => {
     };
     expect(document.info).toEqual({
       title: "Marketingovo Local API",
-      version: "1.0.0",
+      version: "1.1.0",
       description: "Loopback API for the local-first Marketingovo application",
     });
     expect(document.components.securitySchemes.localServiceToken).toMatchObject(

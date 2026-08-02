@@ -1,393 +1,388 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type KeyboardEvent as ReactKeyboardEvent,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useSite } from "../context/site-context";
-import { Icon, type IconName } from "./icon";
+import { useIntegrations } from "../api/queries";
+import { useTerminalSession } from "../api/terminal";
+import { agentStatus, PixelTerminal } from "./pixel-terminal";
+import { PixelMaskIcon, PixelSprite } from "./pixel-sprite";
+import { mascotGlyphs, navGlyphs } from "./pixel-glyphs";
 
-const primaryNav: Array<{ to: string; label: string; icon: IconName }> = [
-  { to: "/", label: "Overview", icon: "overview" },
-  { to: "/context", label: "Project context", icon: "context" },
-  { to: "/actions", label: "Actions", icon: "actions" },
-  { to: "/issues", label: "Issue review", icon: "issues" },
-  { to: "/audits", label: "Audits", icon: "audits" },
-  { to: "/pages", label: "Pages", icon: "pages" },
-];
+/**
+ * The console frame: brand block, command bar, section rail, boot log, and the
+ * agent prompt that runs along the bottom of every page.
+ *
+ * The rail's ten sections are the product's own map rather than a restyling of
+ * the old sidebar — "SEO analytics" and "keyword lab" are how a marketer
+ * describes this work, and each one points at a route that already does it.
+ */
 
-// Market intel is its own group because it answers a different question from
-// the rest of the workspace: not "what is wrong with our site" but "what is the
-// market doing". Folding it in with the technical pages hid it — the
-// competitor and keyword surfaces read as SEO housekeeping rather than as the
-// research they are.
-const intelNav: Array<{ to: string; label: string; icon: IconName }> = [
-  { to: "/competitors", label: "Competitors", icon: "competitors" },
-  { to: "/keywords", label: "Keywords & content", icon: "keywords" },
-];
-
-const operationsNav: Array<{ to: string; label: string; icon: IconName }> = [
-  { to: "/monitoring", label: "Monitoring", icon: "monitoring" },
-  { to: "/reports", label: "Reports", icon: "reports" },
-  { to: "/integrations", label: "Integrations", icon: "integrations" },
-  { to: "/settings", label: "Settings", icon: "settings" },
-  { to: "/system", label: "System health", icon: "health" },
-];
-
-const routeTitles: ReadonlyArray<{
-  matches: (pathname: string) => boolean;
+interface NavItem {
+  to: string;
+  label: string;
+  glyph: string;
   title: string;
-}> = [
-  { matches: (pathname) => pathname === "/", title: "Overview" },
+}
+
+const NAV: NavItem[] = [
+  { to: "/", label: "Dashboard", glyph: "dashboard", title: "Dashboard" },
   {
-    matches: (pathname) => pathname === "/context",
-    title: "Project context",
+    to: "/audits",
+    label: "SEO Analytics",
+    glyph: "seo-analytics",
+    title: "SEO analytics",
   },
   {
-    matches: (pathname) => pathname.startsWith("/actions/"),
-    title: "Action evidence",
-  },
-  { matches: (pathname) => pathname === "/actions", title: "Actions" },
-  { matches: (pathname) => pathname === "/issues", title: "Issue review" },
-  {
-    matches: (pathname) => pathname.startsWith("/audits/"),
-    title: "Audit details",
-  },
-  { matches: (pathname) => pathname === "/audits", title: "Audits" },
-  { matches: (pathname) => pathname === "/pages", title: "Pages" },
-  {
-    matches: (pathname) => pathname === "/keywords",
-    title: "Keywords & content",
+    to: "/social",
+    label: "Social Research",
+    glyph: "social-research",
+    title: "Social research",
   },
   {
-    matches: (pathname) => pathname === "/competitors",
+    to: "/content",
+    label: "Content Intel",
+    glyph: "content-intel",
+    title: "Content intel",
+  },
+  {
+    to: "/competitors",
+    label: "Competitors",
+    glyph: "competitors",
     title: "Competitors",
   },
   {
-    matches: (pathname) => pathname === "/monitoring",
-    title: "Monitoring",
-  },
-  { matches: (pathname) => pathname === "/reports", title: "Reports" },
-  {
-    matches: (pathname) => pathname === "/integrations",
-    title: "Integrations",
-  },
-  { matches: (pathname) => pathname === "/settings", title: "Settings" },
-  {
-    matches: (pathname) => pathname === "/system",
-    title: "System health",
+    to: "/keywords",
+    label: "Keyword Lab",
+    glyph: "keyword-lab",
+    title: "Keyword lab",
   },
   {
-    matches: (pathname) => pathname === "/onboarding",
-    title: "Setup guide",
+    to: "/backlinks",
+    label: "Backlinks",
+    glyph: "backlinks",
+    title: "Backlinks",
   },
+  { to: "/reports", label: "Reports", glyph: "reports", title: "Reports" },
+  { to: "/monitoring", label: "Alerts", glyph: "alerts", title: "Alerts" },
+  { to: "/context", label: "Notes", glyph: "notes", title: "Notes" },
 ];
 
-const focusableSelector = [
-  "a[href]",
-  "button:not([disabled])",
-  "input:not([disabled])",
-  "select:not([disabled])",
-  "textarea:not([disabled])",
-  '[tabindex]:not([tabindex="-1"])',
-].join(",");
+/**
+ * The workbenches the ten headline sections do not cover.
+ *
+ * These are full pages, not detail views: the action queue, issue review, the
+ * page inventory, connectors, settings and health. Giving them a dense
+ * secondary cluster rather than rail entries of their own keeps the primary
+ * rail readable while making sure nothing that works is unreachable — a page
+ * with no link into it is, from the operator's side, a page that does not exist.
+ */
+const UTILITY_NAV: Array<{ to: string; label: string }> = [
+  { to: "/actions", label: "Actions" },
+  { to: "/issues", label: "Issue review" },
+  { to: "/pages", label: "Pages" },
+  { to: "/integrations", label: "Integrations" },
+  { to: "/settings", label: "Settings" },
+  { to: "/system", label: "System health" },
+];
+
+/** Routes reachable from within a section rather than from the rail itself. */
+const SECONDARY_TITLES: ReadonlyArray<[RegExp, string]> = [
+  [/^\/audits\/.+/u, "Audit details"],
+  [/^\/actions\/.+/u, "Action evidence"],
+  [/^\/actions$/u, "Actions"],
+  [/^\/issues$/u, "Issue review"],
+  [/^\/pages$/u, "Pages"],
+  [/^\/integrations$/u, "Integrations"],
+  [/^\/settings$/u, "Settings"],
+  [/^\/system$/u, "System health"],
+  [/^\/onboarding$/u, "Setup guide"],
+  [/^\/setup-checklist$/u, "Setup checklist"],
+];
 
 export function routeTitleForPathname(pathname: string): string {
-  return (
-    routeTitles.find((route) => route.matches(pathname))?.title ??
-    "Page not found"
+  const exact = NAV.find((item) =>
+    item.to === "/" ? pathname === "/" : pathname === item.to,
   );
+  if (exact) return exact.title;
+  const secondary = SECONDARY_TITLES.find(([pattern]) =>
+    pattern.test(pathname),
+  );
+  if (secondary) return secondary[1];
+  const nested = NAV.find(
+    (item) => item.to !== "/" && pathname.startsWith(`${item.to}/`),
+  );
+  return nested?.title ?? "Page not found";
 }
 
-function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(() =>
-    typeof window !== "undefined" && typeof window.matchMedia === "function"
-      ? window.matchMedia(query).matches
-      : false,
-  );
-
-  useEffect(() => {
-    if (typeof window.matchMedia !== "function") return;
-    const media = window.matchMedia(query);
-    const update = () => setMatches(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, [query]);
-
-  return matches;
+function isActive(pathname: string, to: string): boolean {
+  return to === "/" ? pathname === "/" : pathname.startsWith(to);
 }
 
-function NavGroup({
-  label,
-  items,
-  pathname,
-  onNavigate,
-}: {
-  label: string;
-  items: typeof primaryNav;
-  pathname: string;
-  onNavigate: () => void;
-}) {
+/**
+ * The boot log is not decoration. Each line is a configured connector and its
+ * real state, which makes the most console-looking element on the page also the
+ * fastest answer to "is my data actually flowing".
+ */
+function BootLog({ siteId }: { siteId: string }) {
+  const integrations = useIntegrations(siteId);
+  const items = integrations.data?.data.items ?? [];
+
+  const lines: Array<{ text: string; state: "ok" | "pending" | "fail" }> = [
+    { text: "connecting to data sources...", state: "ok" },
+  ];
+
+  if (integrations.isLoading) {
+    lines.push({ text: "probing connectors", state: "pending" });
+  } else if (items.length === 0) {
+    lines.push({ text: "no connectors configured", state: "pending" });
+    lines.push({ text: "open integrations to connect", state: "pending" });
+  } else {
+    for (const integration of items) {
+      const ok = integration.status === "connected";
+      const failed =
+        integration.status === "failed" || integration.status === "expired";
+      lines.push({
+        text: `${integration.name.toLowerCase()} [ ${
+          ok ? "OK" : failed ? "FAIL" : integration.status.replace(/_/gu, " ")
+        } ]`,
+        state: ok ? "ok" : failed ? "fail" : "pending",
+      });
+    }
+    const connected = items.filter(
+      (integration) => integration.status === "connected",
+    ).length;
+    lines.push({
+      text:
+        connected === items.length
+          ? "data sync complete ✓"
+          : `${connected}/${items.length} sources live`,
+      state: connected === items.length ? "ok" : "pending",
+    });
+  }
+
   return (
-    <div className="nav-group">
-      <span className="nav-label">{label}</span>
-      <nav aria-label={label}>
-        {items.map((item) => {
-          const active =
-            item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
-          return (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={`nav-link ${active ? "nav-link-active" : ""}`}
-              aria-current={active ? "page" : undefined}
-              onClick={onNavigate}
-            >
-              <Icon name={item.icon} />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
-    </div>
+    // Deliberately unnamed: an aria-label here would override the visible
+    // "Terminal" heading as this region's name, and the scrollable group inside
+    // already carries one.
+    <section className="pixel-panel pixel-bootlog">
+      <div className="pixel-panel-head">
+        <h2>Terminal</h2>
+        <span className="pixel-bootlog-dots" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </span>
+      </div>
+      {/* The connector list scrolls once enough sources are configured, and a
+          scroll container that nothing inside can take focus is unreachable
+          from the keyboard. Making the region itself focusable and naming it is
+          what lets someone arrow through it without a pointer. */}
+      <div
+        className="pixel-bootlog-body"
+        tabIndex={0}
+        role="group"
+        aria-label="Connector boot log"
+      >
+        <ul>
+          {lines.map((line) => (
+            <li key={line.text} data-state={line.state}>
+              {line.text}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
   );
 }
 
 export function AppShell() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [routeAnnouncement, setRouteAnnouncement] = useState("");
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
-  const isMobile = useMediaQuery("(max-width: 820px)");
-  const { sites, siteId, setSiteId, isLoading } = useSite();
-  const sidebarRef = useRef<HTMLElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const { siteId, sites, setSiteId, isLoading } = useSite();
+  const session = useTerminalSession(siteId || null);
+  const status = agentStatus(session);
+  const [railCollapsed, setRailCollapsed] = useState(true);
+  const [announcement, setAnnouncement] = useState("");
   const mainRef = useRef<HTMLElement>(null);
-  const previousPathnameRef = useRef(pathname);
-  const restoreMenuFocusRef = useRef(false);
+  const previousPathname = useRef(pathname);
   const routeTitle = routeTitleForPathname(pathname);
-
-  const closeMobileNavigation = useCallback((restoreFocus = true) => {
-    restoreMenuFocusRef.current = restoreFocus;
-    setMobileOpen(false);
-  }, []);
 
   useEffect(() => {
     document.title = `${routeTitle} | Marketingovo`;
-    setRouteAnnouncement(`${routeTitle} page loaded.`);
-    if (previousPathnameRef.current !== pathname) {
-      mainRef.current?.focus();
-    }
-    previousPathnameRef.current = pathname;
+    setAnnouncement(`${routeTitle} page loaded.`);
+    if (previousPathname.current !== pathname) mainRef.current?.focus();
+    previousPathname.current = pathname;
   }, [pathname, routeTitle]);
 
-  useEffect(() => {
-    if (!mobileOpen && restoreMenuFocusRef.current) {
-      restoreMenuFocusRef.current = false;
-      menuButtonRef.current?.focus();
-    }
-  }, [mobileOpen]);
-
-  useEffect(() => {
-    if (!isMobile && mobileOpen) closeMobileNavigation(false);
-  }, [closeMobileNavigation, isMobile, mobileOpen]);
-
-  useEffect(() => {
-    if (!isMobile || !mobileOpen) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeButtonRef.current?.focus();
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isMobile, mobileOpen]);
-
-  function trapDrawerFocus(event: ReactKeyboardEvent<HTMLElement>) {
-    if (!isMobile || !mobileOpen) return;
-    if (event.key === "Escape") {
-      event.preventDefault();
-      closeMobileNavigation(true);
-      return;
-    }
-    if (event.key !== "Tab") return;
-
-    const focusable = Array.from(
-      sidebarRef.current?.querySelectorAll<HTMLElement>(focusableSelector) ??
-        [],
-    ).filter(
-      (element) =>
-        !element.hasAttribute("disabled") &&
-        element.getAttribute("aria-hidden") !== "true",
-    );
-    const first = focusable[0];
-    const last = focusable.at(-1);
-    if (!first || !last) return;
-
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  }
-
-  const mobileSidebarHidden = isMobile && !mobileOpen;
-  const workspaceHidden = isMobile && mobileOpen;
-  const onboardingActive = pathname === "/onboarding";
-
   return (
-    <div className="app-shell">
-      <a
-        className="skip-link"
-        href="#main-content"
-        aria-hidden={workspaceHidden || undefined}
-        tabIndex={workspaceHidden ? -1 : undefined}
-      >
+    <div className="pixel-frame">
+      <a className="pixel-skip" href="#main-content">
         Skip to content
       </a>
       <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {routeAnnouncement}
+        {announcement}
       </div>
-      <aside
-        id="mobile-navigation"
-        ref={sidebarRef}
-        className={`sidebar ${mobileOpen ? "sidebar-open" : ""}`}
-        aria-label="Main navigation"
-        aria-hidden={mobileSidebarHidden || undefined}
-        aria-modal={isMobile && mobileOpen ? true : undefined}
-        role={isMobile ? "dialog" : undefined}
-        inert={mobileSidebarHidden ? true : undefined}
-        onKeyDown={trapDrawerFocus}
-      >
-        <div className="brand-row">
-          <Link
-            to="/"
-            className="brand"
-            onClick={() => closeMobileNavigation(false)}
-            aria-label="Marketingovo home"
+
+      <Link to="/" className="pixel-brand" aria-label="Marketingovo home">
+        <PixelSprite
+          src="/pixel/mascot/cat-mark.png"
+          fallback={mascotGlyphs.cat}
+          size={34}
+        />
+        <span className="pixel-wordmark">
+          <span className="mark-a">marketing</span>
+          <span className="mark-b">ovo</span>
+        </span>
+      </Link>
+
+      <header className="pixel-topbar">
+        <div className="pixel-cmdline">
+          <span className="pixel-cmdline-sigil" aria-hidden="true">
+            $
+          </span>
+          <span aria-hidden="true">
+            marketingovo --intel-mode=active --site=
+          </span>
+          {/* The `--site=` argument is the real project switcher rather than a
+              caption. Writing it as a flag value keeps the console conceit
+              intact while restoring the control a multi-project operator needs;
+              a decorative command line that could not change anything would be
+              a worse trade than a slightly less pure one. */}
+          <label className="sr-only" htmlFor="site-select">
+            Active site
+          </label>
+          <select
+            id="site-select"
+            className="pixel-cmdline-select"
+            value={siteId}
+            onChange={(event) => setSiteId(event.target.value)}
+            disabled={isLoading || sites.length === 0}
           >
-            <img
-              className="brand-mark"
-              src="/marketingovo-icon.png"
-              alt=""
-              width="38"
-              height="38"
-            />
-            <span>
-              <strong>Marketingovo</strong>
-              <small>Marketing control panel</small>
-            </span>
+            {sites.length === 0 ? (
+              <option value="">none</option>
+            ) : (
+              sites.map((entry) => (
+                <option value={entry.id} key={entry.id}>
+                  {entry.name.toLowerCase().replace(/\s+/gu, "_")}
+                </option>
+              ))
+            )}
+          </select>
+          <Link to="/onboarding" className="pixel-cmdline-action">
+            + add site
           </Link>
-          <button
-            ref={closeButtonRef}
-            className="icon-button sidebar-close"
-            type="button"
-            onClick={() => closeMobileNavigation(true)}
-            aria-label="Close navigation"
-          >
-            <Icon name="close" />
-          </button>
+          <span className="pixel-status" data-state={status.state}>
+            <span className="pixel-status-dot" aria-hidden="true" />
+            {status.label}
+          </span>
         </div>
-        <NavGroup
-          label="Workspace"
-          items={primaryNav}
-          pathname={pathname}
-          onNavigate={() => closeMobileNavigation(false)}
-        />
-        <NavGroup
-          label="Market intel"
-          items={intelNav}
-          pathname={pathname}
-          onNavigate={() => closeMobileNavigation(false)}
-        />
-        <NavGroup
-          label="Operations"
-          items={operationsNav}
-          pathname={pathname}
-          onNavigate={() => closeMobileNavigation(false)}
-        />
-        <Link
-          to="/onboarding"
-          className="setup-card"
-          aria-current={onboardingActive ? "page" : undefined}
-          onClick={() => closeMobileNavigation(false)}
-        >
-          <span>Setup guide</span>
-          <strong>Connect data and run a baseline</strong>
-          <Icon name="arrow" />
-        </Link>
-      </aside>
-      {mobileOpen && isMobile ? (
-        <div
-          className="sidebar-scrim"
-          aria-hidden="true"
-          onClick={() => closeMobileNavigation(true)}
-        />
-      ) : null}
-      <div
-        className="workspace"
-        aria-hidden={workspaceHidden || undefined}
-        inert={workspaceHidden ? true : undefined}
+        <div className="pixel-window-buttons" aria-hidden="true">
+          {/* Chrome for the conceit only — a web page cannot minimise itself,
+              so these stay inert rather than pretending to be functional. */}
+          <span className="pixel-window-button" data-variant="min">
+            –
+          </span>
+          <span className="pixel-window-button" data-variant="max">
+            □
+          </span>
+          <span className="pixel-window-button" data-variant="close">
+            ✕
+          </span>
+        </div>
+      </header>
+
+      <aside
+        className="pixel-rail"
+        data-collapsed={railCollapsed}
+        aria-label="Sections"
       >
-        <header className="topbar">
-          <button
-            ref={menuButtonRef}
-            className="icon-button mobile-menu"
-            type="button"
-            onClick={() => setMobileOpen(true)}
-            aria-label="Open navigation"
-            aria-expanded={isMobile ? mobileOpen : undefined}
-            aria-controls="mobile-navigation"
-          >
-            <Icon name="menu" />
-          </button>
-          <div className="site-switcher">
-            <label htmlFor="site-select">Active site</label>
-            <select
-              id="site-select"
-              value={siteId}
-              onChange={(event) => setSiteId(event.target.value)}
-              disabled={isLoading || sites.length === 0}
-            >
-              {sites.length === 0 ? (
-                <option value="">No site connected</option>
-              ) : (
-                sites.map((site) => (
-                  <option value={site.id} key={site.id}>
-                    {site.name}
-                  </option>
-                ))
-              )}
-            </select>
-          </div>
-          <div className="topbar-actions">
-            <Link
-              to="/onboarding"
-              className="topbar-link"
-              aria-current={onboardingActive ? "page" : undefined}
-            >
-              <Icon name="plus" /> Add site
-            </Link>
-            <span className="environment-pill">
-              <span /> Local
-            </span>
-          </div>
-        </header>
-        <main
-          ref={mainRef}
-          id="main-content"
-          className="main-content"
-          tabIndex={-1}
+        <button
+          type="button"
+          className="pixel-rail-toggle"
+          onClick={() => setRailCollapsed((current) => !current)}
+          aria-expanded={!railCollapsed}
         >
-          <Outlet />
-        </main>
-      </div>
+          {railCollapsed ? "▸ sections" : "▾ sections"}
+        </button>
+        <nav className="pixel-nav">
+          {NAV.map((item) => {
+            const active = isActive(pathname, item.to);
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="pixel-nav-link"
+                aria-current={active ? "page" : undefined}
+              >
+                {active ? (
+                  <span className="pixel-nav-caret" aria-hidden="true">
+                    &gt;
+                  </span>
+                ) : null}
+                <PixelMaskIcon
+                  src={`/pixel/nav/${item.glyph}.png`}
+                  fallback={navGlyphs[item.glyph]}
+                />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+        <BootLog siteId={siteId} />
+        <div className="pixel-rail-mascot">
+          <PixelSprite
+            src="/pixel/mascot/monitor-buddy.png"
+            fallback={mascotGlyphs.monitor}
+            size={128}
+            height={116}
+          />
+        </div>
+        <nav className="pixel-subnav" aria-label="Workbenches">
+          <span className="pixel-subnav-label">Workbenches</span>
+          {UTILITY_NAV.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              className="pixel-subnav-link"
+              aria-current={isActive(pathname, item.to) ? "page" : undefined}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+        {/* The checklist tracks setup across a workspace's whole life, where
+            the wizard behind "+ add site" only covers first creation. It had no
+            entry point at all after the console shell replaced the old sidebar,
+            which left a supported surface unreachable. */}
+        <Link to="/setup-checklist" className="pixel-rail-setup">
+          Setup checklist
+        </Link>
+        <p className="pixel-rail-status">
+          system status: {status.state === "offline" ? "standby" : "optimal"}
+        </p>
+      </aside>
+
+      {/* tabIndex 0, not -1: the main column is a scroll container at desktop
+          widths, and a scrollable region that cannot be reached by keyboard is
+          content only a pointer can read. It still accepts the programmatic
+          focus that announces a route change. */}
+      <main ref={mainRef} id="main-content" className="pixel-main" tabIndex={0}>
+        <Outlet />
+      </main>
+
+      <PixelTerminal session={session} />
+
+      <footer className="pixel-footer">
+        <span>
+          © {new Date().getFullYear()} marketingovo{" "}
+          <span className="pixel-footer-heart">♥</span>
+        </span>
+        <span>
+          <span className="pixel-footer-heart">♥</span> data is beautiful{" "}
+          <span className="pixel-footer-heart">♥</span>
+        </span>
+        <span>v{__APP_VERSION__}</span>
+      </footer>
     </div>
   );
 }

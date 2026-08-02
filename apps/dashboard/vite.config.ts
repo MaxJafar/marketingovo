@@ -1,5 +1,13 @@
+import { readFileSync } from "node:fs";
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
+
+// The console footer prints the running version. Reading it from package.json
+// at build time keeps it honest: a hardcoded string silently claims the wrong
+// release for as long as nobody notices it.
+const { version } = JSON.parse(
+  readFileSync(new URL("./package.json", import.meta.url), "utf8"),
+) as { version: string };
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
@@ -8,6 +16,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    define: {
+      __APP_VERSION__: JSON.stringify(version),
+    },
     server: {
       host: "127.0.0.1",
       port: 4318,

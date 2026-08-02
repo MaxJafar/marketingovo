@@ -17,8 +17,43 @@ const routes = [
     getParentRoute: () => rootRoute,
     path: "/",
     component: lazyRouteComponent(
+      () => import("../pages/dashboard"),
+      "DashboardPage",
+    ),
+  }),
+  // The original metric-led overview stays reachable: the console home is a
+  // briefing, and this is still the page to open when you want the numbers
+  // with their coverage and freshness stated in full.
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/overview",
+    component: lazyRouteComponent(
       () => import("../pages/overview"),
       "OverviewPage",
+    ),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/social",
+    component: lazyRouteComponent(
+      () => import("../pages/social-research"),
+      "SocialResearchPage",
+    ),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/content",
+    component: lazyRouteComponent(
+      () => import("../pages/content-intel"),
+      "ContentIntelPage",
+    ),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/backlinks",
+    component: lazyRouteComponent(
+      () => import("../pages/backlinks"),
+      "BacklinksPage",
     ),
   }),
   createRoute({

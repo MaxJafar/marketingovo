@@ -1,57 +1,59 @@
 :root {
-  /* Vice: neon on deep violet.
-     This is a dense working surface, so the neon is identity — sidebar, brand,
-     accents, charts — while the reading surfaces stay calm. Every foreground
-     token below clears WCAG AA for body text against every surface token it is
-     used on; the lowest pair is inkFaint on surfaceStrong at 5.39:1. Changing a
-     colour here means re-checking that, not eyeballing it. */
+  /* Console: neon on near-black.
+     The dashboard presents itself as a CRT terminal (see pixel.css), and these
+     tokens are the same palette pulled down to the shared components the older
+     pages still use, so a page that has not been rebuilt yet still belongs to
+     the same machine.
+     Every foreground token clears WCAG AA for body text against every surface
+     token it is used on; the lowest pair is inkFaint on surfaceStrong at
+     5.42:1. Changing a colour here means re-checking that, not eyeballing it.
+     The console's own values live in one place — pixel.css — and these mirror
+     them; edit both or neither. */
   color-scheme: dark;
   font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-  color: #f4f0ff;
-  background: #120d24;
+    "Departure Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: #f2edff;
+  background: #07060f;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --ink: #f4f0ff;
-  --ink-soft: #c3b8e0;
-  --ink-faint: #a396c9;
-  --surface: #1b1430;
-  --surface-soft: #221a3c;
-  --surface-strong: #2c2150;
-  --line: #3a2c66;
-  --line-strong: #4a397f;
-  --sidebar: #120d24;
-  --sidebar-soft: #1d1536;
+  --ink: #f2edff;
+  --ink-soft: #bfb4e0;
+  --ink-faint: #9c90c4;
+  --surface: #12101f;
+  --surface-soft: #1a1730;
+  --surface-strong: #221d3d;
+  --line: #2f2850;
+  --line-strong: #423868;
+  --sidebar: #07060f;
+  --sidebar-soft: #0d0b1a;
   --accent: #ff5fb0;
-  --accent-dark: #e63f95;
-  --accent-text: #ff85c6;
-  --accent-soft: #2e1740;
+  --accent-dark: #c73d84;
+  --accent-text: #ff9ad0;
+  --accent-soft: #2b1330;
   --cyan: #3fe3e0;
-  --cyan-text: #5cf0ed;
+  --cyan-text: #7ff0ee;
   --lime: #b9f36a;
   --green: #4be8a5;
-  --green-soft: #12332c;
-  --amber: #ffc061;
-  --amber-soft: #382a17;
+  --green-soft: #0f2a22;
+  --amber: #ffd76a;
+  --amber-soft: #322613;
   --red: #ff6b81;
-  --red-soft: #3a1626;
-  --blue-soft: #1b2145;
-  /* Neon reads as glow rather than drop shadow on a dark surface. */
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 40%), 0 6px 18px rgb(0 0 0 / 28%);
-  --shadow-md: 0 12px 36px rgb(0 0 0 / 45%);
-  --glow-accent:
-    0 0 0 1px rgb(255 95 176 / 30%), 0 6px 22px rgb(255 95 176 / 18%);
-  --glow-cyan:
-    0 0 0 1px rgb(63 227 224 / 28%), 0 6px 22px rgb(63 227 224 / 16%);
-  --radius-sm: 10px;
-  --radius: 16px;
-  --radius-lg: 24px;
+  --red-soft: #33121e;
+  --blue-soft: #161c3a;
+  /* Referenced through var() fallbacks that were never defined, so the
+     light-theme literals shipped instead. Defined here on the dark ramp:
+     9.59:1 and 5.95:1 against the panel. */
+  --violet: #cbaaff;
+  --focus-ring: #8d80ff;
+  /* Hard offset instead of a soft glow: the console frame has square corners
+     and no blur anywhere, and a diffuse shadow reads as a different product. */
+  --shadow-sm: 2px 2px 0 #07060f;
+  --shadow-md: 3px 3px 0 #07060f;
+  --glow-accent: 0 0 0 1px rgb(255 95 176 / 45%);
+  --glow-cyan: 0 0 0 1px rgb(63 227 224 / 42%);
+  --radius-sm: 0;
+  --radius: 0;
+  --radius-lg: 0;
 }
 
 * {
@@ -530,7 +532,7 @@ p {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--accent-dark);
+  color: var(--accent-text);
   font-size: 0.78rem;
   font-weight: 700;
   text-decoration: none;
@@ -582,8 +584,12 @@ p {
 .status-ready,
 .status-resolved,
 .status-verified,
+/* These three badge families carried dark foregrounds left over from a light
+   theme, so success/warning/danger sat between 1.8:1 and 2.1:1 on their own
+   tinted backgrounds — a serious contrast failure that predates the console
+   palette. Each now uses the light end of its ramp: 9.7:1, 10.7:1 and 6.2:1. */
 .status-active {
-  color: #09633f;
+  color: var(--green);
   background: var(--green-soft);
 }
 .status-degraded,
@@ -598,7 +604,7 @@ p {
 .status-generating,
 .status-medium,
 .status-acknowledged {
-  color: #6b4700;
+  color: var(--amber);
   background: var(--amber-soft);
 }
 .status-offline,
@@ -614,7 +620,7 @@ p {
 .status-blocked,
 .status-noindex,
 .status-fail {
-  color: #8f222c;
+  color: var(--red);
   background: var(--red-soft);
 }
 .status-unknown,
@@ -670,7 +676,7 @@ p {
   padding: 11px 14px;
   border: 1px solid var(--line);
   border-radius: 11px;
-  color: #6f591f;
+  color: var(--amber);
   background: var(--amber-soft);
   font-size: 0.75rem;
 }
@@ -691,7 +697,7 @@ p {
 .freshness-missing,
 .freshness-unavailable {
   border-color: var(--red);
-  color: #8d373e;
+  color: var(--red);
   background: var(--red-soft);
 }
 
@@ -723,7 +729,7 @@ p {
 }
 .notice-warning {
   border-color: var(--amber);
-  color: #775d17;
+  color: var(--amber);
   background: var(--amber-soft);
 }
 .notice-danger {
@@ -1101,14 +1107,14 @@ p {
 .priority-reason span {
   display: block;
   margin-bottom: 4px;
-  color: var(--accent-dark);
+  color: var(--accent-text);
   font-size: 0.58rem;
   font-weight: 700;
   text-transform: uppercase;
 }
 .priority-reason p {
   margin: 0;
-  color: #514d70;
+  color: var(--ink-faint);
   font-size: 0.67rem;
   line-height: 1.45;
 }
@@ -1168,7 +1174,7 @@ p {
   cursor: pointer;
 }
 .filter-bar button.filter-active {
-  color: var(--accent-dark);
+  color: var(--accent-text);
   background: var(--accent-soft);
 }
 
@@ -1538,11 +1544,11 @@ p {
   font-size: 0.68rem;
 }
 .form-error {
-  color: #8f222c;
+  color: var(--red);
   background: var(--red-soft);
 }
 .form-success {
-  color: #09633f;
+  color: var(--green);
   background: var(--green-soft);
 }
 
@@ -1583,7 +1589,7 @@ p {
 }
 .outcome-kicker {
   display: block;
-  color: var(--accent-dark);
+  color: var(--accent-text);
   font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.09em;
@@ -2112,10 +2118,10 @@ p {
   font-size: 1.75rem;
 }
 .comparison-score-row strong.comparison-negative {
-  color: #a42e38;
+  color: var(--red);
 }
 .comparison-score-row strong.comparison-positive {
-  color: #087449;
+  color: var(--green);
 }
 .comparison-score-row p {
   max-width: 760px;
@@ -2807,7 +2813,7 @@ p {
   padding: 14px 14px 14px 32px;
   border: 1px solid var(--line);
   border-radius: 10px;
-  color: #72521f;
+  color: var(--amber);
   background: var(--amber-soft);
   font-size: 0.67rem;
 }
@@ -2974,7 +2980,7 @@ p {
   height: 40px;
   place-items: center;
   border-radius: 12px;
-  color: var(--accent-dark);
+  color: var(--accent-text);
   background: var(--accent-soft);
   font-family: "Manrope", sans-serif;
   font-size: 0.8rem;
@@ -3461,7 +3467,7 @@ p {
   padding: 6px 9px;
   border: 1px solid #cbc5ff;
   border-radius: 999px;
-  color: var(--purple-dark, #4b3cb0);
+  color: var(--violet);
   background: var(--surface);
   font-size: 0.58rem;
   font-weight: 800;
@@ -3495,11 +3501,11 @@ p {
   transform: translateY(-1px);
 }
 .extraction-template-card:focus-visible {
-  outline: 3px solid var(--focus-ring, #8d80ff);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 .extraction-template-card > span {
-  color: var(--purple-dark, #4b3cb0);
+  color: var(--violet);
   font-size: 0.56rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -3911,11 +3917,11 @@ p {
   background: rgb(160 110 255 / 18%);
 }
 .status-constraint {
-  color: #8f222c;
+  color: var(--red);
   background: var(--red-soft);
 }
 .status-experiment {
-  color: #09633f;
+  color: var(--green);
   background: var(--green-soft);
 }
 

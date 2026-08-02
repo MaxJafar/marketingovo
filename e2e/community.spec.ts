@@ -368,7 +368,11 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
     /^http:\/\/127\.0\.0\.1:\d+\/#token=[A-Za-z0-9_-]{32,}$/u,
   );
 
-  await page.goto(dashboardUrl, { waitUntil: "networkidle" });
+  // "load", never "networkidle": the agent console holds a server-sent event
+  // stream open for as long as the page is on screen, so network activity never
+  // falls quiet and networkidle would always time out. Visibility assertions
+  // below are the real readiness signal anyway.
+  await page.goto(dashboardUrl, { waitUntil: "load" });
   await expect(
     page.getByRole("link", { name: "Marketingovo home" }),
   ).toBeVisible();
@@ -380,11 +384,16 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
   );
   expect(session).toMatchObject({ httpOnly: true, sameSite: "Strict" });
 
-  await page.getByRole("link", { name: /Setup guide/u }).click();
+  // The console rail reaches the checklist, which is the surface that tracks
+  // setup across a workspace's life. The "+ add site" action beside the
+  // --site= flag opens the first-run wizard instead; both are supported, and
+  // this journey exercises the checklist because it also covers goal choice,
+  // the baseline run and audit history in one place.
+  await page.getByRole("link", { name: "Setup checklist" }).click();
   await expect(
     page.getByRole("heading", { name: "Reach your first useful insight" }),
   ).toBeVisible();
-  await expectNoWcagViolations(page, "Setup guide");
+  await expectNoWcagViolations(page, "Setup checklist");
   await page.getByLabel("Workspace name").fill("Synthetic marketer site");
   await page.getByLabel("Canonical URL").fill(`${fixtureOrigin}/`);
   await page.getByRole("button", { name: "Add site" }).click();
@@ -462,7 +471,7 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
   ).toBeVisible();
   await expectNoWcagViolations(page, "Replayed audit details");
 
-  await page.getByRole("link", { name: "Audits", exact: true }).click();
+  await page.getByRole("link", { name: "SEO Analytics", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Compare audit runs" }),
   ).toBeVisible();
@@ -562,14 +571,12 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
   await statusControl.selectOption("in_progress");
   await expect(statusControl).toHaveValue("in_progress");
   await expect(page.getByText("Saving…", { exact: true }).first()).toBeHidden();
-  await page.reload({ waitUntil: "networkidle" });
+  await page.reload({ waitUntil: "load" });
   await expect(page.getByRole("combobox", { name: statusLabel! })).toHaveValue(
     "in_progress",
   );
 
-  await page
-    .getByRole("link", { name: "Project context", exact: true })
-    .click();
+  await page.getByRole("link", { name: "Notes", exact: true }).click();
   await expect(
     page.getByRole("heading", { level: 1, name: "Project context" }),
   ).toBeVisible();
@@ -614,7 +621,7 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
     page.getByText("Prioritize verification before growth claims"),
   ).toBeVisible();
   await expectNoWcagViolations(page, "Versioned Project Context");
-  await page.reload({ waitUntil: "networkidle" });
+  await page.reload({ waitUntil: "load" });
   await expect(
     page.getByRole("heading", { level: 2, name: "Revision 1" }),
   ).toBeVisible();
@@ -659,7 +666,7 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
     issuesTable.locator("tbody tr").filter({ hasText: reviewedIssueTitle }),
   ).toHaveCount(reviewedGroupSize - 1);
 
-  await page.reload({ waitUntil: "networkidle" });
+  await page.reload({ waitUntil: "load" });
   await page.getByLabel("Status").selectOption("false_positive");
   const falsePositiveIssueRow = page
     .getByRole("table", {
@@ -712,7 +719,7 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
       .filter({ hasText: reviewedIssueTitle }),
   ).toHaveCount(0);
 
-  await page.reload({ waitUntil: "networkidle" });
+  await page.reload({ waitUntil: "load" });
   await page.getByLabel("Status").selectOption("ignored");
   await expect(
     page
@@ -880,7 +887,7 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
   await expect(page.getByLabel("Current rule set")).toContainText("Revision 1");
   await expectNoWcagViolations(page, "Extraction preview and saved revision");
 
-  await page.getByRole("link", { name: "Audits", exact: true }).click();
+  await page.getByRole("link", { name: "SEO Analytics", exact: true }).click();
   await page.getByText("Private-site access", { exact: true }).click();
   await page
     .getByLabel(/Allow this exact hostname to access a private network/u)
@@ -1008,9 +1015,7 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
   );
   await expectNoWcagViolations(page, "Imported project confirmation");
 
-  await page
-    .getByRole("link", { name: "Project context", exact: true })
-    .click();
+  await page.getByRole("link", { name: "Notes", exact: true }).click();
   await expect(
     page.getByRole("heading", { level: 2, name: "Revision 1" }),
   ).toBeVisible();
@@ -1029,16 +1034,21 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
   ).toBeVisible();
   await expectNoWcagViolations(page, "System health");
 
+  // Narrow widths collapse the section rail behind a disclosure rather than a
+  // modal drawer: the console stacks into one column and the page scrolls
+  // normally, so there is nothing to trap focus inside.
   await page.setViewportSize({ width: 390, height: 844 });
-  const openNavigation = page.getByRole("button", { name: "Open navigation" });
-  await expect(openNavigation).toBeVisible();
-  await openNavigation.click();
+  const sectionsToggle = page.getByRole("button", { name: /sections/iu });
+  await expect(sectionsToggle).toBeVisible();
+  await expect(sectionsToggle).toHaveAttribute("aria-expanded", "false");
+  await sectionsToggle.click();
+  await expect(sectionsToggle).toHaveAttribute("aria-expanded", "true");
   await expect(
-    page.getByRole("dialog", { name: "Main navigation" }),
+    page.getByRole("link", { name: "Dashboard", exact: true }),
   ).toBeVisible();
-  await expectNoWcagViolations(page, "Mobile navigation dialog");
-  await page.keyboard.press("Escape");
-  await expect(openNavigation).toBeFocused();
+  await expectNoWcagViolations(page, "Mobile section rail");
+  await sectionsToggle.click();
+  await expect(sectionsToggle).toHaveAttribute("aria-expanded", "false");
 
   await page.setViewportSize({ width: 1440, height: 960 });
   const siteSelector = page.getByLabel("Active site");
@@ -1060,9 +1070,7 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
   await expect(siteSelector.locator("option")).toHaveCount(1);
   await expectNoWcagViolations(page, "Project deletion receipt");
 
-  await page
-    .getByRole("link", { name: "Project context", exact: true })
-    .click();
+  await page.getByRole("link", { name: "Notes", exact: true }).click();
   await expect(
     page.getByRole("heading", { level: 2, name: "Revision 1" }),
   ).toBeVisible();

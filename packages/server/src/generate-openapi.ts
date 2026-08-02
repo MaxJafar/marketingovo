@@ -17,7 +17,7 @@ function sortValue(value: unknown): unknown {
 const runtime = new MarketingovoLocalRuntime({
   // This is an ephemeral generator path, not a persisted-data migration.
   dataDir: mkdtempSync(join(tmpdir(), "marketingovo-openapi-")),
-  version: "1.0.0",
+  version: "1.1.0",
 });
 const server = await createLocalServer({ runtime, port: 3210 });
 try {

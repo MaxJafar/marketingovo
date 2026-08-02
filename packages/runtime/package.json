@@ -1,6 +1,6 @@
 {
   "name": "@marketingovo/runtime",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Local Marketingovo service composition and workflow runtime",
   "license": "Apache-2.0",
   "type": "module",

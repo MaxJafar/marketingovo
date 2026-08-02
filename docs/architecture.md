@@ -70,6 +70,34 @@ instances are reviewed; raw actions remain available in history and portable
 exports. Import reconstructs action-to-issue links from canonical rule/module
 identities so this behavior survives a `.marketingovo` transfer.
 
+## Agent terminal sessions
+
+The dashboard presents itself as a console, and the prompt along its bottom edge
+is a real one: a two-sided pipe between the browser and an agent harness the
+operator already trusts. The daemon does not implement a chatbot and holds no
+model credential. It stores turns, wakes waiting readers, and expires leases.
+
+That split is deliberate. This process already owns provider credentials and a
+marketer's crawl history, so adding a model API key beside them would widen the
+blast radius of the one component most worth keeping boring. A harness — Claude
+Code, Codex, anything speaking MCP — already has a model, already has consent to
+act, and already reaches the workflow tools. It only lacked a way to be spoken
+to from the browser.
+
+The two sides authenticate differently and the difference is load-bearing. The
+browser arrives with a same-origin session cookie plus a CSRF token; the harness
+arrives with the local service token, which the auth hook accepts ahead of the
+cookie path. Neither can impersonate the other, so "who said this" is decided by
+transport rather than by a role field a caller could set. Agent-side routes
+additionally carry the `agentId` minted at attach, so a second process holding
+the same service token still cannot write into a session it does not hold.
+
+Only one agent holds a session at a time. Liveness is decided by silence rather
+than by a clean goodbye: every poll renews a lease, and a harness that crashes
+mid-turn has its lease lapse so the console can say so instead of showing an
+agent that will never answer. History is bounded and in-memory — this is a live
+console, not an audit log, and nothing typed into it is written to SQLite.
+
 ## Project Context and human memory
 
 Project Context keeps operator intent separate from observed SEO state. The

@@ -26,6 +26,15 @@ vault. Browser, Lighthouse, and third-party connector work occurs out of process
 with an allowlisted environment. Workers receive scoped, short-lived material
 and never open the vault or database directly.
 
+Agent terminal sessions add one boundary. A session has a browser side
+authenticated by the same-origin cookie and CSRF token, and an agent side
+authenticated by the local service token. The daemon never becomes a model
+client: it holds no provider key for the conversation and performs no inference,
+so a compromised harness gains nothing it did not already have through the
+service token it presented. Anything an attached agent writes into a session is
+untrusted text authored outside this process; it is rendered as text and is
+never interpreted as an instruction by the daemon or the dashboard.
+
 ## Required controls
 
 1. Resolve and validate every A/AAAA result for user-controlled crawl and
@@ -76,6 +85,16 @@ and never open the vault or database directly.
     until updater metadata, native lifecycle evidence, npm provenance, and
     public-release approval all succeed. The metadata itself selects an update;
     the embedded key, not the transport filename, authenticates the payload.
+
+12. Keep agent terminal sessions credential-free and single-holder. The daemon
+    performs no inference and stores no model key for a conversation. Session
+    writes require the local service token plus the `agentId` minted at attach,
+    so holding the token is not by itself authority to speak into a session
+    another agent holds. Leases expire on silence rather than on a clean
+    detach, bound message size and history, and keep transcripts in memory so
+    free-text typed at the prompt never reaches SQLite, exports, or backups.
+    Treat agent-authored session text as untrusted input: render it, never
+    execute or interpret it.
 
 ## Release abuse corpus
 

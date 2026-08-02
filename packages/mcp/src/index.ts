@@ -12,7 +12,13 @@ import {
   AgentRunEvidenceTool,
   AgentRunGetTool,
   AgentRunLinksTool,
+  AgentSessionAttachTool,
+  AgentSessionDetachTool,
+  AgentSessionListTool,
+  AgentSessionSayTool,
+  AgentSessionWaitTool,
   PUBLIC_AGENT_TOOL_NAMES,
+  TERMINAL_SESSION_TOOL_NAMES,
   type AgentAuditStartInput,
   type AgentCompareStartInput,
   type AgentContentPlanStartInput,
@@ -22,11 +28,17 @@ import {
   type AgentRunEvidenceInput,
   type AgentRunGetInput,
   type AgentRunLinksInput,
+  type AgentSessionAttachInput,
+  type AgentSessionDetachInput,
+  type AgentSessionListInput,
+  type AgentSessionSayInput,
+  type AgentSessionWaitInput,
 } from "@marketingovo/contracts/agent-tools";
 import { MarketingovoClient } from "@marketingovo/sdk";
 import { resolveMcpConnectionEnvironment } from "./compatibility.js";
 
 export const PUBLIC_TOOL_NAMES = PUBLIC_AGENT_TOOL_NAMES;
+export const SESSION_TOOL_NAMES = TERMINAL_SESSION_TOOL_NAMES;
 
 const toMcpInputSchema = <Value>(schema: unknown): z.ZodType<Value> =>
   z.fromJSONSchema(
@@ -63,6 +75,21 @@ const monitoringStatusInputSchema =
   toMcpInputSchema<AgentMonitoringStatusInput>(
     AgentMonitoringStatusTool.inputSchema,
   );
+const sessionListInputSchema = toMcpInputSchema<AgentSessionListInput>(
+  AgentSessionListTool.inputSchema,
+);
+const sessionAttachInputSchema = toMcpInputSchema<AgentSessionAttachInput>(
+  AgentSessionAttachTool.inputSchema,
+);
+const sessionWaitInputSchema = toMcpInputSchema<AgentSessionWaitInput>(
+  AgentSessionWaitTool.inputSchema,
+);
+const sessionSayInputSchema = toMcpInputSchema<AgentSessionSayInput>(
+  AgentSessionSayTool.inputSchema,
+);
+const sessionDetachInputSchema = toMcpInputSchema<AgentSessionDetachInput>(
+  AgentSessionDetachTool.inputSchema,
+);
 
 export interface MarketingovoMcpOptions {
   client?: MarketingovoClient;
@@ -104,10 +131,10 @@ export async function createMarketingovoMcpServer(
     );
   }
   const server = new McpServer(
-    { name: "marketingovo", version: "1.0.0" },
+    { name: "marketingovo", version: "1.1.0" },
     {
       instructions:
-        "Use start tools only after identifying the project and reading its context resource. Runs are asynchronous: call marketingovo_run_get until terminal, then summarize evidence, confidence, effort, and the five highest-value actions. Respect ignored and false-positive classifications exposed by the project issue-review resource. Never ask for or transmit credentials through tools.",
+        "Use start tools only after identifying the project and reading its context resource. Runs are asynchronous: call marketingovo_run_get until terminal, then summarize evidence, confidence, effort, and the five highest-value actions. Respect ignored and false-positive classifications exposed by the project issue-review resource. Never ask for or transmit credentials through tools.\n\nTo answer a marketer typing at the dashboard terminal, run this loop: marketingovo_session_list to find the session, marketingovo_session_attach to claim it, then marketingovo_session_wait to receive each turn. Answer with marketingovo_session_say, using kind 'thought' to narrate long work so the terminal does not look frozen, and kind 'message' for the answer itself. Keep polling with marketingovo_session_wait — it renews your lease, and an empty result simply means nobody has typed yet. Stop and discard the current answer when a wait returns cancel_requested. Call marketingovo_session_detach when the conversation ends.",
     },
   );
 
@@ -315,6 +342,106 @@ export async function createMarketingovoMcpServer(
         schedules: await client.schedules.list(project_id),
         runs: (await client.runs.list(project_id)).slice(0, 10),
       }),
+  );
+
+  /* ------------------------------------------------------------------ */
+  /* Terminal sessions                                                   */
+  /*                                                                     */
+  /* These five turn this MCP server into the answering half of the      */
+  /* dashboard's console. The loop an agent runs is: list → attach →     */
+  /* wait → (work) → say → wait again. `wait` doubles as the lease       */
+  /* heartbeat, so an agent that stops polling releases the session      */
+  /* rather than holding it hostage.                                     */
+  /* ------------------------------------------------------------------ */
+
+  server.registerTool(
+    AgentSessionListTool.name,
+    {
+      title: AgentSessionListTool.title,
+      description: AgentSessionListTool.description,
+      inputSchema: sessionListInputSchema,
+      annotations: {
+        title: AgentSessionListTool.title,
+        ...AgentSessionListTool.annotations,
+      },
+    },
+    async () => textResult(await client.terminal.list()),
+  );
+
+  server.registerTool(
+    AgentSessionAttachTool.name,
+    {
+      title: AgentSessionAttachTool.title,
+      description: AgentSessionAttachTool.description,
+      inputSchema: sessionAttachInputSchema,
+      annotations: {
+        title: AgentSessionAttachTool.title,
+        ...AgentSessionAttachTool.annotations,
+      },
+    },
+    async ({ session_id, label, harness }) =>
+      textResult(
+        await client.terminal.attach(session_id, {
+          label,
+          harness: harness ?? "mcp",
+        }),
+      ),
+  );
+
+  server.registerTool(
+    AgentSessionWaitTool.name,
+    {
+      title: AgentSessionWaitTool.title,
+      description: AgentSessionWaitTool.description,
+      inputSchema: sessionWaitInputSchema,
+      annotations: {
+        title: AgentSessionWaitTool.title,
+        ...AgentSessionWaitTool.annotations,
+      },
+    },
+    async ({ session_id, agent_id, wait_ms }) =>
+      textResult(
+        await client.terminal.wait(session_id, agent_id, wait_ms ?? 20_000),
+      ),
+  );
+
+  server.registerTool(
+    AgentSessionSayTool.name,
+    {
+      title: AgentSessionSayTool.title,
+      description: AgentSessionSayTool.description,
+      inputSchema: sessionSayInputSchema,
+      annotations: {
+        title: AgentSessionSayTool.title,
+        ...AgentSessionSayTool.annotations,
+      },
+    },
+    async ({ session_id, agent_id, text, kind, tool }) =>
+      textResult(
+        await client.terminal.say(session_id, {
+          agentId: agent_id,
+          text,
+          kind: kind ?? "message",
+          ...(tool ? { tool } : {}),
+        }),
+      ),
+  );
+
+  server.registerTool(
+    AgentSessionDetachTool.name,
+    {
+      title: AgentSessionDetachTool.title,
+      description: AgentSessionDetachTool.description,
+      inputSchema: sessionDetachInputSchema,
+      annotations: {
+        title: AgentSessionDetachTool.title,
+        ...AgentSessionDetachTool.annotations,
+      },
+    },
+    async ({ session_id, agent_id }) => {
+      await client.terminal.detach(session_id, agent_id);
+      return textResult({ detached: true, sessionId: session_id });
+    },
   );
 
   server.registerResource(

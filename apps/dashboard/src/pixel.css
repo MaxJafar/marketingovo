@@ -1,0 +1,1583 @@
+/*
+ * Marketingovo terminal UI.
+ *
+ * The dashboard presents itself as a fake OS window running a CRT console. The
+ * conceit is not decoration for its own sake: a marketer sitting in front of an
+ * agent needs to believe there is a machine on the other end of the prompt, and
+ * a console frame says that far more directly than a card grid does.
+ *
+ * Two rules hold the look together and are worth knowing before editing:
+ *
+ *   1. Nothing is rounded and nothing is blurred. Corners are square, borders
+ *      are exactly 1px, and depth is expressed with a hard offset shadow rather
+ *      than a soft one. A single stray border-radius reads as a different app.
+ *   2. Neon is structural, not accent. Pink marks the active and the primary,
+ *      cyan marks the secondary and the idle. A panel picks one and commits.
+ *
+ * Raster art is scaled with image-rendering: pixelated everywhere, so assets
+ * must be authored on a pixel grid — see docs/design/terminal-ui-asset-packet.md.
+ */
+
+@font-face {
+  font-family: "Departure Mono";
+  /* local() first so an already-installed copy is used without a download, then
+     the vendored files the asset packet delivers. Until either exists the stack
+     below falls through to the platform monospace, which keeps layout metrics
+     honest. */
+  src:
+    local("Departure Mono"),
+    local("DepartureMono-Regular"),
+    url("/pixel/font/departure-mono.woff2") format("woff2"),
+    url("/pixel/font/departure-mono.woff") format("woff");
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+}
+
+:root {
+  /* Monaco and Menlo lead the fallbacks deliberately: both descend from bitmap
+     screen faces and keep square terminals and flat-sided rounds, so they hold
+     the console look far better than SF Mono's softer, more humanist curves. */
+  --font-pixel:
+    "Departure Mono", Monaco, Menlo, Consolas, "Andale Mono", "Liberation Mono",
+    ui-monospace, monospace;
+
+  --px-void: #07060f;
+  --px-panel: #12101f;
+  --px-raised: #1a1730;
+  --px-sunken: #0d0b1a;
+  --px-line: #2f2850;
+  --px-line-soft: #221d3d;
+
+  --px-pink: #ff5fb0;
+  --px-pink-dim: #c73d84;
+  --px-pink-lift: #ff9ad0;
+  --px-cyan: #3fe3e0;
+  --px-cyan-dim: #2aa8a6;
+  --px-cyan-lift: #7ff0ee;
+  --px-green: #4be8a5;
+  --px-gold: #ffd76a;
+  --px-red: #ff6b81;
+
+  --px-ink: #f2edff;
+  --px-ink-soft: #bfb4e0;
+  --px-ink-faint: #8f83b8;
+
+  --px-rail: 264px;
+  --px-gap: 14px;
+  --px-shadow: 3px 3px 0 var(--px-void);
+}
+
+/* ------------------------------------------------------------------ */
+/* Frame                                                               */
+/* ------------------------------------------------------------------ */
+
+body:has(.pixel-frame) {
+  background: var(--px-void);
+  font-family: var(--font-pixel);
+}
+
+/*
+ * Pixel type rules.
+ *
+ * Turning subpixel and greyscale smoothing off is the single biggest lever
+ * here, and it is doing real work rather than nostalgia: anti-aliasing spreads
+ * a glyph edge across a gradient of intermediate pixels, which is exactly the
+ * thing a bitmap face is defined by not having. With smoothing off, whatever
+ * font the platform supplies renders with hard, aliased edges and reads as a
+ * terminal even before the vendored pixel face arrives.
+ *
+ * The ligature and kerning switches matter for the same reason. A coding
+ * monospace left to itself will fuse `->` into an arrow and `~$` into
+ * something decorative — pleasant in an editor, wrong in a shell prompt that
+ * is meant to look like literal characters.
+ */
+.pixel-frame,
+.pixel-frame input,
+.pixel-frame button,
+.pixel-frame select,
+.pixel-frame textarea {
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+  font-synthesis: none;
+  font-variant-ligatures: none;
+  font-feature-settings:
+    "liga" 0,
+    "clig" 0,
+    "calt" 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.pixel-frame {
+  display: grid;
+  grid-template-columns: var(--px-rail) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  grid-template-areas:
+    "brand  topbar"
+    "rail   main"
+    "prompt prompt"
+    "footer footer";
+  gap: var(--px-gap);
+  min-height: 100vh;
+  padding: var(--px-gap);
+  background: var(--px-void);
+  color: var(--px-ink);
+  font-family: var(--font-pixel);
+  /* Integer type metrics. A bitmap glyph placed on a half pixel is resampled
+     and loses the hard edge the rule above just bought, so the base size and
+     leading are whole numbers and every derived size below is too. */
+  font-size: 13px;
+  line-height: 20px;
+  letter-spacing: 0;
+}
+
+/* On a real screen the frame is a window, not a document: it occupies the
+   viewport exactly and its two tall regions scroll inside themselves. That is
+   what keeps the agent prompt on screen at all times — a console whose input
+   line is a thousand pixels below the fold is not a console. Below the stacking
+   breakpoint the grid becomes a single column and the page scrolls normally,
+   because pinning a prompt on a phone costs more than it gives. */
+@media (min-width: 901px) {
+  .pixel-frame {
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* min-height: 0 is load-bearing, not tidying. A grid item defaults to
+     min-height: auto, so these two would refuse to shrink below their content
+     and push the prompt and footer off the bottom of the window the moment the
+     transcript opens — which is exactly when the prompt matters most. */
+  .pixel-main,
+  .pixel-rail {
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+/* The scanline wash sits above the page and below the pointer. Kept very low
+   contrast: it should register as texture, never as banding over live text. */
+.pixel-frame::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 1.6%) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-frame::after {
+    display: none;
+  }
+}
+
+.pixel-panel {
+  position: relative;
+  border: 1px solid var(--px-line);
+  background: var(--px-panel);
+  box-shadow: var(--px-shadow);
+}
+
+.pixel-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--px-line);
+  background: var(--px-sunken);
+}
+
+.pixel-panel-head h2,
+.pixel-panel-head h3 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--px-cyan);
+}
+
+/* The double chevron is the panel's "port marker" — it repeats on every panel
+   header so the grid reads as one instrument rather than assorted widgets. */
+.pixel-panel-head::before {
+  content: "▸▸";
+  color: var(--px-pink);
+  font-size: 10px;
+  letter-spacing: -1px;
+}
+
+.pixel-panel-mark {
+  margin-left: auto;
+}
+
+.pixel-panel-body {
+  padding: 14px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Brand block                                                         */
+/* ------------------------------------------------------------------ */
+
+.pixel-brand {
+  grid-area: brand;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--px-pink);
+  background: var(--px-panel);
+  box-shadow: var(--px-shadow);
+  text-decoration: none;
+  color: inherit;
+}
+
+.pixel-brand:focus-visible {
+  outline: 2px solid var(--px-cyan);
+  outline-offset: 2px;
+}
+
+/* Faux-bold, pixel style. The fallback console faces ship no bold weight and
+   font-synthesis is off, so weight is added by reprinting the glyph one whole
+   pixel to the right. That thickens the stem without introducing a blur or a
+   half-pixel edge, which is what a real bitmap bold does anyway. Applied only
+   to display type; at body sizes it would close up the counters. */
+.pixel-wordmark {
+  text-shadow: 1px 0 0 currentcolor;
+  font-size: 19px;
+  letter-spacing: 0;
+}
+
+.pixel-wordmark .mark-a {
+  color: var(--px-pink);
+}
+
+.pixel-wordmark .mark-b {
+  color: var(--px-cyan);
+}
+
+/* ------------------------------------------------------------------ */
+/* Top bar                                                             */
+/* ------------------------------------------------------------------ */
+
+.pixel-topbar {
+  grid-area: topbar;
+  display: flex;
+  align-items: stretch;
+  gap: var(--px-gap);
+  min-width: 0;
+}
+
+.pixel-cmdline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--px-cyan);
+  background: var(--px-panel);
+  box-shadow: var(--px-shadow);
+  color: var(--px-cyan-lift);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixel-cmdline-sigil {
+  color: var(--px-green);
+}
+
+/* The project switcher, dressed as the value of a command-line flag. It keeps
+   the native <select> — a custom listbox would cost keyboard and screen-reader
+   behaviour that this control has no business reimplementing — and only strips
+   the chrome that would break the illusion. */
+.pixel-cmdline-select {
+  max-width: 22ch;
+  margin-left: -10px;
+  padding: 2px 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--px-ink);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  appearance: none;
+  text-overflow: ellipsis;
+}
+
+.pixel-cmdline-select:hover:not(:disabled) {
+  border-color: var(--px-cyan-dim);
+}
+
+.pixel-cmdline-select:focus-visible {
+  outline: 2px solid var(--px-cyan);
+  outline-offset: 1px;
+}
+
+.pixel-cmdline-select:disabled {
+  color: var(--px-ink-faint);
+  cursor: default;
+}
+
+.pixel-cmdline-select option {
+  background: var(--px-panel);
+  color: var(--px-ink);
+}
+
+.pixel-cmdline-action {
+  flex: none;
+  padding: 3px 8px;
+  border: 1px solid var(--px-pink-dim);
+  color: var(--px-pink);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pixel-cmdline-action:hover {
+  background: var(--px-pink);
+  color: var(--px-void);
+}
+
+.pixel-cmdline-action:focus-visible {
+  outline: 2px solid var(--px-ink);
+  outline-offset: 2px;
+}
+
+.pixel-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  padding-left: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--px-ink-soft);
+}
+
+.pixel-status-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--px-ink-faint);
+}
+
+.pixel-status[data-state="online"] .pixel-status-dot {
+  background: var(--px-green);
+  animation: pixel-pulse 2s steps(2, end) infinite;
+}
+
+.pixel-status[data-state="online"] {
+  color: var(--px-green);
+}
+
+.pixel-status[data-state="busy"] .pixel-status-dot {
+  background: var(--px-gold);
+  animation: pixel-pulse 0.7s steps(2, end) infinite;
+}
+
+.pixel-status[data-state="busy"] {
+  color: var(--px-gold);
+}
+
+.pixel-status[data-state="offline"] .pixel-status-dot {
+  background: var(--px-red);
+}
+
+@keyframes pixel-pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-status-dot {
+    animation: none !important;
+  }
+}
+
+.pixel-window-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pixel-window-button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--px-cyan);
+  background: var(--px-panel);
+  color: var(--px-cyan);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--px-shadow);
+}
+
+.pixel-window-button:hover {
+  background: var(--px-raised);
+  color: var(--px-cyan-lift);
+}
+
+.pixel-window-button[data-variant="close"] {
+  border-color: var(--px-pink);
+  color: var(--px-pink);
+}
+
+.pixel-window-button[data-variant="close"]:hover {
+  background: var(--px-pink);
+  color: var(--px-void);
+}
+
+.pixel-window-button:focus-visible {
+  outline: 2px solid var(--px-ink);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Sidebar rail                                                        */
+/* ------------------------------------------------------------------ */
+
+.pixel-rail {
+  grid-area: rail;
+  display: flex;
+  flex-direction: column;
+  gap: var(--px-gap);
+  min-height: 0;
+}
+
+.pixel-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  /* The rail scrolls too, so the section list must keep its size and let the
+     boot log below it absorb the slack instead. */
+  flex: none;
+}
+
+.pixel-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  color: var(--px-ink-soft);
+  text-decoration: none;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.pixel-nav-link:hover {
+  border-color: var(--px-line);
+  background: var(--px-panel);
+  color: var(--px-ink);
+}
+
+.pixel-nav-link:focus-visible {
+  outline: 2px solid var(--px-cyan);
+  outline-offset: -2px;
+}
+
+.pixel-nav-link[aria-current="page"] {
+  border-color: var(--px-pink);
+  background: var(--px-panel);
+  color: var(--px-pink);
+  box-shadow: var(--px-shadow);
+}
+
+/* The caret marks the active row and is what makes the rail read as a selection
+   list rather than a set of buttons. It is a real aria-hidden element rather
+   than ::before content, because generated content is folded into the
+   accessible name — the active link would announce as "> Reports". */
+.pixel-nav-caret {
+  color: var(--px-pink);
+  margin-right: -4px;
+}
+
+.pixel-nav-icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  background-color: currentcolor;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+/* ------------------------------------------------------------------ */
+/* Boot log                                                            */
+/* ------------------------------------------------------------------ */
+
+.pixel-bootlog {
+  flex: 1;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+}
+
+.pixel-bootlog .pixel-panel-head h2 {
+  color: var(--px-ink-soft);
+  letter-spacing: 2px;
+}
+
+.pixel-bootlog-dots {
+  margin-left: auto;
+  display: flex;
+  gap: 5px;
+}
+
+.pixel-bootlog-dots span {
+  width: 6px;
+  height: 6px;
+  background: var(--px-line);
+}
+
+.pixel-bootlog-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 12px;
+  font-size: 11px;
+  line-height: 20px;
+  color: var(--px-green);
+}
+
+.pixel-bootlog-body:focus-visible {
+  outline: 2px solid var(--px-cyan);
+  outline-offset: -2px;
+}
+
+.pixel-bootlog-body li {
+  list-style: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixel-bootlog-body ul {
+  margin: 0;
+  padding: 0;
+}
+
+.pixel-bootlog-body li::before {
+  content: "> ";
+  color: var(--px-cyan-dim);
+}
+
+.pixel-bootlog-body li[data-state="pending"] {
+  color: var(--px-ink-faint);
+}
+
+.pixel-bootlog-body li[data-state="fail"] {
+  color: var(--px-red);
+}
+
+.pixel-rail-mascot {
+  display: grid;
+  place-items: center;
+  padding: 4px 0;
+  flex: none;
+}
+
+/* Dense two-column cluster: subordinate to the ten headline sections by size
+   and colour, but a real navigation list rather than a footnote. */
+.pixel-subnav {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px 10px;
+  padding: 9px 10px;
+  border: 1px solid var(--px-line-soft);
+}
+
+.pixel-subnav-label {
+  grid-column: 1 / -1;
+  margin-bottom: 3px;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--px-ink-faint);
+}
+
+.pixel-subnav-link {
+  /* 24px is the WCAG 2.2 minimum target size, not a visual preference. At the
+     11px type these links use, the natural line box is only 20px. */
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+  color: var(--px-ink-soft);
+  font-size: 11px;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixel-subnav-link:hover {
+  color: var(--px-cyan);
+}
+
+.pixel-subnav-link[aria-current="page"] {
+  color: var(--px-pink);
+}
+
+.pixel-subnav-link:focus-visible {
+  outline: 2px solid var(--px-cyan);
+  outline-offset: 2px;
+}
+
+.pixel-rail-setup {
+  flex: none;
+  display: block;
+  padding: 9px 12px;
+  border: 1px solid var(--px-line);
+  background: var(--px-panel);
+  color: var(--px-ink-soft);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+  text-decoration: none;
+}
+
+.pixel-rail-setup:hover {
+  border-color: var(--px-cyan-dim);
+  color: var(--px-cyan);
+}
+
+.pixel-rail-setup:focus-visible {
+  outline: 2px solid var(--px-cyan);
+  outline-offset: 2px;
+}
+
+.pixel-rail-status {
+  font-size: 11px;
+  color: var(--px-green);
+  letter-spacing: 1px;
+}
+
+.pixel-rail-status::before {
+  content: "> ";
+  color: var(--px-cyan-dim);
+}
+
+/* ------------------------------------------------------------------ */
+/* Main column                                                         */
+/* ------------------------------------------------------------------ */
+
+/* Grid rather than a flex column, and the distinction is not cosmetic: once the
+   main region became height-constrained and scrollable, flex children started
+   shrinking to fit instead of overflowing, which silently crushed the welcome
+   banner to a sliver. Grid rows sized by content, anchored to the start, let
+   the column overflow and scroll the way it is supposed to. */
+.pixel-main {
+  grid-area: main;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: var(--px-gap);
+}
+
+/* No ring for the programmatic focus that follows a route change, but a real
+   one when someone tabs to the region to scroll it. */
+.pixel-main:focus {
+  outline: none;
+}
+
+.pixel-main:focus-visible {
+  outline: 2px solid var(--px-cyan);
+  outline-offset: -2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Hero                                                                */
+/* ------------------------------------------------------------------ */
+
+/* Deliberately not `overflow: hidden`. Clipping here looks harmless but changes
+   this box's automatic minimum size to zero once it is a grid item, and the row
+   then collapses to a sliver with the banner spilling out of it. The sparkles
+   are positioned inside the padding box instead, so there is nothing to clip. */
+.pixel-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 22px 22px;
+}
+
+.pixel-hero-copy h1 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: var(--px-cyan);
+}
+
+.pixel-hero-title {
+  text-shadow: 1px 0 0 currentcolor;
+  display: block;
+  margin: 2px 0 6px;
+  font-size: clamp(30px, 5vw, 52px);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.pixel-hero-title .mark-a {
+  color: var(--px-pink);
+}
+
+.pixel-hero-title .mark-b {
+  color: var(--px-cyan);
+}
+
+.pixel-hero-sub {
+  margin: 0;
+  font-size: 13px;
+  color: var(--px-ink-soft);
+}
+
+.pixel-hero-art {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: none;
+}
+
+.pixel-bubble {
+  align-self: flex-start;
+  position: relative;
+  margin-top: 12px;
+  padding: 8px 11px;
+  border: 1px solid var(--px-ink);
+  background: var(--px-ink);
+  color: var(--px-void);
+  font-size: 11px;
+  line-height: 15px;
+  max-width: 130px;
+}
+
+/* Square tail, drawn as a rotated block so it stays crisp at any zoom. */
+.pixel-bubble::after {
+  content: "";
+  position: absolute;
+  right: -5px;
+  top: 14px;
+  width: 8px;
+  height: 8px;
+  background: var(--px-ink);
+  transform: rotate(45deg);
+}
+
+.pixel-sparkle {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Stat cards                                                          */
+/* ------------------------------------------------------------------ */
+
+.pixel-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid var(--px-line);
+  background: var(--px-panel);
+  box-shadow: var(--px-shadow);
+}
+
+.pixel-stat {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  min-width: 0;
+}
+
+.pixel-stat + .pixel-stat {
+  border-left: 1px solid var(--px-line);
+}
+
+.pixel-stat-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.pixel-stat-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--px-ink-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixel-stat-value {
+  text-shadow: 1px 0 0 currentcolor;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 3px 0 5px;
+  font-size: 27px;
+  line-height: 30px;
+  color: var(--px-ink);
+}
+
+.pixel-stat-unit {
+  /* Units stay hairline: doubling them muddies "/100" and "%". */
+  text-shadow: none;
+  font-size: 12px;
+  color: var(--px-ink-faint);
+}
+
+.pixel-stat-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pixel-delta {
+  font-size: 11px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.pixel-delta[data-direction="up"] {
+  color: var(--px-green);
+}
+
+.pixel-delta[data-direction="down"] {
+  color: var(--px-red);
+}
+
+.pixel-delta[data-direction="flat"] {
+  color: var(--px-ink-faint);
+}
+
+/* ------------------------------------------------------------------ */
+/* Panel grid                                                          */
+/* ------------------------------------------------------------------ */
+
+.pixel-grid {
+  display: grid;
+  gap: var(--px-gap);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.pixel-col-4 {
+  grid-column: span 4;
+}
+.pixel-col-5 {
+  grid-column: span 5;
+}
+.pixel-col-6 {
+  grid-column: span 6;
+}
+.pixel-col-7 {
+  grid-column: span 7;
+}
+.pixel-col-8 {
+  grid-column: span 8;
+}
+.pixel-col-12 {
+  grid-column: span 12;
+}
+
+/* ------------------------------------------------------------------ */
+/* Charts                                                              */
+/* ------------------------------------------------------------------ */
+
+.pixel-donut-row {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.pixel-donut {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+
+.pixel-donut-label {
+  position: absolute;
+  text-align: center;
+  line-height: 32px;
+}
+
+.pixel-donut-score {
+  text-shadow: 1px 0 0 currentcolor;
+  display: block;
+  font-size: 30px;
+  color: var(--px-ink);
+}
+
+.pixel-donut-max {
+  text-shadow: none;
+  font-size: 11px;
+  color: var(--px-ink-faint);
+}
+
+.pixel-meters {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 9px;
+}
+
+.pixel-meter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px 12px;
+  font-size: 12px;
+}
+
+.pixel-meter-name {
+  color: var(--px-ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixel-meter-value {
+  color: var(--px-ink-faint);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.pixel-meter-track {
+  grid-column: 1 / -1;
+  height: 7px;
+  background: var(--px-sunken);
+  border: 1px solid var(--px-line-soft);
+}
+
+.pixel-meter-fill {
+  height: 100%;
+  background: var(--px-pink);
+}
+
+.pixel-meter:nth-child(even) .pixel-meter-fill {
+  background: var(--px-cyan);
+}
+
+.pixel-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pixel-chart-axis {
+  font-size: 10px;
+  fill: var(--px-ink-faint);
+}
+
+.pixel-chart-grid {
+  stroke: var(--px-line-soft);
+  stroke-width: 1;
+}
+
+.pixel-social-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 172px;
+  gap: 18px;
+  align-items: start;
+}
+
+.pixel-platforms {
+  display: grid;
+  gap: 11px;
+}
+
+.pixel-platform {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.pixel-platform-name {
+  flex: 1;
+  color: var(--px-ink-soft);
+}
+
+.pixel-platform-count {
+  color: var(--px-ink);
+}
+
+/* ------------------------------------------------------------------ */
+/* Tables                                                              */
+/* ------------------------------------------------------------------ */
+
+.pixel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.pixel-table th {
+  padding: 0 8px 9px;
+  text-align: left;
+  font-weight: 400;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--px-ink-faint);
+  border-bottom: 1px solid var(--px-line);
+}
+
+.pixel-table td {
+  padding: 9px 8px;
+  color: var(--px-ink-soft);
+  border-bottom: 1px solid var(--px-line-soft);
+}
+
+.pixel-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.pixel-table td:first-child {
+  color: var(--px-ink);
+}
+
+.pixel-table .is-numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.pixel-table tr[data-self="true"] td {
+  background: rgb(255 95 176 / 9%);
+  color: var(--px-pink-lift);
+  border-color: var(--px-pink-dim);
+}
+
+.pixel-table tr[data-self="true"] td:first-child {
+  color: var(--px-pink);
+}
+
+.pixel-panel-action {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 9px;
+  border: 1px solid var(--px-cyan-dim);
+  background: transparent;
+  color: var(--px-cyan);
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.pixel-panel-action:hover {
+  background: var(--px-cyan);
+  color: var(--px-void);
+}
+
+.pixel-panel-action:focus-visible {
+  outline: 2px solid var(--px-ink);
+  outline-offset: 2px;
+}
+
+.pixel-panel-action[data-accent="pink"] {
+  border-color: var(--px-pink-dim);
+  color: var(--px-pink);
+}
+
+.pixel-panel-action[data-accent="pink"]:hover {
+  background: var(--px-pink);
+  color: var(--px-void);
+}
+
+/* ------------------------------------------------------------------ */
+/* Content feed                                                        */
+/* ------------------------------------------------------------------ */
+
+.pixel-feed {
+  display: grid;
+  gap: 11px;
+}
+
+.pixel-feed-item {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+}
+
+.pixel-feed-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.pixel-feed-title {
+  margin: 0 0 5px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--px-ink);
+  line-height: 17px;
+}
+
+.pixel-feed-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--px-ink-faint);
+}
+
+.pixel-tag {
+  flex: none;
+  align-self: flex-start;
+  padding: 3px 7px;
+  border: 1px solid currentcolor;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--px-cyan);
+  white-space: nowrap;
+}
+
+.pixel-tag[data-tone="hot"] {
+  color: var(--px-pink);
+}
+.pixel-tag[data-tone="gold"] {
+  color: var(--px-gold);
+}
+
+/* ------------------------------------------------------------------ */
+/* Prompt bar                                                          */
+/* ------------------------------------------------------------------ */
+
+.pixel-console {
+  grid-area: prompt;
+  display: flex;
+  flex-direction: column;
+  gap: var(--px-gap);
+  min-width: 0;
+}
+
+.pixel-prompt {
+  display: flex;
+  align-items: stretch;
+  gap: var(--px-gap);
+}
+
+/* A button that has to sit inside running text without becoming a chunky
+   control — used for "hide", "interrupt", and the transcript counter. */
+.pixel-linklike {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--px-cyan);
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.pixel-linklike:hover {
+  color: var(--px-cyan-lift);
+}
+
+.pixel-linklike:focus-visible {
+  outline: 2px solid var(--px-cyan);
+  outline-offset: 2px;
+}
+
+.pixel-prompt-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  padding: 0 14px;
+  border: 1px solid var(--px-line);
+  background: var(--px-panel);
+  box-shadow: var(--px-shadow);
+}
+
+.pixel-prompt-field:focus-within {
+  border-color: var(--px-pink);
+}
+
+.pixel-prompt-sigil {
+  flex: none;
+  color: var(--px-pink);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.pixel-prompt-input {
+  flex: 1;
+  min-width: 0;
+  padding: 15px 0;
+  border: none;
+  background: transparent;
+  color: var(--px-ink);
+  font: inherit;
+  font-size: 13px;
+}
+
+.pixel-prompt-input::placeholder {
+  color: var(--px-ink-faint);
+}
+
+.pixel-prompt-input:focus {
+  outline: none;
+}
+
+.pixel-prompt-send {
+  flex: none;
+  width: 52px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--px-pink);
+  background: var(--px-pink);
+  color: var(--px-void);
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: var(--px-shadow);
+}
+
+.pixel-prompt-send:hover:not(:disabled) {
+  background: var(--px-pink-lift);
+}
+
+.pixel-prompt-send:disabled {
+  border-color: var(--px-line);
+  background: var(--px-raised);
+  color: var(--px-ink-faint);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.pixel-prompt-send:focus-visible {
+  outline: 2px solid var(--px-cyan);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Transcript                                                          */
+/* ------------------------------------------------------------------ */
+
+.pixel-transcript {
+  display: flex;
+  flex-direction: column;
+  max-height: min(46vh, 420px);
+}
+
+.pixel-transcript-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: grid;
+  gap: 9px;
+  align-content: start;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.pixel-line {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 9px;
+  align-items: baseline;
+}
+
+.pixel-line-who {
+  font-size: 11px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.pixel-line-text {
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--px-ink-soft);
+}
+
+.pixel-line[data-role="user"] .pixel-line-who {
+  color: var(--px-pink);
+}
+
+.pixel-line[data-role="user"] .pixel-line-text {
+  color: var(--px-ink);
+}
+
+.pixel-line[data-role="agent"] .pixel-line-who {
+  color: var(--px-cyan);
+}
+
+.pixel-line[data-role="system"] .pixel-line-who,
+.pixel-line[data-role="system"] .pixel-line-text {
+  color: var(--px-ink-faint);
+}
+
+.pixel-line[data-kind="thought"] .pixel-line-text {
+  color: var(--px-ink-faint);
+  font-style: italic;
+}
+
+.pixel-line[data-kind="tool"] .pixel-line-text {
+  color: var(--px-gold);
+}
+
+.pixel-line[data-kind="error"] .pixel-line-text {
+  color: var(--px-red);
+}
+
+.pixel-caret {
+  display: inline-block;
+  width: 7px;
+  height: 13px;
+  vertical-align: text-bottom;
+  background: var(--px-cyan);
+  animation: pixel-blink 1s steps(2, end) infinite;
+}
+
+@keyframes pixel-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-caret {
+    animation: none;
+  }
+}
+
+.pixel-transcript-hint {
+  padding: 10px 14px;
+  border-top: 1px solid var(--px-line);
+  font-size: 11px;
+  color: var(--px-ink-faint);
+  background: var(--px-sunken);
+}
+
+.pixel-transcript-hint code {
+  color: var(--px-cyan);
+  font: inherit;
+}
+
+/* ------------------------------------------------------------------ */
+/* Footer                                                              */
+/* ------------------------------------------------------------------ */
+
+.pixel-footer {
+  grid-area: footer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 2px 2px 0;
+  font-size: 11px;
+  color: var(--px-ink-faint);
+  letter-spacing: 1px;
+}
+
+.pixel-footer-heart {
+  color: var(--px-pink);
+}
+
+/* ------------------------------------------------------------------ */
+/* Sprites                                                             */
+/* ------------------------------------------------------------------ */
+
+.pixel-sprite {
+  display: block;
+  flex: none;
+  image-rendering: pixelated;
+}
+
+/* Peeks over the bottom-right of the panel grid. Pinned to the main column so
+   it never overlaps the prompt the user is typing into. */
+.pixel-corner-buddy {
+  position: absolute;
+  right: 18px;
+  bottom: -6px;
+  color: var(--px-pink);
+  pointer-events: none;
+}
+
+.pixel-main {
+  position: relative;
+}
+
+img.pixel-sprite {
+  object-fit: contain;
+}
+
+/* ------------------------------------------------------------------ */
+/* States                                                              */
+/* ------------------------------------------------------------------ */
+
+.pixel-note {
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--px-ink-faint);
+}
+
+.pixel-note[data-tone="error"] {
+  color: var(--px-red);
+}
+
+.pixel-demo-flag {
+  display: inline-block;
+  padding: 2px 6px;
+  border: 1px solid var(--px-gold);
+  color: var(--px-gold);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.pixel-skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.pixel-skip:focus {
+  left: 14px;
+  top: 14px;
+  z-index: 20;
+  padding: 10px 14px;
+  border: 1px solid var(--px-pink);
+  background: var(--px-panel);
+  color: var(--px-ink);
+}
+
+.pixel-rail-toggle {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive                                                          */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 1180px) {
+  .pixel-col-4,
+  .pixel-col-5,
+  .pixel-col-7,
+  .pixel-col-8 {
+    grid-column: span 6;
+  }
+
+  .pixel-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pixel-stat:nth-child(odd) {
+    border-left: none;
+  }
+
+  .pixel-stat:nth-child(n + 3) {
+    border-top: 1px solid var(--px-line);
+  }
+}
+
+@media (max-width: 900px) {
+  .pixel-frame {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "brand"
+      "topbar"
+      "rail"
+      "main"
+      "prompt"
+      "footer";
+  }
+
+  .pixel-rail-toggle {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--px-cyan-dim);
+    background: var(--px-panel);
+    color: var(--px-cyan);
+    font: inherit;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .pixel-rail[data-collapsed="true"] > *:not(.pixel-rail-toggle) {
+    display: none;
+  }
+
+  .pixel-col-4,
+  .pixel-col-5,
+  .pixel-col-6,
+  .pixel-col-7,
+  .pixel-col-8 {
+    grid-column: span 12;
+  }
+
+  .pixel-social-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pixel-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pixel-window-buttons {
+    display: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .pixel-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pixel-stat {
+    border-left: none !important;
+  }
+
+  .pixel-stat + .pixel-stat {
+    border-top: 1px solid var(--px-line);
+  }
+
+  .pixel-donut-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pixel-donut {
+    justify-self: center;
+  }
+}

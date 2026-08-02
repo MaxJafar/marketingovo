@@ -57,6 +57,61 @@ export {
   type MarketingovoOpenApiPaths,
 } from "./generated-client.js";
 
+/** One line in a dashboard terminal, from either side of the conversation. */
+export interface TerminalEvent {
+  id: string;
+  seq: number;
+  role: "user" | "agent" | "system";
+  kind: "message" | "thought" | "tool" | "error" | "status";
+  text: string;
+  tool?: string;
+  createdAt: string;
+}
+
+export interface TerminalAttachment {
+  agentId: string;
+  label: string;
+  harness: string;
+  attachedAt: string;
+  lastSeenAt: string;
+}
+
+export interface TerminalPresence {
+  attached: boolean;
+  agent: TerminalAttachment | null;
+  busy: boolean;
+}
+
+export interface TerminalSession {
+  id: string;
+  projectId: string | null;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TerminalSessionSummary extends TerminalSession {
+  presence: TerminalPresence;
+}
+
+export interface TerminalTranscript {
+  session: TerminalSession;
+  events: TerminalEvent[];
+  presence: TerminalPresence;
+}
+
+export interface TerminalAttachResult {
+  agentId: string;
+  attachment: TerminalAttachment;
+  backlog: TerminalEvent[];
+  session: TerminalSession;
+}
+
+export interface TerminalWaitResult {
+  messages: TerminalEvent[];
+  cancelRequested: boolean;
+}
+
 export class MarketingovoApiError extends Error {
   readonly status: number;
   readonly problem: ProblemDetails | null;
@@ -187,6 +242,60 @@ export class MarketingovoClient {
       this.request<{ token: string; expiresAt: string }>(
         "/session/bootstrap-token",
         { method: "POST" },
+      ),
+  };
+
+  /**
+   * The dashboard's terminal, from the agent's side. These routes envelope
+   * their payloads as `{ data, meta }`, unlike the older project routes, so
+   * each call unwraps `data` to keep the SDK surface consistent.
+   */
+  terminal = {
+    list: () =>
+      this.request<{ data: { items: TerminalSessionSummary[] } }>(
+        "/agent/sessions",
+      ).then((body) => body.data.items),
+    transcript: (sessionId: string, since = 0) =>
+      this.request<{ data: TerminalTranscript }>(
+        `/agent/sessions/${encodeURIComponent(sessionId)}?since=${since}`,
+      ).then((body) => body.data),
+    attach: (sessionId: string, input: { label: string; harness: string }) =>
+      this.request<{ data: TerminalAttachResult }>(
+        `/agent/sessions/${encodeURIComponent(sessionId)}/attach`,
+        { method: "POST", body: JSON.stringify(input) },
+      ).then((body) => body.data),
+    wait: (sessionId: string, agentId: string, waitMs: number) =>
+      this.request<{ data: TerminalWaitResult }>(
+        `/agent/sessions/${encodeURIComponent(sessionId)}/wait`,
+        {
+          method: "POST",
+          body: JSON.stringify({ agentId, waitMs }),
+          // The daemon holds this request open on purpose. The client deadline
+          // has to outlast the server's park or every successful long poll
+          // would surface as a timeout.
+          signal: AbortSignal.timeout(waitMs + 10_000),
+        },
+      ).then((body) => body.data),
+    say: (
+      sessionId: string,
+      input: {
+        agentId: string;
+        text: string;
+        kind?: "message" | "thought" | "tool" | "error";
+        tool?: string;
+      },
+    ) =>
+      this.request<{ data: TerminalEvent }>(
+        `/agent/sessions/${encodeURIComponent(sessionId)}/emit`,
+        {
+          method: "POST",
+          body: JSON.stringify({ kind: "message", ...input }),
+        },
+      ).then((body) => body.data),
+    detach: (sessionId: string, agentId: string) =>
+      this.request<void>(
+        `/agent/sessions/${encodeURIComponent(sessionId)}/detach`,
+        { method: "POST", body: JSON.stringify({ agentId }) },
       ),
   };
   projects = {

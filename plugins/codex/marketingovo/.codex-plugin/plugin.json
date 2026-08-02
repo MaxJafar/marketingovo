@@ -1,6 +1,6 @@
 {
   "name": "marketingovo",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Turn local crawl, Search Console, GA4, performance, and SERP evidence into prioritized SEO actions.",
   "author": { "name": "Marketingovo" },
   "license": "Apache-2.0",

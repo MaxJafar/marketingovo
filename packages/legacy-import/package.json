@@ -1,6 +1,6 @@
 {
   "name": "@marketingovo/legacy-import",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Non-destructive Marketingovo v0 data importer",
   "license": "Apache-2.0",
   "type": "module",

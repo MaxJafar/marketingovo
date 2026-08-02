@@ -101,6 +101,40 @@ Project Context and journal writes are also deliberate human operations in the
 dashboard or local API; the default agent tools remain read-only for this
 memory.
 
+## Answer the dashboard terminal
+
+The Marketingovo dashboard has a console along its bottom edge. It has no model
+of its own — it is waiting for an agent to attach and answer. When the operator
+asks you to staff it, run this loop:
+
+1. `marketingovo_session_list` — find the session. Prefer one with no agent
+   attached; a session whose title is the marketer's own first line is the one
+   they are looking at.
+2. `marketingovo_session_attach` — claim it. Keep the returned `agent_id`; every
+   later call needs it. The response also carries any turns typed before you
+   arrived, so answer those first rather than greeting an empty room.
+3. `marketingovo_session_wait` — block for the next turn. An empty result means
+   nobody typed yet, not that the conversation ended: call it again. Each call
+   also renews your lease, so a session you stop polling is released to another
+   agent after ninety seconds.
+4. Do the work with the normal tools above, then `marketingovo_session_say`.
+
+Write to the terminal the way a console behaves. Use `kind: "thought"` to say
+what you are doing before a long run, so the prompt does not look frozen; use
+`kind: "tool"` when reporting a tool you actually called; use `kind: "message"`
+for the answer itself; use `kind: "error"` when you could not complete the
+request, and say why. Keep individual lines short — this is a terminal, not a
+document.
+
+Abandon the current answer when a wait returns `cancel_requested`: the marketer
+pressed interrupt and no longer wants it. Call `marketingovo_session_detach`
+when the conversation ends rather than letting the lease lapse.
+
+The same honesty rules apply here as everywhere else, and they matter more in a
+chat because the format invites confident prose. Do not answer from memory of an
+earlier run, do not describe a queued run as finished, and never write a
+credential or provider key into a session.
+
 ## Handle asynchronous work
 
 Start tools return quickly. Preserve the run id and call `marketingovo_run_get`

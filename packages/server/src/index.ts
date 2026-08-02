@@ -94,6 +94,22 @@ import {
   dashboardActionOutcomes,
 } from "./action-workbench.js";
 import {
+  AgentSessionError,
+  AgentSessionStore,
+  AttachSessionInputSchema,
+  CreateSessionInputSchema,
+  DetachSessionInputSchema,
+  EmitSessionInputSchema,
+  PresenceSchema,
+  SaySessionInputSchema,
+  SessionEventSchema,
+  SessionTranscriptSchema,
+  TerminalSessionSchema,
+  WaitResultSchema,
+  WaitSessionInputSchema,
+  type StreamEnvelope,
+} from "./agent-session.js";
+import {
   GoogleDesktopOAuthBroker,
   OAuthBrokerProblem,
 } from "./google-oauth.js";
@@ -113,6 +129,7 @@ export {
   GoogleDesktopOAuthBroker,
   OAuthBrokerProblem,
 } from "./google-oauth.js";
+export { AgentSessionStore, AgentSessionError } from "./agent-session.js";
 
 export interface LocalServerOptions {
   runtime: MarketingovoLocalRuntime;
@@ -1093,6 +1110,7 @@ export async function createLocalServer(
   }
   const bootstrapTickets = new Map<string, BootstrapTicket>();
   const sessions = new Map<string, Session>();
+  const terminalSessions = new AgentSessionStore();
   const serviceTokenPath =
     options.serviceTokenPath ?? join(options.runtime.dataDir, "service-token");
   const serviceToken = ensureServiceToken(serviceTokenPath);
@@ -1122,7 +1140,7 @@ export async function createLocalServer(
     openapi: {
       info: {
         title: "Marketingovo Local API",
-        version: "1.0.0",
+        version: "1.1.0",
         description:
           "Loopback API for the local-first Marketingovo application",
       },
@@ -1218,6 +1236,22 @@ export async function createLocalServer(
   });
 
   app.setErrorHandler((error, request, reply) => {
+    if (error instanceof AgentSessionError) {
+      return reply
+        .code(error.status)
+        .type("application/problem+json")
+        .send({
+          type: `urn:marketingovo:problem:${error.code.replaceAll("_", "-")}`,
+          title:
+            error.status === 404
+              ? "Terminal session not found"
+              : "Terminal session request was rejected",
+          status: error.status,
+          detail: error.message,
+          instance: request.id,
+          code: error.code,
+        });
+    }
     if (error instanceof IssueAdjudicationError) {
       return reply
         .code(error.status)
@@ -4041,6 +4075,313 @@ export async function createLocalServer(
     });
   });
 
+  /* ---------------------------------------------------------------- */
+  /* Agent terminal sessions                                           */
+  /*                                                                   */
+  /* Two audiences share these routes. The dashboard reaches them with */
+  /* a session cookie and a CSRF token; an agent harness reaches them  */
+  /* with the local service token, which the auth preHandler accepts   */
+  /* ahead of the cookie path. The split is why "agent" routes take an */
+  /* agentId rather than trusting a role the caller could assert.      */
+  /* ---------------------------------------------------------------- */
+
+  const SessionIdParams = Type.Object(
+    { id: Type.String({ minLength: 1 }) },
+    { additionalProperties: false },
+  );
+
+  app.post(
+    "/api/v1/agent/sessions",
+    {
+      schema: {
+        tags: ["agent-sessions"],
+        body: CreateSessionInputSchema,
+        response: {
+          201: Type.Object({
+            data: TerminalSessionSchema,
+            meta: Type.Unknown(),
+          }),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request, reply) => {
+      const body = request.body as { projectId?: string };
+      const session = terminalSessions.create(body.projectId ?? null);
+      return reply.code(201).send(envelope(session));
+    },
+  );
+
+  app.get(
+    "/api/v1/agent/sessions",
+    {
+      schema: {
+        tags: ["agent-sessions"],
+        response: {
+          200: Type.Object({
+            data: Type.Object({
+              items: Type.Array(
+                Type.Intersect([
+                  TerminalSessionSchema,
+                  Type.Object({ presence: PresenceSchema }),
+                ]),
+              ),
+            }),
+            meta: Type.Unknown(),
+          }),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async () => envelope({ items: terminalSessions.list() }),
+  );
+
+  app.get(
+    "/api/v1/agent/sessions/:id",
+    {
+      schema: {
+        tags: ["agent-sessions"],
+        params: SessionIdParams,
+        querystring: Type.Object(
+          { since: Type.Optional(Type.Integer({ minimum: 0 })) },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Object({
+            data: SessionTranscriptSchema,
+            meta: Type.Unknown(),
+          }),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const { id } = request.params as { id: string };
+      const { since } = request.query as { since?: number };
+      const transcript = terminalSessions.transcript(id, since ?? 0);
+      return envelope({
+        ...transcript,
+        presence: terminalSessions.presence(id),
+      });
+    },
+  );
+
+  app.delete(
+    "/api/v1/agent/sessions/:id",
+    {
+      schema: {
+        tags: ["agent-sessions"],
+        params: SessionIdParams,
+        response: { 204: Type.Null(), ...StandardProblemResponses },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      terminalSessions.delete(id);
+      return reply.code(204).send();
+    },
+  );
+
+  app.post(
+    "/api/v1/agent/sessions/:id/messages",
+    {
+      schema: {
+        tags: ["agent-sessions"],
+        params: SessionIdParams,
+        body: SaySessionInputSchema,
+        response: {
+          201: Type.Object({ data: SessionEventSchema, meta: Type.Unknown() }),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const { text } = request.body as { text: string };
+      return reply.code(201).send(envelope(terminalSessions.say(id, text)));
+    },
+  );
+
+  app.post(
+    "/api/v1/agent/sessions/:id/cancel",
+    {
+      schema: {
+        tags: ["agent-sessions"],
+        params: SessionIdParams,
+        response: { 204: Type.Null(), ...StandardProblemResponses },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      terminalSessions.cancel(id);
+      return reply.code(204).send();
+    },
+  );
+
+  /**
+   * The browser's live feed. Server-sent events rather than a socket because
+   * the traffic is one-directional — the terminal posts turns over ordinary
+   * requests — and SSE reconnects on its own without a keepalive protocol to
+   * maintain. `since` lets a reconnecting tab replay only what it missed.
+   */
+  app.get(
+    "/api/v1/agent/sessions/:id/stream",
+    { schema: { tags: ["agent-sessions"], params: SessionIdParams } },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const since = Number((request.query as { since?: string }).since ?? 0);
+      const backlog = terminalSessions.transcript(
+        id,
+        Number.isFinite(since) ? since : 0,
+      );
+      const presence = terminalSessions.presence(id);
+
+      reply.hijack();
+      const stream = reply.raw;
+      stream.writeHead(200, {
+        "content-type": "text/event-stream; charset=utf-8",
+        "cache-control": "no-store",
+        connection: "keep-alive",
+        "x-content-type-options": "nosniff",
+      });
+
+      const send = (envelopeValue: StreamEnvelope): void => {
+        if (stream.writableEnded) return;
+        stream.write(`data: ${JSON.stringify(envelopeValue)}\n\n`);
+      };
+
+      send({ type: "presence", presence });
+      for (const event of backlog.events) send({ type: "event", event });
+
+      const unsubscribe = terminalSessions.subscribe(id, send);
+      // Proxies and browsers both drop a stream that goes quiet. The comment
+      // frame costs nothing and is ignored by EventSource.
+      const heartbeat = setInterval(() => {
+        if (stream.writableEnded) return;
+        stream.write(": ping\n\n");
+      }, 20_000);
+
+      const close = (): void => {
+        clearInterval(heartbeat);
+        unsubscribe();
+        if (!stream.writableEnded) stream.end();
+      };
+      request.raw.on("close", close);
+      request.raw.on("error", close);
+    },
+  );
+
+  app.post(
+    "/api/v1/agent/sessions/:id/attach",
+    {
+      schema: {
+        tags: ["agent-sessions"],
+        security: [{ localServiceToken: [] }],
+        params: SessionIdParams,
+        body: AttachSessionInputSchema,
+        response: {
+          200: Type.Object({ data: Type.Unknown(), meta: Type.Unknown() }),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const { id } = request.params as { id: string };
+      const body = request.body as { label: string; harness: string };
+      const result = terminalSessions.attach(id, body);
+      return envelope({
+        agentId: result.attachment.agentId,
+        attachment: result.attachment,
+        backlog: result.backlog,
+        session: terminalSessions.transcript(id).session,
+      });
+    },
+  );
+
+  app.post(
+    "/api/v1/agent/sessions/:id/wait",
+    {
+      schema: {
+        tags: ["agent-sessions"],
+        security: [{ localServiceToken: [] }],
+        params: SessionIdParams,
+        body: WaitSessionInputSchema,
+        response: {
+          200: Type.Object({ data: WaitResultSchema, meta: Type.Unknown() }),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const { id } = request.params as { id: string };
+      const body = request.body as { agentId: string; waitMs?: number };
+      return envelope(
+        await terminalSessions.wait(id, body.agentId, body.waitMs ?? 25_000),
+      );
+    },
+  );
+
+  app.post(
+    "/api/v1/agent/sessions/:id/emit",
+    {
+      schema: {
+        tags: ["agent-sessions"],
+        security: [{ localServiceToken: [] }],
+        params: SessionIdParams,
+        body: EmitSessionInputSchema,
+        response: {
+          201: Type.Object({ data: SessionEventSchema, meta: Type.Unknown() }),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const body = request.body as {
+        agentId: string;
+        kind: "message" | "thought" | "tool" | "error";
+        text: string;
+        tool?: string;
+      };
+      const presence = terminalSessions.presence(id);
+      if (presence.agent?.agentId !== body.agentId) {
+        throw new AgentSessionError(
+          "This agent does not hold the session.",
+          409,
+          "agent_not_attached",
+        );
+      }
+      return reply.code(201).send(
+        envelope(
+          terminalSessions.emit(id, {
+            kind: body.kind,
+            text: body.text,
+            ...(body.tool ? { tool: body.tool } : {}),
+          }),
+        ),
+      );
+    },
+  );
+
+  app.post(
+    "/api/v1/agent/sessions/:id/detach",
+    {
+      schema: {
+        tags: ["agent-sessions"],
+        security: [{ localServiceToken: [] }],
+        params: SessionIdParams,
+        body: DetachSessionInputSchema,
+        response: { 204: Type.Null(), ...StandardProblemResponses },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const { agentId } = request.body as { agentId: string };
+      terminalSessions.detach(id, agentId);
+      return reply.code(204).send();
+    },
+  );
+
   if (
     options.dashboardDir &&
     existsSync(join(options.dashboardDir, "index.html"))
@@ -4066,6 +4407,9 @@ export async function createLocalServer(
     serviceTokenPath,
     listen: async () => app.listen({ host, port }),
     close: async () => {
+      // Ahead of app.close(): parked long-polls and open event streams each
+      // hold a timer, and Fastify waits on in-flight requests to settle.
+      terminalSessions.dispose();
       await oauthBroker.close();
       await app.close();
       options.runtime.close();

@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ZodType } from "zod/v4";
 import type { MarketingovoClient } from "@marketingovo/sdk";
-import { createMarketingovoMcpServer, PUBLIC_TOOL_NAMES } from "./index.js";
+import {
+  createMarketingovoMcpServer,
+  PUBLIC_TOOL_NAMES,
+  SESSION_TOOL_NAMES,
+} from "./index.js";
 
 type RegisteredTool = {
   inputSchema: ZodType;
@@ -108,12 +112,15 @@ describe("Marketingovo MCP public contract", () => {
     expect(createMarketingovoMcpServer).toBe(createMarketingovoMcpServer);
   });
 
-  it("registers exactly the nine approved workflow tools", async () => {
+  it("registers exactly the nine approved workflow tools and the five session tools", async () => {
     const { client } = stubClient("running");
     const server = await createMarketingovoMcpServer({ client });
 
+    // The two groups stay separately enumerated so an adapter can allowlist
+    // conversational access without granting workflow access, or the reverse.
     expect(Object.keys(registeredTools(server))).toEqual([
       ...PUBLIC_TOOL_NAMES,
+      ...SESSION_TOOL_NAMES,
     ]);
     expect(PUBLIC_TOOL_NAMES).toEqual([
       "marketingovo_audit_start",
@@ -125,6 +132,13 @@ describe("Marketingovo MCP public contract", () => {
       "marketingovo_keyword_research_start",
       "marketingovo_content_plan_start",
       "marketingovo_monitoring_status",
+    ]);
+    expect(SESSION_TOOL_NAMES).toEqual([
+      "marketingovo_session_list",
+      "marketingovo_session_attach",
+      "marketingovo_session_wait",
+      "marketingovo_session_say",
+      "marketingovo_session_detach",
     ]);
   });
 
@@ -206,6 +220,7 @@ describe("Marketingovo MCP public contract", () => {
 
     expect(Object.keys(registeredTools(server))).toEqual([
       ...PUBLIC_TOOL_NAMES,
+      ...SESSION_TOOL_NAMES,
     ]);
     expect(resources["marketingovo-project-context"]).toBeDefined();
 

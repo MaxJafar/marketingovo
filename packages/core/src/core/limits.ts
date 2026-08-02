@@ -8,7 +8,7 @@
 
 import { envBool, envInt, envStr } from "../env.js";
 
-export const MARKETINGOVO_DEFAULT_USER_AGENT = "Marketingovo/1.0.0";
+export const MARKETINGOVO_DEFAULT_USER_AGENT = "Marketingovo/1.1.0";
 
 export interface Limits {
   maxUrls: number;

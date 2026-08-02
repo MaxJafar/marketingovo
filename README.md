@@ -138,6 +138,13 @@ The localhost API is same-origin and versioned under `/api/v1`. Long-running
 operations return `202` with a run ID, progress streams over SSE, and errors use
 `application/problem+json`.
 
+The dashboard is a console, and the prompt along its bottom edge is a real one.
+Marketingovo runs no model and holds no model credential: it delivers what you
+type to an agent harness you started and authorized yourself, and streams that
+harness's answers back. One agent holds a session at a time, liveness is decided
+by a lease rather than a clean goodbye, and the transcript lives only in memory —
+it is never written to SQLite, exports, or backups.
+
 The Pages workspace also exposes an immutable internal-link graph for each new
 audit. Marketers can inspect exact inlink sources and outlink targets, anchor
 samples, follow/nofollow occurrences, placement, redirects, broken targets,

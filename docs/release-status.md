@@ -1,5 +1,60 @@
 # Release status
 
+## 1.1.0 — prepared, not approved
+
+Every engineering gate passes and the evidence is recorded in
+`release/acceptance/1.1.0.json`. The release is **not approved**: that record
+carries `releaseOwner.status: "pending"` and `licenceCompliance.status:
+"pending"` because both are human attestations, and
+`pnpm validate:public-release-approval --tag v1.1.0` correctly fails until the
+release owner supplies them. Nothing here should be read as a shipped release.
+
+1.1.0 is additive. The nine-tool workflow registry, the REST surface it already
+published, the SDK, the CLI, and the `.marketingovo` bundle format are
+unchanged, so no existing integration breaks.
+
+**What it adds:**
+
+- **The agent terminal.** The dashboard is now a console, and the prompt along
+  its bottom edge is a two-sided pipe between the browser and an agent harness
+  the operator already runs. Marketingovo performs no inference and holds no
+  model credential for it. Ten `/api/v1/agent/sessions` routes carry it: the
+  browser side authenticates with the same-origin cookie and CSRF token, the
+  agent side with the local service token plus the `agentId` minted at attach.
+  One agent holds a session at a time, liveness is decided by a lapsing lease
+  rather than a clean goodbye, and transcripts stay in memory — never SQLite,
+  exports, or backups.
+- **Five terminal session tools** in a registry separate from the nine workflow
+  tools, so conversational access and crawl access can be allowlisted
+  independently. `client.terminal` exposes the same operations to the SDK.
+- **The console dashboard**, with a live boot log of real connector state, and
+  the ten marketer-facing sections beside a workbench cluster for the action
+  queue, issue review, pages, integrations, settings, and health.
+
+**What preparing this release found and fixed:**
+
+- The packaged browser journey had **not** been passing on this branch. It
+  navigated through a sidebar entry the monorepo consolidation removed, so it
+  failed before reaching any assertion. The acceptance evidence for 1.0.0
+  predates that consolidation.
+- Working it through end to end surfaced **eleven WCAG AA contrast failures**
+  that predate this release — success, warning and danger badges and several
+  inline states carried light-theme foregrounds scoring between 1.8:1 and
+  3.2:1 on their own dark backgrounds. All now sit between 6.2:1 and 10.7:1.
+- Two design tokens, `--purple-dark` and `--focus-ring`, were referenced only
+  through `var()` fallbacks and never defined, so every use silently shipped a
+  light-theme literal at 2.29:1. Both are now defined on the dark ramp.
+- The console shell had stranded six working pages with no link into them, and
+  removed the site switcher a multi-project operator needs. Both are restored,
+  and a unit test now asserts the whole reachable route set.
+
+**Known limits carried into 1.1.0:** the demo-flagged panels on the console
+home — social mentions, brand sentiment, and the mentions trend — have no
+connector behind them and say so in the interface. Backlinks states plainly
+that crawling your own site cannot measure referring domains. The terminal-UI
+pixel art and its OFL font are not generated yet; the console ships inline SVG
+stand-ins and the platform monospace stack until they are.
+
 ## 1.0.0 — released state
 
 Marketingovo 1.0.0 declares a stable public surface: the REST API and its OpenAPI

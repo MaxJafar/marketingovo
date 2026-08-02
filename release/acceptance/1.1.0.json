@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 2,
+  "version": "1.1.0",
+  "releaseOwner": {
+    "status": "pending",
+    "name": "",
+    "approvedAt": null,
+    "note": "Not approved. The engineering gates below were observed passing and are recorded as evidence, but a release-owner approval is a human attestation and has not been given for 1.1.0. `pnpm validate:public-release-approval --tag v1.1.0` fails until the owner fills in name and approvedAt themselves."
+  },
+  "licenceCompliance": {
+    "status": "pending",
+    "spdxIdentifier": "Apache-2.0",
+    "noticeReviewed": false,
+    "dependencyPolicy": "passing",
+    "reviewer": "",
+    "reviewedAt": null,
+    "note": "`pnpm validate:licenses` passes and is recorded, but NOTICE review is a human reading task and has not been repeated for 1.1.0. This release adds no new runtime dependency; if the terminal-UI pixel font is vendored before the tag, its OFL attribution must be added to NOTICE and reviewed here."
+  },
+  "evidence": {
+    "workspaceGate": {
+      "command": "pnpm check",
+      "result": "passed",
+      "observedAt": "2026-08-02T18:36:34.000Z",
+      "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
+    },
+    "correctnessCorpus": {
+      "command": "pnpm benchmark",
+      "result": "passed",
+      "observedAt": "2026-08-02T18:36:46.000Z",
+      "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
+    },
+    "dependencyAdvisories": {
+      "command": "pnpm audit:dependencies",
+      "result": "passed",
+      "observedAt": "2026-08-02T18:36:47.000Z",
+      "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
+    },
+    "licencePolicy": {
+      "command": "pnpm validate:licenses",
+      "result": "passed",
+      "observedAt": "2026-08-02T18:36:47.000Z",
+      "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
+    },
+    "agentSurfaces": {
+      "command": "pnpm validate:plugins",
+      "result": "passed",
+      "observedAt": "2026-08-02T18:36:48.000Z",
+      "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
+    },
+    "instructionGuardrails": {
+      "command": "pnpm validate:skills",
+      "result": "passed",
+      "observedAt": "2026-08-02T18:36:48.000Z",
+      "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
+    },
+    "packagedBrowserJourney": {
+      "command": "pnpm test:e2e",
+      "result": "passed",
+      "observedAt": "2026-08-02T18:37:06.000Z",
+      "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
+    }
+  },
+  "deferredChannels": [
+    {
+      "channel": "signed-desktop-installers",
+      "reason": "No Apple Developer ID or Windows signing certificate has been procured, so no notarized DMG, signed MSI, deb or AppImage exists. The native release policy still requires a verified upgrade from an older signed installer before any stable native artifact ships."
+    },
+    {
+      "channel": "updater-latest-json",
+      "reason": "The Tauri updater channel depends on signed native artifacts and is deferred with them."
+    },
+    {
+      "channel": "npm-registry-publication",
+      "reason": "Packages are version-locked and pack cleanly, but publication requires the maintainer's npm account and GitHub Actions OIDC on the canonical tag workflow."
+    },
+    {
+      "channel": "terminal-ui-pixel-assets",
+      "reason": "The console ships with inline SVG stand-ins for all 37 sprites and the platform monospace stack. The generated pixel art and the vendored OFL pixel font are tracked in docs/design/codex-image-generation-packet.md and are a visual upgrade, not a functional gate."
+    }
+  ],
+  "notes": [
+    "1.1.0 is additive: the nine-tool workflow registry, the REST surface it already published, the SDK, the CLI and the .marketingovo bundle format are unchanged. It adds ten agent-session REST routes, a separate five-tool terminal session registry, a client.terminal SDK surface, and the console dashboard.",
+    "The packaged browser journey did not pass on the branch before this release preparation: it navigated through a sidebar entry the monorepo consolidation had already removed. Fixing it surfaced eleven pre-existing WCAG AA contrast failures and two undefined design tokens, all repaired here.",
+    "This record covers the source, CLI, MCP plugin and npm-packable surfaces. It deliberately does not claim any signed native artifact, and it deliberately does not claim an approval nobody gave."
+  ]
+}

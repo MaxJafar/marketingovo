@@ -1,26 +1,45 @@
 ---
 title: MCP, Codex, and OpenClaw
-description: Connect agents to six workflow-level tools without giving them provider credentials.
+description: Connect agents to nine workflow tools and five session tools without giving them provider credentials.
 ---
 
 # MCP, Codex, and OpenClaw
 
 All official agent surfaces connect to the existing local daemon. They do not start another runtime, own another database, or receive provider credentials.
 
-## Six public tools
+## Nine public workflow tools
 
-| Tool                                  | Mode                   | Purpose                                                              |
-| ------------------------------------- | ---------------------- | -------------------------------------------------------------------- |
-| `marketingovo_audit_start`            | Starts network work    | Audit an existing project with bounded static or JavaScript settings |
-| `marketingovo_run_get`                | Read-only, replay-safe | Read run state and canonical issues                                  |
-| `marketingovo_compare_start`          | Starts network work    | Compare a project with one to five public competitor URLs            |
-| `marketingovo_keyword_research_start` | Starts provider work   | Expand a seed, classify intent, and evaluate momentum                |
-| `marketingovo_content_plan_start`     | Starts provider work   | Build profiles and clusters for up to ten seed topics                |
-| `marketingovo_monitoring_status`      | Read-only, replay-safe | Read health, schedules, and recent runs                              |
+| Tool                                  | Mode                   | Purpose                                                               |
+| ------------------------------------- | ---------------------- | --------------------------------------------------------------------- |
+| `marketingovo_audit_start`            | Starts network work    | Audit an existing project with bounded static or JavaScript settings  |
+| `marketingovo_run_get`                | Read-only, replay-safe | Read run state and canonical issues                                   |
+| `marketingovo_run_evidence`           | Read-only, replay-safe | Page through stored crawl, redirect, hreflang and extraction evidence |
+| `marketingovo_run_links`              | Read-only, replay-safe | Read the recorded inlinks or outlinks for one page URL                |
+| `marketingovo_run_compare`            | Read-only, replay-safe | Read the server-computed comparison between two completed audits      |
+| `marketingovo_compare_start`          | Starts network work    | Compare a project with one to five public competitor URLs             |
+| `marketingovo_keyword_research_start` | Starts provider work   | Expand a seed, classify intent, and evaluate momentum                 |
+| `marketingovo_content_plan_start`     | Starts provider work   | Build profiles and clusters for up to ten seed topics                 |
+| `marketingovo_monitoring_status`      | Read-only, replay-safe | Read health, schedules, and recent runs                               |
 
 Start tools return a run ID. The agent must call `marketingovo_run_get` until the run is terminal before describing the work as complete.
 
 The start tools are marked optional in the OpenClaw adapter so an operator can allowlist network-initiating behavior. Read-only inspection remains separate.
+
+## Five terminal session tools
+
+The dashboard's bottom edge is a console with no model of its own. It waits for an agent to attach and answer. These five tools are that other half, and they live in a registry separate from the nine workflow tools so an operator can grant conversational access without granting crawl access, or the reverse.
+
+| Tool                          | Mode                   | Purpose                                                              |
+| ----------------------------- | ---------------------- | -------------------------------------------------------------------- |
+| `marketingovo_session_list`   | Read-only, replay-safe | Find sessions and see whether one already has an agent attached      |
+| `marketingovo_session_attach` | Claims a session       | Become its answering agent; returns `agent_id` and any earlier turns |
+| `marketingovo_session_wait`   | Long poll              | Block for the next turn the marketer types; renews the lease         |
+| `marketingovo_session_say`    | Writes a line          | Answer, narrate progress, report a tool, or report a failure         |
+| `marketingovo_session_detach` | Releases a session     | Hand the session back so another agent can answer it                 |
+
+The loop is `list → attach → wait → work → say → wait`. An empty `wait` result means nobody has typed yet, not that the conversation ended. Because `wait` doubles as the lease heartbeat, an agent that stops polling releases the session after ninety seconds rather than holding a console nobody is answering. Stop and discard the current answer when a wait returns `cancel_requested`.
+
+Marketingovo never becomes a model client here. It has no provider key for the conversation and runs no inference; the harness brings its own model, which is why attaching costs the daemon no new credential. Never write a credential or provider key into a session.
 
 Names, descriptions, strict input objects, defaults, limits, and safety annotations live in one `@marketingovo/contracts` registry. MCP converts that JSON Schema to Zod for runtime validation; OpenClaw projects the same schema into its TypeBox dialect. Neither adapter maintains a second field definition.
 

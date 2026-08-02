@@ -89,7 +89,7 @@ describe("loadLimits", () => {
     expect(l.ignoreRobots).toBe(false);
     expect(l.renderMode).toBe("static");
     expect(l.customHeaders).toEqual({});
-    expect(l.userAgent).toBe("Marketingovo/1.0.0");
+    expect(l.userAgent).toBe("Marketingovo/1.1.0");
   });
 
   it("parses renderMode and customHeaders from env", () => {
