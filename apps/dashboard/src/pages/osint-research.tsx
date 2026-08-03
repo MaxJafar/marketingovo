@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from "react";
 import type {
+  OsintChange,
   OsintDossier,
   OsintEvidence,
+  OsintWorkspace,
   OsintTargetDossier,
 } from "../api/contracts";
 import { useOsintDossier, useStartWorkflow } from "../api/queries";
@@ -233,13 +235,90 @@ function Findings({ dossier }: { dossier: OsintDossier }) {
   );
 }
 
+function ChangeHistory({ workspace }: { workspace: OsintWorkspace }) {
+  const description =
+    workspace.compared && workspace.previousGeneratedAt
+      ? "Cited public-web changes since " +
+        formatDate(workspace.previousGeneratedAt, true) +
+        ". A blocked target is excluded instead of being treated as a disappearance."
+      : "Run a second public-web pass to compare exact signals over time.";
+  return (
+    <Card>
+      <SectionHeading title="Pass history" description={description} />
+      {!workspace.compared ? (
+        <p className="muted-copy">
+          The first pass establishes the baseline. Later passes report added,
+          removed, and changed evidence without making identity claims.
+        </p>
+      ) : workspace.changes.length === 0 ? (
+        <p className="muted-copy">
+          No supported public signal changed since the previous pass.
+        </p>
+      ) : (
+        <ul className="stack-list">
+          {workspace.changes.map((change: OsintChange) => {
+            const target = safeExternalUrl(change.targetUrl);
+            const source = safeExternalUrl(change.sourceUrl);
+            const before = change.before
+              ? displayEvidenceValue(change.before.value)
+              : null;
+            const after = change.after
+              ? displayEvidenceValue(change.after.value)
+              : null;
+            return (
+              <li key={change.id}>
+                <div className="evidence-row-heading">
+                  <strong>{change.label}</strong>
+                  <StatusBadge status={change.change} />
+                </div>
+                <p>
+                  {change.change === "changed"
+                    ? String(before ?? "Unavailable") +
+                      " → " +
+                      String(after ?? "Unavailable")
+                    : change.change === "added"
+                      ? (after ?? "Available")
+                      : (before ?? "Unavailable")}
+                </p>
+                <small>
+                  {change.category} · target{" "}
+                  {target ? (
+                    <a href={target} target="_blank" rel="noreferrer">
+                      {change.targetUrl}
+                    </a>
+                  ) : (
+                    change.targetUrl
+                  )}{" "}
+                  · {change.evidenceIds.length} cited evidence item
+                  {change.evidenceIds.length === 1 ? "" : "s"} ·{" "}
+                  {Math.round(change.confidence * 100)}% confidence
+                  {source ? (
+                    <>
+                      {" "}
+                      ·{" "}
+                      <a href={source} target="_blank" rel="noreferrer">
+                        source
+                      </a>
+                    </>
+                  ) : null}
+                </small>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
 export function OsintResearchPage() {
   const { siteId } = useSite();
   const query = useOsintDossier(siteId);
   const start = useStartWorkflow();
   const [targets, setTargets] = useState("");
   const [inputError, setInputError] = useState<string | null>(null);
-  const dossier = query.data?.data;
+  const workspace = query.data?.data;
+  const dossier = workspace?.dossier ?? null;
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -337,6 +416,7 @@ export function OsintResearchPage() {
             <FreshnessNotice meta={query.data?.meta} />
             <Coverage dossier={dossier} />
             <Findings dossier={dossier} />
+            {workspace ? <ChangeHistory workspace={workspace} /> : null}
             <section>
               <SectionHeading
                 title="Target dossiers"

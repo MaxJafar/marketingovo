@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   competitorDashboardItems,
   keywordDashboardWorkspace,
+  osintDashboardWorkspace,
   parseResearchArtifact,
 } from "./research-dashboard.js";
 
@@ -94,5 +95,94 @@ describe("research dashboard projections", () => {
     expect(
       parseResearchArtifact(new Uint8Array(4 * 1024 * 1024 + 1)),
     ).toBeNull();
+  });
+
+  it("compares repeat OSINT passes without turning a failed crawl into removals", () => {
+    const evidence = (
+      id: string,
+      label: string,
+      value: unknown,
+      state = "available",
+    ) => ({
+      id,
+      kind: "public-channel",
+      label,
+      value,
+      state,
+      sourceUrl: "https://example.com/",
+      sourceClass: "public_web",
+      observedAt: "2026-08-03T12:00:00.000Z",
+      confidence: 1,
+    });
+    const baseline = {
+      generatedAt: "2026-08-02T12:00:00.000Z",
+      targets: [
+        {
+          targetUrl: "https://example.com/",
+          status: "available",
+          evidence: [
+            evidence("same", "Security page", "/security"),
+            evidence("removed", "Press page", "/press"),
+          ],
+        },
+        {
+          targetUrl: "https://blocked.example/",
+          status: "available",
+          evidence: [evidence("blocked", "Profile", "https://x.com/acme")],
+        },
+      ],
+    };
+    const current = {
+      generatedAt: "2026-08-03T12:00:00.000Z",
+      targets: [
+        {
+          targetUrl: "https://example.com/",
+          status: "available",
+          evidence: [
+            evidence("same", "Security page", "/security", "contradictory"),
+            evidence("added", "About page", "/about"),
+          ],
+        },
+        {
+          targetUrl: "https://blocked.example/",
+          status: "failed",
+          evidence: [
+            evidence("fetch", "Target fetch", "blocked", "insufficient"),
+          ],
+        },
+      ],
+    };
+
+    const workspace = osintDashboardWorkspace(current, baseline);
+    expect(workspace).toMatchObject({
+      compared: true,
+      previousGeneratedAt: "2026-08-02T12:00:00.000Z",
+    });
+    expect(workspace.changes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          targetUrl: "https://example.com/",
+          change: "changed",
+          label: "Security page",
+        }),
+        expect.objectContaining({
+          targetUrl: "https://example.com/",
+          change: "added",
+          label: "About page",
+        }),
+        expect.objectContaining({
+          targetUrl: "https://example.com/",
+          change: "removed",
+          label: "Press page",
+        }),
+      ]),
+    );
+    expect(
+      workspace.changes.some(
+        (item) =>
+          (item as { targetUrl?: string }).targetUrl ===
+          "https://blocked.example/",
+      ),
+    ).toBe(false);
   });
 });

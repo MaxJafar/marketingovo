@@ -94,6 +94,7 @@ const requiredOperations = [
   ["get", "/api/v1/runs/{id}/events"],
   ["get", "/api/v1/runs/{id}/issues"],
   ["get", "/api/v1/runs/{id}/report"],
+  ["get", "/api/v1/osint"],
   ["get", "/api/v1/actions"],
   ["patch", "/api/v1/actions/{id}"],
   ["get", "/api/v1/integrations"],

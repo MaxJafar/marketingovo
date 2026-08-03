@@ -424,4 +424,111 @@ describe("dashboard control panel API", () => {
       },
     });
   });
+
+  it("returns cited OSINT changes from the previous completed pass", async () => {
+    const { dataDir, runtime, server, project, headers } = await setup();
+    const dossier = (generatedAt: string, value: string) => ({
+      schemaVersion: "osint-dossier.v1",
+      workflow: "osint-research",
+      generatedAt,
+      sourceBudget: 1,
+      targets: [
+        {
+          targetUrl: "https://example.com/",
+          finalUrl: "https://example.com/",
+          host: "example.com",
+          status: "available",
+          pagesObserved: 1,
+          evidence: [
+            {
+              id: "signal",
+              kind: "public-channel",
+              label: "Security page",
+              value,
+              state: "available",
+              sourceUrl: "https://example.com/",
+              sourceClass: "public_web",
+              observedAt: generatedAt,
+              confidence: 1,
+            },
+          ],
+          entities: [],
+          relationships: [],
+          publishingCadence: null,
+          error: null,
+        },
+      ],
+      findings: [],
+      coverage: {
+        state: "available",
+        targetsRequested: 1,
+        targetsCompleted: 1,
+        pagesObserved: 1,
+        evidenceAvailable: 1,
+      },
+      policy: {
+        collection: "public_web_only",
+        personalData: "disabled",
+        identityResolution: "disabled",
+        authenticatedCollection: "disabled",
+        darkWebCollection: "disabled",
+      },
+      limitations: ["Public web only."],
+    });
+    const baseline = runtime.database.insertRun({
+      id: "osint-baseline",
+      projectId: project.id,
+      workflowId: "osint-research",
+    });
+    runtime.database.updateRun(baseline.id, {
+      status: "succeeded",
+      completedAt: "2026-08-02T12:00:00.000Z",
+      progress: 1,
+    });
+    saveResearchArtifact(
+      runtime,
+      dataDir,
+      baseline.id,
+      dossier("2026-08-02T12:00:00.000Z", "/security"),
+    );
+    const current = runtime.database.insertRun({
+      id: "osint-current",
+      projectId: project.id,
+      workflowId: "osint-research",
+    });
+    runtime.database.updateRun(current.id, {
+      status: "succeeded",
+      completedAt: "2026-08-03T12:00:00.000Z",
+      progress: 1,
+    });
+    saveResearchArtifact(
+      runtime,
+      dataDir,
+      current.id,
+      dossier("2026-08-03T12:00:00.000Z", "/security.txt"),
+    );
+
+    const response = await server.app.inject({
+      method: "GET",
+      url: `/api/v1/osint?siteId=${project.id}`,
+      headers,
+    });
+    expect(response.statusCode, response.body).toBe(200);
+    expect(response.json()).toMatchObject({
+      meta: { state: "fresh" },
+      data: {
+        compared: true,
+        previousGeneratedAt: "2026-08-02T12:00:00.000Z",
+        changes: [
+          {
+            targetUrl: "https://example.com/",
+            change: "changed",
+            label: "Security page",
+            before: { value: "/security" },
+            after: { value: "/security.txt" },
+          },
+        ],
+      },
+    });
+  });
 });

@@ -45,6 +45,8 @@ import {
   RunComparisonSchema,
   RunReplaySchema,
   RunSchema,
+  OsintDossierSchema,
+  OsintEvidenceSchema,
   ScheduleSchema,
   StartRunInputSchema,
   PreviewExtractionRulesInputSchema,
@@ -122,6 +124,7 @@ import {
   competitorDashboardItems,
   contentGapTerms,
   keywordDashboardWorkspace,
+  osintDashboardWorkspace,
   parseResearchArtifact,
 } from "./research-dashboard.js";
 
@@ -903,6 +906,41 @@ const DashboardCompetitorSchema = Type.Object(
       Type.String({ format: "date-time" }),
       Type.Null(),
     ]),
+  },
+  { additionalProperties: false },
+);
+
+const DashboardOsintChangeSchema = Type.Object(
+  {
+    id: Type.String({ minLength: 1, maxLength: 160 }),
+    targetUrl: Type.String({ minLength: 1, maxLength: 2048 }),
+    change: Type.Union([
+      Type.Literal("added"),
+      Type.Literal("removed"),
+      Type.Literal("changed"),
+    ]),
+    category: Type.String({ minLength: 1, maxLength: 120 }),
+    label: Type.String({ minLength: 1, maxLength: 240 }),
+    before: Type.Union([OsintEvidenceSchema, Type.Null()]),
+    after: Type.Union([OsintEvidenceSchema, Type.Null()]),
+    sourceUrl: Type.Union([Type.String({ format: "uri" }), Type.Null()]),
+    evidenceIds: Type.Array(Type.String({ minLength: 1, maxLength: 160 }), {
+      maxItems: 2,
+    }),
+    confidence: Type.Number({ minimum: 0, maximum: 1 }),
+  },
+  { additionalProperties: false },
+);
+
+const DashboardOsintWorkspaceSchema = Type.Object(
+  {
+    dossier: Type.Union([OsintDossierSchema, Type.Null()]),
+    previousGeneratedAt: Type.Union([
+      Type.String({ format: "date-time" }),
+      Type.Null(),
+    ]),
+    compared: Type.Boolean(),
+    changes: Type.Array(DashboardOsintChangeSchema, { maxItems: 100 }),
   },
   { additionalProperties: false },
 );
@@ -3858,6 +3896,72 @@ export async function createLocalServer(
         total: items.length,
         contentGapTerms: contentGapTerms(artifact),
       });
+    },
+  );
+  app.get(
+    "/api/v1/osint",
+    {
+      schema: {
+        querystring: Type.Object(
+          {
+            siteId: Type.Optional(
+              Type.String({ minLength: 1, maxLength: 160 }),
+            ),
+          },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: DashboardEnvelopeSchema(DashboardOsintWorkspaceSchema),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const empty = {
+        dossier: null,
+        previousGeneratedAt: null,
+        compared: false,
+        changes: [],
+      };
+      const siteId = (request.query as { siteId?: string }).siteId;
+      if (!siteId)
+        return envelope(empty, "unavailable", [
+          "Select a site to view public-web OSINT.",
+        ]);
+      const researchRuns = (await options.runtime.runs.list(siteId))
+        .filter(
+          (candidate) =>
+            candidate.workflowId === "osint-research" &&
+            ["succeeded", "partial"].includes(candidate.status),
+        )
+        .sort((left, right) => {
+          const leftAt = Date.parse(
+            left.completedAt ?? left.startedAt ?? left.requestedAt,
+          );
+          const rightAt = Date.parse(
+            right.completedAt ?? right.startedAt ?? right.requestedAt,
+          );
+          return rightAt - leftAt;
+        });
+      const latest = researchRuns[0];
+      if (!latest)
+        return envelope(empty, "missing", [
+          "Run a public-web OSINT pass to populate this workspace.",
+        ]);
+      const artifact = parseResearchArtifact(
+        await options.runtime.reports.get(latest.id, "json"),
+      );
+      if (!artifact)
+        return envelope(empty, "unavailable", [
+          "The latest OSINT dossier could not be read.",
+        ]);
+      const previous = researchRuns[1];
+      const baseline = previous
+        ? (parseResearchArtifact(
+            await options.runtime.reports.get(previous.id, "json"),
+          ) ?? undefined)
+        : undefined;
+      return envelope(osintDashboardWorkspace(artifact, baseline));
     },
   );
   app.get("/api/v1/monitoring", async (request) => {

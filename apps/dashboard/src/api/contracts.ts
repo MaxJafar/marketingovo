@@ -458,6 +458,26 @@ export interface OsintDossier {
   limitations: string[];
 }
 
+export interface OsintChange {
+  id: string;
+  targetUrl: string;
+  change: "added" | "removed" | "changed";
+  category: string;
+  label: string;
+  before: OsintEvidence | null;
+  after: OsintEvidence | null;
+  sourceUrl: string | null;
+  evidenceIds: string[];
+  confidence: number;
+}
+
+export interface OsintWorkspace {
+  dossier: OsintDossier | null;
+  previousGeneratedAt: string | null;
+  compared: boolean;
+  changes: OsintChange[];
+}
+
 export interface RunReplay {
   sourceRunId: string;
   configurationVersion: 1;

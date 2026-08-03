@@ -43,7 +43,8 @@ The REST API, OpenAPI document, SDK, ten-tool agent contract registry, CLI and `
   with assumption disclosure, explicit draft review, fresh IDs, and conflict
   and capacity safeguards;
 - bounded public-web OSINT dossiers with exact source links, evidence states,
-  target graphs, and explicit privacy/collection limits;
+  target graphs, repeat-pass change history, and explicit privacy/collection
+  limits;
 - CLI and typed REST SDK;
 - versioned `/api/v1`, OpenAPI, asynchronous runs, SSE events, and problem details;
 - ten workflow-level agent tools and read-only resources, plus a separate five-tool terminal session registry;

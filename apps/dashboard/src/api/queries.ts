@@ -28,7 +28,7 @@ import type {
   ListResponse,
   MonitoringWorkspace,
   Overview,
-  OsintDossier,
+  OsintWorkspace,
   PageRecord,
   ProjectContextJournalEntry,
   ProjectContextProfile,
@@ -261,7 +261,7 @@ function isTerminalResearchRun(run: AuditRun): boolean {
   return ["succeeded", "completed", "partial"].includes(run.status);
 }
 
-/** Load the latest persisted public-web OSINT dossier for a project. */
+/** Load the latest persisted public-web OSINT dossier and pass history. */
 export function useOsintDossier(siteId: string) {
   const runs = useRuns(siteId);
   const researchRuns = (runs.data?.data.items ?? [])
@@ -277,11 +277,8 @@ export function useOsintDossier(siteId: string) {
   const query = useQuery({
     queryKey: queryKeys.osint(siteId, latestTerminalRun?.id),
     queryFn: ({ signal }) =>
-      apiRequest<OsintDossier>(
-        `/runs/${encodeURIComponent(latestTerminalRun!.id)}/report?format=json`,
-        { signal },
-      ),
-    enabled: Boolean(siteId && latestTerminalRun?.id),
+      apiRequest<OsintWorkspace>(withQuery("/osint", { siteId }), { signal }),
+    enabled: Boolean(siteId),
   });
 
   return { ...query, latestRun };

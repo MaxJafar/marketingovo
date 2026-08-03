@@ -108,9 +108,11 @@ Context, an append-only marketer journal, secret-safe portable history, and a
 read-only agent context resource.
 The first public-web OSINT layer is now available as the bounded
 `osint-research` workflow, dashboard `/osint` page, and agent start tool. It
-keeps exact source links and missing/insufficient states visible; it does not
-enable people-search, authenticated scraping, identity resolution, or dark-web
-collection. See [the OSINT layer contract](osint-layer.md).
+keeps exact source links and missing/insufficient states visible, and repeat
+passes expose cited added/removed/changed signals without treating a blocked
+target as a disappearance. It does not enable people-search, authenticated
+scraping, identity resolution, or dark-web collection. See [the OSINT layer
+contract](osint-layer.md).
 Audit details now include a versioned, paginated evidence workbench for crawl
 paths, redirect chains, reciprocal hreflang, sitemap coverage, and bounded
 custom extraction results. A corrected reciprocity model and sitemap-index

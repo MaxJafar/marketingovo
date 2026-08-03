@@ -21,7 +21,8 @@ first and verify the result after the next audit.
 > supplied public HTTPS targets from the dashboard (`/osint`), CLI, REST API,
 > MCP, or OpenClaw. Marketingovo returns cited source links, availability states,
 > publication signals, public profile links, business-page discovery, and an
-> exact-match evidence graph. It is deliberately not a people-search,
+> exact-match evidence graph, then compares repeat passes for added, removed,
+> and changed public signals. It is deliberately not a people-search,
 > authenticated-scraping, contact-enrichment, breach, or dark-web tool. See the
 > [OSINT layer guide](docs/osint-layer.md).
 
@@ -58,7 +59,8 @@ first and verify the result after the next audit.
   and DataForSEO use one normalized model.
 - **Public-web OSINT research.** Run a bounded, cited dossier on your own site
   and explicitly supplied public targets, with source states, publishing cadence,
-  public social/profile links, business paths, and an exact-match graph.
+  public social/profile links, business paths, an exact-match graph, and cited
+  repeat-pass changes.
 - **Audit evidence workbench.** Paginated crawl paths, redirect chains,
   reciprocal hreflang, sitemap coverage, and bounded custom extractions expose
   the exact source state behind a finding instead of collapsing missing data to

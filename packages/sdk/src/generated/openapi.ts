@@ -6542,6 +6542,299 @@ export type paths = {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/osint": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: {
+          siteId?: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": {
+              data: {
+                changes: {
+                  after: {
+                    confidence: number;
+                    id: string;
+                    kind: string;
+                    label: string;
+                    /** Format: date-time */
+                    observedAt: string;
+                    sourceClass:
+                      | "public_web"
+                      | "first_party"
+                      | "licensed_provider"
+                      | "user_import";
+                    sourceUrl: string | null;
+                    state:
+                      | "available"
+                      | "missing"
+                      | "insufficient"
+                      | "contradictory";
+                    value: unknown;
+                  } | null;
+                  before: {
+                    confidence: number;
+                    id: string;
+                    kind: string;
+                    label: string;
+                    /** Format: date-time */
+                    observedAt: string;
+                    sourceClass:
+                      | "public_web"
+                      | "first_party"
+                      | "licensed_provider"
+                      | "user_import";
+                    sourceUrl: string | null;
+                    state:
+                      | "available"
+                      | "missing"
+                      | "insufficient"
+                      | "contradictory";
+                    value: unknown;
+                  } | null;
+                  category: string;
+                  change: "added" | "removed" | "changed";
+                  confidence: number;
+                  evidenceIds: string[];
+                  id: string;
+                  label: string;
+                  sourceUrl: string | null;
+                  targetUrl: string;
+                }[];
+                compared: boolean;
+                dossier: {
+                  coverage: {
+                    evidenceAvailable: number;
+                    pagesObserved: number;
+                    state:
+                      | "available"
+                      | "missing"
+                      | "insufficient"
+                      | "contradictory";
+                    targetsCompleted: number;
+                    targetsRequested: number;
+                  };
+                  findings: {
+                    actionable: boolean;
+                    confidence: number;
+                    evidenceIds: string[];
+                    id: string;
+                    severity: "info" | "low" | "medium";
+                    statement: string;
+                    title: string;
+                  }[];
+                  /** Format: date-time */
+                  generatedAt: string;
+                  limitations: string[];
+                  policy: {
+                    /** @enum {string} */
+                    authenticatedCollection: "disabled";
+                    /** @enum {string} */
+                    collection: "public_web_only";
+                    /** @enum {string} */
+                    darkWebCollection: "disabled";
+                    /** @enum {string} */
+                    identityResolution: "disabled";
+                    /** @enum {string} */
+                    personalData: "disabled";
+                  };
+                  /** @enum {string} */
+                  schemaVersion: "osint-dossier.v1";
+                  sourceBudget: number;
+                  targets: {
+                    entities: {
+                      exactMatch: boolean;
+                      id: string;
+                      label: string;
+                      type:
+                        "organization" | "domain" | "page" | "profile" | "feed";
+                      url: string | null;
+                    }[];
+                    error: string | null;
+                    evidence: {
+                      confidence: number;
+                      id: string;
+                      kind: string;
+                      label: string;
+                      /** Format: date-time */
+                      observedAt: string;
+                      sourceClass:
+                        | "public_web"
+                        | "first_party"
+                        | "licensed_provider"
+                        | "user_import";
+                      sourceUrl: string | null;
+                      state:
+                        | "available"
+                        | "missing"
+                        | "insufficient"
+                        | "contradictory";
+                      value: unknown;
+                    }[];
+                    finalUrl: string | null;
+                    host: string | null;
+                    pagesObserved: number;
+                    publishingCadence: {
+                      cadence: {
+                        cadenceDays: number | null;
+                        datedItems: number;
+                        /** Format: uri */
+                        feedUrl: string;
+                        freshnessSeconds: number | null;
+                        intervals: number | null;
+                        itemsInFeed: number;
+                        newestPublishedAt: string | null;
+                        oldestPublishedAt: string | null;
+                        spanDays: number | null;
+                      } | null;
+                      detail?: string;
+                      /** Format: uri */
+                      target: string;
+                      unavailable:
+                        | "no-feed-discovered"
+                        | "blocked-by-robots"
+                        | "unsafe-url"
+                        | "fetch-failed"
+                        | "unparseable"
+                        | null;
+                    } | null;
+                    relationships: {
+                      evidenceIds: string[];
+                      fromEntityId: string;
+                      id: string;
+                      toEntityId: string;
+                      type: "owns" | "links_to" | "same_as" | "publishes_via";
+                    }[];
+                    status: "available" | "partial" | "failed";
+                    targetUrl: string;
+                  }[];
+                  /** @enum {string} */
+                  workflow: "osint-research";
+                } | null;
+                previousGeneratedAt: string | null;
+              };
+              meta: {
+                /** Format: date-time */
+                generatedAt: string;
+                state:
+                  "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                warnings: string[];
+              };
+            };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/overview": {
     parameters: {
       query?: never;

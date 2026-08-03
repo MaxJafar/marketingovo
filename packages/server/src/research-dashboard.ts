@@ -381,6 +381,170 @@ export function parseResearchArtifact(bytes: Uint8Array | null): unknown {
   }
 }
 
+const MAX_OSINT_CHANGES = 100;
+
+function osintTargets(value: unknown): UnknownRecord[] {
+  const targets = record(value)?.targets;
+  return Array.isArray(targets)
+    ? targets.flatMap((item) => {
+        const target = record(item);
+        return target ? [target] : [];
+      })
+    : [];
+}
+
+function osintEvidence(target: UnknownRecord): UnknownRecord[] {
+  const evidence = target.evidence;
+  return Array.isArray(evidence)
+    ? evidence.flatMap((item) => {
+        const entry = record(item);
+        return entry && text(entry.id) ? [entry] : [];
+      })
+    : [];
+}
+
+function osintEvidenceFingerprint(item: UnknownRecord): string {
+  return JSON.stringify({
+    kind: item.kind,
+    label: item.label,
+    value: item.value,
+    state: item.state,
+    sourceUrl: item.sourceUrl,
+    confidence: item.confidence,
+  });
+}
+
+function osintChange(
+  targetUrl: string,
+  change: "added" | "removed" | "changed",
+  before: UnknownRecord | null,
+  after: UnknownRecord | null,
+): UnknownRecord {
+  const category = text(after?.kind) ?? text(before?.kind) ?? "evidence";
+  const label = text(after?.label) ?? text(before?.label) ?? category;
+  const beforeId = text(before?.id);
+  const afterId = text(after?.id);
+  const evidenceIds = [beforeId, afterId].filter((value): value is string =>
+    Boolean(value),
+  );
+  const confidence =
+    change === "changed"
+      ? Math.min(
+          finite(before?.confidence) ?? 0,
+          finite(after?.confidence) ?? 0,
+        )
+      : (finite(after?.confidence) ?? finite(before?.confidence) ?? 0);
+  return {
+    id: stableId(
+      "osint-change",
+      `${targetUrl}|${change}|${category}|${beforeId ?? ""}|${afterId ?? ""}`,
+    ),
+    targetUrl,
+    change,
+    category,
+    label,
+    before,
+    after,
+    sourceUrl: text(after?.sourceUrl) ?? text(before?.sourceUrl),
+    evidenceIds,
+    confidence: Math.max(0, Math.min(1, confidence)),
+  };
+}
+
+/**
+ * Compare two public-web OSINT snapshots without inferring ownership or
+ * treating an unavailable crawl as evidence that a signal disappeared.
+ *
+ * Evidence IDs are stable for the same target/kind/label/value, so a changed
+ * state or source can be reported separately from an added or removed signal.
+ * Failed and zero-page partial targets are skipped entirely: a blocked second
+ * pass must not turn every previously observed profile or feed into a false
+ * removal.
+ */
+export function osintDashboardWorkspace(
+  value: unknown,
+  baseline?: unknown,
+): {
+  dossier: UnknownRecord | null;
+  previousGeneratedAt: string | null;
+  compared: boolean;
+  changes: UnknownRecord[];
+} {
+  const dossier = record(value);
+  const previous = record(baseline);
+  const previousGeneratedAt = text(previous?.generatedAt);
+  if (!dossier || !previous) {
+    return {
+      dossier,
+      previousGeneratedAt,
+      compared: false,
+      changes: [],
+    };
+  }
+
+  const currentByTarget = new Map<string, UnknownRecord>();
+  const previousByTarget = new Map<string, UnknownRecord>();
+  for (const target of osintTargets(dossier)) {
+    const url = text(target.targetUrl);
+    if (url) currentByTarget.set(url, target);
+  }
+  for (const target of osintTargets(previous)) {
+    const url = text(target.targetUrl);
+    if (url) previousByTarget.set(url, target);
+  }
+
+  const changes: UnknownRecord[] = [];
+  const targetUrls = [
+    ...new Set([...currentByTarget.keys(), ...previousByTarget.keys()]),
+  ].sort();
+  for (const targetUrl of targetUrls) {
+    if (changes.length >= MAX_OSINT_CHANGES) break;
+    const current = currentByTarget.get(targetUrl);
+    const prior = previousByTarget.get(targetUrl);
+    const currentUnavailable =
+      current?.status === "failed" ||
+      (current?.status === "partial" &&
+        (finite(current.pagesObserved) ?? 0) === 0);
+    const priorUnavailable =
+      prior?.status === "failed" ||
+      (prior?.status === "partial" && (finite(prior.pagesObserved) ?? 0) === 0);
+    if (!current || !prior || currentUnavailable || priorUnavailable) {
+      continue;
+    }
+    const currentEvidence = new Map(
+      osintEvidence(current).map((item) => [text(item.id)!, item]),
+    );
+    const previousEvidence = new Map(
+      osintEvidence(prior).map((item) => [text(item.id)!, item]),
+    );
+    const evidenceIds = [
+      ...new Set([...currentEvidence.keys(), ...previousEvidence.keys()]),
+    ].sort();
+    for (const evidenceId of evidenceIds) {
+      if (changes.length >= MAX_OSINT_CHANGES) break;
+      const after = currentEvidence.get(evidenceId) ?? null;
+      const before = previousEvidence.get(evidenceId) ?? null;
+      if (before && after) {
+        if (
+          osintEvidenceFingerprint(before) === osintEvidenceFingerprint(after)
+        )
+          continue;
+        changes.push(osintChange(targetUrl, "changed", before, after));
+      } else if (after) {
+        changes.push(osintChange(targetUrl, "added", null, after));
+      } else if (before) {
+        changes.push(osintChange(targetUrl, "removed", before, null));
+      }
+    }
+  }
+  return {
+    dossier,
+    previousGeneratedAt,
+    compared: true,
+    changes,
+  };
+}
+
 /**
  * The topics references cover that the target does not.
  *
