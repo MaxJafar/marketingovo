@@ -1,9 +1,12 @@
 {
   "name": "@marketingovo/core",
   "version": "1.1.0",
-  "private": true,
+  "private": false,
   "description": "Crawler, checks, rule engine and reporting primitives for Marketingovo",
   "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -35,8 +38,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "tsc -p tsconfig.json --noEmit",
-    "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
+    "lint": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@marketingovo/integrations": "workspace:*",

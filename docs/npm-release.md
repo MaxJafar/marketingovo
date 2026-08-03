@@ -1,10 +1,23 @@
 # npm release and provenance
 
 The npm route is a verified release surface, not a best-effort workspace
-publish. The canonical tag workflow publishes 13 packages because
+publish. The public package graph is enabled and the canonical tag workflow
+publishes 13 packages because
 the CLI depends on the same public contracts, engine, runtime, storage,
 integrations, server, SDK, MCP, and adapter packages used by the other product
 surfaces.
+
+## Install after publication
+
+Once the GitHub release contains `npm-publication.json` and the matching npm
+provenance record, install the local service with:
+
+```bash
+npx marketingovo serve
+```
+
+The current source version is not itself evidence that `marketingovo@1.1.0`
+has reached the registry; release evidence is the authority.
 
 ## Release invariants
 

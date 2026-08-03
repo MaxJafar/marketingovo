@@ -32,10 +32,10 @@ first and verify the result after the next audit.
 > [`release/acceptance/1.1.0.json`](release/acceptance/1.1.0.json), including
 > the two named human attestations.
 >
-> Install from source or as an agent plugin. Signed desktop installers, the
-> updater channel, and npm registry publication are **not** part of this release
-> — they need a code-signing identity and a registry account that do not exist
-> yet, and are declared as deferred channels rather than left to be inferred.
+> Install from source today. The public npm distribution graph is now prepared
+> and verified; after a canonical tag publishes it, the shortest install will be
+> `npx marketingovo serve`. Signed desktop installers and the updater channel
+> remain deferred until their signing identities and lifecycle evidence exist.
 > See [release status](docs/release-status.md) for exactly what was verified.
 
 ## Why Marketingovo
@@ -110,12 +110,15 @@ Add site → establish context → connect data → choose goal → run audit
          → review evidence → act → verify
 ```
 
-**Building from source is currently the only install route.** The release
-tooling supports publishing an `npx @marketingovo/cli serve` path, but nothing
-has been published to npm yet — npm registry publication is a declared deferred
-channel. When it ships, use only a GitHub release that includes
-`npm-publication.json`, matching tarball integrity, and npm provenance; the
-source version alone is never evidence that the same version was published.
+**The npm route is prepared but not yet published for 1.1.0.** Once a GitHub
+release includes `npm-publication.json`, matching tarball integrity, and npm
+provenance, the install command is:
+
+```bash
+npx marketingovo serve
+```
+
+The source version alone is never evidence that the same version was published.
 
 See [the ten-minute quickstart](docs/quickstart.md) and
 [current release status](docs/release-status.md) before running this against

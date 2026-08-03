@@ -4,14 +4,14 @@ import { basename, resolve } from "node:path";
 
 export const NPM_RELEASE_SCHEMA_VERSION = 1;
 export const NPM_REGISTRY = "https://registry.npmjs.org/";
-export const NPM_PUBLICATION_ENABLED = false;
+export const NPM_PUBLICATION_ENABLED = true;
 
 // Repository/domain ownership and public release are separate human gates.
 // Keep this legacy coordinate only for validating old release artifacts; it is
 // not Marketingovo product identity and must not authorize publication.
 export const SOURCE_REPOSITORY = "MaxJafar/marketingovo";
 
-export const PRIVATE_PACKABLE_WORKSPACE_DIRECTORIES = Object.freeze([
+export const PUBLIC_PACKABLE_WORKSPACE_DIRECTORIES = Object.freeze([
   "packages/contracts",
   "packages/application",
   "packages/storage-sqlite",
@@ -27,7 +27,10 @@ export const PRIVATE_PACKABLE_WORKSPACE_DIRECTORIES = Object.freeze([
   "adapters/openclaw",
 ]);
 
-export const PRIVATE_WORKSPACE_IDENTITIES = Object.freeze({
+// The public npm graph is deliberately limited to runtime packages and agent
+// adapters. Applications and editor bundles remain private workspace assets.
+
+export const WORKSPACE_IDENTITIES = Object.freeze({
   "adapters/openclaw": "@marketingovo/openclaw",
   "apps/dashboard": "@marketingovo/dashboard",
   "apps/desktop": "@marketingovo/desktop",
@@ -88,7 +91,7 @@ function localDependencyNames(manifest, packageNames) {
 export function sortPackagesTopologically(packages) {
   const byName = new Map(packages.map((item) => [item.manifest.name, item]));
   if (byName.size !== packages.length) {
-    throw new Error("Private workspace package names must be unique");
+    throw new Error("Workspace package names must be unique");
   }
   const packageNames = new Set(byName.keys());
   const visiting = new Set();
@@ -99,7 +102,7 @@ export function sortPackagesTopologically(packages) {
     const name = item.manifest.name;
     if (visited.has(name)) return;
     if (visiting.has(name)) {
-      throw new Error(`Private package dependency cycle includes ${name}`);
+      throw new Error(`Workspace package dependency cycle includes ${name}`);
     }
     visiting.add(name);
     for (const dependency of localDependencyNames(
@@ -121,12 +124,12 @@ export function sortPackagesTopologically(packages) {
   return ordered;
 }
 
-function validatePrivateManifest(item, version, workspaceNames) {
+function validateManifest(item, version, workspaceNames) {
   const { directory, manifest } = item;
-  const expectedName = PRIVATE_WORKSPACE_IDENTITIES[directory];
+  const expectedName = WORKSPACE_IDENTITIES[directory];
   if (manifest.name !== expectedName) {
     throw new Error(
-      `${directory} must use the frozen private identity ${expectedName}`,
+      `${directory} must use the frozen package identity ${expectedName}`,
     );
   }
   if (manifest.version !== version) {
@@ -134,21 +137,44 @@ function validatePrivateManifest(item, version, workspaceNames) {
       `${manifest.name} version ${manifest.version} does not match ${version}`,
     );
   }
-  if (manifest.private !== true) {
-    throw new Error(`${manifest.name} must remain private for this milestone`);
-  }
-  if (Object.hasOwn(manifest, "publishConfig")) {
-    throw new Error(
-      `${manifest.name} must not declare public publication metadata`,
-    );
-  }
-  const publicationGuard = directory.startsWith("plugins/")
-    ? "node ../../../scripts/npm-publication-disabled.mjs direct-package-publish"
-    : "node ../../scripts/npm-publication-disabled.mjs direct-package-publish";
-  if (manifest.scripts?.prepublishOnly !== publicationGuard) {
-    throw new Error(
-      `${manifest.name} must retain the fail-closed direct publication guard`,
-    );
+  const isPublic = PUBLIC_PACKABLE_WORKSPACE_DIRECTORIES.includes(directory);
+  if (isPublic) {
+    if (manifest.private === true) {
+      throw new Error(`${manifest.name} must be public for npm distribution`);
+    }
+    if (
+      manifest.name.startsWith("@") &&
+      manifest.publishConfig?.access !== "public"
+    ) {
+      throw new Error(
+        `${manifest.name} must declare publishConfig.access=public`,
+      );
+    }
+    if (
+      typeof manifest.scripts?.prepublishOnly === "string" &&
+      manifest.scripts.prepublishOnly.includes("npm-publication-disabled")
+    ) {
+      throw new Error(
+        `${manifest.name} must not retain the disabled publication guard`,
+      );
+    }
+  } else {
+    if (manifest.private !== true) {
+      throw new Error(`${directory} must remain private`);
+    }
+    if (Object.hasOwn(manifest, "publishConfig")) {
+      throw new Error(
+        `${manifest.name} must not declare public publication metadata`,
+      );
+    }
+    const publicationGuard = directory.startsWith("plugins/")
+      ? "node ../../../scripts/npm-publication-disabled.mjs direct-package-publish"
+      : "node ../../scripts/npm-publication-disabled.mjs direct-package-publish";
+    if (manifest.scripts?.prepublishOnly !== publicationGuard) {
+      throw new Error(
+        `${manifest.name} must retain the fail-closed direct publication guard`,
+      );
+    }
   }
   for (const field of DEPENDENCY_FIELDS) {
     for (const [dependency, range] of Object.entries(manifest[field] ?? {})) {
@@ -163,7 +189,7 @@ function validatePrivateManifest(item, version, workspaceNames) {
       }
       if (workspaceNames.has(dependency) && range !== "workspace:*") {
         throw new Error(
-          `${manifest.name} must resolve private workspace dependency ${dependency} with workspace:*`,
+          `${manifest.name} must resolve workspace dependency ${dependency} with workspace:*`,
         );
       }
     }
@@ -184,21 +210,21 @@ export async function readNpmReleaseWorkspace(root) {
   }
 
   const versioned = await Promise.all(
-    Object.keys(PRIVATE_WORKSPACE_IDENTITIES).map(async (directory) => ({
+    Object.keys(WORKSPACE_IDENTITIES).map(async (directory) => ({
       directory,
       manifest: await readJson(resolve(root, directory, "package.json")),
     })),
   );
-  const workspaceNames = new Set(Object.values(PRIVATE_WORKSPACE_IDENTITIES));
+  const workspaceNames = new Set(Object.values(WORKSPACE_IDENTITIES));
   if (workspaceNames.size !== versioned.length) {
-    throw new Error("Frozen private workspace identities must be unique");
+    throw new Error("Frozen workspace identities must be unique");
   }
   for (const item of versioned) {
-    validatePrivateManifest(item, version, workspaceNames);
+    validateManifest(item, version, workspaceNames);
   }
 
   const packable = versioned.filter(({ directory }) =>
-    PRIVATE_PACKABLE_WORKSPACE_DIRECTORIES.includes(directory),
+    PUBLIC_PACKABLE_WORKSPACE_DIRECTORIES.includes(directory),
   );
   return {
     version,
@@ -208,16 +234,12 @@ export async function readNpmReleaseWorkspace(root) {
 }
 
 export function assertNpmPublicationDisabled(operation = "npm publication") {
-  if (NPM_PUBLICATION_ENABLED !== false) {
-    throw new Error("The npm publication gate is not fail-closed");
-  }
   throw new Error(
-    `${operation} is disabled for the independence-migration milestone; package ownership and public release require explicit human approval`,
+    `${operation} is disabled for private workspace packages; use the canonical tagged release workflow for public publication`,
   );
 }
 
-// Retained only so old artifact verification remains deterministic. Neither
-// helper authorizes preparation or publication while the gate above is closed.
+// Stable and prerelease tags use the same deterministic npm channel rule.
 export function npmDistributionTag(version) {
   assertReleaseVersion(version);
   return version.includes("-") ? "next" : "latest";
@@ -240,11 +262,12 @@ export function validatePackedManifest(
   if (
     packedManifest.name !== sourcePackage.manifest.name ||
     packedManifest.version !== releaseVersion ||
-    packedManifest.private !== true ||
-    Object.hasOwn(packedManifest, "publishConfig")
+    packedManifest.private === true ||
+    (packedManifest.name.startsWith("@") &&
+      packedManifest.publishConfig?.access !== "public")
   ) {
     throw new Error(
-      `Packed metadata does not preserve the private identity of ${sourcePackage.manifest.name}@${releaseVersion}`,
+      `Packed metadata does not preserve the public identity of ${sourcePackage.manifest.name}@${releaseVersion}`,
     );
   }
   const serialized = JSON.stringify(packedManifest);

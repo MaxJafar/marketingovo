@@ -107,39 +107,61 @@ try {
         dependencies: Object.fromEntries(
           tarballs.map(({ name, path }) => [name, `file:${path}`]),
         ),
-        pnpm: {
-          overrides: Object.fromEntries(
-            tarballs.map(({ name, path }) => [name, `file:${path}`]),
-          ),
-        },
+        overrides: Object.fromEntries(
+          tarballs.map(({ name, path }) => [name, `file:${path}`]),
+        ),
       },
       null,
       2,
     )}\n`,
+  );
+  // pnpm 11 no longer reads the legacy package.json `pnpm.overrides` field.
+  // Keep the consumer isolated, but override every transitive public package
+  // from the tarballs just produced so this is a real registry-free install.
+  await writeFile(
+    resolve(consumer, "pnpm-workspace.yaml"),
+    `overrides:\n${tarballs
+      .map(
+        ({ name, path }) =>
+          `  ${JSON.stringify(name)}: ${JSON.stringify(`file:${path}`)}`,
+      )
+      .join("\n")}\n`,
   );
   const installTarballs =
     process.env.CI === "true" ||
     process.env.MARKETINGOVO_NPM_INSTALL_SMOKE === "1" ||
     process.env.MARKETINGOVO_NPM_INSTALL_SMOKE === "1";
   if (installTarballs) {
-    const installed = spawnSync(
-      "pnpm",
-      [
-        "install",
-        "--prefer-offline",
-        "--ignore-scripts",
-        "--no-frozen-lockfile",
-      ],
-      { cwd: consumer, encoding: "utf8", shell: false },
-    );
+    const installer =
+      process.env.MARKETINGOVO_NPM_INSTALL_SMOKE === "1" ? "npm" : "pnpm";
+    const installArgs =
+      installer === "npm"
+        ? [
+            "install",
+            "--ignore-scripts",
+            "--no-package-lock",
+            "--no-audit",
+            "--no-fund",
+          ]
+        : [
+            "install",
+            "--prefer-offline",
+            "--ignore-scripts",
+            "--no-frozen-lockfile",
+          ];
+    const installed = spawnSync(installer, installArgs, {
+      cwd: consumer,
+      encoding: "utf8",
+      shell: false,
+    });
     assert.equal(
       installed.status,
       0,
       `clean tarball installation failed:\n${installed.stdout}\n${installed.stderr}`,
     );
     const installedCli = spawnSync(
-      process.execPath,
-      [resolve(consumer, "node_modules/marketingovo/dist/cli.js"), "--version"],
+      "npx",
+      ["--no-install", "marketingovo", "--version"],
       { cwd: consumer, encoding: "utf8", shell: false },
     );
     assert.equal(
@@ -150,7 +172,7 @@ try {
     assert.equal(installedCli.stdout.trim(), workspace.version);
   }
   process.stdout.write(
-    `${installTarballs ? "Packed, installed and executed" : "Packed and inspected"} ${workspace.packages.length} private artifacts.\n`,
+    `${installTarballs ? "Packed, installed and executed" : "Packed and inspected"} ${workspace.packages.length} public artifacts.\n`,
   );
 } finally {
   await Promise.all(

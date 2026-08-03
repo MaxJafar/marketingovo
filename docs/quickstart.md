@@ -17,7 +17,7 @@ pnpm marketingovo serve
 For a release whose attached npm publication record is verified:
 
 ```bash
-npx @marketingovo/cli serve
+npx marketingovo serve
 ```
 
 Prerelease source code does not imply that the same version already exists on

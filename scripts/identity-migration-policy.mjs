@@ -3,7 +3,10 @@ import { createHash } from "node:crypto";
 import { readFile, stat, writeFile } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { PRIVATE_WORKSPACE_IDENTITIES } from "./npm-release-policy.mjs";
+import {
+  WORKSPACE_IDENTITIES,
+  PUBLIC_PACKABLE_WORKSPACE_DIRECTORIES,
+} from "./npm-release-policy.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const IDENTITY_BASELINE_PATH = "scripts/identity-migration-baseline.json";
@@ -575,7 +578,7 @@ export function validateTextSource(path, source, baseline = null) {
 async function validatePackageManifests(repositoryRoot) {
   const violations = [];
   for (const [directory, expectedName] of Object.entries(
-    PRIVATE_WORKSPACE_IDENTITIES,
+    WORKSPACE_IDENTITIES,
   )) {
     const path = `${directory}/package.json`;
     const manifest = JSON.parse(
@@ -589,24 +592,43 @@ async function validatePackageManifests(repositoryRoot) {
         match: `${String(manifest.name)} != ${expectedName}`,
       });
     }
-    if (manifest.private !== true || Object.hasOwn(manifest, "publishConfig")) {
-      violations.push({
-        rule: "public-publish-metadata",
-        path,
-        line: 1,
-        match: "manifest must be private and omit publishConfig",
-      });
-    }
-    const publicationGuard = directory.startsWith("plugins/")
-      ? "node ../../../scripts/npm-publication-disabled.mjs direct-package-publish"
-      : "node ../../scripts/npm-publication-disabled.mjs direct-package-publish";
-    if (manifest.scripts?.prepublishOnly !== publicationGuard) {
-      violations.push({
-        rule: "public-publish-metadata",
-        path,
-        line: 1,
-        match: "manifest is missing the fail-closed direct publish guard",
-      });
+    const isPublic = PUBLIC_PACKABLE_WORKSPACE_DIRECTORIES.includes(directory);
+    if (isPublic) {
+      if (
+        manifest.private === true ||
+        (manifest.name.startsWith("@") &&
+          manifest.publishConfig?.access !== "public")
+      ) {
+        violations.push({
+          rule: "public-publish-metadata",
+          path,
+          line: 1,
+          match: "public package must expose public npm access metadata",
+        });
+      }
+    } else {
+      if (
+        manifest.private !== true ||
+        Object.hasOwn(manifest, "publishConfig")
+      ) {
+        violations.push({
+          rule: "public-publish-metadata",
+          path,
+          line: 1,
+          match: "manifest must be private and omit publishConfig",
+        });
+      }
+      const publicationGuard = directory.startsWith("plugins/")
+        ? "node ../../../scripts/npm-publication-disabled.mjs direct-package-publish"
+        : "node ../../scripts/npm-publication-disabled.mjs direct-package-publish";
+      if (manifest.scripts?.prepublishOnly !== publicationGuard) {
+        violations.push({
+          rule: "public-publish-metadata",
+          path,
+          line: 1,
+          match: "manifest is missing the fail-closed direct publish guard",
+        });
+      }
     }
   }
   return violations;
@@ -658,7 +680,7 @@ async function validateCanonicalIdentity(repositoryRoot) {
   // removed rather than carried as a deprecated alias.
   if (
     cliManifest.name !== "marketingovo" ||
-    cliManifest.private !== true ||
+    cliManifest.private === true ||
     cliManifest.bin?.marketingovo !== "./dist/cli.js" ||
     Object.keys(cliManifest.bin ?? {}).length !== 1
   ) {
@@ -667,7 +689,7 @@ async function validateCanonicalIdentity(repositoryRoot) {
       path: cliManifestPath,
       line: 1,
       match:
-        "expected private marketingovo package with exactly one canonical bin",
+        "expected public marketingovo package with exactly one canonical bin",
     });
   }
 

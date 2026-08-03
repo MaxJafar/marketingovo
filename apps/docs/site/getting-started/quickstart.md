@@ -23,11 +23,15 @@ pnpm build
 pnpm marketingovo serve
 ```
 
-The published-package route described by the project is:
+After the canonical npm release is published, the package route is:
 
 ```bash
-npx @marketingovo/cli serve
+npx marketingovo serve
 ```
+
+Until the release carries its `npm-publication.json` evidence, use the source
+install above; the repository version alone is not proof that the package is on
+npm.
 
 The daemon binds to `127.0.0.1:3210`. Keep it on loopback. The daemon prints a one-time dashboard URL; open that exact URL so the fragment token can be exchanged for the HttpOnly local session and removed from the address bar.
 

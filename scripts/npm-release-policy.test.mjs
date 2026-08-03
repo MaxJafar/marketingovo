@@ -5,7 +5,8 @@ import { resolve } from "node:path";
 import test from "node:test";
 import {
   NPM_PUBLICATION_ENABLED,
-  PRIVATE_WORKSPACE_IDENTITIES,
+  WORKSPACE_IDENTITIES,
+  PUBLIC_PACKABLE_WORKSPACE_DIRECTORIES,
   assertNpmPublicationDisabled,
   readNpmReleaseWorkspace,
   validatePackedManifest,
@@ -13,7 +14,7 @@ import {
 
 const root = resolve(import.meta.dirname, "..");
 
-test("the frozen workspace graph uses only private Marketingovo package identities", async () => {
+test("the frozen workspace graph separates public packages from private apps", async () => {
   const workspace = await readNpmReleaseWorkspace(root);
   assert.equal(workspace.packages.length, 13);
   // 17 after the never-published legacy Codex plugin workspace was removed.
@@ -25,24 +26,31 @@ test("the frozen workspace graph uses only private Marketingovo package identiti
   );
   assert.deepEqual(
     new Set(workspace.versioned.map(({ manifest }) => manifest.name)),
-    new Set(Object.values(PRIVATE_WORKSPACE_IDENTITIES)),
+    new Set(Object.values(WORKSPACE_IDENTITIES)),
   );
-  for (const { manifest } of workspace.versioned) {
-    assert.equal(manifest.private, true, `${manifest.name} must be private`);
-    assert.equal(
-      Object.hasOwn(manifest, "publishConfig"),
-      false,
-      `${manifest.name} must not contain publishConfig`,
-    );
-    assert.match(
-      manifest.scripts.prepublishOnly,
-      /npm-publication-disabled\.mjs direct-package-publish$/u,
-      `${manifest.name} must reject direct publication`,
-    );
+  for (const { directory, manifest } of workspace.versioned) {
+    if (PUBLIC_PACKABLE_WORKSPACE_DIRECTORIES.includes(directory)) {
+      assert.notEqual(
+        manifest.private,
+        true,
+        `${manifest.name} must be public`,
+      );
+      if (manifest.name.startsWith("@")) {
+        assert.equal(manifest.publishConfig?.access, "public");
+      }
+      assert.equal(manifest.scripts?.prepublishOnly, undefined);
+    } else {
+      assert.equal(manifest.private, true, `${manifest.name} must be private`);
+      assert.equal(Object.hasOwn(manifest, "publishConfig"), false);
+      assert.match(
+        manifest.scripts.prepublishOnly,
+        /npm-publication-disabled\.mjs direct-package-publish$/u,
+      );
+    }
   }
 });
 
-test("private packable packages remain topologically ordered", async () => {
+test("public packable packages remain topologically ordered", async () => {
   const workspace = await readNpmReleaseWorkspace(root);
   const positions = new Map(
     workspace.packages.map(({ manifest }, index) => [manifest.name, index]),
@@ -65,7 +73,7 @@ test("private packable packages remain topologically ordered", async () => {
   }
 });
 
-test("packed artifacts retain private metadata and deterministic local versions", async () => {
+test("packed artifacts retain public metadata and deterministic local versions", async () => {
   const workspace = await readNpmReleaseWorkspace(root);
   const sourcePackage = workspace.packages.find(
     ({ manifest }) => manifest.name === "@marketingovo/application",
@@ -83,7 +91,7 @@ test("packed artifacts retain private metadata and deterministic local versions"
       packageNames,
     ),
   );
-  packed.private = false;
+  packed.private = true;
   assert.throws(
     () =>
       validatePackedManifest(
@@ -92,36 +100,28 @@ test("packed artifacts retain private metadata and deterministic local versions"
         workspace.version,
         packageNames,
       ),
-    /private identity/u,
+    /public identity/u,
   );
 });
 
-test("the milestone publication gate is explicitly fail-closed", async () => {
-  assert.equal(NPM_PUBLICATION_ENABLED, false);
+test("the public publication gate is enabled only for the tagged workflow", async () => {
+  assert.equal(NPM_PUBLICATION_ENABLED, true);
   assert.throws(
-    () => assertNpmPublicationDisabled("test publication"),
-    /disabled for the independence-migration milestone/u,
+    () => assertNpmPublicationDisabled("private package publication"),
+    /private workspace packages/u,
   );
 
   const rootManifest = JSON.parse(
     await readFile(resolve(root, "package.json"), "utf8"),
   );
-  for (const command of ["npm:prepare-release", "npm:publish-release"]) {
-    assert.equal(
-      rootManifest.scripts[command],
-      `node scripts/npm-publication-disabled.mjs ${command}`,
-    );
-    const result = spawnSync("pnpm", [command], {
-      cwd: root,
-      encoding: "utf8",
-      shell: false,
-    });
-    assert.notEqual(result.status, 0, `${command} must fail`);
-    assert.match(
-      `${result.stdout}${result.stderr}`,
-      /disabled for the independence-migration milestone/u,
-    );
-  }
+  assert.equal(
+    rootManifest.scripts["npm:prepare-release"],
+    "node scripts/prepare-npm-release.mjs",
+  );
+  assert.equal(
+    rootManifest.scripts["npm:publish-release"],
+    "node scripts/publish-npm-release.mjs",
+  );
 });
 
 test("the legacy direct publisher also fails before registry access", () => {
@@ -131,25 +131,19 @@ test("the legacy direct publisher also fails before registry access", () => {
     { cwd: root, encoding: "utf8", shell: false },
   );
   assert.notEqual(result.status, 0);
-  assert.match(
-    `${result.stdout}${result.stderr}`,
-    /disabled for the independence-migration milestone/u,
-  );
+  assert.match(`${result.stdout}${result.stderr}`, /canonical tag workflow/u);
   assert.doesNotMatch(
     `${result.stdout}${result.stderr}`,
     /npm view|npm publish/u,
   );
 });
 
-test("a direct package publish attempt is stopped by the lifecycle guard", () => {
+test("the CLI package is publicly packable", () => {
   const result = spawnSync("npm", ["publish", "--dry-run", "--tag", "next"], {
     cwd: resolve(root, "packages/cli"),
     encoding: "utf8",
     shell: false,
   });
-  assert.notEqual(result.status, 0);
-  assert.match(
-    `${result.stdout}${result.stderr}`,
-    /disabled for the independence-migration milestone/u,
-  );
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+  assert.match(`${result.stdout}${result.stderr}`, /marketingovo@1\.1\.0/u);
 });

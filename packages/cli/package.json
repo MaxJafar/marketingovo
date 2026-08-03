@@ -3,6 +3,9 @@
   "version": "1.1.0",
   "description": "CLI and local service launcher for Marketingovo",
   "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
@@ -27,8 +30,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests",
-    "dev": "tsx src/cli.ts serve",
-    "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
+    "dev": "tsx src/cli.ts serve"
   },
   "dependencies": {
     "@marketingovo/contracts": "workspace:*",
@@ -49,5 +51,5 @@
   "engines": {
     "node": ">=24 <25"
   },
-  "private": true
+  "private": false
 }

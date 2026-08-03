@@ -3,6 +3,9 @@
   "version": "1.1.0",
   "description": "Authenticated loopback Fastify API for Marketingovo",
   "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
@@ -22,8 +25,7 @@
     "build": "tsc -p tsconfig.json && node dist/generate-openapi.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run",
-    "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
+    "test": "vitest run"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
@@ -45,5 +47,5 @@
   "engines": {
     "node": ">=24 <25"
   },
-  "private": true
+  "private": false
 }
