@@ -4,8 +4,8 @@
   <img src="assets/brand/marketingovo-readme-poster.png" alt="Marketingovo — local-first marketing intelligence for SEO audits, competitor intelligence, content signals, and verified results">
 </p>
 
-**A local-first SEO operations system that turns crawl, Search Console, GA4,
-performance, and SERP data into verified actions.**
+**A local-first SEO and public-web OSINT system that turns crawl, Search
+Console, GA4, performance, SERP, and competitive signals into verified actions.**
 
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-5b63ff)](LICENSE)
 [![Telemetry](https://img.shields.io/badge/telemetry-off%20by%20default-242b36)](PRIVACY.md)
@@ -17,7 +17,15 @@ issue dump: it connects technical evidence to organic exposure, conversion
 exposure, reach, confidence, and effort so a marketer can decide what to fix
 first and verify the result after the next audit.
 
-> **Status: 1.1.0.** The REST API, OpenAPI document, SDK, nine-tool agent
+> **Built-in public-web OSINT.** Research your site and up to four explicitly
+> supplied public HTTPS targets from the dashboard (`/osint`), CLI, REST API,
+> MCP, or OpenClaw. Marketingovo returns cited source links, availability states,
+> publication signals, public profile links, business-page discovery, and an
+> exact-match evidence graph. It is deliberately not a people-search,
+> authenticated-scraping, contact-enrichment, breach, or dark-web tool. See the
+> [OSINT layer guide](docs/osint-layer.md).
+
+> **Status: 1.1.0.** The REST API, OpenAPI document, SDK, ten-tool agent
 > contract registry, CLI and `.marketingovo` bundle format are stable; breaking
 > changes to them require a major version. Every release gate is recorded with
 > the command that produced it in
@@ -48,6 +56,9 @@ first and verify the result after the next audit.
   revocable.
 - **Cross-source evidence.** Crawl, GSC, GA4, Lighthouse, PSI, Trends, SerpAPI,
   and DataForSEO use one normalized model.
+- **Public-web OSINT research.** Run a bounded, cited dossier on your own site
+  and explicitly supplied public targets, with source states, publishing cadence,
+  public social/profile links, business paths, and an exact-match graph.
 - **Audit evidence workbench.** Paginated crawl paths, redirect chains,
   reciprocal hreflang, sitemap coverage, and bounded custom extractions expose
   the exact source state behind a finding instead of collapsing missing data to
