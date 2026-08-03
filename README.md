@@ -1,7 +1,7 @@
 # Marketingovo
 
 <p align="center">
-  <img src="assets/brand/marketingovo-icon.png" width="132" height="132" alt="Marketingovo product mark">
+  <img src="assets/brand/marketingovo-readme-poster.png" alt="Marketingovo — local-first marketing intelligence for SEO audits, competitor intelligence, content signals, and verified results">
 </p>
 
 **A local-first SEO operations system that turns crawl, Search Console, GA4,

@@ -22,6 +22,10 @@ jobs:
         with:
           languages: javascript-typescript
           queries: security-extended
+          # Excludes generated output only — the build below writes bundles and
+          # site files that would otherwise be reported alongside the source
+          # they came from. Queries and test coverage are unchanged.
+          config-file: .github/codeql/codeql-config.yml
       - uses: actions/setup-node@v6
         with:
           node-version: 24.15.0

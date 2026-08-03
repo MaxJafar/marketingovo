@@ -92,28 +92,107 @@ function parseFeedTime(value: string | undefined): Date | null {
   return null;
 }
 
-function firstTag(block: string, tag: string): string {
-  const match = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, "i").exec(
-    block,
-  );
-  if (!match?.[1]) return "";
-  return match[1]
-    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
-    .replace(/<[^>]+>/g, "")
-    .trim();
+// Scanning below is deliberately index-based rather than regex-based.
+//
+// The obvious spelling of "find every <item>…</item>" is a lazy quantifier:
+// `/<item[\s>][\s\S]*?<\/item>/g`. On well-formed input that is fine. On a feed
+// with many `<item` openers and no closer it is quadratic — the engine restarts
+// the inner scan at every opener and runs to end-of-input each time. A hostile
+// competitor URL is untrusted input a marketer pastes in, so that is a denial of
+// service, not a curiosity. `indexOf` walks forward once and stops at the first
+// unterminated element, which is linear and gives the same answer on every feed
+// that is actually parseable.
+
+/** Position just past `<tag`, or -1 when this is a different element. */
+function openerEnd(xml: string, at: number, tag: string): number {
+  const end = at + tag.length + 1;
+  const next = xml[end];
+  // `<item` must be followed by whitespace or `>`, so `<items>` is not an item.
+  return next === undefined || /[\s>]/.test(next) ? end : -1;
+}
+
+/** Every `<tag …>…</tag>` element, in document order. Linear in input length. */
+function* elements(xml: string, tag: string): Generator<string> {
+  // Both sides are folded: feeds use `<pubDate>` and `<dc:date>` as readily as
+  // lowercase, and matching a cased needle against a folded haystack silently
+  // finds nothing.
+  const open = `<${tag}`.toLowerCase();
+  const close = `</${tag}>`.toLowerCase();
+  // Folded once. Doing this inside the loop would make each lookup O(n) and
+  // reintroduce the quadratic cost this function exists to remove.
+  const haystack = xml.toLowerCase();
+  let from = 0;
+  for (;;) {
+    const start = haystack.indexOf(open, from);
+    if (start === -1) return;
+    const afterName = openerEnd(xml, start, tag);
+    if (afterName === -1) {
+      from = start + open.length;
+      continue;
+    }
+    const end = haystack.indexOf(close, afterName);
+    // Unterminated. Stop rather than rescanning from the next opener, which is
+    // exactly the quadratic behaviour this function exists to avoid.
+    if (end === -1) return;
+    yield xml.slice(start, end + close.length);
+    from = end + close.length;
+  }
+}
+
+/** Unwrap CDATA sections. An unterminated section is left verbatim. */
+function unwrapCdata(value: string): string {
+  const open = "<![CDATA[";
+  const close = "]]>";
+  let out = "";
+  let from = 0;
+  for (;;) {
+    const start = value.indexOf(open, from);
+    if (start === -1) return out + value.slice(from);
+    const end = value.indexOf(close, start + open.length);
+    if (end === -1) return out + value.slice(from);
+    out += value.slice(from, start) + value.slice(start + open.length, end);
+    from = end + close.length;
+  }
 }
 
 /**
- * Parses RSS 2.0 and Atom. Deliberately regex-based rather than a full XML
- * parser: feeds in the wild are frequently malformed, and a strict parser
- * rejects entire documents over one bad entry. Reading fewer entries is a
- * better failure than reading none.
+ * Remove markup. Every `<` begins a removal, so a nested opener such as
+ * `<scr<script>ipt>` cannot leave a live `<script` behind the way a single
+ * `/<[^>]+>/g` pass can. An unterminated tag drops the remainder.
+ */
+function stripTags(value: string): string {
+  let out = "";
+  let from = 0;
+  for (;;) {
+    const lt = value.indexOf("<", from);
+    if (lt === -1) return out + value.slice(from);
+    out += value.slice(from, lt);
+    const gt = value.indexOf(">", lt + 1);
+    if (gt === -1) return out;
+    from = gt + 1;
+  }
+}
+
+function firstTag(block: string, tag: string): string {
+  for (const element of elements(block, tag)) {
+    const open = element.indexOf(">");
+    if (open === -1) return "";
+    const inner = element.slice(open + 1, element.length - tag.length - 3);
+    return stripTags(unwrapCdata(inner)).trim();
+  }
+  return "";
+}
+
+/**
+ * Parses RSS 2.0 and Atom. Deliberately not a full XML parser: feeds in the
+ * wild are frequently malformed, and a strict parser rejects entire documents
+ * over one bad entry. Reading fewer entries is a better failure than reading
+ * none.
  */
 export function parseFeed(xml: string): FeedItem[] {
   const items: FeedItem[] = [];
 
-  for (const match of xml.matchAll(/<item[\s>][\s\S]*?<\/item>/gi)) {
-    const block = match[0];
+  for (const block of elements(xml, "item")) {
     const link = firstTag(block, "link");
     const guid = firstTag(block, "guid");
     const title = firstTag(block, "title");
@@ -128,13 +207,18 @@ export function parseFeed(xml: string): FeedItem[] {
   }
   if (items.length > 0) return items;
 
-  for (const match of xml.matchAll(/<entry[\s>][\s\S]*?<\/entry>/gi)) {
-    const block = match[0];
+  for (const block of elements(xml, "entry")) {
     const id = firstTag(block, "id");
     const title = firstTag(block, "title");
-    // Atom links carry the URL in an attribute, not as element text.
-    const linkMatch = /<link[^>]*\bhref=["']([^"']+)["'][^>]*>/i.exec(block);
-    const link = linkMatch?.[1] ?? "";
+    // Atom links carry the URL in an attribute, not as element text. Isolate
+    // the one tag first so the attribute pattern runs over a bounded string.
+    const linkStart = block.toLowerCase().indexOf("<link");
+    const linkEnd = linkStart === -1 ? -1 : block.indexOf(">", linkStart);
+    const linkTag =
+      linkStart === -1 || linkEnd === -1
+        ? ""
+        : block.slice(linkStart, linkEnd + 1);
+    const link = HREF.exec(linkTag)?.[1] ?? "";
     items.push({
       id: id || link || title,
       title,
