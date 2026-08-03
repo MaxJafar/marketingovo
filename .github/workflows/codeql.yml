@@ -26,7 +26,7 @@ jobs:
           # site files that would otherwise be reported alongside the source
           # they came from. Queries and test coverage are unchanged.
           config-file: .github/codeql/codeql-config.yml
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.15.0
       - run: |

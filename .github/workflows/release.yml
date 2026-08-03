@@ -41,7 +41,7 @@ jobs:
     environment: public-release
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.15.0
           package-manager-cache: false
@@ -61,7 +61,7 @@ jobs:
         with:
           languages: javascript-typescript
           queries: security-extended
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.15.0
       - name: Enable the pinned package manager
@@ -140,7 +140,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.15.0
       - name: Fail closed on incomplete macOS signing configuration
@@ -372,7 +372,7 @@ jobs:
     environment: npm-production
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.15.0
           registry-url: https://registry.npmjs.org
@@ -408,7 +408,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.15.0
           package-manager-cache: false
