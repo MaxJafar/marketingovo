@@ -49,6 +49,13 @@ function EvidenceRow({ item }: { item: OsintEvidence }) {
       <p>{displayEvidenceValue(item.value)}</p>
       <small>
         {evidenceLabel(item)} · observed {formatDate(item.observedAt, true)}
+        {item.claimHash ? (
+          <>
+            {" "}
+            · claim{" "}
+            <code title={item.claimHash}>{item.claimHash.slice(0, 12)}…</code>
+          </>
+        ) : null}
         {source ? (
           <>
             {" "}
@@ -198,6 +205,80 @@ function Coverage({ dossier }: { dossier: OsintDossier }) {
         />
         <StatusBadge status="missing" label="Dark web disabled" />
       </div>
+    </Card>
+  );
+}
+
+function TrustSummary({ dossier }: { dossier: OsintDossier }) {
+  const evidence = dossier.targets.flatMap((target) => target.evidence);
+  const fingerprinted = evidence.filter((item) =>
+    item.claimHash ? /^[a-f0-9]{64}$/u.test(item.claimHash) : false,
+  ).length;
+  const sourceCount = new Set(
+    evidence
+      .map((item) => item.sourceUrl)
+      .filter((sourceUrl): sourceUrl is string => sourceUrl !== null),
+  ).size;
+  const provenance = dossier.provenance;
+  const integrityRecorded =
+    provenance !== undefined &&
+    provenance.evidenceCount === evidence.length &&
+    provenance.sourceCount === sourceCount &&
+    /^[a-f0-9]{64}$/u.test(provenance.evidenceDigest) &&
+    fingerprinted === evidence.length;
+
+  return (
+    <Card>
+      <SectionHeading
+        title="Trust and provenance"
+        description="Stable claim fingerprints make repeat passes auditable without presenting a public-web observation as independently verified truth."
+      />
+      <div className="evidence-metric-grid osint-metrics">
+        <div>
+          <span>Claim fingerprints</span>
+          <strong>
+            {formatNumber(fingerprinted)} / {formatNumber(evidence.length)}
+          </strong>
+        </div>
+        <div>
+          <span>Source URLs recorded</span>
+          <strong>{formatNumber(provenance?.sourceCount ?? 0)}</strong>
+        </div>
+        <div>
+          <span>Integrity record</span>
+          <strong>
+            <StatusBadge
+              status={integrityRecorded ? "available" : "insufficient"}
+              label={
+                integrityRecorded
+                  ? "Recorded"
+                  : provenance
+                    ? "Incomplete"
+                    : "Legacy dossier"
+              }
+            />
+          </strong>
+        </div>
+        <div>
+          <span>Fingerprint algorithm</span>
+          <strong>{provenance?.claimHashAlgorithm.toUpperCase() ?? "—"}</strong>
+        </div>
+      </div>
+      {provenance ? (
+        <p className="osint-provenance-digest">
+          Evidence digest: <code>{provenance.evidenceDigest}</code>
+        </p>
+      ) : (
+        <InlineNotice tone="info" title="Older dossier format">
+          This saved pass predates claim fingerprints. Run a new public-web pass
+          to record provenance for every observation.
+        </InlineNotice>
+      )}
+      <p className="muted-copy">
+        Fingerprints cover the observed claim fields and intentionally exclude
+        capture time. The digest detects report changes; it does not certify
+        that a source is accurate or authoritative.
+      </p>
     </Card>
   );
 }
@@ -415,6 +496,7 @@ export function OsintResearchPage() {
           <>
             <FreshnessNotice meta={query.data?.meta} />
             <Coverage dossier={dossier} />
+            <TrustSummary dossier={dossier} />
             <Findings dossier={dossier} />
             {workspace ? <ChangeHistory workspace={workspace} /> : null}
             <section>

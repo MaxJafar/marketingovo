@@ -21,8 +21,10 @@ first and verify the result after the next audit.
 > supplied public HTTPS targets from the dashboard (`/osint`), CLI, REST API,
 > MCP, or OpenClaw. Marketingovo returns cited source links, availability states,
 > publication signals, public profile links, business-page discovery, and an
-> exact-match evidence graph, then compares repeat passes for added, removed,
-> and changed public signals. It is deliberately not a people-search,
+> exact-match evidence graph, stable claim fingerprints, and a dossier
+> provenance digest, then compares repeat passes for added, removed, and
+> changed public signals. The digest detects report changes but does not turn
+> a public source into verified truth. It is deliberately not a people-search,
 > authenticated-scraping, contact-enrichment, breach, or dark-web tool. See the
 > [OSINT layer guide](docs/osint-layer.md).
 

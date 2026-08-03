@@ -132,6 +132,48 @@ describe("public-web OSINT dossier", () => {
     expect(target.relationships.some((item) => item.type === "links_to")).toBe(
       true,
     );
+    expect(
+      target.evidence.every((item) => /^[a-f0-9]{64}$/u.test(item.claimHash)),
+    ).toBe(true);
+    expect(dossier.provenance).toMatchObject({
+      captureMethod: "same_origin_public_crawl",
+      claimHashAlgorithm: "sha256",
+      evidenceCount: dossier.targets.reduce(
+        (sum, item) => sum + item.evidence.length,
+        0,
+      ),
+    });
+    expect(dossier.provenance.evidenceDigest).toMatch(/^[a-f0-9]{64}$/u);
+  });
+
+  it("keeps claim fingerprints stable when only capture time changes", async () => {
+    const first = await runOsintResearch(baseOptions());
+    const second = await runOsintResearch(
+      baseOptions({ now: new Date("2026-08-04T12:00:00.000Z") }),
+    );
+    expect(first.targets[0]?.evidence.map((item) => item.claimHash)).toEqual(
+      second.targets[0]?.evidence.map((item) => item.claimHash),
+    );
+    expect(first.provenance.evidenceDigest).toBe(
+      second.provenance.evidenceDigest,
+    );
+  });
+
+  it("changes the provenance digest when an observed claim changes", async () => {
+    const baseline = await runOsintResearch(baseOptions());
+    const changed = await runOsintResearch(
+      baseOptions({
+        crawlFn: async (options) => {
+          const target = options.startUrl;
+          return outcome(target, [
+            page(target, parsed(target, { title: "Different company" })),
+          ]);
+        },
+      }),
+    );
+    expect(changed.provenance.evidenceDigest).not.toBe(
+      baseline.provenance.evidenceDigest,
+    );
   });
 
   it("keeps missing feed evidence unavailable instead of inventing a zero", async () => {

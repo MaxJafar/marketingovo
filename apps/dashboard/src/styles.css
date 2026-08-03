@@ -2808,6 +2808,20 @@ p {
 .osint-evidence-list a {
   color: var(--ink);
 }
+.osint-evidence-list code {
+  color: var(--ink-soft);
+  font-size: 0.58rem;
+}
+.osint-provenance-digest {
+  margin: 14px 0 0;
+  color: var(--ink-faint);
+  font-size: 0.64rem;
+  overflow-wrap: anywhere;
+}
+.osint-provenance-digest code {
+  color: var(--ink-soft);
+  font-size: 0.6rem;
+}
 .evidence-source-link {
   margin: -4px 0 0;
   color: var(--ink-faint);

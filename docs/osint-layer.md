@@ -28,10 +28,23 @@ and changed public signals. A target that is blocked on the newer pass is
 excluded from removal comparisons, so an outage cannot be mistaken for a
 disappearance.
 
+New passes also attach a stable SHA-256 `claimHash` to every observation. The
+fingerprint covers the target, claim fields, state, source class, and
+confidence, but intentionally excludes capture time so the same claim can be
+recognized across passes. The dossier records a sorted SHA-256
+`provenance.evidenceDigest`, the evidence count, and the number of distinct
+source URLs. The dashboard exposes the short claim fingerprints and full
+dossier digest in **Trust and provenance**. These values make accidental or
+tampered report changes detectable; they do not certify that a public source is
+accurate, authoritative, or controlled by the named organization. Older
+dossiers remain readable and are labeled as legacy until a new pass records
+the provenance fields.
+
 ## Product surfaces
 
 - Dashboard: `/osint`, with a bounded target form, coverage/policy state, target
-  dossiers, findings, graph counts, source links, and cited pass history.
+  dossiers, findings, graph counts, source links, trust/provenance summary, and
+  cited pass history.
 - Runtime: `osint-research`, persisted as `report.json` and available through
   the normal run report endpoint.
 - Dashboard API: `/api/v1/osint?siteId=...`, which returns the latest dossier

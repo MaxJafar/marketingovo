@@ -6570,6 +6570,7 @@ export type paths = {
               data: {
                 changes: {
                   after: {
+                    claimHash?: string;
                     confidence: number;
                     id: string;
                     kind: string;
@@ -6590,6 +6591,7 @@ export type paths = {
                     value: unknown;
                   } | null;
                   before: {
+                    claimHash?: string;
                     confidence: number;
                     id: string;
                     kind: string;
@@ -6655,6 +6657,15 @@ export type paths = {
                     /** @enum {string} */
                     personalData: "disabled";
                   };
+                  provenance?: {
+                    /** @enum {string} */
+                    captureMethod: "same_origin_public_crawl";
+                    /** @enum {string} */
+                    claimHashAlgorithm: "sha256";
+                    evidenceCount: number;
+                    evidenceDigest: string;
+                    sourceCount: number;
+                  };
                   /** @enum {string} */
                   schemaVersion: "osint-dossier.v1";
                   sourceBudget: number;
@@ -6669,6 +6680,7 @@ export type paths = {
                     }[];
                     error: string | null;
                     evidence: {
+                      claimHash?: string;
                       confidence: number;
                       id: string;
                       kind: string;

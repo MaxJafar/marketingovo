@@ -1525,6 +1525,7 @@ export const OsintEvidenceSchema = Type.Object(
     ]),
     observedAt: IsoDateTimeSchema,
     confidence: Type.Number({ minimum: 0, maximum: 1 }),
+    claimHash: Type.Optional(Type.String({ pattern: "^[a-f0-9]{64}$" })),
   },
   { additionalProperties: false },
 );
@@ -1643,12 +1644,25 @@ export const OsintFindingSchema = Type.Object(
 );
 export type OsintFinding = Static<typeof OsintFindingSchema>;
 
+export const OsintProvenanceSchema = Type.Object(
+  {
+    captureMethod: Type.Literal("same_origin_public_crawl"),
+    claimHashAlgorithm: Type.Literal("sha256"),
+    evidenceDigest: Type.String({ pattern: "^[a-f0-9]{64}$" }),
+    evidenceCount: Type.Integer({ minimum: 0 }),
+    sourceCount: Type.Integer({ minimum: 0 }),
+  },
+  { additionalProperties: false },
+);
+export type OsintProvenance = Static<typeof OsintProvenanceSchema>;
+
 export const OsintDossierSchema = Type.Object(
   {
     schemaVersion: Type.Literal("osint-dossier.v1"),
     workflow: Type.Literal("osint-research"),
     generatedAt: IsoDateTimeSchema,
     sourceBudget: Type.Integer({ minimum: 1, maximum: 5 }),
+    provenance: Type.Optional(OsintProvenanceSchema),
     targets: Type.Array(OsintTargetDossierSchema, {
       minItems: 1,
       maxItems: 5,

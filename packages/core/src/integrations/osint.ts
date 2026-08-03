@@ -35,6 +35,8 @@ export interface OsintEvidence {
   sourceClass: OsintSourceClass;
   observedAt: string;
   confidence: number;
+  /** Stable claim fingerprint; excludes observation time so repeat passes can be compared. */
+  claimHash: string;
 }
 
 export interface OsintEntity {
@@ -77,11 +79,20 @@ export interface OsintFinding {
   actionable: boolean;
 }
 
+export interface OsintProvenance {
+  captureMethod: "same_origin_public_crawl";
+  claimHashAlgorithm: "sha256";
+  evidenceDigest: string;
+  evidenceCount: number;
+  sourceCount: number;
+}
+
 export interface OsintDossier {
   schemaVersion: "osint-dossier.v1";
   workflow: "osint-research";
   generatedAt: string;
   sourceBudget: number;
+  provenance: OsintProvenance;
   targets: OsintTargetDossier[];
   findings: OsintFinding[];
   coverage: {
@@ -186,6 +197,48 @@ function urlOrNull(value: string): string | null {
   }
 }
 
+function canonicalize(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, item]) => [key, canonicalize(item)]),
+    );
+  }
+  return value;
+}
+
+type EvidenceClaim = Pick<
+  OsintEvidence,
+  | "kind"
+  | "label"
+  | "value"
+  | "state"
+  | "sourceUrl"
+  | "sourceClass"
+  | "confidence"
+>;
+
+function hashClaim(target: string, item: EvidenceClaim): string {
+  return createHash("sha256")
+    .update(
+      JSON.stringify(
+        canonicalize({
+          target,
+          kind: item.kind,
+          label: item.label,
+          value: item.value,
+          state: item.state,
+          sourceUrl: item.sourceUrl,
+          sourceClass: item.sourceClass,
+          confidence: item.confidence,
+        }),
+      ),
+    )
+    .digest("hex");
+}
+
 function evidence(
   target: string,
   kind: string,
@@ -196,7 +249,7 @@ function evidence(
   confidence: number,
   sourceUrl: string | null = target,
 ): OsintEvidence {
-  return {
+  const next = {
     id: stableId(
       "evidence",
       `${target}|${kind}|${label}|${JSON.stringify(value)}`,
@@ -209,7 +262,8 @@ function evidence(
     sourceClass: "public_web",
     observedAt,
     confidence: clampConfidence(confidence),
-  };
+  } as const;
+  return { ...next, claimHash: hashClaim(target, next) };
 }
 
 function entity(
@@ -248,19 +302,42 @@ function relationship(
 function addEvidence(
   target: string,
   out: OsintEvidence[],
-  item: Omit<OsintEvidence, "id" | "sourceClass">,
+  item: Omit<OsintEvidence, "id" | "sourceClass" | "claimHash">,
 ): OsintEvidence {
   if (out.length >= LIMITS.maxEvidencePerTarget) return out[out.length - 1]!;
-  const next: OsintEvidence = {
+  const next = {
     ...item,
     id: stableId(
       "evidence",
       `${target}|${item.kind}|${item.label}|${JSON.stringify(item.value)}`,
     ),
-    sourceClass: "public_web",
+    sourceClass: "public_web" as const,
   };
-  out.push(next);
-  return next;
+  const withHash: OsintEvidence = {
+    ...next,
+    claimHash: hashClaim(target, next),
+  };
+  out.push(withHash);
+  return withHash;
+}
+
+function provenanceFor(dossiers: OsintTargetDossier[]): OsintProvenance {
+  const evidenceItems = dossiers.flatMap((target) => target.evidence);
+  const claimHashes = evidenceItems.map((item) => item.claimHash).sort();
+  const sourceUrls = new Set(
+    evidenceItems
+      .map((item) => item.sourceUrl)
+      .filter((sourceUrl): sourceUrl is string => sourceUrl !== null),
+  );
+  return {
+    captureMethod: "same_origin_public_crawl",
+    claimHashAlgorithm: "sha256",
+    evidenceDigest: createHash("sha256")
+      .update(JSON.stringify(claimHashes))
+      .digest("hex"),
+    evidenceCount: evidenceItems.length,
+    sourceCount: sourceUrls.size,
+  };
 }
 
 function firstPage(outcome: CrawlOutcome): CrawledPage | null {
@@ -749,6 +826,7 @@ export async function runOsintResearch(
     workflow: "osint-research",
     generatedAt: observedAt,
     sourceBudget: targets.length,
+    provenance: provenanceFor(dossiers),
     targets: dossiers,
     findings,
     coverage: {

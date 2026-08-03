@@ -175,6 +175,7 @@ export {
   type OsintResearchOptions,
   type OsintSourceClass,
   type OsintTargetDossier,
+  type OsintProvenance,
 } from "./integrations/osint.js";
 
 // The executive layer of a report, shared by every renderer so the HTML and PDF

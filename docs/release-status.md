@@ -111,7 +111,9 @@ The first public-web OSINT layer is now available as the bounded
 keeps exact source links and missing/insufficient states visible, and repeat
 passes expose cited added/removed/changed signals without treating a blocked
 target as a disappearance. It does not enable people-search, authenticated
-scraping, identity resolution, or dark-web collection. See [the OSINT layer
+scraping, identity resolution, or dark-web collection. New passes now expose
+stable claim fingerprints and a dossier-level provenance digest so report
+changes are detectable without overstating source truth. See [the OSINT layer
 contract](osint-layer.md).
 Audit details now include a versioned, paginated evidence workbench for crawl
 paths, redirect chains, reciprocal hreflang, sitemap coverage, and bounded

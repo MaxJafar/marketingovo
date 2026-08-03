@@ -376,6 +376,7 @@ export interface OsintEvidence {
   sourceClass: OsintSourceClass;
   observedAt: string;
   confidence: number;
+  claimHash?: string;
 }
 
 export interface OsintEntity {
@@ -434,11 +435,20 @@ export interface OsintFinding {
   actionable: boolean;
 }
 
+export interface OsintProvenance {
+  captureMethod: "same_origin_public_crawl";
+  claimHashAlgorithm: "sha256";
+  evidenceDigest: string;
+  evidenceCount: number;
+  sourceCount: number;
+}
+
 export interface OsintDossier {
   schemaVersion: "osint-dossier.v1";
   workflow: "osint-research";
   generatedAt: string;
   sourceBudget: number;
+  provenance?: OsintProvenance;
   targets: OsintTargetDossier[];
   findings: OsintFinding[];
   coverage: {
