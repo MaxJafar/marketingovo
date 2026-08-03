@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: 24.15.0
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
@@ -71,7 +71,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
       - name: Create deterministic worker environment
@@ -90,7 +90,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install Linux credential-broker metadata
         if: matrix.os == 'ubuntu-24.04'
         run: sudo apt-get update && sudo apt-get install --yes libdbus-1-dev pkg-config
@@ -102,7 +102,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: 24.15.0
@@ -130,7 +130,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install Linux credential-broker metadata
         run: sudo apt-get update && sudo apt-get install --yes libdbus-1-dev pkg-config
       - name: Enforce native formatting
@@ -146,7 +146,7 @@ jobs:
       checks: write
       issues: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Audit the credential broker dependency graph
         uses: rustsec/audit-check@v2.0.0
         with:
@@ -163,7 +163,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # Gitleaks needs the full history to scan a pull request's commits, not
           # only the merge result. A secret that was added and then removed in the
@@ -183,7 +183,7 @@ jobs:
     runs-on: macos-14
     timeout-minutes: 35
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: 24.15.0
@@ -209,7 +209,7 @@ jobs:
       contents: read
       pull-requests: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: gitleaks/gitleaks-action@v2
