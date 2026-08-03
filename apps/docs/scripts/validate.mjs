@@ -17,7 +17,6 @@ const requiredPages = [
   "site/trust/security-privacy.md",
   "site/community/contributing.md",
   "site/product/release-status.md",
-  "site/product/reference-audit.md",
 ];
 
 for (const page of requiredPages) {

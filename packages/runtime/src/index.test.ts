@@ -373,6 +373,109 @@ describe("runtime OAuth integration persistence", () => {
     }
   });
 
+  it("executes and persists the bounded public-web OSINT dossier workflow", async () => {
+    let receivedOptions: Record<string, unknown> | undefined;
+    const dossier = {
+      schemaVersion: "osint-dossier.v1" as const,
+      workflow: "osint-research" as const,
+      generatedAt: new Date().toISOString(),
+      sourceBudget: 2,
+      targets: [
+        {
+          targetUrl: "https://example.com",
+          finalUrl: "https://example.com/",
+          host: "example.com",
+          status: "available" as const,
+          pagesObserved: 1,
+          evidence: [],
+          entities: [],
+          relationships: [],
+          publishingCadence: null,
+          error: null,
+        },
+      ],
+      findings: [],
+      coverage: {
+        state: "insufficient" as const,
+        targetsRequested: 2,
+        targetsCompleted: 1,
+        pagesObserved: 1,
+        evidenceAvailable: 0,
+      },
+      policy: {
+        collection: "public_web_only" as const,
+        personalData: "disabled" as const,
+        identityResolution: "disabled" as const,
+        authenticatedCollection: "disabled" as const,
+        darkWebCollection: "disabled" as const,
+      },
+      limitations: ["Synthetic runtime fixture."],
+    };
+    const engine = {
+      crawl: async () => {
+        throw new Error("unexpected audit");
+      },
+      runOsintResearch: async (options: Record<string, unknown>) => {
+        receivedOptions = options;
+        return dossier;
+      },
+      reportToJson: (report: unknown) => JSON.stringify(report),
+      reportToHtml: () => "",
+      reportToCsv: () => "",
+    };
+    const runtime = new MarketingovoLocalRuntime({
+      dataDir: mkdtempSync(join(tmpdir(), "marketingovo-runtime-osint-")),
+      engine,
+    });
+    try {
+      const project = await runtime.projects.create({
+        name: "OSINT",
+        canonicalUrl: "https://example.com",
+      });
+      const run = await runtime.runs.start(
+        {
+          projectId: project.id,
+          workflowId: "osint-research",
+          options: { targetUrls: ["https://partner.example"] },
+        },
+        "osint-runtime-test-key",
+      );
+      let completed = await runtime.runs.get(run.id);
+      for (
+        let attempt = 0;
+        attempt < 300 &&
+        completed &&
+        !["succeeded", "partial", "failed"].includes(completed.status);
+        attempt++
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        completed = await runtime.runs.get(run.id);
+      }
+      expect(completed?.status).toBe("partial");
+      expect(receivedOptions).toMatchObject({
+        targetUrls: ["https://example.com/", "https://partner.example"],
+        maxUrls: 12,
+        maxRuntimeMs: 60_000,
+      });
+      expect(receivedOptions).not.toHaveProperty("privateHostAllowlist");
+      expect(
+        JSON.parse(
+          Buffer.from((await runtime.reports.get(run.id, "json"))!).toString(
+            "utf8",
+          ),
+        ),
+      ).toEqual(dossier);
+      expect(runtime.database.listRunModules(run.id)).toEqual([
+        expect.objectContaining({
+          moduleId: "research-osint-research",
+          status: "succeeded",
+        }),
+      ]);
+    } finally {
+      runtime.close();
+    }
+  });
+
   it("injects the stored PSI key into an audit without persisting or reporting it", async () => {
     const dataDir = mkdtempSync(join(tmpdir(), "marketingovo-runtime-psi-"));
     const apiKey = "vault-psi-key-that-must-never-leak";

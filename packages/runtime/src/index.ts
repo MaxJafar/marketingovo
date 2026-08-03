@@ -186,6 +186,8 @@ interface EngineModule {
   ): Promise<unknown>;
   /** Topics the references cover that the target does not. */
   runContentGap?(options: Record<string, unknown>): Promise<unknown>;
+  /** Independent, public-web-only OSINT dossier builder. */
+  runOsintResearch?(options: Record<string, unknown>): Promise<unknown>;
   keywordResearchModule?: {
     invoke(
       input: Record<string, unknown>,
@@ -2540,9 +2542,13 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
         );
       }
       if (
-        !["audit", "compare", "keyword-research", "content-plan"].includes(
-          source.workflowId,
-        )
+        ![
+          "audit",
+          "compare",
+          "keyword-research",
+          "content-plan",
+          "osint-research",
+        ].includes(source.workflowId)
       ) {
         throw new RunReplayError(
           "The source run uses a workflow that this runtime cannot replay.",
@@ -3827,6 +3833,7 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
         "trends",
         "serpapi-byok",
         "dataforseo-byok",
+        "public-web-osint",
         "actions",
         "comparisons",
         "reports",
@@ -5034,6 +5041,31 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
             (profile) =>
               Array.isArray(profile.issues) && profile.issues.length > 0,
           );
+        } else if (run.workflowId === "osint-research") {
+          if (!engine.runOsintResearch)
+            throw new Error("The OSINT research workflow is unavailable");
+          const requestedTargets = Array.isArray(options.targetUrls)
+            ? options.targetUrls.filter(
+                (target): target is string =>
+                  typeof target === "string" && target.trim().length > 0,
+              )
+            : [];
+          const targetUrls = [canonicalUrl, ...requestedTargets]
+            .map((target) => target.trim())
+            .filter((target, index, all) => all.indexOf(target) === index)
+            .slice(0, 5);
+          output = await engine.runOsintResearch({
+            targetUrls,
+            maxUrls: typeof options.maxUrls === "number" ? options.maxUrls : 12,
+            maxRuntimeMs:
+              typeof options.maxRuntimeMs === "number"
+                ? options.maxRuntimeMs
+                : 60_000,
+            signal,
+          });
+          partial =
+            (output as { coverage?: { state?: string } }).coverage?.state !==
+            "available";
         } else {
           throw new Error(`Unknown workflow '${run.workflowId}'`);
         }

@@ -44,6 +44,3 @@ uv.lock
 **/.pytest_cache/
 **/.ruff_cache/
 .hypothesis/
-
-# Untrusted third-party reference material, never a build or tooling input.
-TO REVERSE ENGINEEER/

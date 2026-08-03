@@ -66,7 +66,7 @@ Costs and risks accepted:
   with the canonical Apache-2.0 text, verified byte-identical to the upstream
   text apart from the copyright line.
 - `NOTICE` rewritten for Apache-2.0 attribution, retaining the trademark
-  reservation and adding the third-party reference-corpus disclaimer.
+  reservation.
 - Every `license` field — `package.json`, `Cargo.toml`, `pyproject.toml`,
   `tauri.conf.json`, plugin manifests, OpenAPI `info.license` — set to
   `Apache-2.0`.

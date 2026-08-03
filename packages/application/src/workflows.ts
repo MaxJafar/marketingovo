@@ -1,5 +1,6 @@
 import { Type, type TSchema } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
+import { OsintDossierSchema } from "@marketingovo/contracts";
 import type {
   ExecutionPlan,
   LeafModuleRegistry,
@@ -12,6 +13,7 @@ export const runtimeWorkflowIds = [
   "compare",
   "keyword-research",
   "content-plan",
+  "osint-research",
 ] as const;
 export type RuntimeWorkflowId = (typeof runtimeWorkflowIds)[number];
 
@@ -126,6 +128,11 @@ export function createWorkflowRegistry(): WorkflowRegistry {
       "content-plan",
       "research-content-plan",
       researchWorkflowOutput(ContentPlanOutputSchema),
+    ),
+    singleLeafWorkflow(
+      "osint-research",
+      "research-osint-research",
+      researchWorkflowOutput(OsintDossierSchema),
     ),
   ];
   return new Map(workflows.map((workflow) => [workflow.id, workflow]));

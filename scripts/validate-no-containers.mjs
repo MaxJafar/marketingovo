@@ -25,20 +25,10 @@ const ignoredPaths = new Set([
   ".archive",
   "apps/desktop/src-tauri/binaries",
   "apps/desktop/src-tauri/runtime",
-  // Third-party projects kept only to be read. Many ship the deployment style
-  // this gate forbids; that is their choice, not a claim about Marketingovo.
-  // Never a build, test or product input — see scripts/reference-lab-validate.mjs.
-  "TO REVERSE ENGINEEER",
-  // The ledger and quarantine manifest describe that corpus, so they quote the
-  // very paths this gate scans for.
-  "docs/intel/reverse-engineering",
 ]);
 const ignoredFiles = new Set([
   "pnpm-lock.yaml",
   "validate-no-containers.mjs",
-  // These guard the reference corpus, so they must name the patterns they detect.
-  "reference-lab-validate.mjs",
-  "scan-reference-secrets.mjs",
 ]);
 const textExtensions = new Set([
   "",

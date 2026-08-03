@@ -1,7 +1,7 @@
 {
   "id": "marketingovo",
   "name": "Marketingovo",
-  "description": "Run local SEO audits, comparisons, keyword research, content plans, evidence inspection, and monitoring through bounded workflow-level tools.",
+  "description": "Run local SEO audits, comparisons, keyword research, content plans, public-web OSINT research, evidence inspection, and monitoring through bounded workflow-level tools.",
   "version": "1.1.0",
   "configSchema": {
     "type": "object",
@@ -50,6 +50,7 @@
       "marketingovo_compare_start",
       "marketingovo_keyword_research_start",
       "marketingovo_content_plan_start",
+      "marketingovo_osint_research_start",
       "marketingovo_monitoring_status"
     ]
   },
@@ -64,6 +65,9 @@
       "optional": true
     },
     "marketingovo_content_plan_start": {
+      "optional": true
+    },
+    "marketingovo_osint_research_start": {
       "optional": true
     }
   }

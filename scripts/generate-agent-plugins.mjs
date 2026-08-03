@@ -109,6 +109,23 @@ Do not infer a competitor's traffic or rankings; Marketingovo does not measure t
    instead of filling it with generic advice.`,
   },
   {
+    file: "osint-research.md",
+    description: "Build a bounded public-web OSINT dossier for a project.",
+    tool: "marketingovo_osint_research_start",
+    body: `Build a public-web intelligence dossier for the project in $ARGUMENTS.
+
+1. Call \`marketingovo_osint_research_start\` with the project and only the
+   explicitly supplied public HTTPS targets. Ask which project is meant if it
+   is ambiguous — never guess or add a target on the user's behalf.
+2. Poll \`marketingovo_run_get\` until the run finishes, then read its JSON
+   report. Summarize coverage, target status, findings, and the evidence URLs.
+3. Keep missing and insufficient observations visible. A linked social URL is
+   linkage evidence, not proof of account ownership, audience, or engagement.
+4. Never request credentials or pivot to people lookup, contact enrichment,
+   authenticated scraping, identity resolution, breach data, or dark-web work.
+   Cadence is publication evidence only — do not turn it into reach or revenue.`,
+  },
+  {
     file: "seo-status.md",
     description: "Read schedules, recent runs, and runtime health.",
     tool: "marketingovo_monitoring_status",
@@ -229,7 +246,7 @@ outputs.set(
     id: "marketingovo",
     name: "Marketingovo",
     description:
-      "Run local SEO audits, comparisons, keyword research, content plans, evidence inspection, and monitoring through bounded workflow-level tools.",
+      "Run local SEO audits, comparisons, keyword research, content plans, public-web OSINT research, evidence inspection, and monitoring through bounded workflow-level tools.",
     version,
     configSchema: {
       type: "object",

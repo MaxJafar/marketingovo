@@ -75,5 +75,4 @@ a bounded newest-first view so one request cannot grow without limit; the
 portable bundle retains every stored revision and entry up to the documented
 bundle limits.
 
-See [Architecture](architecture.md), [Quickstart](quickstart.md), and the
-[reference-tool reverse-engineering record](reference-tool-reverse-engineering.md).
+See [Architecture](architecture.md) and [Quickstart](quickstart.md).

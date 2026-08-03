@@ -327,7 +327,13 @@ export interface AuditRun {
   startedAt: string;
   completedAt?: string | null;
   status:
-    "queued" | "running" | "completed" | "partial" | "failed" | "cancelled";
+    | "queued"
+    | "running"
+    | "succeeded"
+    | "completed"
+    | "partial"
+    | "failed"
+    | "cancelled";
   progress?: number | null;
   trigger?: "manual" | "scheduled" | "webhook" | string;
   pagesCrawled?: number | null;
@@ -346,6 +352,110 @@ export interface AuditRunDetail extends AuditRun {
     message: string;
     level?: "info" | "warning" | "error";
   }>;
+}
+
+export type OsintEvidenceState =
+  "available" | "missing" | "insufficient" | "contradictory";
+
+export type OsintSourceClass =
+  "public_web" | "first_party" | "licensed_provider" | "user_import";
+
+export type OsintEntityType =
+  "organization" | "domain" | "page" | "profile" | "feed";
+
+export type OsintRelationshipType =
+  "owns" | "links_to" | "same_as" | "publishes_via";
+
+export interface OsintEvidence {
+  id: string;
+  kind: string;
+  label: string;
+  value: unknown;
+  state: OsintEvidenceState;
+  sourceUrl: string | null;
+  sourceClass: OsintSourceClass;
+  observedAt: string;
+  confidence: number;
+}
+
+export interface OsintEntity {
+  id: string;
+  type: OsintEntityType;
+  label: string;
+  url: string | null;
+  exactMatch: boolean;
+}
+
+export interface OsintRelationship {
+  id: string;
+  fromEntityId: string;
+  toEntityId: string;
+  type: OsintRelationshipType;
+  evidenceIds: string[];
+}
+
+export interface OsintPublishingCadence {
+  feedUrl: string;
+  itemsInFeed: number;
+  datedItems: number;
+  freshnessSeconds: number | null;
+  cadenceDays: number | null;
+  spanDays: number | null;
+  intervals: number | null;
+  newestPublishedAt: string | null;
+  oldestPublishedAt: string | null;
+}
+
+export interface OsintTargetDossier {
+  targetUrl: string;
+  finalUrl: string | null;
+  host: string | null;
+  status: "available" | "partial" | "failed";
+  pagesObserved: number;
+  evidence: OsintEvidence[];
+  entities: OsintEntity[];
+  relationships: OsintRelationship[];
+  publishingCadence: {
+    target: string;
+    cadence: OsintPublishingCadence | null;
+    unavailable: string | null;
+    detail?: string;
+  } | null;
+  error: string | null;
+}
+
+export interface OsintFinding {
+  id: string;
+  severity: "info" | "low" | "medium";
+  title: string;
+  statement: string;
+  evidenceIds: string[];
+  confidence: number;
+  actionable: boolean;
+}
+
+export interface OsintDossier {
+  schemaVersion: "osint-dossier.v1";
+  workflow: "osint-research";
+  generatedAt: string;
+  sourceBudget: number;
+  targets: OsintTargetDossier[];
+  findings: OsintFinding[];
+  coverage: {
+    state: OsintEvidenceState;
+    targetsRequested: number;
+    targetsCompleted: number;
+    pagesObserved: number;
+    evidenceAvailable: number;
+  };
+  policy: {
+    collection: "public_web_only";
+    personalData: "disabled";
+    identityResolution: "disabled";
+    authenticatedCollection: "disabled";
+    darkWebCollection: "disabled";
+  };
+  limitations: string[];
 }
 
 export interface RunReplay {

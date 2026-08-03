@@ -15,8 +15,8 @@ and metric availability are exact expectations for the committed CSV bytes.
 diagnostic codes, derived hosts, and the alpha-wide rule that citations are
 copyable inert text but never clickable or fetched.
 
-The normative grammar, validation diagnostics, canonical field mapping,
-metrics, lifecycle, retention, API, worker, and report contracts are in
-[`docs/intel/adr/0002-local-competitive-pulse-import-alpha.md`](../../docs/intel/adr/0002-local-competitive-pulse-import-alpha.md).
-The sample uses the canonical `marketingovo.*` wire namespace.
+The sample uses the canonical `marketingovo.*` wire namespace. The normative
+grammar, validation diagnostics, field mapping, metrics, lifecycle, retention,
+API, worker, and report contracts are enforced by the import package and its
+tests.
 product name or a license decision.

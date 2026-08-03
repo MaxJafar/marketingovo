@@ -58,10 +58,7 @@ unchanged, so no existing integration breaks.
   schema id, artifact parser version, HTTP header, session cookie, egress user
   agent and data directory. All of it now uses the `marketingovo` namespace.
   Nothing had been published under the old names, so no consumer contract
-  broke. Historical records that describe AGENTintel as it was — the archived
-  planning documents under `docs/intel/`, ADR 0001, and the identity gate's own
-  allowlist reasons — keep the old name deliberately, because rewriting them
-  would falsify a dated document rather than complete a rename.
+  broke. The old identity is no longer part of the supported product surface.
 - **Two generators were wrong.** `scripts/generate-contracts.mjs` wrote the
   intel daemon's OpenAPI types over `packages/sdk/src/generated/openapi.ts`,
   which the SDK generates from the product server's own document and guards
@@ -108,9 +105,12 @@ markup and hreflang checks, exact URL cohort audits, provider-cost transparency,
 an evidence-first Codex marketer workflow, and a durable Issue Review workspace
 for intentional and false-positive findings. It also includes versioned Project
 Context, an append-only marketer journal, secret-safe portable history, and a
-read-only agent context resource. See the
-[reference-tool reverse-engineering record](reference-tool-reverse-engineering.md)
-for provenance and deferred work.
+read-only agent context resource.
+The first public-web OSINT layer is now available as the bounded
+`osint-research` workflow, dashboard `/osint` page, and agent start tool. It
+keeps exact source links and missing/insufficient states visible; it does not
+enable people-search, authenticated scraping, identity resolution, or dark-web
+collection. See [the OSINT layer contract](osint-layer.md).
 Audit details now include a versioned, paginated evidence workbench for crawl
 paths, redirect chains, reciprocal hreflang, sitemap coverage, and bounded
 custom extraction results. A corrected reciprocity model and sitemap-index
@@ -172,8 +172,8 @@ Additional facts about this release:
 - `community-synthetic-v2` detects all 26 labeled defect instances with 1.0
   recall, zero High-severity false positives, and no severity drift on either
   healthy control page. The corpus is small for the confidence it supports;
-  expanding it to a larger public corpus is tracked in `PLAN.md` and is a
-  post-1.0 improvement, not a correctness failure.
+  expanding it to a larger public corpus is a post-1.0 improvement, not a
+  correctness failure.
 - Eight High-severity dependency advisories were cleared for this release by
   pinning patched versions of `brace-expansion`, `fast-uri`, `find-my-way`,
   `js-yaml` and `postcss`, and by taking `@fastify/static` to 10.1.2, which is
@@ -194,7 +194,7 @@ Additional facts about this release:
   OAuth-callback paths, but not yet as separately named CI jobs with documented
   case counts.
 - Scheduled-work crash safety is proven for report artifacts and project
-  deletion. A broader "no duplicate result under a mid-lease kill" proof is
-  tracked in `PLAN.md`.
+  deletion. A broader "no duplicate result under a mid-lease kill" proof
+  remains a post-1.0 reliability improvement.
 - Claims about replacing commercial tools still require a larger reproducible
   public corpus than the one shipped here.

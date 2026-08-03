@@ -5,7 +5,7 @@ import {
 } from "./agent-tools.js";
 
 describe("public agent tool contracts", () => {
-  it("keeps exactly nine unique workflow-level tools", () => {
+  it("keeps unique workflow-level tools", () => {
     expect(PUBLIC_AGENT_TOOL_NAMES).toEqual([
       "marketingovo_audit_start",
       "marketingovo_run_get",
@@ -15,9 +15,10 @@ describe("public agent tool contracts", () => {
       "marketingovo_compare_start",
       "marketingovo_keyword_research_start",
       "marketingovo_content_plan_start",
+      "marketingovo_osint_research_start",
       "marketingovo_monitoring_status",
     ]);
-    expect(new Set(PUBLIC_AGENT_TOOL_NAMES).size).toBe(9);
+    expect(new Set(PUBLIC_AGENT_TOOL_NAMES).size).toBe(10);
     expect(
       PUBLIC_AGENT_TOOL_NAMES.every((toolName) =>
         toolName.startsWith("marketingovo_"),

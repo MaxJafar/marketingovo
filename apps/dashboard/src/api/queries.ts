@@ -28,6 +28,7 @@ import type {
   ListResponse,
   MonitoringWorkspace,
   Overview,
+  OsintDossier,
   PageRecord,
   ProjectContextJournalEntry,
   ProjectContextProfile,
@@ -74,6 +75,8 @@ export const queryKeys = {
   ) => ["run-links", runId, pageUrl, direction, offset, search] as const,
   pages: (siteId: string) => ["pages", siteId] as const,
   keywords: (siteId: string) => ["keywords", siteId] as const,
+  osint: (siteId: string, runId?: string) =>
+    runId ? (["osint", siteId, runId] as const) : (["osint", siteId] as const),
   competitors: (siteId: string) => ["competitors", siteId] as const,
   monitoring: (siteId: string) => ["monitoring", siteId] as const,
   reports: (siteId: string) => ["reports", siteId] as const,
@@ -252,6 +255,36 @@ export function useRuns(siteId: string) {
         : false;
     },
   });
+}
+
+function isTerminalResearchRun(run: AuditRun): boolean {
+  return ["succeeded", "completed", "partial"].includes(run.status);
+}
+
+/** Load the latest persisted public-web OSINT dossier for a project. */
+export function useOsintDossier(siteId: string) {
+  const runs = useRuns(siteId);
+  const researchRuns = (runs.data?.data.items ?? [])
+    .filter((run) => run.workflowId === "osint-research")
+    .sort((left, right) => {
+      const leftAt = Date.parse(left.completedAt ?? left.startedAt);
+      const rightAt = Date.parse(right.completedAt ?? right.startedAt);
+      return rightAt - leftAt;
+    });
+  const latestRun = researchRuns[0];
+  const latestTerminalRun = researchRuns.find(isTerminalResearchRun);
+
+  const query = useQuery({
+    queryKey: queryKeys.osint(siteId, latestTerminalRun?.id),
+    queryFn: ({ signal }) =>
+      apiRequest<OsintDossier>(
+        `/runs/${encodeURIComponent(latestTerminalRun!.id)}/report?format=json`,
+        { signal },
+      ),
+    enabled: Boolean(siteId && latestTerminalRun?.id),
+  });
+
+  return { ...query, latestRun };
 }
 
 export function useRun(runId: string) {
@@ -516,7 +549,8 @@ export function useStartAudit() {
 
 export interface StartWorkflowInput {
   projectId: string;
-  workflowId: "compare" | "keyword-research" | "content-plan";
+  workflowId:
+    "compare" | "keyword-research" | "content-plan" | "osint-research";
   options: Record<string, unknown>;
 }
 
@@ -537,7 +571,9 @@ export function useStartWorkflow() {
           queryKey:
             input.workflowId === "compare"
               ? queryKeys.competitors(input.projectId)
-              : queryKeys.keywords(input.projectId),
+              : input.workflowId === "osint-research"
+                ? queryKeys.osint(input.projectId)
+                : queryKeys.keywords(input.projectId),
         }),
       ]);
     },

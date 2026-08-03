@@ -51,6 +51,7 @@ assert.deepEqual(workflowIds, [
   "compare",
   "keyword-research",
   "content-plan",
+  "osint-research",
 ]);
 
 const serializedOverview = JSON.stringify(contracts.ProjectOverviewSchema);

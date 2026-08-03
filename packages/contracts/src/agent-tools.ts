@@ -53,6 +53,19 @@ export const AgentContentPlanStartInputSchema = strictObject({
   }),
 });
 
+export const AgentOsintResearchStartInputSchema = strictObject({
+  project_id: Type.String({ minLength: 1 }),
+  target_urls: Type.Optional(
+    Type.Array(Type.String({ format: "uri", pattern: "^https?://" }), {
+      minItems: 1,
+      maxItems: 4,
+    }),
+  ),
+  max_urls: Type.Optional(
+    Type.Integer({ minimum: 1, maximum: 100, default: 12 }),
+  ),
+});
+
 export const AgentMonitoringStatusInputSchema = strictObject({
   project_id: Type.Optional(Type.String({ minLength: 1 })),
 });
@@ -100,6 +113,9 @@ export type AgentKeywordResearchStartInput = Static<
 >;
 export type AgentContentPlanStartInput = Static<
   typeof AgentContentPlanStartInputSchema
+>;
+export type AgentOsintResearchStartInput = Static<
+  typeof AgentOsintResearchStartInputSchema
 >;
 export type AgentMonitoringStatusInput = Static<
   typeof AgentMonitoringStatusInputSchema
@@ -199,6 +215,20 @@ export const AgentContentPlanStartTool = agentTool({
   },
 } as const);
 
+export const AgentOsintResearchStartTool = agentTool({
+  name: "marketingovo_osint_research_start",
+  title: "Start public-web OSINT research",
+  description:
+    "Build a bounded, evidence-linked public-web intelligence dossier for the project origin and up to four explicitly supplied public targets. It records exact profile links, structured identity claims, sitemap/robots signals, and publication cadence; it never performs people lookup, authenticated scraping, identity resolution, or dark-web collection.",
+  optional: true,
+  inputSchema: AgentOsintResearchStartInputSchema,
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: true,
+  },
+} as const);
+
 export const AgentMonitoringStatusTool = agentTool({
   name: "marketingovo_monitoring_status",
   title: "Read monitoring status",
@@ -268,6 +298,7 @@ export const PUBLIC_AGENT_TOOL_CONTRACTS = [
   AgentCompareStartTool,
   AgentKeywordResearchStartTool,
   AgentContentPlanStartTool,
+  AgentOsintResearchStartTool,
   AgentMonitoringStatusTool,
 ] as const;
 
@@ -279,7 +310,7 @@ export const PUBLIC_AGENT_TOOL_NAMES: readonly PublicAgentToolName[] =
   PUBLIC_AGENT_TOOL_CONTRACTS.map((contract) => contract.name);
 
 /**
- * Terminal session tools are a separate group from the nine workflow tools
+ * Terminal session tools are a separate group from the ten workflow tools
  * above, and the split is intentional rather than tidiness.
  *
  * The workflow tools answer "do this SEO job". These answer "a human is typing
@@ -287,7 +318,7 @@ export const PUBLIC_AGENT_TOOL_NAMES: readonly PublicAgentToolName[] =
  * capability without the other: an operator may want an agent that audits but
  * never speaks into the browser, or a conversational session that only reads.
  * Keeping the registries apart lets an adapter allowlist them independently,
- * and keeps the documented public workflow surface stable at nine.
+ * and keeps the documented public workflow surface stable at ten.
  *
  * None of these tools touch the network beyond the loopback daemon, and none
  * of them start crawls — so the whole group is closed-world.

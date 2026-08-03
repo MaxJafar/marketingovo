@@ -8,6 +8,7 @@ import {
   AgentContentPlanStartTool,
   AgentKeywordResearchStartTool,
   AgentMonitoringStatusTool,
+  AgentOsintResearchStartTool,
   AgentRunCompareTool,
   AgentRunEvidenceTool,
   AgentRunGetTool,
@@ -24,6 +25,7 @@ import {
   type AgentContentPlanStartInput,
   type AgentKeywordResearchStartInput,
   type AgentMonitoringStatusInput,
+  type AgentOsintResearchStartInput,
   type AgentRunCompareInput,
   type AgentRunEvidenceInput,
   type AgentRunGetInput,
@@ -70,6 +72,10 @@ const keywordResearchStartInputSchema =
 const contentPlanStartInputSchema =
   toMcpInputSchema<AgentContentPlanStartInput>(
     AgentContentPlanStartTool.inputSchema,
+  );
+const osintResearchStartInputSchema =
+  toMcpInputSchema<AgentOsintResearchStartInput>(
+    AgentOsintResearchStartTool.inputSchema,
   );
 const monitoringStatusInputSchema =
   toMcpInputSchema<AgentMonitoringStatusInput>(
@@ -321,6 +327,30 @@ export async function createMarketingovoMcpServer(
           projectId: project_id,
           workflowId: "content-plan",
           options: { seeds },
+        }),
+      ),
+  );
+
+  server.registerTool(
+    AgentOsintResearchStartTool.name,
+    {
+      title: AgentOsintResearchStartTool.title,
+      description: AgentOsintResearchStartTool.description,
+      inputSchema: osintResearchStartInputSchema,
+      annotations: {
+        title: AgentOsintResearchStartTool.title,
+        ...AgentOsintResearchStartTool.annotations,
+      },
+    },
+    async ({ project_id, target_urls, max_urls }) =>
+      textResult(
+        await client.runs.start({
+          projectId: project_id,
+          workflowId: "osint-research",
+          options: {
+            ...(target_urls ? { targetUrls: target_urls } : {}),
+            ...(max_urls !== undefined ? { maxUrls: max_urls } : {}),
+          },
         }),
       ),
   );

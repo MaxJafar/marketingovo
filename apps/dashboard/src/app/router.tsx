@@ -42,6 +42,14 @@ const routes = [
   }),
   createRoute({
     getParentRoute: () => rootRoute,
+    path: "/osint",
+    component: lazyRouteComponent(
+      () => import("../pages/osint-research"),
+      "OsintResearchPage",
+    ),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
     path: "/content",
     component: lazyRouteComponent(
       () => import("../pages/content-intel"),

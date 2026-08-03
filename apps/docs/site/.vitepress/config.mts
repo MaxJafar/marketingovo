@@ -31,7 +31,6 @@ export default defineConfig({
           { text: "Dashboard and actions", link: "/product/dashboard-actions" },
           { text: "Project Context", link: "/product/project-context" },
           { text: "Integrations and BYOK", link: "/integrations/byok" },
-          { text: "Reference-tool audit", link: "/product/reference-audit" },
         ],
       },
       {
@@ -81,7 +80,6 @@ export default defineConfig({
         items: [
           { text: "Security and privacy", link: "/trust/security-privacy" },
           { text: "Release status", link: "/product/release-status" },
-          { text: "Reference-tool audit", link: "/product/reference-audit" },
         ],
       },
       {

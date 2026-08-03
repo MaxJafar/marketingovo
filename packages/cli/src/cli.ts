@@ -409,6 +409,44 @@ async function audit(args: ParsedArgs): Promise<void> {
   json(run);
 }
 
+async function osint(args: ParsedArgs): Promise<void> {
+  const [projectId, ...targets] = args.rest;
+  if (!projectId) {
+    throw new Error(
+      "usage: marketingovo osint <project-id> [public-target-url ...] [--max-urls N]",
+    );
+  }
+  if (targets.length > 4)
+    throw new Error("OSINT accepts at most four additional public targets");
+  for (const target of targets) {
+    let parsed: URL;
+    try {
+      parsed = new URL(target);
+    } catch {
+      throw new Error(`OSINT target is not an absolute URL: ${target}`);
+    }
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:")
+      throw new Error(`OSINT target must use http or https: ${target}`);
+    if (parsed.username || parsed.password)
+      throw new Error("OSINT targets must not contain userinfo or credentials");
+  }
+  const maxUrlsValue = optionalStringFlag(args.flags, "max-urls");
+  const maxUrls = maxUrlsValue === undefined ? 12 : Number(maxUrlsValue);
+  if (!Number.isInteger(maxUrls) || maxUrls < 1 || maxUrls > 100) {
+    throw new Error("--max-urls must be an integer from 1 to 100");
+  }
+  const client = await clientFor(args.flags);
+  const run = await client.runs.start(
+    {
+      projectId,
+      workflowId: "osint-research",
+      options: { targetUrls: targets, maxUrls },
+    },
+    randomUUID(),
+  );
+  json(run);
+}
+
 async function runCommand(args: ParsedArgs): Promise<void> {
   const [subcommand = "list", id] = args.rest;
   const client = await clientFor(args.flags);
@@ -1029,6 +1067,8 @@ async function main(): Promise<void> {
       return project(args);
     case "audit":
       return audit(args);
+    case "osint":
+      return osint(args);
     case "run":
       return runCommand(args);
     case "issue":

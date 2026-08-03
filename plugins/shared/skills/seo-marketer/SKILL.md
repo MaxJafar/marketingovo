@@ -1,6 +1,6 @@
 ---
 name: seo-marketer
-description: Use Marketingovo to audit a site, prioritize verified SEO work, compare competitors, research keywords, build a content plan, or inspect monitoring. Trigger when the user asks what to fix, why organic performance changed, what to publish, how a site compares, or whether an SEO change was verified.
+description: Use Marketingovo to audit a site, prioritize verified SEO work, compare competitors, research keywords, build a content plan, run bounded public-web OSINT research, or inspect monitoring. Trigger when the user asks what to fix, why organic performance changed, what to publish, how a site compares, what public evidence links a brand to its channels, or whether an SEO change was verified.
 ---
 
 # Marketingovo marketer
@@ -37,10 +37,23 @@ intent, SERP evidence, business value, and the site's own historical baseline.
    start `marketingovo_keyword_research_start`.
 4. If the user asks what to publish or how to organize several topics, start
    `marketingovo_content_plan_start`.
-5. If the user asks whether monitoring is active or recent jobs are healthy,
+5. If the user asks for a public-web intelligence dossier, exact public profile
+   links, structured identity claims, public business channels, sitemap/robots
+   signals, or measured publishing cadence, start
+   `marketingovo_osint_research_start` with only the project and targets the
+   user explicitly supplied.
+6. If the user asks whether monitoring is active or recent jobs are healthy,
    call `marketingovo_monitoring_status`.
-6. If a run id already exists, call `marketingovo_run_get`; do not start a
+7. If a run id already exists, call `marketingovo_run_get`; do not start a
    duplicate job.
+
+OSINT is public-web-only. It never performs people lookup, email/phone
+registration, breach or contact enrichment, authenticated scraping, account
+recovery probes, identity resolution, dark-web collection, or bot evasion.
+Treat linked social URLs as exact linkage evidence, not proof of account
+ownership or audience. Treat feed cadence as publication evidence, not reach,
+engagement, customers, or revenue. Preserve `missing`, `insufficient`, and
+`contradictory` states exactly as returned.
 
 Once a run is terminal, three read tools open its stored evidence. Prefer them
 over restating a summary, and cite what they return:

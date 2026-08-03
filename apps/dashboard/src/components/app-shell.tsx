@@ -11,7 +11,7 @@ import { mascotGlyphs, navGlyphs } from "./pixel-glyphs";
  * The console frame: brand block, command bar, section rail, boot log, and the
  * agent prompt that runs along the bottom of every page.
  *
- * The rail's ten sections are the product's own map rather than a restyling of
+ * The rail's headline sections are the product's own map rather than a restyling of
  * the old sidebar — "SEO analytics" and "keyword lab" are how a marketer
  * describes this work, and each one points at a route that already does it.
  */
@@ -36,6 +36,12 @@ const NAV: NavItem[] = [
     label: "Social Research",
     glyph: "social-research",
     title: "Social research",
+  },
+  {
+    to: "/osint",
+    label: "OSINT Layer",
+    glyph: "osint",
+    title: "OSINT layer",
   },
   {
     to: "/content",
@@ -67,7 +73,7 @@ const NAV: NavItem[] = [
 ];
 
 /**
- * The workbenches the ten headline sections do not cover.
+ * The workbenches the headline sections do not cover.
  *
  * These are full pages, not detail views: the action queue, issue review, the
  * page inventory, connectors, settings and health. Giving them a dense

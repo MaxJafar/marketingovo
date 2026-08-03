@@ -9,7 +9,7 @@ const { PUBLIC_AGENT_TOOL_CONTRACTS, PUBLIC_AGENT_TOOL_NAMES } = await import(
 );
 const expectedTools = [...PUBLIC_AGENT_TOOL_NAMES];
 
-assert.equal(PUBLIC_AGENT_TOOL_CONTRACTS.length, 9);
+assert.equal(PUBLIC_AGENT_TOOL_CONTRACTS.length, 10);
 assert.equal(new Set(expectedTools).size, expectedTools.length);
 for (const contract of PUBLIC_AGENT_TOOL_CONTRACTS) {
   assert.equal(contract.inputSchema.type, "object");

@@ -5,6 +5,7 @@ Usage:
   marketingovo serve [--port 3210] [--data-dir PATH] [--credential-broker PATH] [--master-password-file PATH]
   marketingovo project list|create|show|export|import|delete
   marketingovo audit <project-id> [--render static|js] [--collect-vitals]
+  marketingovo osint <project-id> [public-target-url ...] [--max-urls N]
   marketingovo run list|show|compare|links|replay|watch|cancel|issues
   marketingovo issue list <project-id> [--status STATE] [--severity LEVEL] [--search TEXT] | review <project-id> <fingerprint> <open|ignored|false-positive> [--reason-file PATH]
   marketingovo context show <project-id> | update <project-id> --profile-file PATH --change-summary-file PATH | append <project-id> <kind> --title-file PATH --detail-file PATH [--source-run ID]

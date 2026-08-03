@@ -61,9 +61,3 @@ output/playwright/
 
 # Legacy untracked local companion
 dashboard-backend/
-
-# Third-party reference corpus: studied, never copied from, never built or
-# shipped. Many entries are GPL/AGPL. Excluded from version control and from
-# every build, test and product input. Guarded by scripts/reference-lab-validate.mjs
-# and scripts/scan-reference-secrets.mjs.
-TO REVERSE ENGINEEER/

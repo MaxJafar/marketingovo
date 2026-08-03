@@ -1501,6 +1501,187 @@ export const ExtractionPreviewSchema = Type.Object(
 );
 export type ExtractionPreview = Static<typeof ExtractionPreviewSchema>;
 
+export const OsintEvidenceStateSchema = Type.Union([
+  Type.Literal("available"),
+  Type.Literal("missing"),
+  Type.Literal("insufficient"),
+  Type.Literal("contradictory"),
+]);
+export type OsintEvidenceState = Static<typeof OsintEvidenceStateSchema>;
+
+export const OsintEvidenceSchema = Type.Object(
+  {
+    id: IdentifierSchema,
+    kind: IdentifierSchema,
+    label: Type.String({ minLength: 1, maxLength: 240 }),
+    value: Type.Unknown(),
+    state: OsintEvidenceStateSchema,
+    sourceUrl: Type.Union([UrlSchema, Type.Null()]),
+    sourceClass: Type.Union([
+      Type.Literal("public_web"),
+      Type.Literal("first_party"),
+      Type.Literal("licensed_provider"),
+      Type.Literal("user_import"),
+    ]),
+    observedAt: IsoDateTimeSchema,
+    confidence: Type.Number({ minimum: 0, maximum: 1 }),
+  },
+  { additionalProperties: false },
+);
+export type OsintEvidence = Static<typeof OsintEvidenceSchema>;
+
+export const OsintEntitySchema = Type.Object(
+  {
+    id: IdentifierSchema,
+    type: Type.Union([
+      Type.Literal("organization"),
+      Type.Literal("domain"),
+      Type.Literal("page"),
+      Type.Literal("profile"),
+      Type.Literal("feed"),
+    ]),
+    label: Type.String({ minLength: 1, maxLength: 240 }),
+    url: Type.Union([UrlSchema, Type.Null()]),
+    exactMatch: Type.Boolean(),
+  },
+  { additionalProperties: false },
+);
+export type OsintEntity = Static<typeof OsintEntitySchema>;
+
+export const OsintRelationshipSchema = Type.Object(
+  {
+    id: IdentifierSchema,
+    fromEntityId: IdentifierSchema,
+    toEntityId: IdentifierSchema,
+    type: Type.Union([
+      Type.Literal("owns"),
+      Type.Literal("links_to"),
+      Type.Literal("same_as"),
+      Type.Literal("publishes_via"),
+    ]),
+    evidenceIds: Type.Array(IdentifierSchema, { maxItems: 200 }),
+  },
+  { additionalProperties: false },
+);
+export type OsintRelationship = Static<typeof OsintRelationshipSchema>;
+
+export const OsintPublishingCadenceSchema = Type.Object(
+  {
+    feedUrl: UrlSchema,
+    itemsInFeed: Type.Integer({ minimum: 0 }),
+    datedItems: Type.Integer({ minimum: 0 }),
+    freshnessSeconds: Type.Union([Type.Integer({ minimum: 0 }), Type.Null()]),
+    cadenceDays: Type.Union([Type.Number({ minimum: 0 }), Type.Null()]),
+    spanDays: Type.Union([Type.Number({ minimum: 0 }), Type.Null()]),
+    intervals: Type.Union([Type.Integer({ minimum: 0 }), Type.Null()]),
+    newestPublishedAt: Type.Union([IsoDateTimeSchema, Type.Null()]),
+    oldestPublishedAt: Type.Union([IsoDateTimeSchema, Type.Null()]),
+  },
+  { additionalProperties: false },
+);
+export type OsintPublishingCadence = Static<
+  typeof OsintPublishingCadenceSchema
+>;
+
+export const OsintFeedOutcomeSchema = Type.Object(
+  {
+    target: UrlSchema,
+    cadence: Type.Union([OsintPublishingCadenceSchema, Type.Null()]),
+    unavailable: Type.Union([
+      Type.Literal("no-feed-discovered"),
+      Type.Literal("blocked-by-robots"),
+      Type.Literal("unsafe-url"),
+      Type.Literal("fetch-failed"),
+      Type.Literal("unparseable"),
+      Type.Null(),
+    ]),
+    detail: Type.Optional(Type.String({ maxLength: 500 })),
+  },
+  { additionalProperties: false },
+);
+export type OsintFeedOutcome = Static<typeof OsintFeedOutcomeSchema>;
+
+export const OsintTargetDossierSchema = Type.Object(
+  {
+    targetUrl: Type.String({ minLength: 1, maxLength: 2048 }),
+    finalUrl: Type.Union([UrlSchema, Type.Null()]),
+    host: Type.Union([
+      Type.String({ minLength: 1, maxLength: 253 }),
+      Type.Null(),
+    ]),
+    status: Type.Union([
+      Type.Literal("available"),
+      Type.Literal("partial"),
+      Type.Literal("failed"),
+    ]),
+    pagesObserved: Type.Integer({ minimum: 0 }),
+    evidence: Type.Array(OsintEvidenceSchema, { maxItems: 200 }),
+    entities: Type.Array(OsintEntitySchema, { maxItems: 500 }),
+    relationships: Type.Array(OsintRelationshipSchema, { maxItems: 500 }),
+    publishingCadence: Type.Union([OsintFeedOutcomeSchema, Type.Null()]),
+    error: Type.Union([Type.String({ maxLength: 500 }), Type.Null()]),
+  },
+  { additionalProperties: false },
+);
+export type OsintTargetDossier = Static<typeof OsintTargetDossierSchema>;
+
+export const OsintFindingSchema = Type.Object(
+  {
+    id: IdentifierSchema,
+    severity: Type.Union([
+      Type.Literal("info"),
+      Type.Literal("low"),
+      Type.Literal("medium"),
+    ]),
+    title: Type.String({ minLength: 1, maxLength: 240 }),
+    statement: Type.String({ minLength: 1, maxLength: 2_000 }),
+    evidenceIds: Type.Array(IdentifierSchema, { maxItems: 200 }),
+    confidence: Type.Number({ minimum: 0, maximum: 1 }),
+    actionable: Type.Boolean(),
+  },
+  { additionalProperties: false },
+);
+export type OsintFinding = Static<typeof OsintFindingSchema>;
+
+export const OsintDossierSchema = Type.Object(
+  {
+    schemaVersion: Type.Literal("osint-dossier.v1"),
+    workflow: Type.Literal("osint-research"),
+    generatedAt: IsoDateTimeSchema,
+    sourceBudget: Type.Integer({ minimum: 1, maximum: 5 }),
+    targets: Type.Array(OsintTargetDossierSchema, {
+      minItems: 1,
+      maxItems: 5,
+    }),
+    findings: Type.Array(OsintFindingSchema, { maxItems: 1_000 }),
+    coverage: Type.Object(
+      {
+        state: OsintEvidenceStateSchema,
+        targetsRequested: Type.Integer({ minimum: 1, maximum: 5 }),
+        targetsCompleted: Type.Integer({ minimum: 0, maximum: 5 }),
+        pagesObserved: Type.Integer({ minimum: 0 }),
+        evidenceAvailable: Type.Integer({ minimum: 0 }),
+      },
+      { additionalProperties: false },
+    ),
+    policy: Type.Object(
+      {
+        collection: Type.Literal("public_web_only"),
+        personalData: Type.Literal("disabled"),
+        identityResolution: Type.Literal("disabled"),
+        authenticatedCollection: Type.Literal("disabled"),
+        darkWebCollection: Type.Literal("disabled"),
+      },
+      { additionalProperties: false },
+    ),
+    limitations: Type.Array(Type.String({ minLength: 1, maxLength: 1_000 }), {
+      maxItems: 50,
+    }),
+  },
+  { additionalProperties: false },
+);
+export type OsintDossier = Static<typeof OsintDossierSchema>;
+
 export const StartRunInputSchema = Type.Object(
   {
     projectId: IdentifierSchema,
@@ -1510,6 +1691,7 @@ export const StartRunInputSchema = Type.Object(
         Type.Literal("compare"),
         Type.Literal("keyword-research"),
         Type.Literal("content-plan"),
+        Type.Literal("osint-research"),
       ]),
     ),
     goal: Type.Optional(Type.String({ maxLength: 240 })),

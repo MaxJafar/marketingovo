@@ -26,6 +26,3 @@ paths-ignore:
   # can assert the crawler detects specific defects; their flaws are fixtures,
   # not vulnerabilities.
   - "examples/demo-site/**"
-  # Third-party reference corpus. Gitignored, so this is belt and braces: it is
-  # studied, never built and never shipped.
-  - "TO REVERSE ENGINEEER/**"

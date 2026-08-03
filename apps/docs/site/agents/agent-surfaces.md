@@ -1,13 +1,13 @@
 ---
 title: MCP, Codex, and OpenClaw
-description: Connect agents to nine workflow tools and five session tools without giving them provider credentials.
+description: Connect agents to ten workflow tools and five session tools without giving them provider credentials.
 ---
 
 # MCP, Codex, and OpenClaw
 
 All official agent surfaces connect to the existing local daemon. They do not start another runtime, own another database, or receive provider credentials.
 
-## Nine public workflow tools
+## Ten public workflow tools
 
 | Tool                                  | Mode                   | Purpose                                                               |
 | ------------------------------------- | ---------------------- | --------------------------------------------------------------------- |
@@ -19,6 +19,7 @@ All official agent surfaces connect to the existing local daemon. They do not st
 | `marketingovo_compare_start`          | Starts network work    | Compare a project with one to five public competitor URLs             |
 | `marketingovo_keyword_research_start` | Starts provider work   | Expand a seed, classify intent, and evaluate momentum                 |
 | `marketingovo_content_plan_start`     | Starts provider work   | Build profiles and clusters for up to ten seed topics                 |
+| `marketingovo_osint_research_start`  | Starts network work    | Build a bounded public-web dossier with exact source evidence           |
 | `marketingovo_monitoring_status`      | Read-only, replay-safe | Read health, schedules, and recent runs                               |
 
 Start tools return a run ID. The agent must call `marketingovo_run_get` until the run is terminal before describing the work as complete.
@@ -27,7 +28,7 @@ The start tools are marked optional in the OpenClaw adapter so an operator can a
 
 ## Five terminal session tools
 
-The dashboard's bottom edge is a console with no model of its own. It waits for an agent to attach and answer. These five tools are that other half, and they live in a registry separate from the nine workflow tools so an operator can grant conversational access without granting crawl access, or the reverse.
+The dashboard's bottom edge is a console with no model of its own. It waits for an agent to attach and answer. These five tools are that other half, and they live in a registry separate from the ten workflow tools so an operator can grant conversational access without granting crawl access, or the reverse.
 
 | Tool                          | Mode                   | Purpose                                                              |
 | ----------------------------- | ---------------------- | -------------------------------------------------------------------- |

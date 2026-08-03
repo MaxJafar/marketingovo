@@ -112,7 +112,7 @@ describe("Marketingovo MCP public contract", () => {
     expect(createMarketingovoMcpServer).toBe(createMarketingovoMcpServer);
   });
 
-  it("registers exactly the nine approved workflow tools and the five session tools", async () => {
+  it("registers exactly the approved workflow tools and the five session tools", async () => {
     const { client } = stubClient("running");
     const server = await createMarketingovoMcpServer({ client });
 
@@ -131,6 +131,7 @@ describe("Marketingovo MCP public contract", () => {
       "marketingovo_compare_start",
       "marketingovo_keyword_research_start",
       "marketingovo_content_plan_start",
+      "marketingovo_osint_research_start",
       "marketingovo_monitoring_status",
     ]);
     expect(SESSION_TOOL_NAMES).toEqual([
@@ -211,6 +212,26 @@ describe("Marketingovo MCP public contract", () => {
     });
     expect(client.runs.compare).toHaveBeenCalledWith("run-2", "run-1");
     expect(result.content[0].text).toContain("regression-v1");
+  });
+
+  it("starts bounded public-web OSINT with the explicit target list", async () => {
+    const { client } = stubClient("running");
+    const server = await createMarketingovoMcpServer({ client });
+
+    await registeredTools(server).marketingovo_osint_research_start.handler({
+      project_id: "project-1",
+      target_urls: ["https://partner.example"],
+      max_urls: 12,
+    });
+
+    expect(client.runs.start).toHaveBeenCalledWith({
+      projectId: "project-1",
+      workflowId: "osint-research",
+      options: {
+        targetUrls: ["https://partner.example"],
+        maxUrls: 12,
+      },
+    });
   });
 
   it("exposes project context as a read-only resource without expanding the tool surface", async () => {

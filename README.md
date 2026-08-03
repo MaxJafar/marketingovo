@@ -195,21 +195,15 @@ One repository, three runtimes. Node is the product; the other two are opt-in.
 Installing Go and Python is not required to build, test or run Marketingovo
 itself.
 
-`TO REVERSE ENGINEEER/` holds third-party projects kept only to be read. It is
-excluded from version control and from every build, test and product input, and
-nothing is copied from it. `pnpm reference:validate` enforces that.
-
 ## Documentation
 
 - [Quickstart](docs/quickstart.md)
 - [Architecture](docs/architecture.md)
-- [Intelligence architecture (proposal)](docs/intelligence-architecture.md)
-- [Project Context and marketer journal](docs/project-context.md)
+- [Public-web OSINT layer](docs/osint-layer.md)
 - [Desktop runtime and release configuration](docs/desktop-release.md)
 - [npm release and provenance](docs/npm-release.md)
 - [Privacy](PRIVACY.md)
 - [Threat model](docs/threat-model.md)
-- [Reference-tool reverse engineering](docs/reference-tool-reverse-engineering.md)
 - [Security policy](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
 - [Launch kit](launch/README.md)
@@ -220,6 +214,9 @@ Marketingovo is not marketed as a complete Ahrefs, Semrush, or Screaming Frog
 replacement. Those products have mature proprietary datasets and workflows.
 Our claim is narrower and testable: local-first evidence from several sources
 becomes a transparent action queue that can be re-audited and verified.
+The public-web OSINT layer extends that claim to bounded, cited site and
+competitive signals; it is not a people-search, authenticated-scraping, or
+dark-web product.
 
 ## License and marks
 

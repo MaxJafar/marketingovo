@@ -8,6 +8,7 @@ import {
   AgentContentPlanStartTool,
   AgentKeywordResearchStartTool,
   AgentMonitoringStatusTool,
+  AgentOsintResearchStartTool,
   AgentRunCompareTool,
   AgentRunEvidenceTool,
   AgentRunGetTool,
@@ -17,6 +18,7 @@ import {
   type AgentContentPlanStartInput,
   type AgentKeywordResearchStartInput,
   type AgentMonitoringStatusInput,
+  type AgentOsintResearchStartInput,
   type AgentRunCompareInput,
   type AgentRunEvidenceInput,
   type AgentRunGetInput,
@@ -52,6 +54,10 @@ const keywordResearchStartInputSchema =
 const contentPlanStartInputSchema =
   toOpenClawInputSchema<AgentContentPlanStartInput>(
     AgentContentPlanStartTool.inputSchema,
+  );
+const osintResearchStartInputSchema =
+  toOpenClawInputSchema<AgentOsintResearchStartInput>(
+    AgentOsintResearchStartTool.inputSchema,
   );
 const monitoringStatusInputSchema =
   toOpenClawInputSchema<AgentMonitoringStatusInput>(
@@ -123,7 +129,7 @@ export default defineToolPlugin({
   id: "marketingovo",
   name: "Marketingovo",
   description:
-    "Run local SEO audits, comparisons, keyword research, content plans, evidence inspection, and monitoring through bounded workflow-level tools.",
+    "Run local SEO audits, comparisons, keyword research, content plans, public-web OSINT research, evidence inspection, and monitoring through bounded workflow-level tools.",
   configSchema,
   tools: (tool) => [
     tool({
@@ -252,6 +258,25 @@ export default defineToolPlugin({
           projectId: params.project_id,
           workflowId: "content-plan",
           options: { seeds: params.seeds },
+        });
+      },
+    }),
+    tool({
+      name: AgentOsintResearchStartTool.name,
+      label: AgentOsintResearchStartTool.title,
+      description: AgentOsintResearchStartTool.description,
+      optional: AgentOsintResearchStartTool.optional,
+      parameters: osintResearchStartInputSchema,
+      async execute(params, config) {
+        return (await client(config)).runs.start({
+          projectId: params.project_id,
+          workflowId: "osint-research",
+          options: {
+            ...(params.target_urls ? { targetUrls: params.target_urls } : {}),
+            ...(params.max_urls !== undefined
+              ? { maxUrls: params.max_urls }
+              : {}),
+          },
         });
       },
     }),

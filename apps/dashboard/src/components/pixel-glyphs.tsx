@@ -29,6 +29,12 @@ export const navGlyphs: Record<string, ReactNode> = {
   "social-research": (
     <path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9Z" />
   ),
+  osint: (
+    <>
+      <circle cx="10" cy="10" r="5.5" />
+      <path d="m14 14 6 6M7.5 10h5M10 7.5v5" />
+    </>
+  ),
   "content-intel": (
     <>
       {FRAME}

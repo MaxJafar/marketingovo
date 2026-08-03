@@ -176,7 +176,7 @@ describe("AppShell accessibility", () => {
   it("keeps every working page reachable from the shell", () => {
     renderShell();
 
-    // The ten headline sections are the product's map, but six more pages exist
+    // The headline sections are the product's map, but utility pages also exist
     // and a page with no link into it is, from the operator's side, a page that
     // does not exist. This asserts the whole reachable set, so removing a link
     // fails here rather than silently stranding a workbench.
@@ -191,6 +191,7 @@ describe("AppShell accessibility", () => {
       "/",
       "/audits",
       "/social",
+      "/osint",
       "/content",
       "/competitors",
       "/keywords",
@@ -240,6 +241,7 @@ describe("AppShell accessibility", () => {
     expect(routeTitleForPathname("/audits")).toBe("SEO analytics");
     expect(routeTitleForPathname("/audits/run-1")).toBe("Audit details");
     expect(routeTitleForPathname("/context")).toBe("Notes");
+    expect(routeTitleForPathname("/osint")).toBe("OSINT layer");
     expect(routeTitleForPathname("/nowhere")).toBe("Page not found");
   });
 });

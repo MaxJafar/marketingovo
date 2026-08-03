@@ -7,7 +7,7 @@ description: What 1.1.0 contains, which gates were observed passing, and which c
 
 ## 1.1.0
 
-The REST API, OpenAPI document, SDK, nine-tool agent contract registry, CLI and `.marketingovo` bundle format are stable: breaking changes to them require a major version. 1.1.0 is additive on top of 1.0.0 and breaks no existing integration.
+The REST API, OpenAPI document, SDK, ten-tool agent contract registry, CLI and `.marketingovo` bundle format are stable: breaking changes to them require a major version. 1.1.0 is additive on top of 1.0.0 and breaks no existing integration.
 
 <div class="status-banner">
   <strong>Approved, with deferred channels</strong>
@@ -42,9 +42,11 @@ The REST API, OpenAPI document, SDK, nine-tool agent contract registry, CLI and 
 - versioned social, editorial, commerce, and migration extraction templates
   with assumption disclosure, explicit draft review, fresh IDs, and conflict
   and capacity safeguards;
+- bounded public-web OSINT dossiers with exact source links, evidence states,
+  target graphs, and explicit privacy/collection limits;
 - CLI and typed REST SDK;
 - versioned `/api/v1`, OpenAPI, asynchronous runs, SSE events, and problem details;
-- nine workflow-level agent tools and read-only resources, plus a separate five-tool terminal session registry;
+- ten workflow-level agent tools and read-only resources, plus a separate five-tool terminal session registry;
 - Codex and OpenClaw bundles over the same local contracts;
 - connector manifests for GSC, GA4, PageSpeed Insights, Trends, SerpAPI, and DataForSEO;
 - BYOK credential boundary and encrypted CLI vault option;
@@ -142,5 +144,5 @@ Do not claim production certification, universal provider availability, or full 
 
 <p class="source-note">
   Canonical status: <a href="https://github.com/MaxJafar/marketingovo/blob/main/docs/release-status.md">release status</a>.
-  Broader direction belongs in the <a href="https://github.com/MaxJafar/marketingovo/blob/main/README.md">product README</a> and project planning documents.
+  Current scope belongs in the <a href="https://github.com/MaxJafar/marketingovo/blob/main/README.md">product README</a>.
 </p>

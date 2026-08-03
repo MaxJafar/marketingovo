@@ -2750,6 +2750,64 @@ p {
   font-family: "Manrope", sans-serif;
   font-size: 1rem;
 }
+.osint-target-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.osint-target-card {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+}
+.osint-target-heading,
+.evidence-row-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+.osint-target-heading h3 {
+  margin: 4px 0;
+  overflow-wrap: anywhere;
+}
+.osint-target-heading small,
+.osint-target-heading a {
+  color: var(--ink-faint);
+  overflow-wrap: anywhere;
+}
+.osint-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.osint-policy-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.osint-evidence-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.osint-evidence-list li {
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.osint-evidence-list p {
+  margin: 7px 0 4px;
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+.osint-evidence-list small {
+  color: var(--ink-faint);
+  font-size: 0.61rem;
+}
+.osint-evidence-list a {
+  color: var(--ink);
+}
 .evidence-source-link {
   margin: -4px 0 0;
   color: var(--ink-faint);
@@ -4405,6 +4463,7 @@ p {
   .action-grid,
   .action-grid-wide,
   .competitor-grid,
+  .osint-target-grid,
   .cluster-grid,
   .health-check-grid,
   .integration-grid,

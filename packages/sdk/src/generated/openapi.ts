@@ -9045,7 +9045,11 @@ export type paths = {
                 };
                 projectId: string;
                 workflowId?:
-                  "audit" | "compare" | "keyword-research" | "content-plan";
+                  | "audit"
+                  | "compare"
+                  | "keyword-research"
+                  | "content-plan"
+                  | "osint-research";
               }
             | {
                 mode?: "full" | "incremental";

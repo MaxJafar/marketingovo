@@ -162,6 +162,20 @@ export type {
   BrandProfilePresence,
   BrandReachability,
 } from "./integrations/brand-presence.js";
+export {
+  runOsintResearch,
+  type OsintDossier,
+  type OsintEntity,
+  type OsintEntityType,
+  type OsintEvidence,
+  type OsintEvidenceState,
+  type OsintFinding,
+  type OsintRelationship,
+  type OsintRelationshipType,
+  type OsintResearchOptions,
+  type OsintSourceClass,
+  type OsintTargetDossier,
+} from "./integrations/osint.js";
 
 // The executive layer of a report, shared by every renderer so the HTML and PDF
 // can never disagree about what an audit found.
