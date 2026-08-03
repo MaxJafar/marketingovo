@@ -27,6 +27,13 @@ jobs:
           corepack prepare pnpm@10.34.5 --activate
       - name: Install from the single lockfile
         run: pnpm install --frozen-lockfile
+      # packages/core's Web Vitals test crawls in JS render mode, which needs a
+      # real browser. Without one the crawler catches the launch failure and
+      # returns a page with no vitals, so the test fails as "expected null to be
+      # truthy" and hides the actual cause. The browser-e2e job installs the
+      # same pinned runtime.
+      - name: Install the pinned Chromium runtime
+        run: pnpm exec playwright install --with-deps chromium
       - name: Build, lint, typecheck, test and validate public surfaces
         env:
           MARKETINGOVO_NPM_INSTALL_SMOKE: "1"

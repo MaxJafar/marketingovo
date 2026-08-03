@@ -5,7 +5,10 @@ import {
 } from "./integration/fixtures-site.js";
 import { crawl } from "../src/orchestrator.js";
 
-process.env.SCREAMINGCLAW_NO_SANDBOX = "1";
+// No sandbox flag is set here. Nothing reads SCREAMINGCLAW_NO_SANDBOX any more
+// — it was a no-op left over from an earlier brand — and lighthouse.test.ts
+// asserts that --no-sandbox stays out of the Chrome flags on purpose. This test
+// needs a real Chromium, which CI installs, not a weakened one.
 
 let site: FixtureSite;
 beforeAll(async () => {
