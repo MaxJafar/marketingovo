@@ -34,6 +34,23 @@ jobs:
       # same pinned runtime.
       - name: Install the pinned Chromium runtime
         run: pnpm exec playwright install --with-deps chromium
+      # Ubuntu 23.10+ restricts unprivileged user namespaces through AppArmor,
+      # so Chromium's own sandbox cannot initialise and the browser aborts with
+      # "No usable sandbox!" before any page loads.
+      #
+      # The crawler launches with `chromiumSandbox: true` on purpose: it renders
+      # untrusted pages, and packages/core/src/renderer.ts records that running
+      # without the sandbox is not a supported mode, including for diagnostics.
+      # lighthouse.test.ts asserts --no-sandbox stays out of the Chrome flags.
+      # So this restores the kernel setting the sandbox needs rather than
+      # passing --no-sandbox, which would make CI green by testing a
+      # configuration the product refuses to run.
+      #
+      # browser-e2e does not need this: Playwright Test defaults to
+      # chromiumSandbox: false and drives the trusted local dashboard, not the
+      # crawler.
+      - name: Allow unprivileged user namespaces for Chromium's sandbox
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - name: Build, lint, typecheck, test and validate public surfaces
         env:
           MARKETINGOVO_NPM_INSTALL_SMOKE: "1"
