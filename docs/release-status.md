@@ -113,8 +113,9 @@ passes expose cited added/removed/changed signals without treating a blocked
 target as a disappearance. It does not enable people-search, authenticated
 scraping, identity resolution, or dark-web collection. New passes now expose
 stable claim fingerprints and a dossier-level provenance digest so report
-changes are detectable without overstating source truth. See [the OSINT layer
-contract](osint-layer.md).
+changes are detectable without overstating source truth. The first-run setup
+wizard now offers this bounded pass by default, with an explicit opt-out and a
+private-target safety gate. See [the OSINT layer contract](osint-layer.md).
 Audit details now include a versioned, paginated evidence workbench for crawl
 paths, redirect chains, reciprocal hreflang, sitemap coverage, and bounded
 custom extraction results. A corrected reciprocity model and sitemap-index

@@ -4944,3 +4944,38 @@ p {
   flex: 0 0 auto;
   accent-color: var(--accent);
 }
+
+.wizard-osint-option {
+  padding: 0.875rem;
+  border: 1px solid var(--line);
+  border-radius: 0.625rem;
+  background: var(--surface-soft);
+}
+
+.wizard-osint-disabled {
+  opacity: 0.72;
+}
+
+.wizard-osint-option strong,
+.wizard-osint-option small {
+  display: block;
+}
+
+.wizard-osint-option strong {
+  color: var(--ink);
+}
+
+.wizard-osint-option small {
+  margin-top: 0.25rem;
+  color: var(--ink-faint);
+  font-size: 0.72rem;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.wizard-lock-reason {
+  margin: 0.625rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}

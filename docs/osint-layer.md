@@ -45,6 +45,10 @@ the provenance fields.
 - Dashboard: `/osint`, with a bounded target form, coverage/policy state, target
   dossiers, findings, graph counts, source links, trust/provenance summary, and
   cited pass history.
+- Setup wizard: the first-run review queues a public-web OSINT dossier by
+  default, using the project site plus only the explicit competitor URLs in
+  that setup. It can be skipped, and it is disabled for private or loopback
+  primary sites.
 - Runtime: `osint-research`, persisted as `report.json` and available through
   the normal run report endpoint.
 - Dashboard API: `/api/v1/osint?siteId=...`, which returns the latest dossier

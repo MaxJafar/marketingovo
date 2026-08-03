@@ -106,7 +106,7 @@ export function withProtocol(value: string): string {
 function privateHostOf(rawUrl: string): string | null {
   let host: string;
   try {
-    host = new URL(rawUrl).hostname.toLowerCase();
+    host = new URL(rawUrl).hostname.toLowerCase().replace(/^\[|\]$/gu, "");
   } catch {
     return null;
   }
@@ -157,6 +157,7 @@ export function WizardPage() {
   const [siteId, setSiteId] = useState<string | null>(null);
   const [launched, setLaunched] = useState<string[]>([]);
   const [allowPrivate, setAllowPrivate] = useState(false);
+  const [includeOsint, setIncludeOsint] = useState(true);
 
   const createSite = useCreateSite();
   const updateContext = useUpdateProjectContext(siteId ?? "");
@@ -191,6 +192,19 @@ export function WizardPage() {
     }
     return [...hosts];
   }, [websiteUrl, competitors]);
+
+  const primaryPrivateHost = useMemo(
+    () => privateHostOf(withProtocol(websiteUrl)),
+    [websiteUrl],
+  );
+  const osintTargets = useMemo(
+    () =>
+      competitors
+        .filter((candidate) => !privateHostOf(withProtocol(candidate)))
+        .slice(0, 4)
+        .map(withProtocol),
+    [competitors],
+  );
 
   const configuredProviders = useMemo(
     () => Object.entries(secrets).filter(([, value]) => value.trim()),
@@ -284,6 +298,17 @@ export function WizardPage() {
         });
         started.push("Competitor comparison");
       }
+      if (includeOsint && !primaryPrivateHost) {
+        await startWorkflow.mutateAsync({
+          projectId: siteId,
+          workflowId: "osint-research",
+          options: {
+            targetUrls: osintTargets,
+            maxUrls: 12,
+          },
+        });
+        started.push("Public-web OSINT dossier");
+      }
       setLaunched(started);
     } catch (cause) {
       setError(
@@ -355,18 +380,20 @@ export function WizardPage() {
               title="What are we tracking?"
               description="The workspace is named for the brand. The site is what gets crawled."
             />
-            <label>
+            <label htmlFor="wizard-brand-name">
               Brand name
               <input
+                id="wizard-brand-name"
                 value={brandName}
                 onChange={(event) => setBrandName(event.currentTarget.value)}
                 placeholder="Acme Running"
                 required
               />
             </label>
-            <label>
+            <label htmlFor="wizard-website">
               Website
               <input
+                id="wizard-website"
                 value={websiteUrl}
                 onChange={(event) => setWebsiteUrl(event.currentTarget.value)}
                 placeholder="acme.example"
@@ -374,10 +401,11 @@ export function WizardPage() {
               />
               <small>https:// is added if you leave it off.</small>
             </label>
-            <label>
+            <label htmlFor="wizard-summary">
               What does this brand do?{" "}
               <span className="optional">Optional</span>
               <textarea
+                id="wizard-summary"
                 value={summary}
                 onChange={(event) => setSummary(event.currentTarget.value)}
                 placeholder="Direct-to-consumer running shoes, UK and Ireland."
@@ -399,9 +427,10 @@ export function WizardPage() {
             />
             {profiles.map((entry, index) => (
               <div className="wizard-row" key={index}>
-                <label>
+                <label htmlFor={`wizard-profile-label-${index}`}>
                   Label
                   <input
+                    id={`wizard-profile-label-${index}`}
                     value={entry.label}
                     onChange={(event) =>
                       updateProfile(index, { label: event.currentTarget.value })
@@ -409,9 +438,10 @@ export function WizardPage() {
                     placeholder="Instagram"
                   />
                 </label>
-                <label>
+                <label htmlFor={`wizard-profile-url-${index}`}>
                   Profile URL
                   <input
+                    id={`wizard-profile-url-${index}`}
                     value={entry.url}
                     onChange={(event) =>
                       updateProfile(index, { url: event.currentTarget.value })
@@ -453,9 +483,10 @@ export function WizardPage() {
               title="Who are you measured against?"
               description="Every competitor is crawled with the same limits as your own site. Publishing cadence and content gaps come from their pages, so no provider key is needed."
             />
-            <label>
+            <label htmlFor="wizard-competitors">
               Competitor domains
               <textarea
+                id="wizard-competitors"
                 value={competitorText}
                 onChange={(event) =>
                   setCompetitorText(event.currentTarget.value)
@@ -478,9 +509,13 @@ export function WizardPage() {
               description="Every one of these is optional. Skip them and the audit still runs — findings are ranked by technical severity and reach, and anything that needs a source is reported as unavailable rather than guessed."
             />
             {CREDENTIAL_PROVIDERS.map((provider) => (
-              <label key={provider.id}>
+              <label
+                key={provider.id}
+                htmlFor={`wizard-provider-${provider.id}`}
+              >
                 {provider.label} <span className="optional">Optional</span>
                 <input
+                  id={`wizard-provider-${provider.id}`}
                   type="password"
                   autoComplete="off"
                   value={secrets[provider.id] ?? ""}
@@ -509,7 +544,7 @@ export function WizardPage() {
           <div>
             <SectionHeading
               title="Ready to run"
-              description="The baseline audit and the competitor comparison start together."
+              description="The baseline audit, competitor comparison, and optional public-web OSINT pass are queued together."
             />
             <dl className="wizard-summary">
               <div>
@@ -545,6 +580,16 @@ export function WizardPage() {
                 </dd>
               </div>
               <div>
+                <dt>Public-web OSINT</dt>
+                <dd>
+                  {includeOsint && !primaryPrivateHost
+                    ? "Included — cited public signals and repeat-pass history"
+                    : primaryPrivateHost
+                      ? "Skipped — public target required"
+                      : "Skipped by choice"}
+                </dd>
+              </div>
+              <div>
                 <dt>Integrations detected</dt>
                 <dd>
                   {integrations.data
@@ -553,6 +598,36 @@ export function WizardPage() {
                 </dd>
               </div>
             </dl>
+
+            <label
+              className={`wizard-affirm wizard-osint-option${primaryPrivateHost ? " wizard-osint-disabled" : ""}`}
+            >
+              <input
+                type="checkbox"
+                checked={includeOsint}
+                disabled={Boolean(primaryPrivateHost)}
+                onChange={(event) =>
+                  setIncludeOsint(event.currentTarget.checked)
+                }
+                aria-describedby="wizard-osint-help"
+              />
+              <span>
+                <strong>Include the public-web OSINT dossier</strong>
+                <small id="wizard-osint-help">
+                  Recommended. Uses only this site and the explicit competitor
+                  URLs above, with source links, availability states, and no
+                  people-search, authenticated scraping, or dark-web collection.
+                  Private or loopback competitor URLs are excluded.
+                </small>
+              </span>
+            </label>
+            {primaryPrivateHost ? (
+              <p className="wizard-lock-reason">
+                OSINT stays off for {primaryPrivateHost}; it is limited to
+                public targets. The baseline can still run with the private-host
+                authorization above.
+              </p>
+            ) : null}
 
             {privateHosts.length > 0 ? (
               <InlineNotice
