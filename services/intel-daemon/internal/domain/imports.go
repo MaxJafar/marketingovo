@@ -3,8 +3,8 @@ package domain
 import "time"
 
 const (
-	CompetitivePulseImportSchema  = "agentintel.competitive-pulse-import.v1"
-	CompetitivePulseParserVersion = "agentintel-python-competitive-pulse-csv@1.0.0"
+	CompetitivePulseImportSchema  = "marketingovo.competitive-pulse-import.v1"
+	CompetitivePulseParserVersion = "marketingovo-python-competitive-pulse-csv@1.0.0"
 	CompetitivePulseMetricCatalog = "competitive-pulse.v1"
 )
 

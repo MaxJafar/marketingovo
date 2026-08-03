@@ -8,7 +8,12 @@ from urllib.parse import parse_qsl, urlsplit
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from .constants import MODEL_VERSION, REPORT_SCHEMA_ID, WORKER_VERSION
+from .constants import (
+    CSV_REPORT_SCHEMA_ID,
+    MODEL_VERSION,
+    REPORT_SCHEMA_ID,
+    WORKER_VERSION,
+)
 
 
 def iso_z(value: datetime) -> str:
@@ -219,7 +224,7 @@ class Derivation(BaseModel):
 class ComparisonReport(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: Literal["agentintel.comparison-report.v1"] = REPORT_SCHEMA_ID
+    schema_version: Literal["marketingovo.comparison-report.v1"] = REPORT_SCHEMA_ID
     run_id: str
     workflow: Literal["compare", "research"]
     research_question: str | None = None
@@ -321,19 +326,21 @@ class ImportDatasetProvenance(BaseModel):
 
     dataset_id: str
     input_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
-    input_schema_id: Literal["agentintel.competitive-pulse-import.v1"]
+    input_schema_id: Literal["marketingovo.competitive-pulse-import.v1"]
     input_size_bytes: int = Field(ge=0)
     platform: str
     validated_at: str
     retention_until: str
-    input_parser_version: Literal["agentintel-python-competitive-pulse-csv@1.0.0"]
+    input_parser_version: Literal["marketingovo-python-competitive-pulse-csv@1.0.0"]
     metric_catalog_version: Literal["competitive-pulse.v1"]
 
 
 class ImportComparisonReport(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: Literal["agentintel.comparison-report.v2"] = "agentintel.comparison-report.v2"
+    schema_version: Literal["marketingovo.comparison-report.v2"] = (
+        CSV_REPORT_SCHEMA_ID
+    )
     run_id: str
     workflow: Literal["compare"] = "compare"
     generated_at: str
@@ -428,7 +435,7 @@ class AnalysisRequest(BaseModel):
             raise ValueError(
                 "research workflow requires a 3-2000 character question and source budget 1-100"
             )
-        if self.input_schema_id == "agentintel.competitive-pulse-import.v1":
+        if self.input_schema_id == "marketingovo.competitive-pulse-import.v1":
             if self.workflow != "compare":
                 raise ValueError("CSV imports support only the deterministic compare workflow")
             if not all(

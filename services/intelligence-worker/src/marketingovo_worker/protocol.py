@@ -38,21 +38,21 @@ MAX_CONTROL_MESSAGE_BYTES = 4 * 1024 * 1024
 def load_worker_pb2() -> ModuleType:
     """Load generated bindings directly from the repository contract output."""
     try:
-        from agentintel.v1 import worker_pb2  # type: ignore[import-not-found]
+        from marketingovo.v1 import worker_pb2  # type: ignore[import-not-found]
 
         return worker_pb2
     except ModuleNotFoundError:
         repository_root = Path(__file__).resolve().parents[4]
         generated_root = Path(
-            os.environ.get("AGENTINTEL_GEN_PYTHON", repository_root / "gen/python")
+            os.environ.get("MARKETINGOVO_GEN_PYTHON", repository_root / "gen/python")
         ).resolve()
-        if not (generated_root / "agentintel/v1/worker_pb2.py").is_file():
+        if not (generated_root / "marketingovo/v1/worker_pb2.py").is_file():
             raise WorkerError(
                 "protocol_bindings_unavailable",
                 "Generated Python worker bindings are unavailable; run `buf generate`.",
             ) from None
         sys.path.insert(0, str(generated_root))
-        from agentintel.v1 import worker_pb2  # type: ignore[import-not-found,no-redef]
+        from marketingovo.v1 import worker_pb2  # type: ignore[import-not-found,no-redef]
 
         return worker_pb2
 

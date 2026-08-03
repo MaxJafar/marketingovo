@@ -140,7 +140,7 @@ func validateLiveTargets(targets []string) error {
 			continue
 		}
 		live++
-		if _, err := ValidateEgressURL(target, DefaultEgressLimits("AGENTintel")); err != nil {
+		if _, err := ValidateEgressURL(target, DefaultEgressLimits("Marketingovo-Intel")); err != nil {
 			return fmt.Errorf("%w: %s is not a permitted source: %v",
 				ErrInvalidRequest, target, err)
 		}

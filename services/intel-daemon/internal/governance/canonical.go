@@ -21,7 +21,7 @@ import (
 	"github.com/apache/arrow-go/v18/parquet/pqarrow"
 )
 
-const CanonicalParserVersion = "agentintel-go-arrow-parquet.v1"
+const CanonicalParserVersion = "marketingovo-go-arrow-parquet.v1"
 
 var canonicalObservationFields = []arrow.Field{
 	{Name: "observation_id", Type: arrow.BinaryTypes.String, Nullable: false},
@@ -159,8 +159,8 @@ func validateCanonicalSchema(schema *arrow.Schema, requireSchemaID bool) error {
 				index, expected.Name, expected.Type, expected.Nullable, actual.Name, actual.Type, actual.Nullable)
 		}
 	}
-	if schemaID, present := schema.Metadata().GetValue("agentintel.schema_id"); requireSchemaID && (!present || schemaID != "agentintel.observations.v1") {
-		return fmt.Errorf("%w: canonical schema metadata lacks agentintel.observations.v1", ErrArtifactMismatch)
+	if schemaID, present := schema.Metadata().GetValue("marketingovo.schema_id"); requireSchemaID && (!present || schemaID != "marketingovo.observations.v1") {
+		return fmt.Errorf("%w: canonical schema metadata lacks marketingovo.observations.v1", ErrArtifactMismatch)
 	}
 	return nil
 }

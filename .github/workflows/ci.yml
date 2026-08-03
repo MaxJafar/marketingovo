@@ -173,6 +173,10 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITLEAKS_VERSION: 8.30.1
+          # Named explicitly rather than relying on root auto-detection, so a
+          # moved or renamed config fails loudly instead of silently scanning
+          # with defaults and re-flagging the reviewed test canary.
+          GITLEAKS_CONFIG: .gitleaks.toml
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   desktop-native:
@@ -211,4 +215,5 @@ jobs:
       - uses: gitleaks/gitleaks-action@v2
         env:
           GITLEAKS_VERSION: 8.30.1
+          GITLEAKS_CONFIG: .gitleaks.toml
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

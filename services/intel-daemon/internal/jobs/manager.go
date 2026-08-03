@@ -532,7 +532,7 @@ func (manager *Manager) execute(run domain.Run) {
 	}
 	provenance := domain.Provenance{
 		WorkerVersion: result.WorkerVersion, ModelVersion: result.ModelVersion,
-		ConnectorVersion: selected.ID(), ParserVersion: "agentintel-go-fixture.v1",
+		ConnectorVersion: selected.ID(), ParserVersion: "marketingovo-go-fixture.v1",
 	}
 	if provenance.WorkerVersion == "" {
 		provenance.WorkerVersion = selected.ID()
@@ -542,7 +542,7 @@ func (manager *Manager) execute(run domain.Run) {
 	}
 	switch selected.ID() {
 	case "python.intelligence.protocol.v1":
-		provenance.ParserVersion = "agentintel-go-arrow-parquet.v1"
+		provenance.ParserVersion = "marketingovo-go-arrow-parquet.v1"
 	case connectors.WebsiteID:
 		provenance.ParserVersion = connectors.WebsiteParserVersion
 	}
@@ -647,7 +647,7 @@ func deriveCanonicalProjections(runID string, observations []domain.Observation,
 }
 
 func (manager *Manager) prepareInputSnapshot(run domain.Run, destinationPath string) (domain.InputSnapshot, error) {
-	const schemaID = "agentintel.fixture-observations.v1"
+	const schemaID = "marketingovo.fixture-observations.v1"
 	if run.InputSHA256 != "" {
 		if run.InputSchemaID == "" || run.InputRelativePath == "" || run.InputSizeBytes <= 0 {
 			return domain.InputSnapshot{}, &connectors.WorkerError{Code: "input_snapshot_invalid", Message: "replay input snapshot metadata is incomplete"}

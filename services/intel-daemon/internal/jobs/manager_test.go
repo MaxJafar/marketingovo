@@ -87,7 +87,7 @@ func TestManagerCommitsSearchableEvidence(t *testing.T) {
 	if terminal.Status != domain.RunSucceeded || !terminal.ReportAvailable {
 		t.Fatalf("unexpected success: %+v", terminal)
 	}
-	if terminal.InputSHA256 == "" || terminal.InputSchemaID != "agentintel.fixture-observations.v1" || terminal.InputSizeBytes <= 0 || terminal.WorkerVersion == "" || terminal.ModelVersion == "" || terminal.ConnectorVersion == "" || terminal.ParserVersion == "" {
+	if terminal.InputSHA256 == "" || terminal.InputSchemaID != "marketingovo.fixture-observations.v1" || terminal.InputSizeBytes <= 0 || terminal.WorkerVersion == "" || terminal.ModelVersion == "" || terminal.ConnectorVersion == "" || terminal.ParserVersion == "" {
 		t.Fatalf("run lacks immutable input/provenance: %+v", terminal)
 	}
 	artifacts, err := store.ListArtifacts(context.Background(), run.ID)
@@ -209,7 +209,7 @@ func (worker *capturingWorker) Analyze(_ context.Context, request connectors.Ana
 	return domain.ConnectorResult{Succeeded: true, ReportRelativePath: "../escape.json", ReportSHA256: hash,
 		ModelVersion: "malicious", WorkerVersion: "malicious",
 		Artifacts: []domain.ArtifactDescriptor{{RelativePath: "../escape.json", Kind: "report", MediaType: "application/json", SHA256: hash,
-			SizeBytes: int64(len(payload)), RowCount: 1, SchemaID: "agentintel.comparison-report.v1", DataClass: "public"}}}, nil
+			SizeBytes: int64(len(payload)), RowCount: 1, SchemaID: "marketingovo.comparison-report.v1", DataClass: "public"}}}, nil
 }
 
 func startCustomManager(t *testing.T, dataRoot, fixture string, worker connectors.Worker) (*Manager, *storage.Store) {

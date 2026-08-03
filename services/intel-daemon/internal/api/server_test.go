@@ -88,12 +88,12 @@ func TestBearerAndOneTimeBrowserSessionBoundaries(t *testing.T) {
 		t.Fatalf("cookie mutation without CSRF = %d", withoutCSRF.StatusCode)
 	}
 	withoutCSRF.Body.Close()
-	wrongOrigin := postJSON(t, browser, environment.server.URL+"/v1/comparisons", comparisonBody(), map[string]string{"Origin": "http://127.0.0.1:1", "X-AgentIntel-CSRF": session.CSRF})
+	wrongOrigin := postJSON(t, browser, environment.server.URL+"/v1/comparisons", comparisonBody(), map[string]string{"Origin": "http://127.0.0.1:1", "X-Marketingovo-CSRF": session.CSRF})
 	if wrongOrigin.StatusCode != http.StatusForbidden {
 		t.Fatalf("cross-origin cookie mutation = %d", wrongOrigin.StatusCode)
 	}
 	wrongOrigin.Body.Close()
-	accepted := postJSON(t, browser, environment.server.URL+"/v1/comparisons", comparisonBody(), map[string]string{"Origin": environment.server.URL, "X-AgentIntel-CSRF": session.CSRF})
+	accepted := postJSON(t, browser, environment.server.URL+"/v1/comparisons", comparisonBody(), map[string]string{"Origin": environment.server.URL, "X-Marketingovo-CSRF": session.CSRF})
 	if accepted.StatusCode != http.StatusAccepted {
 		payload, _ := io.ReadAll(accepted.Body)
 		t.Fatalf("session mutation status = %d: %s", accepted.StatusCode, payload)
@@ -220,7 +220,7 @@ func newTestAPI(t *testing.T) testAPIEnvironment {
 	if err := os.MkdirAll(dashboard, 0o700); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(dashboard, "index.html"), []byte("<!doctype html><title>AGENTintel</title>"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(dashboard, "index.html"), []byte("<!doctype html><title>Marketingovo</title>"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	serviceToken, _ := GenerateToken()

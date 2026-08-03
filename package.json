@@ -69,8 +69,8 @@
     "reference:validate": "node scripts/reference-lab-validate.mjs",
     "reference:scan": "node scripts/scan-reference-secrets.mjs",
     "reference:scan:strict": "node scripts/scan-reference-secrets.mjs --fail-on-unquarantined",
-    "intel": "go -C services/intel-daemon run ./cmd/agentintel",
-    "intel:daemon": "go -C services/intel-daemon run ./cmd/agentinteld",
+    "intel": "go -C services/intel-daemon run ./cmd/marketingovo-intel",
+    "intel:daemon": "go -C services/intel-daemon run ./cmd/marketingovo-inteld",
     "check:native": "pnpm build:go && pnpm lint:go && pnpm test:go && pnpm lint:python && pnpm test:python",
     "check:all": "pnpm check && pnpm check:native"
   },

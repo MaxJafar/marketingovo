@@ -1,4 +1,4 @@
-# AGENTintel Competitive Pulse import v1 golden contract
+# Marketingovo Competitive Pulse import v1 golden contract
 
 `competitive-pulse.csv` is the sanitized golden input for the private local
 import alpha. It contains 18 fictional observations for three fictional brands.
@@ -18,5 +18,5 @@ copyable inert text but never clickable or fetched.
 The normative grammar, validation diagnostics, canonical field mapping,
 metrics, lifecycle, retention, API, worker, and report contracts are in
 [`docs/intel/adr/0002-local-competitive-pulse-import-alpha.md`](../../docs/intel/adr/0002-local-competitive-pulse-import-alpha.md).
-The sample uses the canonical `agentintel.*` wire namespace.
+The sample uses the canonical `marketingovo.*` wire namespace.
 product name or a license decision.

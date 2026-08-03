@@ -47,11 +47,11 @@ func TestCommitEvidenceAndDetectPostCommitCorruption(t *testing.T) {
 		Descriptors: []domain.ArtifactDescriptor{{
 			RelativePath: "observations.ndjson", Kind: "raw", MediaType: "application/x-ndjson",
 			SHA256: hex.EncodeToString(rawHash[:]), SizeBytes: int64(len(raw)), RowCount: 1,
-			SchemaID: "agentintel.observations.v1", DataClass: "public", MinimumObservedAt: &bound, MaximumObservedAt: &bound,
+			SchemaID: "marketingovo.observations.v1", DataClass: "public", MinimumObservedAt: &bound, MaximumObservedAt: &bound,
 		}, {
 			RelativePath: "report.json", Kind: "report", MediaType: "application/json",
 			SHA256: hex.EncodeToString(hash[:]), SizeBytes: int64(len(contents)),
-			RowCount: 1, SchemaID: "agentintel.comparison-report.v1", DataClass: "public",
+			RowCount: 1, SchemaID: "marketingovo.comparison-report.v1", DataClass: "public",
 		}},
 	})
 	if err != nil {
@@ -91,7 +91,7 @@ func TestCommitEvidenceRejectsSymlink(t *testing.T) {
 		Descriptors: []domain.ArtifactDescriptor{{
 			RelativePath: "report.json", Kind: "report", MediaType: "application/json",
 			SHA256: "00" + string(make([]byte, 62)), SizeBytes: 6, RowCount: 1,
-			SchemaID: "agentintel.comparison-report.v1", DataClass: "public",
+			SchemaID: "marketingovo.comparison-report.v1", DataClass: "public",
 		}},
 	})
 	if !errors.Is(err, ErrUnsafePath) {
@@ -133,7 +133,7 @@ func TestCommitEvidenceRejectsUndeclaredWorkerOutput(t *testing.T) {
 		Descriptors: []domain.ArtifactDescriptor{{
 			RelativePath: "report.json", Kind: "report", MediaType: "application/json",
 			SHA256: hex.EncodeToString(digest[:]), SizeBytes: int64(len(report)),
-			RowCount: 1, SchemaID: "agentintel.comparison-report.v1", DataClass: "public",
+			RowCount: 1, SchemaID: "marketingovo.comparison-report.v1", DataClass: "public",
 		}},
 	})
 	if !errors.Is(err, ErrUnsafePath) {
@@ -164,12 +164,12 @@ func TestCommitEvidenceRejectsSpoofedParquetSignature(t *testing.T) {
 			{
 				RelativePath: "observations.parquet", Kind: "parquet", MediaType: "application/vnd.apache.parquet",
 				SHA256: hex.EncodeToString(parquetHash[:]), SizeBytes: int64(len(fakeParquet)), RowCount: 1,
-				SchemaID: "agentintel.observations.v1", MinimumObservedAt: &minimum, MaximumObservedAt: &maximum, DataClass: "public",
+				SchemaID: "marketingovo.observations.v1", MinimumObservedAt: &minimum, MaximumObservedAt: &maximum, DataClass: "public",
 			},
 			{
 				RelativePath: "report.json", Kind: "report", MediaType: "application/json",
 				SHA256: hex.EncodeToString(reportHash[:]), SizeBytes: int64(len(report)), RowCount: 1,
-				SchemaID: "agentintel.comparison-report.v1", DataClass: "public",
+				SchemaID: "marketingovo.comparison-report.v1", DataClass: "public",
 			},
 		},
 	})
@@ -179,14 +179,14 @@ func TestCommitEvidenceRejectsSpoofedParquetSignature(t *testing.T) {
 }
 
 func testProvenance() domain.Provenance {
-	return domain.Provenance{WorkerVersion: "worker.v1", ModelVersion: "model.v1", ConnectorVersion: "fixture.v1", ParserVersion: "agentintel-go-fixture.v1"}
+	return domain.Provenance{WorkerVersion: "worker.v1", ModelVersion: "model.v1", ConnectorVersion: "fixture.v1", ParserVersion: "marketingovo-go-fixture.v1"}
 }
 
 func validReportBytes(t *testing.T, runID string) []byte {
 	t.Helper()
 	now := time.Now().UTC()
 	report := domain.ComparisonReport{
-		SchemaVersion: "agentintel.comparison-report.v1", RunID: runID, GeneratedAt: now,
+		SchemaVersion: "marketingovo.comparison-report.v1", RunID: runID, GeneratedAt: now,
 		Workflow: domain.WorkflowCompare, ResearchPlan: []string{"validate test evidence"}, Derivation: testProvenance(),
 		Title: "Test report", Summary: "Evidence-backed test report.",
 		Targets: []domain.TargetFinding{{

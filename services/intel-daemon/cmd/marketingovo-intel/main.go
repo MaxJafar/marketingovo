@@ -22,7 +22,7 @@ import (
 
 func main() {
 	if err := run(os.Args[1:]); err != nil {
-		fmt.Fprintln(os.Stderr, "agentintel:", err)
+		fmt.Fprintln(os.Stderr, "marketingovo-intel:", err)
 		os.Exit(1)
 	}
 }
@@ -32,7 +32,7 @@ func run(arguments []string) error {
 	if err != nil {
 		return err
 	}
-	global := flag.NewFlagSet("agentintel", flag.ContinueOnError)
+	global := flag.NewFlagSet("marketingovo-intel", flag.ContinueOnError)
 	global.SetOutput(os.Stderr)
 	apiOrigin := global.String("api", "http://127.0.0.1:7465", "local daemon origin")
 	tokenFile := global.String("token-file", filepath.Join(dataDir, api.ServiceTokenFilename), "service token file")
@@ -146,7 +146,7 @@ func importCommand(ctx context.Context, client *api.Client, arguments []string) 
 		return err
 	}
 	if flags.NArg() != 0 || *filePath == "" {
-		return fmt.Errorf("usage: agentintel import --file PATH")
+		return fmt.Errorf("usage: marketingovo-intel import --file PATH")
 	}
 	info, err := os.Lstat(*filePath)
 	if err != nil {
@@ -165,7 +165,7 @@ func importCommand(ctx context.Context, client *api.Client, arguments []string) 
 		return fmt.Errorf("import file changed while opening")
 	}
 	var preview domain.ImportPreview
-	headers := http.Header{"X-AgentIntel-Import-Attestation": []string{"public-permitted-brand-competitive-research.v1"}}
+	headers := http.Header{"X-Marketingovo-Import-Attestation": []string{"public-permitted-brand-competitive-research.v1"}}
 	if err := client.DoBytes(ctx, http.MethodPost, "/v1/datasets/competitive-pulse/preview", "text/csv; charset=utf-8", file, headers, &preview); err != nil {
 		return err
 	}
@@ -217,7 +217,7 @@ func runsCommand(ctx context.Context, client *api.Client, arguments []string) er
 
 func runCommand(ctx context.Context, client *api.Client, arguments []string) error {
 	if len(arguments) != 1 {
-		return fmt.Errorf("usage: agentintel run RUN_ID")
+		return fmt.Errorf("usage: marketingovo-intel run RUN_ID")
 	}
 	var response domain.RunDetail
 	if err := client.Do(ctx, http.MethodGet, "/v1/runs/"+url.PathEscape(arguments[0]), nil, &response); err != nil {
@@ -233,7 +233,7 @@ func watchCommand(ctx context.Context, client *api.Client, arguments []string) e
 		return err
 	}
 	if flags.NArg() != 1 {
-		return fmt.Errorf("usage: agentintel watch [--after N] RUN_ID")
+		return fmt.Errorf("usage: marketingovo-intel watch [--after N] RUN_ID")
 	}
 	return client.StreamEvents(ctx, flags.Arg(0), *after, func(event domain.RunEvent) error { return printJSON(event) })
 }
@@ -245,7 +245,7 @@ func cancelCommand(ctx context.Context, client *api.Client, arguments []string) 
 		return err
 	}
 	if flags.NArg() != 1 {
-		return fmt.Errorf("usage: agentintel cancel [--reason TEXT] RUN_ID")
+		return fmt.Errorf("usage: marketingovo-intel cancel [--reason TEXT] RUN_ID")
 	}
 	var response domain.Run
 	if err := client.Do(ctx, http.MethodPost, "/v1/runs/"+url.PathEscape(flags.Arg(0))+"/cancel", map[string]string{"reason": *reason}, &response); err != nil {
@@ -256,7 +256,7 @@ func cancelCommand(ctx context.Context, client *api.Client, arguments []string) 
 
 func replayCommand(ctx context.Context, client *api.Client, arguments []string) error {
 	if len(arguments) != 1 {
-		return fmt.Errorf("usage: agentintel replay RUN_ID")
+		return fmt.Errorf("usage: marketingovo-intel replay RUN_ID")
 	}
 	var response domain.Run
 	if err := client.Do(ctx, http.MethodPost, "/v1/runs/"+url.PathEscape(arguments[0])+"/replay", nil, &response); err != nil {
@@ -267,7 +267,7 @@ func replayCommand(ctx context.Context, client *api.Client, arguments []string) 
 
 func reportCommand(ctx context.Context, client *api.Client, arguments []string) error {
 	if len(arguments) != 1 {
-		return fmt.Errorf("usage: agentintel report RUN_ID")
+		return fmt.Errorf("usage: marketingovo-intel report RUN_ID")
 	}
 	var response json.RawMessage
 	if err := client.Do(ctx, http.MethodGet, "/v1/runs/"+url.PathEscape(arguments[0])+"/report", nil, &response); err != nil {
@@ -283,7 +283,7 @@ func searchCommand(ctx context.Context, client *api.Client, arguments []string) 
 		return err
 	}
 	if flags.NArg() != 1 {
-		return fmt.Errorf("usage: agentintel search [--limit N] QUERY")
+		return fmt.Errorf("usage: marketingovo-intel search [--limit N] QUERY")
 	}
 	query := url.Values{"q": []string{flags.Arg(0)}, "limit": []string{strconv.Itoa(*limit)}}
 	var response []domain.SearchResult
@@ -295,7 +295,7 @@ func searchCommand(ctx context.Context, client *api.Client, arguments []string) 
 
 func entityCommand(ctx context.Context, client *api.Client, arguments []string) error {
 	if len(arguments) != 1 {
-		return fmt.Errorf("usage: agentintel entity ENTITY_ID")
+		return fmt.Errorf("usage: marketingovo-intel entity ENTITY_ID")
 	}
 	var response domain.Entity
 	if err := client.Do(ctx, http.MethodGet, "/v1/entities/"+url.PathEscape(arguments[0]), nil, &response); err != nil {
@@ -337,5 +337,5 @@ func printJSON(value any) error {
 }
 
 func usageError() error {
-	return fmt.Errorf("usage: agentintel [--api URL] [--token-file PATH] COMMAND; commands: health, import, compare, research, runs, run, watch, cancel, replay, report, search, entity, monitoring, version")
+	return fmt.Errorf("usage: marketingovo-intel [--api URL] [--token-file PATH] COMMAND; commands: health, import, compare, research, runs, run, watch, cancel, replay, report, search, entity, monitoring, version")
 }

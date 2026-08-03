@@ -41,9 +41,9 @@ import (
 const (
 	WebsiteID               = "website.rss"
 	WebsiteConnectorVersion = "website.rss@1.0.0"
-	websiteUserAgent        = "AGENTintel/1.0 (+https://github.com/MaxJafar/marketingovo/services/intel-daemon)"
+	websiteUserAgent        = "Marketingovo-Intel/1.0 (+https://github.com/MaxJafar/marketingovo)"
 	// Parser identity recorded in evidence provenance for live website runs.
-	WebsiteParserVersion = "agentintel-go-feed.v1"
+	WebsiteParserVersion = "marketingovo-go-feed.v1"
 )
 
 // WebsiteWorker collects publication evidence from a site's own feed.
@@ -720,13 +720,13 @@ func (worker *WebsiteWorker) publish(
 			{
 				RelativePath: "observations.ndjson", Kind: "raw", MediaType: "application/x-ndjson",
 				SHA256: observationHash, SizeBytes: observationSize, RowCount: int64(len(observations)),
-				SchemaID: "agentintel.observations.v1", MinimumObservedAt: minimum, MaximumObservedAt: maximum,
+				SchemaID: "marketingovo.observations.v1", MinimumObservedAt: minimum, MaximumObservedAt: maximum,
 				DataClass: "public",
 			},
 			{
 				RelativePath: "report.json", Kind: "report", MediaType: "application/json",
 				SHA256: reportHash, SizeBytes: reportSize, RowCount: int64(len(report.Targets)),
-				SchemaID: "agentintel.comparison-report.v1", DataClass: "public",
+				SchemaID: "marketingovo.comparison-report.v1", DataClass: "public",
 			},
 		},
 		ReportRelativePath: "report.json", ReportSHA256: reportHash,

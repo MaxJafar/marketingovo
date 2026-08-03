@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	intelv1 "github.com/MaxJafar/marketingovo/services/intel-daemon/gen/go/agentintel/v1"
+	intelv1 "github.com/MaxJafar/marketingovo/services/intel-daemon/gen/go/marketingovo/v1"
 	"github.com/MaxJafar/marketingovo/services/intel-daemon/internal/domain"
 	"google.golang.org/protobuf/proto"
 )
@@ -253,7 +253,7 @@ func (runner *WorkerRunner) ValidateImport(ctx context.Context, request ImportVa
 
 func (runner *WorkerRunner) command() (string, []string) {
 	if runner.PythonCommand != "" {
-		return runner.PythonCommand, []string{"-I", "-B", "-m", "agentintel_worker", "protocol"}
+		return runner.PythonCommand, []string{"-I", "-B", "-m", "marketingovo_worker", "protocol"}
 	}
 	command := runner.UVCommand
 	if command == "" {
@@ -261,7 +261,7 @@ func (runner *WorkerRunner) command() (string, []string) {
 	}
 	return command, []string{
 		"run", "--frozen", "--offline", "--no-dev", "--no-config", "--no-sync",
-		"--project", runner.ProjectDir, "python", "-I", "-B", "-m", "agentintel_worker", "protocol",
+		"--project", runner.ProjectDir, "python", "-I", "-B", "-m", "marketingovo_worker", "protocol",
 	}
 }
 

@@ -1,0 +1,37 @@
+# Gitleaks configuration for Marketingovo.
+#
+# This file extends the upstream default rule set rather than replacing it, so
+# every rule gitleaks ships with stays active. It exists only to record the
+# narrow, reviewed exceptions below.
+#
+# Adding an entry here is a security decision. The bar is: the value must be
+# demonstrably synthetic, it must be load-bearing for a test that proves a
+# secret is *rejected*, and the allowlist entry must be scoped to that exact
+# value in that exact file — never a whole path, never a whole rule.
+
+[extend]
+useDefault = true
+
+# ---------------------------------------------------------------------------
+# Secret-rejection canary in the project-bundle import test.
+#
+# packages/runtime/src/project-bundle.test.ts feeds a Stripe-shaped string into
+# the bundle importer twice — once as a connector API key and once inside a
+# marketer journal entry — and asserts both are refused with
+# `secret_material_rejected`. The test is the proof that secret screening works
+# on import, so the string has to look like a real key to be worth anything.
+#
+# The value is `sk_live_` followed by sequential hex (1234567890abcdef). It has
+# never been a live credential and matches no Stripe account. Deleting it would
+# delete the test's evidence; scoping the allowlist to the literal keeps every
+# other Stripe or generic-key hit in the repository a real failure.
+#
+# Both rules are named: the literal is Stripe-shaped, and it also trips the
+# generic high-entropy rule, so suppressing only one just moves the failure.
+[[allowlists]]
+description = "Synthetic Stripe-shaped canary proving bundle import rejects secrets"
+targetRules = ["stripe-access-token", "generic-api-key"]
+condition = "AND"
+regexTarget = "match"
+regexes = ['''sk_live_1234567890abcdef''']
+paths = ['''packages/runtime/src/project-bundle\.test\.ts''']

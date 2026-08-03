@@ -11,7 +11,7 @@ import (
 )
 
 func TestCanonicalSchemaIsExactly32PhysicalFields(t *testing.T) {
-	metadata := arrow.MetadataFrom(map[string]string{"agentintel.schema_id": "agentintel.observations.v1"})
+	metadata := arrow.MetadataFrom(map[string]string{"marketingovo.schema_id": "marketingovo.observations.v1"})
 	if err := validateCanonicalSchema(arrow.NewSchema(canonicalObservationFields, &metadata), true); err != nil {
 		t.Fatalf("exact schema rejected: %v", err)
 	}

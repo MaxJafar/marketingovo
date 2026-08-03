@@ -13,12 +13,12 @@
   "error_code": null,
   "error_message": null,
   "report_available": true,
-  "worker_version": "agentintel-worker@1.0.0",
+  "worker_version": "marketingovo-worker@1.0.0",
   "model_version": "competitive-pulse-baseline@0.1.0",
   "connector_version": "fixture.competitive-pulse@1",
-  "parser_version": "agentintel-parser@1.0.0",
+  "parser_version": "marketingovo-parser@1.0.0",
   "input_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "input_schema_id": "agentintel.fixture-observations.v1",
+  "input_schema_id": "marketingovo.fixture-observations.v1",
   "input_size_bytes": 16384,
   "events": [
     {
@@ -41,7 +41,7 @@
       "media_type": "application/json",
       "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       "size_bytes": 2048,
-      "schema_id": "agentintel.evidence-manifest.v1",
+      "schema_id": "marketingovo.evidence-manifest.v1",
       "data_class": "public"
     }
   ]

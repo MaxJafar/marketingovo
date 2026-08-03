@@ -11,10 +11,10 @@ if (!target || !supported.has(target)) {
   const root = resolve(import.meta.dirname, "..");
   const config = {
     mcpServers: {
-      agentintel: {
+      marketingovo: {
         command: "node",
         args: [resolve(root, "packages/mcp/dist/stdio.js")],
-        env: { AGENTINTEL_API_URL: "http://127.0.0.1:7465" },
+        env: { MARKETINGOVO_API_URL: "http://127.0.0.1:3210/api/v1" },
       },
     },
   };

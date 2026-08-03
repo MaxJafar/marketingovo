@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	intelv1 "github.com/MaxJafar/marketingovo/services/intel-daemon/gen/go/agentintel/v1"
+	intelv1 "github.com/MaxJafar/marketingovo/services/intel-daemon/gen/go/marketingovo/v1"
 	"github.com/MaxJafar/marketingovo/services/intel-daemon/internal/domain"
 )
 
@@ -47,7 +47,7 @@ func TestWorkerCommandsAndEnvironmentAreSealed(t *testing.T) {
 	}
 	runner := WorkerRunner{PythonCommand: python, ProjectDir: project}
 	command, args := runner.command()
-	if command != python || strings.Join(args, " ") != "-I -B -m agentintel_worker protocol" {
+	if command != python || strings.Join(args, " ") != "-I -B -m marketingovo_worker protocol" {
 		t.Fatalf("direct command = %q %q", command, args)
 	}
 	runner = WorkerRunner{UVCommand: python, ProjectDir: project}
@@ -73,7 +73,7 @@ func TestWorkerCommandsAndEnvironmentAreSealed(t *testing.T) {
 }
 
 func TestStartAnalysisRequiresCoherentTypedWorkflow(t *testing.T) {
-	base := AnalysisRequest{RunID: "run-1", ProjectID: "demo", WorkspacePath: "/job", InputPath: "/job/input", InputSHA256: strings.Repeat("a", 64), InputSchemaID: "agentintel.fixture-observations.v1", OutputDir: "/job/output"}
+	base := AnalysisRequest{RunID: "run-1", ProjectID: "demo", WorkspacePath: "/job", InputPath: "/job/input", InputSHA256: strings.Repeat("a", 64), InputSchemaID: "marketingovo.fixture-observations.v1", OutputDir: "/job/output"}
 	compare := base
 	compare.Workflow = domain.WorkflowCompare
 	envelope, err := startAnalysisEnvelope(compare)

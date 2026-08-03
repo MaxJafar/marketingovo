@@ -11,11 +11,11 @@ from pathlib import Path
 
 import pytest
 
-from agentintel_worker.constants import FIXTURE_INPUT_SCHEMA_ID
-from agentintel_worker.errors import WorkerError
-from agentintel_worker.events import EventEmitter
-from agentintel_worker.models import AnalysisRequest
-from agentintel_worker.pipeline import run_analysis
+from marketingovo_worker.constants import FIXTURE_INPUT_SCHEMA_ID
+from marketingovo_worker.errors import WorkerError
+from marketingovo_worker.events import EventEmitter
+from marketingovo_worker.models import AnalysisRequest
+from marketingovo_worker.pipeline import run_analysis
 
 
 def _request(
@@ -134,7 +134,7 @@ def test_slow_cli_handles_termination_as_cancellation(
     command = [
         sys.executable,
         "-m",
-        "agentintel_worker",
+        "marketingovo_worker",
         "analyze",
         "--run-id",
         "cancel-test",

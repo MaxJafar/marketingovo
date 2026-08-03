@@ -1,5 +1,5 @@
 {
-  "schema_version": "agentintel.source-reference-conformance.v1",
+  "schema_version": "marketingovo.source-reference-conformance.v1",
   "policy_version": "source-reference.v1",
   "navigation": {
     "clickable": false,

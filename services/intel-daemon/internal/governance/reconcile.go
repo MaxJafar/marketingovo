@@ -55,7 +55,7 @@ func validateEvidenceSemantics(descriptors []domain.ArtifactDescriptor, allowLeg
 		if err := validateReportCitations(report, canonicalRows); err != nil {
 			return nil, provenance, err
 		}
-		if report.SchemaVersion != "agentintel.comparison-report.v2" {
+		if report.SchemaVersion != "marketingovo.comparison-report.v2" {
 			provenance.ConnectorVersion = canonicalConnectorVersion(canonicalRows)
 			provenance.ParserVersion = CanonicalParserVersion
 		}
@@ -168,7 +168,7 @@ func LoadCommittedEvidence(dataRoot, runID string, maximum int64) (CommitResult,
 	artifacts = append(artifacts, domain.Artifact{ID: manifestID, RunID: runID, Kind: "manifest",
 		RelativePath: filepath.ToSlash(filepath.Join("runs", runID, "evidence", "evidence-manifest.json")),
 		MediaType:    "application/json", SHA256: hex.EncodeToString(manifestHash[:]), SizeBytes: int64(len(manifestBytes)),
-		SchemaID: "agentintel.evidence-manifest.v1", DataClass: mostRestrictiveDataClass(manifest.Artifacts), CreatedAt: manifest.CommittedAt})
+		SchemaID: "marketingovo.evidence-manifest.v1", DataClass: mostRestrictiveDataClass(manifest.Artifacts), CreatedAt: manifest.CommittedAt})
 	return CommitResult{Artifacts: artifacts, Manifest: manifest, EvidenceDir: evidenceDir, Observations: rows, Report: report}, nil
 }
 
@@ -212,13 +212,13 @@ func committedEvidenceDirectory(dataRoot, runID string) (string, error) {
 
 func committedArtifactKind(item ManifestArtifactItem) (string, error) {
 	switch {
-	case item.MediaType == "application/vnd.apache.arrow.file" && item.SchemaID == "agentintel.observations.v1":
+	case item.MediaType == "application/vnd.apache.arrow.file" && item.SchemaID == "marketingovo.observations.v1":
 		return "arrow", nil
-	case item.MediaType == "application/vnd.apache.parquet" && item.SchemaID == "agentintel.observations.v1":
+	case item.MediaType == "application/vnd.apache.parquet" && item.SchemaID == "marketingovo.observations.v1":
 		return "parquet", nil
-	case item.MediaType == "application/x-ndjson" && item.SchemaID == "agentintel.observations.v1":
+	case item.MediaType == "application/x-ndjson" && item.SchemaID == "marketingovo.observations.v1":
 		return "raw", nil
-	case item.MediaType == "application/json" && (item.SchemaID == "agentintel.comparison-report.v1" || item.SchemaID == "agentintel.comparison-report.v2"):
+	case item.MediaType == "application/json" && (item.SchemaID == "marketingovo.comparison-report.v1" || item.SchemaID == "marketingovo.comparison-report.v2"):
 		return "report", nil
 	default:
 		return "", fmt.Errorf("%w: committed artifact contract is not allowlisted", ErrArtifactMismatch)

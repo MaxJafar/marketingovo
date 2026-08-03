@@ -1,4 +1,4 @@
-"""AGENTintel bounded intelligence worker."""
+"""Marketingovo bounded intelligence worker."""
 
 from .constants import (
     FIXTURE_INPUT_SCHEMA_ID,

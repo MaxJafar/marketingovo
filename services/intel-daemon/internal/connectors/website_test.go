@@ -36,7 +36,7 @@ const sampleAtom = `<?xml version="1.0"?>
 // A worker pointed at a test server needs private addresses allowed, because
 // httptest binds loopback. Everything else stays at its default bound.
 func testWorker(observed time.Time) *WebsiteWorker {
-	limits := policy.DefaultEgressLimits("AGENTintel/test")
+	limits := policy.DefaultEgressLimits("Marketingovo-Intel/test")
 	limits.AllowPrivateHosts = true
 	worker := &WebsiteWorker{Limits: limits, Now: func() time.Time { return observed }}
 	return worker

@@ -48,6 +48,35 @@ unchanged, so no existing integration breaks.
   removed the site switcher a multi-project operator needs. Both are restored,
   and a unit test now asserts the whole reachable route set.
 
+**What preparing the repository for publication found and fixed:**
+
+- **The AGENTintel identity was still live.** The wire package was
+  `agentintel.v1`, the Python distribution `agentintel-worker`, the daemon
+  binaries `agentintel` and `agentinteld`, and the same name ran through every
+  schema id, artifact parser version, HTTP header, session cookie, egress user
+  agent and data directory. All of it now uses the `marketingovo` namespace.
+  Nothing had been published under the old names, so no consumer contract
+  broke. Historical records that describe AGENTintel as it was — the archived
+  planning documents under `docs/intel/`, ADR 0001, and the identity gate's own
+  allowlist reasons — keep the old name deliberately, because rewriting them
+  would falsify a dated document rather than complete a rename.
+- **Two generators were wrong.** `scripts/generate-contracts.mjs` wrote the
+  intel daemon's OpenAPI types over `packages/sdk/src/generated/openapi.ts`,
+  which the SDK generates from the product server's own document and guards
+  with `generate:check`. `scripts/render-agent-config.mjs` emitted
+  `AGENTINTEL_API_URL` at port 7465, while the MCP package reads
+  `MARKETINGOVO_API_URL` and the product serves 3210 — the config it produced
+  could never have connected.
+- **`buf generate` could not run in a fresh checkout.** `protoc-gen-es` is not
+  a declared dependency, and nothing imported the generated TypeScript, so that
+  target was removed. Go and Python bindings still generate.
+- **The secret scan had never run on this history.** CI triggers on push to
+  `main` and pull requests, and the consolidation branch was never pushed.
+  Gitleaks 8.30.1 over all 78 commits now reports no leaks. It first flagged the
+  synthetic `sk_live_…` canary that proves bundle import rejects secret
+  material; `.gitleaks.toml` records that one exception, scoped to the exact
+  literal in the exact file.
+
 **Known limits carried into 1.1.0:** the demo-flagged panels on the console
 home — social mentions, brand sentiment, and the mentions trend — have no
 connector behind them and say so in the interface. Backlinks states plainly

@@ -74,7 +74,7 @@ func (manager *Manager) PreviewImport(ctx context.Context, source io.Reader, val
 	if err != nil {
 		return domain.ImportPreview{}, &ImportError{Code: connectors.ErrorCode(err), Err: err}
 	}
-	preview := domain.ImportPreview{SchemaVersion: "agentintel.import-preview.v1", Valid: result.Valid, Input: result.Input,
+	preview := domain.ImportPreview{SchemaVersion: "marketingovo.import-preview.v1", Valid: result.Valid, Input: result.Input,
 		Policy: result.Policy, Platform: result.Platform, Targets: result.Targets, Diagnostics: result.Diagnostics, DiagnosticsTruncated: result.DiagnosticsTruncated}
 	if err := validateImportProposal(preview, requestID, digest, size); err != nil {
 		return domain.ImportPreview{}, &ImportError{Code: "worker_protocol_error", Err: err}

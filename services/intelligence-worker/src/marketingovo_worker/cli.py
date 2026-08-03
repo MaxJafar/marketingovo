@@ -23,7 +23,7 @@ from .protocol import run_protocol
 
 
 def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="agentintel-worker")
+    parser = argparse.ArgumentParser(prog="marketingovo-worker")
     parser.add_argument("--version", action="version", version=__version__)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("protocol", help="serve one length-delimited Protobuf analysis session")
@@ -33,7 +33,7 @@ def _parser() -> argparse.ArgumentParser:
     analyze.add_argument("--workspace-path", type=Path, default=Path.cwd())
     analyze.add_argument("--input", dest="input_path", required=True, type=Path)
     analyze.add_argument("--input-sha256", required=True)
-    analyze.add_argument("--input-schema-id", default="agentintel.fixture-observations.v1")
+    analyze.add_argument("--input-schema-id", default="marketingovo.fixture-observations.v1")
     analyze.add_argument("--output-dir", dest="output_directory", required=True, type=Path)
     analyze.add_argument("--target-id", dest="target_ids", action="append", default=[])
     analyze.add_argument(

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pyarrow as pa
 
-from agentintel_worker.schema import OBSERVATION_SCHEMA
+from marketingovo_worker.schema import OBSERVATION_SCHEMA
 
 
 def _arrow_type(name: str) -> pa.DataType:
@@ -23,7 +23,7 @@ def _arrow_type(name: str) -> pa.DataType:
 def test_runtime_schema_exactly_matches_contract(repository_root: Path) -> None:
     contract_path = repository_root / "schemas/arrow/observations.schema.json"
     contract = json.loads(contract_path.read_text())
-    assert contract["properties"]["schema_id"]["const"] == "agentintel.observations.v1"
+    assert contract["properties"]["schema_id"]["const"] == "marketingovo.observations.v1"
     expected = contract["properties"]["fields"]["prefixItems"]
     assert len(expected) == len(OBSERVATION_SCHEMA) == 32
     for field, expected_wrapper in zip(OBSERVATION_SCHEMA, expected, strict=True):

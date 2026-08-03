@@ -11,7 +11,7 @@ import (
 	"sync"
 )
 
-const filename = ".agentinteld.lock"
+const filename = ".marketingovo-inteld.lock"
 
 // ErrAlreadyRunning means another daemon owns the same canonical data root.
 var ErrAlreadyRunning = errors.New("daemon data root is already in use")
@@ -116,5 +116,5 @@ func verifyLockFile(path string, file *os.File) error {
 }
 
 func alreadyRunning(root string) error {
-	return fmt.Errorf("%w: another agentinteld process owns %s", ErrAlreadyRunning, root)
+	return fmt.Errorf("%w: another marketingovo-inteld process owns %s", ErrAlreadyRunning, root)
 }

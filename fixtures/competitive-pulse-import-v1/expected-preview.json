@@ -1,14 +1,14 @@
 {
-  "schema_version": "agentintel.import-preview.v1",
+  "schema_version": "marketingovo.import-preview.v1",
   "valid": true,
   "dataset_id": "dataset_00000000000000000000000001",
   "state": "ready",
   "validated_at": "2026-07-16T12:00:00Z",
   "retention_until": "2026-10-14T12:00:00Z",
   "input": {
-    "schema_id": "agentintel.competitive-pulse-import.v1",
-    "sha256": "300a5bdfc2313818e49ee28c86488a7bbace034a50ed06ba704e3f0e2f4e5810",
-    "size_bytes": 5659,
+    "schema_id": "marketingovo.competitive-pulse-import.v1",
+    "sha256": "472cb8f11968dfac886a287e7d51ff6150ab1e12553dfebd32dd3ee08801b8f7",
+    "size_bytes": 5695,
     "row_count": 18
   },
   "policy": {

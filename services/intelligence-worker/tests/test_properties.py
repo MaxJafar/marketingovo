@@ -8,9 +8,9 @@ import pyarrow as pa
 from hypothesis import given
 from hypothesis import strategies as st
 
-from agentintel_worker.constants import FIXTURE_INPUT_SCHEMA_ID
-from agentintel_worker.normalize import normalize_table, parse_observations
-from agentintel_worker.schema import OBSERVATION_SCHEMA
+from marketingovo_worker.constants import FIXTURE_INPUT_SCHEMA_ID
+from marketingovo_worker.normalize import normalize_table, parse_observations
+from marketingovo_worker.schema import OBSERVATION_SCHEMA
 
 
 @given(

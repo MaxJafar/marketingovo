@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	browserSessionCookie = "agentintel_session"
+	browserSessionCookie = "marketingovo_session"
 	browserSessionTTL    = 8 * time.Hour
 )
 

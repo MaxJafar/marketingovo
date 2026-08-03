@@ -26,7 +26,7 @@ import (
 
 func main() {
 	if err := run(os.Args[1:]); err != nil {
-		fmt.Fprintln(os.Stderr, "agentinteld:", err)
+		fmt.Fprintln(os.Stderr, "marketingovo-inteld:", err)
 		os.Exit(1)
 	}
 }
@@ -37,13 +37,13 @@ func run(arguments []string) error {
 		return nil
 	}
 	if len(arguments) == 0 || arguments[0] != "serve" {
-		return fmt.Errorf("usage: agentinteld serve [flags]")
+		return fmt.Errorf("usage: marketingovo-inteld serve [flags]")
 	}
 	defaults, err := defaultPaths()
 	if err != nil {
 		return err
 	}
-	flags := flag.NewFlagSet("agentinteld serve", flag.ContinueOnError)
+	flags := flag.NewFlagSet("marketingovo-inteld serve", flag.ContinueOnError)
 	flags.SetOutput(os.Stderr)
 	listen := flags.String("listen", "127.0.0.1:7465", "exact loopback listen address")
 	dataDir := flags.String("data-dir", defaults.dataDir, "private durable data directory")
@@ -119,7 +119,7 @@ func run(arguments []string) error {
 	if bootstrapToken == serviceToken {
 		return fmt.Errorf("dashboard bootstrap ticket must differ from the persistent service token")
 	}
-	store, err := storage.Open(filepath.Join(root, "agentintel.sqlite3"))
+	store, err := storage.Open(filepath.Join(root, "marketingovo-intel.sqlite3"))
 	if err != nil {
 		return err
 	}

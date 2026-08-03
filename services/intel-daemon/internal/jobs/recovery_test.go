@@ -345,7 +345,7 @@ func createPublishedRecoveredRun(t *testing.T, mutate func(*testing.T, string, s
 		DataRoot: root, RunID: run.ID, StageDir: stage, Descriptors: result.Artifacts,
 		MaximumBytes: governance.DefaultMaximumArtifactBytes, AllowLegacyFixture: true,
 		Provenance: domain.Provenance{WorkerVersion: result.WorkerVersion, ModelVersion: result.ModelVersion,
-			ConnectorVersion: connectors.FixtureID, ParserVersion: "agentintel-go-fixture.v1"},
+			ConnectorVersion: connectors.FixtureID, ParserVersion: "marketingovo-go-fixture.v1"},
 	})
 	if err != nil {
 		t.Fatal(err)

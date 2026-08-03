@@ -4,10 +4,10 @@
 
 - Model ID: `competitive-pulse-baseline@0.1.0`
 - Type: deterministic descriptive analytics; no trained parameters
-- Owner: AGENTintel Community
-- Inputs: validated `agentintel.observations.v1` evidence selected by target ID
-- Outputs: `agentintel.comparison-report.v1` for the legacy fixture and
-  `agentintel.comparison-report.v2` for validated Competitive Pulse CSV v1 imports
+- Owner: the Marketingovo project
+- Inputs: validated `marketingovo.observations.v1` evidence selected by target ID
+- Outputs: `marketingovo.comparison-report.v1` for the legacy fixture and
+  `marketingovo.comparison-report.v2` for validated Competitive Pulse CSV v1 imports
 
 ## Intended use
 

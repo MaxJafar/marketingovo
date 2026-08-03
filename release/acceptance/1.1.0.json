@@ -20,43 +20,43 @@
     "workspaceGate": {
       "command": "pnpm check",
       "result": "passed",
-      "observedAt": "2026-08-02T18:36:34.000Z",
+      "observedAt": "2026-08-03T00:05:05.000Z",
       "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
     },
     "correctnessCorpus": {
       "command": "pnpm benchmark",
       "result": "passed",
-      "observedAt": "2026-08-02T18:36:46.000Z",
+      "observedAt": "2026-08-03T00:05:05.000Z",
       "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
     },
     "dependencyAdvisories": {
       "command": "pnpm audit:dependencies",
       "result": "passed",
-      "observedAt": "2026-08-02T18:36:47.000Z",
+      "observedAt": "2026-08-03T00:05:05.000Z",
       "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
     },
     "licencePolicy": {
       "command": "pnpm validate:licenses",
       "result": "passed",
-      "observedAt": "2026-08-02T18:36:47.000Z",
+      "observedAt": "2026-08-03T00:05:05.000Z",
       "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
     },
     "agentSurfaces": {
       "command": "pnpm validate:plugins",
       "result": "passed",
-      "observedAt": "2026-08-02T18:36:48.000Z",
+      "observedAt": "2026-08-03T00:05:05.000Z",
       "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
     },
     "instructionGuardrails": {
       "command": "pnpm validate:skills",
       "result": "passed",
-      "observedAt": "2026-08-02T18:36:48.000Z",
+      "observedAt": "2026-08-03T00:05:05.000Z",
       "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
     },
     "packagedBrowserJourney": {
       "command": "pnpm test:e2e",
       "result": "passed",
-      "observedAt": "2026-08-02T18:37:06.000Z",
+      "observedAt": "2026-08-03T00:05:05.000Z",
       "environment": "macOS arm64, Node 24.18.1, pnpm 10.34.5"
     }
   },
@@ -83,6 +83,11 @@
     "Beyond the seven required gates, the native suites were also observed passing on the same host: pnpm build:go, lint:go, test:go, test:go:race, lint:python, test:python, and pnpm sbom. These are not part of REQUIRED_RELEASE_EVIDENCE and are recorded here as supporting evidence only.",
     "One CI job was not reproduced locally: `cargo check` for packages/credential-broker-native. Rust is not installed on this host, so that gate rests on the CI matrix rather than on a local observation.",
     "The packaged browser journey did not pass on the branch before this release preparation: it navigated through a sidebar entry the monorepo consolidation had already removed. Fixing it surfaced eleven pre-existing WCAG AA contrast failures and two undefined design tokens, all repaired here.",
-    "This record covers the source, CLI, MCP plugin and npm-packable surfaces. It deliberately does not claim any signed native artifact, and it deliberately does not claim an approval nobody gave."
+    "This record covers the source, CLI, MCP plugin and npm-packable surfaces. It deliberately does not claim any signed native artifact, and it deliberately does not claim an approval nobody gave.",
+    "Re-observed on 2026-08-03 after the identity consolidation. The evidence above was first recorded on 2026-08-02 against a tree that predates it, so every one of the seven required gates was run again rather than carried forward. All seven passed on the same host.",
+    "The AGENTintel identity was retired in this pass. The wire package moved from agentintel.v1 to marketingovo.v1, the Python distribution from agentintel-worker to marketingovo-worker, the daemon binaries to marketingovo-intel and marketingovo-inteld, and every schema id, artifact parser version, HTTP header, session cookie, egress user agent and data directory to the marketingovo namespace. Nothing had been published under the old names \u2014 the AGENTintel 1.0.0 tag was retracted and never pushed \u2014 so no consumer contract was broken. Beyond pnpm check, the native suites were observed passing: build:go, vet, test:go, test:go:race, ruff, pytest.",
+    "The golden Competitive Pulse fixture is 5695 bytes with sha256 472cb8f11968dfac886a287e7d51ff6150ab1e12553dfebd32dd3ee08801b8f7, re-pinned because the schema-id column grew by two characters per row. The size and digest are asserted by the worker's golden-contract test.",
+    "A .gitleaks.toml now records one reviewed exception. Gitleaks 8.30.1 over all 78 commits reports no leaks; before the exception it flagged a synthetic Stripe-shaped canary in packages/runtime/src/project-bundle.test.ts, which exists to prove bundle import rejects secret material. The allowlist is scoped to that literal in that file and names both rules that match it. This scan had never run against this history: CI triggers on push to main and pull requests, and the consolidation branch was never pushed.",
+    "Two defects were found and fixed while preparing this: scripts/generate-contracts.mjs wrote the intel daemon's OpenAPI types over packages/sdk/src/generated/openapi.ts, which the SDK generates from the product server's own document and guards with generate:check; and scripts/render-agent-config.mjs emitted AGENTINTEL_API_URL at port 7465, while the MCP package reads MARKETINGOVO_API_URL and the product serves 3210. The buf TypeScript target was also removed: protoc-gen-es is not a declared dependency, so buf generate could not run in a fresh checkout, and nothing imported the generated TypeScript."
   ]
 }

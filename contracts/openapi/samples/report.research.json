@@ -1,5 +1,5 @@
 {
-  "schema_version": "agentintel.comparison-report.v1",
+  "schema_version": "marketingovo.comparison-report.v1",
   "run_id": "run_sample_02",
   "workflow": "research",
   "research_question": "How did the monitored public engagement signals change?",
@@ -9,10 +9,10 @@
     "Preserve contradictory observations and cite each material finding."
   ],
   "derivation": {
-    "worker_version": "agentintel-worker@1.0.0",
+    "worker_version": "marketingovo-worker@1.0.0",
     "model_version": "competitive-pulse-baseline@0.1.0",
     "connector_version": "fixture.competitive-pulse@1",
-    "parser_version": "agentintel-parser@1.0.0"
+    "parser_version": "marketingovo-parser@1.0.0"
   },
   "generated_at": "2026-07-16T08:00:03Z",
   "title": "Research dossier: monitored public engagement signals",

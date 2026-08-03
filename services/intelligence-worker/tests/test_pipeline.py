@@ -8,12 +8,12 @@ import pyarrow.ipc as ipc
 import pyarrow.parquet as pq
 import pytest
 
-from agentintel_worker.constants import FIXTURE_INPUT_SCHEMA_ID
-from agentintel_worker.events import EventEmitter
-from agentintel_worker.io import sha256_file
-from agentintel_worker.models import AnalysisRequest
-from agentintel_worker.pipeline import run_analysis
-from agentintel_worker.schema import OBSERVATION_SCHEMA
+from marketingovo_worker.constants import FIXTURE_INPUT_SCHEMA_ID
+from marketingovo_worker.events import EventEmitter
+from marketingovo_worker.io import sha256_file
+from marketingovo_worker.models import AnalysisRequest
+from marketingovo_worker.pipeline import run_analysis
+from marketingovo_worker.schema import OBSERVATION_SCHEMA
 
 
 def _request(
@@ -103,7 +103,7 @@ def test_golden_pipeline_emits_exact_artifacts_and_metrics(
             "worker_version": "0.1.0",
             "model_version": "competitive-pulse-baseline@0.1.0",
             "connector_version": "fixture.competitive-pulse@1.0.0",
-            "parser_version": "agentintel-go-arrow-parquet.v1",
+            "parser_version": "marketingovo-go-arrow-parquet.v1",
         }
         assert "customer retention" in report["summary"]
         assert len(findings["northstar-labs"]["citations"]) == 6

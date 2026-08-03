@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/MaxJafar/AGENTintel/schemas/intel/evidence-manifest-v1.json",
+  "$id": "https://github.com/MaxJafar/marketingovo/schemas/intel/evidence-manifest-v1.json",
   "title": "Committed evidence manifest",
   "type": "object",
   "additionalProperties": false,

@@ -10,24 +10,24 @@ from types import SimpleNamespace
 
 import pyarrow.ipc as ipc
 
-from agentintel_worker.constants import (
+from marketingovo_worker.constants import (
     CSV_INPUT_SCHEMA_ID,
     CSV_PARSER_VERSION,
     METRIC_CATALOG_VERSION,
 )
-from agentintel_worker.events import EventEmitter
-from agentintel_worker.imports import validate_csv_import
-from agentintel_worker.models import AnalysisRequest
-from agentintel_worker.normalize import parse_csv_import
-from agentintel_worker.pipeline import run_analysis
-from agentintel_worker.protocol import (
+from marketingovo_worker.events import EventEmitter
+from marketingovo_worker.imports import validate_csv_import
+from marketingovo_worker.models import AnalysisRequest
+from marketingovo_worker.normalize import parse_csv_import
+from marketingovo_worker.pipeline import run_analysis
+from marketingovo_worker.protocol import (
     PROTOCOL_VERSION,
     _analysis_request,
     load_worker_pb2,
     read_delimited,
     run_protocol,
 )
-from agentintel_worker.schema import OBSERVATION_SCHEMA
+from marketingovo_worker.schema import OBSERVATION_SCHEMA
 
 VALIDATED_AT = "2026-07-16T12:00:00Z"
 
@@ -60,7 +60,7 @@ def test_golden_preview_is_valid_complete_and_sorted(tmp_path: Path, repository_
 
     assert result.valid
     assert result.input.sha256 == hashlib.sha256(payload).hexdigest()
-    assert result.input.size_bytes == 5659
+    assert result.input.size_bytes == 5695
     assert result.input.row_count == 18
     assert result.platform == "youtube"
     assert result.file_policy.retention_days == 90
@@ -224,11 +224,11 @@ def test_absent_metric_rows_remain_missing_not_zero(repository_root: Path) -> No
         + "\n".join(
             line
             for line in lines[1:]
-            if not line.startswith("agentintel.competitive-pulse-import.v1,obs-north-engagement")
+            if not line.startswith("marketingovo.competitive-pulse-import.v1,obs-north-engagement")
         )
         + "\n"
     ).encode()
-    from agentintel_worker.normalize import parse_authority_timestamp
+    from marketingovo_worker.normalize import parse_authority_timestamp
 
     parsed = parse_csv_import(
         without_north_engagement,
@@ -252,7 +252,7 @@ def test_source_reference_conformance_cases(repository_root: Path) -> None:
             repository_root / "fixtures/competitive-pulse-import-v1/source-url-policy.json"
         ).read_text()
     )
-    from agentintel_worker.normalize import validate_source_url
+    from marketingovo_worker.normalize import validate_source_url
 
     for case in fixture["cases"]:
         diagnostic = validate_source_url(case["source_url"], record=2)
@@ -313,7 +313,7 @@ def test_out_of_order_is_normalized_and_follower_conflict_is_retained(
 ) -> None:
     payload = _golden(repository_root)
     digest = hashlib.sha256(payload).hexdigest()
-    from agentintel_worker.normalize import parse_authority_timestamp
+    from marketingovo_worker.normalize import parse_authority_timestamp
 
     ordered = parse_csv_import(
         payload,
@@ -375,9 +375,9 @@ def test_import_analysis_emits_authority_valid_artifacts_and_report_v2(
     result = run_analysis(request, EventEmitter(request.run_id))
     assert result.succeeded
     assert [artifact.schema_id for artifact in result.artifacts] == [
-        "agentintel.observations.v1",
-        "agentintel.observations.v1",
-        "agentintel.comparison-report.v2",
+        "marketingovo.observations.v1",
+        "marketingovo.observations.v1",
+        "marketingovo.comparison-report.v2",
     ]
     with ipc.open_file(tmp_path / "out/normalized.arrow") as reader:
         table = reader.read_all()
@@ -395,7 +395,7 @@ def test_import_analysis_emits_authority_valid_artifacts_and_report_v2(
     assert all(row["retention_until"].isoformat() == "2026-10-14T12:00:00+00:00" for row in rows)
 
     report = json.loads((tmp_path / "out/report.json").read_text())
-    assert report["schema_version"] == "agentintel.comparison-report.v2"
+    assert report["schema_version"] == "marketingovo.comparison-report.v2"
     assert report["derivation"]["parser_version"] == CSV_PARSER_VERSION
     assert [target["target_id"] for target in report["targets"]] == [
         "northstar-labs",

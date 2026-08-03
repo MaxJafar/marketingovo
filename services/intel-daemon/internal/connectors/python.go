@@ -49,7 +49,7 @@ func (worker *PythonWorker) Analyze(ctx context.Context, request AnalysisRequest
 	}
 	args := []string{
 		"run", "--frozen", "--offline", "--no-dev", "--no-config", "--no-sync", "--project", worker.ProjectDir,
-		"python", "-I", "-B", "-m", "agentintel_worker", "analyze",
+		"python", "-I", "-B", "-m", "marketingovo_worker", "analyze",
 		"--run-id", request.RunID,
 		"--input", request.InputPath,
 		"--input-sha256", request.InputSHA256,

@@ -36,7 +36,7 @@ lives.
 | Governance / policy engine  | `services/intel-daemon/internal/{governance,policy}/` | Rights state, retention, permitted purpose        |
 | Analytics worker            | `services/intelligence-worker/`                       | Arrow/Parquet pipeline, 32 tests green            |
 | Competitive Pulse metrics   | `docs/intel/metric-catalog/competitive-pulse-v1.md`   | Written contracts, no live connector behind them  |
-| Worker protocol             | `contracts/proto/agentintel/v1/worker.proto`          | Stable, versioned, generates Go / Python / TS     |
+| Worker protocol             | `contracts/proto/marketingovo/v1/worker.proto`        | Stable, versioned, generates Go and Python        |
 
 ### Does not exist
 
@@ -56,7 +56,7 @@ most valuable asset in this repository:
 > **An absent measurement is never a zero.**
 
 AGENTintel encoded it as a five-state enum
-(`contracts/proto/agentintel/v1/worker.proto:78`):
+(`contracts/proto/marketingovo/v1/worker.proto:78`):
 
 ```
 UNSPECIFIED · MISSING · INSUFFICIENT · CONTRADICTORY · AVAILABLE
@@ -245,10 +245,14 @@ exposure.
 
 ## 8. Open decisions
 
-**Proto and Python identity.** The wire package is still `agentintel.v1` and
-the Python package `agentintel_worker`. Deliberately left alone during the
-merge — renaming a working protocol is churn with real breakage risk and no
-user-visible gain. Worth doing once, before the first external consumer.
+**Resolved — proto and Python identity.** The wire package was `agentintel.v1`
+and the Python package `agentintel_worker`, deliberately left alone during the
+merge on the reasoning that renaming a working protocol is churn with real
+breakage risk. That reasoning held only until the first external consumer, and
+going public is that moment. Both were renamed before publication: the wire
+package is `marketingovo.v1`, the Python package `marketingovo_worker`, the
+daemon binaries `marketingovo-intel` and `marketingovo-inteld`. Nothing had
+been published, so there was nothing to break.
 
 **Does the Go daemon earn its place?** It is genuinely good — lease discipline,
 fail-closed recovery, rights enforcement. But it is a second runtime for

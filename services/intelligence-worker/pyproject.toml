@@ -1,7 +1,7 @@
 [project]
-name = "agentintel-worker"
+name = "marketingovo-worker"
 version = "1.0.0"
-description = "Bounded, deterministic intelligence worker for AGENTintel"
+description = "Bounded, deterministic intelligence worker for Marketingovo"
 readme = "README.md"
 requires-python = ">=3.12,<3.14"
 license = { text = "Apache-2.0" }
@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.scripts]
-agentintel-worker = "agentintel_worker.cli:main"
+marketingovo-worker = "marketingovo_worker.cli:main"
 
 [dependency-groups]
 dev = [
@@ -30,7 +30,7 @@ requires = ["hatchling==1.27.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/agentintel_worker"]
+packages = ["src/marketingovo_worker"]
 
 [tool.pytest.ini_options]
 addopts = "-ra --strict-config --strict-markers -m 'not best_effort'"

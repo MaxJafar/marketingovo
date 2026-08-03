@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "agentintel://arrow/observations/v1",
-  "title": "AGENTintel observation Arrow schema",
+  "$id": "marketingovo://arrow/observations/v1",
+  "title": "Marketingovo observation Arrow schema",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_id", "fields"],
   "properties": {
-    "schema_id": { "const": "agentintel.observations.v1" },
+    "schema_id": { "const": "marketingovo.observations.v1" },
     "fields": {
       "type": "array",
       "prefixItems": [

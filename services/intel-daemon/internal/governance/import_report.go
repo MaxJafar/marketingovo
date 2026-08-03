@@ -108,7 +108,7 @@ func readImportReportJSON(payload []byte, runID string, expectedRows int64) (dom
 	} else if !errors.Is(err, io.EOF) {
 		return domain.ComparisonReport{}, fmt.Errorf("%w: imported report JSON contains trailing data", ErrArtifactMismatch)
 	}
-	if report.SchemaVersion != "agentintel.comparison-report.v2" || report.RunID != runID || report.Workflow != "compare" ||
+	if report.SchemaVersion != "marketingovo.comparison-report.v2" || report.RunID != runID || report.Workflow != "compare" ||
 		strings.TrimSpace(report.Summary) == "" || len(report.Targets) < 2 || len(report.Targets) > 5 || int64(len(report.Targets)) != expectedRows ||
 		len(report.Limitations) == 0 || report.Evidence == nil || report.Contradictions == nil || report.Comparisons == nil {
 		return domain.ComparisonReport{}, fmt.Errorf("%w: imported report is incomplete", ErrArtifactMismatch)

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/MaxJafar/AGENTintel/schemas/intel/connector-manifest-v1.json",
-  "title": "AGENTintel connector manifest",
+  "$id": "https://github.com/MaxJafar/marketingovo/schemas/intel/connector-manifest-v1.json",
+  "title": "Marketingovo connector manifest",
   "type": "object",
   "additionalProperties": false,
   "required": [

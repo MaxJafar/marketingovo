@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        (unknown)
-// source: agentintel/v1/worker.proto
+// source: marketingovo/v1/worker.proto
 
 package intelv1
 
@@ -60,11 +60,11 @@ func (x ImportMetricAvailability) String() string {
 }
 
 func (ImportMetricAvailability) Descriptor() protoreflect.EnumDescriptor {
-	return file_agentintel_v1_worker_proto_enumTypes[0].Descriptor()
+	return file_marketingovo_v1_worker_proto_enumTypes[0].Descriptor()
 }
 
 func (ImportMetricAvailability) Type() protoreflect.EnumType {
-	return &file_agentintel_v1_worker_proto_enumTypes[0]
+	return &file_marketingovo_v1_worker_proto_enumTypes[0]
 }
 
 func (x ImportMetricAvailability) Number() protoreflect.EnumNumber {
@@ -73,7 +73,7 @@ func (x ImportMetricAvailability) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ImportMetricAvailability.Descriptor instead.
 func (ImportMetricAvailability) EnumDescriptor() ([]byte, []int) {
-	return file_agentintel_v1_worker_proto_rawDescGZIP(), []int{0}
+	return file_marketingovo_v1_worker_proto_rawDescGZIP(), []int{0}
 }
 
 type ImportDiagnosticSeverity int32
@@ -109,11 +109,11 @@ func (x ImportDiagnosticSeverity) String() string {
 }
 
 func (ImportDiagnosticSeverity) Descriptor() protoreflect.EnumDescriptor {
-	return file_agentintel_v1_worker_proto_enumTypes[1].Descriptor()
+	return file_marketingovo_v1_worker_proto_enumTypes[1].Descriptor()
 }
 
 func (ImportDiagnosticSeverity) Type() protoreflect.EnumType {
-	return &file_agentintel_v1_worker_proto_enumTypes[1]
+	return &file_marketingovo_v1_worker_proto_enumTypes[1]
 }
 
 func (x ImportDiagnosticSeverity) Number() protoreflect.EnumNumber {
@@ -122,7 +122,7 @@ func (x ImportDiagnosticSeverity) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ImportDiagnosticSeverity.Descriptor instead.
 func (ImportDiagnosticSeverity) EnumDescriptor() ([]byte, []int) {
-	return file_agentintel_v1_worker_proto_rawDescGZIP(), []int{1}
+	return file_marketingovo_v1_worker_proto_rawDescGZIP(), []int{1}
 }
 
 type AnalysisWorkflow int32
@@ -158,11 +158,11 @@ func (x AnalysisWorkflow) String() string {
 }
 
 func (AnalysisWorkflow) Descriptor() protoreflect.EnumDescriptor {
-	return file_agentintel_v1_worker_proto_enumTypes[2].Descriptor()
+	return file_marketingovo_v1_worker_proto_enumTypes[2].Descriptor()
 }
 
 func (AnalysisWorkflow) Type() protoreflect.EnumType {
-	return &file_agentintel_v1_worker_proto_enumTypes[2]
+	return &file_marketingovo_v1_worker_proto_enumTypes[2]
 }
 
 func (x AnalysisWorkflow) Number() protoreflect.EnumNumber {
@@ -171,7 +171,7 @@ func (x AnalysisWorkflow) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use AnalysisWorkflow.Descriptor instead.
 func (AnalysisWorkflow) EnumDescriptor() ([]byte, []int) {
-	return file_agentintel_v1_worker_proto_rawDescGZIP(), []int{2}
+	return file_marketingovo_v1_worker_proto_rawDescGZIP(), []int{2}
 }
 
 // WorkerEnvelope is a length-delimited control message. Bulk evidence never
@@ -194,7 +194,7 @@ type WorkerEnvelope struct {
 
 func (x *WorkerEnvelope) Reset() {
 	*x = WorkerEnvelope{}
-	mi := &file_agentintel_v1_worker_proto_msgTypes[0]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -206,7 +206,7 @@ func (x *WorkerEnvelope) String() string {
 func (*WorkerEnvelope) ProtoMessage() {}
 
 func (x *WorkerEnvelope) ProtoReflect() protoreflect.Message {
-	mi := &file_agentintel_v1_worker_proto_msgTypes[0]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -219,7 +219,7 @@ func (x *WorkerEnvelope) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorkerEnvelope.ProtoReflect.Descriptor instead.
 func (*WorkerEnvelope) Descriptor() ([]byte, []int) {
-	return file_agentintel_v1_worker_proto_rawDescGZIP(), []int{0}
+	return file_marketingovo_v1_worker_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *WorkerEnvelope) GetProtocolVersion() uint32 {
@@ -341,7 +341,7 @@ type StartAnalysis struct {
 	OutputDirectory  string                 `protobuf:"bytes,7,opt,name=output_directory,json=outputDirectory,proto3" json:"output_directory,omitempty"`
 	TargetIds        []string               `protobuf:"bytes,8,rep,name=target_ids,json=targetIds,proto3" json:"target_ids,omitempty"`
 	Options          map[string]string      `protobuf:"bytes,9,rep,name=options,proto3" json:"options,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Workflow         AnalysisWorkflow       `protobuf:"varint,10,opt,name=workflow,proto3,enum=agentintel.v1.AnalysisWorkflow" json:"workflow,omitempty"`
+	Workflow         AnalysisWorkflow       `protobuf:"varint,10,opt,name=workflow,proto3,enum=marketingovo.v1.AnalysisWorkflow" json:"workflow,omitempty"`
 	ResearchQuestion string                 `protobuf:"bytes,11,opt,name=research_question,json=researchQuestion,proto3" json:"research_question,omitempty"`
 	SourceBudget     uint32                 `protobuf:"varint,12,opt,name=source_budget,json=sourceBudget,proto3" json:"source_budget,omitempty"`
 	ImportContext    *ImportContext         `protobuf:"bytes,13,opt,name=import_context,json=importContext,proto3" json:"import_context,omitempty"`
@@ -351,7 +351,7 @@ type StartAnalysis struct {
 
 func (x *StartAnalysis) Reset() {
 	*x = StartAnalysis{}
-	mi := &file_agentintel_v1_worker_proto_msgTypes[1]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -363,7 +363,7 @@ func (x *StartAnalysis) String() string {
 func (*StartAnalysis) ProtoMessage() {}
 
 func (x *StartAnalysis) ProtoReflect() protoreflect.Message {
-	mi := &file_agentintel_v1_worker_proto_msgTypes[1]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -376,7 +376,7 @@ func (x *StartAnalysis) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartAnalysis.ProtoReflect.Descriptor instead.
 func (*StartAnalysis) Descriptor() ([]byte, []int) {
-	return file_agentintel_v1_worker_proto_rawDescGZIP(), []int{1}
+	return file_marketingovo_v1_worker_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *StartAnalysis) GetRunId() string {
@@ -483,7 +483,7 @@ type ValidateImport struct {
 
 func (x *ValidateImport) Reset() {
 	*x = ValidateImport{}
-	mi := &file_agentintel_v1_worker_proto_msgTypes[2]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -495,7 +495,7 @@ func (x *ValidateImport) String() string {
 func (*ValidateImport) ProtoMessage() {}
 
 func (x *ValidateImport) ProtoReflect() protoreflect.Message {
-	mi := &file_agentintel_v1_worker_proto_msgTypes[2]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -508,7 +508,7 @@ func (x *ValidateImport) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ValidateImport.ProtoReflect.Descriptor instead.
 func (*ValidateImport) Descriptor() ([]byte, []int) {
-	return file_agentintel_v1_worker_proto_rawDescGZIP(), []int{2}
+	return file_marketingovo_v1_worker_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ValidateImport) GetRequestId() string {
@@ -562,7 +562,7 @@ type ImportValidationResult struct {
 
 func (x *ImportValidationResult) Reset() {
 	*x = ImportValidationResult{}
-	mi := &file_agentintel_v1_worker_proto_msgTypes[3]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -574,7 +574,7 @@ func (x *ImportValidationResult) String() string {
 func (*ImportValidationResult) ProtoMessage() {}
 
 func (x *ImportValidationResult) ProtoReflect() protoreflect.Message {
-	mi := &file_agentintel_v1_worker_proto_msgTypes[3]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -587,7 +587,7 @@ func (x *ImportValidationResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImportValidationResult.ProtoReflect.Descriptor instead.
 func (*ImportValidationResult) Descriptor() ([]byte, []int) {
-	return file_agentintel_v1_worker_proto_rawDescGZIP(), []int{3}
+	return file_marketingovo_v1_worker_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ImportValidationResult) GetRequestId() string {
@@ -658,7 +658,7 @@ type ImportInputSummary struct {
 
 func (x *ImportInputSummary) Reset() {
 	*x = ImportInputSummary{}
-	mi := &file_agentintel_v1_worker_proto_msgTypes[4]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -670,7 +670,7 @@ func (x *ImportInputSummary) String() string {
 func (*ImportInputSummary) ProtoMessage() {}
 
 func (x *ImportInputSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_agentintel_v1_worker_proto_msgTypes[4]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -683,7 +683,7 @@ func (x *ImportInputSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImportInputSummary.ProtoReflect.Descriptor instead.
 func (*ImportInputSummary) Descriptor() ([]byte, []int) {
-	return file_agentintel_v1_worker_proto_rawDescGZIP(), []int{4}
+	return file_marketingovo_v1_worker_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ImportInputSummary) GetSchemaId() string {
@@ -727,7 +727,7 @@ type ImportFilePolicySummary struct {
 
 func (x *ImportFilePolicySummary) Reset() {
 	*x = ImportFilePolicySummary{}
-	mi := &file_agentintel_v1_worker_proto_msgTypes[5]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -739,7 +739,7 @@ func (x *ImportFilePolicySummary) String() string {
 func (*ImportFilePolicySummary) ProtoMessage() {}
 
 func (x *ImportFilePolicySummary) ProtoReflect() protoreflect.Message {
-	mi := &file_agentintel_v1_worker_proto_msgTypes[5]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -752,7 +752,7 @@ func (x *ImportFilePolicySummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImportFilePolicySummary.ProtoReflect.Descriptor instead.
 func (*ImportFilePolicySummary) Descriptor() ([]byte, []int) {
-	return file_agentintel_v1_worker_proto_rawDescGZIP(), []int{5}
+	return file_marketingovo_v1_worker_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ImportFilePolicySummary) GetTargetScope() string {
@@ -795,14 +795,14 @@ type ImportTargetSummary struct {
 	TargetId           string                              `protobuf:"bytes,1,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
 	TargetName         string                              `protobuf:"bytes,2,opt,name=target_name,json=targetName,proto3" json:"target_name,omitempty"`
 	RowCount           uint64                              `protobuf:"varint,3,opt,name=row_count,json=rowCount,proto3" json:"row_count,omitempty"`
-	MetricAvailability map[string]ImportMetricAvailability `protobuf:"bytes,4,rep,name=metric_availability,json=metricAvailability,proto3" json:"metric_availability,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value,enum=agentintel.v1.ImportMetricAvailability"`
+	MetricAvailability map[string]ImportMetricAvailability `protobuf:"bytes,4,rep,name=metric_availability,json=metricAvailability,proto3" json:"metric_availability,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value,enum=marketingovo.v1.ImportMetricAvailability"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
 
 func (x *ImportTargetSummary) Reset() {
 	*x = ImportTargetSummary{}
-	mi := &file_agentintel_v1_worker_proto_msgTypes[6]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -814,7 +814,7 @@ func (x *ImportTargetSummary) String() string {
 func (*ImportTargetSummary) ProtoMessage() {}
 
 func (x *ImportTargetSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_agentintel_v1_worker_proto_msgTypes[6]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -827,7 +827,7 @@ func (x *ImportTargetSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImportTargetSummary.ProtoReflect.Descriptor instead.
 func (*ImportTargetSummary) Descriptor() ([]byte, []int) {
-	return file_agentintel_v1_worker_proto_rawDescGZIP(), []int{6}
+	return file_marketingovo_v1_worker_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ImportTargetSummary) GetTargetId() string {
@@ -860,7 +860,7 @@ func (x *ImportTargetSummary) GetMetricAvailability() map[string]ImportMetricAva
 
 type ImportDiagnostic struct {
 	state         protoimpl.MessageState   `protogen:"open.v1"`
-	Severity      ImportDiagnosticSeverity `protobuf:"varint,1,opt,name=severity,proto3,enum=agentintel.v1.ImportDiagnosticSeverity" json:"severity,omitempty"`
+	Severity      ImportDiagnosticSeverity `protobuf:"varint,1,opt,name=severity,proto3,enum=marketingovo.v1.ImportDiagnosticSeverity" json:"severity,omitempty"`
 	Code          string                   `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
 	RecordNumber  *uint32                  `protobuf:"varint,3,opt,name=record_number,json=recordNumber,proto3,oneof" json:"record_number,omitempty"`
 	Column        *string                  `protobuf:"bytes,4,opt,name=column,proto3,oneof" json:"column,omitempty"`
@@ -871,7 +871,7 @@ type ImportDiagnostic struct {
 
 func (x *ImportDiagnostic) Reset() {
 	*x = ImportDiagnostic{}
-	mi := &file_agentintel_v1_worker_proto_msgTypes[7]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -883,7 +883,7 @@ func (x *ImportDiagnostic) String() string {
 func (*ImportDiagnostic) ProtoMessage() {}
 
 func (x *ImportDiagnostic) ProtoReflect() protoreflect.Message {
-	mi := &file_agentintel_v1_worker_proto_msgTypes[7]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -896,7 +896,7 @@ func (x *ImportDiagnostic) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImportDiagnostic.ProtoReflect.Descriptor instead.
 func (*ImportDiagnostic) Descriptor() ([]byte, []int) {
-	return file_agentintel_v1_worker_proto_rawDescGZIP(), []int{7}
+	return file_marketingovo_v1_worker_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ImportDiagnostic) GetSeverity() ImportDiagnosticSeverity {
@@ -946,7 +946,7 @@ type ImportContext struct {
 
 func (x *ImportContext) Reset() {
 	*x = ImportContext{}
-	mi := &file_agentintel_v1_worker_proto_msgTypes[8]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -958,7 +958,7 @@ func (x *ImportContext) String() string {
 func (*ImportContext) ProtoMessage() {}
 
 func (x *ImportContext) ProtoReflect() protoreflect.Message {
-	mi := &file_agentintel_v1_worker_proto_msgTypes[8]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -971,7 +971,7 @@ func (x *ImportContext) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImportContext.ProtoReflect.Descriptor instead.
 func (*ImportContext) Descriptor() ([]byte, []int) {
-	return file_agentintel_v1_worker_proto_rawDescGZIP(), []int{8}
+	return file_marketingovo_v1_worker_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ImportContext) GetDatasetId() string {
@@ -1012,7 +1012,7 @@ type CancelAnalysis struct {
 
 func (x *CancelAnalysis) Reset() {
 	*x = CancelAnalysis{}
-	mi := &file_agentintel_v1_worker_proto_msgTypes[9]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1024,7 +1024,7 @@ func (x *CancelAnalysis) String() string {
 func (*CancelAnalysis) ProtoMessage() {}
 
 func (x *CancelAnalysis) ProtoReflect() protoreflect.Message {
-	mi := &file_agentintel_v1_worker_proto_msgTypes[9]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1037,7 +1037,7 @@ func (x *CancelAnalysis) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelAnalysis.ProtoReflect.Descriptor instead.
 func (*CancelAnalysis) Descriptor() ([]byte, []int) {
-	return file_agentintel_v1_worker_proto_rawDescGZIP(), []int{9}
+	return file_marketingovo_v1_worker_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *CancelAnalysis) GetRunId() string {
@@ -1069,7 +1069,7 @@ type WorkerEvent struct {
 
 func (x *WorkerEvent) Reset() {
 	*x = WorkerEvent{}
-	mi := &file_agentintel_v1_worker_proto_msgTypes[10]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1081,7 +1081,7 @@ func (x *WorkerEvent) String() string {
 func (*WorkerEvent) ProtoMessage() {}
 
 func (x *WorkerEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_agentintel_v1_worker_proto_msgTypes[10]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1094,7 +1094,7 @@ func (x *WorkerEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorkerEvent.ProtoReflect.Descriptor instead.
 func (*WorkerEvent) Descriptor() ([]byte, []int) {
-	return file_agentintel_v1_worker_proto_rawDescGZIP(), []int{10}
+	return file_marketingovo_v1_worker_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *WorkerEvent) GetRunId() string {
@@ -1163,7 +1163,7 @@ type ArtifactDescriptor struct {
 
 func (x *ArtifactDescriptor) Reset() {
 	*x = ArtifactDescriptor{}
-	mi := &file_agentintel_v1_worker_proto_msgTypes[11]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1175,7 +1175,7 @@ func (x *ArtifactDescriptor) String() string {
 func (*ArtifactDescriptor) ProtoMessage() {}
 
 func (x *ArtifactDescriptor) ProtoReflect() protoreflect.Message {
-	mi := &file_agentintel_v1_worker_proto_msgTypes[11]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1188,7 +1188,7 @@ func (x *ArtifactDescriptor) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ArtifactDescriptor.ProtoReflect.Descriptor instead.
 func (*ArtifactDescriptor) Descriptor() ([]byte, []int) {
-	return file_agentintel_v1_worker_proto_rawDescGZIP(), []int{11}
+	return file_marketingovo_v1_worker_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ArtifactDescriptor) GetRelativePath() string {
@@ -1271,7 +1271,7 @@ type AnalysisResult struct {
 
 func (x *AnalysisResult) Reset() {
 	*x = AnalysisResult{}
-	mi := &file_agentintel_v1_worker_proto_msgTypes[12]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1283,7 +1283,7 @@ func (x *AnalysisResult) String() string {
 func (*AnalysisResult) ProtoMessage() {}
 
 func (x *AnalysisResult) ProtoReflect() protoreflect.Message {
-	mi := &file_agentintel_v1_worker_proto_msgTypes[12]
+	mi := &file_marketingovo_v1_worker_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1296,7 +1296,7 @@ func (x *AnalysisResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AnalysisResult.ProtoReflect.Descriptor instead.
 func (*AnalysisResult) Descriptor() ([]byte, []int) {
-	return file_agentintel_v1_worker_proto_rawDescGZIP(), []int{12}
+	return file_marketingovo_v1_worker_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *AnalysisResult) GetRunId() string {
@@ -1362,21 +1362,21 @@ func (x *AnalysisResult) GetWorkerVersion() string {
 	return ""
 }
 
-var File_agentintel_v1_worker_proto protoreflect.FileDescriptor
+var File_marketingovo_v1_worker_proto protoreflect.FileDescriptor
 
-const file_agentintel_v1_worker_proto_rawDesc = "" +
+const file_marketingovo_v1_worker_proto_rawDesc = "" +
 	"\n" +
-	"\x1aagentintel/v1/worker.proto\x12\ragentintel.v1\"\x8f\x04\n" +
+	"\x1cmarketingovo/v1/worker.proto\x12\x0fmarketingovo.v1\"\x9b\x04\n" +
 	"\x0eWorkerEnvelope\x12)\n" +
-	"\x10protocol_version\x18\x01 \x01(\rR\x0fprotocolVersion\x12E\n" +
+	"\x10protocol_version\x18\x01 \x01(\rR\x0fprotocolVersion\x12G\n" +
 	"\x0estart_analysis\x18\n" +
-	" \x01(\v2\x1c.agentintel.v1.StartAnalysisH\x00R\rstartAnalysis\x12H\n" +
-	"\x0fcancel_analysis\x18\v \x01(\v2\x1d.agentintel.v1.CancelAnalysisH\x00R\x0ecancelAnalysis\x12?\n" +
-	"\fworker_event\x18\f \x01(\v2\x1a.agentintel.v1.WorkerEventH\x00R\vworkerEvent\x12H\n" +
-	"\x0fanalysis_result\x18\r \x01(\v2\x1d.agentintel.v1.AnalysisResultH\x00R\x0eanalysisResult\x12H\n" +
-	"\x0fvalidate_import\x18\x0e \x01(\v2\x1d.agentintel.v1.ValidateImportH\x00R\x0evalidateImport\x12a\n" +
-	"\x18import_validation_result\x18\x0f \x01(\v2%.agentintel.v1.ImportValidationResultH\x00R\x16importValidationResultB\t\n" +
-	"\amessage\"\xf5\x04\n" +
+	" \x01(\v2\x1e.marketingovo.v1.StartAnalysisH\x00R\rstartAnalysis\x12J\n" +
+	"\x0fcancel_analysis\x18\v \x01(\v2\x1f.marketingovo.v1.CancelAnalysisH\x00R\x0ecancelAnalysis\x12A\n" +
+	"\fworker_event\x18\f \x01(\v2\x1c.marketingovo.v1.WorkerEventH\x00R\vworkerEvent\x12J\n" +
+	"\x0fanalysis_result\x18\r \x01(\v2\x1f.marketingovo.v1.AnalysisResultH\x00R\x0eanalysisResult\x12J\n" +
+	"\x0fvalidate_import\x18\x0e \x01(\v2\x1f.marketingovo.v1.ValidateImportH\x00R\x0evalidateImport\x12c\n" +
+	"\x18import_validation_result\x18\x0f \x01(\v2'.marketingovo.v1.ImportValidationResultH\x00R\x16importValidationResultB\t\n" +
+	"\amessage\"\xfb\x04\n" +
 	"\rStartAnalysis\x12\x15\n" +
 	"\x06run_id\x18\x01 \x01(\tR\x05runId\x12\x1d\n" +
 	"\n" +
@@ -1388,13 +1388,13 @@ const file_agentintel_v1_worker_proto_rawDesc = "" +
 	"\x0finput_schema_id\x18\x06 \x01(\tR\rinputSchemaId\x12)\n" +
 	"\x10output_directory\x18\a \x01(\tR\x0foutputDirectory\x12\x1d\n" +
 	"\n" +
-	"target_ids\x18\b \x03(\tR\ttargetIds\x12C\n" +
-	"\aoptions\x18\t \x03(\v2).agentintel.v1.StartAnalysis.OptionsEntryR\aoptions\x12;\n" +
+	"target_ids\x18\b \x03(\tR\ttargetIds\x12E\n" +
+	"\aoptions\x18\t \x03(\v2+.marketingovo.v1.StartAnalysis.OptionsEntryR\aoptions\x12=\n" +
 	"\bworkflow\x18\n" +
-	" \x01(\x0e2\x1f.agentintel.v1.AnalysisWorkflowR\bworkflow\x12+\n" +
+	" \x01(\x0e2!.marketingovo.v1.AnalysisWorkflowR\bworkflow\x12+\n" +
 	"\x11research_question\x18\v \x01(\tR\x10researchQuestion\x12#\n" +
-	"\rsource_budget\x18\f \x01(\rR\fsourceBudget\x12C\n" +
-	"\x0eimport_context\x18\r \x01(\v2\x1c.agentintel.v1.ImportContextR\rimportContext\x1a:\n" +
+	"\rsource_budget\x18\f \x01(\rR\fsourceBudget\x12E\n" +
+	"\x0eimport_context\x18\r \x01(\v2\x1e.marketingovo.v1.ImportContextR\rimportContext\x1a:\n" +
 	"\fOptionsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xbc\x01\n" +
@@ -1405,17 +1405,17 @@ const file_agentintel_v1_worker_proto_rawDesc = "" +
 	"input_path\x18\x02 \x01(\tR\tinputPath\x12!\n" +
 	"\finput_sha256\x18\x03 \x01(\tR\vinputSha256\x12&\n" +
 	"\x0finput_schema_id\x18\x04 \x01(\tR\rinputSchemaId\x12!\n" +
-	"\fvalidated_at\x18\x05 \x01(\tR\vvalidatedAt\"\xb3\x03\n" +
+	"\fvalidated_at\x18\x05 \x01(\tR\vvalidatedAt\"\xbb\x03\n" +
 	"\x16ImportValidationResult\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12\x14\n" +
-	"\x05valid\x18\x02 \x01(\bR\x05valid\x127\n" +
-	"\x05input\x18\x03 \x01(\v2!.agentintel.v1.ImportInputSummaryR\x05input\x12G\n" +
-	"\vfile_policy\x18\x04 \x01(\v2&.agentintel.v1.ImportFilePolicySummaryR\n" +
+	"\x05valid\x18\x02 \x01(\bR\x05valid\x129\n" +
+	"\x05input\x18\x03 \x01(\v2#.marketingovo.v1.ImportInputSummaryR\x05input\x12I\n" +
+	"\vfile_policy\x18\x04 \x01(\v2(.marketingovo.v1.ImportFilePolicySummaryR\n" +
 	"filePolicy\x12\x1f\n" +
-	"\bplatform\x18\x05 \x01(\tH\x00R\bplatform\x88\x01\x01\x12<\n" +
-	"\atargets\x18\x06 \x03(\v2\".agentintel.v1.ImportTargetSummaryR\atargets\x12A\n" +
-	"\vdiagnostics\x18\a \x03(\v2\x1f.agentintel.v1.ImportDiagnosticR\vdiagnostics\x123\n" +
+	"\bplatform\x18\x05 \x01(\tH\x00R\bplatform\x88\x01\x01\x12>\n" +
+	"\atargets\x18\x06 \x03(\v2$.marketingovo.v1.ImportTargetSummaryR\atargets\x12C\n" +
+	"\vdiagnostics\x18\a \x03(\v2!.marketingovo.v1.ImportDiagnosticR\vdiagnostics\x123\n" +
 	"\x15diagnostics_truncated\x18\b \x01(\bR\x14diagnosticsTruncatedB\v\n" +
 	"\t_platform\"\x98\x01\n" +
 	"\x12ImportInputSummary\x12\x1b\n" +
@@ -1437,18 +1437,18 @@ const file_agentintel_v1_worker_proto_rawDesc = "" +
 	"\v_data_classB\x14\n" +
 	"\x12_permitted_purposeB\x11\n" +
 	"\x0f_retention_daysB\x0f\n" +
-	"\r_rights_state\"\xcd\x02\n" +
+	"\r_rights_state\"\xd1\x02\n" +
 	"\x13ImportTargetSummary\x12\x1b\n" +
 	"\ttarget_id\x18\x01 \x01(\tR\btargetId\x12\x1f\n" +
 	"\vtarget_name\x18\x02 \x01(\tR\n" +
 	"targetName\x12\x1b\n" +
-	"\trow_count\x18\x03 \x01(\x04R\browCount\x12k\n" +
-	"\x13metric_availability\x18\x04 \x03(\v2:.agentintel.v1.ImportTargetSummary.MetricAvailabilityEntryR\x12metricAvailability\x1an\n" +
+	"\trow_count\x18\x03 \x01(\x04R\browCount\x12m\n" +
+	"\x13metric_availability\x18\x04 \x03(\v2<.marketingovo.v1.ImportTargetSummary.MetricAvailabilityEntryR\x12metricAvailability\x1ap\n" +
 	"\x17MetricAvailabilityEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12=\n" +
-	"\x05value\x18\x02 \x01(\x0e2'.agentintel.v1.ImportMetricAvailabilityR\x05value:\x028\x01\"\xe9\x01\n" +
-	"\x10ImportDiagnostic\x12C\n" +
-	"\bseverity\x18\x01 \x01(\x0e2'.agentintel.v1.ImportDiagnosticSeverityR\bseverity\x12\x12\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12?\n" +
+	"\x05value\x18\x02 \x01(\x0e2).marketingovo.v1.ImportMetricAvailabilityR\x05value:\x028\x01\"\xeb\x01\n" +
+	"\x10ImportDiagnostic\x12E\n" +
+	"\bseverity\x18\x01 \x01(\x0e2).marketingovo.v1.ImportDiagnosticSeverityR\bseverity\x12\x12\n" +
 	"\x04code\x18\x02 \x01(\tR\x04code\x12(\n" +
 	"\rrecord_number\x18\x03 \x01(\rH\x00R\frecordNumber\x88\x01\x01\x12\x1b\n" +
 	"\x06column\x18\x04 \x01(\tH\x01R\x06column\x88\x01\x01\x12\x18\n" +
@@ -1485,14 +1485,14 @@ const file_agentintel_v1_worker_proto_rawDesc = "" +
 	"\x13minimum_observed_at\x18\a \x01(\tR\x11minimumObservedAt\x12.\n" +
 	"\x13maximum_observed_at\x18\b \x01(\tR\x11maximumObservedAt\x12\x1d\n" +
 	"\n" +
-	"data_class\x18\t \x01(\tR\tdataClass\"\xed\x02\n" +
+	"data_class\x18\t \x01(\tR\tdataClass\"\xef\x02\n" +
 	"\x0eAnalysisResult\x12\x15\n" +
 	"\x06run_id\x18\x01 \x01(\tR\x05runId\x12\x1c\n" +
 	"\tsucceeded\x18\x02 \x01(\bR\tsucceeded\x12\x1d\n" +
 	"\n" +
 	"error_code\x18\x03 \x01(\tR\terrorCode\x12#\n" +
-	"\rerror_message\x18\x04 \x01(\tR\ferrorMessage\x12?\n" +
-	"\tartifacts\x18\x05 \x03(\v2!.agentintel.v1.ArtifactDescriptorR\tartifacts\x120\n" +
+	"\rerror_message\x18\x04 \x01(\tR\ferrorMessage\x12A\n" +
+	"\tartifacts\x18\x05 \x03(\v2#.marketingovo.v1.ArtifactDescriptorR\tartifacts\x120\n" +
 	"\x14report_relative_path\x18\x06 \x01(\tR\x12reportRelativePath\x12#\n" +
 	"\rreport_sha256\x18\a \x01(\tR\freportSha256\x12#\n" +
 	"\rmodel_version\x18\b \x01(\tR\fmodelVersion\x12%\n" +
@@ -1510,60 +1510,60 @@ const file_agentintel_v1_worker_proto_rawDesc = "" +
 	"\x10AnalysisWorkflow\x12!\n" +
 	"\x1dANALYSIS_WORKFLOW_UNSPECIFIED\x10\x00\x12\x1d\n" +
 	"\x19ANALYSIS_WORKFLOW_COMPARE\x10\x01\x12\x1e\n" +
-	"\x1aANALYSIS_WORKFLOW_RESEARCH\x10\x02B=Z;github.com/MaxJafar/AGENTintel/gen/go/agentintel/v1;intelv1b\x06proto3"
+	"\x1aANALYSIS_WORKFLOW_RESEARCH\x10\x02BWZUgithub.com/MaxJafar/marketingovo/services/intel-daemon/gen/go/marketingovo/v1;intelv1b\x06proto3"
 
 var (
-	file_agentintel_v1_worker_proto_rawDescOnce sync.Once
-	file_agentintel_v1_worker_proto_rawDescData []byte
+	file_marketingovo_v1_worker_proto_rawDescOnce sync.Once
+	file_marketingovo_v1_worker_proto_rawDescData []byte
 )
 
-func file_agentintel_v1_worker_proto_rawDescGZIP() []byte {
-	file_agentintel_v1_worker_proto_rawDescOnce.Do(func() {
-		file_agentintel_v1_worker_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_agentintel_v1_worker_proto_rawDesc), len(file_agentintel_v1_worker_proto_rawDesc)))
+func file_marketingovo_v1_worker_proto_rawDescGZIP() []byte {
+	file_marketingovo_v1_worker_proto_rawDescOnce.Do(func() {
+		file_marketingovo_v1_worker_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_marketingovo_v1_worker_proto_rawDesc), len(file_marketingovo_v1_worker_proto_rawDesc)))
 	})
-	return file_agentintel_v1_worker_proto_rawDescData
+	return file_marketingovo_v1_worker_proto_rawDescData
 }
 
-var file_agentintel_v1_worker_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_agentintel_v1_worker_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
-var file_agentintel_v1_worker_proto_goTypes = []any{
-	(ImportMetricAvailability)(0),   // 0: agentintel.v1.ImportMetricAvailability
-	(ImportDiagnosticSeverity)(0),   // 1: agentintel.v1.ImportDiagnosticSeverity
-	(AnalysisWorkflow)(0),           // 2: agentintel.v1.AnalysisWorkflow
-	(*WorkerEnvelope)(nil),          // 3: agentintel.v1.WorkerEnvelope
-	(*StartAnalysis)(nil),           // 4: agentintel.v1.StartAnalysis
-	(*ValidateImport)(nil),          // 5: agentintel.v1.ValidateImport
-	(*ImportValidationResult)(nil),  // 6: agentintel.v1.ImportValidationResult
-	(*ImportInputSummary)(nil),      // 7: agentintel.v1.ImportInputSummary
-	(*ImportFilePolicySummary)(nil), // 8: agentintel.v1.ImportFilePolicySummary
-	(*ImportTargetSummary)(nil),     // 9: agentintel.v1.ImportTargetSummary
-	(*ImportDiagnostic)(nil),        // 10: agentintel.v1.ImportDiagnostic
-	(*ImportContext)(nil),           // 11: agentintel.v1.ImportContext
-	(*CancelAnalysis)(nil),          // 12: agentintel.v1.CancelAnalysis
-	(*WorkerEvent)(nil),             // 13: agentintel.v1.WorkerEvent
-	(*ArtifactDescriptor)(nil),      // 14: agentintel.v1.ArtifactDescriptor
-	(*AnalysisResult)(nil),          // 15: agentintel.v1.AnalysisResult
-	nil,                             // 16: agentintel.v1.StartAnalysis.OptionsEntry
-	nil,                             // 17: agentintel.v1.ImportTargetSummary.MetricAvailabilityEntry
+var file_marketingovo_v1_worker_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_marketingovo_v1_worker_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_marketingovo_v1_worker_proto_goTypes = []any{
+	(ImportMetricAvailability)(0),   // 0: marketingovo.v1.ImportMetricAvailability
+	(ImportDiagnosticSeverity)(0),   // 1: marketingovo.v1.ImportDiagnosticSeverity
+	(AnalysisWorkflow)(0),           // 2: marketingovo.v1.AnalysisWorkflow
+	(*WorkerEnvelope)(nil),          // 3: marketingovo.v1.WorkerEnvelope
+	(*StartAnalysis)(nil),           // 4: marketingovo.v1.StartAnalysis
+	(*ValidateImport)(nil),          // 5: marketingovo.v1.ValidateImport
+	(*ImportValidationResult)(nil),  // 6: marketingovo.v1.ImportValidationResult
+	(*ImportInputSummary)(nil),      // 7: marketingovo.v1.ImportInputSummary
+	(*ImportFilePolicySummary)(nil), // 8: marketingovo.v1.ImportFilePolicySummary
+	(*ImportTargetSummary)(nil),     // 9: marketingovo.v1.ImportTargetSummary
+	(*ImportDiagnostic)(nil),        // 10: marketingovo.v1.ImportDiagnostic
+	(*ImportContext)(nil),           // 11: marketingovo.v1.ImportContext
+	(*CancelAnalysis)(nil),          // 12: marketingovo.v1.CancelAnalysis
+	(*WorkerEvent)(nil),             // 13: marketingovo.v1.WorkerEvent
+	(*ArtifactDescriptor)(nil),      // 14: marketingovo.v1.ArtifactDescriptor
+	(*AnalysisResult)(nil),          // 15: marketingovo.v1.AnalysisResult
+	nil,                             // 16: marketingovo.v1.StartAnalysis.OptionsEntry
+	nil,                             // 17: marketingovo.v1.ImportTargetSummary.MetricAvailabilityEntry
 }
-var file_agentintel_v1_worker_proto_depIdxs = []int32{
-	4,  // 0: agentintel.v1.WorkerEnvelope.start_analysis:type_name -> agentintel.v1.StartAnalysis
-	12, // 1: agentintel.v1.WorkerEnvelope.cancel_analysis:type_name -> agentintel.v1.CancelAnalysis
-	13, // 2: agentintel.v1.WorkerEnvelope.worker_event:type_name -> agentintel.v1.WorkerEvent
-	15, // 3: agentintel.v1.WorkerEnvelope.analysis_result:type_name -> agentintel.v1.AnalysisResult
-	5,  // 4: agentintel.v1.WorkerEnvelope.validate_import:type_name -> agentintel.v1.ValidateImport
-	6,  // 5: agentintel.v1.WorkerEnvelope.import_validation_result:type_name -> agentintel.v1.ImportValidationResult
-	16, // 6: agentintel.v1.StartAnalysis.options:type_name -> agentintel.v1.StartAnalysis.OptionsEntry
-	2,  // 7: agentintel.v1.StartAnalysis.workflow:type_name -> agentintel.v1.AnalysisWorkflow
-	11, // 8: agentintel.v1.StartAnalysis.import_context:type_name -> agentintel.v1.ImportContext
-	7,  // 9: agentintel.v1.ImportValidationResult.input:type_name -> agentintel.v1.ImportInputSummary
-	8,  // 10: agentintel.v1.ImportValidationResult.file_policy:type_name -> agentintel.v1.ImportFilePolicySummary
-	9,  // 11: agentintel.v1.ImportValidationResult.targets:type_name -> agentintel.v1.ImportTargetSummary
-	10, // 12: agentintel.v1.ImportValidationResult.diagnostics:type_name -> agentintel.v1.ImportDiagnostic
-	17, // 13: agentintel.v1.ImportTargetSummary.metric_availability:type_name -> agentintel.v1.ImportTargetSummary.MetricAvailabilityEntry
-	1,  // 14: agentintel.v1.ImportDiagnostic.severity:type_name -> agentintel.v1.ImportDiagnosticSeverity
-	14, // 15: agentintel.v1.AnalysisResult.artifacts:type_name -> agentintel.v1.ArtifactDescriptor
-	0,  // 16: agentintel.v1.ImportTargetSummary.MetricAvailabilityEntry.value:type_name -> agentintel.v1.ImportMetricAvailability
+var file_marketingovo_v1_worker_proto_depIdxs = []int32{
+	4,  // 0: marketingovo.v1.WorkerEnvelope.start_analysis:type_name -> marketingovo.v1.StartAnalysis
+	12, // 1: marketingovo.v1.WorkerEnvelope.cancel_analysis:type_name -> marketingovo.v1.CancelAnalysis
+	13, // 2: marketingovo.v1.WorkerEnvelope.worker_event:type_name -> marketingovo.v1.WorkerEvent
+	15, // 3: marketingovo.v1.WorkerEnvelope.analysis_result:type_name -> marketingovo.v1.AnalysisResult
+	5,  // 4: marketingovo.v1.WorkerEnvelope.validate_import:type_name -> marketingovo.v1.ValidateImport
+	6,  // 5: marketingovo.v1.WorkerEnvelope.import_validation_result:type_name -> marketingovo.v1.ImportValidationResult
+	16, // 6: marketingovo.v1.StartAnalysis.options:type_name -> marketingovo.v1.StartAnalysis.OptionsEntry
+	2,  // 7: marketingovo.v1.StartAnalysis.workflow:type_name -> marketingovo.v1.AnalysisWorkflow
+	11, // 8: marketingovo.v1.StartAnalysis.import_context:type_name -> marketingovo.v1.ImportContext
+	7,  // 9: marketingovo.v1.ImportValidationResult.input:type_name -> marketingovo.v1.ImportInputSummary
+	8,  // 10: marketingovo.v1.ImportValidationResult.file_policy:type_name -> marketingovo.v1.ImportFilePolicySummary
+	9,  // 11: marketingovo.v1.ImportValidationResult.targets:type_name -> marketingovo.v1.ImportTargetSummary
+	10, // 12: marketingovo.v1.ImportValidationResult.diagnostics:type_name -> marketingovo.v1.ImportDiagnostic
+	17, // 13: marketingovo.v1.ImportTargetSummary.metric_availability:type_name -> marketingovo.v1.ImportTargetSummary.MetricAvailabilityEntry
+	1,  // 14: marketingovo.v1.ImportDiagnostic.severity:type_name -> marketingovo.v1.ImportDiagnosticSeverity
+	14, // 15: marketingovo.v1.AnalysisResult.artifacts:type_name -> marketingovo.v1.ArtifactDescriptor
+	0,  // 16: marketingovo.v1.ImportTargetSummary.MetricAvailabilityEntry.value:type_name -> marketingovo.v1.ImportMetricAvailability
 	17, // [17:17] is the sub-list for method output_type
 	17, // [17:17] is the sub-list for method input_type
 	17, // [17:17] is the sub-list for extension type_name
@@ -1571,12 +1571,12 @@ var file_agentintel_v1_worker_proto_depIdxs = []int32{
 	0,  // [0:17] is the sub-list for field type_name
 }
 
-func init() { file_agentintel_v1_worker_proto_init() }
-func file_agentintel_v1_worker_proto_init() {
-	if File_agentintel_v1_worker_proto != nil {
+func init() { file_marketingovo_v1_worker_proto_init() }
+func file_marketingovo_v1_worker_proto_init() {
+	if File_marketingovo_v1_worker_proto != nil {
 		return
 	}
-	file_agentintel_v1_worker_proto_msgTypes[0].OneofWrappers = []any{
+	file_marketingovo_v1_worker_proto_msgTypes[0].OneofWrappers = []any{
 		(*WorkerEnvelope_StartAnalysis)(nil),
 		(*WorkerEnvelope_CancelAnalysis)(nil),
 		(*WorkerEnvelope_WorkerEvent)(nil),
@@ -1584,26 +1584,26 @@ func file_agentintel_v1_worker_proto_init() {
 		(*WorkerEnvelope_ValidateImport)(nil),
 		(*WorkerEnvelope_ImportValidationResult)(nil),
 	}
-	file_agentintel_v1_worker_proto_msgTypes[3].OneofWrappers = []any{}
-	file_agentintel_v1_worker_proto_msgTypes[4].OneofWrappers = []any{}
-	file_agentintel_v1_worker_proto_msgTypes[5].OneofWrappers = []any{}
-	file_agentintel_v1_worker_proto_msgTypes[7].OneofWrappers = []any{}
+	file_marketingovo_v1_worker_proto_msgTypes[3].OneofWrappers = []any{}
+	file_marketingovo_v1_worker_proto_msgTypes[4].OneofWrappers = []any{}
+	file_marketingovo_v1_worker_proto_msgTypes[5].OneofWrappers = []any{}
+	file_marketingovo_v1_worker_proto_msgTypes[7].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_agentintel_v1_worker_proto_rawDesc), len(file_agentintel_v1_worker_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_marketingovo_v1_worker_proto_rawDesc), len(file_marketingovo_v1_worker_proto_rawDesc)),
 			NumEnums:      3,
 			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_agentintel_v1_worker_proto_goTypes,
-		DependencyIndexes: file_agentintel_v1_worker_proto_depIdxs,
-		EnumInfos:         file_agentintel_v1_worker_proto_enumTypes,
-		MessageInfos:      file_agentintel_v1_worker_proto_msgTypes,
+		GoTypes:           file_marketingovo_v1_worker_proto_goTypes,
+		DependencyIndexes: file_marketingovo_v1_worker_proto_depIdxs,
+		EnumInfos:         file_marketingovo_v1_worker_proto_enumTypes,
+		MessageInfos:      file_marketingovo_v1_worker_proto_msgTypes,
 	}.Build()
-	File_agentintel_v1_worker_proto = out.File
-	file_agentintel_v1_worker_proto_goTypes = nil
-	file_agentintel_v1_worker_proto_depIdxs = nil
+	File_marketingovo_v1_worker_proto = out.File
+	file_marketingovo_v1_worker_proto_goTypes = nil
+	file_marketingovo_v1_worker_proto_depIdxs = nil
 }

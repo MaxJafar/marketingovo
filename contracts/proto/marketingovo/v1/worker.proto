@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package agentintel.v1;
+package marketingovo.v1;
 
-option go_package = "github.com/MaxJafar/marketingovo/services/intel-daemon/gen/go/agentintel/v1;intelv1";
+option go_package = "github.com/MaxJafar/marketingovo/services/intel-daemon/gen/go/marketingovo/v1;intelv1";
 
 // WorkerEnvelope is a length-delimited control message. Bulk evidence never
 // travels inside Protobuf; it moves through hash-addressed Arrow spool files.

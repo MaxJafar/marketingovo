@@ -28,7 +28,7 @@ func newSPAHandler(directory string) http.Handler {
 		if rootErr != nil {
 			writer.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			writer.WriteHeader(http.StatusServiceUnavailable)
-			_, _ = io.WriteString(writer, "AGENTintel dashboard assets are unavailable; build apps/dashboard/dist or pass --dashboard-dir.\n")
+			_, _ = io.WriteString(writer, "Marketingovo dashboard assets are unavailable; build apps/dashboard/dist or pass --dashboard-dir.\n")
 			return
 		}
 		cleanURL := path.Clean("/" + request.URL.Path)

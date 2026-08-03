@@ -28,10 +28,10 @@ type artifactContract struct {
 }
 
 var phaseOneArtifactContracts = map[string]artifactContract{
-	"arrow":   {mediaType: "application/vnd.apache.arrow.file", schemaID: "agentintel.observations.v1"},
-	"parquet": {mediaType: "application/vnd.apache.parquet", schemaID: "agentintel.observations.v1"},
-	"raw":     {mediaType: "application/x-ndjson", schemaID: "agentintel.observations.v1"},
-	"report":  {mediaType: "application/json", schemaID: "agentintel.comparison-report.v1"},
+	"arrow":   {mediaType: "application/vnd.apache.arrow.file", schemaID: "marketingovo.observations.v1"},
+	"parquet": {mediaType: "application/vnd.apache.parquet", schemaID: "marketingovo.observations.v1"},
+	"raw":     {mediaType: "application/x-ndjson", schemaID: "marketingovo.observations.v1"},
+	"report":  {mediaType: "application/json", schemaID: "marketingovo.comparison-report.v1"},
 }
 
 var (
@@ -255,7 +255,7 @@ func CommitEvidence(options CommitOptions) (_ CommitResult, err error) {
 		ID: manifestID, RunID: options.RunID, Kind: "manifest",
 		RelativePath: filepath.ToSlash(filepath.Join(finalRelative, "evidence-manifest.json")),
 		MediaType:    "application/json", SHA256: hex.EncodeToString(manifestHash[:]), SizeBytes: int64(len(manifestBytes)),
-		SchemaID: "agentintel.evidence-manifest.v1", DataClass: mostRestrictiveDataClass(items), CreatedAt: committedAt,
+		SchemaID: "marketingovo.evidence-manifest.v1", DataClass: mostRestrictiveDataClass(items), CreatedAt: committedAt,
 	})
 	return CommitResult{Artifacts: artifacts, Manifest: manifest, EvidenceDir: finalDir, Observations: canonicalRows, Report: report}, nil
 }
@@ -393,7 +393,7 @@ func validateArtifactMetadata(descriptor domain.ArtifactDescriptor) error {
 		return fmt.Errorf("%w: unsupported artifact kind %q", ErrArtifactMismatch, descriptor.Kind)
 	}
 	if descriptor.MediaType != contract.mediaType || (descriptor.SchemaID != contract.schemaID &&
-		!(descriptor.Kind == "report" && descriptor.SchemaID == "agentintel.comparison-report.v2")) {
+		!(descriptor.Kind == "report" && descriptor.SchemaID == "marketingovo.comparison-report.v2")) {
 		return fmt.Errorf("%w: kind/media_type/schema_id combination is not allowlisted", ErrArtifactMismatch)
 	}
 	if descriptor.RowCount <= 0 || descriptor.RowCount > maximumArtifactRows {
@@ -507,7 +507,7 @@ func readReportJSON(path, runID string, expectedRows int64) (domain.ComparisonRe
 	if err := json.Unmarshal(payload, &header); err != nil {
 		return domain.ComparisonReport{}, fmt.Errorf("%w: report JSON does not match its schema: %v", ErrArtifactMismatch, err)
 	}
-	if header.SchemaVersion == "agentintel.comparison-report.v2" {
+	if header.SchemaVersion == "marketingovo.comparison-report.v2" {
 		return readImportReportJSON(payload, runID, expectedRows)
 	}
 	decoder := json.NewDecoder(bytes.NewReader(payload))
@@ -520,7 +520,7 @@ func readReportJSON(path, runID string, expectedRows int64) (domain.ComparisonRe
 	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
 		return domain.ComparisonReport{}, fmt.Errorf("%w: report JSON contains trailing data", ErrArtifactMismatch)
 	}
-	if report.SchemaVersion != "agentintel.comparison-report.v1" || report.RunID != runID {
+	if report.SchemaVersion != "marketingovo.comparison-report.v1" || report.RunID != runID {
 		return domain.ComparisonReport{}, fmt.Errorf("%w: report schema version or run id does not match", ErrArtifactMismatch)
 	}
 	if len(report.Targets) == 0 || len(report.Targets) > 50 || int64(len(report.Targets)) != expectedRows {
@@ -553,7 +553,7 @@ func readReportJSON(path, runID string, expectedRows int64) (domain.ComparisonRe
 }
 
 func validateReportContext(report domain.ComparisonReport, provenance domain.Provenance) error {
-	if report.SchemaVersion == "agentintel.comparison-report.v2" {
+	if report.SchemaVersion == "marketingovo.comparison-report.v2" {
 		if report.Workflow != domain.WorkflowCompare || report.Derivation != provenance {
 			return fmt.Errorf("%w: imported report workflow or derivation is invalid", ErrArtifactMismatch)
 		}

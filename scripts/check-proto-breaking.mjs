@@ -17,7 +17,7 @@ if (!against) {
 const env = {
   ...process.env,
   BUF_CACHE_DIR:
-    process.env.BUF_CACHE_DIR ?? resolve(root, ".agentintel/cache/buf"),
+    process.env.BUF_CACHE_DIR ?? resolve(root, ".marketingovo/cache/buf"),
 };
 
 execFileSync("buf", ["breaking", ".", "--against", against], {

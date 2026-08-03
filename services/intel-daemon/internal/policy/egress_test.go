@@ -10,7 +10,7 @@ import (
 // egress layer is the control that keeps it from becoming an SSRF proxy. Every
 // case below is a way that has worked against real crawlers.
 func TestEgressURLCorpus(t *testing.T) {
-	limits := DefaultEgressLimits("AGENTintel/test")
+	limits := DefaultEgressLimits("Marketingovo-Intel/test")
 
 	blocked := []struct {
 		name   string
@@ -78,7 +78,7 @@ func TestEgressURLCorpus(t *testing.T) {
 // which is the DNS-rebinding shape. The decision has to be made on the address
 // actually dialled.
 func TestResolvedAddressIsCheckedAfterDNS(t *testing.T) {
-	limits := DefaultEgressLimits("AGENTintel/test")
+	limits := DefaultEgressLimits("Marketingovo-Intel/test")
 
 	for _, address := range []string{
 		"127.0.0.1:3210",
@@ -101,7 +101,7 @@ func TestResolvedAddressIsCheckedAfterDNS(t *testing.T) {
 // must never re-open the metadata endpoint or the loopback API, because those
 // are not what an operator means by "my internal wiki".
 func TestPrivateHostApprovalDoesNotUnblockMetadataOrLoopback(t *testing.T) {
-	limits := DefaultEgressLimits("AGENTintel/test")
+	limits := DefaultEgressLimits("Marketingovo-Intel/test")
 	limits.AllowPrivateHosts = true
 
 	if err := ValidateResolvedAddress("10.0.0.5:443", limits); err != nil {
@@ -115,7 +115,7 @@ func TestPrivateHostApprovalDoesNotUnblockMetadataOrLoopback(t *testing.T) {
 }
 
 func TestRedirectHopsAreRevalidated(t *testing.T) {
-	limits := DefaultEgressLimits("AGENTintel/test")
+	limits := DefaultEgressLimits("Marketingovo-Intel/test")
 	client := NewEgressClient(limits)
 	if client.CheckRedirect == nil {
 		t.Fatal("the egress client must re-validate redirects")
@@ -146,7 +146,7 @@ func TestRedirectHopsAreRevalidated(t *testing.T) {
 // The loopback allowance is test-only. If a default ever ships with it enabled,
 // the daemon's own API becomes reachable from an attacker-supplied URL.
 func TestDefaultLimitsRefuseLoopback(t *testing.T) {
-	limits := DefaultEgressLimits("AGENTintel/test")
+	limits := DefaultEgressLimits("Marketingovo-Intel/test")
 	if limits.AllowLoopback {
 		t.Fatal("AllowLoopback must default to false")
 	}
