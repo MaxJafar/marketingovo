@@ -75,12 +75,12 @@
     "check:all": "pnpm check && pnpm check:native"
   },
   "devDependencies": {
-    "@playwright/test": "1.61.1",
-    "@types/node": "^24.3.0",
+    "@playwright/test": "1.62.1",
+    "@types/node": "^26.1.2",
     "axe-core": "4.12.1",
-    "prettier": "^3.6.2",
-    "turbo": "^2.5.6",
+    "prettier": "^3.9.6",
+    "turbo": "^2.10.7",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.10"
   }
 }

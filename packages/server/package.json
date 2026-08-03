@@ -26,8 +26,8 @@
     "prepublishOnly": "node ../../scripts/npm-publication-disabled.mjs direct-package-publish"
   },
   "dependencies": {
-    "@fastify/cookie": "^11.0.2",
-    "@fastify/rate-limit": "^10.3.0",
+    "@fastify/cookie": "^11.1.2",
+    "@fastify/rate-limit": "^11.2.0",
     "@fastify/static": "^10.1.2",
     "@fastify/swagger": "^9.5.1",
     "@marketingovo/contracts": "workspace:*",
@@ -35,12 +35,12 @@
     "@marketingovo/integrations": "workspace:*",
     "@marketingovo/runtime": "workspace:*",
     "@sinclair/typebox": "^0.34.41",
-    "fastify": "^5.6.0"
+    "fastify": "^5.11.0"
   },
   "devDependencies": {
-    "@types/node": "^24.3.0",
+    "@types/node": "^26.1.2",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": ">=24 <25"
