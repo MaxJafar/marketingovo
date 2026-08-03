@@ -35,6 +35,18 @@ Three things are **not** shipped and must not be implied:
 
 They are declared as deferred channels in [`release/acceptance/1.1.0.json`](../release/acceptance/1.1.0.json), not left to be inferred. Building from source is currently the only install route.
 
+## Launch loop
+
+The launch kit now has a machine-checked readiness and learning loop in
+[`launch-loop.json`](launch-loop.json), with the operating rules in
+[`launch-loop.md`](launch-loop.md). It separates repository evidence from
+audience signals, requires a source window, baseline, target, and caveat for
+every metric, and keeps the initial cycle in `ready` state until a human records
+real observations. It does not claim that a campaign ran or publish anything.
+
+Run `pnpm validate:launch-loop` to verify the cycle, or `pnpm launch:loop` to
+verify it alongside the deterministic benchmark corpus.
+
 ## CTA hierarchy
 
 1. **Run it locally from source**
@@ -65,6 +77,7 @@ They are declared as deferred channels in [`release/acceptance/1.1.0.json`](../r
 | [Engineering deep dive](engineering-deep-dive-outline.md)       | Engineers and agent builders     | Technical article or livestream | Inspect contracts and contribute |
 | [Marketer case-study template](marketer-case-study-template.md) | Design partners and contributors | Evidence-backed workflow story  | Reproduce the workflow           |
 | [Six-week public calendar](build-in-public-calendar.md)         | Founder and product team         | Sustained launch cadence        | Alternate install and star       |
+| [Launch loop](launch-loop.md)                                   | Founder and product team         | Evidence → feedback → next test | Validate the cycle               |
 
 ## Channel rules
 
@@ -98,6 +111,7 @@ utm_content=<asset-and-variant>
 - [ ] No asset tells a reader to run `npx @marketingovo/cli` — it is not published.
 - [ ] Product footage contains no secrets or private customer data.
 - [ ] Metrics have a source, date range, baseline, and caveat.
+- [ ] `pnpm validate:launch-loop` passes and the cycle status matches what was actually observed.
 - [ ] The primary CTA is install from source or star.
 - [ ] Every GitHub link resolves.
 - [ ] Image and video alt text is included.

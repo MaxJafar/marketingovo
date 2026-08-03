@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "marketingovo.launch-loop.v1",
+  "cycleId": "2026-08-initial-public-loop",
+  "productVersion": "1.1.0",
+  "status": "ready",
+  "ownerRole": "launch-owner",
+  "primaryCta": "install-from-source",
+  "cadence": {
+    "review": "weekly",
+    "publish": "three-primary-posts-per-week",
+    "feedbackSlaDays": 7
+  },
+  "evidence": [
+    {
+      "id": "release-status",
+      "kind": "release",
+      "source": "docs/release-status.md",
+      "command": "pnpm check",
+      "state": "declared",
+      "note": "The committed release record is a claim source; re-run pnpm check before approving a new tag."
+    },
+    {
+      "id": "osint-evaluation",
+      "kind": "evaluation",
+      "source": "fixtures/osint-research-v1/manifest.json",
+      "command": "pnpm benchmark",
+      "state": "verified",
+      "note": "Synthetic offline cases; the benchmark never contacts the public web."
+    },
+    {
+      "id": "launch-kit",
+      "kind": "content",
+      "source": "launch/README.md",
+      "command": "pnpm validate:launch-loop",
+      "state": "verified",
+      "note": "Claims and CTA language must match the release status and current product."
+    }
+  ],
+  "signals": [
+    {
+      "id": "quickstart-success",
+      "label": "Successful reproducible quickstarts",
+      "unit": "runs",
+      "value": null,
+      "baseline": null,
+      "target": 3,
+      "window": "per launch cycle",
+      "source": "sanitized manual observation log",
+      "caveat": "Do not infer adoption from stars, impressions, or a single unrepeatable setup."
+    },
+    {
+      "id": "categorized-feedback",
+      "label": "Categorized substantive feedback items",
+      "unit": "items",
+      "value": null,
+      "baseline": null,
+      "target": 5,
+      "window": "per launch cycle",
+      "source": "sanitized channel notes",
+      "caveat": "Count distinct observations; do not count repeated impressions of the same note."
+    },
+    {
+      "id": "verified-workflow",
+      "label": "Evidence-backed workflows approved for publication",
+      "unit": "stories",
+      "value": null,
+      "baseline": null,
+      "target": 1,
+      "window": "per launch cycle",
+      "source": "attribution-approved workflow record",
+      "caveat": "Never publish a participant story without written attribution approval."
+    }
+  ],
+  "feedback": [],
+  "steps": [
+    {
+      "id": "prepare",
+      "phase": "prepare",
+      "ownerRole": "launch-owner",
+      "exitEvidence": "Current release and evaluation commands are recorded."
+    },
+    {
+      "id": "publish",
+      "phase": "publish",
+      "ownerRole": "launch-owner",
+      "exitEvidence": "One asset and one primary CTA are selected by a human."
+    },
+    {
+      "id": "observe",
+      "phase": "observe",
+      "ownerRole": "research-owner",
+      "exitEvidence": "Sanitized observations include a source window."
+    },
+    {
+      "id": "classify",
+      "phase": "classify",
+      "ownerRole": "research-owner",
+      "exitEvidence": "Each feedback item has one allowed category."
+    },
+    {
+      "id": "convert",
+      "phase": "convert",
+      "ownerRole": "product-owner",
+      "exitEvidence": "Repeated evidence maps to an issue, test, or deferred item."
+    },
+    {
+      "id": "verify",
+      "phase": "verify",
+      "ownerRole": "quality-owner",
+      "exitEvidence": "The smallest relevant fixture or gate passes."
+    },
+    {
+      "id": "repeat",
+      "phase": "repeat",
+      "ownerRole": "launch-owner",
+      "exitEvidence": "The next testable question is selected from the record."
+    }
+  ],
+  "nextTest": {
+    "id": "first-run-osint-option",
+    "status": "planned",
+    "ownerRole": "product-owner",
+    "hypothesis": "A checked-by-default public-web OSINT option makes the first-run result more useful without weakening consent or public-only boundaries.",
+    "measure": "At least three reproducible setup observations and the category of each onboarding objection.",
+    "decisionRule": "Keep the default when setup observations are reproducible and no trust objection remains unresolved; otherwise change the copy or default and add a fixture.",
+    "evidenceSource": "launch/build-in-public-calendar.md"
+  },
+  "notes": [
+    "Readiness artifact only: no campaign, customer study, or release publication is claimed.",
+    "Telemetry remains off by default; observations are recorded only when a human chooses to add sanitized notes."
+  ]
+}
