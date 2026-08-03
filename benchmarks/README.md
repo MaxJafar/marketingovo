@@ -1,15 +1,25 @@
 # Correctness benchmark
 
-`pnpm benchmark` runs the fixed `community-synthetic-v2` corpus against a
-loopback fixture. Version 2 contains 26 exact `ruleId + path` defect instances
-and two explicitly healthy control pages. The gate measures independent
-promises:
+`pnpm benchmark` runs the fixed `community-synthetic-v2` SEO corpus against a
+loopback fixture and the `public-web-osint-synthetic-v1` OSINT corpus against
+injected, offline observations. Version 2 contains 26 exact `ruleId + path`
+defect instances and two explicitly healthy control pages. The OSINT corpus has
+five cases covering linked public signals, missing signals, blocked targets,
+target-budget bounds, and the private-target boundary. The gate measures
+independent promises:
 
 - at least 95% recall across the labeled instances;
 - less than 5% unexpected High-severity findings and no unexpected High finding
   on either healthy control page;
 - no severity drift for a detected labeled instance;
 - elapsed time no more than 20% above the checked-in release baseline.
+
+The OSINT cases additionally require stable SHA-256 claim fingerprints,
+recomputable dossier provenance, source-linked evidence, explicit missing and
+failed states, the public-only policy, and a five-target cap. They use reserved
+`.invalid` hosts and injected crawl/feed seams, so the benchmark never contacts
+the public web. The inspectable manifest is
+`fixtures/osint-research-v1/manifest.json`.
 
 Informational and deliberately unlabelled findings remain visible in the
 benchmark output, but cannot hide a missed defect, a severity mismatch, or a

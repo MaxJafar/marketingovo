@@ -1,0 +1,237 @@
+{
+  "schemaVersion": "marketingovo.osint-evaluation.v1",
+  "name": "public-web-osint-synthetic-v1",
+  "version": 1,
+  "observedAt": "2026-08-03T12:00:00.000Z",
+  "cases": [
+    {
+      "id": "linked-public-signals",
+      "description": "A public site links to exact profile and business pages and publishes a dated feed.",
+      "targetUrls": ["https://northstar.invalid/"],
+      "pages": [
+        {
+          "url": "https://northstar.invalid/",
+          "title": "Northstar Labs",
+          "metaDescription": "A fictional public research studio.",
+          "canonical": "https://northstar.invalid/",
+          "robotsAllowed": true,
+          "externalLinks": [
+            "https://www.linkedin.com/company/northstar-labs",
+            "https://www.youtube.com/@northstar-labs"
+          ],
+          "internalLinks": [
+            "https://northstar.invalid/about/",
+            "https://northstar.invalid/contact"
+          ],
+          "jsonLd": [
+            "{\"@context\":\"https://schema.org\",\"sameAs\":[\"https://www.linkedin.com/company/northstar-labs\",\"https://x.com/northstar-labs\"]}"
+          ],
+          "headers": { "server": "fixture-web" }
+        },
+        {
+          "url": "https://northstar.invalid/about/",
+          "title": "About Northstar Labs",
+          "metaDescription": "The fictional studio's public about page.",
+          "canonical": "https://northstar.invalid/about/",
+          "robotsAllowed": true,
+          "externalLinks": [],
+          "internalLinks": ["https://northstar.invalid/press"],
+          "jsonLd": [],
+          "headers": { "server": "fixture-web" }
+        }
+      ],
+      "sitemap": {
+        "origin": "https://northstar.invalid",
+        "sourceUrl": "https://northstar.invalid/sitemap.xml",
+        "state": "available",
+        "statusCode": 200,
+        "pageUrls": [
+          "https://northstar.invalid/",
+          "https://northstar.invalid/about/"
+        ],
+        "files": [
+          {
+            "url": "https://northstar.invalid/sitemap.xml",
+            "kind": "urlset",
+            "statusCode": 200,
+            "locCount": 2
+          }
+        ],
+        "warnings": []
+      },
+      "cadence": {
+        "target": "https://northstar.invalid/",
+        "cadence": {
+          "feedUrl": "https://northstar.invalid/feed.xml",
+          "itemsInFeed": 3,
+          "datedItems": 3,
+          "freshnessSeconds": 604800,
+          "cadenceDays": 10.5,
+          "spanDays": 21,
+          "intervals": 2,
+          "newestPublishedAt": "2026-07-27T12:00:00.000Z",
+          "oldestPublishedAt": "2026-07-06T12:00:00.000Z"
+        },
+        "unavailable": null
+      },
+      "expect": {
+        "coverageState": "available",
+        "targetStatus": "available",
+        "pagesObserved": 2,
+        "requiredEvidence": [
+          {
+            "kind": "social-profile",
+            "value": "https://www.linkedin.com/company/northstar-labs",
+            "state": "available"
+          },
+          {
+            "kind": "structured-identity",
+            "value": "https://x.com/northstar-labs",
+            "state": "available"
+          },
+          {
+            "kind": "public-channel",
+            "value": "https://northstar.invalid/about/",
+            "state": "available"
+          },
+          {
+            "kind": "publishing-cadence",
+            "state": "available"
+          }
+        ],
+        "requiredRelationshipTypes": ["links_to", "same_as", "publishes_via"],
+        "requiredFindingTitles": [
+          "Owned social profile links observed",
+          "Structured identity claims observed",
+          "Public publishing signal available"
+        ]
+      }
+    },
+    {
+      "id": "missing-signals",
+      "description": "A reachable page has no declared identity, metadata, or feed signal.",
+      "targetUrls": ["https://quiet.invalid/"],
+      "pages": [
+        {
+          "url": "https://quiet.invalid/",
+          "title": null,
+          "metaDescription": null,
+          "canonical": null,
+          "robotsAllowed": null,
+          "externalLinks": [],
+          "internalLinks": [],
+          "jsonLd": [],
+          "headers": {}
+        }
+      ],
+      "expect": {
+        "coverageState": "available",
+        "targetStatus": "available",
+        "pagesObserved": 1,
+        "requiredEvidenceStates": [
+          {
+            "kind": "site-identity",
+            "label": "Home page title",
+            "state": "missing"
+          },
+          {
+            "kind": "site-identity",
+            "label": "Meta description",
+            "state": "missing"
+          },
+          {
+            "kind": "site-identity",
+            "label": "Canonical declaration",
+            "state": "missing"
+          },
+          {
+            "kind": "crawl-policy",
+            "label": "Robots result",
+            "state": "insufficient"
+          },
+          {
+            "kind": "discovery",
+            "label": "XML sitemap capture",
+            "state": "missing"
+          },
+          {
+            "kind": "publishing-cadence",
+            "label": "RSS/Atom publication signal",
+            "state": "insufficient"
+          }
+        ],
+        "absentFindingTitles": [
+          "Owned social profile links observed",
+          "Public publishing signal available",
+          "Structured identity claims observed"
+        ]
+      }
+    },
+    {
+      "id": "blocked-target",
+      "description": "A public target is blocked by the transport boundary.",
+      "targetUrls": ["https://blocked.invalid/"],
+      "crawlError": "fixture blocked by egress policy",
+      "expect": {
+        "coverageState": "missing",
+        "targetStatus": "failed",
+        "pagesObserved": 0,
+        "requiredEvidenceStates": [
+          {
+            "kind": "target-fetch",
+            "label": "Public target fetch",
+            "state": "insufficient"
+          }
+        ],
+        "requiredFindingTitles": ["Public target could not be fully observed"]
+      }
+    },
+    {
+      "id": "bounded-target-set",
+      "description": "Duplicate and oversized explicit target input is bounded before crawling.",
+      "targetUrls": [
+        "https://alpha.invalid/",
+        "https://alpha.invalid/",
+        "https://bravo.invalid/",
+        "https://charlie.invalid/",
+        "https://delta.invalid/",
+        "https://echo.invalid/",
+        "https://foxtrot.invalid/"
+      ],
+      "pageTemplate": {
+        "title": "Bounded fixture target",
+        "metaDescription": "A deterministic bounded-target page.",
+        "canonical": "{{TARGET}}",
+        "robotsAllowed": true,
+        "externalLinks": [],
+        "internalLinks": [],
+        "jsonLd": [],
+        "headers": { "server": "fixture-web" }
+      },
+      "expect": {
+        "coverageState": "available",
+        "targetStatus": "available",
+        "targetCount": 5,
+        "targetUrls": [
+          "https://alpha.invalid/",
+          "https://bravo.invalid/",
+          "https://charlie.invalid/",
+          "https://delta.invalid/",
+          "https://echo.invalid/"
+        ]
+      }
+    },
+    {
+      "id": "private-target-boundary",
+      "description": "A loopback target is passed to the crawl seam with private access disabled.",
+      "targetUrls": ["https://127.0.0.1/"],
+      "privateTarget": true,
+      "expect": {
+        "coverageState": "missing",
+        "targetStatus": "failed",
+        "pagesObserved": 0,
+        "requiredFindingTitles": ["Public target could not be fully observed"]
+      }
+    }
+  ]
+}

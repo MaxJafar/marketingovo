@@ -38,7 +38,7 @@
     "audit:dependencies": "node scripts/audit-dependencies.mjs",
     "sbom": "node scripts/generate-sbom.mjs",
     "pack:smoke": "node scripts/package-smoke.mjs",
-    "benchmark": "node --test benchmarks/corpus-metrics.test.mjs && node benchmarks/run.mjs",
+    "benchmark": "node --test benchmarks/corpus-metrics.test.mjs benchmarks/osint-evaluation.test.mjs && node benchmarks/run.mjs && node benchmarks/osint-evaluation.mjs",
     "desktop:prepare": "node scripts/prepare-desktop-runtime.mjs",
     "desktop:verify": "node scripts/verify-desktop-runtime.mjs",
     "desktop:configure-release": "node scripts/configure-desktop-release.mjs",
