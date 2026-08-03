@@ -30,7 +30,9 @@ if (/client[_-]?secret/iu.test(source))
   );
 const config = JSON.parse(source);
 
-for (const file of ["LICENSE", "NOTICE", "PRIVACY.md", "TRADEMARKS.md"]) {
+// TRADEMARKS.md was deleted with the trademark regime in d9c8298. There is
+// no trademark policy to ship.
+for (const file of ["LICENSE", "NOTICE", "PRIVACY.md"]) {
   const [canonical, packaged] = await Promise.all([
     readFile(resolve(root, file)),
     readFile(resolve(runtimeRoot, "legal", file)),

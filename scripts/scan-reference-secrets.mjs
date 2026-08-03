@@ -228,6 +228,24 @@ async function collectFiles(directory, output = []) {
 }
 
 async function main() {
+  // The corpus is gitignored, so CI and every fresh clone have no corpus root
+  // at all. There is nothing to scan and nothing to leak, which is a pass —
+  // not the SCAN_ERROR that collectFiles would otherwise report for an
+  // unreadable directory. A root that exists but cannot be read still fails.
+  let referenceRootPresent = true;
+  try {
+    referenceRootPresent = (await stat(referenceRoot)).isDirectory();
+  } catch {
+    referenceRootPresent = false;
+  }
+  if (!referenceRootPresent) {
+    process.stdout.write(
+      "SUMMARY\tfiles_scanned=0,files_skipped=0,finding_paths=0," +
+        "unquarantined_paths=0,corpus_on_disk=false\n",
+    );
+    return;
+  }
+
   const quarantine = await loadQuarantine();
   const files = await collectFiles(referenceRoot);
   const findings = [];

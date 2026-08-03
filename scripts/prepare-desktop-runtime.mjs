@@ -47,7 +47,9 @@ await mkdir(configRuntime, { recursive: true, mode: 0o755 });
 await mkdir(legalRuntime, { recursive: true, mode: 0o755 });
 await mkdir(binaries, { recursive: true, mode: 0o755 });
 
-for (const file of ["LICENSE", "NOTICE", "PRIVACY.md", "TRADEMARKS.md"]) {
+// TRADEMARKS.md was deleted with the trademark regime in d9c8298. There is
+// no trademark policy to ship.
+for (const file of ["LICENSE", "NOTICE", "PRIVACY.md"]) {
   await copyFile(resolve(root, file), resolve(legalRuntime, file));
 }
 

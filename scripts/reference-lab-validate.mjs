@@ -109,15 +109,28 @@ async function exists(absolutePath) {
   }
 }
 
+// The corpus is gitignored on purpose: 820MB of third-party GPL/AGPL source
+// that must never enter version control. So CI, and every fresh clone, has no
+// corpus on disk. That is the normal case, not a failure.
+//
+// Only three checks below need the files themselves: comparing disk archives
+// against the ledger, resolving licence evidence paths, and confirming
+// quarantined paths still exist. Those are skipped when the corpus is absent.
+// Everything else still runs — in particular the product-tree scan that proves
+// no build manifest or source file references the corpus, which is the check
+// that actually protects a public release.
+let referenceRootPresent = false;
+
 async function validateLedger() {
   const ledger = await readJson(ledgerPath, "LEDGER_PARSE");
   if (!ledger) return { ledger: null, archives: [] };
 
-  const diskEntries = await readdir(referenceRoot, { withFileTypes: true });
-  const diskArchives = diskEntries
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .sort();
+  const diskArchives = referenceRootPresent
+    ? (await readdir(referenceRoot, { withFileTypes: true }))
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name)
+        .sort()
+    : null;
   const records = Array.isArray(ledger.archives) ? ledger.archives : [];
   const ledgerArchives = records.map((record) => record.archive).sort();
 
@@ -132,13 +145,15 @@ async function validateLedger() {
     fail("LEDGER_DUPLICATE_ARCHIVE", repoRelative(ledgerPath));
   }
 
-  for (const archive of diskArchives) {
-    if (!ledgerArchives.includes(archive))
-      fail("LEDGER_MISSING_ARCHIVE", `${referenceRootName}/${archive}`);
-  }
-  for (const archive of ledgerArchives) {
-    if (!diskArchives.includes(archive))
-      fail("LEDGER_UNKNOWN_ARCHIVE", `${referenceRootName}/${archive}`);
+  if (diskArchives) {
+    for (const archive of diskArchives) {
+      if (!ledgerArchives.includes(archive))
+        fail("LEDGER_MISSING_ARCHIVE", `${referenceRootName}/${archive}`);
+    }
+    for (const archive of ledgerArchives) {
+      if (!diskArchives.includes(archive))
+        fail("LEDGER_UNKNOWN_ARCHIVE", `${referenceRootName}/${archive}`);
+    }
   }
 
   for (const record of records) {
@@ -162,6 +177,7 @@ async function validateLedger() {
       }
     }
     for (const evidencePath of record.license?.evidence ?? []) {
+      if (!referenceRootPresent) continue;
       if (!(await exists(path.join(repoRoot, recordPath, evidencePath)))) {
         fail(
           "LEDGER_LICENSE_EVIDENCE_MISSING",
@@ -242,7 +258,7 @@ async function validateQuarantine(ledger) {
       if (!allowedEntryKeys.has(key))
         fail("QUARANTINE_UNSAFE_FIELD", entryPath);
     }
-    if (!(await exists(path.join(repoRoot, entryPath))))
+    if (referenceRootPresent && !(await exists(path.join(repoRoot, entryPath))))
       fail("QUARANTINE_PATH_MISSING", entryPath);
     const ledgerRecord = ledger?.archives?.find(
       (record) => record.archive === entry.archive,
@@ -327,6 +343,7 @@ async function inspectProductTree(directory, archiveNames) {
 }
 
 async function main() {
+  referenceRootPresent = await exists(referenceRoot);
   const { ledger, archives } = await validateLedger();
   await validateBehavioralCards(archives);
   await validateQuarantine(ledger);
@@ -348,7 +365,8 @@ async function main() {
   }
 
   process.stdout.write(
-    `PASS\treference_archives=${archives.length},build_inputs=0\n`,
+    `PASS\treference_archives=${archives.length},build_inputs=0,` +
+      `corpus_on_disk=${referenceRootPresent}\n`,
   );
 }
 
