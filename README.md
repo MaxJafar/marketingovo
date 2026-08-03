@@ -17,13 +17,12 @@ issue dump: it connects technical evidence to organic exposure, conversion
 exposure, reach, confidence, and effort so a marketer can decide what to fix
 first and verify the result after the next audit.
 
-> **Status: 1.1.0, prepared but not approved.** The REST API, OpenAPI document,
-> SDK, nine-tool agent contract registry, CLI and `.marketingovo` bundle format
-> are stable; breaking changes to them require a major version. Every
-> engineering gate passes and the evidence is recorded in
-> [`release/acceptance/1.1.0.json`](release/acceptance/1.1.0.json), but the
-> release-owner and licence-compliance attestations are still pending, so this
-> is not a shipped release.
+> **Status: 1.1.0.** The REST API, OpenAPI document, SDK, nine-tool agent
+> contract registry, CLI and `.marketingovo` bundle format are stable; breaking
+> changes to them require a major version. Every release gate is recorded with
+> the command that produced it in
+> [`release/acceptance/1.1.0.json`](release/acceptance/1.1.0.json), including
+> the two named human attestations.
 >
 > Install from source or as an agent plugin. Signed desktop installers, the
 > updater channel, and npm registry publication are **not** part of this release

@@ -5,13 +5,13 @@ description: What 1.1.0 contains, which gates were observed passing, and which c
 
 # Release status
 
-## 1.1.0 — prepared, not approved
+## 1.1.0
 
 The REST API, OpenAPI document, SDK, nine-tool agent contract registry, CLI and `.marketingovo` bundle format are stable: breaking changes to them require a major version. 1.1.0 is additive on top of 1.0.0 and breaks no existing integration.
 
 <div class="status-banner">
-  <strong>Not an approved release</strong>
-  <p>Every engineering gate passes and the evidence is recorded, but the release-owner and licence-compliance attestations are still pending. Nothing here should be read as a shipped release.</p>
+  <strong>Approved, with deferred channels</strong>
+  <p>Every gate is recorded with the command that produced it, and both human attestations are named. Signed installers, the updater channel and npm publication are deliberately not part of this release.</p>
 </div>
 
 ## Present in the current source

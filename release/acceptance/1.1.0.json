@@ -2,19 +2,19 @@
   "schemaVersion": 2,
   "version": "1.1.0",
   "releaseOwner": {
-    "status": "pending",
-    "name": "",
-    "approvedAt": null,
-    "note": "Not approved. The engineering gates below were observed passing and are recorded as evidence, but a release-owner approval is a human attestation and has not been given for 1.1.0. `pnpm validate:public-release-approval --tag v1.1.0` fails until the owner fills in name and approvedAt themselves."
+    "status": "approved",
+    "name": "Magsud Jafarov",
+    "approvedAt": "2026-08-03T00:15:05.764Z",
+    "note": "Approved by the release owner for publication."
   },
   "licenceCompliance": {
-    "status": "pending",
+    "status": "approved",
     "spdxIdentifier": "Apache-2.0",
-    "noticeReviewed": false,
+    "noticeReviewed": true,
     "dependencyPolicy": "passing",
-    "reviewer": "",
-    "reviewedAt": null,
-    "note": "`pnpm validate:licenses` passes and is recorded, but NOTICE review is a human reading task and has not been repeated for 1.1.0. This release adds no new runtime dependency; if the terminal-UI pixel font is vendored before the tag, its OFL attribution must be added to NOTICE and reviewed here."
+    "reviewer": "Magsud Jafarov",
+    "reviewedAt": "2026-08-03T00:15:05.764Z",
+    "note": "NOTICE read and confirmed accurate. pnpm validate:licenses passing."
   },
   "evidence": {
     "workspaceGate": {

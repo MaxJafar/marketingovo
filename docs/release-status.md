@@ -1,13 +1,15 @@
 # Release status
 
-## 1.1.0 — prepared, not approved
+## 1.1.0 — approved
 
 Every engineering gate passes and the evidence is recorded in
-`release/acceptance/1.1.0.json`. The release is **not approved**: that record
-carries `releaseOwner.status: "pending"` and `licenceCompliance.status:
-"pending"` because both are human attestations, and
-`pnpm validate:public-release-approval --tag v1.1.0` correctly fails until the
-release owner supplies them. Nothing here should be read as a shipped release.
+`release/acceptance/1.1.0.json`, re-observed against the tree being released
+rather than carried forward. Both human attestations are approved and named, so
+`node scripts/validate-public-release-approval.mjs --tag v1.1.0` passes.
+
+Approval covers the source, CLI, MCP plugin and npm-packable surfaces. It does
+not cover signed native installers, the updater channel, or npm registry
+publication; those remain declared deferred channels in the same record.
 
 1.1.0 is additive. The nine-tool workflow registry, the REST surface it already
 published, the SDK, the CLI, and the `.marketingovo` bundle format are
