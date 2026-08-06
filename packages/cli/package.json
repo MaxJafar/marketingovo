@@ -43,10 +43,10 @@
   },
   "devDependencies": {
     "@marketingovo/dashboard": "workspace:*",
-    "@types/node": "^24.3.0",
-    "tsx": "^4.20.5",
+    "@types/node": "^26.1.2",
+    "tsx": "^4.23.5",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": ">=24 <25"
