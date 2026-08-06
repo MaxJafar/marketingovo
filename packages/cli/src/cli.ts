@@ -329,10 +329,17 @@ async function project(args: ParsedArgs): Promise<void> {
   const client = await clientFor(args.flags);
   if (subcommand === "list") return json(await client.projects.list());
   if (subcommand === "create") {
+    // The URL is optional: a workspace can be created for social, ads or
+    // research work and given a website later.
     const [name, canonicalUrl] = rest;
-    if (!name || !canonicalUrl)
-      throw new Error("usage: marketingovo project create <name> <https-url>");
-    return json(await client.projects.create({ name, canonicalUrl }));
+    if (!name)
+      throw new Error("usage: marketingovo project create <name> [https-url]");
+    return json(
+      await client.projects.create({
+        name,
+        ...(canonicalUrl ? { canonicalUrl } : {}),
+      }),
+    );
   }
   if (subcommand === "show") {
     if (!rest[0])

@@ -32,6 +32,36 @@ const NAV: NavItem[] = [
     title: "SEO analytics",
   },
   {
+    to: "/calendar",
+    label: "Calendar",
+    glyph: "calendar",
+    title: "Content calendar — schedule and publish across platforms",
+  },
+  {
+    to: "/report",
+    label: "Report",
+    glyph: "report",
+    title: "Cross-channel report for clients",
+  },
+  {
+    to: "/links",
+    label: "Links & QR",
+    glyph: "links",
+    title: "Campaign links and QR codes that never expire",
+  },
+  {
+    to: "/email",
+    label: "Email",
+    glyph: "email",
+    title: "Email builder — brand kit and campaign HTML",
+  },
+  {
+    to: "/ads",
+    label: "Ad Cabinets",
+    glyph: "ad-cabinets",
+    title: "Ad cabinets — Meta and Google Ads",
+  },
+  {
     to: "/social",
     label: "Social Research",
     glyph: "social-research",
@@ -230,15 +260,13 @@ export function AppShell() {
       </div>
 
       <Link to="/" className="pixel-brand" aria-label="Marketingovo home">
-        <PixelSprite
-          src="/pixel/mascot/cat-mark.png"
-          fallback={mascotGlyphs.cat}
-          size={34}
+        <img
+          className="pixel-brand-lockup"
+          src="/pixel/brand/marketingovo-lockup.png"
+          alt=""
+          width={232}
+          height={32}
         />
-        <span className="pixel-wordmark">
-          <span className="mark-a">marketing</span>
-          <span className="mark-b">ovo</span>
-        </span>
       </Link>
 
       <header className="pixel-topbar">

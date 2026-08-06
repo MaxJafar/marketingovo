@@ -126,6 +126,91 @@ Do not infer a competitor's traffic or rankings; Marketingovo does not measure t
    Cadence is publication evidence only — do not turn it into reach or revenue.`,
   },
   {
+    file: "meta-ads.md",
+    description: "Audit Facebook and Instagram ad cabinets.",
+    tool: "marketingovo_ads_audit_start",
+    body: `Audit the Meta ad cabinets linked to the project in $ARGUMENTS.
+
+1. Call \`marketingovo_ads_cabinets\` to see which cabinets the workspace reads,
+   their currency, and the spend caps the operator set. Ask which project is
+   meant if it is ambiguous — never guess.
+2. Call \`marketingovo_ads_audit_start\`, then poll \`marketingovo_run_get\` until
+   the run leaves the running state. A \`partial\` run means at least one cabinet
+   could not be fully read; name which, and why.
+3. Read \`marketingovo_ads_performance\` for each cabinet and report Facebook and
+   Instagram separately. They are different auctions with different costs, and
+   an account total hides which one is working.
+4. A null metric was not measured. Say so and give the stated reason — never
+   report it as zero spend, zero conversions, or a cost per result derived from
+   a missing denominator. Reach and frequency have no window total by design.
+5. Rank findings by measured money at stake, not by rule severity alone.
+
+You may draft campaigns with \`marketingovo_campaign_stage\`. You cannot approve
+or publish one, and no tool here can: a person approves what runs under their
+brand, in the dashboard. Say the drafts are waiting for review rather than
+describing anything as launched.`,
+  },
+  {
+    file: "email-campaign.md",
+    description:
+      "Build a brand-consistent HTML email that survives real inboxes.",
+    tool: "marketingovo_email_draft",
+    body: `Build an HTML email for the campaign described in $ARGUMENTS.
+
+1. Call \`marketingovo_brand_kit\` for the project named in $ARGUMENTS. Ask which
+   project is meant if it is ambiguous — never guess. Use its colours, type
+   stacks, content width, voice and prohibitions. The footer fields are not
+   optional decoration: the postal address and the unsubscribe merge tag are
+   legally required in commercial mail.
+2. Write the HTML. Email is not the web:
+   - lay out with nested tables and \`role="presentation"\`, never flexbox or
+     grid — Outlook on Windows renders with Microsoft Word and has neither;
+   - give every image \`alt\` text and a \`width\` attribute, because Outlook
+     blocks remote images by default and the alt is what most people see;
+   - end every font stack with a generic family, since web fonts are ignored
+     by Outlook and Gmail's mobile apps;
+   - keep the whole document under 102KB or Gmail clips it, hiding the footer
+     and the unsubscribe link behind a "view entire message" link.
+3. Call \`marketingovo_email_draft\` without a \`template_id\` and read the
+   findings. Each one names a real client and what it does. Fix them and
+   resubmit. Do not explain a finding away — the report is the specification.
+4. When nothing blocking or error-level remains, call it once more with the
+   \`template_id\` to save it.
+5. Report what you built, the revision, and any warnings you deliberately left.
+
+Marketingovo does not send email. Say the HTML is ready to export into the
+operator's own email service; never describe a campaign as sent.`,
+  },
+  {
+    file: "marketing-report.md",
+    description:
+      "Build a client-facing report across paid, organic, social and email.",
+    tool: "marketingovo_marketing_report",
+    body: `Build the cross-channel report for the period in $ARGUMENTS.
+
+1. Call \`marketingovo_marketing_report\` for the project named in $ARGUMENTS.
+   Ask which project is meant if it is ambiguous — never guess.
+2. Read every section, including the ones marked unavailable. A section that
+   could not be read is a finding, not an omission.
+3. Write the narrative. Report each channel's own figures.
+
+Three things you must not do, because this document goes to a client who
+cannot check it:
+
+- **Never add conversions across channels.** Meta counts conversions it
+  attributes on its own window; Analytics counts key events on a last-click
+  session model. The same purchase appears in both, so a sum is larger than
+  what happened. The report refuses this total — repeat the refusal.
+- **Never turn an unavailable source into zero.** If Search Console was
+  disconnected, say so. "Organic clicks: 0" is a different claim, and a false
+  one.
+- **Never compute a change against an unmeasured period.** The report already
+  withholds those; do not reconstruct them.
+
+Say plainly what the period showed and what could not be seen. A report whose
+gaps are stated is worth more to a client than one that reads as complete.`,
+  },
+  {
     file: "seo-status.md",
     description: "Read schedules, recent runs, and runtime health.",
     tool: "marketingovo_monitoring_status",

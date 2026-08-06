@@ -79,7 +79,57 @@ import type {
   UpdateExtractionRulesInput,
   UpdateIssueAdjudicationInput,
   UpdateProjectContextInput,
+  WorkspaceCapabilities,
+  WorkspaceCapabilityState,
 } from "@marketingovo/contracts";
+import type {
+  CalendarEntry,
+  ContentCalendar,
+  MediaAsset,
+  PublishRecord,
+  ScheduleIntentInput,
+  SocialPlatform,
+} from "@marketingovo/contracts/publishing";
+import type {
+  GenerateReportInput,
+  MarketingReport,
+  MarketingReportSummary,
+} from "@marketingovo/contracts/reporting";
+import type {
+  CampaignLink,
+  CampaignLinkFinding,
+  CreateCampaignLinkInput,
+  QrPlacement,
+  QrPrintAdvice,
+  QrStyle,
+  RedirectTarget,
+  UtmParameters,
+} from "@marketingovo/contracts/campaign-links";
+import type {
+  BrandKitWorkspace,
+  CompileEmailInput,
+  CreateEmailTemplateInput,
+  EmailPreview,
+  EmailTemplate,
+  EmailTemplateWorkspace,
+  UpdateBrandKitInput,
+} from "@marketingovo/contracts/email";
+import type {
+  CampaignBrief,
+  CampaignDeliverable,
+  CampaignWorkspace,
+  ChannelAccount,
+  ChannelMetric,
+  ChannelPerformance,
+  CreateCampaignBriefInput,
+  CreateCampaignDeliverableInput,
+  DiscoveredChannelAccount,
+  LinkChannelAccountInput,
+  PublishIntent,
+  SearchTermRecord,
+  StagePublishIntentInput,
+  UpdateChannelAccountInput,
+} from "@marketingovo/contracts/channels";
 import {
   MARKETINGOVO_PROJECT_BUNDLE_LIMITS,
   MarketingovoProjectBundleV2Schema,
@@ -105,13 +155,18 @@ import {
 import type {
   ConnectorHealth,
   ConnectorId,
+  GoogleOAuthProvider,
   GoogleOAuthTokenSet,
 } from "@marketingovo/integrations";
 import {
   checkConnectorHealth,
   connectorManifests,
+  extensionForMediaType,
   getConnectorManifest,
   refreshGoogleOAuthToken,
+  refreshXOAuthToken,
+  sniffMedia,
+  uploadMediaToRelay,
   validateConnectorConfiguration,
 } from "@marketingovo/integrations";
 import {
@@ -123,6 +178,7 @@ import {
 } from "@marketingovo/storage-sqlite";
 import {
   redactSecrets,
+  reportState,
   type PerformancePeriodSummary,
   type Report as EngineReport,
   validateExtractorRules,
@@ -131,7 +187,23 @@ import {
 } from "@marketingovo/core";
 import { validateCustomRuleRegex } from "@marketingovo/core/custom-rule-regex";
 import { nextCronOccurrence } from "./cron.js";
+import {
+  assertWithinSpendCap,
+  ChannelError,
+  daysBetween,
+  isoDateBefore,
+  publishPayloadHash,
+  summarizeChannelMetrics,
+} from "./channels.js";
 import { resolveGoogleDesktopClientId } from "./google-oauth-env.js";
+import {
+  createIdempotencyKey,
+  platformFor,
+  runPublishAttempt,
+  type PublishAttemptOutcome,
+  type PublishExecutor,
+} from "./publishing.js";
+import { gatherEvidence, resolveReportWindow } from "./reporting.js";
 import {
   DurableJobWorker,
   DurableScheduler,
@@ -140,6 +212,126 @@ import {
 import { summarizePageIndexability } from "./indexability.js";
 import { buildAuditComparison } from "./audit-comparison.js";
 export { nextCronOccurrence };
+export {
+  ChannelError,
+  publishPayloadHash,
+  summarizeChannelMetrics,
+  type ChannelErrorCode,
+} from "./channels.js";
+export {
+  createIdempotencyKey,
+  dailyLimitReached,
+  PublishJobError,
+  runPublishAttempt,
+  type PublishAttemptOutcome,
+  type PublishExecutor,
+  type PublishJobErrorCode,
+} from "./publishing.js";
+
+const MAX_MEDIA_BYTES = 100 * 1024 * 1024;
+
+export { gatherEvidence, resolveReportWindow } from "./reporting.js";
+
+export type ReportErrorCode =
+  | "report_project_not_found"
+  | "report_not_found"
+  | "report_composer_unavailable";
+
+export class ReportError extends Error {
+  readonly code: ReportErrorCode;
+  readonly status: number;
+
+  constructor(code: ReportErrorCode, message: string, status = 400) {
+    super(message);
+    this.name = "ReportError";
+    this.code = code;
+    this.status = status;
+  }
+}
+
+export type CampaignLinkErrorCode =
+  | "campaign_link_project_not_found"
+  | "campaign_link_not_found"
+  | "campaign_link_invalid"
+  | "campaign_link_duplicate"
+  | "qr_unavailable";
+
+export class CampaignLinkError extends Error {
+  readonly code: CampaignLinkErrorCode;
+  readonly status: number;
+  /**
+   * The findings that caused the refusal.
+   *
+   * Carried on the error rather than logged, because the caller needs to show
+   * the operator which parameter to change — an error that only says the link
+   * was rejected leaves them guessing.
+   */
+  readonly findings: CampaignLinkFinding[];
+
+  constructor(
+    code: CampaignLinkErrorCode,
+    message: string,
+    status = 400,
+    findings: CampaignLinkFinding[] = [],
+  ) {
+    super(message);
+    this.name = "CampaignLinkError";
+    this.code = code;
+    this.status = status;
+    this.findings = findings;
+  }
+}
+
+const DEFAULT_QR_STYLE: QrStyle = {
+  errorCorrection: "M",
+  // Four is the standard minimum and the thing layout pressure removes first.
+  quietZone: 4,
+  darkColor: "#000000",
+  lightColor: "#ffffff",
+  transparent: false,
+};
+
+function resolveQrStyle(style: Partial<QrStyle> | undefined): QrStyle {
+  return { ...DEFAULT_QR_STYLE, ...(style ?? {}) };
+}
+
+export type EmailErrorCode =
+  | "email_project_not_found"
+  | "email_template_not_found"
+  | "email_compiler_unavailable";
+
+export class EmailError extends Error {
+  readonly code: EmailErrorCode;
+  readonly status: number;
+
+  constructor(code: EmailErrorCode, message: string, status = 400) {
+    super(message);
+    this.name = "EmailError";
+    this.code = code;
+    this.status = status;
+  }
+}
+
+export type MediaErrorCode =
+  | "media_project_not_found"
+  | "media_not_found"
+  | "media_too_large"
+  | "media_unsupported"
+  | "media_unreadable"
+  | "media_url_invalid"
+  | "media_relay_not_configured";
+
+export class MediaError extends Error {
+  readonly code: MediaErrorCode;
+  readonly status: number;
+
+  constructor(code: MediaErrorCode, message: string, status = 400) {
+    super(message);
+    this.name = "MediaError";
+    this.code = code;
+    this.status = status;
+  }
+}
 export { resolveGoogleDesktopClientId } from "./google-oauth-env.js";
 export {
   DurableJobWorker,
@@ -156,6 +348,94 @@ interface LegacyIssue {
   detail?: Record<string, unknown>;
   fix?: string;
   moduleId?: string;
+}
+
+/**
+ * The publisher shape the runtime depends on.
+ *
+ * Structural rather than imported: core owns the real interface, and the
+ * runtime only needs to know it can hand over a post and get back what the
+ * provider created.
+ */
+/**
+ * The QR shapes the runtime passes through.
+ *
+ * Structural rather than imported for the same reason as the publisher above:
+ * core owns the real types, and the runtime only moves matrices from the
+ * encoder to the renderer without inspecting them.
+ */
+interface QrMatrixLike {
+  readonly size: number;
+  readonly version: number;
+  readonly errorCorrection: "L" | "M" | "Q" | "H";
+  readonly mask: number;
+  readonly mode: string;
+  readonly modules: readonly (readonly boolean[])[];
+}
+
+/**
+ * The landing-alignment shapes, structural for the same reason as the rest:
+ * core owns the real types and the runtime only carries them between the ad
+ * sync, the crawl and the rules.
+ */
+interface AdDestinationLike {
+  url: string;
+  origin: string;
+  accountId: string;
+  accountName: string;
+  accountExternalId: string;
+  entities: Array<{
+    kind: string;
+    id: string;
+    name: string | null;
+    campaignId: string | null;
+    campaignName: string | null;
+  }>;
+  keywords: string[];
+  spend: number | null;
+  clicks: number | null;
+  currency: string | null;
+}
+
+interface PageSnapshotLike {
+  url: string;
+  finalUrl: string;
+  status: number | null;
+  redirectChain: string[];
+  title: string | null;
+  h1: string[];
+  h2: string[];
+  metaDescription: string | null;
+  wordCount: number | null;
+  indexable: boolean | null;
+  lcpMs: number | null;
+  responseTimeMs: number | null;
+  source: string;
+  textCaptured: boolean;
+  error: string | null;
+  observedAt: string;
+}
+
+interface QrRenderOptionsLike {
+  quietZone?: number;
+  darkColor?: string;
+  lightColor?: string;
+  transparent?: boolean;
+  scale?: number;
+}
+
+interface SocialPublisherLike {
+  publish(request: {
+    externalId: string;
+    body: string;
+    attachments: readonly unknown[];
+    linkUrl?: string | null;
+    signal?: AbortSignal;
+  }): Promise<{
+    providerId: string;
+    permalink: string | null;
+    request: Record<string, unknown>;
+  }>;
 }
 
 interface EngineModule {
@@ -188,6 +468,255 @@ interface EngineModule {
   runContentGap?(options: Record<string, unknown>): Promise<unknown>;
   /** Independent, public-web-only OSINT dossier builder. */
   runOsintResearch?(options: Record<string, unknown>): Promise<unknown>;
+  /** Meta ad cabinet discovery. Read-only; nothing here writes to Meta. */
+  MetaAdsClient?: new (options: {
+    accessToken: string;
+    graphVersion?: string;
+    providerFetch?: typeof fetch;
+    businessId?: string;
+  }) => {
+    listAdAccounts(): Promise<
+      Array<{
+        id: string;
+        name: string;
+        currency: string | null;
+        status: string | null;
+      }>
+    >;
+    debugToken?(): Promise<{
+      expiresAt: string | null;
+      scopes: string[];
+      valid: boolean;
+    }>;
+  };
+  /**
+   * Publishers. Each takes a resolved post and returns what the provider said.
+   *
+   * Optional so a build without the social connectors degrades to a clear
+   * "unavailable in this build" rather than a crash at 09:00.
+   */
+  TelegramPublisher?: new (options: {
+    botToken: string;
+    providerFetch?: typeof fetch;
+  }) => SocialPublisherLike;
+  XPublisher?: new (options: {
+    accessToken: string;
+    username?: string | null;
+    providerFetch?: typeof fetch;
+  }) => SocialPublisherLike;
+  FacebookPagePublisher?: new (options: {
+    accessToken: string;
+    graphVersion?: string;
+    providerFetch?: typeof fetch;
+  }) => SocialPublisherLike;
+  InstagramPublisher?: new (options: {
+    accessToken: string;
+    graphVersion?: string;
+    providerFetch?: typeof fetch;
+  }) => SocialPublisherLike;
+  /** Composes the cross-channel report, including what it refuses to claim. */
+  composeReport?(input: Record<string, unknown>): MarketingReport;
+  renderReportHtml?(
+    report: MarketingReport,
+    brand: {
+      companyName: string;
+      text: string;
+      background: string;
+      surface: string;
+      accent: string;
+      muted: string;
+      headingFont: string;
+      bodyFont: string;
+      logoUrl: string | null;
+    },
+  ): string;
+  renderReportText?(report: MarketingReport): string;
+  /** Sanitizes, inlines and validates one email against real client behaviour. */
+  compileEmail?(options: {
+    html: string;
+    subject: string;
+    preheader?: string;
+    brand?: {
+      colors: string[];
+      fontStacks: string[];
+      contentWidthPx: number;
+      unsubscribePlaceholder: string;
+      postalAddress: string;
+    };
+  }): {
+    subject: string;
+    preheader: string;
+    compiledHtml: string;
+    plainText: string;
+    report: EmailPreview["report"];
+  };
+  starterEmailHtml?(brand: {
+    contentWidthPx: number;
+    bodyFont: string;
+    headingFont: string;
+    background: string;
+    surface: string;
+    text: string;
+    accent: string;
+    companyName: string;
+    postalAddress: string;
+    unsubscribePlaceholder: string;
+  }): string;
+  /**
+   * QR encoding and campaign-link checking.
+   *
+   * The encoder is part of the engine rather than a dependency so a printed
+   * code stays readable no matter what happens to this software.
+   */
+  encodeQr?(
+    text: string,
+    options?: {
+      errorCorrection?: "L" | "M" | "Q" | "H";
+      mask?: number;
+      maxVersion?: number;
+    },
+  ): QrMatrixLike;
+  renderQrSvg?(matrix: QrMatrixLike, options?: QrRenderOptionsLike): string;
+  renderQrPng?(matrix: QrMatrixLike, options?: QrRenderOptionsLike): Uint8Array;
+  adviseQr?(input: {
+    matrix: QrMatrixLike;
+    placement: QrPlacement;
+    printedWidthMm: number;
+    quietZone: number;
+    darkColor: string;
+    lightColor: string;
+  }): QrPrintAdvice;
+  recommendedErrorCorrection?(placement: QrPlacement): {
+    level: "L" | "M" | "Q" | "H";
+    reason: string;
+  };
+  buildTaggedUrl?(destinationUrl: string, utm: UtmParameters): string;
+  normalizeUtmParameters?(utm: UtmParameters): UtmParameters;
+  validateCampaignLink?(input: {
+    destinationUrl: string;
+    utm: UtmParameters;
+  }): CampaignLinkFinding[];
+  renderRedirectConfig?(
+    target: RedirectTarget,
+    routes: Array<{
+      path: string;
+      target: string;
+      expiresAt: string | null;
+      fallbackUrl: string | null;
+    }>,
+  ): {
+    target: RedirectTarget;
+    filename: string;
+    contents: string;
+    enforcesExpiry: boolean;
+    notes: string[];
+  };
+  adviseRedirect?(input: {
+    target: RedirectTarget;
+    routes: Array<{
+      path: string;
+      target: string;
+      expiresAt: string | null;
+      fallbackUrl: string | null;
+    }>;
+    shortHost: string | null;
+  }): CampaignLinkFinding[];
+  shortLinkPath?(label: string, prefix?: string): string;
+  GoogleAdsClient?: new (options: {
+    accessToken: string;
+    developerToken: string;
+    customerId: string;
+    loginCustomerId?: string | null;
+    apiVersion?: string;
+    providerFetch?: typeof fetch;
+  }) => {
+    accessibleCustomers(): Promise<string[]>;
+    customer(): Promise<{
+      id: string;
+      descriptiveName: string | null;
+      currencyCode: string | null;
+      manager: boolean;
+      testAccount: boolean;
+    }>;
+  };
+  /**
+   * Reads one Google Ads account's window and runs the paid-media rules.
+   *
+   * Read-only, and no mutate surface exists to add later without a contract
+   * change — see ADR 0008 for why the guarantee lives here rather than in the
+   * OAuth scope, which Google offers no read-only variant of.
+   */
+  syncGoogleAdsAccount?(options: {
+    account: {
+      id: string;
+      externalId: string;
+      displayName: string;
+      currency: string | null;
+      dailySpendCap: number | null;
+    };
+    accessToken: string;
+    developerToken: string;
+    loginCustomerId?: string | null;
+    apiVersion?: string;
+    since: string;
+    until: string;
+    providerFetch?: typeof fetch;
+    signal?: AbortSignal;
+    includeSearchTerms?: boolean;
+  }): Promise<{
+    accountId: string;
+    metrics: ChannelMetric[];
+    searchTerms: SearchTermRecord[];
+    destinations: AdDestinationLike[];
+    coverage: {
+      inspectableSpend: number | null;
+      opaqueSpend: number | null;
+      opaqueCampaigns: string[];
+      currency: string | null;
+    };
+    issues: LegacyIssue[];
+    state: "available" | "partial" | "failed";
+    reason: string | null;
+  }>;
+  /** Where paid spend meets the page it buys. See the landing module. */
+  auditLandingAlignment?(input: {
+    projectName: string;
+    destinations: readonly AdDestinationLike[];
+    snapshots: ReadonlyMap<string, PageSnapshotLike>;
+  }): LegacyIssue[];
+  probeDestinations?(
+    urls: readonly string[],
+    options: {
+      limits: Record<string, unknown>;
+      userAgent: string;
+      timeoutMs?: number;
+      maxProbes?: number;
+      signal?: AbortSignal;
+    },
+  ): Promise<Map<string, PageSnapshotLike>>;
+  /** Reads one cabinet's window and runs the paid-media rules over it. */
+  syncMetaCabinet?(options: {
+    cabinet: {
+      id: string;
+      externalId: string;
+      displayName: string;
+      currency: string | null;
+      dailySpendCap: number | null;
+    };
+    accessToken: string;
+    graphVersion?: string;
+    since: string;
+    until: string;
+    providerFetch?: typeof fetch;
+    signal?: AbortSignal;
+  }): Promise<{
+    cabinetId: string;
+    metrics: ChannelMetric[];
+    delivery: unknown[];
+    issues: LegacyIssue[];
+    state: "available" | "partial" | "failed";
+    reason: string | null;
+  }>;
   keywordResearchModule?: {
     invoke(
       input: Record<string, unknown>,
@@ -393,6 +922,33 @@ export class RunLinkExplorerError extends Error {
   ) {
     super(message);
     this.name = "RunLinkExplorerError";
+  }
+}
+
+/**
+ * Workflows whose first act is to crawl the workspace's own site.
+ *
+ * Everything absent from this set runs without a website: keyword research and
+ * content planning work from seeds, and OSINT researches whichever public
+ * targets it was handed.
+ */
+const WEBSITE_REQUIRED_WORKFLOWS = new Set(["audit", "compare"]);
+
+/**
+ * Raised when work that can only be done against a website is requested for a
+ * workspace that has none.
+ *
+ * A workspace is not required to have a website — social, ads, OSINT and
+ * keyword research all work without one. Crawling does not, and the honest
+ * answer there is to name the missing input and how to supply it. Returning an
+ * empty crawl would present "we never looked" as "we looked and found nothing".
+ */
+export class WorkspaceWebsiteError extends Error {
+  readonly code = "workspace_has_no_website" as const;
+  readonly status = 422 as const;
+  constructor(message: string) {
+    super(message);
+    this.name = "WorkspaceWebsiteError";
   }
 }
 
@@ -1745,6 +2301,164 @@ export function auditReportState(report: EngineReport): {
   return { status: "succeeded", coverage, error: null };
 }
 
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Identifies the landing-page probe to the sites it fetches.
+ *
+ * Named rather than disguised. These requests go to pages the operator is
+ * already paying to send people to, and a server owner reading their logs
+ * should be able to tell what this is and who to ask about it.
+ */
+const DEFAULT_PROBE_USER_AGENT =
+  "Marketingovo-LandingCheck/1.0 (+https://github.com/marketingovo)";
+
+/**
+ * Paid findings, scored on the same priority-v1 model as everything else.
+ *
+ * Two of the model's inputs are deliberately left null. Organic exposure does
+ * not apply to an ad set — there is no organic reach to measure — and
+ * conversion exposure is not derivable from a crawl. Passing null records both
+ * as genuinely unavailable and lowers confidence accordingly, which is the
+ * honest answer; inventing a value for the slot to avoid the penalty would put
+ * a fabricated number inside the score a marketer prioritizes by.
+ */
+function normalizeAdsActions(
+  projectId: string,
+  issues: readonly LegacyIssue[],
+  observedAt: string,
+): Action[] {
+  const priorityRank = { High: 3, Medium: 2, Low: 1 } as const;
+  const grouped = new Map<string, LegacyIssue>();
+  for (const issue of issues) {
+    const key = `${issue.moduleId ?? "integrations:meta-ads"}${issue.id}`;
+    const existing = grouped.get(key);
+    if (!existing) {
+      grouped.set(key, { ...issue, urls: [...issue.urls] });
+      continue;
+    }
+    grouped.set(key, {
+      ...existing,
+      priority:
+        priorityRank[issue.priority] > priorityRank[existing.priority]
+          ? issue.priority
+          : existing.priority,
+      detail: existing.detail ?? issue.detail,
+      fix: existing.fix ?? issue.fix,
+      urls: [...existing.urls, ...issue.urls],
+    });
+  }
+
+  return [...grouped.values()].map<Action>((issue) => {
+    const validUrls = [
+      ...new Set(
+        issue.urls
+          .map((url) => canonicalizeIssueUrl(url))
+          .filter((url): url is string => url !== null),
+      ),
+    ].sort((left, right) => left.localeCompare(right));
+    // A disapproved ad is one edit; a rising cost per conversion is a
+    // restructure. Effort is read from the rule rather than from URL count,
+    // which measures nothing about paid work.
+    const effort: Action["effort"] = /cpa-drift|creative-fatigue/.test(issue.id)
+      ? "medium"
+      : /under-pacing/.test(issue.id)
+        ? "high"
+        : "low";
+    const scored = scorePriorityV1({
+      severity: severity(issue.priority),
+      organicExposure: null,
+      conversionExposure: null,
+      urlReach: Math.min(1, validUrls.length / 10),
+      confidence: issue.detail ? 0.92 : 0.82,
+      effort,
+    });
+    const actionIdentity = sha256(
+      `${projectId}${issue.moduleId ?? "integrations:meta-ads"}${issue.id}`,
+    );
+    return {
+      id: `action-${actionIdentity.slice(0, 24)}`,
+      projectId,
+      ruleId: issue.id,
+      moduleId: issue.moduleId ?? "integrations:meta-ads",
+      issueFingerprint: issueFingerprint(issue, validUrls[0] ?? null),
+      title: boundedContractText(issue.message, 240, "Paid media action"),
+      whyNow: `${validUrls.length || 1} affected ad entit${validUrls.length === 1 ? "y" : "ies"}. Organic and conversion exposure do not apply to paid delivery and are recorded as unavailable.`,
+      impact: scored.impact,
+      effort,
+      confidence: scored.scoreInputs.confidence,
+      priorityScore: scored.priorityScore,
+      scoreVersion: "priority-v1",
+      scoreInputs: scored.scoreInputs,
+      affectedUrls: validUrls,
+      owner: null,
+      status: "open",
+      verification: "pending",
+      createdAt: observedAt,
+      updatedAt: observedAt,
+    };
+  });
+}
+
+/**
+ * The `ads` capability, and for each way it can be missing, the one step that
+ * supplies it.
+ */
+function adsCapability(
+  connected: boolean,
+  linkedCabinets: number,
+): WorkspaceCapabilityState {
+  if (!connected) {
+    return {
+      capability: "ads",
+      available: false,
+      reason:
+        "No ad platform is connected, so paid spend, delivery and creative performance cannot be read.",
+      remedy: { label: "Connect Meta Ads", href: "/integrations" },
+    };
+  }
+  if (linkedCabinets === 0) {
+    return {
+      capability: "ads",
+      available: false,
+      reason:
+        "Meta is connected but no ad cabinet is linked to this workspace, so there is nothing to read from.",
+      remedy: { label: "Link an ad cabinet", href: "/ads" },
+    };
+  }
+  return {
+    capability: "ads",
+    available: true,
+    reason: "",
+    remedy: null,
+  };
+}
+
+function socialCapability(
+  connected: boolean,
+  linkedAccounts: number,
+): WorkspaceCapabilityState {
+  if (!connected) {
+    return {
+      capability: "social",
+      available: false,
+      reason:
+        "No social platform is connected, so nothing can be scheduled or posted.",
+      remedy: { label: "Connect a platform", href: "/integrations" },
+    };
+  }
+  if (linkedAccounts === 0) {
+    return {
+      capability: "social",
+      available: false,
+      reason:
+        "A platform is connected but no channel is linked to this workspace, so there is nowhere to post.",
+      remedy: { label: "Link a channel", href: "/calendar" },
+    };
+  }
+  return { capability: "social", available: true, reason: "", remedy: null };
+}
+
 function normalizeIssues(report: EngineReport): IssueInstance[] {
   const observedAt = report.generatedAt;
   const normalized = new Map<string, IssueInstance>();
@@ -2405,6 +3119,102 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
 
   readonly projects = {
     list: async () => this.database.listProjects(),
+    /**
+     * What this workspace can currently do, and for anything it cannot, the one
+     * step that would change that.
+     *
+     * Derived on every read from the project row and the connector list; there
+     * is no capability state of its own to fall out of date.
+     */
+    capabilities: async (
+      projectId: string,
+    ): Promise<WorkspaceCapabilities | null> => {
+      const project = this.database.getProject(projectId);
+      if (!project) return null;
+      const integrations = await this.integrations.list(projectId);
+      const configured = (
+        provider: string,
+        requiredSetting?: string,
+      ): boolean => {
+        const integration = integrations.find(
+          (candidate) => candidate.provider === provider,
+        );
+        if (!integration || integration.status === "not_configured")
+          return false;
+        // "Connected" is a credential fact. A provider still cannot answer a
+        // question about this workspace until it has been pointed at the right
+        // property, so the mapping counts as part of the capability.
+        if (!requiredSetting) return true;
+        const value = integration.configuration?.[requiredSetting];
+        return typeof value === "string" && value.length > 0;
+      };
+
+      const states: WorkspaceCapabilityState[] = [
+        {
+          capability: "website",
+          available: project.canonicalUrl !== null,
+          reason:
+            project.canonicalUrl !== null
+              ? ""
+              : "This workspace has no website, so there is nothing to crawl.",
+          remedy: { label: "Add a website", href: "/settings" },
+        },
+        {
+          capability: "search-console",
+          available: configured("google-search-console", "siteUrl"),
+          reason: configured("google-search-console", "siteUrl")
+            ? ""
+            : "Search Console is not connected and mapped to a property.",
+          remedy: { label: "Connect Search Console", href: "/integrations" },
+        },
+        {
+          capability: "analytics",
+          available: configured("google-analytics-4", "propertyId"),
+          reason: configured("google-analytics-4", "propertyId")
+            ? ""
+            : "Google Analytics is not connected and mapped to a property.",
+          remedy: { label: "Connect Analytics", href: "/integrations" },
+        },
+        {
+          capability: "serp",
+          available: configured("serpapi") || configured("dataforseo"),
+          reason:
+            configured("serpapi") || configured("dataforseo")
+              ? ""
+              : "No SERP provider is connected, so rank positions cannot be measured.",
+          remedy: { label: "Connect a SERP provider", href: "/integrations" },
+        },
+        // Paid is a two-part fact and both parts are load-bearing: a
+        // credential that reaches Meta still cannot answer a question about
+        // *this* workspace until a cabinet has been linked to it, and a
+        // linked cabinet is unreadable once the token behind it expires.
+        // Reporting either half alone would send an operator to the wrong
+        // remedy.
+        adsCapability(
+          configured("meta-ads") || configured("google-ads"),
+          this.database.listChannelAccounts(projectId, { kind: "ads" }).length,
+        ),
+        // Same two-part fact as `ads`, for the same reason: a connected
+        // credential that reaches nothing this workspace has linked cannot
+        // answer a question about it, and the two halves need different
+        // remedies.
+        socialCapability(
+          ["telegram", "x", "meta-ads"].some((provider) =>
+            configured(provider),
+          ),
+          this.database.listChannelAccounts(projectId, { kind: "social" })
+            .length,
+        ),
+      ];
+
+      return {
+        projectId,
+        available: states
+          .filter((state) => state.available)
+          .map((state) => state.capability),
+        states,
+      };
+    },
     create: async (input: CreateProjectInput) =>
       this.database.createProject(input),
     overview: async (projectId: string): Promise<ProjectOverview> => {
@@ -2482,10 +3292,22 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
       input: StartRunInput,
       idempotencyKey?: string,
     ): Promise<Run> => {
-      if (!this.database.getProject(input.projectId))
-        throw new Error("Project not found");
+      const project = this.database.getProject(input.projectId);
+      if (!project) throw new Error("Project not found");
+      const workflowId = input.workflowId ?? "audit";
+      // Refuse before the run row and job exist. Queuing work that is certain
+      // to fail deep in the executor would leave a failed run in history for a
+      // configuration problem the operator can fix in one step.
+      if (
+        project.canonicalUrl === null &&
+        WEBSITE_REQUIRED_WORKFLOWS.has(workflowId)
+      ) {
+        throw new WorkspaceWebsiteError(
+          `The ${workflowId} workflow crawls a website, and this workspace does not have one yet. Add a website in Settings, then run it again.`,
+        );
+      }
       const runOptions = { ...(input.options ?? {}) };
-      if ((input.workflowId ?? "audit") === "audit") {
+      if (workflowId === "audit") {
         // This reserved option makes extraction output reproducible even after
         // the marketer edits the project's current rule set.
         delete runOptions.extractionRuleRevision;
@@ -2499,7 +3321,7 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
       const run = this.database.insertRun({
         id,
         projectId: input.projectId,
-        workflowId: input.workflowId ?? "audit",
+        workflowId,
         idempotencyKey,
         options: runOptions,
       });
@@ -2548,6 +3370,7 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
           "keyword-research",
           "content-plan",
           "osint-research",
+          "ads-audit",
         ].includes(source.workflowId)
       ) {
         throw new RunReplayError(
@@ -2872,11 +3695,20 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
           422,
         );
       }
+      // The preview is scoped to the workspace's own origin, so there is
+      // nothing to scope it against until a website exists. This is a distinct
+      // failure from a malformed URL and must not be reported as one.
+      if (project.canonicalUrl === null) {
+        throw new WorkspaceWebsiteError(
+          "Extraction previews run against this workspace's own website, and it does not have one yet.",
+        );
+      }
+      const projectCanonicalUrl = project.canonicalUrl;
       let requestedUrl: URL;
       let projectUrl: URL;
       try {
         requestedUrl = new URL(input.url);
-        projectUrl = new URL(project.canonicalUrl);
+        projectUrl = new URL(projectCanonicalUrl);
       } catch {
         throw new ExtractionRulesError(
           "The preview URL must be an absolute HTTP or HTTPS URL.",
@@ -3552,12 +4384,11 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
       const manifest = getConnectorManifest(provider);
       if (!manifest) throw new Error("Unknown integration provider");
       const ref: CredentialRef = { provider, account, kind };
-      return this.replaceCredential(provider, ref, secret, () => {
-        const current = this.database
-          .listIntegrations()
-          .find((candidate) => candidate.provider === provider);
+      const saved = await this.replaceCredential(provider, ref, secret, () => {
+        const current = this.database.getIntegration(provider, account);
         const integration: Integration = {
           provider,
+          ...(account === "default" ? {} : { account }),
           label: manifest.label,
           // Stored is not the same as verified. The explicit provider probe
           // is the only path that promotes an API credential to connected.
@@ -3576,6 +4407,12 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
         this.database.upsertIntegration(integration);
         return integration;
       });
+      // A long-lived token carries its own deadline, and the operator has no
+      // way to see it other than by being told. Asking once, here, is what
+      // turns "it stopped working" into a date they can rotate against.
+      return manifest.auth.type === "long-lived-token"
+        ? await this.recordTokenExpiry(saved, account)
+        : saved;
     },
     completeOAuth: async (
       provider: string,
@@ -3680,7 +4517,9 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
           ...(integration.configuration
             ? { configuration: integration.configuration }
             : {}),
-          ...(project ? { targetUrl: project.canonicalUrl } : {}),
+          // A website-less workspace simply supplies no probe target; the
+          // connector's own health is still worth reporting.
+          ...(project?.canonicalUrl ? { targetUrl: project.canonicalUrl } : {}),
           ...(this.integrationFetch
             ? { fetchImpl: this.integrationFetch }
             : {}),
@@ -3747,6 +4586,1480 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
           });
       }
       return this.database.deleteIntegration(provider);
+    },
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* Channels — ad cabinets and the facts read from them.                */
+  /* ------------------------------------------------------------------ */
+
+  readonly channels = {
+    /**
+     * Cabinets the connected credential can reach but this workspace has not
+     * linked. Read-only: discovery never links anything on its own, because
+     * whose money a workspace is allowed to look at is an operator decision,
+     * not something a connection implies.
+     */
+    discover: async (
+      projectId: string,
+      provider = "meta-ads",
+      account = "default",
+    ): Promise<DiscoveredChannelAccount[]> => {
+      if (!this.database.getProject(projectId))
+        throw new ChannelError("cabinet_not_found", "Project not found", 404);
+      if (provider === "google-ads") {
+        return this.discoverGoogleAdsAccounts(projectId, account);
+      }
+      if (provider !== "meta-ads") {
+        throw new ChannelError(
+          "cabinet_provider_unsupported",
+          `Cabinet discovery is not implemented for ${provider}.`,
+          422,
+        );
+      }
+      const credentials = await this.metaCredential(account);
+      const engine = await this.loadEngine();
+      if (!engine.MetaAdsClient) {
+        throw new ChannelError(
+          "cabinet_provider_unsupported",
+          "The Meta connector is unavailable in this build.",
+          503,
+        );
+      }
+      const client = new engine.MetaAdsClient({
+        accessToken: credentials.accessToken,
+        ...(credentials.graphVersion
+          ? { graphVersion: credentials.graphVersion }
+          : {}),
+        ...(credentials.businessId
+          ? { businessId: credentials.businessId }
+          : {}),
+        ...(this.integrationFetch
+          ? { providerFetch: this.integrationFetch }
+          : {}),
+      });
+      const linked = new Set(
+        this.database
+          .listChannelAccounts(projectId, { includeArchived: true })
+          .filter(
+            (cabinet) =>
+              cabinet.provider === provider && cabinet.account === account,
+          )
+          .map((cabinet) => cabinet.externalId),
+      );
+      const accounts = await client.listAdAccounts();
+      return accounts.map((entry) => ({
+        provider,
+        account,
+        kind: "ads" as const,
+        externalId: entry.id,
+        displayName: entry.name || entry.id,
+        currency: entry.currency,
+        status: entry.status,
+        linked: linked.has(entry.id),
+      }));
+    },
+
+    list: async (
+      projectId: string,
+      options: {
+        kind?: ChannelAccount["kind"];
+        includeArchived?: boolean;
+      } = {},
+    ): Promise<ChannelAccount[]> =>
+      this.database.listChannelAccounts(projectId, options),
+
+    /**
+     * The queries that triggered ads on one account, most expensive first.
+     *
+     * Google Ads only; nothing else reports queries. `actionableOnly` drops
+     * terms already added as keywords or negatives, which is what an operator
+     * working through the list wants.
+     */
+    searchTerms: async (
+      channelAccountId: string,
+      options: {
+        windowStart?: string;
+        windowEnd?: string;
+        actionableOnly?: boolean;
+        limit?: number;
+      } = {},
+    ): Promise<SearchTermRecord[]> =>
+      this.database.listSearchTerms({ channelAccountId, ...options }),
+
+    get: async (id: string): Promise<ChannelAccount | null> =>
+      this.database.getChannelAccount(id),
+
+    link: async (input: LinkChannelAccountInput): Promise<ChannelAccount> => {
+      if (!this.database.getProject(input.projectId))
+        throw new ChannelError("cabinet_not_found", "Project not found", 404);
+      if (!getConnectorManifest(input.provider)) {
+        throw new ChannelError(
+          "cabinet_provider_unsupported",
+          `${input.provider} is not a registered connector.`,
+          422,
+        );
+      }
+      const cabinet = this.database.linkChannelAccount({
+        workspaceId: input.projectId,
+        provider: input.provider,
+        account: input.account ?? "default",
+        kind: input.kind,
+        externalId: input.externalId.trim(),
+        displayName: input.displayName.trim(),
+        currency: input.currency ?? null,
+        dailySpendCap: input.dailySpendCap ?? null,
+        totalSpendCap: input.totalSpendCap ?? null,
+      });
+      this.database.recordAuditEvent({
+        actor: "runtime",
+        action: "channel.linked",
+        entityType: "channel_account",
+        entityId: cabinet.id,
+        payload: {
+          provider: cabinet.provider,
+          kind: cabinet.kind,
+          externalId: cabinet.externalId,
+        },
+      });
+      return cabinet;
+    },
+
+    update: async (
+      id: string,
+      patch: UpdateChannelAccountInput,
+    ): Promise<ChannelAccount | null> =>
+      this.database.updateChannelAccount(id, patch),
+
+    remove: async (id: string): Promise<boolean> => {
+      const cabinet = this.database.getChannelAccount(id);
+      if (!cabinet) return false;
+      const removed = this.database.deleteChannelAccount(id);
+      if (removed) {
+        this.database.recordAuditEvent({
+          actor: "runtime",
+          action: "channel.removed",
+          entityType: "channel_account",
+          entityId: id,
+          payload: { provider: cabinet.provider, kind: cabinet.kind },
+        });
+      }
+      return removed;
+    },
+
+    /**
+     * One cabinet's totals over a window.
+     *
+     * Account-level rows carry no platform breakdown, so the Facebook and
+     * Instagram split is totalled from campaign rows, which partition the
+     * account exactly. Anything that cannot be honestly totalled — reach,
+     * frequency — comes back unavailable with the reason attached rather than
+     * as a number.
+     */
+    performance: async (
+      channelAccountId: string,
+      options: { start?: string; end?: string } = {},
+    ): Promise<ChannelPerformance | null> => {
+      const cabinet = this.database.getChannelAccount(channelAccountId);
+      if (!cabinet) return null;
+      const now = new Date();
+      const end = options.end ?? isoDateBefore(now, 1);
+      const start = options.start ?? isoDateBefore(now, 28);
+      const requestedDays = daysBetween(start, end);
+      const metrics = this.database.listChannelMetrics({
+        channelAccountId,
+        start,
+        end,
+      });
+      return {
+        account: cabinet,
+        start,
+        end,
+        lastSyncedAt: this.database.latestChannelSyncAt(channelAccountId),
+        summaries: [
+          ...summarizeChannelMetrics(metrics, {
+            requestedDays,
+            entityKind: "account",
+          }),
+          ...summarizeChannelMetrics(metrics, {
+            requestedDays,
+            entityKind: "campaign",
+          }).filter((summary) => summary.platform !== "all"),
+        ],
+      };
+    },
+
+    metrics: async (options: {
+      channelAccountId: string;
+      start?: string;
+      end?: string;
+      entityKind?: ChannelMetric["entityKind"];
+      platform?: ChannelMetric["platform"];
+      limit?: number;
+    }): Promise<ChannelMetric[]> => {
+      const now = new Date();
+      return this.database.listChannelMetrics({
+        channelAccountId: options.channelAccountId,
+        start: options.start ?? isoDateBefore(now, 28),
+        end: options.end ?? isoDateBefore(now, 1),
+        ...(options.entityKind ? { entityKind: options.entityKind } : {}),
+        ...(options.platform ? { platform: options.platform } : {}),
+        ...(options.limit ? { limit: options.limit } : {}),
+      });
+    },
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* Campaign staging — draft, stage, and the approval gate.             */
+  /*                                                                     */
+  /* Nothing here reaches a provider. An agent may write everything      */
+  /* except the approval; that one transition is pinned to the browser's */
+  /* transport by the HTTP layer, because a control enforced inside the  */
+  /* thing being controlled is not a control.                            */
+  /* ------------------------------------------------------------------ */
+
+  readonly campaigns = {
+    list: async (projectId: string): Promise<CampaignBrief[]> =>
+      this.database.listCampaignBriefs(projectId),
+
+    create: async (
+      input: CreateCampaignBriefInput,
+      actor: string,
+    ): Promise<CampaignBrief> => {
+      if (!this.database.getProject(input.projectId))
+        throw new ChannelError("brief_not_found", "Project not found", 404);
+      return this.database.createCampaignBrief({
+        projectId: input.projectId,
+        title: input.title.trim(),
+        objective: input.objective.trim(),
+        audience: input.audience ?? null,
+        keyMessage: input.keyMessage ?? null,
+        constraints: input.constraints ?? null,
+        createdBy: actor,
+      });
+    },
+
+    /** A brief with everything staged under it, in one read. */
+    workspace: async (briefId: string): Promise<CampaignWorkspace | null> => {
+      const brief = this.database.getCampaignBrief(briefId);
+      if (!brief) return null;
+      const deliverables = this.database.listCampaignDeliverables(briefId);
+      const deliverableIds = new Set(deliverables.map((entry) => entry.id));
+      return {
+        brief,
+        deliverables,
+        intents: this.database
+          .listPublishIntents({ projectId: brief.projectId })
+          .filter((intent) => deliverableIds.has(intent.deliverableId)),
+      };
+    },
+
+    addDeliverable: async (
+      briefId: string,
+      input: CreateCampaignDeliverableInput,
+      actor: string,
+    ): Promise<CampaignDeliverable> => {
+      if (!this.database.getCampaignBrief(briefId)) {
+        throw new ChannelError(
+          "brief_not_found",
+          "The campaign brief was not found.",
+          404,
+        );
+      }
+      return this.database.createCampaignDeliverable({
+        briefId,
+        channel: input.channel,
+        headline: input.headline ?? null,
+        body: input.body,
+        callToAction: input.callToAction ?? null,
+        destinationUrl: input.destinationUrl ?? null,
+        creativeNotes: input.creativeNotes ?? null,
+        createdBy: actor,
+      });
+    },
+
+    /**
+     * Stages the exact payload that would be sent.
+     *
+     * The spend cap is checked here, before the intent exists, rather than at
+     * approval time — an operator should never be shown an approve button for
+     * something the daemon would refuse.
+     */
+    stage: async (
+      projectId: string,
+      input: StagePublishIntentInput,
+      actor: string,
+    ): Promise<PublishIntent> => {
+      const deliverable = this.database.getCampaignDeliverable(
+        input.deliverableId,
+      );
+      if (!deliverable) {
+        throw new ChannelError(
+          "deliverable_not_found",
+          "The deliverable was not found.",
+          404,
+        );
+      }
+      const cabinet = this.database.getChannelAccount(input.channelAccountId);
+      if (!cabinet || cabinet.workspaceId !== projectId) {
+        throw new ChannelError(
+          "cabinet_not_found",
+          "The target cabinet was not found in this workspace.",
+          404,
+        );
+      }
+      const dailyBudget = input.budget?.dailyBudget ?? null;
+      const lifetimeBudget = input.budget?.lifetimeBudget ?? null;
+      const currency = input.budget?.currency ?? cabinet.currency;
+      assertWithinSpendCap({
+        cabinet,
+        dailyBudget,
+        lifetimeBudget,
+        currency,
+      });
+      const intent = this.database.stagePublishIntent({
+        projectId,
+        deliverableId: input.deliverableId,
+        channelAccountId: input.channelAccountId,
+        payload: input.payload,
+        payloadHash: publishPayloadHash(input.payload),
+        dailyBudget,
+        lifetimeBudget,
+        currency,
+        stagedBy: actor,
+      });
+      this.database.recordAuditEvent({
+        actor,
+        action: "publish_intent.staged",
+        entityType: "publish_intent",
+        entityId: intent.id,
+        payload: {
+          channelAccountId: intent.channelAccountId,
+          payloadHash: intent.payloadHash,
+        },
+      });
+      return intent;
+    },
+
+    intents: async (options: {
+      projectId: string;
+      state?: PublishIntent["state"];
+    }): Promise<PublishIntent[]> => this.database.listPublishIntents(options),
+
+    /**
+     * Records an operator's approval of one exact payload.
+     *
+     * The caller must supply the hash it rendered. If the payload changed
+     * between the render and the click, nothing matches and the approval does
+     * not happen — a record of consent to something nobody read is worse than
+     * no record at all.
+     *
+     * This method never publishes. Nothing in this build does.
+     */
+    approve: async (
+      intentId: string,
+      payloadHash: string,
+      operator: string,
+    ): Promise<PublishIntent> => {
+      const current = this.database.getPublishIntent(intentId);
+      if (!current) {
+        throw new ChannelError(
+          "intent_not_staged",
+          "The publish intent was not found.",
+          404,
+        );
+      }
+      if (current.state !== "staged") {
+        throw new ChannelError(
+          "intent_not_staged",
+          `This intent is ${current.state} and can no longer be approved.`,
+          409,
+        );
+      }
+      if (current.payloadHash !== payloadHash) {
+        throw new ChannelError(
+          "intent_payload_changed",
+          "The payload changed since it was rendered. Re-read the intent and approve the version you can see.",
+          409,
+        );
+      }
+      const cabinet = this.database.getChannelAccount(current.channelAccountId);
+      if (cabinet) {
+        // Re-checked at approval, not only at staging. A cap lowered after an
+        // intent was staged must still bind, or the earlier check becomes a
+        // race an operator can lose by leaving a tab open.
+        assertWithinSpendCap({
+          cabinet,
+          dailyBudget: current.budget.dailyBudget,
+          lifetimeBudget: current.budget.lifetimeBudget,
+          currency: current.budget.currency,
+        });
+      }
+      const approved = this.database.approvePublishIntent(
+        intentId,
+        payloadHash,
+        operator,
+      );
+      if (!approved) {
+        throw new ChannelError(
+          "intent_payload_changed",
+          "The intent changed while the approval was being recorded. Re-read it and approve again.",
+          409,
+        );
+      }
+
+      // The key is minted once, here, and reused by every attempt on this
+      // approval. Generating it per attempt would make each retry a different
+      // key and defeat the record that stops a double-post; regenerating it on
+      // re-approval is correct, because a re-approved post is a new consent.
+      const idempotencyKey = createIdempotencyKey();
+      this.database.setPublishIntentIdempotencyKey(intentId, idempotencyKey);
+
+      // An approved post with a time is handed to the durable queue now, with
+      // `available_at` set to its scheduled moment. The post therefore survives
+      // the daemon being closed between approval and send, which is the whole
+      // reason a calendar can promise anything.
+      if (approved.scheduledAt) {
+        this.database.enqueueJob({
+          type: "publish.intent",
+          payload: { intentId },
+          availableAt: approved.scheduledAt,
+          // One retry. A post that failed for a real reason should be read by
+          // a person, not hammered at the provider until the quota is gone.
+          maxAttempts: 2,
+        });
+      }
+
+      this.database.recordAuditEvent({
+        actor: operator,
+        action: "publish_intent.approved",
+        entityType: "publish_intent",
+        entityId: intentId,
+        payload: {
+          payloadHash,
+          channelAccountId: approved.channelAccountId,
+          ...(approved.scheduledAt
+            ? { scheduledAt: approved.scheduledAt }
+            : {}),
+        },
+      });
+      return this.database.getPublishIntent(intentId) ?? approved;
+    },
+
+    /**
+     * Places an approved post on the calendar.
+     *
+     * Rescheduling clears the approval on purpose. The time is part of what
+     * the operator consented to — a post they approved for Tuesday morning is
+     * not the same post on Saturday night — so it needs consent again, exactly
+     * as edited copy does.
+     */
+    schedule: async (
+      intentId: string,
+      input: ScheduleIntentInput,
+    ): Promise<PublishIntent> => {
+      const current = this.database.getPublishIntent(intentId);
+      if (!current) {
+        throw new ChannelError(
+          "intent_not_staged",
+          "The publish intent was not found.",
+          404,
+        );
+      }
+      if (current.state === "published" || current.state === "publishing") {
+        throw new ChannelError(
+          "intent_not_staged",
+          `This post is ${current.state} and cannot be rescheduled.`,
+          409,
+        );
+      }
+      const at = Date.parse(input.scheduledAt);
+      if (!Number.isFinite(at)) {
+        throw new ChannelError(
+          "intent_not_staged",
+          "The scheduled time is not a valid timestamp.",
+          400,
+        );
+      }
+      // A time in the past would fire the moment it is approved, which is a
+      // surprising way to publish under someone's brand.
+      if (at < Date.now() - 60_000) {
+        throw new ChannelError(
+          "intent_not_staged",
+          "The scheduled time is in the past. Choose a future time, or publish it now deliberately.",
+          422,
+        );
+      }
+      const scheduled = this.database.schedulePublishIntent(
+        intentId,
+        new Date(at).toISOString(),
+        input.timezone,
+      );
+      if (!scheduled) {
+        throw new ChannelError(
+          "intent_not_staged",
+          "The publish intent was not found.",
+          404,
+        );
+      }
+      return scheduled;
+    },
+
+    /** Everything scheduled in a window, plus what is stuck outside it. */
+    calendar: async (
+      projectId: string,
+      start: string,
+      end: string,
+    ): Promise<ContentCalendar> => {
+      const entries: CalendarEntry[] = [];
+      const unscheduled: CalendarEntry[] = [];
+      const overdue: CalendarEntry[] = [];
+      const startMs = Date.parse(start);
+      const endMs = Date.parse(end);
+      const nowMs = Date.now();
+
+      for (const intent of this.database.listPublishIntents({ projectId })) {
+        const entry = this.calendarEntry(intent);
+        if (!entry) continue;
+        if (intent.scheduledAt === null) {
+          // Approved with nowhere to go. A calendar that only draws cells
+          // hides exactly the posts that need attention.
+          if (intent.state === "approved" || intent.state === "staged") {
+            unscheduled.push(entry);
+          }
+          continue;
+        }
+        const at = Date.parse(intent.scheduledAt);
+        if (
+          at < nowMs &&
+          (intent.state === "approved" || intent.state === "staged")
+        ) {
+          overdue.push(entry);
+          continue;
+        }
+        if (at >= startMs && at <= endMs) entries.push(entry);
+      }
+
+      entries.sort((left, right) =>
+        (left.scheduledAt ?? "").localeCompare(right.scheduledAt ?? ""),
+      );
+      return { projectId, start, end, entries, unscheduled, overdue };
+    },
+
+    records: async (
+      projectId: string,
+      intentId?: string,
+    ): Promise<PublishRecord[]> =>
+      this.database.listPublishRecords({
+        projectId,
+        ...(intentId ? { intentId } : {}),
+      }),
+
+    /**
+     * Sends an approved post now, outside its schedule.
+     *
+     * Goes through exactly the same attempt path as the scheduler, so the
+     * idempotency guarantee, the payload re-check and the record are identical
+     * whether a post fires at 09:00 or because someone clicked.
+     */
+    publishNow: async (intentId: string): Promise<PublishAttemptOutcome> =>
+      runPublishAttempt({
+        database: this.database,
+        intentId,
+        executor: this.publishExecutor(),
+      }),
+
+    withdraw: async (
+      intentId: string,
+      note: string,
+      actor: string,
+    ): Promise<PublishIntent | null> => {
+      const current = this.database.getPublishIntent(intentId);
+      if (!current) return null;
+      const withdrawn = this.database.setPublishIntentState(
+        intentId,
+        "withdrawn",
+        note.slice(0, 400),
+      );
+      this.database.recordAuditEvent({
+        actor,
+        action: "publish_intent.withdrawn",
+        entityType: "publish_intent",
+        entityId: intentId,
+        payload: { previousState: current.state },
+      });
+      return withdrawn;
+    },
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* Media library                                                       */
+  /*                                                                     */
+  /* Uploaded assets stay on the operator's disk. Only Instagram forces  */
+  /* them anywhere else, and only when the operator asks.                */
+  /* ------------------------------------------------------------------ */
+
+  readonly media = {
+    list: async (projectId: string): Promise<MediaAsset[]> =>
+      this.database.listMediaAssets(projectId),
+
+    get: async (id: string): Promise<MediaAsset | null> =>
+      this.database.getMediaAsset(id),
+
+    /**
+     * Stores an upload after deciding what it actually is.
+     *
+     * The declared filename and content type are both caller-supplied and
+     * neither is evidence about the bytes, so the type comes from sniffing the
+     * file signature. A file we cannot identify is refused rather than stored
+     * and rejected later by a provider at 09:00.
+     */
+    upload: async (input: {
+      projectId: string;
+      filename: string;
+      bytes: Uint8Array;
+    }): Promise<MediaAsset> => {
+      if (!this.database.getProject(input.projectId)) {
+        throw new MediaError(
+          "media_project_not_found",
+          "Project not found",
+          404,
+        );
+      }
+      if (input.bytes.byteLength === 0) {
+        throw new MediaError("media_unreadable", "The uploaded file is empty.");
+      }
+      if (input.bytes.byteLength > MAX_MEDIA_BYTES) {
+        throw new MediaError(
+          "media_too_large",
+          `The file is ${Math.round(input.bytes.byteLength / 1024 / 1024)}MB and the limit is ${MAX_MEDIA_BYTES / 1024 / 1024}MB.`,
+        );
+      }
+      const sniffed = sniffMedia(input.bytes);
+      if (!sniffed) {
+        throw new MediaError(
+          "media_unsupported",
+          "The file is not a PNG, JPEG, WebP, GIF, MP4 or MOV. Those are the formats the supported platforms accept.",
+        );
+      }
+
+      const digest = createHash("sha256").update(input.bytes).digest("hex");
+      const directory = join(
+        this.dataDir,
+        "projects",
+        input.projectId,
+        "media",
+      );
+      mkdirSync(directory, { recursive: true, mode: 0o700 });
+      const path = join(
+        directory,
+        `${digest}.${extensionForMediaType(sniffed.mediaType)}`,
+      );
+      if (!existsSync(path)) {
+        writeFileSync(path, input.bytes, { mode: 0o600 });
+      }
+      return this.database.createMediaAsset({
+        projectId: input.projectId,
+        // Kept for the operator to recognize, never used to build a path.
+        filename: boundedContractText(input.filename, 240, "upload"),
+        mediaType: sniffed.mediaType,
+        kind: sniffed.kind,
+        sizeBytes: input.bytes.byteLength,
+        sha256: digest,
+        path,
+        width: sniffed.width,
+        height: sniffed.height,
+      });
+    },
+
+    /** The stored bytes, for a publisher that uploads them. */
+    read: async (id: string): Promise<Uint8Array | null> => {
+      const path = this.database.getMediaAssetPath(id);
+      if (!path) return null;
+      try {
+        return new Uint8Array(readFileSync(path));
+      } catch {
+        return null;
+      }
+    },
+
+    /**
+     * Records a public URL the operator already hosts.
+     *
+     * Verified reachable before it is accepted: an Instagram post whose
+     * `image_url` 404s fails at publish time with a message from Meta about a
+     * media download error, which is a much worse place to learn about a typo.
+     */
+    attachPublicUrl: async (
+      id: string,
+      publicUrl: string,
+    ): Promise<MediaAsset> => {
+      const asset = this.database.getMediaAsset(id);
+      if (!asset) {
+        throw new MediaError(
+          "media_not_found",
+          "The asset was not found.",
+          404,
+        );
+      }
+      let url: URL;
+      try {
+        url = new URL(publicUrl);
+      } catch {
+        throw new MediaError("media_url_invalid", "The URL is not valid.");
+      }
+      if (url.protocol !== "https:" || url.username || url.password) {
+        throw new MediaError(
+          "media_url_invalid",
+          "The URL must be plain HTTPS with no embedded credentials.",
+        );
+      }
+      const updated = this.database.setMediaAssetPublicUrl(
+        id,
+        url.toString(),
+        "operator-supplied",
+      );
+      return updated ?? asset;
+    },
+
+    /**
+     * Uploads an asset to the operator's own object storage.
+     *
+     * This is the only path by which a file leaves the machine without being
+     * posted, and it exists solely because Instagram will not accept bytes.
+     * The destination is a bucket the operator configured and owns.
+     */
+    publishToRelay: async (id: string): Promise<MediaAsset> => {
+      const asset = this.database.getMediaAsset(id);
+      if (!asset) {
+        throw new MediaError(
+          "media_not_found",
+          "The asset was not found.",
+          404,
+        );
+      }
+      const bytes = await this.media.read(id);
+      if (!bytes) {
+        throw new MediaError(
+          "media_unreadable",
+          "The stored file could not be read from disk.",
+        );
+      }
+      const integration = this.database.getIntegration("media-relay");
+      if (!integration?.secretRef || !integration.configuration) {
+        throw new MediaError(
+          "media_relay_not_configured",
+          "No object storage is configured. Add S3-compatible credentials in Integrations, or paste a public URL you already host.",
+          422,
+        );
+      }
+      const credentials = await this.readConnectorCredentials(
+        "media-relay",
+        integration,
+      );
+      const configuration = integration.configuration as Record<
+        string,
+        unknown
+      >;
+      const objectKey = `marketingovo/${asset.projectId}/${asset.sha256}.${extensionForMediaType(asset.mediaType)}`;
+      const publicUrl = await uploadMediaToRelay({
+        target: {
+          endpoint: String(configuration.endpoint ?? ""),
+          region: String(configuration.region ?? ""),
+          bucket: String(configuration.bucket ?? ""),
+          publicBaseUrl: String(configuration.publicBaseUrl ?? ""),
+          ...(configuration.forcePathStyle === true
+            ? { forcePathStyle: true }
+            : {}),
+        },
+        credentials: {
+          accessKeyId: String(credentials?.accessKeyId ?? ""),
+          secretAccessKey: String(credentials?.secretAccessKey ?? ""),
+          ...(typeof credentials?.sessionToken === "string"
+            ? { sessionToken: credentials.sessionToken }
+            : {}),
+        },
+        objectKey,
+        body: bytes,
+        contentType: asset.mediaType,
+      });
+      this.database.recordAuditEvent({
+        actor: "operator",
+        action: "media.relayed",
+        entityType: "media_asset",
+        entityId: id,
+        payload: { objectKey, bucket: String(configuration.bucket ?? "") },
+      });
+      return (
+        this.database.setMediaAssetPublicUrl(
+          id,
+          publicUrl,
+          `bucket:${String(configuration.bucket ?? "")}`,
+        ) ?? asset
+      );
+    },
+
+    remove: async (id: string): Promise<boolean> => {
+      const path = this.database.getMediaAssetPath(id);
+      const removed = this.database.deleteMediaAsset(id);
+      if (removed && path) {
+        try {
+          rmSync(path, { force: true });
+        } catch {
+          // The row is gone either way; an undeletable file is a disk problem,
+          // not a reason to leave the library showing an asset that is not
+          // referenced any more.
+        }
+      }
+      return removed;
+    },
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* Email builder                                                       */
+  /*                                                                     */
+  /* An agent writes the HTML. Nothing here trusts it: every compile      */
+  /* sanitizes, inlines, and checks the result against what email clients */
+  /* actually do, and returns a report specific enough to fix.            */
+  /* ------------------------------------------------------------------ */
+
+  readonly email = {
+    brandKit: async (projectId: string): Promise<BrandKitWorkspace | null> =>
+      this.database.getBrandKit(projectId),
+
+    reviseBrandKit: async (
+      projectId: string,
+      input: UpdateBrandKitInput,
+      actor: string,
+    ): Promise<BrandKitWorkspace> => {
+      const workspace = this.database.appendBrandKitVersion({
+        projectId,
+        profile: input.profile as unknown as Record<string, unknown>,
+        changeSummary: input.changeSummary,
+        actor,
+      });
+      if (!workspace) {
+        throw new EmailError(
+          "email_project_not_found",
+          "Project not found",
+          404,
+        );
+      }
+      return workspace;
+    },
+
+    templates: async (projectId: string): Promise<EmailTemplate[]> =>
+      this.database.listEmailTemplates(projectId),
+
+    createTemplate: async (
+      input: CreateEmailTemplateInput,
+    ): Promise<EmailTemplate> => {
+      if (!this.database.getProject(input.projectId)) {
+        throw new EmailError(
+          "email_project_not_found",
+          "Project not found",
+          404,
+        );
+      }
+      return this.database.createEmailTemplate({
+        projectId: input.projectId,
+        name: input.name.trim(),
+        purpose: input.purpose ?? null,
+      });
+    },
+
+    template: async (id: string): Promise<EmailTemplateWorkspace | null> =>
+      this.database.getEmailTemplateWorkspace(id),
+
+    removeTemplate: async (id: string): Promise<boolean> =>
+      this.database.deleteEmailTemplate(id),
+
+    /**
+     * Compiles without storing.
+     *
+     * This is the loop an agent runs: submit HTML, read the report, fix, submit
+     * again. Only a version worth keeping becomes a revision, so twenty
+     * iterations do not become twenty rows an operator scrolls past.
+     */
+    preview: async (
+      projectId: string,
+      input: CompileEmailInput,
+    ): Promise<EmailPreview> => {
+      const engine = await this.loadEngine();
+      if (!engine.compileEmail) {
+        throw new EmailError(
+          "email_compiler_unavailable",
+          "The email compiler is unavailable in this build.",
+          503,
+        );
+      }
+      const brand = this.brandExpectations(projectId);
+      const compiled = engine.compileEmail({
+        html: input.html,
+        subject: input.subject,
+        preheader: input.preheader ?? "",
+        ...(brand ? { brand } : {}),
+      });
+      return {
+        subject: compiled.subject,
+        preheader: compiled.preheader,
+        compiledHtml: compiled.compiledHtml,
+        plainText: compiled.plainText,
+        report: compiled.report,
+      };
+    },
+
+    /** Compiles and keeps the result as an immutable revision. */
+    saveVersion: async (
+      templateId: string,
+      input: CompileEmailInput,
+      actor: string,
+    ): Promise<EmailTemplateWorkspace> => {
+      const template = this.database.getEmailTemplate(templateId);
+      if (!template) {
+        throw new EmailError(
+          "email_template_not_found",
+          "The email template was not found.",
+          404,
+        );
+      }
+      const compiled = await this.email.preview(template.projectId, input);
+      const brand = this.database.getBrandKit(template.projectId);
+      const workspace = this.database.appendEmailTemplateVersion({
+        templateId,
+        subject: compiled.subject,
+        preheader: compiled.preheader,
+        // Both are kept: the source is what a person edits next, and the
+        // compiled document is what was exported and possibly already sent.
+        sourceHtml: input.html,
+        compiledHtml: compiled.compiledHtml,
+        plainText: compiled.plainText,
+        report: compiled.report as unknown as Record<string, unknown>,
+        brandRevision: brand?.current?.revision ?? null,
+        createdBy: actor,
+      });
+      if (!workspace) {
+        throw new EmailError(
+          "email_template_not_found",
+          "The email template was not found.",
+          404,
+        );
+      }
+      return workspace;
+    },
+
+    /** A client-safe starting document built from the current brand kit. */
+    starter: async (projectId: string): Promise<string> => {
+      const engine = await this.loadEngine();
+      if (!engine.starterEmailHtml) {
+        throw new EmailError(
+          "email_compiler_unavailable",
+          "The email compiler is unavailable in this build.",
+          503,
+        );
+      }
+      const profile = this.database.getBrandKit(projectId)?.current?.profile;
+      const color = (index: number, fallback: string): string =>
+        profile?.colors?.[index]?.value ?? fallback;
+      const stack = (role: "heading" | "body", fallback: string): string =>
+        profile?.typefaces?.find((face) => face.role === role)?.stack ??
+        fallback;
+      return engine.starterEmailHtml({
+        contentWidthPx: profile?.contentWidthPx ?? 600,
+        bodyFont: stack("body", "Arial, Helvetica, sans-serif"),
+        headingFont: stack("heading", "Arial, Helvetica, sans-serif"),
+        background: color(1, "#f4f4f5"),
+        surface: color(2, "#ffffff"),
+        text: color(0, "#101828"),
+        accent: color(0, "#1570ef"),
+        companyName: profile?.footer?.companyName ?? "Your company",
+        postalAddress: profile?.footer?.postalAddress ?? "Your postal address",
+        unsubscribePlaceholder:
+          profile?.footer?.unsubscribePlaceholder ?? "{{unsubscribe_url}}",
+      });
+    },
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* Cross-channel reports                                               */
+  /*                                                                     */
+  /* The first thing this product makes that is read by someone who did   */
+  /* not run it. What it refuses to compute is as much the product as    */
+  /* what it reports — see ADR 0007.                                     */
+  /* ------------------------------------------------------------------ */
+
+  readonly marketingReports = {
+    list: async (projectId: string): Promise<MarketingReportSummary[]> =>
+      this.database.listMarketingReports(projectId),
+
+    get: async (id: string): Promise<MarketingReport | null> =>
+      this.database.getMarketingReport(id),
+
+    remove: async (id: string): Promise<boolean> =>
+      this.database.deleteMarketingReport(id),
+
+    /**
+     * Composes and stores a report for a period.
+     *
+     * The stored payload is frozen: a client received a specific document on a
+     * specific day, and Meta alone restates attributed conversions for days
+     * afterwards. Regenerating later would produce something different under
+     * the same title.
+     */
+    generate: async (input: GenerateReportInput): Promise<MarketingReport> => {
+      const project = this.database.getProject(input.projectId);
+      if (!project) {
+        throw new ReportError(
+          "report_project_not_found",
+          "Project not found",
+          404,
+        );
+      }
+      const engine = await this.loadEngine();
+      if (!engine.composeReport) {
+        throw new ReportError(
+          "report_composer_unavailable",
+          "The report composer is unavailable in this build.",
+          503,
+        );
+      }
+
+      const window = resolveReportWindow({
+        ...(input.start ? { start: input.start } : {}),
+        ...(input.end ? { end: input.end } : {}),
+        ...(input.compare === undefined
+          ? { compare: true }
+          : { compare: input.compare }),
+      });
+      const evidence = gatherEvidence(this.database, input.projectId, window);
+      const brand = this.database.getBrandKit(input.projectId)?.current ?? null;
+      const generatedAt = new Date().toISOString();
+
+      const composed = engine.composeReport({
+        projectId: input.projectId,
+        title:
+          input.title ?? `${project.name} — ${window.start} to ${window.end}`,
+        period: {
+          start: window.start,
+          end: window.end,
+          comparisonStart: window.comparisonStart,
+          comparisonEnd: window.comparisonEnd,
+          timezone: input.timezone ?? "UTC",
+        },
+        narrative: input.narrative ?? null,
+        ...evidence,
+        brandRevision: brand?.revision ?? null,
+        generatedAt,
+      });
+
+      const stored = this.database.saveMarketingReport({
+        projectId: input.projectId,
+        title: composed.title,
+        periodStart: window.start,
+        periodEnd: window.end,
+        state: reportState(composed),
+        report: composed as unknown as Record<string, unknown>,
+        brandRevision: brand?.revision ?? null,
+        generatedAt,
+      });
+      if (!stored) {
+        throw new ReportError(
+          "report_project_not_found",
+          "Project not found",
+          404,
+        );
+      }
+      this.database.recordAuditEvent({
+        actor: "runtime",
+        action: "report.generated",
+        entityType: "marketing_report",
+        entityId: stored.id,
+        payload: {
+          periodStart: window.start,
+          periodEnd: window.end,
+          state: reportState(stored),
+        },
+        at: generatedAt,
+      });
+      return stored;
+    },
+
+    /** The client-facing document, styled from the brand kit. */
+    render: async (
+      id: string,
+      format: "html" | "text",
+    ): Promise<string | null> => {
+      const report = this.database.getMarketingReport(id);
+      if (!report) return null;
+      const engine = await this.loadEngine();
+      if (format === "text") {
+        return engine.renderReportText ? engine.renderReportText(report) : null;
+      }
+      if (!engine.renderReportHtml) return null;
+      const profile = this.database.getBrandKit(report.projectId)?.current
+        ?.profile;
+      const color = (index: number, fallback: string): string =>
+        profile?.colors?.[index]?.value ?? fallback;
+      return engine.renderReportHtml(report, {
+        companyName: profile?.footer?.companyName ?? "",
+        text: color(0, "#101828"),
+        background: color(1, "#f4f4f5"),
+        surface: color(2, "#ffffff"),
+        accent: color(3, "#1570ef"),
+        muted: "#667085",
+        headingFont:
+          profile?.typefaces?.find((face) => face.role === "heading")?.stack ??
+          "Georgia, 'Times New Roman', serif",
+        bodyFont:
+          profile?.typefaces?.find((face) => face.role === "body")?.stack ??
+          "Helvetica, Arial, sans-serif",
+        // The logo only appears when it is reachable: a report is often read
+        // offline or forwarded, and a broken image is worse than none.
+        logoUrl: profile?.logoMediaId
+          ? (this.database.getMediaAsset(profile.logoMediaId)?.publicUrl ??
+            null)
+          : null,
+      });
+    },
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* Campaign links and QR codes                                         */
+  /*                                                                     */
+  /* A QR code is a URL that has been made expensive to change. The      */
+  /* tagging inside it is checked before the code is generated, because  */
+  /* afterwards the only fix is a reprint.                               */
+  /* ------------------------------------------------------------------ */
+
+  private async qrEngine() {
+    const engine = await this.loadEngine();
+    if (
+      !engine.encodeQr ||
+      !engine.buildTaggedUrl ||
+      !engine.validateCampaignLink ||
+      !engine.normalizeUtmParameters ||
+      !engine.adviseQr
+    ) {
+      throw new CampaignLinkError(
+        "qr_unavailable",
+        "QR generation is unavailable in this build.",
+        503,
+      );
+    }
+    return engine;
+  }
+
+  readonly campaignLinks = {
+    list: async (projectId: string): Promise<CampaignLink[]> =>
+      this.database.listCampaignLinks(projectId),
+
+    get: async (id: string): Promise<CampaignLink | null> =>
+      this.database.getCampaignLink(id),
+
+    /**
+     * Checks a link without saving it.
+     *
+     * The dashboard calls this on every keystroke so the operator sees the
+     * consequence of a tagging choice while it is still free to change.
+     */
+    preview: async (input: {
+      destinationUrl: string;
+      utm: UtmParameters;
+      style?: Partial<QrStyle>;
+      placement?: QrPlacement;
+      printedWidthMm?: number;
+    }): Promise<{
+      taggedUrl: string;
+      normalizedUtm: UtmParameters;
+      findings: CampaignLinkFinding[];
+      advice: QrPrintAdvice | null;
+      svg: string | null;
+    }> => {
+      const engine = await this.qrEngine();
+      const style = resolveQrStyle(input.style);
+      const placement = input.placement ?? "print-handheld";
+      const findings = engine.validateCampaignLink!({
+        destinationUrl: input.destinationUrl,
+        utm: input.utm,
+      });
+
+      let taggedUrl: string;
+      try {
+        taggedUrl = engine.buildTaggedUrl!(input.destinationUrl, input.utm);
+      } catch {
+        // An unparseable destination is already reported as a blocking
+        // finding; there is simply no URL to show alongside it.
+        return {
+          taggedUrl: "",
+          normalizedUtm: engine.normalizeUtmParameters!(input.utm),
+          findings,
+          advice: null,
+          svg: null,
+        };
+      }
+
+      let matrix: QrMatrixLike;
+      try {
+        matrix = engine.encodeQr!(taggedUrl, {
+          errorCorrection: style.errorCorrection,
+        });
+      } catch (error) {
+        findings.push({
+          rule: "qr-capacity",
+          severity: "blocking",
+          field: "destinationUrl",
+          message:
+            error instanceof Error
+              ? error.message
+              : "This content cannot be encoded as a QR code.",
+          remedy:
+            "Shorten the destination, or point the code at a short link on your own domain and put the tagging on the redirect.",
+        });
+        return {
+          taggedUrl,
+          normalizedUtm: engine.normalizeUtmParameters!(input.utm),
+          findings,
+          advice: null,
+          svg: null,
+        };
+      }
+
+      const advice = engine.adviseQr!({
+        matrix,
+        placement,
+        printedWidthMm: input.printedWidthMm ?? 30,
+        quietZone: style.quietZone,
+        darkColor: style.darkColor,
+        lightColor: style.lightColor,
+      });
+
+      return {
+        taggedUrl,
+        normalizedUtm: engine.normalizeUtmParameters!(input.utm),
+        findings: [...findings, ...advice.findings],
+        advice,
+        svg: engine.renderQrSvg
+          ? engine.renderQrSvg(matrix, {
+              quietZone: style.quietZone,
+              darkColor: style.darkColor,
+              lightColor: style.lightColor,
+              transparent: style.transparent,
+            })
+          : null,
+      };
+    },
+
+    create: async (
+      projectId: string,
+      input: CreateCampaignLinkInput,
+    ): Promise<CampaignLink> => {
+      const engine = await this.qrEngine();
+      if (!this.database.getProject(projectId)) {
+        throw new CampaignLinkError(
+          "campaign_link_project_not_found",
+          "Project not found",
+          404,
+        );
+      }
+
+      const style = resolveQrStyle(input.style);
+      const placement = input.placement ?? "print-handheld";
+      const findings = engine.validateCampaignLink!({
+        destinationUrl: input.destinationUrl,
+        utm: input.utm,
+      });
+
+      // Blocking findings are refused rather than stored. Everything else in
+      // this product records a problem and carries on, but a code is printed
+      // once — recording that the tagging was broken is no use to anyone
+      // holding the leaflet.
+      const blocking = findings.filter(
+        (finding) => finding.severity === "blocking",
+      );
+      if (blocking.length > 0) {
+        throw new CampaignLinkError(
+          "campaign_link_invalid",
+          blocking[0]!.message,
+          422,
+          blocking,
+        );
+      }
+
+      const taggedUrl = engine.buildTaggedUrl!(input.destinationUrl, input.utm);
+      const existing = this.database.findCampaignLinkByTaggedUrl(
+        projectId,
+        taggedUrl,
+      );
+      if (existing) {
+        throw new CampaignLinkError(
+          "campaign_link_duplicate",
+          `"${existing.label}" already uses this exact tagging. Two links tagged identically are one row in every report, so neither could be attributed to what it was printed on.`,
+          409,
+        );
+      }
+
+      const matrix = engine.encodeQr!(taggedUrl, {
+        errorCorrection: style.errorCorrection,
+      });
+      const advice = engine.adviseQr!({
+        matrix,
+        placement,
+        printedWidthMm: input.printedWidthMm ?? 30,
+        quietZone: style.quietZone,
+        darkColor: style.darkColor,
+        lightColor: style.lightColor,
+      });
+
+      const saved = this.database.saveCampaignLink({
+        projectId,
+        label: input.label,
+        destinationUrl: input.destinationUrl,
+        utm: input.utm,
+        taggedUrl,
+        placement,
+        style,
+        printedWidthMm: input.printedWidthMm ?? null,
+        findings: [...findings, ...advice.findings],
+        now: new Date().toISOString(),
+      });
+      if (!saved) {
+        throw new CampaignLinkError(
+          "campaign_link_project_not_found",
+          "Project not found",
+          404,
+        );
+      }
+      this.database.recordAuditEvent({
+        actor: "runtime",
+        action: "campaign_link.created",
+        entityType: "campaign_link",
+        entityId: saved.id,
+        payload: { taggedUrl, placement },
+        at: saved.createdAt,
+      });
+      return saved;
+    },
+
+    update: async (
+      id: string,
+      patch: {
+        label?: string;
+        placement?: QrPlacement;
+        style?: Partial<QrStyle>;
+        printedWidthMm?: number | null;
+      },
+    ): Promise<CampaignLink | null> => {
+      const existing = this.database.getCampaignLink(id);
+      if (!existing) return null;
+      return this.database.updateCampaignLink(
+        id,
+        {
+          ...(patch.label === undefined ? {} : { label: patch.label }),
+          ...(patch.placement === undefined
+            ? {}
+            : { placement: patch.placement }),
+          ...(patch.style === undefined
+            ? {}
+            : { style: resolveQrStyle({ ...existing.style, ...patch.style }) }),
+          ...(patch.printedWidthMm === undefined
+            ? {}
+            : { printedWidthMm: patch.printedWidthMm }),
+        },
+        new Date().toISOString(),
+      );
+    },
+
+    markPrinted: async (id: string): Promise<CampaignLink | null> =>
+      this.database.markCampaignLinkPrinted(id, new Date().toISOString()),
+
+    remove: async (id: string): Promise<boolean> =>
+      this.database.deleteCampaignLink(id),
+
+    /** The code itself, in whichever format the caller is downloading. */
+    render: async (
+      id: string,
+      format: "svg" | "png",
+      scale = 8,
+    ): Promise<{ body: string | Uint8Array; contentType: string } | null> => {
+      const link = this.database.getCampaignLink(id);
+      if (!link) return null;
+      const engine = await this.qrEngine();
+      const matrix = engine.encodeQr!(link.taggedUrl, {
+        errorCorrection: link.style.errorCorrection,
+      });
+      const options = {
+        quietZone: link.style.quietZone,
+        darkColor: link.style.darkColor,
+        lightColor: link.style.lightColor,
+        transparent: link.style.transparent,
+      };
+      if (format === "png") {
+        if (!engine.renderQrPng) return null;
+        return {
+          body: engine.renderQrPng(matrix, { ...options, scale }),
+          contentType: "image/png",
+        };
+      }
+      if (!engine.renderQrSvg) return null;
+      return {
+        body: engine.renderQrSvg(matrix, options),
+        contentType: "image/svg+xml",
+      };
+    },
+
+    /**
+     * Config for a short link the operator hosts on their own domain.
+     *
+     * This is the honest form of a "dynamic" QR code: the redirect lives
+     * somewhere they already control, so nothing here can stop resolving it.
+     */
+    redirectConfig: async (input: {
+      projectId: string;
+      target: RedirectTarget;
+      shortHost?: string | null;
+      linkIds?: string[];
+      expiresAt?: string | null;
+      fallbackUrl?: string | null;
+    }): Promise<{
+      filename: string;
+      contents: string;
+      enforcesExpiry: boolean;
+      notes: string[];
+      findings: CampaignLinkFinding[];
+    }> => {
+      const engine = await this.loadEngine();
+      if (!engine.renderRedirectConfig || !engine.shortLinkPath) {
+        throw new CampaignLinkError(
+          "qr_unavailable",
+          "Redirect configuration is unavailable in this build.",
+          503,
+        );
+      }
+      const all = this.database.listCampaignLinks(input.projectId);
+      const selected = input.linkIds?.length
+        ? all.filter((link) => input.linkIds!.includes(link.id))
+        : all;
+      const routes = selected.map((link) => ({
+        path: engine.shortLinkPath!(link.label),
+        target: link.taggedUrl,
+        expiresAt: input.expiresAt ?? null,
+        fallbackUrl: input.fallbackUrl ?? null,
+      }));
+      const config = engine.renderRedirectConfig(input.target, routes);
+      const findings = engine.adviseRedirect
+        ? engine.adviseRedirect({
+            target: input.target,
+            routes,
+            shortHost: input.shortHost ?? null,
+          })
+        : [];
+      return {
+        filename: config.filename,
+        contents: config.contents,
+        enforcesExpiry: config.enforcesExpiry,
+        notes: config.notes,
+        findings,
+      };
     },
   };
 
@@ -3911,6 +6224,39 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
           }
         },
       ],
+      [
+        // One job per intent, so a Telegram post that succeeds and an X post
+        // that is rate limited settle independently. A single fan-out job
+        // would have to retry the whole set and would resend the one that
+        // already went out.
+        "publish.intent",
+        async (payload) => {
+          const intentId =
+            typeof payload.intentId === "string" ? payload.intentId : null;
+          if (!intentId)
+            throw new Error("publish.intent job is missing intentId");
+          const outcome = await runPublishAttempt({
+            database: this.database,
+            intentId,
+            executor: this.publishExecutor(),
+          });
+          this.database.recordAuditEvent({
+            actor: "scheduler",
+            action: `publish.${outcome.state}`,
+            entityType: "publish_intent",
+            entityId: intentId,
+            payload: {
+              state: outcome.state,
+              ...(outcome.record?.providerId
+                ? { providerId: outcome.record.providerId }
+                : {}),
+            },
+          });
+          // A failed send is recorded, not thrown: the durable worker would
+          // otherwise retry it on its own schedule, and "retry a post" is a
+          // decision the operator makes after reading what went wrong.
+        },
+      ],
     ]);
     this.jobWorker = new DurableJobWorker({
       database: this.database,
@@ -4025,13 +6371,649 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
     }
   }
 
+  /**
+   * The brand facts the validator checks against.
+   *
+   * Returns undefined when no brand kit exists, which disables the brand
+   * conformance rules rather than inventing a palette to measure against.
+   */
+  private brandExpectations(projectId: string):
+    | {
+        colors: string[];
+        fontStacks: string[];
+        contentWidthPx: number;
+        unsubscribePlaceholder: string;
+        postalAddress: string;
+      }
+    | undefined {
+    const profile = this.database.getBrandKit(projectId)?.current?.profile;
+    if (!profile) return undefined;
+    return {
+      colors: (profile.colors ?? []).map((color) => color.value.toLowerCase()),
+      fontStacks: (profile.typefaces ?? []).map((face) =>
+        face.stack.toLowerCase(),
+      ),
+      contentWidthPx: profile.contentWidthPx ?? 600,
+      unsubscribePlaceholder: profile.footer?.unsubscribePlaceholder ?? "",
+      postalAddress: profile.footer?.postalAddress ?? "",
+    };
+  }
+
+  /**
+   * Builds one calendar row.
+   *
+   * Returns null for intents that target an account that no longer exists,
+   * rather than rendering a cell that cannot be opened.
+   */
+  private calendarEntry(intent: PublishIntent): CalendarEntry | null {
+    const cabinet = this.database.getChannelAccount(intent.channelAccountId);
+    if (!cabinet) return null;
+    const platform = platformFor(intent, cabinet.provider);
+    if (!platform) return null;
+    const deliverable = this.database.getCampaignDeliverable(
+      intent.deliverableId,
+    );
+    const brief = deliverable
+      ? this.database.getCampaignBrief(deliverable.briefId)
+      : null;
+    const body =
+      typeof (intent.payload as { body?: unknown }).body === "string"
+        ? (intent.payload as { body: string }).body
+        : (deliverable?.body ?? "");
+    const attachments = deliverable
+      ? this.database.listDeliverableMedia(deliverable.id).length
+      : 0;
+    const records = this.database.listPublishRecords({
+      projectId: intent.projectId,
+      intentId: intent.id,
+      limit: 1,
+    });
+
+    return {
+      intentId: intent.id,
+      deliverableId: intent.deliverableId,
+      briefId: deliverable?.briefId ?? "",
+      briefTitle: brief?.title ?? "",
+      channelAccountId: intent.channelAccountId,
+      platform,
+      accountName: cabinet.displayName,
+      state: intent.state,
+      scheduledAt: intent.scheduledAt,
+      timezone: intent.timezone,
+      preview: body.slice(0, 400),
+      attachmentCount: attachments,
+      record: records[0] ?? null,
+    };
+  }
+
+  /**
+   * Resolves an intent into a real send.
+   *
+   * Everything platform-specific lives behind the publisher interface; what
+   * this does is turn stored state — a credential, a destination, a set of
+   * media rows — into the arguments a publisher takes, and decide which
+   * attachments can travel as bytes and which need a URL.
+   */
+  private publishExecutor(): PublishExecutor {
+    return {
+      publish: async ({ platform, externalId, intent, signal }) => {
+        const engine = await this.loadEngine();
+        const deliverable = this.database.getCampaignDeliverable(
+          intent.deliverableId,
+        );
+        const payload = intent.payload as {
+          body?: unknown;
+          linkUrl?: unknown;
+        };
+        const body =
+          typeof payload.body === "string"
+            ? payload.body
+            : (deliverable?.body ?? "");
+        const linkUrl =
+          typeof payload.linkUrl === "string"
+            ? payload.linkUrl
+            : (deliverable?.destinationUrl ?? null);
+
+        const assets = deliverable
+          ? this.database.listDeliverableMedia(deliverable.id)
+          : [];
+        const wantsBytes = platform !== "instagram";
+        const attachments = [];
+        for (const asset of assets) {
+          attachments.push({
+            mediaType: asset.mediaType,
+            kind: asset.kind,
+            filename: asset.filename,
+            // Bytes only where the platform takes them. Reading a 15MB video
+            // off disk to send a URL would be pure waste, and handing bytes to
+            // Instagram would silently do nothing useful.
+            ...(wantsBytes
+              ? { bytes: (await this.media.read(asset.id)) ?? undefined }
+              : {}),
+            ...(asset.publicUrl ? { publicUrl: asset.publicUrl } : {}),
+          });
+        }
+
+        const publisher = await this.socialPublisher(platform, intent, engine);
+        return publisher.publish({
+          externalId,
+          body,
+          attachments,
+          linkUrl,
+          ...(signal ? { signal } : {}),
+        });
+      },
+    };
+  }
+
+  /** Constructs the publisher for one platform with its live credential. */
+  private async socialPublisher(
+    platform: SocialPlatform,
+    intent: PublishIntent,
+    engine: EngineModule,
+  ): Promise<{
+    publish(request: {
+      externalId: string;
+      body: string;
+      attachments: readonly unknown[];
+      linkUrl?: string | null;
+      signal?: AbortSignal;
+    }): Promise<{
+      providerId: string;
+      permalink: string | null;
+      request: Record<string, unknown>;
+    }>;
+  }> {
+    const cabinet = this.database.getChannelAccount(intent.channelAccountId);
+    if (!cabinet) {
+      throw new ChannelError(
+        "cabinet_not_found",
+        "The destination account was removed.",
+        404,
+      );
+    }
+
+    if (platform === "telegram") {
+      if (!engine.TelegramPublisher) {
+        throw new ChannelError(
+          "cabinet_provider_unsupported",
+          "The Telegram publisher is unavailable in this build.",
+          503,
+        );
+      }
+      const credentials = await this.pastedCredential(
+        "telegram",
+        cabinet.account,
+      );
+      return new engine.TelegramPublisher({
+        botToken: String(credentials.botToken ?? ""),
+        ...(this.integrationFetch
+          ? { providerFetch: this.integrationFetch }
+          : {}),
+      });
+    }
+
+    if (platform === "x") {
+      if (!engine.XPublisher) {
+        throw new ChannelError(
+          "cabinet_provider_unsupported",
+          "The X publisher is unavailable in this build.",
+          503,
+        );
+      }
+      const accessToken = await this.readOrRefreshXCredential(cabinet.account);
+      return new engine.XPublisher({
+        accessToken,
+        username: cabinet.displayName.replace(/^@/, ""),
+        ...(this.integrationFetch
+          ? { providerFetch: this.integrationFetch }
+          : {}),
+      });
+    }
+
+    const meta = await this.metaCredential(cabinet.account);
+    if (platform === "facebook-page") {
+      if (!engine.FacebookPagePublisher) {
+        throw new ChannelError(
+          "cabinet_provider_unsupported",
+          "The Facebook publisher is unavailable in this build.",
+          503,
+        );
+      }
+      return new engine.FacebookPagePublisher({
+        accessToken: meta.accessToken,
+        ...(meta.graphVersion ? { graphVersion: meta.graphVersion } : {}),
+        ...(this.integrationFetch
+          ? { providerFetch: this.integrationFetch }
+          : {}),
+      });
+    }
+    if (!engine.InstagramPublisher) {
+      throw new ChannelError(
+        "cabinet_provider_unsupported",
+        "The Instagram publisher is unavailable in this build.",
+        503,
+      );
+    }
+    return new engine.InstagramPublisher({
+      accessToken: meta.accessToken,
+      ...(meta.graphVersion ? { graphVersion: meta.graphVersion } : {}),
+      ...(this.integrationFetch
+        ? { providerFetch: this.integrationFetch }
+        : {}),
+    });
+  }
+
+  /** Reads a pasted-credential connector's stored JSON payload. */
+  private async pastedCredential(
+    provider: string,
+    account = "default",
+  ): Promise<Record<string, unknown>> {
+    const integration = this.database.getIntegration(provider, account);
+    if (!integration?.secretRef) {
+      throw new ChannelError(
+        "credential_missing",
+        `${provider} is not connected.`,
+        422,
+      );
+    }
+    const credentials = await this.readConnectorCredentials(
+      provider as ConnectorId,
+      integration,
+    );
+    if (!credentials) {
+      throw new ChannelError(
+        "credential_missing",
+        `The ${provider} credential could not be read from the local vault.`,
+        422,
+      );
+    }
+    return credentials;
+  }
+
+  /**
+   * Reads X's access token, refreshing when it is close to expiry.
+   *
+   * X rotates the refresh token on every refresh and kills the old one, so the
+   * new pair is persisted before the access token is handed out. A crash
+   * between those two steps would otherwise leave a connection that cannot be
+   * refreshed and has to be reconnected by hand.
+   */
+  private async readOrRefreshXCredential(account = "default"): Promise<string> {
+    const integration = this.database.getIntegration("x", account);
+    if (!integration?.secretRef) {
+      throw new ChannelError("credential_missing", "X is not connected.", 422);
+    }
+    const ref = this.credentialReference(integration.secretRef, "x");
+    if (!ref) {
+      throw new ChannelError(
+        "credential_missing",
+        "The stored X credential reference is invalid. Reconnect the account.",
+        422,
+      );
+    }
+    const bytes = await this.credentialStore.get(ref);
+    if (!bytes) {
+      throw new ChannelError(
+        "credential_missing",
+        "The X credential is missing from the local vault. Reconnect the account.",
+        422,
+      );
+    }
+    let credential: StoredOAuthCredential;
+    try {
+      credential = decodeOAuthCredential(bytes);
+    } finally {
+      bytes.fill(0);
+    }
+    if (Date.parse(credential.expiresAt) - Date.now() > 5 * 60_000) {
+      return credential.accessToken;
+    }
+
+    const clientId = integration.configuration?.clientId;
+    if (typeof clientId !== "string" || !clientId) {
+      this.updateIntegrationStatus("x", "expired", credential.expiresAt);
+      throw new ChannelError(
+        "credential_missing",
+        "The X token expired and no client ID is configured to refresh it. Reconnect the account.",
+        422,
+      );
+    }
+    const refreshed = await refreshXOAuthToken({
+      clientId,
+      refreshToken: credential.refreshToken,
+      ...(this.oauthFetch ? { fetchImpl: this.oauthFetch } : {}),
+    });
+    const encoded = encodeOAuthCredential({
+      version: 1,
+      provider: "x",
+      accessToken: refreshed.accessToken,
+      refreshToken: refreshed.refreshToken,
+      tokenType: refreshed.tokenType,
+      expiresAt: refreshed.expiresAt,
+      scopes: refreshed.scopes,
+    });
+    try {
+      // Persist first. The old refresh token is already dead at this point.
+      await this.credentialStore.put(ref, encoded);
+    } finally {
+      encoded.fill(0);
+    }
+    this.updateIntegrationStatus("x", "connected", refreshed.expiresAt);
+    return refreshed.accessToken;
+  }
+
+  /**
+   * Asks the provider when the credential it was just given stops working.
+   *
+   * Best-effort by design: a token that saved fine but whose expiry could not
+   * be read stays usable with a null expiry, because refusing a working
+   * credential over a missing metadata field would be the worse failure. The
+   * granted scopes are recorded from the provider's answer rather than from
+   * the manifest, so the connection lists what the token can actually do.
+   */
+  private async recordTokenExpiry(
+    integration: Integration,
+    account: string,
+  ): Promise<Integration> {
+    if (integration.provider !== "meta-ads") return integration;
+    try {
+      const engine = await this.loadEngine();
+      if (!engine.MetaAdsClient) return integration;
+      const credential = await this.metaCredential(account);
+      const client = new engine.MetaAdsClient({
+        accessToken: credential.accessToken,
+        ...(credential.graphVersion
+          ? { graphVersion: credential.graphVersion }
+          : {}),
+        ...(this.integrationFetch
+          ? { providerFetch: this.integrationFetch }
+          : {}),
+      });
+      if (!client.debugToken) return integration;
+      const debug = await client.debugToken();
+      const next: Integration = {
+        ...integration,
+        expiresAt: debug.expiresAt,
+        scopes: debug.scopes.length > 0 ? debug.scopes : integration.scopes,
+        status:
+          debug.expiresAt !== null && Date.parse(debug.expiresAt) <= Date.now()
+            ? "expired"
+            : integration.status,
+      };
+      this.database.upsertIntegration(next);
+      return next;
+    } catch {
+      // Never surface why: this path holds a freshly pasted credential, and a
+      // provider error message here is the most likely place for one to leak.
+      return integration;
+    }
+  }
+
+  /**
+   * Reads the pasted Meta System User token and the connection's settings.
+   *
+   * There is no refresh path, and that is the honest consequence of the auth
+   * choice: Meta's exchange needs an app secret a desktop install cannot hold
+   * safely, so the operator mints a long-lived token themselves and rotates it
+   * before it expires. What the product owes them in return is a visible
+   * expiry and a clear error when the deadline passes, rather than a silent
+   * failure months later.
+   */
+  private async metaCredential(account = "default"): Promise<{
+    accessToken: string;
+    graphVersion?: string;
+    businessId?: string;
+  }> {
+    const integration = this.database.getIntegration("meta-ads", account);
+    if (!integration?.secretRef) {
+      throw new ChannelError(
+        "credential_missing",
+        "Meta Ads is not connected. Paste a System User access token in Integrations.",
+        422,
+      );
+    }
+    if (integration.status === "expired") {
+      throw new ChannelError(
+        "credential_missing",
+        "The Meta access token expired. Generate a new System User token and paste it in Integrations.",
+        422,
+      );
+    }
+    const ref = this.credentialReference(integration.secretRef, "meta-ads");
+    if (!ref) {
+      throw new ChannelError(
+        "credential_missing",
+        "The stored Meta credential reference is invalid. Reconnect Meta Ads.",
+        422,
+      );
+    }
+    const bytes = await this.credentialStore.get(ref);
+    if (!bytes) {
+      throw new ChannelError(
+        "credential_missing",
+        "The Meta credential is missing from the local vault. Reconnect Meta Ads.",
+        422,
+      );
+    }
+    let accessToken: string;
+    try {
+      const parsed = JSON.parse(Buffer.from(bytes).toString("utf8")) as {
+        accessToken?: unknown;
+      };
+      if (typeof parsed.accessToken !== "string" || !parsed.accessToken) {
+        throw new Error("missing access token");
+      }
+      accessToken = parsed.accessToken;
+    } catch {
+      throw new ChannelError(
+        "credential_missing",
+        "The stored Meta credential could not be read. Reconnect Meta Ads.",
+        422,
+      );
+    } finally {
+      bytes.fill(0);
+    }
+    const configuration = integration.configuration ?? {};
+    return {
+      accessToken,
+      ...(typeof configuration.graphVersion === "string"
+        ? { graphVersion: configuration.graphVersion }
+        : {}),
+      ...(typeof configuration.businessId === "string"
+        ? { businessId: configuration.businessId }
+        : {}),
+    };
+  }
+
+  /**
+   * Google Ads accounts this credential can reach.
+   *
+   * Google answers `listAccessibleCustomers` with ids and nothing else, so
+   * each one is read individually for its name and currency. Manager accounts
+   * are returned and marked rather than filtered out: an operator looking at
+   * the list needs to see the manager they signed in through, and a manager
+   * mistaken for a spending account produces empty reports rather than an
+   * error.
+   */
+  private async discoverGoogleAdsAccounts(
+    projectId: string,
+    account: string,
+  ): Promise<DiscoveredChannelAccount[]> {
+    const credential = await this.googleAdsCredential(account);
+    const engine = await this.loadEngine();
+    if (!engine.GoogleAdsClient) {
+      throw new ChannelError(
+        "cabinet_provider_unsupported",
+        "The Google Ads connector is unavailable in this build.",
+        503,
+      );
+    }
+
+    const probe = new engine.GoogleAdsClient({
+      accessToken: credential.accessToken,
+      developerToken: credential.developerToken,
+      // Any reachable id serves for the listing call; the manager is the one
+      // the operator signed in through when there is one.
+      customerId: credential.loginCustomerId ?? "0000000000",
+      loginCustomerId: credential.loginCustomerId,
+      ...(credential.apiVersion ? { apiVersion: credential.apiVersion } : {}),
+      ...(this.integrationFetch
+        ? { providerFetch: this.integrationFetch }
+        : {}),
+    });
+    const ids = await probe.accessibleCustomers();
+
+    const linked = new Set(
+      this.database
+        .listChannelAccounts(projectId, { includeArchived: true })
+        .filter(
+          (cabinet) =>
+            cabinet.provider === "google-ads" && cabinet.account === account,
+        )
+        .map((cabinet) => cabinet.externalId),
+    );
+
+    const discovered: DiscoveredChannelAccount[] = [];
+    for (const id of ids) {
+      let name = id;
+      let currency: string | null = null;
+      let status: string | null = null;
+      try {
+        const client = new engine.GoogleAdsClient({
+          accessToken: credential.accessToken,
+          developerToken: credential.developerToken,
+          customerId: id,
+          loginCustomerId: credential.loginCustomerId,
+          ...(credential.apiVersion
+            ? { apiVersion: credential.apiVersion }
+            : {}),
+          ...(this.integrationFetch
+            ? { providerFetch: this.integrationFetch }
+            : {}),
+        });
+        const record = await client.customer();
+        name = record.descriptiveName || id;
+        currency = record.currencyCode;
+        status = record.manager
+          ? "MANAGER"
+          : record.testAccount
+            ? "TEST_ACCOUNT"
+            : "ENABLED";
+      } catch {
+        // One unreadable account never hides the rest. An agency login often
+        // reaches accounts it has since lost permission on, and refusing the
+        // whole list because of one of them helps nobody.
+        status = "UNREADABLE";
+      }
+      discovered.push({
+        provider: "google-ads",
+        account,
+        kind: "ads" as const,
+        externalId: id,
+        displayName: name,
+        currency,
+        status,
+        linked: linked.has(id),
+      });
+    }
+    return discovered;
+  }
+
+  /**
+   * The two secrets a Google Ads read needs.
+   *
+   * They are stored separately on purpose. The OAuth token rotates every hour
+   * and is refreshed by machinery this product already owns; the developer
+   * token is issued by hand, belongs to the operator's manager account, and
+   * changes approximately never. Folding a long-lived secret into a record
+   * that is rewritten on every refresh is how one gets lost.
+   */
+  private async googleAdsCredential(account = "default"): Promise<{
+    accessToken: string;
+    developerToken: string;
+    loginCustomerId: string | null;
+    apiVersion?: string;
+  }> {
+    const integration = this.database.getIntegration("google-ads", account);
+    if (!integration?.secretRef) {
+      throw new ChannelError(
+        "credential_missing",
+        "Google Ads is not connected. Sign in with Google and add your developer token in Integrations.",
+        422,
+      );
+    }
+    if (integration.status === "expired") {
+      throw new ChannelError(
+        "credential_missing",
+        "The Google sign-in for Google Ads expired. Reconnect it in Integrations.",
+        422,
+      );
+    }
+
+    const oauth = await this.readOrRefreshGoogleCredential(
+      "google-ads",
+      integration.secretRef,
+    );
+
+    const developerRef: CredentialRef = {
+      provider: "google-ads",
+      account,
+      kind: "developer-token",
+    };
+    const bytes = await this.credentialStore.get(developerRef);
+    if (!bytes) {
+      throw new ChannelError(
+        "credential_missing",
+        "No Google Ads developer token is stored. Google issues one in the API Center of a manager account; this product ships none, because a shared token would make every install one identity.",
+        422,
+      );
+    }
+    let developerToken: string;
+    try {
+      const parsed = JSON.parse(Buffer.from(bytes).toString("utf8")) as {
+        developerToken?: unknown;
+      };
+      if (
+        typeof parsed.developerToken !== "string" ||
+        !parsed.developerToken.trim()
+      ) {
+        throw new Error("missing developer token");
+      }
+      developerToken = parsed.developerToken.trim();
+    } catch {
+      throw new ChannelError(
+        "credential_missing",
+        "The stored Google Ads developer token could not be read. Re-enter it in Integrations.",
+        422,
+      );
+    } finally {
+      bytes.fill(0);
+    }
+
+    const configuration = integration.configuration ?? {};
+    const loginCustomerId =
+      typeof configuration.loginCustomerId === "string"
+        ? configuration.loginCustomerId
+        : null;
+    return {
+      accessToken: oauth.accessToken,
+      developerToken,
+      loginCustomerId,
+      ...(typeof configuration.apiVersion === "string"
+        ? { apiVersion: configuration.apiVersion }
+        : {}),
+    };
+  }
+
   private async readConnectorCredentials(
     provider: ConnectorId,
     integration: Integration,
   ): Promise<Record<string, unknown> | undefined> {
     if (
       provider === "google-search-console" ||
-      provider === "google-analytics-4"
+      provider === "google-analytics-4" ||
+      provider === "google-ads"
     ) {
       if (!integration.secretRef) return undefined;
       return this.readOrRefreshGoogleCredential(
@@ -4055,7 +7037,7 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
   }
 
   private googleTokenManager(
-    provider: "google-search-console" | "google-analytics-4",
+    provider: GoogleOAuthProvider,
     exactValues: Set<string>,
   ):
     | { refresh(): Promise<Pick<StoredOAuthCredential, "accessToken">> }
@@ -4078,7 +7060,7 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
   }
 
   private async readOrRefreshGoogleCredential(
-    provider: "google-search-console" | "google-analytics-4",
+    provider: GoogleOAuthProvider,
     secretRef: string,
   ): Promise<Pick<StoredOAuthCredential, "accessToken">> {
     const existing = this.tokenRefreshes.get(provider);
@@ -4480,6 +7462,15 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
         );
         return;
       }
+      // `runs.start` already refused an audit without a website, but the site
+      // can be detached between queueing and execution. Say so instead of
+      // reaching the crawler with a null start URL.
+      if (project.canonicalUrl === null) {
+        throw new WorkspaceWebsiteError(
+          "This workspace no longer has a website, so the queued audit has nothing to crawl.",
+        );
+      }
+      const auditStartUrl = project.canonicalUrl;
       const pageSpeedIntegration = this.database
         .listIntegrations()
         .find((candidate) => candidate.provider === "pagespeed-insights");
@@ -4556,7 +7547,7 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
         }
       }
       const allowedPrivateHosts = privateHostAllowlist(options);
-      const exactUrls = exactAuditUrls(options, project.canonicalUrl);
+      const exactUrls = exactAuditUrls(options, auditStartUrl);
       const extractionRevision = options.extractionRuleRevision;
       const extractionRuleSet =
         extractionRevision === null
@@ -4607,7 +7598,7 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
             this.database.getProjectContext(project.id)?.current?.profile
               .brandProfiles ?? [];
           const outcome = await engine.crawl({
-            startUrl: project.canonicalUrl,
+            startUrl: auditStartUrl,
             projectRoot,
             ...(brandProfiles.length > 0 ? { brandProfiles } : {}),
             renderMode: options.renderMode === "js" ? "js" : "static",
@@ -4766,7 +7757,7 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
       const performanceData = normalizePerformanceData({
         runId,
         projectId: project.id,
-        projectCanonicalUrl: project.canonicalUrl,
+        projectCanonicalUrl: auditStartUrl,
         report,
       });
       this.database.replacePerformanceData({
@@ -4774,11 +7765,7 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
         projectId: project.id,
         ...performanceData,
       });
-      const actions = normalizeActions(
-        project.id,
-        project.canonicalUrl,
-        report,
-      );
+      const actions = normalizeActions(project.id, auditStartUrl, report);
       this.database.upsertActions(actions);
       this.database.replaceActionIssueLinks(
         runId,
@@ -4861,7 +7848,8 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
 
   private async executeResearchWorkflow(
     run: Run,
-    canonicalUrl: string,
+    /** `null` when the workspace has no website; only `compare` requires one. */
+    canonicalUrl: string | null,
     projectRoot: string,
     options: Record<string, unknown>,
     engine: EngineModule,
@@ -4870,6 +7858,11 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
   ): Promise<void> {
     const moduleId = `research-${run.workflowId}`;
     const workflow = workflowById(this.workflows, run.workflowId);
+    // Paid findings are the one research workflow that also produces issues.
+    // They are collected here and persisted after the plan completes, so the
+    // ad rules land in the same queue, with the same scoring, adjudication and
+    // verification, as everything the crawler finds.
+    let adsIssues: LegacyIssue[] = [];
     const researchModule: SeoModule<unknown, unknown> = {
       kind: "leaf",
       id: moduleId,
@@ -4893,8 +7886,15 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
             throw new Error("compare requires competitorUrl or competitorUrls");
           if (!engine.compareSites)
             throw new Error("The core comparison workflow is unavailable");
+          // Comparison is "us against them"; without a website there is no us.
+          if (canonicalUrl === null) {
+            throw new WorkspaceWebsiteError(
+              "This workspace no longer has a website to compare against its competitors.",
+            );
+          }
+          const comparisonUrl = canonicalUrl;
           output = await engine.compareSites({
-            urls: [canonicalUrl, ...competitorUrls],
+            urls: [comparisonUrl, ...competitorUrls],
             projectRoot,
             maxUrls: typeof options.maxUrls === "number" ? options.maxUrls : 30,
             renderMode: options.renderMode === "js" ? "js" : "static",
@@ -4908,7 +7908,7 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
           // reported as unavailable rather than as a zero.
           if (engine.collectCadenceForTarget) {
             const cadence = [];
-            for (const target of [canonicalUrl, ...competitorUrls]) {
+            for (const target of [comparisonUrl, ...competitorUrls]) {
               if (signal?.aborted) break;
               try {
                 cadence.push(
@@ -4942,7 +7942,7 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
             try {
               (output as { contentGap?: unknown }).contentGap =
                 await engine.runContentGap({
-                  targetUrl: canonicalUrl,
+                  targetUrl: comparisonUrl,
                   referenceUrls: competitorUrls,
                   topN: 20,
                   timeoutMs: 30_000,
@@ -4953,7 +7953,7 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
                 });
             } catch (error) {
               (output as { contentGap?: unknown }).contentGap = {
-                targetUrl: canonicalUrl,
+                targetUrl: comparisonUrl,
                 referenceUrls: competitorUrls,
                 missing: [],
                 perReference: [],
@@ -5050,10 +8050,21 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
                   typeof target === "string" && target.trim().length > 0,
               )
             : [];
-          const targetUrls = [canonicalUrl, ...requestedTargets]
+          // The workspace's own site is a convenience target, not a required
+          // one. OSINT researches whatever public targets it was handed, so a
+          // workspace with no website still works — it just has to name them.
+          const targetUrls = [
+            ...(canonicalUrl === null ? [] : [canonicalUrl]),
+            ...requestedTargets,
+          ]
             .map((target) => target.trim())
             .filter((target, index, all) => all.indexOf(target) === index)
             .slice(0, 5);
+          if (targetUrls.length === 0) {
+            throw new WorkspaceWebsiteError(
+              "OSINT research needs at least one target. This workspace has no website, so supply the public URLs to research.",
+            );
+          }
           output = await engine.runOsintResearch({
             targetUrls,
             maxUrls: typeof options.maxUrls === "number" ? options.maxUrls : 12,
@@ -5066,6 +8077,41 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
           partial =
             (output as { coverage?: { state?: string } }).coverage?.state !==
             "available";
+        } else if (run.workflowId === "marketing-report") {
+          const stored = await this.marketingReports.generate({
+            projectId: run.projectId,
+            ...(typeof options.title === "string"
+              ? { title: options.title }
+              : {}),
+            ...(typeof options.start === "string"
+              ? { start: options.start }
+              : {}),
+            ...(typeof options.end === "string" ? { end: options.end } : {}),
+            ...(options.compare === false
+              ? { compare: false }
+              : { compare: true }),
+            ...(typeof options.timezone === "string"
+              ? { timezone: options.timezone }
+              : {}),
+          });
+          output = {
+            reportId: stored.id,
+            title: stored.title,
+            periodStart: stored.period.start,
+            periodEnd: stored.period.end,
+            state: reportState(stored),
+            sections: stored.sections,
+            coverageGaps: stored.coverageGaps,
+          };
+          // A report over a period with unreadable sources is still a report
+          // worth having — it says which sources were unreadable. Partial
+          // reflects the coverage, not a failure to produce the document.
+          partial = reportState(stored) !== "available";
+        } else if (run.workflowId === "ads-audit") {
+          const result = await this.runAdsAudit(run, options, engine, signal);
+          output = result.output;
+          partial = result.partial;
+          adsIssues = result.issues;
         } else {
           throw new Error(`Unknown workflow '${run.workflowId}'`);
         }
@@ -5121,18 +8167,490 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
     // results without knowing private artifact names.
     this.saveJsonArtifact(run.id, "report.json", output, exactSecretValues);
     const status: Run["status"] = partial ? "partial" : "succeeded";
+    // Paid findings join the shared queue here rather than living in a
+    // parallel "ads issues" list. A marketer has one budget of attention, and
+    // an overspending campaign should compete for it against a broken
+    // canonical tag in one ranked place.
+    const issueCount =
+      run.workflowId === "ads-audit"
+        ? this.persistAdsFindings(run, adsIssues, !partial)
+        : 0;
     this.database.updateRun(run.id, {
       status,
       completedAt: new Date().toISOString(),
       progress: 1,
-      issueCount: 0,
+      issueCount,
       error: null,
     });
     this.emitRun(run.id, "run.completed", {
       status,
       workflowId: run.workflowId,
       progress: 1,
+      ...(issueCount > 0 ? { issueCount } : {}),
     });
+  }
+
+  /**
+   * Syncs every linked ad cabinet and runs the paid-media rules over it.
+   *
+   * One failing cabinet never fails the run. An agency workspace holds several
+   * clients' cabinets, and refusing to report on four of them because a fifth
+   * lost its permissions would make the whole surface hostage to the least
+   * healthy connection. Each cabinet reports its own state instead.
+   */
+  private async runAdsAudit(
+    run: Run,
+    options: Record<string, unknown>,
+    engine: EngineModule,
+    signal: AbortSignal,
+  ): Promise<{
+    output: unknown;
+    partial: boolean;
+    issues: LegacyIssue[];
+  }> {
+    const linked = this.database.listChannelAccounts(run.projectId, {
+      kind: "ads",
+    });
+    const cabinets = linked.filter(
+      (cabinet) => cabinet.provider === "meta-ads",
+    );
+    const googleAccounts = linked.filter(
+      (cabinet) => cabinet.provider === "google-ads",
+    );
+    if (cabinets.length === 0 && googleAccounts.length === 0) {
+      throw new ChannelError(
+        "cabinet_not_found",
+        "No ad account is linked to this workspace. Link a Meta cabinet or a Google Ads account before running a paid audit.",
+        422,
+      );
+    }
+    if (cabinets.length > 0 && !engine.syncMetaCabinet) {
+      throw new Error("The Meta ads connector is unavailable in this build");
+    }
+    if (googleAccounts.length > 0 && !engine.syncGoogleAdsAccount) {
+      throw new Error("The Google Ads connector is unavailable in this build");
+    }
+
+    const now = new Date();
+    const end =
+      typeof options.end === "string" && ISO_DATE_PATTERN.test(options.end)
+        ? options.end
+        : // Both providers restate attributed conversions for days after the
+          // fact — Google more so, because it dates a conversion to the click
+          // rather than to the purchase. The most recent day is deliberately
+          // left out rather than reported as if it were final.
+          isoDateBefore(now, 1);
+    const start =
+      typeof options.start === "string" && ISO_DATE_PATTERN.test(options.start)
+        ? options.start
+        : isoDateBefore(now, 28);
+
+    const issues: LegacyIssue[] = [];
+    const summaries: Array<Record<string, unknown>> = [];
+    const destinations: AdDestinationLike[] = [];
+    let anyDegraded = false;
+
+    for (const account of googleAccounts) {
+      signal.throwIfAborted();
+      let credential: Awaited<ReturnType<typeof this.googleAdsCredential>>;
+      try {
+        credential = await this.googleAdsCredential(account.account);
+      } catch (error) {
+        anyDegraded = true;
+        summaries.push({
+          provider: "google-ads",
+          channelAccountId: account.id,
+          externalId: account.externalId,
+          displayName: account.displayName,
+          state: "failed",
+          reason:
+            error instanceof Error
+              ? error.message
+              : "The Google Ads credential could not be read.",
+          metricsWritten: 0,
+          issueCount: 0,
+        });
+        continue;
+      }
+
+      try {
+        const result = await engine.syncGoogleAdsAccount!({
+          account: {
+            id: account.id,
+            externalId: account.externalId,
+            displayName: account.displayName,
+            currency: account.currency,
+            dailySpendCap: account.dailySpendCap,
+          },
+          accessToken: credential.accessToken,
+          developerToken: credential.developerToken,
+          loginCustomerId: credential.loginCustomerId,
+          ...(credential.apiVersion
+            ? { apiVersion: credential.apiVersion }
+            : {}),
+          since: start,
+          until: end,
+          ...(this.integrationFetch
+            ? { providerFetch: this.integrationFetch }
+            : {}),
+          signal,
+        });
+        const written = this.database.recordChannelMetrics(
+          run.projectId,
+          result.metrics,
+        );
+        const termsWritten = this.database.recordSearchTerms(
+          run.projectId,
+          result.searchTerms,
+        );
+        destinations.push(...result.destinations);
+        issues.push(...result.issues);
+        if (result.state !== "available") anyDegraded = true;
+        summaries.push({
+          provider: "google-ads",
+          channelAccountId: account.id,
+          externalId: account.externalId,
+          displayName: account.displayName,
+          state: result.state,
+          reason: result.reason,
+          metricsWritten: written,
+          searchTermsWritten: termsWritten,
+          // Carried into the run output so the coverage gap is visible even
+          // when it sits under the threshold that makes it a finding.
+          searchTermCoverage: result.coverage,
+          issueCount: result.issues.length,
+        });
+      } catch (error) {
+        if (signal.aborted) throw error;
+        anyDegraded = true;
+        summaries.push({
+          provider: "google-ads",
+          channelAccountId: account.id,
+          externalId: account.externalId,
+          displayName: account.displayName,
+          state: "failed",
+          reason:
+            error instanceof Error
+              ? error.message
+              : "The Google Ads account could not be read.",
+          metricsWritten: 0,
+          issueCount: 0,
+        });
+      }
+    }
+
+    for (const cabinet of cabinets) {
+      signal.throwIfAborted();
+      // Read per cabinet, because different cabinets may sit behind different
+      // logins once an agency connects more than one Meta identity.
+      let credential: Awaited<ReturnType<typeof this.metaCredential>>;
+      try {
+        credential = await this.metaCredential(cabinet.account);
+      } catch (error) {
+        anyDegraded = true;
+        summaries.push({
+          provider: "meta-ads",
+          channelAccountId: cabinet.id,
+          externalId: cabinet.externalId,
+          displayName: cabinet.displayName,
+          state: "failed",
+          reason:
+            error instanceof Error
+              ? error.message
+              : "The Meta credential could not be read.",
+          metricsWritten: 0,
+          issueCount: 0,
+        });
+        continue;
+      }
+
+      try {
+        // Non-null: the guard above refuses the whole run when a Meta cabinet
+        // is linked and the connector is missing from the build.
+        const result = await engine.syncMetaCabinet!({
+          cabinet: {
+            id: cabinet.id,
+            externalId: cabinet.externalId,
+            displayName: cabinet.displayName,
+            currency: cabinet.currency,
+            dailySpendCap: cabinet.dailySpendCap,
+          },
+          accessToken: credential.accessToken,
+          ...(credential.graphVersion
+            ? { graphVersion: credential.graphVersion }
+            : {}),
+          since: start,
+          until: end,
+          ...(this.integrationFetch
+            ? { providerFetch: this.integrationFetch }
+            : {}),
+          signal,
+        });
+        const written = this.database.recordChannelMetrics(
+          run.projectId,
+          result.metrics,
+        );
+        issues.push(...result.issues);
+        if (result.state !== "available") anyDegraded = true;
+        summaries.push({
+          provider: "meta-ads",
+          channelAccountId: cabinet.id,
+          externalId: cabinet.externalId,
+          displayName: cabinet.displayName,
+          state: result.state,
+          reason: result.reason,
+          metricsWritten: written,
+          issueCount: result.issues.length,
+        });
+      } catch (error) {
+        if (signal.aborted) throw error;
+        anyDegraded = true;
+        summaries.push({
+          provider: "meta-ads",
+          channelAccountId: cabinet.id,
+          externalId: cabinet.externalId,
+          displayName: cabinet.displayName,
+          state: "failed",
+          reason:
+            error instanceof Error
+              ? error.message
+              : "The cabinet could not be read.",
+          metricsWritten: 0,
+          issueCount: 0,
+        });
+      }
+    }
+
+    // The join: where the money goes versus what is actually on that page.
+    // Runs last, because it needs the destinations the syncs above collected.
+    const alignment = await this.runLandingAlignment(
+      run,
+      engine,
+      destinations,
+      signal,
+    );
+    issues.push(...alignment.issues);
+
+    return {
+      output: {
+        generatedAt: now.toISOString(),
+        start,
+        end,
+        cabinets: summaries,
+        landingAlignment: alignment.summary,
+      },
+      partial: anyDegraded,
+      issues,
+    };
+  }
+
+  /**
+   * Checks the pages paid traffic lands on.
+   *
+   * Prefers the last crawl, because it costs nothing and was taken with the
+   * site's own settings. Anything the crawl never reached is fetched directly:
+   * a dedicated paid landing page is routinely absent from a crawl by design,
+   * since nothing on the site links to it, and "we did not look at the page
+   * your money lands on" is a poor answer.
+   *
+   * Never fails the run. A destination that cannot be established is reported
+   * as unchecked by the rules themselves.
+   */
+  private async runLandingAlignment(
+    run: Run,
+    engine: EngineModule,
+    destinations: AdDestinationLike[],
+    signal: AbortSignal,
+  ): Promise<{ issues: LegacyIssue[]; summary: Record<string, unknown> }> {
+    const absent = (reason: string) => ({
+      issues: [] as LegacyIssue[],
+      summary: { checked: 0, fromCrawl: 0, probed: 0, reason },
+    });
+
+    if (destinations.length === 0) {
+      return absent(
+        "No ad destinations were readable, so no landing page could be checked.",
+      );
+    }
+    if (!engine.auditLandingAlignment) {
+      return absent(
+        "The landing alignment rules are unavailable in this build.",
+      );
+    }
+
+    const project = this.database.getProject(run.projectId);
+    const snapshots = new Map<string, PageSnapshotLike>();
+
+    // The most recent completed audit, whenever it ran. Deliberately not
+    // windowed: a crawl from six weeks ago is worse evidence than one from
+    // yesterday, but it is far better than none, and the snapshot carries the
+    // date it was observed so a stale reading is visible rather than implied.
+    const latestAudit = this.database
+      .listRuns(run.projectId)
+      .find(
+        (candidate) =>
+          candidate.workflowId === "audit" &&
+          (candidate.status === "succeeded" || candidate.status === "partial"),
+      );
+
+    if (latestAudit) {
+      const wanted = new Set(
+        destinations.map((destination) => destination.url),
+      );
+      for (const page of this.database.listPages(latestAudit.id)) {
+        const payload = page.payload as Record<string, unknown>;
+        const sourceUrl =
+          typeof payload.sourceUrl === "string"
+            ? payload.sourceUrl
+            : page.canonicalUrl;
+        // A destination may be recorded against either the URL asked for or
+        // the one the crawl settled on, so both are matched.
+        for (const key of new Set([sourceUrl, page.canonicalUrl])) {
+          if (!wanted.has(key) || snapshots.has(key)) continue;
+          const vitals = payload.vitals as { lcp?: unknown } | null | undefined;
+          const h1 = Array.isArray(payload.h1) ? (payload.h1 as string[]) : [];
+          snapshots.set(key, {
+            url: key,
+            finalUrl: page.canonicalUrl,
+            status: page.statusCode,
+            redirectChain: Array.isArray(payload.redirectChain)
+              ? (payload.redirectChain as string[])
+              : [],
+            title: page.title,
+            h1,
+            h2: Array.isArray(payload.h2) ? (payload.h2 as string[]) : [],
+            metaDescription:
+              typeof payload.metaDescription === "string"
+                ? payload.metaDescription
+                : null,
+            wordCount:
+              typeof payload.wordCount === "number" ? payload.wordCount : null,
+            indexable: page.indexable,
+            lcpMs: vitals && typeof vitals.lcp === "number" ? vitals.lcp : null,
+            responseTimeMs:
+              typeof payload.responseTimeMs === "number"
+                ? payload.responseTimeMs
+                : null,
+            source: "crawl",
+            // A run recorded before the crawl stored page text has a title and
+            // nothing else. The relevance rule declines on those rather than
+            // judging a page on its title alone.
+            textCaptured: payload.htmlParsed === true && "wordCount" in payload,
+            error: typeof payload.error === "string" ? payload.error : null,
+            observedAt: latestAudit.requestedAt,
+          });
+        }
+      }
+    }
+
+    const fromCrawl = snapshots.size;
+    const missing = destinations
+      .map((destination) => destination.url)
+      .filter((url) => !snapshots.has(url));
+
+    if (missing.length > 0 && engine.probeDestinations) {
+      try {
+        const probed = await engine.probeDestinations(missing, {
+          limits: engine.loadLimits?.() ?? {},
+          userAgent: DEFAULT_PROBE_USER_AGENT,
+          signal,
+        });
+        for (const [url, snapshot] of probed) snapshots.set(url, snapshot);
+      } catch (error) {
+        if (signal.aborted) throw error;
+        // A failed probe leaves those destinations unchecked, which the rules
+        // report as such. It never fails the paid audit around it.
+      }
+    }
+
+    const issues = engine.auditLandingAlignment({
+      projectName: project?.name ?? run.projectId,
+      destinations,
+      snapshots,
+    });
+
+    return {
+      issues,
+      summary: {
+        checked: snapshots.size,
+        destinations: destinations.length,
+        fromCrawl,
+        probed: snapshots.size - fromCrawl,
+        crawlRunId: latestAudit?.id ?? null,
+        crawlObservedAt: latestAudit?.requestedAt ?? null,
+        reason: latestAudit
+          ? null
+          : "No completed audit exists for this workspace, so every destination was fetched directly. Running an SEO audit makes this check cheaper and adds page speed to it.",
+      },
+    };
+  }
+
+  /**
+   * Files paid findings into the shared issue and action tables.
+   *
+   * `resolveMissing` is deliberately false when the sync was degraded: a
+   * cabinet that could not be read this time must not have last time's
+   * findings marked resolved, which would report a blind spot as a fix.
+   */
+  private persistAdsFindings(
+    run: Run,
+    issues: readonly LegacyIssue[],
+    complete: boolean,
+  ): number {
+    const observedAt = new Date().toISOString();
+    const instances = new Map<string, IssueInstance>();
+    for (const issue of issues) {
+      const urls = issue.urls.length > 0 ? issue.urls : [null];
+      for (const value of urls) {
+        const canonicalUrl = canonicalizeIssueUrl(value);
+        const fingerprint = issueFingerprint(issue, canonicalUrl);
+        const title = boundedContractText(
+          issue.message,
+          240,
+          "Paid media issue",
+        );
+        instances.set(fingerprint, {
+          fingerprint,
+          ruleId: issue.id,
+          moduleId: issue.moduleId ?? "integrations:meta-ads",
+          canonicalUrl,
+          severity: severity(issue.priority),
+          title,
+          description: boundedContractText(
+            issue.fix ?? issue.message,
+            4_000,
+            title,
+          ),
+          evidence: [
+            {
+              kind: "paid-media-observation",
+              label: title,
+              ...(issue.detail ? { value: issue.detail } : {}),
+              source: issue.moduleId ?? "integrations:meta-ads",
+              observedAt,
+            },
+          ],
+          firstSeenAt: observedAt,
+          lastSeenAt: observedAt,
+          status: "open",
+        });
+      }
+    }
+    const stored = [...instances.values()];
+    this.database.replaceIssues(run.id, run.projectId, stored, {
+      resolveMissing: complete,
+    });
+
+    const actions = normalizeAdsActions(run.projectId, issues, observedAt);
+    this.database.upsertActions(actions);
+    this.database.replaceActionIssueLinks(
+      run.id,
+      run.projectId,
+      this.database.listActions(run.projectId, { includeAdjudicated: true }),
+      stored,
+      { resolveMissing: complete },
+    );
+    return stored.length;
   }
 
   private async moduleContext(

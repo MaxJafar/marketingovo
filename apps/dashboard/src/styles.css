@@ -795,6 +795,40 @@ p {
   color: var(--red);
   background: var(--red-soft);
 }
+/* A locked surface, not a broken one. Amber rather than red: the workspace is
+   healthy and the operator is one step from unlocking this. */
+.capability-gate {
+  display: flex;
+  align-items: flex-start;
+  gap: 17px;
+  padding: 24px;
+  border-color: var(--amber);
+}
+.capability-gate h2 {
+  margin-bottom: 8px;
+}
+.capability-gate-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--amber);
+  background: var(--amber-soft);
+}
+.capability-gate-reasons {
+  margin: 0 0 10px;
+  padding-left: 18px;
+  font-size: 0.86rem;
+}
+.capability-gate-reasons li + li {
+  margin-top: 4px;
+}
+.capability-gate p {
+  margin-bottom: 14px;
+  font-size: 0.82rem;
+}
 .empty-state {
   display: grid;
   min-height: 180px;

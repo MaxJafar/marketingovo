@@ -46,12 +46,18 @@ assert.deepEqual(runStatuses, [
 const workflowIds = contracts.StartRunInputSchema.properties.workflowId.anyOf
   .filter((entry) => typeof entry.const === "string")
   .map((entry) => entry.const);
+// Adding a workflow widens what `POST /runs` accepts, which is an additive
+// contract change every existing client stays valid across. Removing or
+// renaming one is not, which is why this list is exact rather than a subset
+// check.
 assert.deepEqual(workflowIds, [
   "audit",
   "compare",
   "keyword-research",
   "content-plan",
   "osint-research",
+  "ads-audit",
+  "marketing-report",
 ]);
 
 const serializedOverview = JSON.stringify(contracts.ProjectOverviewSchema);

@@ -143,7 +143,8 @@ export interface SourceState {
 export interface Site {
   id: string;
   name: string;
-  url: string;
+  /** `null` when this workspace has no website. */
+  url: string | null;
   status?: "active" | "paused" | "setup";
   lastAuditAt?: string | null;
 }
@@ -946,6 +947,14 @@ export interface Integration {
   description?: string | null;
   accountLabel?: string | null;
   lastSyncAt?: string | null;
+  /**
+   * When this credential stops working, or null for one that does not expire.
+   *
+   * A pasted long-lived token — Meta's System User token, for instance — has a
+   * fixed lifetime and no refresh path, so this date is the difference between
+   * a planned rotation and a surface that goes quiet without explanation.
+   */
+  expiresAt?: string | null;
   quota?: {
     remaining: number;
     limit: number | null;
@@ -1113,7 +1122,28 @@ export interface ListResponse<T> {
 
 export interface CreateSiteInput {
   name: string;
-  url: string;
+  /** Optional: a workspace can be created now and given a website later. */
+  url?: string;
+}
+
+/**
+ * What a workspace can currently do. `ads` and `social` are named ahead of the
+ * channel layer so surfaces can be written against the final vocabulary.
+ */
+export type WorkspaceCapability =
+  "website" | "search-console" | "analytics" | "serp" | "ads" | "social";
+
+export interface WorkspaceCapabilityState {
+  capability: WorkspaceCapability;
+  available: boolean;
+  reason: string;
+  remedy: { label: string; href: string } | null;
+}
+
+export interface WorkspaceCapabilities {
+  projectId: string;
+  available: WorkspaceCapability[];
+  states: WorkspaceCapabilityState[];
 }
 
 export interface StartAuditInput {
@@ -1125,4 +1155,566 @@ export interface StartAuditInput {
   privateHostAllowlist?: string[];
   /** Exact URL cohort for list-mode audits; secrets and headers are forbidden. */
   exactUrls?: string[];
+}
+
+/* ------------------------------------------------------------------ */
+/* Ad cabinets                                                         */
+/*                                                                     */
+/* "Cabinet" is what a marketer calls an ad account, and it is the word */
+/* the surface uses. The API calls the same row a channel account,      */
+/* because the table also holds analytics properties and social         */
+/* profiles.                                                            */
+/* ------------------------------------------------------------------ */
+
+export type ChannelKind = "search" | "analytics" | "ads" | "social";
+
+export type AdPlatform =
+  | "all"
+  | "facebook"
+  | "instagram"
+  | "messenger"
+  | "audience_network"
+  // Google's networks. Search and Search Partners stay separate because
+  // partner traffic converts differently and is switched off separately.
+  // Performance Max is its own value: Google reports it as one opaque surface,
+  // so filing it under Search would claim a breakdown that does not exist.
+  | "google_search"
+  | "google_search_partners"
+  | "google_display"
+  | "google_youtube"
+  | "google_performance_max"
+  | "unknown";
+
+/**
+ * `available` carries a number. Everything else does not, and the surface must
+ * render the reason rather than a zero — the whole point of paid reporting is
+ * that "we spent nothing" and "we could not ask" stay distinguishable.
+ */
+export type ChannelMetricState =
+  "available" | "partial" | "unavailable" | "failed";
+
+export interface ChannelAccount {
+  id: string;
+  workspaceId: string;
+  provider: string;
+  account: string;
+  kind: ChannelKind;
+  externalId: string;
+  displayName: string;
+  currency: string | null;
+  dailySpendCap: number | null;
+  totalSpendCap: number | null;
+  createdAt: string;
+  archivedAt: string | null;
+}
+
+export interface DiscoveredChannelAccount {
+  provider: string;
+  account: string;
+  kind: ChannelKind;
+  externalId: string;
+  displayName: string;
+  currency: string | null;
+  status: string | null;
+  linked: boolean;
+}
+
+export interface ChannelMetricSummary {
+  metricKey: string;
+  platform: AdPlatform;
+  value: number | null;
+  state: ChannelMetricState;
+  currency: string | null;
+  observedDays: number;
+  requestedDays: number;
+  note: string | null;
+}
+
+export interface ChannelPerformance {
+  account: ChannelAccount;
+  start: string;
+  end: string;
+  lastSyncedAt: string | null;
+  summaries: ChannelMetricSummary[];
+}
+
+export interface LinkChannelAccountInput {
+  projectId: string;
+  provider: string;
+  account?: string;
+  kind: ChannelKind;
+  externalId: string;
+  displayName: string;
+  currency?: string | null;
+  dailySpendCap?: number | null;
+  totalSpendCap?: number | null;
+}
+
+export interface UpdateChannelAccountInput {
+  displayName?: string;
+  dailySpendCap?: number | null;
+  totalSpendCap?: number | null;
+  archived?: boolean;
+}
+
+/* ------------------------------------------------------------------ */
+/* Campaign staging                                                    */
+/* ------------------------------------------------------------------ */
+
+export type CampaignBriefStatus = "draft" | "in_review" | "archived";
+
+export type DeliverableChannel =
+  | "facebook-ad"
+  | "instagram-ad"
+  | "instagram-post"
+  | "instagram-reel"
+  | "facebook-post"
+  | "seo-article";
+
+export interface CampaignBrief {
+  id: string;
+  projectId: string;
+  title: string;
+  objective: string;
+  audience: string | null;
+  keyMessage: string | null;
+  constraints: string | null;
+  status: CampaignBriefStatus;
+  /** `agent` or `operator`, decided by transport rather than by the caller. */
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CampaignDeliverable {
+  id: string;
+  briefId: string;
+  channel: DeliverableChannel;
+  headline: string | null;
+  body: string;
+  callToAction: string | null;
+  destinationUrl: string | null;
+  creativeNotes: string | null;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type PublishIntentState = "staged" | "approved" | "void" | "withdrawn";
+
+export interface PublishIntent {
+  id: string;
+  projectId: string;
+  deliverableId: string;
+  channelAccountId: string;
+  state: PublishIntentState;
+  payload: Record<string, unknown>;
+  /** Approval binds to this exact value; a changed payload voids consent. */
+  payloadHash: string;
+  budget: {
+    dailyBudget: number | null;
+    lifetimeBudget: number | null;
+    currency: string | null;
+  };
+  stagedBy: string;
+  stagedAt: string;
+  approvedBy: string | null;
+  approvedAt: string | null;
+  approvedPayloadHash: string | null;
+  note: string | null;
+}
+
+export interface CampaignWorkspace {
+  brief: CampaignBrief;
+  deliverables: CampaignDeliverable[];
+  intents: PublishIntent[];
+}
+
+/* ------------------------------------------------------------------ */
+/* Publishing                                                          */
+/* ------------------------------------------------------------------ */
+
+export type SocialPlatform = "telegram" | "x" | "facebook-page" | "instagram";
+
+export type MediaKind = "image" | "video";
+
+export interface MediaAsset {
+  id: string;
+  projectId: string;
+  filename: string;
+  /** Decided by sniffing the bytes, not by the upload's declared type. */
+  mediaType: string;
+  kind: MediaKind;
+  sizeBytes: number;
+  sha256: string;
+  width: number | null;
+  height: number | null;
+  createdAt: string;
+  /** Null means the bytes have never left this machine. */
+  publicUrl: string | null;
+  publicUrlSource: string | null;
+  publicUrlAt: string | null;
+}
+
+export type PublishAttemptState =
+  "attempting" | "published" | "failed" | "indeterminate";
+
+export interface PublishRecord {
+  id: string;
+  intentId: string;
+  projectId: string;
+  channelAccountId: string;
+  platform: SocialPlatform;
+  state: PublishAttemptState;
+  request: Record<string, unknown>;
+  idempotencyKey: string;
+  providerId: string | null;
+  permalink: string | null;
+  error: string | null;
+  attemptedAt: string;
+  completedAt: string | null;
+}
+
+export interface CalendarEntry {
+  intentId: string;
+  deliverableId: string;
+  briefId: string;
+  briefTitle: string;
+  channelAccountId: string;
+  platform: SocialPlatform;
+  accountName: string;
+  state: string;
+  scheduledAt: string | null;
+  timezone: string | null;
+  preview: string;
+  attachmentCount: number;
+  record: PublishRecord | null;
+}
+
+export interface ContentCalendar {
+  projectId: string;
+  start: string;
+  end: string;
+  entries: CalendarEntry[];
+  /** Approved with no time, and past-due but unsent. Both need attention. */
+  unscheduled: CalendarEntry[];
+  overdue: CalendarEntry[];
+}
+
+export interface PublishOutcome {
+  state: "published" | "failed" | "indeterminate" | "skipped";
+  reason: string | null;
+  record: PublishRecord | null;
+}
+
+/* ------------------------------------------------------------------ */
+/* Email builder                                                       */
+/* ------------------------------------------------------------------ */
+
+export interface BrandColor {
+  name: string;
+  value: string;
+  usage: string | null;
+}
+
+export interface BrandTypeface {
+  role: "heading" | "body" | "mono";
+  stack: string;
+  sizePx: number;
+  lineHeight: number;
+  weight: number;
+}
+
+export interface BrandFooter {
+  companyName: string;
+  postalAddress: string;
+  /** The merge tag the operator's ESP substitutes at send time. */
+  unsubscribePlaceholder: string;
+  legalNotes: string | null;
+}
+
+export interface BrandKitProfile {
+  colors: BrandColor[];
+  typefaces: BrandTypeface[];
+  logoMediaId: string | null;
+  logoAltText: string | null;
+  contentWidthPx: number;
+  buttonRadiusPx: number;
+  voice: string | null;
+  prohibitions: string[];
+  footer: BrandFooter;
+  /** Reference material only. A token that matters is entered above. */
+  referenceMediaId: string | null;
+  referenceNotes: string | null;
+}
+
+export interface BrandKitVersion {
+  projectId: string;
+  revision: number;
+  profile: BrandKitProfile;
+  changeSummary: string;
+  actor: string;
+  createdAt: string;
+}
+
+export interface BrandKitWorkspace {
+  projectId: string;
+  current: BrandKitVersion | null;
+  history: BrandKitVersion[];
+}
+
+export type EmailFindingSeverity = "blocking" | "error" | "warning" | "info";
+
+export interface EmailFinding {
+  rule: string;
+  severity: EmailFindingSeverity;
+  message: string;
+  where: string | null;
+  remedy: string | null;
+  /** Clients this actually affects, named rather than implied. */
+  affects: string[];
+}
+
+export interface EmailValidationReport {
+  ok: boolean;
+  findings: EmailFinding[];
+  sizeBytes: number;
+  gmailClips: boolean;
+  counts: {
+    blocking: number;
+    error: number;
+    warning: number;
+    info: number;
+  };
+}
+
+export interface EmailTemplate {
+  id: string;
+  projectId: string;
+  name: string;
+  purpose: string | null;
+  latestRevision: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EmailTemplateVersion {
+  templateId: string;
+  revision: number;
+  subject: string;
+  preheader: string;
+  sourceHtml: string;
+  compiledHtml: string;
+  plainText: string;
+  report: EmailValidationReport;
+  brandRevision: number | null;
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface EmailTemplateWorkspace {
+  template: EmailTemplate;
+  current: EmailTemplateVersion | null;
+  history: EmailTemplateVersion[];
+}
+
+export interface EmailPreview {
+  subject: string;
+  preheader: string;
+  compiledHtml: string;
+  plainText: string;
+  report: EmailValidationReport;
+}
+
+/* ------------------------------------------------------------------ */
+/* Cross-channel reports                                               */
+/* ------------------------------------------------------------------ */
+
+export type ReportAvailability =
+  "available" | "partial" | "unavailable" | "failed";
+
+export interface ReportMetric {
+  key: string;
+  label: string;
+  /** Null unless actually measured. Rendered as its reason, never a dash. */
+  value: number | null;
+  unit: string;
+  currency: string | null;
+  state: ReportAvailability;
+  /** Only set when both periods were measured. */
+  change: number | null;
+  note: string | null;
+}
+
+export interface ReportSource {
+  id: string;
+  label: string;
+  state: ReportAvailability;
+  reason: string;
+  observedAt: string | null;
+}
+
+/** A total the report declines to compute, with the reason that replaces it. */
+export interface ReportRefusal {
+  expected: string;
+  explanation: string;
+}
+
+export interface ReportSection {
+  id: "paid" | "organic" | "social" | "email" | "actions";
+  title: string;
+  state: ReportAvailability;
+  summary: string;
+  metrics: ReportMetric[];
+  sources: ReportSource[];
+  refusals: ReportRefusal[];
+  breakdown: Array<{ label: string; metrics: ReportMetric[] }>;
+}
+
+export interface MarketingReport {
+  id: string;
+  projectId: string;
+  title: string;
+  period: {
+    start: string;
+    end: string;
+    comparisonStart: string | null;
+    comparisonEnd: string | null;
+    timezone: string;
+  };
+  narrative: string | null;
+  sections: ReportSection[];
+  coverageGaps: Array<{
+    source: string;
+    reason: string;
+    remedy: string | null;
+  }>;
+  generatedAt: string;
+  brandRevision: number | null;
+}
+
+export interface MarketingReportSummary {
+  id: string;
+  projectId: string;
+  title: string;
+  periodStart: string;
+  periodEnd: string;
+  generatedAt: string;
+  state: ReportAvailability;
+}
+
+/* ------------------------------------------------------------------ */
+/* Campaign links and QR codes                                         */
+/* ------------------------------------------------------------------ */
+
+export interface UtmParameters {
+  source: string;
+  medium: string;
+  campaign: string;
+  term: string | null;
+  content: string | null;
+}
+
+export type CampaignLinkFindingSeverity = "blocking" | "warning" | "advice";
+
+export interface CampaignLinkFinding {
+  rule: string;
+  severity: CampaignLinkFindingSeverity;
+  message: string;
+  field: string | null;
+  remedy: string | null;
+}
+
+export type QrErrorCorrection = "L" | "M" | "Q" | "H";
+
+export type QrPlacement =
+  "screen" | "print-handheld" | "print-poster" | "packaging" | "outdoor";
+
+export interface QrStyle {
+  errorCorrection: QrErrorCorrection;
+  quietZone: number;
+  darkColor: string;
+  lightColor: string;
+  transparent: boolean;
+}
+
+export type QrScanVerdict = "comfortable" | "tight" | "unscannable";
+
+export interface QrPrintAdvice {
+  version: number;
+  moduleCount: number;
+  errorCorrection: QrErrorCorrection;
+  printedWidthMm: number;
+  moduleSizeMm: number;
+  verdict: QrScanVerdict;
+  recommendedWidthMm: number;
+  maxScanDistanceMm: number;
+  contrastRatio: number;
+  findings: CampaignLinkFinding[];
+}
+
+export interface CampaignLink {
+  id: string;
+  projectId: string;
+  label: string;
+  destinationUrl: string;
+  utm: UtmParameters;
+  taggedUrl: string;
+  style: QrStyle;
+  placement: QrPlacement;
+  printedWidthMm: number | null;
+  findings: CampaignLinkFinding[];
+  printedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CampaignLinkPreview {
+  taggedUrl: string;
+  normalizedUtm: UtmParameters;
+  findings: CampaignLinkFinding[];
+  advice: QrPrintAdvice | null;
+  svg: string | null;
+}
+
+export type RedirectTarget =
+  "cloudflare-worker" | "netlify" | "vercel" | "nginx" | "apache";
+
+export interface RedirectConfigResponse {
+  filename: string;
+  contents: string;
+  enforcesExpiry: boolean;
+  notes: string[];
+  findings: CampaignLinkFinding[];
+}
+
+/* ------------------------------------------------------------------ */
+/* Search terms — Google Ads only                                      */
+/* ------------------------------------------------------------------ */
+
+export type SearchTermMatchType =
+  "exact" | "phrase" | "broad" | "near_exact" | "near_phrase" | "unknown";
+
+export type SearchTermStatus =
+  "added" | "excluded" | "added_excluded" | "none" | "unknown";
+
+export interface SearchTermRecord {
+  channelAccountId: string;
+  campaignId: string;
+  campaignName: string | null;
+  adGroupId: string;
+  adGroupName: string | null;
+  query: string;
+  matchedKeyword: string | null;
+  matchType: SearchTermMatchType;
+  status: SearchTermStatus;
+  impressions: number | null;
+  clicks: number | null;
+  cost: number | null;
+  conversions: number | null;
+  conversionValue: number | null;
+  currency: string | null;
+  windowStart: string;
+  windowEnd: string;
+  fetchedAt: string;
 }

@@ -132,7 +132,7 @@ function lines(value: string, limit: number): string[] {
 }
 
 const STEPS = [
-  { id: "workspace", label: "Workspace", hint: "Name the brand and its site." },
+  { id: "workspace", label: "Workspace", hint: "Name the brand." },
   { id: "brand", label: "Brand presence", hint: "Where else the brand lives." },
   { id: "competitors", label: "Competitors", hint: "Who to measure against." },
   { id: "data", label: "Data sources", hint: "Optional. Skippable." },
@@ -241,9 +241,10 @@ export function WizardPage() {
     try {
       if (step.id === "workspace") {
         if (!siteId) {
+          const website = websiteUrl.trim() ? withProtocol(websiteUrl) : "";
           const created = await createSite.mutateAsync({
             name: brandName.trim(),
-            url: withProtocol(websiteUrl),
+            ...(website ? { url: website } : {}),
           });
           setSiteId(created.data.id);
         }
@@ -274,18 +275,24 @@ export function WizardPage() {
     setError(null);
     setBusy(true);
     const started: string[] = [];
+    // Both of these begin by crawling this workspace's own site. With no
+    // website they are skipped rather than started and failed, which would
+    // hand a brand-new workspace a red run before it had done anything wrong.
+    const hasWebsite = websiteUrl.trim().length > 0;
     try {
       const privateHostAllowlist =
         allowPrivate && privateHosts.length > 0 ? privateHosts : undefined;
-      await startAudit.mutateAsync({
-        siteId,
-        mode: "full",
-        ...(privateHostAllowlist ? { privateHostAllowlist } : {}),
-      });
-      started.push("Baseline audit");
+      if (hasWebsite) {
+        await startAudit.mutateAsync({
+          siteId,
+          mode: "full",
+          ...(privateHostAllowlist ? { privateHostAllowlist } : {}),
+        });
+        started.push("Baseline audit");
+      }
       // The comparison is what fills Market intel. Without competitors there is
       // nothing to compare, so it is skipped rather than started empty.
-      if (competitors.length > 0) {
+      if (hasWebsite && competitors.length > 0) {
         await startWorkflow.mutateAsync({
           projectId: siteId,
           workflowId: "compare",
@@ -298,7 +305,13 @@ export function WizardPage() {
         });
         started.push("Competitor comparison");
       }
-      if (includeOsint && !primaryPrivateHost) {
+      // OSINT researches whatever public targets it was given, so it runs with
+      // or without a website — as long as there is at least one target.
+      if (
+        includeOsint &&
+        !primaryPrivateHost &&
+        (hasWebsite || osintTargets.length > 0)
+      ) {
         await startWorkflow.mutateAsync({
           projectId: siteId,
           workflowId: "osint-research",
@@ -322,8 +335,9 @@ export function WizardPage() {
 
   const canAdvance = (() => {
     if (busy) return false;
-    if (step.id === "workspace")
-      return brandName.trim().length > 0 && websiteUrl.trim().length > 0;
+    // Only the brand name is required. A workspace can exist for social, ads
+    // or research work and never acquire a website.
+    if (step.id === "workspace") return brandName.trim().length > 0;
     return true;
   })();
 
@@ -332,7 +346,7 @@ export function WizardPage() {
       <PageHeader
         eyebrow="Setup"
         title="Create your marketing workspace"
-        description="Five steps to a dashboard with real data. Only the first needs anything from you."
+        description="Five steps to a dashboard with real data. Only a brand name is required."
       />
 
       <ol className="wizard-rail" aria-label="Setup progress">
@@ -378,7 +392,7 @@ export function WizardPage() {
           >
             <SectionHeading
               title="What are we tracking?"
-              description="The workspace is named for the brand. The site is what gets crawled."
+              description="The workspace is named for the brand. Add a website only if you want it crawled."
             />
             <label htmlFor="wizard-brand-name">
               Brand name
@@ -391,15 +405,18 @@ export function WizardPage() {
               />
             </label>
             <label htmlFor="wizard-website">
-              Website
+              Website <span className="optional">Optional</span>
               <input
                 id="wizard-website"
                 value={websiteUrl}
                 onChange={(event) => setWebsiteUrl(event.currentTarget.value)}
                 placeholder="acme.example"
-                required
               />
-              <small>https:// is added if you leave it off.</small>
+              <small>
+                Needed only for crawling and SEO audits. Social, ads and
+                research work without it, and you can add one later from
+                Settings. https:// is added if you leave it off.
+              </small>
             </label>
             <label htmlFor="wizard-summary">
               What does this brand do?{" "}

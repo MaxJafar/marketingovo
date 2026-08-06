@@ -4,7 +4,15 @@ import type { KeywordOpportunity } from "../api/contracts";
 import { useKeywords, useStartWorkflow } from "../api/queries";
 import { useSite } from "../context/site-context";
 import { DataTable } from "../components/data-table";
-import { FreshnessNotice, QueryState } from "../components/data-state";
+import {
+  CapabilityGate,
+  FreshnessNotice,
+  QueryState,
+} from "../components/data-state";
+import {
+  NEEDS_WEBSITE_OR_SEARCH_CONSOLE,
+  useWorkspaceCapabilities,
+} from "../lib/capabilities";
 import {
   Button,
   Card,
@@ -19,6 +27,7 @@ import {
 
 export function KeywordsPage() {
   const { siteId } = useSite();
+  const { capabilities } = useWorkspaceCapabilities(siteId);
   const query = useKeywords(siteId);
   const start = useStartWorkflow();
   const [seed, setSeed] = useState("");
@@ -207,82 +216,87 @@ export function KeywordsPage() {
             : ""}
         </InlineNotice>
       ) : null}
-      <QueryState
-        isLoading={query.isLoading}
-        error={query.error}
-        siteId={siteId}
-        onRetry={() => void query.refetch()}
+      <CapabilityGate
+        capabilities={capabilities}
+        requires={NEEDS_WEBSITE_OR_SEARCH_CONSOLE}
       >
-        <FreshnessNotice meta={query.data?.meta} />
-        <section>
-          <SectionHeading
-            title="Content clusters"
-            description="Coverage and brief guidance from the connected keyword source."
-          />
-          {clusters.length > 0 ? (
-            <div className="cluster-grid">
-              {clusters.map((cluster) => (
-                <Card key={cluster.id} className="cluster-card">
-                  <span className="cluster-count">
-                    {formatNumber(cluster.keywords)} keywords
-                  </span>
-                  <h3>{cluster.name}</h3>
-                  <div className="progress-row">
-                    <span>Content coverage</span>
-                    <strong>
-                      {cluster.contentCoverage === null ||
-                      cluster.contentCoverage === undefined
-                        ? "Unavailable"
-                        : `${formatNumber(cluster.contentCoverage)}%`}
-                    </strong>
-                  </div>
-                  {cluster.contentCoverage !== null &&
-                  cluster.contentCoverage !== undefined ? (
-                    <div className="progress-track" aria-hidden="true">
-                      <span
-                        style={{
-                          width: `${Math.max(0, Math.min(100, cluster.contentCoverage))}%`,
-                        }}
-                      />
+        <QueryState
+          isLoading={query.isLoading}
+          error={query.error}
+          siteId={siteId}
+          onRetry={() => void query.refetch()}
+        >
+          <FreshnessNotice meta={query.data?.meta} />
+          <section>
+            <SectionHeading
+              title="Content clusters"
+              description="Coverage and brief guidance from the connected keyword source."
+            />
+            {clusters.length > 0 ? (
+              <div className="cluster-grid">
+                {clusters.map((cluster) => (
+                  <Card key={cluster.id} className="cluster-card">
+                    <span className="cluster-count">
+                      {formatNumber(cluster.keywords)} keywords
+                    </span>
+                    <h3>{cluster.name}</h3>
+                    <div className="progress-row">
+                      <span>Content coverage</span>
+                      <strong>
+                        {cluster.contentCoverage === null ||
+                        cluster.contentCoverage === undefined
+                          ? "Unavailable"
+                          : `${formatNumber(cluster.contentCoverage)}%`}
+                      </strong>
                     </div>
-                  ) : (
-                    <div className="progress-unavailable">
-                      Coverage measurement unavailable
-                    </div>
-                  )}
-                  <p>
-                    {cluster.recommendedBrief ??
-                      "No brief recommendation available."}
-                  </p>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              title="No content clusters"
-              description="Connect a keyword provider or import keyword data to build topic clusters."
+                    {cluster.contentCoverage !== null &&
+                    cluster.contentCoverage !== undefined ? (
+                      <div className="progress-track" aria-hidden="true">
+                        <span
+                          style={{
+                            width: `${Math.max(0, Math.min(100, cluster.contentCoverage))}%`,
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="progress-unavailable">
+                        Coverage measurement unavailable
+                      </div>
+                    )}
+                    <p>
+                      {cluster.recommendedBrief ??
+                        "No brief recommendation available."}
+                    </p>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                title="No content clusters"
+                description="Connect a keyword provider or import keyword data to build topic clusters."
+              />
+            )}
+          </section>
+          <section>
+            <SectionHeading
+              title="Keyword opportunities"
+              description="Prioritize demand using position, search volume, difficulty, and opportunity score."
             />
-          )}
-        </section>
-        <section>
-          <SectionHeading
-            title="Keyword opportunities"
-            description="Prioritize demand using position, search volume, difficulty, and opportunity score."
-          />
-          {opportunities.length > 0 ? (
-            <DataTable
-              data={opportunities}
-              columns={columns}
-              label="Keyword opportunities"
-            />
-          ) : (
-            <EmptyState
-              title="No keyword opportunities"
-              description="The API returned a valid empty opportunity set."
-            />
-          )}
-        </section>
-      </QueryState>
+            {opportunities.length > 0 ? (
+              <DataTable
+                data={opportunities}
+                columns={columns}
+                label="Keyword opportunities"
+              />
+            ) : (
+              <EmptyState
+                title="No keyword opportunities"
+                description="The API returned a valid empty opportunity set."
+              />
+            )}
+          </section>
+        </QueryState>
+      </CapabilityGate>
     </div>
   );
 }

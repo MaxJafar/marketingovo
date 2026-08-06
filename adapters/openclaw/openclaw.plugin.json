@@ -51,7 +51,16 @@
       "marketingovo_keyword_research_start",
       "marketingovo_content_plan_start",
       "marketingovo_osint_research_start",
-      "marketingovo_monitoring_status"
+      "marketingovo_monitoring_status",
+      "marketingovo_ads_cabinets",
+      "marketingovo_ads_performance",
+      "marketingovo_ads_audit_start",
+      "marketingovo_campaign_stage",
+      "marketingovo_brand_kit",
+      "marketingovo_email_templates",
+      "marketingovo_email_draft",
+      "marketingovo_marketing_report",
+      "marketingovo_campaign_link"
     ]
   },
   "toolMetadata": {
@@ -68,6 +77,21 @@
       "optional": true
     },
     "marketingovo_osint_research_start": {
+      "optional": true
+    },
+    "marketingovo_ads_audit_start": {
+      "optional": true
+    },
+    "marketingovo_campaign_stage": {
+      "optional": true
+    },
+    "marketingovo_email_draft": {
+      "optional": true
+    },
+    "marketingovo_marketing_report": {
+      "optional": true
+    },
+    "marketingovo_campaign_link": {
       "optional": true
     }
   }

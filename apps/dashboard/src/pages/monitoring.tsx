@@ -7,7 +7,12 @@ import {
   useUpdateSchedule,
 } from "../api/queries";
 import { useSite } from "../context/site-context";
-import { FreshnessNotice, QueryState } from "../components/data-state";
+import {
+  CapabilityGate,
+  FreshnessNotice,
+  QueryState,
+} from "../components/data-state";
+import { NEEDS_WEBSITE, useWorkspaceCapabilities } from "../lib/capabilities";
 import {
   Button,
   Card,
@@ -110,6 +115,7 @@ function cadenceLabel(schedule: MonitoringSchedule): string {
 
 export function MonitoringPage() {
   const { siteId } = useSite();
+  const { capabilities } = useWorkspaceCapabilities(siteId);
   const query = useMonitoring(siteId);
   const createSchedule = useCreateSchedule(siteId);
   const updateSchedule = useUpdateSchedule(siteId);
@@ -153,242 +159,244 @@ export function MonitoringPage() {
           {mutationError.message}
         </InlineNotice>
       ) : null}
-      <QueryState
-        isLoading={query.isLoading}
-        error={query.error}
-        siteId={siteId}
-        onRetry={() => void query.refetch()}
-      >
-        <FreshnessNotice meta={query.data?.meta} />
-        <Card className="schedule-editor">
-          <form onSubmit={submitSchedule}>
-            <div className="schedule-editor-heading">
-              <div>
-                <h2>
-                  {editor.id
-                    ? "Edit audit schedule"
-                    : "Create an audit schedule"}
-                </h2>
-                <p>
-                  Choose a marketer-friendly cadence or use a standard
-                  five-field cron expression.
-                </p>
+      <CapabilityGate capabilities={capabilities} requires={NEEDS_WEBSITE}>
+        <QueryState
+          isLoading={query.isLoading}
+          error={query.error}
+          siteId={siteId}
+          onRetry={() => void query.refetch()}
+        >
+          <FreshnessNotice meta={query.data?.meta} />
+          <Card className="schedule-editor">
+            <form onSubmit={submitSchedule}>
+              <div className="schedule-editor-heading">
+                <div>
+                  <h2>
+                    {editor.id
+                      ? "Edit audit schedule"
+                      : "Create an audit schedule"}
+                  </h2>
+                  <p>
+                    Choose a marketer-friendly cadence or use a standard
+                    five-field cron expression.
+                  </p>
+                </div>
+                {editor.id ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setEditor(blankEditor())}
+                  >
+                    Cancel edit
+                  </Button>
+                ) : null}
               </div>
-              {editor.id ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setEditor(blankEditor())}
-                >
-                  Cancel edit
-                </Button>
-              ) : null}
-            </div>
-            <div className="schedule-form-grid">
-              <label>
-                Frequency
-                <select
-                  name="frequency"
-                  value={editor.frequency}
-                  onChange={(event) => {
-                    const frequency = event.currentTarget
-                      .value as ScheduleFrequency;
-                    setEditor((current) => ({ ...current, frequency }));
-                  }}
-                >
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="custom">Custom cron</option>
-                </select>
-              </label>
-              {editor.frequency === "custom" ? (
+              <div className="schedule-form-grid">
                 <label>
-                  Cron expression
-                  <input
-                    name="cron"
-                    value={editor.cron}
-                    onChange={(event) => {
-                      const cron = event.currentTarget.value;
-                      setEditor((current) => ({ ...current, cron }));
-                    }}
-                    placeholder="0 6 * * 1"
-                    required
-                  />
-                </label>
-              ) : (
-                <label>
-                  Local time
-                  <input
-                    name="time"
-                    type="time"
-                    value={editor.time}
-                    onChange={(event) => {
-                      const time = event.currentTarget.value;
-                      setEditor((current) => ({ ...current, time }));
-                    }}
-                    required
-                  />
-                </label>
-              )}
-              {editor.frequency === "weekly" ? (
-                <label>
-                  Day
+                  Frequency
                   <select
-                    name="weekday"
-                    value={editor.weekday}
+                    name="frequency"
+                    value={editor.frequency}
                     onChange={(event) => {
-                      const weekday = event.currentTarget.value;
-                      setEditor((current) => ({ ...current, weekday }));
+                      const frequency = event.currentTarget
+                        .value as ScheduleFrequency;
+                      setEditor((current) => ({ ...current, frequency }));
                     }}
                   >
-                    {WEEKDAYS.map((weekday) => (
-                      <option key={weekday.value} value={weekday.value}>
-                        {weekday.label}
-                      </option>
-                    ))}
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="custom">Custom cron</option>
                   </select>
                 </label>
-              ) : null}
-              <label>
-                Timezone
-                <input
-                  name="timezone"
-                  value={editor.timezone}
-                  onChange={(event) => {
-                    const timezone = event.currentTarget.value;
-                    setEditor((current) => ({ ...current, timezone }));
-                  }}
-                  placeholder="Europe/London"
-                  required
-                />
-              </label>
-            </div>
-            <div className="form-actions">
-              <Button type="submit" disabled={editorPending || !siteId}>
-                {editorPending
-                  ? "Saving…"
-                  : editor.id
-                    ? "Save schedule"
-                    : "Create schedule"}
-              </Button>
-            </div>
-          </form>
-        </Card>
-        <div className="two-column-grid monitoring-grid">
-          <section>
-            <SectionHeading
-              title="Schedules"
-              description="Durable audit schedules for this project."
-            />
-            {schedules.length > 0 ? (
-              <div className="stack-list">
-                {schedules.map((schedule) => {
-                  const rowPending =
-                    (updateSchedule.isPending &&
-                      updateSchedule.variables?.scheduleId === schedule.id) ||
-                    (deleteSchedule.isPending &&
-                      deleteSchedule.variables === schedule.id);
-                  return (
-                    <Card key={schedule.id} className="schedule-row">
-                      <div className="schedule-main">
-                        <button
-                          type="button"
-                          className={`schedule-toggle ${schedule.enabled ? "toggle-on" : ""}`}
-                          aria-label={`${schedule.enabled ? "Pause" : "Enable"} ${schedule.name} schedule`}
-                          aria-pressed={schedule.enabled}
-                          disabled={rowPending}
-                          onClick={() =>
-                            updateSchedule.mutate({
-                              scheduleId: schedule.id,
-                              input: { enabled: !schedule.enabled },
-                            })
-                          }
-                        />
-                        <div>
-                          <h3>{schedule.name}</h3>
-                          <p>
-                            {cadenceLabel(schedule)} ·{" "}
-                            {schedule.timezone ?? "Timezone unavailable"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="schedule-details">
-                        <StatusBadge status={schedule.status ?? "unknown"} />
-                        <small>
-                          Next: {formatDate(schedule.nextRunAt, true)}
-                        </small>
-                        <div className="schedule-actions">
-                          <Button
+                {editor.frequency === "custom" ? (
+                  <label>
+                    Cron expression
+                    <input
+                      name="cron"
+                      value={editor.cron}
+                      onChange={(event) => {
+                        const cron = event.currentTarget.value;
+                        setEditor((current) => ({ ...current, cron }));
+                      }}
+                      placeholder="0 6 * * 1"
+                      required
+                    />
+                  </label>
+                ) : (
+                  <label>
+                    Local time
+                    <input
+                      name="time"
+                      type="time"
+                      value={editor.time}
+                      onChange={(event) => {
+                        const time = event.currentTarget.value;
+                        setEditor((current) => ({ ...current, time }));
+                      }}
+                      required
+                    />
+                  </label>
+                )}
+                {editor.frequency === "weekly" ? (
+                  <label>
+                    Day
+                    <select
+                      name="weekday"
+                      value={editor.weekday}
+                      onChange={(event) => {
+                        const weekday = event.currentTarget.value;
+                        setEditor((current) => ({ ...current, weekday }));
+                      }}
+                    >
+                      {WEEKDAYS.map((weekday) => (
+                        <option key={weekday.value} value={weekday.value}>
+                          {weekday.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+                <label>
+                  Timezone
+                  <input
+                    name="timezone"
+                    value={editor.timezone}
+                    onChange={(event) => {
+                      const timezone = event.currentTarget.value;
+                      setEditor((current) => ({ ...current, timezone }));
+                    }}
+                    placeholder="Europe/London"
+                    required
+                  />
+                </label>
+              </div>
+              <div className="form-actions">
+                <Button type="submit" disabled={editorPending || !siteId}>
+                  {editorPending
+                    ? "Saving…"
+                    : editor.id
+                      ? "Save schedule"
+                      : "Create schedule"}
+                </Button>
+              </div>
+            </form>
+          </Card>
+          <div className="two-column-grid monitoring-grid">
+            <section>
+              <SectionHeading
+                title="Schedules"
+                description="Durable audit schedules for this project."
+              />
+              {schedules.length > 0 ? (
+                <div className="stack-list">
+                  {schedules.map((schedule) => {
+                    const rowPending =
+                      (updateSchedule.isPending &&
+                        updateSchedule.variables?.scheduleId === schedule.id) ||
+                      (deleteSchedule.isPending &&
+                        deleteSchedule.variables === schedule.id);
+                    return (
+                      <Card key={schedule.id} className="schedule-row">
+                        <div className="schedule-main">
+                          <button
                             type="button"
-                            variant="ghost"
+                            className={`schedule-toggle ${schedule.enabled ? "toggle-on" : ""}`}
+                            aria-label={`${schedule.enabled ? "Pause" : "Enable"} ${schedule.name} schedule`}
+                            aria-pressed={schedule.enabled}
                             disabled={rowPending}
                             onClick={() =>
-                              setEditor(editorForSchedule(schedule))
+                              updateSchedule.mutate({
+                                scheduleId: schedule.id,
+                                input: { enabled: !schedule.enabled },
+                              })
                             }
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="danger"
-                            disabled={rowPending}
-                            onClick={() => {
-                              if (
-                                window.confirm(
-                                  `Delete the ${schedule.name} schedule?`,
-                                )
-                              )
-                                deleteSchedule.mutate(schedule.id);
-                            }}
-                          >
-                            Delete
-                          </Button>
+                          />
+                          <div>
+                            <h3>{schedule.name}</h3>
+                            <p>
+                              {cadenceLabel(schedule)} ·{" "}
+                              {schedule.timezone ?? "Timezone unavailable"}
+                            </p>
+                          </div>
                         </div>
+                        <div className="schedule-details">
+                          <StatusBadge status={schedule.status ?? "unknown"} />
+                          <small>
+                            Next: {formatDate(schedule.nextRunAt, true)}
+                          </small>
+                          <div className="schedule-actions">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              disabled={rowPending}
+                              onClick={() =>
+                                setEditor(editorForSchedule(schedule))
+                              }
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="danger"
+                              disabled={rowPending}
+                              onClick={() => {
+                                if (
+                                  window.confirm(
+                                    `Delete the ${schedule.name} schedule?`,
+                                  )
+                                )
+                                  deleteSchedule.mutate(schedule.id);
+                              }}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
+              ) : (
+                <EmptyState
+                  title="No schedules"
+                  description="Create a schedule above to run repeat audits while the background service is active."
+                />
+              )}
+            </section>
+            <section>
+              <SectionHeading
+                title="Recent alerts"
+                description="Open and acknowledged changes that need review."
+              />
+              {alerts.length > 0 ? (
+                <div className="stack-list">
+                  {alerts.map((alert) => (
+                    <Card key={alert.id} className="alert-row">
+                      <div className="alert-topline">
+                        <StatusBadge status={alert.severity} />
+                        <time>{formatDate(alert.createdAt, true)}</time>
                       </div>
+                      <h3>{alert.title}</h3>
+                      <p>
+                        {alert.detail ?? "No additional detail was returned."}
+                      </p>
+                      <small>
+                        Status:{" "}
+                        {alert.status?.replaceAll("_", " ") ?? "Unavailable"}
+                      </small>
                     </Card>
-                  );
-                })}
-              </div>
-            ) : (
-              <EmptyState
-                title="No schedules"
-                description="Create a schedule above to run repeat audits while the background service is active."
-              />
-            )}
-          </section>
-          <section>
-            <SectionHeading
-              title="Recent alerts"
-              description="Open and acknowledged changes that need review."
-            />
-            {alerts.length > 0 ? (
-              <div className="stack-list">
-                {alerts.map((alert) => (
-                  <Card key={alert.id} className="alert-row">
-                    <div className="alert-topline">
-                      <StatusBadge status={alert.severity} />
-                      <time>{formatDate(alert.createdAt, true)}</time>
-                    </div>
-                    <h3>{alert.title}</h3>
-                    <p>
-                      {alert.detail ?? "No additional detail was returned."}
-                    </p>
-                    <small>
-                      Status:{" "}
-                      {alert.status?.replaceAll("_", " ") ?? "Unavailable"}
-                    </small>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <EmptyState
-                title="No monitoring alerts"
-                description="A valid empty alert stream means no alerts were returned—not that every source is healthy."
-              />
-            )}
-          </section>
-        </div>
-      </QueryState>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  title="No monitoring alerts"
+                  description="A valid empty alert stream means no alerts were returned—not that every source is healthy."
+                />
+              )}
+            </section>
+          </div>
+        </QueryState>
+      </CapabilityGate>
     </div>
   );
 }

@@ -134,15 +134,24 @@ export function OnboardingPage() {
     (schedule) => schedule.enabled,
   );
   const selectedGoal = goals.find((goal) => goal.id === preferences.goal);
+  const hasWebsite = Boolean(site?.url);
   const dataReady = connectedCount > 0 || preferences.crawlOnly;
   const baselineReady = completedRuns > 0;
   const actionsReviewed = preferences.actionsReviewed || monitoringActive;
 
   const progressSteps = [
     {
-      label: "Add a site",
-      description: "Set the property you want to improve.",
+      label: "Create a workspace",
+      description: "Name the brand this workspace is for.",
       complete: Boolean(siteId),
+    },
+    {
+      // Deliberately separate from workspace creation, and skippable. A
+      // workspace doing social, ads or research work may never need one.
+      label: "Add a website",
+      description: "Optional. Required only for crawling and SEO audits.",
+      complete: hasWebsite,
+      optional: true,
     },
     {
       label: "Connect data",
@@ -170,7 +179,12 @@ export function OnboardingPage() {
       complete: monitoringActive,
     },
   ];
-  const currentStep = progressSteps.findIndex((step) => !step.complete);
+  // An optional step never becomes "the current step". Pointing someone at a
+  // skippable task as their next action is how an optional thing quietly
+  // becomes mandatory again.
+  const currentStep = progressSteps.findIndex(
+    (step) => !step.complete && !step.optional,
+  );
   const currentStepIndex =
     currentStep === -1 ? progressSteps.length - 1 : currentStep;
 
@@ -193,10 +207,11 @@ export function OnboardingPage() {
   function submitSite(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    const url = String(form.get("url") ?? "").trim();
     createSite.mutate(
       {
         name: String(form.get("name") ?? "").trim(),
-        url: String(form.get("url") ?? "").trim(),
+        ...(url ? { url } : {}),
       },
       { onSuccess: () => setCreated(true) },
     );
@@ -227,7 +242,7 @@ export function OnboardingPage() {
       <PageHeader
         eyebrow="Guided setup"
         title="Reach your first useful insight"
-        description="Add a property, choose the evidence and outcome, run a baseline, then activate repeat monitoring."
+        description="Create a workspace, choose the evidence and outcome, then activate repeat monitoring. A website is optional and unlocks crawling and audits."
       />
       {sitesError ? (
         <InlineNotice tone="danger" title="The local API is unavailable">
@@ -268,9 +283,11 @@ export function OnboardingPage() {
                     <span className="sr-only">
                       {step.complete
                         ? "Completed."
-                        : current
-                          ? "Current step."
-                          : "Not completed."}
+                        : step.optional
+                          ? "Optional, not completed."
+                          : current
+                            ? "Current step."
+                            : "Not completed."}
                     </span>
                   </div>
                 </li>
@@ -291,11 +308,12 @@ export function OnboardingPage() {
           ) : null}
           {!siteId && !sitesLoading ? (
             <Card className="onboarding-card">
-              <span className="step-kicker">Step 1 of 6</span>
-              <h2>Add your first site</h2>
+              <span className="step-kicker">Step 1 of 7</span>
+              <h2>Create your first workspace</h2>
               <p>
-                Use the canonical public URL. The API will store the workspace
-                and prepare it for integrations.
+                A workspace holds this brand&rsquo;s channels, research and
+                notes. A website is optional — add one only if you want crawling
+                and SEO audits.
               </p>
               {createSite.isError ? (
                 <InlineNotice tone="danger" title="Site was not added">
@@ -318,19 +336,24 @@ export function OnboardingPage() {
                   />
                 </label>
                 <label>
-                  Canonical URL
+                  Canonical URL <span className="optional">Optional</span>
                   <input
                     name="url"
                     type="url"
-                    required
                     placeholder="https://example.com"
                   />
+                  <small>
+                    Leave blank to work on social, ads and research first. You
+                    can add a website any time from Settings.
+                  </small>
                 </label>
                 <Button
                   type="submit"
                   disabled={createSite.isPending || Boolean(sitesError)}
                 >
-                  {createSite.isPending ? "Adding site…" : "Add site"}{" "}
+                  {createSite.isPending
+                    ? "Creating workspace…"
+                    : "Create workspace"}{" "}
                   <Icon name="arrow" />
                 </Button>
               </form>
@@ -340,15 +363,17 @@ export function OnboardingPage() {
             <>
               <Card className="onboarding-card onboarding-summary">
                 <div>
-                  <span className="step-kicker">Active property</span>
+                  <span className="step-kicker">Active workspace</span>
                   <h2>{site?.name}</h2>
-                  <p>{site?.url}</p>
+                  <p>
+                    {site?.url ?? "No website — crawling and audits are off."}
+                  </p>
                 </div>
                 <StatusBadge status={site?.status ?? "active"} />
               </Card>
 
               <Card className="onboarding-card">
-                <span className="step-kicker">Step 2 of 6</span>
+                <span className="step-kicker">Step 3 of 7</span>
                 <h2>Choose your evidence</h2>
                 <p>
                   Connect platforms your team trusts, or start with crawl data
@@ -388,7 +413,7 @@ export function OnboardingPage() {
               </Card>
 
               <Card className="onboarding-card">
-                <span className="step-kicker">Step 3 of 6</span>
+                <span className="step-kicker">Step 4 of 7</span>
                 <h2>Choose the outcome that matters now</h2>
                 <p>
                   The selected goal is stored with the audit run so its purpose
@@ -415,13 +440,20 @@ export function OnboardingPage() {
               </Card>
 
               <Card className="onboarding-card">
-                <span className="step-kicker">Step 4 of 6</span>
+                <span className="step-kicker">Step 5 of 7</span>
                 <h2>Build the baseline</h2>
                 <p>
                   A full audit gives actions URL-level evidence and creates a
                   reference point for monitoring.
                 </p>
-                {!selectedGoal ? (
+                {!hasWebsite ? (
+                  <InlineNotice tone="info" title="This step needs a website">
+                    A baseline audit crawls your site. Add a website in{" "}
+                    <Link to="/settings">Settings</Link> to unlock it, or skip
+                    ahead — the rest of this workspace works without one.
+                  </InlineNotice>
+                ) : null}
+                {hasWebsite && !selectedGoal ? (
                   <InlineNotice tone="warning" title="Choose a goal first">
                     Select the outcome above before starting the baseline.
                   </InlineNotice>
@@ -466,7 +498,9 @@ export function OnboardingPage() {
                   <Button
                     type="button"
                     onClick={startBaseline}
-                    disabled={startAudit.isPending || !selectedGoal}
+                    disabled={
+                      startAudit.isPending || !selectedGoal || !hasWebsite
+                    }
                   >
                     {startAudit.isPending
                       ? "Starting audit…"
@@ -479,7 +513,7 @@ export function OnboardingPage() {
               </Card>
 
               <Card className="onboarding-card">
-                <span className="step-kicker">Step 5 of 6</span>
+                <span className="step-kicker">Step 6 of 7</span>
                 <h2>Choose the first move</h2>
                 <p>
                   Compare impact, effort, confidence, and source evidence before
@@ -514,7 +548,7 @@ export function OnboardingPage() {
               </Card>
 
               <Card className="onboarding-card">
-                <span className="step-kicker">Step 6 of 6</span>
+                <span className="step-kicker">Step 7 of 7</span>
                 <h2>Activate local monitoring</h2>
                 <p>
                   Create a durable weekly audit at 06:00 every Monday in your

@@ -39,6 +39,7 @@ export type ModuleId =
   | "integrations:trends"
   | "integrations:lighthouse"
   | "integrations:psi"
+  | "integrations:meta-ads"
   | "integrations:bwt"
   | "integrations:keyword-research"
   | "integrations:change-detection"

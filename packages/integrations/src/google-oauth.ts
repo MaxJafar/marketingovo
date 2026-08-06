@@ -11,6 +11,18 @@ export const GOOGLE_OAUTH_SCOPES = {
     "https://www.googleapis.com/auth/webmasters.readonly",
   ],
   "google-analytics-4": ["https://www.googleapis.com/auth/analytics.readonly"],
+  /**
+   * Google Ads publishes no read-only scope.
+   *
+   * `https://www.googleapis.com/auth/adwords` is the only scope the API
+   * accepts, and it grants write as well as read. That is Google's design, not
+   * a choice available here, so the read-only guarantee has to be kept above
+   * the credential: this product issues no mutate call, and the contract and
+   * MCP suites assert that no Google Ads write surface exists. An operator
+   * consenting to this screen is trusting the software, and the software is
+   * auditable and local.
+   */
+  "google-ads": ["https://www.googleapis.com/auth/adwords"],
 } as const;
 
 export type GoogleOAuthProvider = keyof typeof GOOGLE_OAUTH_SCOPES;

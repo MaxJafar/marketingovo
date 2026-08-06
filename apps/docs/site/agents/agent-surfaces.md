@@ -1,13 +1,13 @@
 ---
 title: MCP, Codex, and OpenClaw
-description: Connect agents to ten workflow tools and five session tools without giving them provider credentials.
+description: Connect agents to nineteen workflow tools and five session tools without giving them provider credentials.
 ---
 
 # MCP, Codex, and OpenClaw
 
 All official agent surfaces connect to the existing local daemon. They do not start another runtime, own another database, or receive provider credentials.
 
-## Ten public workflow tools
+## Nineteen public workflow tools
 
 | Tool                                  | Mode                   | Purpose                                                               |
 | ------------------------------------- | ---------------------- | --------------------------------------------------------------------- |
@@ -19,12 +19,33 @@ All official agent surfaces connect to the existing local daemon. They do not st
 | `marketingovo_compare_start`          | Starts network work    | Compare a project with one to five public competitor URLs             |
 | `marketingovo_keyword_research_start` | Starts provider work   | Expand a seed, classify intent, and evaluate momentum                 |
 | `marketingovo_content_plan_start`     | Starts provider work   | Build profiles and clusters for up to ten seed topics                 |
-| `marketingovo_osint_research_start`  | Starts network work    | Build a bounded public-web dossier with exact source evidence           |
+| `marketingovo_osint_research_start`   | Starts network work    | Build a bounded public-web dossier with exact source evidence         |
 | `marketingovo_monitoring_status`      | Read-only, replay-safe | Read health, schedules, and recent runs                               |
+| `marketingovo_ads_cabinets`           | Read-only, replay-safe | List linked Meta ad cabinets, their currency and local spend caps     |
+| `marketingovo_ads_performance`        | Read-only, replay-safe | One cabinet's measured window, split by Facebook and Instagram        |
+| `marketingovo_ads_audit_start`        | Starts provider work   | Sync the cabinets and run the paid-media rules                        |
+| `marketingovo_campaign_stage`         | Writes locally         | Draft a campaign brief and its deliverables for a person to review    |
+| `marketingovo_brand_kit`              | Read-only, replay-safe | Brand colours, type stacks, voice and the legal email footer          |
+| `marketingovo_email_templates`        | Read-only, replay-safe | Email templates and their revision history                            |
+| `marketingovo_email_draft`            | Writes locally         | Compile email HTML and get back every real client defect in it        |
+| `marketingovo_marketing_report`       | Writes locally         | Generate or read the cross-channel report, including what it refuses  |
+| `marketingovo_campaign_link`          | Writes locally         | Build a tagged link and a QR code, refusing tagging that loses data   |
 
 Start tools return a run ID. The agent must call `marketingovo_run_get` until the run is terminal before describing the work as complete.
 
-The start tools are marked optional in the OpenClaw adapter so an operator can allowlist network-initiating behavior. Read-only inspection remains separate.
+Tools that change state — every start tool, plus `marketingovo_campaign_stage`, `marketingovo_email_draft`, `marketingovo_marketing_report` and `marketingovo_campaign_link` — are marked optional in the OpenClaw adapter so an operator can allowlist them separately from read-only inspection. Only the start tools are open-world; the rest write locally and reach no provider.
+
+## The one thing no agent tool does
+
+There is no approve or publish tool, and there will not be one.
+
+An agent may draft an entire campaign — ad copy, a reel script, an article — and stage the exact payload that would be sent to Meta. Approving that payload requires a request carrying the browser's session cookie and CSRF token, and the daemon refuses it for the local service token that every agent surface authenticates with.
+
+This is deliberately not a permission flag or a confirmation prompt the model answers. Both are things a sufficiently confused or prompt-injected agent talks its way past, because their enforcement lives inside the thing being controlled. The transport split already means "a person did this in a browser", and spending money under the operator's brand is exactly the operation that should be pinned to it.
+
+The contract and MCP test suites assert that no tool named for approving or publishing exists, so adding one fails a build before it reaches an operator.
+
+Paid numbers carry one more obligation. Every metric Marketingovo could not measure is returned as `null` with a stated reason, never as `0`, and reach and frequency have no window total by design. An agent that reports a null as zero spend, zero conversions, or a cost per result derived from a missing denominator is inventing a measurement — say "not measured" and give the reason.
 
 ## Five terminal session tools
 
@@ -83,7 +104,9 @@ The package binary is named `marketingovo-mcp`. Confirm the current release chan
 - `marketingovo://projects/{id}/issues` — latest evidence, occurrence counts, and
   marketer adjudications;
 - `marketingovo://projects/{id}/context` — versioned business/SEO profile and the
-  append-only marketer journal.
+  append-only marketer journal;
+- `marketingovo://projects/{id}/ads` — linked ad cabinets with their last
+  measured window, split by platform.
 
 ## Codex bundle
 
