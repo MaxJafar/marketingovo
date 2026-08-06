@@ -97,7 +97,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Set up uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
       - name: Create deterministic worker environment
         run: uv sync --project services/intelligence-worker --dev --frozen
       - name: Run Python lints
