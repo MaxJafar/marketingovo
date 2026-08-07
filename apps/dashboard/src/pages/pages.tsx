@@ -4,7 +4,12 @@ import type { PageRecord } from "../api/contracts";
 import { usePages } from "../api/queries";
 import { useSite } from "../context/site-context";
 import { DataTable } from "../components/data-table";
-import { FreshnessNotice, QueryState } from "../components/data-state";
+import {
+  CapabilityGate,
+  FreshnessNotice,
+  QueryState,
+} from "../components/data-state";
+import { NEEDS_WEBSITE, useWorkspaceCapabilities } from "../lib/capabilities";
 import { Icon } from "../components/icon";
 import { InternalLinkExplorer } from "../components/internal-link-explorer";
 import {
@@ -20,6 +25,7 @@ import { indexabilityReasonLabel } from "./page-indexability";
 
 export function PagesPage() {
   const { siteId } = useSite();
+  const { capabilities } = useWorkspaceCapabilities(siteId);
   const query = usePages(siteId);
   const [search, setSearch] = useState("");
   const [selectedPageUrl, setSelectedPageUrl] = useState("");
@@ -138,55 +144,57 @@ export function PagesPage() {
         title="Pages"
         description="Connect technical crawl evidence with organic traffic and conversion context at URL level."
       />
-      <QueryState
-        isLoading={query.isLoading}
-        error={query.error}
-        siteId={siteId}
-        onRetry={() => void query.refetch()}
-      >
-        <FreshnessNotice meta={query.data?.meta} />
-        {selectedPage ? (
-          <InternalLinkExplorer
-            key={`${selectedPage.runId ?? "legacy"}:${selectedPage.url}`}
-            page={selectedPage}
-            onClose={() => setSelectedPageUrl("")}
-          />
-        ) : null}
-        {pages.length > 0 ? (
-          <>
-            <div className="search-field">
-              <Icon name="search" />
-              <label className="sr-only" htmlFor="page-search">
-                Search pages
-              </label>
-              <input
-                id="page-search"
-                type="search"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search by title or URL"
-              />
-            </div>
-            {filtered.length > 0 ? (
-              <DataTable
-                data={filtered}
-                columns={columns}
-                label="Crawled pages"
-              />
-            ) : (
-              <EmptyState
-                title="No pages match"
-                description="Try a broader title or URL search."
-              />
-            )}
-          </>
-        ) : (
-          <EmptyState
-            title="No crawled pages"
-            description="The API returned an empty page inventory. Run an audit to collect URL-level evidence."
-          />
-        )}
-      </QueryState>
+      <CapabilityGate capabilities={capabilities} requires={NEEDS_WEBSITE}>
+        <QueryState
+          isLoading={query.isLoading}
+          error={query.error}
+          siteId={siteId}
+          onRetry={() => void query.refetch()}
+        >
+          <FreshnessNotice meta={query.data?.meta} />
+          {selectedPage ? (
+            <InternalLinkExplorer
+              key={`${selectedPage.runId ?? "legacy"}:${selectedPage.url}`}
+              page={selectedPage}
+              onClose={() => setSelectedPageUrl("")}
+            />
+          ) : null}
+          {pages.length > 0 ? (
+            <>
+              <div className="search-field">
+                <Icon name="search" />
+                <label className="sr-only" htmlFor="page-search">
+                  Search pages
+                </label>
+                <input
+                  id="page-search"
+                  type="search"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search by title or URL"
+                />
+              </div>
+              {filtered.length > 0 ? (
+                <DataTable
+                  data={filtered}
+                  columns={columns}
+                  label="Crawled pages"
+                />
+              ) : (
+                <EmptyState
+                  title="No pages match"
+                  description="Try a broader title or URL search."
+                />
+              )}
+            </>
+          ) : (
+            <EmptyState
+              title="No crawled pages"
+              description="The API returned an empty page inventory. Run an audit to collect URL-level evidence."
+            />
+          )}
+        </QueryState>
+      </CapabilityGate>
     </div>
   );
 }

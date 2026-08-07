@@ -7,7 +7,12 @@ import { useSite } from "../context/site-context";
 import { exactUrlHostname } from "../lib/url";
 import { DataTable } from "../components/data-table";
 import { AuditComparisonCard } from "../components/audit-comparison-card";
-import { FreshnessNotice, QueryState } from "../components/data-state";
+import {
+  CapabilityGate,
+  FreshnessNotice,
+  QueryState,
+} from "../components/data-state";
+import { NEEDS_WEBSITE, useWorkspaceCapabilities } from "../lib/capabilities";
 import { Icon } from "../components/icon";
 import {
   Button,
@@ -23,6 +28,8 @@ export function AuditsPage() {
   const { siteId, site } = useSite();
   const query = useRuns(siteId);
   const startAudit = useStartAudit();
+  const { capabilities, has } = useWorkspaceCapabilities(siteId);
+  const hasWebsite = has("website");
   const runs = query.data?.data.items ?? [];
   const auditRuns = runs.filter((run) => run.workflowId === "audit");
   const [urlList, setUrlList] = useState("");
@@ -119,108 +126,110 @@ export function AuditsPage() {
         actions={
           <Button
             onClick={startFullAudit}
-            disabled={!siteId || startAudit.isPending}
+            disabled={!siteId || !hasWebsite || startAudit.isPending}
           >
             <Icon name="audits" />{" "}
             {startAudit.isPending ? "Starting…" : "Run full audit"}
           </Button>
         }
       />
-      {privateAccessHost ? (
-        <details className="private-site-access">
-          <summary>Private-site access</summary>
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={privateAccessApproved}
-              onChange={(event) =>
-                setPrivateAccessApproved(event.currentTarget.checked)
-              }
-            />
-            <span>
-              <strong>
-                Allow this exact hostname to access a private network for this
-                audit
-              </strong>
+      <CapabilityGate capabilities={capabilities} requires={NEEDS_WEBSITE}>
+        {privateAccessHost ? (
+          <details className="private-site-access">
+            <summary>Private-site access</summary>
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={privateAccessApproved}
+                onChange={(event) =>
+                  setPrivateAccessApproved(event.currentTarget.checked)
+                }
+              />
+              <span>
+                <strong>
+                  Allow this exact hostname to access a private network for this
+                  audit
+                </strong>
+                <small>
+                  {privateAccessHost} only. This approval applies to audits
+                  started from this page until you switch projects; cloud
+                  metadata always stays blocked.
+                </small>
+              </span>
+            </label>
+          </details>
+        ) : null}
+        <details className="audit-scope-panel">
+          <summary>Expert audit scope</summary>
+          <form onSubmit={startExactCohort}>
+            <div>
+              <h2>Audit an exact URL cohort</h2>
+              <p>
+                Paste one absolute URL per line. Marketingovo crawls only this
+                list and keeps each URL as a seed, which is useful for
+                migrations, templates, QA samples, and verification runs.
+              </p>
+            </div>
+            <label htmlFor="audit-exact-urls">
+              URL list
+              <textarea
+                id="audit-exact-urls"
+                value={urlList}
+                onChange={(event) => setUrlList(event.currentTarget.value)}
+                placeholder={
+                  "https://example.com/pricing\nhttps://example.com/docs/getting-started"
+                }
+                rows={6}
+              />
               <small>
-                {privateAccessHost} only. This approval applies to audits
-                started from this page until you switch projects; cloud metadata
-                always stays blocked.
+                URLs must use the project origin. Fragments and duplicates are
+                removed before the run starts.
               </small>
-            </span>
-          </label>
+            </label>
+            {scopeError ? (
+              <InlineNotice tone="warning" title="URL cohort needs attention">
+                {scopeError}
+              </InlineNotice>
+            ) : null}
+            <div className="form-actions">
+              <Button
+                type="submit"
+                variant="secondary"
+                disabled={!siteId || startAudit.isPending || !urlList.trim()}
+              >
+                Run URL list audit
+              </Button>
+            </div>
+          </form>
         </details>
-      ) : null}
-      <details className="audit-scope-panel">
-        <summary>Expert audit scope</summary>
-        <form onSubmit={startExactCohort}>
-          <div>
-            <h2>Audit an exact URL cohort</h2>
-            <p>
-              Paste one absolute URL per line. Marketingovo crawls only this
-              list and keeps each URL as a seed, which is useful for migrations,
-              templates, QA samples, and verification runs.
-            </p>
-          </div>
-          <label htmlFor="audit-exact-urls">
-            URL list
-            <textarea
-              id="audit-exact-urls"
-              value={urlList}
-              onChange={(event) => setUrlList(event.currentTarget.value)}
-              placeholder={
-                "https://example.com/pricing\nhttps://example.com/docs/getting-started"
-              }
-              rows={6}
+        {startAudit.isError ? (
+          <InlineNotice tone="danger" title="Audit could not start">
+            {startAudit.error.message}
+          </InlineNotice>
+        ) : null}
+        {startAudit.isSuccess ? (
+          <InlineNotice tone="success" title="Audit queued">
+            The API accepted the run. Refresh or watch the status below.
+          </InlineNotice>
+        ) : null}
+        <QueryState
+          isLoading={query.isLoading}
+          error={query.error}
+          siteId={siteId}
+          onRetry={() => void query.refetch()}
+        >
+          <FreshnessNotice meta={query.data?.meta} />
+          <AuditComparisonCard runs={auditRuns} />
+          {auditRuns.length > 0 ? (
+            <DataTable data={auditRuns} columns={columns} label="Audit runs" />
+          ) : (
+            <EmptyState
+              title="No audit runs yet"
+              description="Start a full baseline audit to populate crawl history and prioritized actions."
             />
-            <small>
-              URLs must use the project origin. Fragments and duplicates are
-              removed before the run starts.
-            </small>
-          </label>
-          {scopeError ? (
-            <InlineNotice tone="warning" title="URL cohort needs attention">
-              {scopeError}
-            </InlineNotice>
-          ) : null}
-          <div className="form-actions">
-            <Button
-              type="submit"
-              variant="secondary"
-              disabled={!siteId || startAudit.isPending || !urlList.trim()}
-            >
-              Run URL list audit
-            </Button>
-          </div>
-        </form>
-      </details>
-      {startAudit.isError ? (
-        <InlineNotice tone="danger" title="Audit could not start">
-          {startAudit.error.message}
-        </InlineNotice>
-      ) : null}
-      {startAudit.isSuccess ? (
-        <InlineNotice tone="success" title="Audit queued">
-          The API accepted the run. Refresh or watch the status below.
-        </InlineNotice>
-      ) : null}
-      <QueryState
-        isLoading={query.isLoading}
-        error={query.error}
-        siteId={siteId}
-        onRetry={() => void query.refetch()}
-      >
-        <FreshnessNotice meta={query.data?.meta} />
-        <AuditComparisonCard runs={auditRuns} />
-        {auditRuns.length > 0 ? (
-          <DataTable data={auditRuns} columns={columns} label="Audit runs" />
-        ) : (
-          <EmptyState
-            title="No audit runs yet"
-            description="Start a full baseline audit to populate crawl history and prioritized actions."
-          />
-        )}
-      </QueryState>
+          )}
+        </QueryState>
+      </CapabilityGate>
     </div>
   );
 }

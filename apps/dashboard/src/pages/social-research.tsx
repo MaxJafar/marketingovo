@@ -1,19 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import { useSite } from "../context/site-context";
 import { useIntegrations } from "../api/queries";
-import { PixelSprite } from "../components/pixel-sprite";
-import { panelGlyphs, socialGlyphs } from "../components/pixel-glyphs";
-import { PixelLineChart, SparkBars } from "../components/pixel-charts";
-import { DEMO, formatCompact } from "../lib/intel";
 
 /**
  * Social research.
  *
- * Marketingovo has no social connector yet, and this page says so rather than
- * dressing the sample set up as measurement. The charts are here because the
- * shape of the answer is worth showing before the data source exists — but
- * every one of them carries a demo flag, and the first thing the page states is
- * which sources are actually connected.
+ * Marketingovo has no social listening collector, and this page says so
+ * plainly instead of drawing sample charts. What IS measured lives elsewhere:
+ * the content calendar records exactly what was published where, and the
+ * cross-channel report counts those sends with their availability stated.
+ * A chart of invented mentions would poison both.
  */
 
 const SOCIAL_CONNECTOR_HINT = [
@@ -50,13 +46,15 @@ export function SocialResearchPage() {
           {connected.length > 0 ? (
             <p className="pixel-hero-sub">
               {connected.length} social source
-              {connected.length === 1 ? "" : "s"} connected. Mention volumes
-              below still come from the sample set until the collector ships.
+              {connected.length === 1 ? "" : "s"} connected for publishing.
+              Listening — mentions, sentiment, engagement — has no collector
+              yet, so nothing of that kind is measured or shown.
             </p>
           ) : (
             <p className="pixel-hero-sub">
-              No social source is connected, so nothing on this page is measured
-              from your accounts. Everything below is a labelled sample.{" "}
+              No social source is connected, and social listening has no
+              collector yet — so this page shows no mention or sentiment figures
+              at all rather than inventing them.{" "}
               <Link to="/integrations" className="pixel-linklike">
                 connect a source
               </Link>
@@ -66,71 +64,32 @@ export function SocialResearchPage() {
       </section>
 
       <div className="pixel-grid">
-        <section className="pixel-panel pixel-col-8">
+        <section className="pixel-panel pixel-col-6">
           <div className="pixel-panel-head">
-            <h2>Mentions trend</h2>
-            <span className="pixel-panel-mark">
-              <span className="pixel-demo-flag">demo</span>
-              <PixelSprite
-                src="/pixel/panel/chat.png"
-                fallback={panelGlyphs.chat}
-                size={22}
-              />
-            </span>
+            <h2>What is measured today</h2>
           </div>
           <div className="pixel-panel-body">
-            <PixelLineChart
-              title="Sample mentions trend over thirty days"
-              series={DEMO.mentionsSeries.map((entry) => ({
-                ...entry,
-                points: [...entry.points],
-              }))}
-              xLabels={[...DEMO.mentionsAxis]}
-              height={220}
-            />
-            <div className="pixel-feed-meta" style={{ marginTop: 12 }}>
-              {DEMO.mentionsSeries.map((entry) => (
-                <span key={entry.id}>
-                  <span style={{ color: entry.colour }}>■</span> {entry.label}
-                </span>
-              ))}
+            <p className="pixel-hero-sub">
+              Publishing is measured end to end: every post staged in the
+              calendar keeps an immutable record of the exact request sent to
+              each platform, and the cross-channel report counts published,
+              refused, and indeterminate sends per platform.
+            </p>
+            <div className="pixel-row-actions" style={{ marginTop: 12 }}>
+              <Link
+                to="/calendar"
+                className="pixel-button pixel-button-primary"
+              >
+                Open the calendar →
+              </Link>
+              <Link to="/report" className="pixel-button">
+                See it in the report →
+              </Link>
             </div>
           </div>
         </section>
 
-        <section className="pixel-panel pixel-col-4">
-          <div className="pixel-panel-head">
-            <h2>By platform</h2>
-            <span className="pixel-panel-mark">
-              <span className="pixel-demo-flag">demo</span>
-            </span>
-          </div>
-          <div className="pixel-panel-body">
-            <div className="pixel-platforms">
-              {DEMO.platforms.map((platform) => (
-                <div className="pixel-platform" key={platform.id}>
-                  <PixelSprite
-                    src={`/pixel/social/${platform.id}.png`}
-                    fallback={socialGlyphs[platform.id]}
-                    size={20}
-                  />
-                  <span className="pixel-platform-name">{platform.name}</span>
-                  <SparkBars
-                    values={[...DEMO.mentionsSpark]}
-                    accent="cyan"
-                    width={52}
-                    height={18}
-                  />
-                  <span className="pixel-platform-count">
-                    {formatCompact(platform.count)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="pixel-panel pixel-col-12">
+        <section className="pixel-panel pixel-col-6">
           <div className="pixel-panel-head">
             <h2>Ask the agent</h2>
           </div>

@@ -133,7 +133,30 @@ describe("Marketingovo MCP public contract", () => {
       "marketingovo_content_plan_start",
       "marketingovo_osint_research_start",
       "marketingovo_monitoring_status",
+      "marketingovo_ads_cabinets",
+      "marketingovo_ads_performance",
+      "marketingovo_ads_audit_start",
+      "marketingovo_campaign_stage",
+      "marketingovo_brand_kit",
+      "marketingovo_email_templates",
+      "marketingovo_email_draft",
+      "marketingovo_marketing_report",
+      "marketingovo_campaign_link",
     ]);
+    // No approve, publish or mutate tool, and this assertion is why one cannot
+    // be added quietly: an agent that could approve its own staged payload
+    // would route around the transport split that keeps a person between a
+    // draft and the operator's ad budget.
+    //
+    // `mutate` is named here for Google Ads specifically. Google publishes no
+    // read-only scope, so the credential this product holds can write; the
+    // guarantee that it does not lives above the permission, which means it
+    // has to be asserted rather than assumed. See ADR 0008.
+    expect(
+      PUBLIC_TOOL_NAMES.filter((name) =>
+        /approve|publish|launch|mutate/iu.test(name),
+      ),
+    ).toEqual([]);
     expect(SESSION_TOOL_NAMES).toEqual([
       "marketingovo_session_list",
       "marketingovo_session_attach",

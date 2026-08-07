@@ -9,7 +9,10 @@ const { PUBLIC_AGENT_TOOL_CONTRACTS, PUBLIC_AGENT_TOOL_NAMES } = await import(
 );
 const expectedTools = [...PUBLIC_AGENT_TOOL_NAMES];
 
-assert.equal(PUBLIC_AGENT_TOOL_CONTRACTS.length, 10);
+// A literal count, on purpose. Every entry here is a capability an operator
+// grants an agent over their marketing data and ad budget, so growing the
+// surface should require editing this line and thinking about why.
+assert.equal(PUBLIC_AGENT_TOOL_CONTRACTS.length, 19);
 assert.equal(new Set(expectedTools).size, expectedTools.length);
 for (const contract of PUBLIC_AGENT_TOOL_CONTRACTS) {
   assert.equal(contract.inputSchema.type, "object");

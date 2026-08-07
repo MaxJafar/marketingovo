@@ -4,8 +4,13 @@
   <img src="assets/brand/marketingovo-readme-poster.png" alt="Marketingovo — local-first marketing intelligence for SEO audits, competitor intelligence, content signals, and verified results">
 </p>
 
-**A local-first SEO and public-web OSINT system that turns crawl, Search
-Console, GA4, performance, SERP, and competitive signals into verified actions.**
+**The 360° marketing terminal — email, social, SEO, ads, competitors and
+trends under one roof.** A marketer's data lives fragmented across a dozen
+consoles that do not talk to each other and quietly disagree. Marketingovo
+exists to consolidate it: one local-first dashboard that turns crawl, Search
+Console, GA4, ad platform, publishing, performance, SERP and trend signals
+into verified actions and one client-ready report — and says plainly what it
+could not measure.
 
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-5b63ff)](LICENSE)
 [![Telemetry](https://img.shields.io/badge/telemetry-off%20by%20default-242b36)](PRIVACY.md)
@@ -16,6 +21,20 @@ keeps projects and credentials under your control. It does more than produce an
 issue dump: it connects technical evidence to organic exposure, conversion
 exposure, reach, confidence, and effort so a marketer can decide what to fix
 first and verify the result after the next audit.
+
+The mission is consolidation without fabrication. Every channel's console
+shows its own numbers on its own model; pulling them under a single roof is
+only useful if the seams stay visible. So Marketingovo joins the channels
+where joining is arithmetic — spend, published posts, resolved issues — and
+refuses the joins that would be inventions, with the refusal printed where
+the number would have been.
+
+One rule runs through all of it: **a value that was not measured is `null` with
+a stated reason, never a zero.** "This campaign spent nothing" and "we could not
+read this account" call for opposite actions, and only one of them is about the
+account. The same discipline is why the cross-channel report refuses totals that
+would be fabrications, and why the paid audit reports the share of an account it
+could not inspect rather than treating silence as a clean bill.
 
 > **Built-in public-web OSINT.** Research your site and up to four explicitly
 > supplied public HTTPS targets from the dashboard (`/osint`), CLI, REST API,
@@ -28,7 +47,7 @@ first and verify the result after the next audit.
 > authenticated-scraping, contact-enrichment, breach, or dark-web tool. See the
 > [OSINT layer guide](docs/osint-layer.md).
 
-> **Status: 1.1.0.** The REST API, OpenAPI document, SDK, ten-tool agent
+> **Status: 1.1.0.** The REST API, OpenAPI document, SDK, nineteen-tool agent
 > contract registry, CLI and `.marketingovo` bundle format are stable; breaking
 > changes to them require a major version. Every release gate is recorded with
 > the command that produced it in
@@ -42,6 +61,11 @@ first and verify the result after the next audit.
 > See [release status](docs/release-status.md) for exactly what was verified.
 
 ## Why Marketingovo
+
+One terminal for the channels a marketing team actually runs — SEO audits,
+Google and Meta ads, the social calendar, email production, competitor
+research and search-trend signals — with one action queue and one report
+across all of them.
 
 - **Actions, not noise.** Every prioritized action explains impact, effort,
   confidence, affected URLs, evidence, and verification state.
@@ -58,11 +82,87 @@ first and verify the result after the next audit.
   an exact-name confirmation; shared BYOK credentials remain separately
   revocable.
 - **Cross-source evidence.** Crawl, GSC, GA4, Lighthouse, PSI, Trends, SerpAPI,
-  and DataForSEO use one normalized model.
+  DataForSEO, Meta Ads and Google Ads use one normalized model.
+- **One report across every channel, with its gaps stated.** The document you
+  send a client on the first of the month — paid, organic, social, email, the
+  competitive landscape and completed work in one place, with charts for what
+  was measured and a PDF download drawn locally with no browser involved. It
+  refuses the totals that would be fabrications and says why: conversions are
+  never summed across channels, because Meta's attributed conversions and
+  Analytics' key events count the same purchase on different models. A
+  disconnected source shows its reason where the number would be, never a
+  zero; a change is only reported when both periods were measured; and an
+  unmeasured row is named beneath a chart, never drawn as an empty bar.
+  Schedules can generate the report daily, weekly, or monthly. See the
+  [cross-channel report guide](docs/cross-channel-report.md).
+- **The join between the ads and the site.** An SEO tool knows what a page
+  says; an ads tool knows where the money goes; neither knows the other. This
+  holds both, so the paid audit also checks the pages the ads land on: a
+  destination returning 404 — every click billed, none arriving, invisible in
+  every ad-platform metric — a redirect that silently drops the click
+  identifier so conversions are never attributed back, and landing pages that
+  never mention what is being bid on, which is what a low quality score
+  actually means. See the
+  [landing alignment guide](docs/landing-alignment.md).
+- **Google Ads, read and audited.** Search terms that took money and converted
+  nothing, the same query wasting spend across several campaigns, broken
+  conversion tracking, campaigns held back by budget versus by ad rank — two
+  problems with opposite remedies that Google reports separately and most
+  dashboards merge. It also reports how much spend sits in Performance Max,
+  whose queries Google exposes to nobody: an audit that inspects the third of
+  an account it can see and reports a clean bill is lying by omission. Needs
+  your own developer token from a Google Ads manager account; this ships none,
+  because a token compiled into the app would make every install one identity
+  to Google. Read-only by design. See the
+  [Google Ads guide](docs/google-ads.md).
+- **QR codes that are free the way a hammer is free.** Generated locally, with
+  no account and no service resolving them, so nothing can meter them, revoke
+  them or start charging — including after this software is uninstalled. The
+  encoder is written here rather than taken from a package, because a code
+  printed on ten thousand leaflets is a commitment measured in years. The
+  tagging is checked before the code exists, and the checks refuse rather than
+  warn: a printed code has no second attempt, so a capital letter that would
+  split one campaign into two unmergeable rows is an error, not a note. It also
+  judges whether the code can physically be scanned at the width it will be
+  printed, which error correction cannot rescue. See the
+  [campaign links guide](docs/campaign-links.md).
+- **Email campaigns an agent can actually write.** Give the workspace a brand
+  kit — colours, type stacks, logo, voice, legal footer — and an attached agent
+  drafts the campaign HTML against it. Every draft is sanitized, CSS-inlined and
+  checked against what real clients do: Outlook rendering with Word and ignoring
+  flexbox, images without alt text that Outlook blocks by default, Gmail
+  clipping past 102KB, contrast below WCAG AA, a missing unsubscribe tag. The
+  agent iterates against that report until it is clean. Export the HTML into
+  your own email service; Marketingovo does not send. See the
+  [email builder guide](docs/email-builder.md).
+- **One content calendar across platforms.** Write a post once and schedule it
+  to Telegram, X, a Facebook Page and Instagram, with an immutable record of the
+  exact request sent to each. Uploaded files stay on your machine and go
+  straight to the platform; only Instagram needs a public URL, because its API
+  fetches media rather than accepting an upload, and you supply that from your
+  own storage. An agent can draft and stage every post; only a person in a
+  browser can approve or publish one. See the
+  [content calendar guide](docs/content-calendar.md).
+- **Paid media beside organic.** Link Facebook and Instagram ad cabinets, read
+  spend and delivery split by platform, and get paid findings — disapproved ads,
+  missing conversion tracking, cost-per-conversion drift, creative fatigue,
+  budget under-pacing — in the same prioritized queue as SEO work. A metric
+  nobody measured is `null` with a reason, never a zero, and reach has no window
+  total because adding it would count the same person twice. An attached agent
+  can draft a whole campaign; only a person in a browser can approve one, and
+  nothing in this build sends to Meta. See the
+  [Meta Ads guide](docs/meta-ads.md).
 - **Public-web OSINT research.** Run a bounded, cited dossier on your own site
   and explicitly supplied public targets, with source states, publishing cadence,
   public social/profile links, business paths, an exact-match graph, and cited
   repeat-pass changes.
+- **Search-trend research.** Keyword work reads Google Trends interest,
+  momentum and a growing/steady/declining verdict through the built-in
+  integration, and the opt-in Python worker ships a `pytrends` adapter
+  (`marketingovo-worker trends`) that emits the same vocabulary as portable
+  JSON. Both state that Google's unofficial endpoints report relative
+  interest rather than search volumes, and both degrade to stated reasons —
+  never zeros — when a keyword has no data or the endpoint refuses.
 - **Audit evidence workbench.** Paginated crawl paths, redirect chains,
   reciprocal hreflang, sitemap coverage, and bounded custom extractions expose
   the exact source state behind a finding instead of collapsing missing data to

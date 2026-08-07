@@ -27,6 +27,16 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--version", action="version", version=__version__)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("protocol", help="serve one length-delimited Protobuf analysis session")
+    trends = commands.add_parser(
+        "trends",
+        help=(
+            "research Google Trends interest for up to five keywords over "
+            "pytrends (the one network-enabled adapter; operator-invoked only)"
+        ),
+    )
+    trends.add_argument("--keyword", dest="keywords", action="append", required=True)
+    trends.add_argument("--timeframe", default="today 12-m")
+    trends.add_argument("--geo", default="")
     analyze = commands.add_parser("analyze", help="normalize and analyze one bounded spool")
     analyze.add_argument("--run-id", required=True)
     analyze.add_argument("--project-id", default="local")
@@ -72,6 +82,26 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "protocol":
         return run_protocol()
+    if args.command == "trends":
+        from datetime import UTC, datetime
+
+        from .trends import run_trends_research
+
+        try:
+            research = run_trends_research(
+                args.keywords,
+                timeframe=args.timeframe,
+                geo=args.geo,
+                generated_at=datetime.now(UTC).isoformat(timespec="seconds"),
+            )
+        except ValueError as exc:
+            sys.stderr.write(f"{exc}\n")
+            return 2
+        sys.stdout.buffer.write(canonical_json_bytes(research.model_dump(mode="json")))
+        sys.stdout.buffer.flush()
+        # Reachability is not correctness: an entirely-unavailable result still
+        # exits 0, because the stated reasons are the honest answer.
+        return 0
     run_id = getattr(args, "run_id", "unknown")
     try:
         request = _request(args)

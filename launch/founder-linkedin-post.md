@@ -6,7 +6,7 @@ An SEO audit can return 1,000 issues and still leave the most important question
 
 **What should we fix first — and how will we know it worked?**
 
-Today I am open-sourcing Marketingovo `1.1.0`, a local-first SEO operations system built around that decision.
+Today I am open-sourcing Marketingovo `1.1.0`, a local-first marketing system — SEO, paid media, social publishing, email and public-web research — built around that decision.
 
 Instead of stopping at an issue list, Marketingovo connects crawl and marketing evidence to an action queue. An action can show impact, effort, confidence, affected URLs, its supporting evidence, and what should be checked after the fix.
 

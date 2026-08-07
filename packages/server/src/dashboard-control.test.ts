@@ -172,6 +172,52 @@ describe("dashboard control panel API", () => {
     expect(await server.runtime.schedules.list(project.id)).toHaveLength(0);
   });
 
+  it("creates a schedule that generates the cross-channel report", async () => {
+    const { server, project, headers } = await setup();
+    const created = await server.app.inject({
+      method: "POST",
+      url: "/api/v1/schedules",
+      headers,
+      payload: {
+        projectId: project.id,
+        cron: "0 8 1 * *",
+        timezone: "UTC",
+        enabled: true,
+        workflowId: "marketing-report",
+        options: { compare: true },
+      },
+    });
+    expect(created.statusCode).toBe(201);
+    expect(created.json()).toMatchObject({
+      workflowId: "marketing-report",
+      options: { compare: true },
+    });
+    const schedule = created.json() as { id: string };
+
+    const retargeted = await server.app.inject({
+      method: "PATCH",
+      url: `/api/v1/schedules/${schedule.id}`,
+      headers,
+      payload: { workflowId: "audit" },
+    });
+    expect(retargeted.statusCode).toBe(200);
+    expect(retargeted.json()).toMatchObject({ workflowId: "audit" });
+
+    const rejected = await server.app.inject({
+      method: "POST",
+      url: "/api/v1/schedules",
+      headers,
+      payload: {
+        projectId: project.id,
+        cron: "0 8 * * *",
+        timezone: "UTC",
+        enabled: true,
+        workflowId: "not-a-workflow",
+      },
+    });
+    expect(rejected.statusCode).toBe(400);
+  });
+
   it("validates and persists project settings instead of returning an alpha placeholder", async () => {
     const { server, project, headers } = await setup();
     const updated = await server.app.inject({

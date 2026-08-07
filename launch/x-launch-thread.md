@@ -6,7 +6,7 @@ Eight-post launch thread. Publish the GitHub link in post 8 so the opening posts
 
 An SEO audit can find 1,000 issues and still fail to answer one question: what should we fix first?
 
-Today I am open-sourcing Marketingovo `1.1.0` — a local-first SEO operations system built around actions, evidence, priority, and verification. 🧵
+Today I am open-sourcing Marketingovo `1.1.0` — a local-first marketing system for SEO, paid media, social, email and public-web research, built around actions, evidence, priority, and verification. 🧵
 
 ## 2/8
 

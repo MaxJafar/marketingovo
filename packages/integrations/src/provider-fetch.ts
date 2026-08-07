@@ -404,3 +404,18 @@ export const safeGoogleAnalyticsFetch = createSafeProviderFetch({
 export const safePageSpeedFetch = createSafeProviderFetch({
   allowedHosts: ["pagespeedonline.googleapis.com"],
 });
+
+/** Meta Marketing, Pages and Instagram reads all share one Graph host. */
+export const safeMetaGraphFetch = createSafeProviderFetch({
+  allowedHosts: ["graph.facebook.com"],
+});
+
+/**
+ * Google Ads is queried with GAQL, so one host serves every read.
+ *
+ * Deliberately excludes `ads.google.com`: findings deep-link there for the
+ * operator's browser to open, and the daemon must never follow one.
+ */
+export const safeGoogleAdsFetch = createSafeProviderFetch({
+  allowedHosts: ["googleads.googleapis.com"],
+});

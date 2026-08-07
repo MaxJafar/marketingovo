@@ -26,10 +26,7 @@ const ignoredPaths = new Set([
   "apps/desktop/src-tauri/binaries",
   "apps/desktop/src-tauri/runtime",
 ]);
-const ignoredFiles = new Set([
-  "pnpm-lock.yaml",
-  "validate-no-containers.mjs",
-]);
+const ignoredFiles = new Set(["pnpm-lock.yaml", "validate-no-containers.mjs"]);
 const textExtensions = new Set([
   "",
   ".cjs",

@@ -22,6 +22,26 @@
     "./agent-tools": {
       "types": "./dist/agent-tools.d.ts",
       "default": "./dist/agent-tools.js"
+    },
+    "./channels": {
+      "types": "./dist/channels.d.ts",
+      "default": "./dist/channels.js"
+    },
+    "./publishing": {
+      "types": "./dist/publishing.d.ts",
+      "default": "./dist/publishing.js"
+    },
+    "./email": {
+      "types": "./dist/email.d.ts",
+      "default": "./dist/email.js"
+    },
+    "./reporting": {
+      "types": "./dist/reporting.d.ts",
+      "default": "./dist/reporting.js"
+    },
+    "./campaign-links": {
+      "types": "./dist/campaign-links.d.ts",
+      "default": "./dist/campaign-links.js"
     }
   },
   "files": [

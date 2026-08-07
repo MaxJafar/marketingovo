@@ -42,6 +42,46 @@ const routes = [
   }),
   createRoute({
     getParentRoute: () => rootRoute,
+    path: "/ads",
+    component: lazyRouteComponent(
+      () => import("../pages/ad-cabinets"),
+      "AdCabinetsPage",
+    ),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/calendar",
+    component: lazyRouteComponent(
+      () => import("../pages/content-calendar"),
+      "ContentCalendarPage",
+    ),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/report",
+    component: lazyRouteComponent(
+      () => import("../pages/marketing-report"),
+      "MarketingReportPage",
+    ),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/links",
+    component: lazyRouteComponent(
+      () => import("../pages/campaign-links"),
+      "CampaignLinksPage",
+    ),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/email",
+    component: lazyRouteComponent(
+      () => import("../pages/email-builder"),
+      "EmailBuilderPage",
+    ),
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
     path: "/osint",
     component: lazyRouteComponent(
       () => import("../pages/osint-research"),

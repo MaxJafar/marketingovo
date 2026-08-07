@@ -447,7 +447,12 @@ export const ProjectSchema = Type.Object(
   {
     id: IdentifierSchema,
     name: Type.String({ minLength: 1, maxLength: 160 }),
-    canonicalUrl: UrlSchema,
+    /**
+     * `null` when the workspace has no website. Widening this from a bare URL
+     * is observable only for workspaces created without one, which cannot
+     * exist in a database written before this field became optional.
+     */
+    canonicalUrl: Type.Union([UrlSchema, Type.Null()]),
     createdAt: IsoDateTimeSchema,
     updatedAt: IsoDateTimeSchema,
   },
@@ -1107,8 +1112,75 @@ export const IntegrationStatusSchema = Type.Union([
 ]);
 export type IntegrationStatus = Static<typeof IntegrationStatusSchema>;
 
+/**
+ * What a workspace can currently do, derived from what it actually holds.
+ *
+ * A workspace is not required to have a website. Most of this product works
+ * without one, and the surfaces that genuinely cannot — anything that starts by
+ * crawling the site — should say which input they are missing rather than
+ * refusing the whole workspace. Capabilities are the vocabulary for that: each
+ * surface declares what it needs, and a missing capability carries the reason
+ * and the one step that supplies it.
+ *
+ * `ads` and `social` are reserved for the channel layer and are never reported
+ * as present yet; they are named here so surfaces can be written against the
+ * final vocabulary rather than being renamed later.
+ */
+export const WorkspaceCapabilitySchema = Type.Union([
+  Type.Literal("website"),
+  Type.Literal("search-console"),
+  Type.Literal("analytics"),
+  Type.Literal("serp"),
+  Type.Literal("ads"),
+  Type.Literal("social"),
+]);
+export type WorkspaceCapability = Static<typeof WorkspaceCapabilitySchema>;
+
+export const WorkspaceCapabilityStateSchema = Type.Object(
+  {
+    capability: WorkspaceCapabilitySchema,
+    available: Type.Boolean(),
+    /** Why it is unavailable, in the operator's terms. Empty when available. */
+    reason: Type.String(),
+    /** The single next step that supplies it, or `null` when there is none. */
+    remedy: Type.Union([
+      Type.Object(
+        {
+          label: Type.String(),
+          href: Type.String(),
+        },
+        { additionalProperties: false },
+      ),
+      Type.Null(),
+    ]),
+  },
+  { additionalProperties: false },
+);
+export type WorkspaceCapabilityState = Static<
+  typeof WorkspaceCapabilityStateSchema
+>;
+
+export const WorkspaceCapabilitiesSchema = Type.Object(
+  {
+    projectId: IdentifierSchema,
+    available: Type.Array(WorkspaceCapabilitySchema),
+    states: Type.Array(WorkspaceCapabilityStateSchema),
+  },
+  { additionalProperties: false },
+);
+export type WorkspaceCapabilities = Static<typeof WorkspaceCapabilitiesSchema>;
+
 export const IntegrationSchema = Type.Object({
   provider: IdentifierSchema,
+  /**
+   * Which credential under this provider. One Meta login reaches many ad
+   * cabinets and an agency needs a different login per client, so a connection
+   * is `(provider, account)` rather than one row per provider.
+   *
+   * Optional in the contract and omitted for `default`, so every request and
+   * response written against the single-account API stays valid.
+   */
+  account: Type.Optional(IdentifierSchema),
   label: Type.String(),
   status: IntegrationStatusSchema,
   secretRef: Type.Optional(Type.String()),
@@ -1137,6 +1209,15 @@ export const ScheduleSchema = Type.Object({
   timezone: Type.String({ minLength: 1, maxLength: 80 }),
   enabled: Type.Boolean(),
   nextRunAt: IsoDateTimeSchema,
+  /**
+   * What this schedule runs.
+   *
+   * Optional and defaulting to `audit`, because until the reporting layer a
+   * schedule could only ever start an audit — the worker had the workflow
+   * hardcoded. Every request written against that behaviour stays valid.
+   */
+  workflowId: Type.Optional(IdentifierSchema),
+  options: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
   createdAt: IsoDateTimeSchema,
   updatedAt: IsoDateTimeSchema,
 });
@@ -1170,7 +1251,8 @@ export type ProblemDetails = Static<typeof ProblemDetailsSchema>;
 export const CreateProjectInputSchema = Type.Object(
   {
     name: Type.String({ minLength: 1, maxLength: 160 }),
-    canonicalUrl: UrlSchema,
+    /** Optional: a workspace can be created first and given a website later. */
+    canonicalUrl: Type.Optional(UrlSchema),
   },
   { additionalProperties: false },
 );
@@ -1197,6 +1279,15 @@ export const ProjectDeletionCountsSchema = Type.Object(
     contextVersions: Type.Integer({ minimum: 0 }),
     contextEntries: Type.Integer({ minimum: 0 }),
     extractionRuleVersions: Type.Integer({ minimum: 0 }),
+    /**
+     * Channel-layer records. A receipt that omitted them would under-report
+     * what a deletion removed, and the point of the receipt is that it does
+     * not.
+     */
+    channelAccounts: Type.Integer({ minimum: 0 }),
+    channelMetrics: Type.Integer({ minimum: 0 }),
+    campaignBriefs: Type.Integer({ minimum: 0 }),
+    publishIntents: Type.Integer({ minimum: 0 }),
   },
   { additionalProperties: false },
 );
@@ -1696,18 +1787,25 @@ export const OsintDossierSchema = Type.Object(
 );
 export type OsintDossier = Static<typeof OsintDossierSchema>;
 
+/**
+ * Every workflow a run can execute. Shared by StartRunInput and the schedule
+ * surfaces so a schedule can only name a workflow the runtime actually has.
+ */
+export const WorkflowIdSchema = Type.Union([
+  Type.Literal("audit"),
+  Type.Literal("compare"),
+  Type.Literal("keyword-research"),
+  Type.Literal("content-plan"),
+  Type.Literal("osint-research"),
+  Type.Literal("ads-audit"),
+  Type.Literal("marketing-report"),
+]);
+export type WorkflowId = Static<typeof WorkflowIdSchema>;
+
 export const StartRunInputSchema = Type.Object(
   {
     projectId: IdentifierSchema,
-    workflowId: Type.Optional(
-      Type.Union([
-        Type.Literal("audit"),
-        Type.Literal("compare"),
-        Type.Literal("keyword-research"),
-        Type.Literal("content-plan"),
-        Type.Literal("osint-research"),
-      ]),
-    ),
+    workflowId: Type.Optional(WorkflowIdSchema),
     goal: Type.Optional(Type.String({ maxLength: 240 })),
     options: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
   },

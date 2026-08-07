@@ -35,6 +35,37 @@ import type {
   UpdateActionInput,
 } from "@marketingovo/contracts";
 import type {
+  CampaignBrief,
+  CampaignDeliverable,
+  ChannelAccount,
+  ChannelMetric,
+  PublishIntent,
+  SearchTermRecord,
+} from "@marketingovo/contracts/channels";
+import type {
+  MediaAsset,
+  PublishRecord,
+  SocialPlatform,
+} from "@marketingovo/contracts/publishing";
+import type {
+  BrandKitVersion,
+  BrandKitWorkspace,
+  EmailTemplate,
+  EmailTemplateVersion,
+  EmailTemplateWorkspace,
+} from "@marketingovo/contracts/email";
+import type {
+  MarketingReport,
+  MarketingReportSummary,
+} from "@marketingovo/contracts/reporting";
+import type {
+  CampaignLink,
+  CampaignLinkFinding,
+  QrPlacement,
+  QrStyle,
+  UtmParameters,
+} from "@marketingovo/contracts/campaign-links";
+import type {
   ProjectBundleConnector,
   ProjectBundleIssueAdjudication,
   ProjectBundleMetric,
@@ -85,7 +116,8 @@ export interface ProjectSettings {
 
 export interface ProjectSettingsPatch {
   name?: string;
-  canonicalUrl?: string;
+  /** `null` clears the website; a URL adds or replaces one. */
+  canonicalUrl?: string | null;
   timezone?: string | null;
   reportingCurrency?: string | null;
   weeklyDigest?: boolean;
@@ -488,9 +520,225 @@ function asProject(row: Row): Project {
   return {
     id: String(row.id),
     name: String(row.name),
-    canonicalUrl: String(row.canonical_url),
+    // NULL is "this workspace has no website", not an empty URL. Coercing it to
+    // a string here would make every downstream guard read a plausible-looking
+    // "" and treat an absent site as a present one.
+    canonicalUrl: row.canonical_url === null ? null : String(row.canonical_url),
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
+  };
+}
+
+function asIntegration(row: Row): Integration {
+  const account = String(row.account ?? "default");
+  return {
+    provider: String(row.provider),
+    // Omitted for the default account so a response written against the
+    // single-credential API is byte-identical to what it was before accounts.
+    ...(account === "default" ? {} : { account }),
+    label: String(row.label),
+    status: row.status as Integration["status"],
+    ...(row.secret_ref ? { secretRef: String(row.secret_ref) } : {}),
+    maskedIdentifier:
+      row.masked_identifier === null ? null : String(row.masked_identifier),
+    scopes: json<string[]>(row.scopes_json, []),
+    lastSyncAt: row.last_sync_at === null ? null : String(row.last_sync_at),
+    nextSyncAt: row.next_sync_at === null ? null : String(row.next_sync_at),
+    expiresAt: row.expires_at === null ? null : String(row.expires_at),
+    quota: json<Integration["quota"]>(row.quota_json, null),
+    ...(Object.keys(json<Record<string, unknown>>(row.config_json, {})).length >
+    0
+      ? { configuration: json<Record<string, unknown>>(row.config_json, {}) }
+      : {}),
+  };
+}
+
+function asChannelAccount(row: Row): ChannelAccount {
+  return {
+    id: String(row.id),
+    workspaceId: String(row.workspace_id),
+    provider: String(row.provider),
+    account: String(row.account),
+    kind: row.kind as ChannelAccount["kind"],
+    externalId: String(row.external_id),
+    displayName: String(row.display_name),
+    currency: row.currency === null ? null : String(row.currency),
+    dailySpendCap:
+      row.daily_spend_cap === null ? null : Number(row.daily_spend_cap),
+    totalSpendCap:
+      row.total_spend_cap === null ? null : Number(row.total_spend_cap),
+    createdAt: String(row.created_at),
+    archivedAt: row.archived_at === null ? null : String(row.archived_at),
+  };
+}
+
+function asChannelMetric(row: Row): ChannelMetric {
+  return {
+    channelAccountId: String(row.channel_account_id),
+    entityKind: row.entity_kind as ChannelMetric["entityKind"],
+    entityId: String(row.entity_id),
+    entityName: row.entity_name === null ? null : String(row.entity_name),
+    platform: row.platform as ChannelMetric["platform"],
+    date: String(row.date),
+    metricKey: row.metric_key as ChannelMetric["metricKey"],
+    // A NULL here is the whole point of the column being nullable. Number(null)
+    // is 0, and that single coercion would turn "we could not ask" into "we
+    // spent nothing" everywhere downstream.
+    value: row.value === null ? null : Number(row.value),
+    state: row.state as ChannelMetric["state"],
+    currency: row.currency === null ? null : String(row.currency),
+    source: String(row.source),
+    fetchedAt: String(row.fetched_at),
+    note: row.note === null ? null : String(row.note),
+  };
+}
+
+function asCampaignBrief(row: Row): CampaignBrief {
+  return {
+    id: String(row.id),
+    projectId: String(row.project_id),
+    title: String(row.title),
+    objective: String(row.objective),
+    audience: row.audience === null ? null : String(row.audience),
+    keyMessage: row.key_message === null ? null : String(row.key_message),
+    constraints: row.constraints === null ? null : String(row.constraints),
+    status: row.status as CampaignBrief["status"],
+    createdBy: String(row.created_by),
+    createdAt: String(row.created_at),
+    updatedAt: String(row.updated_at),
+  };
+}
+
+function asCampaignDeliverable(row: Row): CampaignDeliverable {
+  return {
+    id: String(row.id),
+    briefId: String(row.brief_id),
+    channel: row.channel as CampaignDeliverable["channel"],
+    headline: row.headline === null ? null : String(row.headline),
+    body: String(row.body),
+    callToAction:
+      row.call_to_action === null ? null : String(row.call_to_action),
+    destinationUrl:
+      row.destination_url === null ? null : String(row.destination_url),
+    creativeNotes:
+      row.creative_notes === null ? null : String(row.creative_notes),
+    createdBy: String(row.created_by),
+    createdAt: String(row.created_at),
+    updatedAt: String(row.updated_at),
+  };
+}
+
+function asBrandKitVersion(row: Row): BrandKitVersion {
+  return {
+    projectId: String(row.project_id),
+    revision: Number(row.revision),
+    profile: json<BrandKitVersion["profile"]>(
+      row.profile_json,
+      {} as BrandKitVersion["profile"],
+    ),
+    changeSummary: String(row.change_summary),
+    actor: String(row.actor),
+    createdAt: String(row.created_at),
+  };
+}
+
+function asEmailTemplate(row: Row): EmailTemplate {
+  return {
+    id: String(row.id),
+    projectId: String(row.project_id),
+    name: String(row.name),
+    purpose: row.purpose === null ? null : String(row.purpose),
+    latestRevision: Number(row.latest_revision ?? 0),
+    createdAt: String(row.created_at),
+    updatedAt: String(row.updated_at),
+  };
+}
+
+function asEmailTemplateVersion(row: Row): EmailTemplateVersion {
+  return {
+    templateId: String(row.template_id),
+    revision: Number(row.revision),
+    subject: String(row.subject),
+    preheader: String(row.preheader ?? ""),
+    sourceHtml: String(row.source_html),
+    compiledHtml: String(row.compiled_html),
+    plainText: String(row.plain_text),
+    report: json<EmailTemplateVersion["report"]>(
+      row.report_json,
+      {} as EmailTemplateVersion["report"],
+    ),
+    brandRevision:
+      row.brand_revision === null ? null : Number(row.brand_revision),
+    createdBy: String(row.created_by),
+    createdAt: String(row.created_at),
+  };
+}
+
+function asMediaAsset(row: Row): MediaAsset {
+  return {
+    id: String(row.id),
+    projectId: String(row.project_id),
+    filename: String(row.filename),
+    mediaType: String(row.media_type),
+    kind: row.kind as MediaAsset["kind"],
+    sizeBytes: Number(row.size_bytes),
+    sha256: String(row.sha256),
+    width: row.width === null ? null : Number(row.width),
+    height: row.height === null ? null : Number(row.height),
+    createdAt: String(row.created_at),
+    publicUrl: row.public_url === null ? null : String(row.public_url),
+    publicUrlSource:
+      row.public_url_source === null ? null : String(row.public_url_source),
+    publicUrlAt: row.public_url_at === null ? null : String(row.public_url_at),
+  };
+}
+
+function asPublishRecord(row: Row): PublishRecord {
+  return {
+    id: String(row.id),
+    intentId: String(row.intent_id),
+    projectId: String(row.project_id),
+    channelAccountId: String(row.channel_account_id),
+    platform: row.platform as PublishRecord["platform"],
+    state: row.state as PublishRecord["state"],
+    request: json<Record<string, unknown>>(row.request_json, {}),
+    idempotencyKey: String(row.idempotency_key),
+    providerId: row.provider_id === null ? null : String(row.provider_id),
+    permalink: row.permalink === null ? null : String(row.permalink),
+    error: row.error === null ? null : String(row.error),
+    attemptedAt: String(row.attempted_at),
+    completedAt: row.completed_at === null ? null : String(row.completed_at),
+  };
+}
+
+function asPublishIntent(row: Row): PublishIntent {
+  return {
+    id: String(row.id),
+    projectId: String(row.project_id),
+    deliverableId: String(row.deliverable_id),
+    channelAccountId: String(row.channel_account_id),
+    state: row.state as PublishIntent["state"],
+    payload: json<Record<string, unknown>>(row.payload_json, {}),
+    payloadHash: String(row.payload_hash),
+    scheduledAt: row.scheduled_at === null ? null : String(row.scheduled_at),
+    timezone: row.timezone === null ? null : String(row.timezone),
+    idempotencyKey:
+      row.idempotency_key === null ? null : String(row.idempotency_key),
+    budget: {
+      dailyBudget: row.daily_budget === null ? null : Number(row.daily_budget),
+      lifetimeBudget:
+        row.lifetime_budget === null ? null : Number(row.lifetime_budget),
+      currency: row.currency === null ? null : String(row.currency),
+    },
+    stagedBy: String(row.staged_by),
+    stagedAt: String(row.staged_at),
+    approvedBy: row.approved_by === null ? null : String(row.approved_by),
+    approvedAt: row.approved_at === null ? null : String(row.approved_at),
+    approvedPayloadHash:
+      row.approved_payload_hash === null
+        ? null
+        : String(row.approved_payload_hash),
+    note: row.note === null ? null : String(row.note),
   };
 }
 
@@ -762,7 +1010,9 @@ export class MarketingovoDatabase {
     const project: Project = {
       id: randomUUID(),
       name: input.name.trim(),
-      canonicalUrl: new URL(input.canonicalUrl).href,
+      canonicalUrl: input.canonicalUrl
+        ? new URL(input.canonicalUrl).href
+        : null,
       createdAt: timestamp,
       updatedAt: timestamp,
     };
@@ -778,11 +1028,15 @@ export class MarketingovoDatabase {
           project.createdAt,
           project.updatedAt,
         );
-      this.db
-        .prepare(
-          "INSERT INTO sites(id,project_id,canonical_url,created_at) VALUES(?,?,?,?)",
-        )
-        .run(randomUUID(), project.id, project.canonicalUrl, timestamp);
+      // `sites.canonical_url` is NOT NULL, so a website-less workspace has no
+      // site row at all rather than a row holding a placeholder.
+      if (project.canonicalUrl !== null) {
+        this.db
+          .prepare(
+            "INSERT INTO sites(id,project_id,canonical_url,created_at) VALUES(?,?,?,?)",
+          )
+          .run(randomUUID(), project.id, project.canonicalUrl, timestamp);
+      }
     });
     return project;
   }
@@ -839,6 +1093,18 @@ export class MarketingovoDatabase {
         ),
         extractionRuleVersions: count(
           "SELECT COUNT(*) AS count FROM project_extraction_rule_versions WHERE project_id=?",
+        ),
+        channelAccounts: count(
+          "SELECT COUNT(*) AS count FROM channel_accounts WHERE workspace_id=?",
+        ),
+        channelMetrics: count(
+          "SELECT COUNT(*) AS count FROM channel_metrics WHERE workspace_id=?",
+        ),
+        campaignBriefs: count(
+          "SELECT COUNT(*) AS count FROM campaign_briefs WHERE project_id=?",
+        ),
+        publishIntents: count(
+          "SELECT COUNT(*) AS count FROM publish_intents WHERE project_id=?",
         ),
       };
 
@@ -913,7 +1179,9 @@ export class MarketingovoDatabase {
     const canonicalUrl =
       patch.canonicalUrl === undefined
         ? project.canonicalUrl
-        : new URL(patch.canonicalUrl).href;
+        : patch.canonicalUrl === null
+          ? null
+          : new URL(patch.canonicalUrl).href;
     const settings = {
       timezone:
         patch.timezone === undefined
@@ -943,9 +1211,23 @@ export class MarketingovoDatabase {
           "UPDATE projects SET name=?, canonical_url=?, updated_at=? WHERE id=?",
         )
         .run(name, canonicalUrl, updatedAt, projectId);
-      this.db
-        .prepare("UPDATE sites SET canonical_url=? WHERE project_id=?")
-        .run(canonicalUrl, projectId);
+      // A workspace can gain a website long after it was created, so this has
+      // to insert as well as update. Clearing the website removes the row
+      // instead of writing a placeholder into a NOT NULL column.
+      if (canonicalUrl === null) {
+        this.db.prepare("DELETE FROM sites WHERE project_id=?").run(projectId);
+      } else {
+        const updated = this.db
+          .prepare("UPDATE sites SET canonical_url=? WHERE project_id=?")
+          .run(canonicalUrl, projectId);
+        if (updated.changes === 0) {
+          this.db
+            .prepare(
+              "INSERT INTO sites(id,project_id,canonical_url,created_at) VALUES(?,?,?,?)",
+            )
+            .run(randomUUID(), projectId, canonicalUrl, updatedAt);
+        }
+      }
       this.db
         .prepare(
           `INSERT INTO project_settings
@@ -3036,34 +3318,40 @@ export class MarketingovoDatabase {
   listIntegrations(): Integration[] {
     return (
       this.db
-        .prepare("SELECT * FROM integrations ORDER BY label")
+        .prepare("SELECT * FROM integrations ORDER BY label, account")
         .all() as Row[]
-    ).map((row) => ({
-      provider: String(row.provider),
-      label: String(row.label),
-      status: row.status as Integration["status"],
-      ...(row.secret_ref ? { secretRef: String(row.secret_ref) } : {}),
-      maskedIdentifier:
-        row.masked_identifier === null ? null : String(row.masked_identifier),
-      scopes: json<string[]>(row.scopes_json, []),
-      lastSyncAt: row.last_sync_at === null ? null : String(row.last_sync_at),
-      nextSyncAt: row.next_sync_at === null ? null : String(row.next_sync_at),
-      expiresAt: row.expires_at === null ? null : String(row.expires_at),
-      quota: json<Integration["quota"]>(row.quota_json, null),
-      ...(Object.keys(json<Record<string, unknown>>(row.config_json, {}))
-        .length > 0
-        ? { configuration: json<Record<string, unknown>>(row.config_json, {}) }
-        : {}),
-    }));
+    ).map((row) => asIntegration(row));
+  }
+
+  /**
+   * One connection. `account` is the credential discriminator, and `default`
+   * is what every single-credential provider and every pre-channel-layer row
+   * uses, so a caller that does not know about accounts still reads the row it
+   * always read.
+   */
+  getIntegration(provider: string, account = "default"): Integration | null {
+    const row = this.db
+      .prepare("SELECT * FROM integrations WHERE provider=? AND account=?")
+      .get(provider, account) as Row | undefined;
+    return row ? asIntegration(row) : null;
+  }
+
+  /** Every credential stored under one provider, oldest account key first. */
+  listProviderIntegrations(provider: string): Integration[] {
+    return (
+      this.db
+        .prepare("SELECT * FROM integrations WHERE provider=? ORDER BY account")
+        .all(provider) as Row[]
+    ).map((row) => asIntegration(row));
   }
 
   upsertIntegration(integration: Integration): void {
     this.db
       .prepare(
         `INSERT INTO integrations
-      (provider,label,status,secret_ref,masked_identifier,scopes_json,last_sync_at,next_sync_at,expires_at,quota_json,config_json,updated_at)
-      VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
-      ON CONFLICT(provider) DO UPDATE SET
+      (provider,account,label,status,secret_ref,masked_identifier,scopes_json,last_sync_at,next_sync_at,expires_at,quota_json,config_json,updated_at)
+      VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+      ON CONFLICT(provider,account) DO UPDATE SET
         label=excluded.label,status=excluded.status,secret_ref=excluded.secret_ref,
         masked_identifier=excluded.masked_identifier,scopes_json=excluded.scopes_json,
         last_sync_at=excluded.last_sync_at,next_sync_at=excluded.next_sync_at,
@@ -3072,6 +3360,7 @@ export class MarketingovoDatabase {
       )
       .run(
         integration.provider,
+        integration.account ?? "default",
         integration.label,
         integration.status,
         integration.secretRef ?? null,
@@ -3086,12 +3375,12 @@ export class MarketingovoDatabase {
       );
   }
 
-  deleteIntegration(provider: string): boolean {
+  deleteIntegration(provider: string, account = "default"): boolean {
     return (
       Number(
         this.db
-          .prepare("DELETE FROM integrations WHERE provider=?")
-          .run(provider).changes,
+          .prepare("DELETE FROM integrations WHERE provider=? AND account=?")
+          .run(provider, account).changes,
       ) > 0
     );
   }
@@ -3136,6 +3425,1423 @@ export class MarketingovoDatabase {
       provider: String(row.provider),
       configuration: json<Record<string, unknown>>(row.config_json, {}),
     }));
+  }
+
+  /**
+   * Appends one row to the local audit log.
+   *
+   * The payload is caller-supplied and must never carry credential material;
+   * this log is readable by anyone who can read the database file, which is
+   * the point of it existing separately from the vault.
+   */
+  recordAuditEvent(input: {
+    actor: string;
+    action: string;
+    entityType: string;
+    entityId?: string | null;
+    payload?: Record<string, unknown>;
+    at?: string;
+  }): void {
+    this.db
+      .prepare(
+        `INSERT INTO audit_events(actor,action,entity_type,entity_id,at,payload_json)
+         VALUES(?,?,?,?,?,?)`,
+      )
+      .run(
+        input.actor,
+        input.action,
+        input.entityType,
+        input.entityId ?? null,
+        input.at ?? now(),
+        JSON.stringify(input.payload ?? {}),
+      );
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Channel accounts — the ad cabinets, properties and profiles a      */
+  /* workspace reads from.                                              */
+  /* ---------------------------------------------------------------- */
+
+  listChannelAccounts(
+    workspaceId: string,
+    options: { kind?: ChannelAccount["kind"]; includeArchived?: boolean } = {},
+  ): ChannelAccount[] {
+    const clauses = ["workspace_id=?"];
+    const parameters: SQLInputValue[] = [workspaceId];
+    if (options.kind) {
+      clauses.push("kind=?");
+      parameters.push(options.kind);
+    }
+    if (!options.includeArchived) clauses.push("archived_at IS NULL");
+    return (
+      this.db
+        .prepare(
+          `SELECT * FROM channel_accounts WHERE ${clauses.join(" AND ")}
+           ORDER BY display_name, external_id`,
+        )
+        .all(...parameters) as Row[]
+    ).map((row) => asChannelAccount(row));
+  }
+
+  getChannelAccount(id: string): ChannelAccount | null {
+    const row = this.db
+      .prepare("SELECT * FROM channel_accounts WHERE id=?")
+      .get(id) as Row | undefined;
+    return row ? asChannelAccount(row) : null;
+  }
+
+  /**
+   * Links a cabinet, or returns the existing row when the same external entity
+   * is already linked. Re-linking is idempotent rather than an error: an
+   * operator repeating the action means "make sure this is connected", and a
+   * second row for one cabinet would double every total computed from it.
+   */
+  linkChannelAccount(input: {
+    workspaceId: string;
+    provider: string;
+    account: string;
+    kind: ChannelAccount["kind"];
+    externalId: string;
+    displayName: string;
+    currency?: string | null;
+    dailySpendCap?: number | null;
+    totalSpendCap?: number | null;
+  }): ChannelAccount {
+    const existing = this.db
+      .prepare(
+        `SELECT * FROM channel_accounts
+         WHERE workspace_id=? AND provider=? AND account=? AND external_id=?`,
+      )
+      .get(
+        input.workspaceId,
+        input.provider,
+        input.account,
+        input.externalId,
+      ) as Row | undefined;
+    if (existing) {
+      const id = String(existing.id);
+      this.db
+        .prepare(
+          `UPDATE channel_accounts
+           SET display_name=?, currency=?, daily_spend_cap=?, total_spend_cap=?,
+               archived_at=NULL
+           WHERE id=?`,
+        )
+        .run(
+          input.displayName,
+          input.currency ?? (existing.currency as string | null) ?? null,
+          input.dailySpendCap ?? (existing.daily_spend_cap as number | null),
+          input.totalSpendCap ?? (existing.total_spend_cap as number | null),
+          id,
+        );
+      return this.getChannelAccount(id)!;
+    }
+    const id = randomUUID();
+    this.db
+      .prepare(
+        `INSERT INTO channel_accounts
+         (id,workspace_id,provider,account,kind,external_id,display_name,currency,
+          daily_spend_cap,total_spend_cap,created_at,archived_at)
+         VALUES(?,?,?,?,?,?,?,?,?,?,?,NULL)`,
+      )
+      .run(
+        id,
+        input.workspaceId,
+        input.provider,
+        input.account,
+        input.kind,
+        input.externalId,
+        input.displayName,
+        input.currency ?? null,
+        input.dailySpendCap ?? null,
+        input.totalSpendCap ?? null,
+        now(),
+      );
+    return this.getChannelAccount(id)!;
+  }
+
+  updateChannelAccount(
+    id: string,
+    patch: {
+      displayName?: string;
+      dailySpendCap?: number | null;
+      totalSpendCap?: number | null;
+      archived?: boolean;
+    },
+  ): ChannelAccount | null {
+    const current = this.getChannelAccount(id);
+    if (!current) return null;
+    const archivedAt =
+      patch.archived === undefined
+        ? current.archivedAt
+        : patch.archived
+          ? (current.archivedAt ?? now())
+          : null;
+    this.db
+      .prepare(
+        `UPDATE channel_accounts
+         SET display_name=?, daily_spend_cap=?, total_spend_cap=?, archived_at=?
+         WHERE id=?`,
+      )
+      .run(
+        patch.displayName ?? current.displayName,
+        patch.dailySpendCap === undefined
+          ? current.dailySpendCap
+          : patch.dailySpendCap,
+        patch.totalSpendCap === undefined
+          ? current.totalSpendCap
+          : patch.totalSpendCap,
+        archivedAt,
+        id,
+      );
+    return this.getChannelAccount(id);
+  }
+
+  /**
+   * Removes a cabinet and, by cascade, the facts recorded against it.
+   *
+   * Archiving is the reversible action and is what the dashboard offers;
+   * deletion exists for a workspace that linked the wrong client's account and
+   * wants its spend history gone rather than hidden.
+   */
+  deleteChannelAccount(id: string): boolean {
+    return (
+      Number(
+        this.db.prepare("DELETE FROM channel_accounts WHERE id=?").run(id)
+          .changes,
+      ) > 0
+    );
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Channel metrics — the cross-channel fact table.                    */
+  /* ---------------------------------------------------------------- */
+
+  /**
+   * Writes one sync's readings. Existing rows for the same key are replaced,
+   * because a later fetch of the same day is a better answer about that day —
+   * Meta restates attributed conversions for several days after the fact.
+   */
+  recordChannelMetrics(
+    workspaceId: string,
+    metrics: readonly ChannelMetric[],
+  ): number {
+    if (metrics.length === 0) return 0;
+    const statement = this.db.prepare(
+      `INSERT INTO channel_metrics
+       (workspace_id,channel_account_id,entity_kind,entity_id,entity_name,platform,
+        date,metric_key,value,state,currency,source,fetched_at,note)
+       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+       ON CONFLICT(channel_account_id,entity_kind,entity_id,platform,date,metric_key)
+       DO UPDATE SET
+         entity_name=excluded.entity_name,value=excluded.value,state=excluded.state,
+         currency=excluded.currency,source=excluded.source,
+         fetched_at=excluded.fetched_at,note=excluded.note`,
+    );
+    return this.transaction(() => {
+      let written = 0;
+      for (const metric of metrics) {
+        statement.run(
+          workspaceId,
+          metric.channelAccountId,
+          metric.entityKind,
+          metric.entityId,
+          metric.entityName,
+          metric.platform,
+          metric.date,
+          metric.metricKey,
+          metric.value,
+          metric.state,
+          metric.currency,
+          metric.source,
+          metric.fetchedAt,
+          metric.note,
+        );
+        written += 1;
+      }
+      return written;
+    });
+  }
+
+  listChannelMetrics(options: {
+    channelAccountId: string;
+    start: string;
+    end: string;
+    entityKind?: ChannelMetric["entityKind"];
+    platform?: ChannelMetric["platform"];
+    limit?: number;
+  }): ChannelMetric[] {
+    const clauses = ["channel_account_id=?", "date>=?", "date<=?"];
+    const parameters: SQLInputValue[] = [
+      options.channelAccountId,
+      options.start,
+      options.end,
+    ];
+    if (options.entityKind) {
+      clauses.push("entity_kind=?");
+      parameters.push(options.entityKind);
+    }
+    if (options.platform) {
+      clauses.push("platform=?");
+      parameters.push(options.platform);
+    }
+    const limit = Math.max(1, Math.min(20_000, options.limit ?? 5_000));
+    return (
+      this.db
+        .prepare(
+          `SELECT * FROM channel_metrics WHERE ${clauses.join(" AND ")}
+           ORDER BY date DESC, entity_id, metric_key LIMIT ?`,
+        )
+        .all(...parameters, limit) as Row[]
+    ).map((row) => asChannelMetric(row));
+  }
+
+  latestChannelSyncAt(channelAccountId: string): string | null {
+    const row = this.db
+      .prepare(
+        "SELECT MAX(fetched_at) AS fetched_at FROM channel_metrics WHERE channel_account_id=?",
+      )
+      .get(channelAccountId) as Row | undefined;
+    return row?.fetched_at ? String(row.fetched_at) : null;
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Search terms — the queries that triggered ads                      */
+  /* ---------------------------------------------------------------- */
+
+  recordSearchTerms(
+    workspaceId: string,
+    terms: readonly SearchTermRecord[],
+  ): number {
+    if (terms.length === 0) return 0;
+    const statement = this.db.prepare(
+      `INSERT INTO search_terms
+       (workspace_id,channel_account_id,campaign_id,campaign_name,ad_group_id,
+        ad_group_name,query,matched_keyword,match_type,status,impressions,clicks,
+        cost,conversions,conversion_value,currency,window_start,window_end,fetched_at)
+       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+       ON CONFLICT(channel_account_id,window_start,window_end,campaign_id,ad_group_id,query)
+       DO UPDATE SET
+         campaign_name=excluded.campaign_name,ad_group_name=excluded.ad_group_name,
+         matched_keyword=excluded.matched_keyword,match_type=excluded.match_type,
+         status=excluded.status,impressions=excluded.impressions,
+         clicks=excluded.clicks,cost=excluded.cost,conversions=excluded.conversions,
+         conversion_value=excluded.conversion_value,currency=excluded.currency,
+         fetched_at=excluded.fetched_at`,
+    );
+    return this.transaction(() => {
+      let written = 0;
+      for (const term of terms) {
+        statement.run(
+          workspaceId,
+          term.channelAccountId,
+          term.campaignId,
+          term.campaignName,
+          term.adGroupId,
+          term.adGroupName,
+          term.query,
+          term.matchedKeyword,
+          term.matchType,
+          term.status,
+          term.impressions,
+          term.clicks,
+          term.cost,
+          term.conversions,
+          term.conversionValue,
+          term.currency,
+          term.windowStart,
+          term.windowEnd,
+          term.fetchedAt,
+        );
+        written += 1;
+      }
+      return written;
+    });
+  }
+
+  /**
+   * Search terms for one account, most expensive first.
+   *
+   * Ordered by cost rather than date because every question asked of this
+   * table is about money: which queries took the most and returned the least.
+   */
+  listSearchTerms(options: {
+    channelAccountId: string;
+    windowStart?: string;
+    windowEnd?: string;
+    /** Excludes terms already added or negated, which need no action. */
+    actionableOnly?: boolean;
+    limit?: number;
+  }): SearchTermRecord[] {
+    const clauses = ["channel_account_id=?"];
+    const parameters: SQLInputValue[] = [options.channelAccountId];
+    if (options.windowStart) {
+      clauses.push("window_start>=?");
+      parameters.push(options.windowStart);
+    }
+    if (options.windowEnd) {
+      clauses.push("window_end<=?");
+      parameters.push(options.windowEnd);
+    }
+    if (options.actionableOnly) {
+      clauses.push("status IN ('none','unknown')");
+    }
+    const limit = Math.max(1, Math.min(10_000, options.limit ?? 500));
+    return (
+      this.db
+        .prepare(
+          `SELECT * FROM search_terms WHERE ${clauses.join(" AND ")}
+           ORDER BY cost DESC NULLS LAST, clicks DESC LIMIT ?`,
+        )
+        .all(...parameters, limit) as Row[]
+    ).map((row) => ({
+      channelAccountId: String(row.channel_account_id),
+      campaignId: String(row.campaign_id),
+      campaignName:
+        row.campaign_name === null ? null : String(row.campaign_name),
+      adGroupId: String(row.ad_group_id),
+      adGroupName:
+        row.ad_group_name === null ? null : String(row.ad_group_name),
+      query: String(row.query),
+      matchedKeyword:
+        row.matched_keyword === null ? null : String(row.matched_keyword),
+      matchType: row.match_type as SearchTermRecord["matchType"],
+      status: row.status as SearchTermRecord["status"],
+      impressions: row.impressions === null ? null : Number(row.impressions),
+      clicks: row.clicks === null ? null : Number(row.clicks),
+      cost: row.cost === null ? null : Number(row.cost),
+      conversions: row.conversions === null ? null : Number(row.conversions),
+      conversionValue:
+        row.conversion_value === null ? null : Number(row.conversion_value),
+      currency: row.currency === null ? null : String(row.currency),
+      windowStart: String(row.window_start),
+      windowEnd: String(row.window_end),
+      fetchedAt: String(row.fetched_at),
+    }));
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Campaign staging — briefs, deliverables and unapproved payloads.   */
+  /* ---------------------------------------------------------------- */
+
+  createCampaignBrief(input: {
+    projectId: string;
+    title: string;
+    objective: string;
+    audience?: string | null;
+    keyMessage?: string | null;
+    constraints?: string | null;
+    createdBy: string;
+  }): CampaignBrief {
+    const id = randomUUID();
+    const timestamp = now();
+    this.db
+      .prepare(
+        `INSERT INTO campaign_briefs
+         (id,project_id,title,objective,audience,key_message,constraints,status,
+          created_by,created_at,updated_at)
+         VALUES(?,?,?,?,?,?,?,'draft',?,?,?)`,
+      )
+      .run(
+        id,
+        input.projectId,
+        input.title,
+        input.objective,
+        input.audience ?? null,
+        input.keyMessage ?? null,
+        input.constraints ?? null,
+        input.createdBy,
+        timestamp,
+        timestamp,
+      );
+    return this.getCampaignBrief(id)!;
+  }
+
+  getCampaignBrief(id: string): CampaignBrief | null {
+    const row = this.db
+      .prepare("SELECT * FROM campaign_briefs WHERE id=?")
+      .get(id) as Row | undefined;
+    return row ? asCampaignBrief(row) : null;
+  }
+
+  listCampaignBriefs(projectId: string): CampaignBrief[] {
+    return (
+      this.db
+        .prepare(
+          "SELECT * FROM campaign_briefs WHERE project_id=? ORDER BY created_at DESC",
+        )
+        .all(projectId) as Row[]
+    ).map((row) => asCampaignBrief(row));
+  }
+
+  setCampaignBriefStatus(
+    id: string,
+    status: CampaignBrief["status"],
+  ): CampaignBrief | null {
+    this.db
+      .prepare("UPDATE campaign_briefs SET status=?, updated_at=? WHERE id=?")
+      .run(status, now(), id);
+    return this.getCampaignBrief(id);
+  }
+
+  createCampaignDeliverable(input: {
+    briefId: string;
+    channel: CampaignDeliverable["channel"];
+    headline?: string | null;
+    body: string;
+    callToAction?: string | null;
+    destinationUrl?: string | null;
+    creativeNotes?: string | null;
+    createdBy: string;
+  }): CampaignDeliverable {
+    const id = randomUUID();
+    const timestamp = now();
+    this.db
+      .prepare(
+        `INSERT INTO campaign_deliverables
+         (id,brief_id,channel,headline,body,call_to_action,destination_url,
+          creative_notes,created_by,created_at,updated_at)
+         VALUES(?,?,?,?,?,?,?,?,?,?,?)`,
+      )
+      .run(
+        id,
+        input.briefId,
+        input.channel,
+        input.headline ?? null,
+        input.body,
+        input.callToAction ?? null,
+        input.destinationUrl ?? null,
+        input.creativeNotes ?? null,
+        input.createdBy,
+        timestamp,
+        timestamp,
+      );
+    return this.getCampaignDeliverable(id)!;
+  }
+
+  getCampaignDeliverable(id: string): CampaignDeliverable | null {
+    const row = this.db
+      .prepare("SELECT * FROM campaign_deliverables WHERE id=?")
+      .get(id) as Row | undefined;
+    return row ? asCampaignDeliverable(row) : null;
+  }
+
+  listCampaignDeliverables(briefId: string): CampaignDeliverable[] {
+    return (
+      this.db
+        .prepare(
+          "SELECT * FROM campaign_deliverables WHERE brief_id=? ORDER BY created_at",
+        )
+        .all(briefId) as Row[]
+    ).map((row) => asCampaignDeliverable(row));
+  }
+
+  stagePublishIntent(input: {
+    projectId: string;
+    deliverableId: string;
+    channelAccountId: string;
+    payload: Record<string, unknown>;
+    payloadHash: string;
+    dailyBudget?: number | null;
+    lifetimeBudget?: number | null;
+    currency?: string | null;
+    stagedBy: string;
+    platform?: SocialPlatform | null;
+    scheduledAt?: string | null;
+    timezone?: string | null;
+  }): PublishIntent {
+    const id = randomUUID();
+    this.db
+      .prepare(
+        `INSERT INTO publish_intents
+         (id,project_id,deliverable_id,channel_account_id,state,payload_json,
+          payload_hash,daily_budget,lifetime_budget,currency,staged_by,staged_at,
+          approved_by,approved_at,approved_payload_hash,note,
+          platform,scheduled_at,timezone,idempotency_key)
+         VALUES(?,?,?,?,'staged',?,?,?,?,?,?,?,NULL,NULL,NULL,NULL,?,?,?,NULL)`,
+      )
+      .run(
+        id,
+        input.projectId,
+        input.deliverableId,
+        input.channelAccountId,
+        JSON.stringify(input.payload),
+        input.payloadHash,
+        input.dailyBudget ?? null,
+        input.lifetimeBudget ?? null,
+        input.currency ?? null,
+        input.stagedBy,
+        now(),
+        input.platform ?? null,
+        input.scheduledAt ?? null,
+        input.timezone ?? null,
+      );
+    return this.getPublishIntent(id)!;
+  }
+
+  /**
+   * Places an approved intent on the calendar, or moves it.
+   *
+   * Rescheduling deliberately drops the intent back to `staged` and clears the
+   * approval: the time is part of what the operator consented to, so a post
+   * moved from Tuesday to Saturday needs consent again, exactly as edited copy
+   * does.
+   */
+  schedulePublishIntent(
+    id: string,
+    scheduledAt: string,
+    timezone: string,
+  ): PublishIntent | null {
+    const current = this.getPublishIntent(id);
+    if (!current) return null;
+    const wasApproved = current.state === "approved";
+    this.db
+      .prepare(
+        `UPDATE publish_intents
+         SET scheduled_at=?, timezone=?,
+             state=CASE WHEN state='approved' THEN 'staged' ELSE state END,
+             approved_by=CASE WHEN state='approved' THEN NULL ELSE approved_by END,
+             approved_at=CASE WHEN state='approved' THEN NULL ELSE approved_at END,
+             approved_payload_hash=CASE WHEN state='approved' THEN NULL ELSE approved_payload_hash END,
+             note=CASE WHEN state='approved' THEN ? ELSE note END
+         WHERE id=?`,
+      )
+      .run(
+        scheduledAt,
+        timezone,
+        "The scheduled time changed after approval, so the approval was cleared. Approve the new time.",
+        id,
+      );
+    void wasApproved;
+    return this.getPublishIntent(id);
+  }
+
+  /**
+   * Intents that are approved, scheduled, and due.
+   *
+   * The worker takes these one at a time and must still win the claim below;
+   * this query only narrows the candidates.
+   */
+  listDuePublishIntents(asOf: string, limit = 20): PublishIntent[] {
+    return (
+      this.db
+        .prepare(
+          `SELECT * FROM publish_intents
+           WHERE state='approved' AND scheduled_at IS NOT NULL AND scheduled_at<=?
+           ORDER BY scheduled_at LIMIT ?`,
+        )
+        .all(asOf, limit) as Row[]
+    ).map((row) => asPublishIntent(row));
+  }
+
+  /**
+   * Claims an intent for sending.
+   *
+   * The `WHERE state='approved'` is the whole mechanism: a second worker, or a
+   * retried job whose predecessor already claimed the row, changes nothing and
+   * gets null back. Without it, two workers waking on the same due post would
+   * each send it.
+   */
+  claimPublishIntent(id: string): PublishIntent | null {
+    const changed = Number(
+      this.db
+        .prepare(
+          "UPDATE publish_intents SET state='publishing' WHERE id=? AND state='approved'",
+        )
+        .run(id).changes,
+    );
+    return changed > 0 ? this.getPublishIntent(id) : null;
+  }
+
+  settlePublishIntent(
+    id: string,
+    state: Extract<PublishIntent["state"], "published" | "failed" | "approved">,
+    note: string | null,
+  ): PublishIntent | null {
+    this.db
+      .prepare("UPDATE publish_intents SET state=?, note=? WHERE id=?")
+      .run(state, note, id);
+    return this.getPublishIntent(id);
+  }
+
+  setPublishIntentIdempotencyKey(id: string, key: string): void {
+    this.db
+      .prepare("UPDATE publish_intents SET idempotency_key=? WHERE id=?")
+      .run(key, id);
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Media library                                                     */
+  /* ---------------------------------------------------------------- */
+
+  createMediaAsset(input: {
+    projectId: string;
+    filename: string;
+    mediaType: string;
+    kind: MediaAsset["kind"];
+    sizeBytes: number;
+    sha256: string;
+    path: string;
+    width?: number | null;
+    height?: number | null;
+  }): MediaAsset {
+    // Content-addressed per workspace: uploading the same file twice returns
+    // the first asset rather than a duplicate that would have to be kept in
+    // sync when one of them is relayed to public storage.
+    const existing = this.db
+      .prepare("SELECT * FROM media_assets WHERE project_id=? AND sha256=?")
+      .get(input.projectId, input.sha256) as Row | undefined;
+    if (existing) return asMediaAsset(existing);
+
+    const id = randomUUID();
+    this.db
+      .prepare(
+        `INSERT INTO media_assets
+         (id,project_id,filename,media_type,kind,size_bytes,sha256,path,width,height,
+          created_at,public_url,public_url_source,public_url_at)
+         VALUES(?,?,?,?,?,?,?,?,?,?,?,NULL,NULL,NULL)`,
+      )
+      .run(
+        id,
+        input.projectId,
+        input.filename,
+        input.mediaType,
+        input.kind,
+        input.sizeBytes,
+        input.sha256,
+        input.path,
+        input.width ?? null,
+        input.height ?? null,
+        now(),
+      );
+    return this.getMediaAsset(id)!;
+  }
+
+  getMediaAsset(id: string): MediaAsset | null {
+    const row = this.db
+      .prepare("SELECT * FROM media_assets WHERE id=?")
+      .get(id) as Row | undefined;
+    return row ? asMediaAsset(row) : null;
+  }
+
+  /** The on-disk path. Kept out of the contract so it never reaches an API. */
+  getMediaAssetPath(id: string): string | null {
+    const row = this.db
+      .prepare("SELECT path FROM media_assets WHERE id=?")
+      .get(id) as Row | undefined;
+    return row ? String(row.path) : null;
+  }
+
+  listMediaAssets(projectId: string, limit = 200): MediaAsset[] {
+    return (
+      this.db
+        .prepare(
+          "SELECT * FROM media_assets WHERE project_id=? ORDER BY created_at DESC LIMIT ?",
+        )
+        .all(projectId, Math.max(1, Math.min(1_000, limit))) as Row[]
+    ).map((row) => asMediaAsset(row));
+  }
+
+  setMediaAssetPublicUrl(
+    id: string,
+    publicUrl: string,
+    source: string,
+  ): MediaAsset | null {
+    this.db
+      .prepare(
+        "UPDATE media_assets SET public_url=?, public_url_source=?, public_url_at=? WHERE id=?",
+      )
+      .run(publicUrl, source, now(), id);
+    return this.getMediaAsset(id);
+  }
+
+  deleteMediaAsset(id: string): boolean {
+    return (
+      Number(
+        this.db.prepare("DELETE FROM media_assets WHERE id=?").run(id).changes,
+      ) > 0
+    );
+  }
+
+  setDeliverableMedia(
+    deliverableId: string,
+    mediaIds: readonly string[],
+  ): void {
+    this.transaction(() => {
+      this.db
+        .prepare("DELETE FROM deliverable_media WHERE deliverable_id=?")
+        .run(deliverableId);
+      const statement = this.db.prepare(
+        "INSERT INTO deliverable_media(deliverable_id,media_id,position) VALUES(?,?,?)",
+      );
+      mediaIds.forEach((mediaId, position) => {
+        statement.run(deliverableId, mediaId, position);
+      });
+    });
+  }
+
+  listDeliverableMedia(deliverableId: string): MediaAsset[] {
+    return (
+      this.db
+        .prepare(
+          `SELECT a.* FROM media_assets a
+           JOIN deliverable_media d ON d.media_id=a.id
+           WHERE d.deliverable_id=? ORDER BY d.position`,
+        )
+        .all(deliverableId) as Row[]
+    ).map((row) => asMediaAsset(row));
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Publish records — immutable evidence of what was sent             */
+  /* ---------------------------------------------------------------- */
+
+  /**
+   * Opens an attempt, before the outbound call.
+   *
+   * Returns null when a record already exists for this idempotency key, which
+   * is what a retry of an already-attempted send looks like. The caller must
+   * treat that as "a request may already have gone out" and resolve it rather
+   * than sending again.
+   */
+  beginPublishRecord(input: {
+    intentId: string;
+    projectId: string;
+    channelAccountId: string;
+    platform: SocialPlatform;
+    request: Record<string, unknown>;
+    idempotencyKey: string;
+  }): PublishRecord | null {
+    const id = randomUUID();
+    try {
+      this.db
+        .prepare(
+          `INSERT INTO publish_records
+           (id,intent_id,project_id,channel_account_id,platform,state,request_json,
+            idempotency_key,provider_id,permalink,error,attempted_at,completed_at)
+           VALUES(?,?,?,?,?,'attempting',?,?,NULL,NULL,NULL,?,NULL)`,
+        )
+        .run(
+          id,
+          input.intentId,
+          input.projectId,
+          input.channelAccountId,
+          input.platform,
+          JSON.stringify(input.request),
+          input.idempotencyKey,
+          now(),
+        );
+    } catch {
+      // The UNIQUE(idempotency_key) constraint fired. Another attempt owns it.
+      return null;
+    }
+    return this.getPublishRecord(id);
+  }
+
+  getPublishRecord(id: string): PublishRecord | null {
+    const row = this.db
+      .prepare("SELECT * FROM publish_records WHERE id=?")
+      .get(id) as Row | undefined;
+    return row ? asPublishRecord(row) : null;
+  }
+
+  getPublishRecordByKey(idempotencyKey: string): PublishRecord | null {
+    const row = this.db
+      .prepare("SELECT * FROM publish_records WHERE idempotency_key=?")
+      .get(idempotencyKey) as Row | undefined;
+    return row ? asPublishRecord(row) : null;
+  }
+
+  /**
+   * Closes an attempt with what the provider said.
+   *
+   * `request` is settled here rather than being fixed at `beginPublishRecord`,
+   * because only the publisher knows what it actually put on the wire — the
+   * intent's payload is a draft, and a record of the draft would answer the
+   * wrong question later. The opening row therefore holds the draft as the
+   * best available evidence if the process dies mid-send, and the settle
+   * replaces it with the truth.
+   *
+   * Only an `attempting` row may be settled. A record that already reached a
+   * terminal state is evidence, and evidence is not edited.
+   */
+  settlePublishRecord(
+    id: string,
+    input: {
+      state: Exclude<PublishRecord["state"], "attempting">;
+      providerId?: string | null;
+      permalink?: string | null;
+      error?: string | null;
+      request?: Record<string, unknown>;
+    },
+  ): PublishRecord | null {
+    this.db
+      .prepare(
+        `UPDATE publish_records
+         SET state=?, provider_id=?, permalink=?, error=?, completed_at=?,
+             request_json=COALESCE(?, request_json)
+         WHERE id=? AND state='attempting'`,
+      )
+      .run(
+        input.state,
+        input.providerId ?? null,
+        input.permalink ?? null,
+        input.error ?? null,
+        now(),
+        input.request === undefined ? null : JSON.stringify(input.request),
+        id,
+      );
+    return this.getPublishRecord(id);
+  }
+
+  listPublishRecords(options: {
+    projectId: string;
+    intentId?: string;
+    limit?: number;
+  }): PublishRecord[] {
+    const clauses = ["project_id=?"];
+    const parameters: SQLInputValue[] = [options.projectId];
+    if (options.intentId) {
+      clauses.push("intent_id=?");
+      parameters.push(options.intentId);
+    }
+    return (
+      this.db
+        .prepare(
+          `SELECT * FROM publish_records WHERE ${clauses.join(" AND ")}
+           ORDER BY attempted_at DESC LIMIT ?`,
+        )
+        .all(
+          ...parameters,
+          Math.max(1, Math.min(500, options.limit ?? 100)),
+        ) as Row[]
+    ).map((row) => asPublishRecord(row));
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Cross-channel reports                                             */
+  /* ---------------------------------------------------------------- */
+
+  /**
+   * Stores a report as it was made.
+   *
+   * The whole payload is frozen rather than a query kept to re-run: a client
+   * received a specific document on a specific day, and regenerating it later
+   * against changed connectors or restated provider figures would produce
+   * something different and equally titled.
+   */
+  saveMarketingReport(input: {
+    projectId: string;
+    title: string;
+    periodStart: string;
+    periodEnd: string;
+    state: MarketingReportSummary["state"];
+    report: Record<string, unknown>;
+    brandRevision: number | null;
+    generatedAt: string;
+  }): MarketingReport | null {
+    if (!this.getProject(input.projectId)) return null;
+    const id = randomUUID();
+    this.db
+      .prepare(
+        `INSERT INTO marketing_reports
+         (id,project_id,title,period_start,period_end,state,payload_json,
+          brand_revision,generated_at)
+         VALUES(?,?,?,?,?,?,?,?,?)`,
+      )
+      .run(
+        id,
+        input.projectId,
+        input.title,
+        input.periodStart,
+        input.periodEnd,
+        input.state,
+        JSON.stringify({ ...input.report, id }),
+        input.brandRevision,
+        input.generatedAt,
+      );
+    return this.getMarketingReport(id);
+  }
+
+  getMarketingReport(id: string): MarketingReport | null {
+    const row = this.db
+      .prepare("SELECT * FROM marketing_reports WHERE id=?")
+      .get(id) as Row | undefined;
+    if (!row) return null;
+    return json<MarketingReport>(row.payload_json, {} as MarketingReport);
+  }
+
+  listMarketingReports(
+    projectId: string,
+    limit = 50,
+  ): MarketingReportSummary[] {
+    return (
+      this.db
+        .prepare(
+          `SELECT id,project_id,title,period_start,period_end,state,generated_at
+           FROM marketing_reports WHERE project_id=?
+           ORDER BY generated_at DESC LIMIT ?`,
+        )
+        .all(projectId, Math.max(1, Math.min(200, limit))) as Row[]
+    ).map((row) => ({
+      id: String(row.id),
+      projectId: String(row.project_id),
+      title: String(row.title),
+      periodStart: String(row.period_start),
+      periodEnd: String(row.period_end),
+      generatedAt: String(row.generated_at),
+      state: row.state as MarketingReportSummary["state"],
+    }));
+  }
+
+  deleteMarketingReport(id: string): boolean {
+    return (
+      Number(
+        this.db.prepare("DELETE FROM marketing_reports WHERE id=?").run(id)
+          .changes,
+      ) > 0
+    );
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Campaign links and QR codes                                       */
+  /* ---------------------------------------------------------------- */
+
+  private campaignLinkFromRow(row: Row): CampaignLink {
+    return {
+      id: String(row.id),
+      projectId: String(row.project_id),
+      label: String(row.label),
+      destinationUrl: String(row.destination_url),
+      utm: {
+        source: String(row.utm_source),
+        medium: String(row.utm_medium),
+        campaign: String(row.utm_campaign),
+        term: row.utm_term === null ? null : String(row.utm_term),
+        content: row.utm_content === null ? null : String(row.utm_content),
+      },
+      taggedUrl: String(row.tagged_url),
+      placement: row.placement as QrPlacement,
+      style: json<QrStyle>(row.style_json, {
+        errorCorrection: "M",
+        quietZone: 4,
+        darkColor: "#000000",
+        lightColor: "#ffffff",
+        transparent: false,
+      }),
+      printedWidthMm:
+        row.printed_width_mm === null ? null : Number(row.printed_width_mm),
+      findings: json<CampaignLinkFinding[]>(row.findings_json, []),
+      printedAt: row.printed_at === null ? null : String(row.printed_at),
+      createdAt: String(row.created_at),
+      updatedAt: String(row.updated_at),
+    };
+  }
+
+  /**
+   * Saves a link, or returns null when the same tagged URL already exists.
+   *
+   * Two links tagged identically are not two links: every report merges them
+   * into one row, so keeping both means neither can be attributed to the thing
+   * it was printed on. The caller surfaces the existing one instead.
+   */
+  saveCampaignLink(input: {
+    projectId: string;
+    label: string;
+    destinationUrl: string;
+    utm: UtmParameters;
+    taggedUrl: string;
+    placement: QrPlacement;
+    style: QrStyle;
+    printedWidthMm: number | null;
+    findings: CampaignLinkFinding[];
+    now: string;
+  }): CampaignLink | null {
+    if (!this.getProject(input.projectId)) return null;
+    if (this.findCampaignLinkByTaggedUrl(input.projectId, input.taggedUrl)) {
+      return null;
+    }
+    const id = randomUUID();
+    this.db
+      .prepare(
+        `INSERT INTO campaign_links
+         (id,project_id,label,destination_url,utm_source,utm_medium,
+          utm_campaign,utm_term,utm_content,tagged_url,placement,style_json,
+          printed_width_mm,findings_json,printed_at,created_at,updated_at)
+         VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,NULL,?,?)`,
+      )
+      .run(
+        id,
+        input.projectId,
+        input.label,
+        input.destinationUrl,
+        input.utm.source,
+        input.utm.medium,
+        input.utm.campaign,
+        input.utm.term,
+        input.utm.content,
+        input.taggedUrl,
+        input.placement,
+        JSON.stringify(input.style),
+        input.printedWidthMm,
+        JSON.stringify(input.findings),
+        input.now,
+        input.now,
+      );
+    return this.getCampaignLink(id);
+  }
+
+  getCampaignLink(id: string): CampaignLink | null {
+    const row = this.db
+      .prepare("SELECT * FROM campaign_links WHERE id=?")
+      .get(id) as Row | undefined;
+    return row ? this.campaignLinkFromRow(row) : null;
+  }
+
+  findCampaignLinkByTaggedUrl(
+    projectId: string,
+    taggedUrl: string,
+  ): CampaignLink | null {
+    const row = this.db
+      .prepare(
+        "SELECT * FROM campaign_links WHERE project_id=? AND tagged_url=?",
+      )
+      .get(projectId, taggedUrl) as Row | undefined;
+    return row ? this.campaignLinkFromRow(row) : null;
+  }
+
+  listCampaignLinks(projectId: string, limit = 100): CampaignLink[] {
+    return (
+      this.db
+        .prepare(
+          `SELECT * FROM campaign_links WHERE project_id=?
+           ORDER BY created_at DESC LIMIT ?`,
+        )
+        .all(projectId, Math.max(1, Math.min(500, limit))) as Row[]
+    ).map((row) => this.campaignLinkFromRow(row));
+  }
+
+  /**
+   * Updates presentation only.
+   *
+   * The tagged URL is never among the updatable fields. Once a code exists it
+   * may already be printed, and changing where it points would leave a
+   * physical object pointing somewhere this row no longer describes. A new
+   * destination is a new link.
+   */
+  updateCampaignLink(
+    id: string,
+    patch: {
+      label?: string;
+      placement?: QrPlacement;
+      style?: QrStyle;
+      printedWidthMm?: number | null;
+    },
+    now: string,
+  ): CampaignLink | null {
+    const existing = this.getCampaignLink(id);
+    if (!existing) return null;
+    this.db
+      .prepare(
+        `UPDATE campaign_links
+         SET label=?, placement=?, style_json=?, printed_width_mm=?, updated_at=?
+         WHERE id=?`,
+      )
+      .run(
+        patch.label ?? existing.label,
+        patch.placement ?? existing.placement,
+        JSON.stringify(patch.style ?? existing.style),
+        patch.printedWidthMm === undefined
+          ? existing.printedWidthMm
+          : patch.printedWidthMm,
+        now,
+        id,
+      );
+    return this.getCampaignLink(id);
+  }
+
+  /** Records that the code has gone to print, which freezes it. */
+  markCampaignLinkPrinted(id: string, printedAt: string): CampaignLink | null {
+    const changes = Number(
+      this.db
+        .prepare(
+          "UPDATE campaign_links SET printed_at=?, updated_at=? WHERE id=?",
+        )
+        .run(printedAt, printedAt, id).changes,
+    );
+    return changes > 0 ? this.getCampaignLink(id) : null;
+  }
+
+  deleteCampaignLink(id: string): boolean {
+    return (
+      Number(
+        this.db.prepare("DELETE FROM campaign_links WHERE id=?").run(id)
+          .changes,
+      ) > 0
+    );
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Brand kit and email templates                                     */
+  /* ---------------------------------------------------------------- */
+
+  getBrandKit(projectId: string): BrandKitWorkspace | null {
+    if (!this.getProject(projectId)) return null;
+    const rows = this.db
+      .prepare(
+        "SELECT * FROM brand_kit_versions WHERE project_id=? ORDER BY revision DESC",
+      )
+      .all(projectId) as Row[];
+    const history = rows.map((row) => asBrandKitVersion(row));
+    return { projectId, current: history[0] ?? null, history };
+  }
+
+  /**
+   * Appends a revision.
+   *
+   * Never an update: an email compiled against revision 3 must still be able
+   * to say what revision 3 was, and overwriting the row would make that claim
+   * unverifiable the moment someone changes a colour.
+   */
+  appendBrandKitVersion(input: {
+    projectId: string;
+    profile: Record<string, unknown>;
+    changeSummary: string;
+    actor: string;
+  }): BrandKitWorkspace | null {
+    if (!this.getProject(input.projectId)) return null;
+    return this.transaction(() => {
+      const row = this.db
+        .prepare(
+          "SELECT MAX(revision) AS revision FROM brand_kit_versions WHERE project_id=?",
+        )
+        .get(input.projectId) as Row | undefined;
+      const revision = Number(row?.revision ?? 0) + 1;
+      const createdAt = now();
+      this.db
+        .prepare(
+          `INSERT INTO brand_kit_versions
+           (project_id,revision,profile_json,change_summary,actor,created_at)
+           VALUES(?,?,?,?,?,?)`,
+        )
+        .run(
+          input.projectId,
+          revision,
+          JSON.stringify(input.profile),
+          input.changeSummary,
+          input.actor,
+          createdAt,
+        );
+      this.recordAuditEvent({
+        actor: input.actor,
+        action: "brand_kit.revised",
+        entityType: "project",
+        entityId: input.projectId,
+        payload: { revision },
+        at: createdAt,
+      });
+      return this.getBrandKit(input.projectId);
+    });
+  }
+
+  createEmailTemplate(input: {
+    projectId: string;
+    name: string;
+    purpose?: string | null;
+  }): EmailTemplate {
+    const id = randomUUID();
+    const timestamp = now();
+    this.db
+      .prepare(
+        `INSERT INTO email_templates(id,project_id,name,purpose,created_at,updated_at)
+         VALUES(?,?,?,?,?,?)`,
+      )
+      .run(
+        id,
+        input.projectId,
+        input.name,
+        input.purpose ?? null,
+        timestamp,
+        timestamp,
+      );
+    return this.getEmailTemplate(id)!;
+  }
+
+  getEmailTemplate(id: string): EmailTemplate | null {
+    const row = this.db
+      .prepare(
+        `SELECT t.*, (
+           SELECT COALESCE(MAX(revision), 0) FROM email_template_versions v
+           WHERE v.template_id = t.id
+         ) AS latest_revision
+         FROM email_templates t WHERE t.id=?`,
+      )
+      .get(id) as Row | undefined;
+    return row ? asEmailTemplate(row) : null;
+  }
+
+  listEmailTemplates(projectId: string): EmailTemplate[] {
+    return (
+      this.db
+        .prepare(
+          `SELECT t.*, (
+             SELECT COALESCE(MAX(revision), 0) FROM email_template_versions v
+             WHERE v.template_id = t.id
+           ) AS latest_revision
+           FROM email_templates t WHERE t.project_id=?
+           ORDER BY t.updated_at DESC`,
+        )
+        .all(projectId) as Row[]
+    ).map((row) => asEmailTemplate(row));
+  }
+
+  getEmailTemplateWorkspace(id: string): EmailTemplateWorkspace | null {
+    const template = this.getEmailTemplate(id);
+    if (!template) return null;
+    const history = (
+      this.db
+        .prepare(
+          "SELECT * FROM email_template_versions WHERE template_id=? ORDER BY revision DESC",
+        )
+        .all(id) as Row[]
+    ).map((row) => asEmailTemplateVersion(row));
+    return { template, current: history[0] ?? null, history };
+  }
+
+  appendEmailTemplateVersion(input: {
+    templateId: string;
+    subject: string;
+    preheader: string;
+    sourceHtml: string;
+    compiledHtml: string;
+    plainText: string;
+    report: Record<string, unknown>;
+    brandRevision: number | null;
+    createdBy: string;
+  }): EmailTemplateWorkspace | null {
+    if (!this.getEmailTemplate(input.templateId)) return null;
+    return this.transaction(() => {
+      const row = this.db
+        .prepare(
+          "SELECT MAX(revision) AS revision FROM email_template_versions WHERE template_id=?",
+        )
+        .get(input.templateId) as Row | undefined;
+      const revision = Number(row?.revision ?? 0) + 1;
+      const timestamp = now();
+      this.db
+        .prepare(
+          `INSERT INTO email_template_versions
+           (template_id,revision,subject,preheader,source_html,compiled_html,
+            plain_text,report_json,brand_revision,created_by,created_at)
+           VALUES(?,?,?,?,?,?,?,?,?,?,?)`,
+        )
+        .run(
+          input.templateId,
+          revision,
+          input.subject,
+          input.preheader,
+          input.sourceHtml,
+          input.compiledHtml,
+          input.plainText,
+          JSON.stringify(input.report),
+          input.brandRevision,
+          input.createdBy,
+          timestamp,
+        );
+      this.db
+        .prepare("UPDATE email_templates SET updated_at=? WHERE id=?")
+        .run(timestamp, input.templateId);
+      return this.getEmailTemplateWorkspace(input.templateId);
+    });
+  }
+
+  deleteEmailTemplate(id: string): boolean {
+    return (
+      Number(
+        this.db.prepare("DELETE FROM email_templates WHERE id=?").run(id)
+          .changes,
+      ) > 0
+    );
+  }
+
+  /** Posts already published to one account in a window, for rate limits. */
+  countPublishedSince(channelAccountId: string, since: string): number {
+    const row = this.db
+      .prepare(
+        `SELECT COUNT(*) AS count FROM publish_records
+         WHERE channel_account_id=? AND state='published' AND attempted_at>=?`,
+      )
+      .get(channelAccountId, since) as Row | undefined;
+    return Number(row?.count ?? 0);
+  }
+
+  getPublishIntent(id: string): PublishIntent | null {
+    const row = this.db
+      .prepare("SELECT * FROM publish_intents WHERE id=?")
+      .get(id) as Row | undefined;
+    return row ? asPublishIntent(row) : null;
+  }
+
+  listPublishIntents(options: {
+    projectId: string;
+    deliverableId?: string;
+    state?: PublishIntent["state"];
+  }): PublishIntent[] {
+    const clauses = ["project_id=?"];
+    const parameters: SQLInputValue[] = [options.projectId];
+    if (options.deliverableId) {
+      clauses.push("deliverable_id=?");
+      parameters.push(options.deliverableId);
+    }
+    if (options.state) {
+      clauses.push("state=?");
+      parameters.push(options.state);
+    }
+    return (
+      this.db
+        .prepare(
+          `SELECT * FROM publish_intents WHERE ${clauses.join(" AND ")}
+           ORDER BY staged_at DESC`,
+        )
+        .all(...parameters) as Row[]
+    ).map((row) => asPublishIntent(row));
+  }
+
+  /**
+   * Records an approval against the exact payload hash the operator read.
+   *
+   * The `WHERE` clause carries both the current state and the hash on purpose:
+   * if the payload changed between the render and the click, no row matches
+   * and the approval simply does not happen. An approval of a payload nobody
+   * saw is worse than no approval, because it produces a record of consent
+   * that was not informed.
+   */
+  approvePublishIntent(
+    id: string,
+    payloadHash: string,
+    approvedBy: string,
+  ): PublishIntent | null {
+    const changes = Number(
+      this.db
+        .prepare(
+          `UPDATE publish_intents
+           SET state='approved', approved_by=?, approved_at=?, approved_payload_hash=?
+           WHERE id=? AND state='staged' AND payload_hash=?`,
+        )
+        .run(approvedBy, now(), payloadHash, id, payloadHash).changes,
+    );
+    return changes > 0 ? this.getPublishIntent(id) : null;
+  }
+
+  setPublishIntentState(
+    id: string,
+    state: Extract<PublishIntent["state"], "void" | "withdrawn">,
+    note: string,
+  ): PublishIntent | null {
+    this.db
+      .prepare("UPDATE publish_intents SET state=?, note=? WHERE id=?")
+      .run(state, note, id);
+    return this.getPublishIntent(id);
   }
 
   enqueueJob(input: {
@@ -3367,6 +5073,10 @@ export class MarketingovoDatabase {
       timezone: String(row.timezone),
       enabled: Boolean(row.enabled),
       nextRunAt: String(row.next_run_at),
+      // Rows written before schedules could name a workflow default to the
+      // audit they already meant, so no existing schedule changes behaviour.
+      workflowId: String(row.workflow_id ?? "audit"),
+      options: json<Record<string, unknown>>(row.options_json, {}),
       createdAt: String(row.created_at),
       updatedAt: String(row.updated_at),
     }));
@@ -3384,8 +5094,9 @@ export class MarketingovoDatabase {
     };
     this.db
       .prepare(
-        `INSERT INTO schedules(id,project_id,cron,timezone,enabled,next_run_at,created_at,updated_at)
-      VALUES(?,?,?,?,?,?,?,?)`,
+        `INSERT INTO schedules(id,project_id,cron,timezone,enabled,next_run_at,
+          workflow_id,options_json,created_at,updated_at)
+      VALUES(?,?,?,?,?,?,?,?,?,?)`,
       )
       .run(
         schedule.id,
@@ -3394,6 +5105,8 @@ export class MarketingovoDatabase {
         schedule.timezone,
         schedule.enabled ? 1 : 0,
         schedule.nextRunAt,
+        schedule.workflowId ?? "audit",
+        JSON.stringify(schedule.options ?? {}),
         schedule.createdAt,
         schedule.updatedAt,
       );
@@ -3403,7 +5116,10 @@ export class MarketingovoDatabase {
   updateSchedule(
     id: string,
     patch: Partial<
-      Pick<Schedule, "cron" | "timezone" | "enabled" | "nextRunAt">
+      Pick<
+        Schedule,
+        "cron" | "timezone" | "enabled" | "nextRunAt" | "workflowId" | "options"
+      >
     >,
   ): Schedule | null {
     const current = this.listSchedules().find((schedule) => schedule.id === id);
@@ -3411,13 +5127,15 @@ export class MarketingovoDatabase {
     const next = { ...current, ...patch, updatedAt: now() };
     this.db
       .prepare(
-        "UPDATE schedules SET cron=?,timezone=?,enabled=?,next_run_at=?,updated_at=? WHERE id=?",
+        "UPDATE schedules SET cron=?,timezone=?,enabled=?,next_run_at=?,workflow_id=?,options_json=?,updated_at=? WHERE id=?",
       )
       .run(
         next.cron,
         next.timezone,
         next.enabled ? 1 : 0,
         next.nextRunAt,
+        next.workflowId ?? "audit",
+        JSON.stringify(next.options ?? {}),
         next.updatedAt,
         id,
       );
@@ -3467,6 +5185,10 @@ export class MarketingovoDatabase {
           timezone: String(row.timezone),
           enabled: Boolean(row.enabled),
           nextRunAt: String(row.next_run_at),
+          // Without these two, every claimed schedule fell back to the audit
+          // default at execution even when the row named another workflow.
+          workflowId: String(row.workflow_id ?? "audit"),
+          options: json<Record<string, unknown>>(row.options_json, {}),
           createdAt: String(row.created_at),
           updatedAt: String(row.updated_at),
           leaseOwner: workerId,
@@ -3596,16 +5318,20 @@ export class MarketingovoDatabase {
           input.project.createdAt,
           input.project.updatedAt,
         );
-      this.db
-        .prepare(
-          "INSERT INTO sites(id,project_id,canonical_url,created_at) VALUES(?,?,?,?)",
-        )
-        .run(
-          randomUUID(),
-          input.project.id,
-          input.project.canonicalUrl,
-          input.importedAt,
-        );
+      // A transferred workspace may legitimately carry no website; importing it
+      // must not synthesise a site row the exporter never had.
+      if (input.project.canonicalUrl !== null) {
+        this.db
+          .prepare(
+            "INSERT INTO sites(id,project_id,canonical_url,created_at) VALUES(?,?,?,?)",
+          )
+          .run(
+            randomUUID(),
+            input.project.id,
+            input.project.canonicalUrl,
+            input.importedAt,
+          );
+      }
 
       if (input.settings) {
         this.db
@@ -3927,8 +5653,8 @@ export class MarketingovoDatabase {
 
       const insertSchedule = this.db.prepare(
         `INSERT INTO schedules
-        (id,project_id,cron,timezone,enabled,next_run_at,created_at,updated_at)
-        VALUES(?,?,?,?,0,?,?,?)`,
+        (id,project_id,cron,timezone,enabled,next_run_at,workflow_id,options_json,created_at,updated_at)
+        VALUES(?,?,?,?,0,?,?,?,?,?)`,
       );
       for (const schedule of input.schedules) {
         insertSchedule.run(
@@ -3937,6 +5663,10 @@ export class MarketingovoDatabase {
           schedule.cron,
           schedule.timezone,
           schedule.nextRunAt,
+          // Without these two, an imported report schedule silently becomes
+          // an audit the moment somebody re-enables it.
+          schedule.workflowId ?? "audit",
+          JSON.stringify(schedule.options ?? {}),
           schedule.createdAt,
           schedule.updatedAt,
         );

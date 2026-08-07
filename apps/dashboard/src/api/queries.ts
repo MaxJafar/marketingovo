@@ -13,9 +13,28 @@ import type {
   ActionEvidenceResponse,
   ActionStatus,
   ActionVerificationRun,
+  BrandKitProfile,
+  BrandKitWorkspace,
+  CalendarEntry,
+  CampaignLink,
+  CampaignLinkPreview,
+  ChannelAccount,
+  EmailPreview,
+  EmailTemplate,
+  EmailTemplateWorkspace,
+  MarketingReport,
+  MarketingReportSummary,
+  ChannelPerformance,
   Competitor,
+  ContentCalendar,
+  MediaAsset,
+  PublishOutcome,
   CompetitorWorkspace,
   CreateSiteInput,
+  DiscoveredChannelAccount,
+  LinkChannelAccountInput,
+  PublishIntent,
+  UpdateChannelAccountInput,
   DashboardSettings,
   ExtractionPreview,
   ExtractionRule,
@@ -35,6 +54,10 @@ import type {
   ProjectContextWorkspace,
   ProjectDeletionReceipt,
   ProjectImportResult,
+  QrPlacement,
+  QrStyle,
+  RedirectConfigResponse,
+  RedirectTarget,
   Report,
   RunEvidencePage,
   RunEvidenceSection,
@@ -42,14 +65,18 @@ import type {
   InternalLinkDirection,
   RunComparison,
   RunReplay,
+  SearchTermRecord,
   SeoAction,
   Site,
   StartAuditInput,
   SystemHealth,
+  UtmParameters,
+  WorkspaceCapabilities,
 } from "./contracts";
 
 export const queryKeys = {
   sites: ["sites"] as const,
+  capabilities: (siteId: string) => ["capabilities", siteId] as const,
   overview: (siteId: string) => ["overview", siteId] as const,
   context: (siteId: string) => ["context", siteId] as const,
   actions: (siteId: string) => ["actions", siteId] as const,
@@ -84,6 +111,21 @@ export const queryKeys = {
   settings: (siteId: string) => ["settings", siteId] as const,
   extractionRules: (siteId: string) => ["extraction-rules", siteId] as const,
   extractionRuleTemplates: ["extraction-rule-templates"] as const,
+  marketingReports: (siteId: string) => ["marketing-reports", siteId] as const,
+  marketingReport: (reportId: string) =>
+    ["marketing-report", reportId] as const,
+  campaignLinks: (siteId: string) => ["campaign-links", siteId] as const,
+  brandKit: (siteId: string) => ["brand-kit", siteId] as const,
+  emailTemplates: (siteId: string) => ["email-templates", siteId] as const,
+  emailTemplate: (templateId: string) =>
+    ["email-template", templateId] as const,
+  calendar: (siteId: string) => ["calendar", siteId] as const,
+  mediaLibrary: (siteId: string) => ["media-library", siteId] as const,
+  cabinets: (siteId: string) => ["cabinets", siteId] as const,
+  cabinetDiscovery: (siteId: string) => ["cabinet-discovery", siteId] as const,
+  cabinetPerformance: (cabinetId: string) =>
+    ["cabinet-performance", cabinetId] as const,
+  publishIntents: (siteId: string) => ["publish-intents", siteId] as const,
   systemHealth: ["system-health"] as const,
 };
 
@@ -106,6 +148,24 @@ function useSiteQuery<T>(
     queryFn: ({ signal }) =>
       apiRequest<T>(withQuery(path, { siteId }), { signal }),
     enabled: Boolean(siteId),
+  });
+}
+
+/**
+ * What this workspace can do right now, and the remedy for anything it cannot.
+ *
+ * Read from the project route rather than the site-scoped compatibility layer,
+ * because a capability answer is about the workspace itself.
+ */
+export function useCapabilities(siteId: string) {
+  return useQuery({
+    queryKey: queryKeys.capabilities(siteId),
+    queryFn: ({ signal }) =>
+      apiRequest<WorkspaceCapabilities>(`/projects/${siteId}/capabilities`, {
+        signal,
+      }),
+    enabled: Boolean(siteId),
+    staleTime: 30_000,
   });
 }
 
@@ -445,6 +505,477 @@ export const useSettings = (siteId: string) =>
     siteId,
   );
 
+/* ------------------------------------------------------------------ */
+/* Ad cabinets                                                         */
+/* ------------------------------------------------------------------ */
+
+export const useCabinets = (siteId: string) =>
+  useQuery({
+    queryKey: queryKeys.cabinets(siteId),
+    queryFn: ({ signal }) =>
+      apiRequest<ListResponse<ChannelAccount>>(
+        withQuery("/channels/accounts", { projectId: siteId, kind: "ads" }),
+        { signal },
+      ),
+    enabled: Boolean(siteId),
+  });
+
+/**
+ * Cabinets the credential can reach.
+ *
+ * Disabled by default and fetched on demand: this is the one query on the page
+ * that leaves the machine, and it should happen because someone asked to see
+ * their ad accounts, not because a tab was opened.
+ */
+export function useCabinetDiscovery(
+  siteId: string,
+  enabled: boolean,
+  provider = "meta-ads",
+) {
+  return useQuery({
+    queryKey: [...queryKeys.cabinetDiscovery(siteId), provider],
+    queryFn: ({ signal }) =>
+      apiRequest<ListResponse<DiscoveredChannelAccount>>(
+        withQuery("/channels/discover", { projectId: siteId, provider }),
+        { signal },
+      ),
+    enabled: Boolean(siteId) && enabled,
+    retry: false,
+    staleTime: 60_000,
+  });
+}
+
+export const useCabinetPerformance = (cabinetId: string) =>
+  useQuery({
+    queryKey: queryKeys.cabinetPerformance(cabinetId),
+    queryFn: ({ signal }) =>
+      apiRequest<ChannelPerformance>(
+        `/channels/accounts/${encodeURIComponent(cabinetId)}/performance`,
+        { signal },
+      ),
+    enabled: Boolean(cabinetId),
+  });
+
+export function useLinkCabinet(siteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: LinkChannelAccountInput) =>
+      apiRequest<ChannelAccount>("/channels/accounts", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.cabinets(siteId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.cabinetDiscovery(siteId),
+      });
+      // Linking the first cabinet is what turns the `ads` capability on.
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.capabilities(siteId),
+      });
+    },
+  });
+}
+
+export function useUpdateCabinet(siteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      input,
+    }: {
+      id: string;
+      input: UpdateChannelAccountInput;
+    }) =>
+      apiRequest<ChannelAccount>(
+        `/channels/accounts/${encodeURIComponent(id)}`,
+        { method: "PATCH", body: JSON.stringify(input) },
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.cabinets(siteId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.capabilities(siteId),
+      });
+    },
+  });
+}
+
+export function useRemoveCabinet(siteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiRequest<void>(`/channels/accounts/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.cabinets(siteId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.capabilities(siteId),
+      });
+    },
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Cross-channel reports                                               */
+/* ------------------------------------------------------------------ */
+
+export const useMarketingReports = (siteId: string) =>
+  useQuery({
+    queryKey: queryKeys.marketingReports(siteId),
+    queryFn: ({ signal }) =>
+      apiRequest<ListResponse<MarketingReportSummary>>(
+        withQuery("/marketing-reports", { projectId: siteId }),
+        { signal },
+      ),
+    enabled: Boolean(siteId),
+  });
+
+export const useMarketingReport = (reportId: string) =>
+  useQuery({
+    queryKey: queryKeys.marketingReport(reportId),
+    queryFn: ({ signal }) =>
+      apiRequest<MarketingReport>(
+        `/marketing-reports/${encodeURIComponent(reportId)}`,
+        { signal },
+      ),
+    enabled: Boolean(reportId),
+  });
+
+export function useGenerateReport(siteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {
+      title?: string;
+      start?: string;
+      end?: string;
+      compare?: boolean;
+      narrative?: string | null;
+    }) =>
+      apiRequest<MarketingReport>("/marketing-reports", {
+        method: "POST",
+        body: JSON.stringify({
+          projectId: siteId,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          ...input,
+        }),
+      }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.marketingReports(siteId),
+      }),
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Email builder                                                       */
+/* ------------------------------------------------------------------ */
+
+export const useBrandKit = (siteId: string) =>
+  useQuery({
+    queryKey: queryKeys.brandKit(siteId),
+    queryFn: ({ signal }) =>
+      apiRequest<BrandKitWorkspace>(
+        `/projects/${encodeURIComponent(siteId)}/brand-kit`,
+        { signal },
+      ),
+    enabled: Boolean(siteId),
+  });
+
+export function useReviseBrandKit(siteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { profile: BrandKitProfile; changeSummary: string }) =>
+      apiRequest<BrandKitWorkspace>(
+        `/projects/${encodeURIComponent(siteId)}/brand-kit`,
+        { method: "PUT", body: JSON.stringify(input) },
+      ),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.brandKit(siteId) }),
+  });
+}
+
+export const useEmailTemplates = (siteId: string) =>
+  useQuery({
+    queryKey: queryKeys.emailTemplates(siteId),
+    queryFn: ({ signal }) =>
+      apiRequest<ListResponse<EmailTemplate>>(
+        withQuery("/email-templates", { projectId: siteId }),
+        { signal },
+      ),
+    enabled: Boolean(siteId),
+  });
+
+export const useEmailTemplate = (templateId: string) =>
+  useQuery({
+    queryKey: queryKeys.emailTemplate(templateId),
+    queryFn: ({ signal }) =>
+      apiRequest<EmailTemplateWorkspace>(
+        `/email-templates/${encodeURIComponent(templateId)}`,
+        { signal },
+      ),
+    enabled: Boolean(templateId),
+  });
+
+export function useCreateEmailTemplate(siteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { name: string; purpose?: string | null }) =>
+      apiRequest<EmailTemplate>("/email-templates", {
+        method: "POST",
+        body: JSON.stringify({ projectId: siteId, ...input }),
+      }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.emailTemplates(siteId),
+      }),
+  });
+}
+
+/**
+ * Compiles and validates without storing.
+ *
+ * The editor calls this on every check, so a person sees the same report an
+ * agent iterates against rather than a different, friendlier one.
+ */
+export function usePreviewEmail(siteId: string) {
+  return useMutation({
+    mutationFn: (input: {
+      subject: string;
+      preheader?: string;
+      html: string;
+    }) =>
+      apiRequest<EmailPreview>(
+        `/projects/${encodeURIComponent(siteId)}/email-preview`,
+        { method: "POST", body: JSON.stringify(input) },
+      ),
+  });
+}
+
+export function useSaveEmailVersion(siteId: string, templateId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {
+      subject: string;
+      preheader?: string;
+      html: string;
+    }) =>
+      apiRequest<EmailTemplateWorkspace>(
+        `/email-templates/${encodeURIComponent(templateId)}/versions`,
+        { method: "POST", body: JSON.stringify(input) },
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.emailTemplate(templateId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.emailTemplates(siteId),
+      });
+    },
+  });
+}
+
+/** A client-safe starting document built from the current brand kit. */
+export function useEmailStarter(siteId: string) {
+  return useMutation({
+    mutationFn: () =>
+      apiRequest<{ html: string }>(
+        `/projects/${encodeURIComponent(siteId)}/email-starter`,
+      ),
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Content calendar and media                                          */
+/* ------------------------------------------------------------------ */
+
+export const useCalendar = (siteId: string) =>
+  useQuery({
+    queryKey: queryKeys.calendar(siteId),
+    queryFn: ({ signal }) =>
+      apiRequest<ContentCalendar>(
+        withQuery("/calendar", { projectId: siteId }),
+        { signal },
+      ),
+    enabled: Boolean(siteId),
+    // A scheduled post fires without anyone watching, so an open calendar
+    // should notice within a minute rather than after a manual reload.
+    refetchInterval: 60_000,
+  });
+
+export const useMediaLibrary = (siteId: string) =>
+  useQuery({
+    queryKey: queryKeys.mediaLibrary(siteId),
+    queryFn: ({ signal }) =>
+      apiRequest<ListResponse<MediaAsset>>(
+        `/projects/${encodeURIComponent(siteId)}/media`,
+        { signal },
+      ),
+    enabled: Boolean(siteId),
+  });
+
+export function useUploadMedia(siteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (file: File) =>
+      apiRequest<MediaAsset>(`/projects/${encodeURIComponent(siteId)}/media`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/octet-stream",
+          // The name is for the operator to recognize the asset by; the
+          // real media type comes from sniffing the bytes server-side.
+          "x-marketingovo-filename": file.name,
+        },
+        body: await file.arrayBuffer(),
+      }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.mediaLibrary(siteId),
+      }),
+  });
+}
+
+/** Sends a local file to the operator's own storage so Instagram can fetch it. */
+export function useRelayMedia(siteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (mediaId: string) =>
+      apiRequest<MediaAsset>(`/media/${encodeURIComponent(mediaId)}/relay`, {
+        method: "POST",
+      }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.mediaLibrary(siteId),
+      }),
+  });
+}
+
+export function useAttachPublicUrl(siteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      mediaId,
+      publicUrl,
+    }: {
+      mediaId: string;
+      publicUrl: string;
+    }) =>
+      apiRequest<MediaAsset>(
+        `/media/${encodeURIComponent(mediaId)}/public-url`,
+        { method: "POST", body: JSON.stringify({ publicUrl }) },
+      ),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.mediaLibrary(siteId),
+      }),
+  });
+}
+
+export function useScheduleIntent(siteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      intentId,
+      scheduledAt,
+      timezone,
+    }: {
+      intentId: string;
+      scheduledAt: string;
+      timezone: string;
+    }) =>
+      apiRequest<PublishIntent>(
+        `/publish-intents/${encodeURIComponent(intentId)}/schedule`,
+        { method: "POST", body: JSON.stringify({ scheduledAt, timezone }) },
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.calendar(siteId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.publishIntents(siteId),
+      });
+    },
+  });
+}
+
+/** Sends an approved post immediately. Refused for anything but the browser. */
+export function usePublishNow(siteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (intentId: string) =>
+      apiRequest<PublishOutcome>(
+        `/publish-intents/${encodeURIComponent(intentId)}/publish-now`,
+        { method: "POST" },
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.calendar(siteId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.publishIntents(siteId),
+      });
+    },
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Campaign staging                                                    */
+/* ------------------------------------------------------------------ */
+
+export const usePublishIntents = (siteId: string) =>
+  useQuery({
+    queryKey: queryKeys.publishIntents(siteId),
+    queryFn: ({ signal }) =>
+      apiRequest<ListResponse<PublishIntent>>(
+        withQuery("/publish-intents", { projectId: siteId, state: "staged" }),
+        { signal },
+      ),
+    enabled: Boolean(siteId),
+  });
+
+/**
+ * Approves one staged payload.
+ *
+ * The hash travels with the request on purpose: the daemon matches it against
+ * the stored payload and refuses if they differ, so approving something that
+ * changed after it was rendered is impossible rather than merely unlikely.
+ */
+export function useApprovePublishIntent(siteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payloadHash }: { id: string; payloadHash: string }) =>
+      apiRequest<PublishIntent>(
+        `/publish-intents/${encodeURIComponent(id)}/approve`,
+        { method: "POST", body: JSON.stringify({ payloadHash }) },
+      ),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.publishIntents(siteId),
+      }),
+  });
+}
+
+export function useWithdrawPublishIntent(siteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, note }: { id: string; note: string }) =>
+      apiRequest<PublishIntent>(
+        `/publish-intents/${encodeURIComponent(id)}/withdraw`,
+        { method: "POST", body: JSON.stringify({ note }) },
+      ),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.publishIntents(siteId),
+      }),
+  });
+}
+
 export const useExtractionRules = (siteId: string) =>
   useQuery({
     queryKey: queryKeys.extractionRules(siteId),
@@ -547,7 +1078,11 @@ export function useStartAudit() {
 export interface StartWorkflowInput {
   projectId: string;
   workflowId:
-    "compare" | "keyword-research" | "content-plan" | "osint-research";
+    | "compare"
+    | "keyword-research"
+    | "content-plan"
+    | "osint-research"
+    | "ads-audit";
   options: Record<string, unknown>;
 }
 
@@ -570,7 +1105,9 @@ export function useStartWorkflow() {
               ? queryKeys.competitors(input.projectId)
               : input.workflowId === "osint-research"
                 ? queryKeys.osint(input.projectId)
-                : queryKeys.keywords(input.projectId),
+                : input.workflowId === "ads-audit"
+                  ? queryKeys.cabinets(input.projectId)
+                  : queryKeys.keywords(input.projectId),
         }),
       ]);
     },
@@ -750,6 +1287,13 @@ export interface ScheduleDefinitionInput {
   cron: string;
   timezone: string;
   enabled: boolean;
+  /**
+   * What the schedule starts. Omitted means a site audit. Any registered
+   * workflow id is legal — the editor offers two, but a schedule created over
+   * the API keeps whatever it was created with.
+   */
+  workflowId?: string;
+  options?: Record<string, unknown>;
 }
 
 export function useCreateSchedule(siteId: string) {
@@ -866,5 +1410,143 @@ export function useDeleteProject(siteId: string) {
       });
       await queryClient.invalidateQueries({ queryKey: queryKeys.sites });
     },
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Campaign links and QR codes                                         */
+/* ------------------------------------------------------------------ */
+
+export const useCampaignLinks = (siteId: string) =>
+  useQuery({
+    queryKey: queryKeys.campaignLinks(siteId),
+    queryFn: ({ signal }) =>
+      apiRequest<ListResponse<CampaignLink>>(
+        `/projects/${encodeURIComponent(siteId)}/campaign-links`,
+        { signal },
+      ),
+    enabled: Boolean(siteId),
+  });
+
+/**
+ * Checks tagging without saving it.
+ *
+ * A mutation rather than a query because it is driven by editing, not by
+ * navigation — the point is to show what a tagging choice costs while it is
+ * still free to change.
+ */
+export function usePreviewCampaignLink(siteId: string) {
+  return useMutation({
+    mutationFn: (input: {
+      destinationUrl: string;
+      utm: UtmParameters;
+      style?: Partial<QrStyle>;
+      placement?: QrPlacement;
+      printedWidthMm?: number;
+    }) =>
+      apiRequest<CampaignLinkPreview>(
+        `/projects/${encodeURIComponent(siteId)}/campaign-links/preview`,
+        { method: "POST", body: JSON.stringify(input) },
+      ),
+  });
+}
+
+export function useCreateCampaignLink(siteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {
+      label: string;
+      destinationUrl: string;
+      utm: UtmParameters;
+      style?: Partial<QrStyle>;
+      placement?: QrPlacement;
+      printedWidthMm?: number;
+    }) =>
+      apiRequest<CampaignLink>(
+        `/projects/${encodeURIComponent(siteId)}/campaign-links`,
+        { method: "POST", body: JSON.stringify(input) },
+      ),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.campaignLinks(siteId),
+      }),
+  });
+}
+
+export function useMarkCampaignLinkPrinted(siteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (linkId: string) =>
+      apiRequest<CampaignLink>(
+        `/campaign-links/${encodeURIComponent(linkId)}/printed`,
+        { method: "POST" },
+      ),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.campaignLinks(siteId),
+      }),
+  });
+}
+
+export function useDeleteCampaignLink(siteId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (linkId: string) =>
+      apiRequest<void>(`/campaign-links/${encodeURIComponent(linkId)}`, {
+        method: "DELETE",
+      }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.campaignLinks(siteId),
+      }),
+  });
+}
+
+export function useRedirectConfig(siteId: string) {
+  return useMutation({
+    mutationFn: (input: {
+      target: RedirectTarget;
+      shortHost?: string | null;
+      linkIds?: string[];
+      expiresAt?: string | null;
+      fallbackUrl?: string | null;
+    }) =>
+      apiRequest<RedirectConfigResponse>(
+        `/projects/${encodeURIComponent(siteId)}/campaign-links/redirect-config`,
+        { method: "POST", body: JSON.stringify(input) },
+      ),
+  });
+}
+
+/**
+ * The queries that triggered ads on one account.
+ *
+ * Google Ads only. A Meta cabinet returns an empty list rather than an error,
+ * because "this provider reports no queries" is a fact about the provider.
+ */
+export function useSearchTerms(
+  channelAccountId: string,
+  enabled: boolean,
+  options: { actionableOnly?: boolean; limit?: number } = {},
+) {
+  return useQuery({
+    queryKey: [
+      "search-terms",
+      channelAccountId,
+      options.actionableOnly ?? true,
+      options.limit ?? 100,
+    ],
+    queryFn: ({ signal }) =>
+      apiRequest<ListResponse<SearchTermRecord>>(
+        withQuery(
+          `/channels/accounts/${encodeURIComponent(channelAccountId)}/search-terms`,
+          {
+            actionableOnly: String(options.actionableOnly ?? true),
+            limit: String(options.limit ?? 100),
+          },
+        ),
+        { signal },
+      ),
+    enabled: Boolean(channelAccountId) && enabled,
   });
 }

@@ -6,7 +6,7 @@ This directory contains the English launch narrative for Marketingovo `1.1.0`. T
 
 SEO audits are easy to generate. Deciding what deserves attention, explaining why, assigning the work, and verifying the result are the harder parts.
 
-Marketingovo is a local-first SEO operations system that turns crawl and connected marketing evidence into a transparent action queue. Each action can carry impact, effort, confidence, affected URLs, evidence, and a verification state.
+Marketingovo is a local-first marketing system — SEO, paid media, social publishing, email and public-web research — that turns crawl and connected marketing evidence into a transparent action queue. Each action can carry impact, effort, confidence, affected URLs, evidence, and a verification state.
 
 ## Canonical claims
 

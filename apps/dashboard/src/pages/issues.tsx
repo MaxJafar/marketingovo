@@ -12,7 +12,12 @@ import {
   type IssueReviewFilters,
 } from "../api/queries";
 import { useSite } from "../context/site-context";
-import { FreshnessNotice, QueryState } from "../components/data-state";
+import {
+  CapabilityGate,
+  FreshnessNotice,
+  QueryState,
+} from "../components/data-state";
+import { NEEDS_WEBSITE, useWorkspaceCapabilities } from "../lib/capabilities";
 import { Icon } from "../components/icon";
 import {
   Button,
@@ -267,6 +272,7 @@ function IssueReviewEditor({
 
 export function IssuesPage() {
   const { siteId } = useSite();
+  const { capabilities } = useWorkspaceCapabilities(siteId);
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search.trim());
   const [status, setStatus] = useState<IssueStatus | "all">("open");
@@ -313,219 +319,224 @@ export function IssuesPage() {
         title="Issue review"
         description="Inspect crawl evidence, document intentional exceptions, and keep false positives out of future priorities without erasing audit history."
       />
-      <QueryState
-        isLoading={query.isLoading}
-        error={query.error}
-        siteId={siteId}
-        onRetry={() => void query.refetch()}
-      >
-        <FreshnessNotice meta={query.data?.meta} />
-        <section
-          className="workbench-controls"
-          aria-labelledby="issue-filter-title"
+      <CapabilityGate capabilities={capabilities} requires={NEEDS_WEBSITE}>
+        <QueryState
+          isLoading={query.isLoading}
+          error={query.error}
+          siteId={siteId}
+          onRetry={() => void query.refetch()}
         >
-          <div className="workbench-control-heading">
-            <div>
-              <h2 id="issue-filter-title">
-                Separate signal from accepted behavior
-              </h2>
-              <p>
-                Search titles, rules, modules, fingerprints, and canonical URLs.
-                Decisions are scoped to the selected site.
+          <FreshnessNotice meta={query.data?.meta} />
+          <section
+            className="workbench-controls"
+            aria-labelledby="issue-filter-title"
+          >
+            <div className="workbench-control-heading">
+              <div>
+                <h2 id="issue-filter-title">
+                  Separate signal from accepted behavior
+                </h2>
+                <p>
+                  Search titles, rules, modules, fingerprints, and canonical
+                  URLs. Decisions are scoped to the selected site.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={resetFilters}
+                disabled={!filtersActive}
+              >
+                Reset filters
+              </Button>
+            </div>
+            <div className="workbench-filter-grid issue-filter-grid">
+              <label className="workbench-search">
+                <span>Search issues</span>
+                <span className="search-field">
+                  <Icon name="search" />
+                  <input
+                    type="search"
+                    value={search}
+                    maxLength={160}
+                    onChange={(event) => setSearch(event.currentTarget.value)}
+                    placeholder="Rule, URL, title, fingerprint…"
+                  />
+                </span>
+              </label>
+              <label>
+                Status
+                <select
+                  value={status}
+                  onChange={(event) =>
+                    setStatus(event.currentTarget.value as IssueStatus | "all")
+                  }
+                >
+                  <option value="all">All statuses</option>
+                  <option value="open">Open</option>
+                  <option value="resolved">Resolved by audit</option>
+                  <option value="ignored">Ignored intentionally</option>
+                  <option value="false_positive">False positives</option>
+                </select>
+              </label>
+              <label>
+                Severity
+                <select
+                  value={severity}
+                  onChange={(event) =>
+                    setSeverity(event.currentTarget.value as Severity | "all")
+                  }
+                >
+                  <option value="all">All severities</option>
+                  <option value="critical">Critical</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                  <option value="info">Info</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          {page && page.total > 0 ? (
+            <>
+              <p
+                className="workbench-result-count"
+                role="status"
+                aria-live="polite"
+              >
+                Showing {formatNumber(page.offset + 1)}–{formatNumber(end)} of{" "}
+                {formatNumber(page.total)} issues
               </p>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={resetFilters}
-              disabled={!filtersActive}
-            >
-              Reset filters
-            </Button>
-          </div>
-          <div className="workbench-filter-grid issue-filter-grid">
-            <label className="workbench-search">
-              <span>Search issues</span>
-              <span className="search-field">
-                <Icon name="search" />
-                <input
-                  type="search"
-                  value={search}
-                  maxLength={160}
-                  onChange={(event) => setSearch(event.currentTarget.value)}
-                  placeholder="Rule, URL, title, fingerprint…"
-                />
-              </span>
-            </label>
-            <label>
-              Status
-              <select
-                value={status}
-                onChange={(event) =>
-                  setStatus(event.currentTarget.value as IssueStatus | "all")
-                }
-              >
-                <option value="all">All statuses</option>
-                <option value="open">Open</option>
-                <option value="resolved">Resolved by audit</option>
-                <option value="ignored">Ignored intentionally</option>
-                <option value="false_positive">False positives</option>
-              </select>
-            </label>
-            <label>
-              Severity
-              <select
-                value={severity}
-                onChange={(event) =>
-                  setSeverity(event.currentTarget.value as Severity | "all")
-                }
-              >
-                <option value="all">All severities</option>
-                <option value="critical">Critical</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
-                <option value="info">Info</option>
-              </select>
-            </label>
-          </div>
-        </section>
-
-        {page && page.total > 0 ? (
-          <>
-            <p
-              className="workbench-result-count"
-              role="status"
-              aria-live="polite"
-            >
-              Showing {formatNumber(page.offset + 1)}–{formatNumber(end)} of{" "}
-              {formatNumber(page.total)} issues
-            </p>
-            <div className="table-shell issue-review-table">
-              <table aria-label="SEO issues awaiting or carrying review decisions">
-                <thead>
-                  <tr>
-                    <th scope="col">Severity</th>
-                    <th scope="col">Issue</th>
-                    <th scope="col">URL</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Occurrences</th>
-                    <th scope="col">Last seen</th>
-                    <th scope="col">Review</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((item) => {
-                    const url = safeExternalUrl(item.issue.canonicalUrl);
-                    const active =
-                      selectedFingerprint === item.issue.fingerprint;
-                    return (
-                      <tr key={item.issue.fingerprint}>
-                        <td>
-                          <StatusBadge status={item.issue.severity} />
-                        </td>
-                        <td>
-                          <div className="issue-title-cell">
-                            <strong>{item.issue.title}</strong>
-                            <small>
-                              {item.issue.ruleId} · {item.issue.moduleId}
-                            </small>
-                          </div>
-                        </td>
-                        <td>
-                          {url ? (
-                            <a
-                              href={url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="issue-url"
+              <div className="table-shell issue-review-table">
+                <table aria-label="SEO issues awaiting or carrying review decisions">
+                  <thead>
+                    <tr>
+                      <th scope="col">Severity</th>
+                      <th scope="col">Issue</th>
+                      <th scope="col">URL</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Occurrences</th>
+                      <th scope="col">Last seen</th>
+                      <th scope="col">Review</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map((item) => {
+                      const url = safeExternalUrl(item.issue.canonicalUrl);
+                      const active =
+                        selectedFingerprint === item.issue.fingerprint;
+                      return (
+                        <tr key={item.issue.fingerprint}>
+                          <td>
+                            <StatusBadge status={item.issue.severity} />
+                          </td>
+                          <td>
+                            <div className="issue-title-cell">
+                              <strong>{item.issue.title}</strong>
+                              <small>
+                                {item.issue.ruleId} · {item.issue.moduleId}
+                              </small>
+                            </div>
+                          </td>
+                          <td>
+                            {url ? (
+                              <a
+                                href={url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="issue-url"
+                              >
+                                {item.issue.canonicalUrl}
+                              </a>
+                            ) : (
+                              <span className="muted-copy">Site-wide</span>
+                            )}
+                          </td>
+                          <td>
+                            <StatusBadge
+                              status={item.issue.status}
+                              label={displayLabel(item.issue.status)}
+                            />
+                          </td>
+                          <td>{formatNumber(item.occurrenceCount)}</td>
+                          <td>{formatDate(item.issue.lastSeenAt, true)}</td>
+                          <td>
+                            <Button
+                              type="button"
+                              variant={active ? "secondary" : "ghost"}
+                              aria-expanded={active}
+                              aria-controls="issue-review-panel"
+                              onClick={() =>
+                                setSelectedFingerprint(
+                                  active ? null : item.issue.fingerprint,
+                                )
+                              }
                             >
-                              {item.issue.canonicalUrl}
-                            </a>
-                          ) : (
-                            <span className="muted-copy">Site-wide</span>
-                          )}
-                        </td>
-                        <td>
-                          <StatusBadge
-                            status={item.issue.status}
-                            label={displayLabel(item.issue.status)}
-                          />
-                        </td>
-                        <td>{formatNumber(item.occurrenceCount)}</td>
-                        <td>{formatDate(item.issue.lastSeenAt, true)}</td>
-                        <td>
-                          <Button
-                            type="button"
-                            variant={active ? "secondary" : "ghost"}
-                            aria-expanded={active}
-                            aria-controls="issue-review-panel"
-                            onClick={() =>
-                              setSelectedFingerprint(
-                                active ? null : item.issue.fingerprint,
-                              )
-                            }
-                          >
-                            {active ? "Hide" : "Review"}
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-            <nav className="pagination-controls" aria-label="Issue pages">
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={page.offset === 0}
-                onClick={() => {
-                  setOffset(Math.max(0, page.offset - page.limit));
-                  setSelectedFingerprint(null);
-                }}
-              >
-                Previous
-              </Button>
-              <span>
-                Page {formatNumber(Math.floor(page.offset / page.limit) + 1)} of{" "}
-                {formatNumber(Math.max(1, Math.ceil(page.total / page.limit)))}
-              </span>
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={page.offset + page.limit >= page.total}
-                onClick={() => {
-                  setOffset(page.offset + page.limit);
-                  setSelectedFingerprint(null);
-                }}
-              >
-                Next
-              </Button>
-            </nav>
-          </>
-        ) : (
-          <EmptyState
-            title={filtersActive ? "No issues match" : "No open issues"}
-            description={
-              filtersActive
-                ? "Broaden the filters or search another rule, module, title, or URL."
-                : "Run an audit to collect issue evidence, or switch the status filter to review resolved findings."
-            }
-          />
-        )}
-
-        {selected ? (
-          <div id="issue-review-panel">
-            <IssueReviewEditor
-              key={selected.issue.fingerprint}
-              item={selected}
-              siteId={siteId}
-              onClose={() => setSelectedFingerprint(null)}
+                              {active ? "Hide" : "Review"}
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <nav className="pagination-controls" aria-label="Issue pages">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={page.offset === 0}
+                  onClick={() => {
+                    setOffset(Math.max(0, page.offset - page.limit));
+                    setSelectedFingerprint(null);
+                  }}
+                >
+                  Previous
+                </Button>
+                <span>
+                  Page {formatNumber(Math.floor(page.offset / page.limit) + 1)}{" "}
+                  of{" "}
+                  {formatNumber(
+                    Math.max(1, Math.ceil(page.total / page.limit)),
+                  )}
+                </span>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={page.offset + page.limit >= page.total}
+                  onClick={() => {
+                    setOffset(page.offset + page.limit);
+                    setSelectedFingerprint(null);
+                  }}
+                >
+                  Next
+                </Button>
+              </nav>
+            </>
+          ) : (
+            <EmptyState
+              title={filtersActive ? "No issues match" : "No open issues"}
+              description={
+                filtersActive
+                  ? "Broaden the filters or search another rule, module, title, or URL."
+                  : "Run an audit to collect issue evidence, or switch the status filter to review resolved findings."
+              }
             />
-          </div>
-        ) : null}
-      </QueryState>
+          )}
+
+          {selected ? (
+            <div id="issue-review-panel">
+              <IssueReviewEditor
+                key={selected.issue.fingerprint}
+                item={selected}
+                siteId={siteId}
+                onClose={() => setSelectedFingerprint(null)}
+              />
+            </div>
+          ) : null}
+        </QueryState>
+      </CapabilityGate>
     </div>
   );
 }

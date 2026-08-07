@@ -44,6 +44,51 @@ import type {
   MarketingovoProjectBundleV2,
   ProjectImportResult,
 } from "@marketingovo/contracts/project-bundle";
+import type {
+  CampaignBrief,
+  CampaignDeliverable,
+  CampaignWorkspace,
+  ChannelAccount,
+  ChannelPerformance,
+  CreateCampaignBriefInput,
+  CreateCampaignDeliverableInput,
+  DiscoveredChannelAccount,
+  LinkChannelAccountInput,
+  PublishIntent,
+  SearchTermRecord,
+  StagePublishIntentInput,
+  UpdateChannelAccountInput,
+} from "@marketingovo/contracts/channels";
+import type {
+  ContentCalendar,
+  MediaAsset,
+  PublishRecord,
+  ScheduleIntentInput,
+} from "@marketingovo/contracts/publishing";
+import type {
+  GenerateReportInput,
+  MarketingReport,
+  MarketingReportSummary,
+} from "@marketingovo/contracts/reporting";
+import type {
+  CampaignLink,
+  CampaignLinkPreview,
+  CreateCampaignLinkInput,
+  QrPlacement,
+  QrStyle,
+  RedirectConfigResponse,
+  RedirectTarget,
+  UtmParameters,
+} from "@marketingovo/contracts/campaign-links";
+import type {
+  BrandKitWorkspace,
+  CompileEmailInput,
+  CreateEmailTemplateInput,
+  EmailPreview,
+  EmailTemplate,
+  EmailTemplateWorkspace,
+  UpdateBrandKitInput,
+} from "@marketingovo/contracts/email";
 import {
   DEFAULT_LOCAL_API_BASE_URL,
   validateLocalApiBaseUrl,
@@ -542,6 +587,361 @@ export class MarketingovoClient {
         method: "DELETE",
       }),
   };
+  /**
+   * Ad cabinets and the facts read from them.
+   *
+   * Every read here is of locally stored evidence, and every write is either
+   * a link, a cap, or a removal. There is no publish method, in this namespace
+   * or anywhere else in this client, because nothing in the product sends to a
+   * provider yet.
+   */
+  channels = {
+    list: (
+      projectId: string,
+      options: {
+        kind?: ChannelAccount["kind"];
+        includeArchived?: boolean;
+      } = {},
+    ) => {
+      const query = new URLSearchParams({ projectId });
+      if (options.kind) query.set("kind", options.kind);
+      if (options.includeArchived) query.set("includeArchived", "true");
+      return this.request<ChannelAccount[]>(
+        `/channels/accounts?${query.toString()}`,
+      );
+    },
+    /** Cabinets the credential can reach. Reading this links nothing. */
+    discover: (projectId: string, provider = "meta-ads", account = "default") =>
+      this.request<DiscoveredChannelAccount[]>(
+        `/channels/discover?${new URLSearchParams({ projectId, provider, account }).toString()}`,
+      ),
+    link: (input: LinkChannelAccountInput) =>
+      this.request<ChannelAccount>("/channels/accounts", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+    update: (id: string, input: UpdateChannelAccountInput) =>
+      this.request<ChannelAccount>(
+        `/channels/accounts/${encodeURIComponent(id)}`,
+        { method: "PATCH", body: JSON.stringify(input) },
+      ),
+    remove: (id: string) =>
+      this.request<void>(`/channels/accounts/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      }),
+    performance: (
+      id: string,
+      options: { start?: string; end?: string } = {},
+    ) => {
+      const query = new URLSearchParams();
+      if (options.start) query.set("start", options.start);
+      if (options.end) query.set("end", options.end);
+      const suffix = query.toString() ? `?${query.toString()}` : "";
+      return this.request<ChannelPerformance>(
+        `/channels/accounts/${encodeURIComponent(id)}/performance${suffix}`,
+      );
+    },
+
+    /**
+     * The queries that triggered ads, most expensive first.
+     *
+     * Google Ads only. A Meta cabinet returns an empty list rather than an
+     * error: no such report exists on that platform, which is a fact about
+     * the platform rather than a bad request.
+     *
+     * Read this as covering Search and Shopping spend only. Performance Max
+     * and Demand Gen report no queries at all, so a quiet result on an account
+     * dominated by them means very little — the paid audit raises that as its
+     * own finding.
+     */
+    searchTerms: (
+      id: string,
+      options: {
+        start?: string;
+        end?: string;
+        actionableOnly?: boolean;
+        limit?: number;
+      } = {},
+    ) => {
+      const query = new URLSearchParams();
+      if (options.start) query.set("start", options.start);
+      if (options.end) query.set("end", options.end);
+      if (options.actionableOnly !== undefined) {
+        query.set("actionableOnly", String(options.actionableOnly));
+      }
+      if (options.limit !== undefined)
+        query.set("limit", String(options.limit));
+      const suffix = query.toString() ? `?${query.toString()}` : "";
+      return this.request<SearchTermRecord[]>(
+        `/channels/accounts/${encodeURIComponent(id)}/search-terms${suffix}`,
+      );
+    },
+  };
+
+  /**
+   * Campaign staging.
+   *
+   * `approve` is deliberately absent. Approval requires the browser's own
+   * session transport, and this client authenticates with the local service
+   * token, so offering the method would only produce a 403 an agent might read
+   * as a bug rather than as the boundary it is.
+   */
+  campaigns = {
+    list: (projectId: string) =>
+      this.request<CampaignBrief[]>(
+        `/campaigns?projectId=${encodeURIComponent(projectId)}`,
+      ),
+    create: (input: CreateCampaignBriefInput) =>
+      this.request<CampaignBrief>("/campaigns", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+    get: (briefId: string) =>
+      this.request<CampaignWorkspace>(
+        `/campaigns/${encodeURIComponent(briefId)}`,
+      ),
+    addDeliverable: (briefId: string, input: CreateCampaignDeliverableInput) =>
+      this.request<CampaignDeliverable>(
+        `/campaigns/${encodeURIComponent(briefId)}/deliverables`,
+        { method: "POST", body: JSON.stringify(input) },
+      ),
+    stage: (projectId: string, input: StagePublishIntentInput) =>
+      this.request<PublishIntent>(
+        `/projects/${encodeURIComponent(projectId)}/publish-intents`,
+        { method: "POST", body: JSON.stringify(input) },
+      ),
+    intents: (projectId: string, state?: PublishIntent["state"]) => {
+      const query = new URLSearchParams({ projectId });
+      if (state) query.set("state", state);
+      return this.request<PublishIntent[]>(
+        `/publish-intents?${query.toString()}`,
+      );
+    },
+    withdraw: (intentId: string, note: string) =>
+      this.request<PublishIntent>(
+        `/publish-intents/${encodeURIComponent(intentId)}/withdraw`,
+        { method: "POST", body: JSON.stringify({ note }) },
+      ),
+    /**
+     * Places a post on the calendar.
+     *
+     * Available to agent tooling because scheduling clears an existing
+     * approval — proposing a time cannot cause a send, since a person still
+     * has to approve the post at that time.
+     */
+    schedule: (intentId: string, input: ScheduleIntentInput) =>
+      this.request<PublishIntent>(
+        `/publish-intents/${encodeURIComponent(intentId)}/schedule`,
+        { method: "POST", body: JSON.stringify(input) },
+      ),
+    calendar: (projectId: string, start?: string, end?: string) => {
+      const query = new URLSearchParams({ projectId });
+      if (start) query.set("start", start);
+      if (end) query.set("end", end);
+      return this.request<ContentCalendar>(`/calendar?${query.toString()}`);
+    },
+    records: (projectId: string, intentId?: string) => {
+      const query = new URLSearchParams({ projectId });
+      if (intentId) query.set("intentId", intentId);
+      return this.request<PublishRecord[]>(
+        `/publish-records?${query.toString()}`,
+      );
+    },
+    // `approve` and `publishNow` are deliberately absent: both require the
+    // browser's session transport, and this client holds the service token.
+  };
+
+  /**
+   * Cross-channel reports.
+   *
+   * Read a generated report's sections and — as importantly — its refusals:
+   * the totals it declines to compute, each with the reason. A summary that
+   * repeats a refusal as if it were a number defeats the whole document.
+   */
+  marketingReports = {
+    list: (projectId: string) =>
+      this.request<MarketingReportSummary[]>(
+        `/marketing-reports?projectId=${encodeURIComponent(projectId)}`,
+      ),
+    get: (id: string) =>
+      this.request<MarketingReport>(
+        `/marketing-reports/${encodeURIComponent(id)}`,
+      ),
+    generate: (input: GenerateReportInput) =>
+      this.request<MarketingReport>("/marketing-reports", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+    /** The rendered client-facing document; `pdf` returns the download bytes. */
+    render: (id: string, format: "html" | "text" | "pdf" = "html") =>
+      this.requestBytes(
+        `/marketing-reports/${encodeURIComponent(id)}/render?format=${encodeURIComponent(format)}`,
+      ),
+    remove: (id: string) =>
+      this.request<void>(`/marketing-reports/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      }),
+  };
+
+  /**
+   * Campaign links and their QR codes.
+   *
+   * Call `preview` before `create`. A QR code is a URL that has been made
+   * expensive to change, so the tagging is checked while it is still free —
+   * `create` refuses anything that would lose data rather than recording the
+   * problem beside a code somebody is about to print.
+   */
+  campaignLinks = {
+    list: (projectId: string) =>
+      this.request<CampaignLink[]>(
+        `/projects/${encodeURIComponent(projectId)}/campaign-links`,
+      ),
+    preview: (
+      projectId: string,
+      input: {
+        destinationUrl: string;
+        utm: UtmParameters;
+        style?: Partial<QrStyle>;
+        placement?: QrPlacement;
+        printedWidthMm?: number;
+      },
+    ) =>
+      this.request<CampaignLinkPreview>(
+        `/projects/${encodeURIComponent(projectId)}/campaign-links/preview`,
+        { method: "POST", body: JSON.stringify(input) },
+      ),
+    create: (projectId: string, input: CreateCampaignLinkInput) =>
+      this.request<CampaignLink>(
+        `/projects/${encodeURIComponent(projectId)}/campaign-links`,
+        { method: "POST", body: JSON.stringify(input) },
+      ),
+    update: (
+      id: string,
+      patch: {
+        label?: string;
+        placement?: QrPlacement;
+        style?: Partial<QrStyle>;
+        printedWidthMm?: number | null;
+      },
+    ) =>
+      this.request<CampaignLink>(`/campaign-links/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        body: JSON.stringify(patch),
+      }),
+    /** Records that the code has gone to print, which freezes it. */
+    markPrinted: (id: string) =>
+      this.request<CampaignLink>(
+        `/campaign-links/${encodeURIComponent(id)}/printed`,
+        { method: "POST" },
+      ),
+    /** The image URL, for embedding rather than fetching. */
+    qrUrl: (id: string, format: "svg" | "png" = "svg", scale?: number) =>
+      `${this.baseUrl}/campaign-links/${encodeURIComponent(id)}/qr?format=${format}${
+        scale === undefined ? "" : `&scale=${scale}`
+      }`,
+    redirectConfig: (
+      projectId: string,
+      input: {
+        target: RedirectTarget;
+        shortHost?: string | null;
+        linkIds?: string[];
+        expiresAt?: string | null;
+        fallbackUrl?: string | null;
+      },
+    ) =>
+      this.request<RedirectConfigResponse>(
+        `/projects/${encodeURIComponent(projectId)}/campaign-links/redirect-config`,
+        { method: "POST", body: JSON.stringify(input) },
+      ),
+    remove: (id: string) =>
+      this.request<void>(`/campaign-links/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      }),
+  };
+
+  /**
+   * The email builder.
+   *
+   * `preview` is the loop: submit HTML, read the report, fix what it names,
+   * submit again. Only call `saveVersion` for a draft worth keeping, so an
+   * operator's history is decisions rather than iterations.
+   */
+  email = {
+    brandKit: (projectId: string) =>
+      this.request<BrandKitWorkspace>(
+        `/projects/${encodeURIComponent(projectId)}/brand-kit`,
+      ),
+    reviseBrandKit: (projectId: string, input: UpdateBrandKitInput) =>
+      this.request<BrandKitWorkspace>(
+        `/projects/${encodeURIComponent(projectId)}/brand-kit`,
+        { method: "PUT", body: JSON.stringify(input) },
+      ),
+    templates: (projectId: string) =>
+      this.request<EmailTemplate[]>(
+        `/email-templates?projectId=${encodeURIComponent(projectId)}`,
+      ),
+    createTemplate: (input: CreateEmailTemplateInput) =>
+      this.request<EmailTemplate>("/email-templates", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+    template: (templateId: string) =>
+      this.request<EmailTemplateWorkspace>(
+        `/email-templates/${encodeURIComponent(templateId)}`,
+      ),
+    /** Compiles and validates without storing anything. */
+    preview: (projectId: string, input: CompileEmailInput) =>
+      this.request<EmailPreview>(
+        `/projects/${encodeURIComponent(projectId)}/email-preview`,
+        { method: "POST", body: JSON.stringify(input) },
+      ),
+    saveVersion: (templateId: string, input: CompileEmailInput) =>
+      this.request<EmailTemplateWorkspace>(
+        `/email-templates/${encodeURIComponent(templateId)}/versions`,
+        { method: "POST", body: JSON.stringify(input) },
+      ),
+    /** A client-safe starting document built from the current brand kit. */
+    starter: (projectId: string) =>
+      this.request<{ html: string }>(
+        `/projects/${encodeURIComponent(projectId)}/email-starter`,
+      ),
+  };
+
+  /**
+   * The media library.
+   *
+   * `relay` is absent for the same reason `approve` is: sending a local file
+   * to public storage is a decision about the operator's own machine, and the
+   * daemon refuses it for the service token.
+   */
+  media = {
+    list: (projectId: string) =>
+      this.request<MediaAsset[]>(
+        `/projects/${encodeURIComponent(projectId)}/media`,
+      ),
+    upload: (projectId: string, filename: string, bytes: Uint8Array) =>
+      this.request<MediaAsset>(
+        `/projects/${encodeURIComponent(projectId)}/media`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/octet-stream",
+            "x-marketingovo-filename": filename,
+          },
+          body: bytes as unknown as BodyInit,
+        },
+      ),
+    attachPublicUrl: (mediaId: string, publicUrl: string) =>
+      this.request<MediaAsset>(
+        `/media/${encodeURIComponent(mediaId)}/public-url`,
+        { method: "POST", body: JSON.stringify({ publicUrl }) },
+      ),
+    remove: (mediaId: string) =>
+      this.request<void>(`/media/${encodeURIComponent(mediaId)}`, {
+        method: "DELETE",
+      }),
+  };
+
   schedules = {
     list: (projectId?: string) =>
       this.request<Schedule[]>(
@@ -555,7 +955,15 @@ export class MarketingovoClient {
     update: (
       id: string,
       input: Partial<
-        Pick<Schedule, "cron" | "timezone" | "enabled" | "nextRunAt">
+        Pick<
+          Schedule,
+          | "cron"
+          | "timezone"
+          | "enabled"
+          | "nextRunAt"
+          | "workflowId"
+          | "options"
+        >
       >,
     ) =>
       this.request<Schedule>(`/schedules/${encodeURIComponent(id)}`, {

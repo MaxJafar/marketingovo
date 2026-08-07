@@ -5,6 +5,11 @@ dist/
 coverage/
 *.tsbuildinfo
 
+# Built dashboard copied into the CLI package by packages/cli/scripts/copy-dashboard.mjs.
+# It is regenerated on every build and shipped from disk via the CLI's `files` list,
+# so tracking it only produced content-hash churn and a stale bundle.
+packages/cli/dashboard/
+
 # Local Marketingovo state and artifacts
 .marketingovo/
 *.marketingovo
@@ -54,6 +59,10 @@ test-results/
 output/playwright/
 .nyc_output/
 .DS_Store
+# macOS AppleDouble sidecars. A copy from a Mac onto a non-HFS filesystem
+# leaves one of these beside every file, and vitest and the plugin validator
+# both try to parse the ones shadowing a .ts or .md source.
+._*
 *.swp
 *.swo
 .idea/

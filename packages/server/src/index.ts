@@ -49,11 +49,13 @@ import {
   OsintEvidenceSchema,
   ScheduleSchema,
   StartRunInputSchema,
+  WorkflowIdSchema,
   PreviewExtractionRulesInputSchema,
   UpdateExtractionRulesInputSchema,
   UpdateActionInputSchema,
   UpdateIssueAdjudicationInputSchema,
   UpdateProjectContextInputSchema,
+  WorkspaceCapabilitiesSchema,
   type Action,
   type ActionEvidenceWorkspace,
   type ActionService,
@@ -68,9 +70,79 @@ import {
   MarketingovoProjectBundleV2Schema,
   ProjectImportResultSchema,
 } from "@marketingovo/contracts/project-bundle";
+import {
+  ApprovePublishIntentInputSchema,
+  CampaignBriefSchema,
+  CampaignDeliverableSchema,
+  CampaignWorkspaceSchema,
+  ChannelAccountSchema,
+  ChannelKindSchema,
+  ChannelPerformanceSchema,
+  CreateCampaignBriefInputSchema,
+  CreateCampaignDeliverableInputSchema,
+  DiscoveredChannelAccountSchema,
+  LinkChannelAccountInputSchema,
+  PublishIntentSchema,
+  PublishIntentStateSchema,
+  SearchTermRecordSchema,
+  StagePublishIntentInputSchema,
+  UpdateChannelAccountInputSchema,
+  type ApprovePublishIntentInput,
+  type ChannelAccount,
+  type CreateCampaignBriefInput,
+  type CreateCampaignDeliverableInput,
+  type LinkChannelAccountInput,
+  type PublishIntent,
+  type StagePublishIntentInput,
+  type UpdateChannelAccountInput,
+} from "@marketingovo/contracts/channels";
+import {
+  AttachPublicMediaUrlInputSchema,
+  ContentCalendarSchema,
+  MediaAssetSchema,
+  PublishRecordSchema,
+  ScheduleIntentInputSchema,
+  type AttachPublicMediaUrlInput,
+  type ScheduleIntentInput,
+} from "@marketingovo/contracts/publishing";
+import {
+  BrandKitWorkspaceSchema,
+  CompileEmailInputSchema,
+  CreateEmailTemplateInputSchema,
+  EmailPreviewSchema,
+  EmailTemplateSchema,
+  EmailTemplateWorkspaceSchema,
+  UpdateBrandKitInputSchema,
+  type CompileEmailInput,
+  type CreateEmailTemplateInput,
+  type UpdateBrandKitInput,
+} from "@marketingovo/contracts/email";
+import {
+  GenerateReportInputSchema,
+  MarketingReportSchema,
+  MarketingReportSummarySchema,
+  type GenerateReportInput,
+} from "@marketingovo/contracts/reporting";
+import {
+  CampaignLinkPreviewSchema,
+  CampaignLinkProblemSchema,
+  CampaignLinkSchema,
+  CreateCampaignLinkInputSchema,
+  QrPlacementSchema,
+  QrStyleSchema,
+  RedirectConfigResponseSchema,
+  RedirectTargetSchema,
+  UtmParametersSchema,
+  type CreateCampaignLinkInput,
+} from "@marketingovo/contracts/campaign-links";
 import { getConnectorManifest } from "@marketingovo/integrations";
 import {
   ActionCheckpointError,
+  CampaignLinkError,
+  ChannelError,
+  EmailError,
+  MediaError,
+  ReportError,
   ActionEvidenceCursorError,
   MarketingovoLocalRuntime,
   ExtractionRulesError,
@@ -83,6 +155,7 @@ import {
   RunComparisonError,
   RunLinkExplorerError,
   RunReplayError,
+  WorkspaceWebsiteError,
 } from "@marketingovo/runtime";
 import {
   ActionCheckpointInputSchema,
@@ -198,6 +271,31 @@ function requestCsrfToken(request: FastifyRequest): string | undefined {
 
 function isDashboardRequest(request: FastifyRequest): boolean {
   return headerValue(request, MARKETINGOVO_CLIENT_HEADER) === "dashboard";
+}
+
+/**
+ * Who is asking, decided by transport rather than by anything the caller sends.
+ *
+ * A request carrying the browser's session cookie is a person; a request
+ * carrying the local service token is agent tooling. Both are legitimate, and
+ * the difference is recorded on everything they author so a staged campaign
+ * says truthfully whether a model or a marketer wrote it.
+ */
+function requestActor(request: FastifyRequest): "operator" | "agent" {
+  return requestSessionId(request) ? "operator" : "agent";
+}
+
+/**
+ * The operator identity for an action only a person may take.
+ *
+ * Returns null for the service token even though the token is otherwise fully
+ * authorized. A caller cannot become an operator by asserting it: the session
+ * cookie is same-origin, HttpOnly and issued by a bootstrap the browser
+ * performed, which is what makes this a claim about the transport rather than
+ * about the message.
+ */
+function browserOperator(request: FastifyRequest): string | null {
+  return requestSessionId(request) ? "operator" : null;
 }
 
 function setSessionCookies(reply: FastifyReply, sessionId: string): void {
@@ -344,6 +442,12 @@ const CreateScheduleInputSchema = Type.Object(
     timezone: Type.String({ minLength: 1, maxLength: 80 }),
     enabled: Type.Boolean(),
     nextRunAt: Type.Optional(Type.String({ format: "date-time" })),
+    /**
+     * What the schedule starts. Omitted means `audit`, which is what every
+     * schedule ran before schedules could name a workflow.
+     */
+    workflowId: Type.Optional(WorkflowIdSchema),
+    options: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
   },
   { additionalProperties: false },
 );
@@ -354,6 +458,8 @@ const UpdateScheduleInputSchema = Type.Partial(
     timezone: Type.String({ minLength: 1, maxLength: 80 }),
     enabled: Type.Boolean(),
     nextRunAt: Type.String({ format: "date-time" }),
+    workflowId: WorkflowIdSchema,
+    options: Type.Record(Type.String(), Type.Unknown()),
   }),
   { additionalProperties: false, minProperties: 1 },
 );
@@ -558,6 +664,28 @@ const DashboardMetaSchema = Type.Object(
   { additionalProperties: false },
 );
 
+/**
+ * What one send did.
+ *
+ * `state` carries `indeterminate` as a first-class outcome rather than folding
+ * it into failure: a request that left with no recorded reply is not a failed
+ * post, and telling an operator it failed is how a post gets sent twice.
+ */
+const PublishOutcomeSchema = Type.Object(
+  {
+    state: Type.Union([
+      Type.Literal("published"),
+      Type.Literal("failed"),
+      Type.Literal("indeterminate"),
+      Type.Literal("skipped"),
+    ]),
+    reason: Type.Union([Type.String(), Type.Null()]),
+    intent: PublishIntentSchema,
+    record: Type.Union([PublishRecordSchema, Type.Null()]),
+  },
+  { additionalProperties: false },
+);
+
 const DashboardEnvelopeSchema = <T extends TSchema>(data: T) =>
   Type.Object(
     { data, meta: DashboardMetaSchema },
@@ -700,6 +828,8 @@ const DashboardIntegrationSchema = Type.Object(
     description: Type.Union([Type.String(), Type.Null()]),
     accountLabel: Type.Union([Type.String(), Type.Null()]),
     lastSyncAt: Type.Union([Type.String({ format: "date-time" }), Type.Null()]),
+    /** When a credential stops working. Null for one that does not expire. */
+    expiresAt: Type.Union([Type.String({ format: "date-time" }), Type.Null()]),
     quota: Type.Union([
       Type.Object(
         {
@@ -948,7 +1078,12 @@ const DashboardOsintWorkspaceSchema = Type.Object(
 const DashboardSettingsInputSchema = Type.Partial(
   Type.Object({
     siteName: Type.String({ minLength: 1, maxLength: 160 }),
-    siteUrl: Type.String({ minLength: 1, maxLength: 2048 }),
+    /** `null` or `""` removes the website; the workspace itself survives. */
+    siteUrl: Type.Union([
+      Type.String({ minLength: 1, maxLength: 2048 }),
+      Type.Literal(""),
+      Type.Null(),
+    ]),
     timezone: Type.Union([Type.String({ maxLength: 80 }), Type.Null()]),
     reportingCurrency: Type.Union([
       Type.String({ pattern: "^[A-Za-z]{3}$" }),
@@ -992,34 +1127,43 @@ function integrationForDashboard(integration: Integration) {
   const manifest = getConnectorManifest(integration.provider);
   const auth = manifest?.auth.type;
   const credentialFields =
-    auth === "api-key"
+    auth === "long-lived-token"
       ? [
           {
-            key: "apiKey",
-            label:
-              integration.provider === "pagespeed-insights"
-                ? "API key (optional)"
-                : "API key",
+            key: "accessToken",
+            label: "System User access token",
             type: "secret" as const,
-            required: integration.provider !== "pagespeed-insights",
+            required: true,
           },
         ]
-      : auth === "basic"
+      : auth === "api-key"
         ? [
             {
-              key: "login",
-              label: "Login",
-              type: "text" as const,
-              required: true,
-            },
-            {
-              key: "password",
-              label: "Password",
+              key: "apiKey",
+              label:
+                integration.provider === "pagespeed-insights"
+                  ? "API key (optional)"
+                  : "API key",
               type: "secret" as const,
-              required: true,
+              required: integration.provider !== "pagespeed-insights",
             },
           ]
-        : [];
+        : auth === "basic"
+          ? [
+              {
+                key: "login",
+                label: "Login",
+                type: "text" as const,
+                required: true,
+              },
+              {
+                key: "password",
+                label: "Password",
+                type: "secret" as const,
+                required: true,
+              },
+            ]
+          : [];
   const configurationFields =
     integration.provider === "google-search-console"
       ? [
@@ -1081,7 +1225,24 @@ function integrationForDashboard(integration: Integration) {
                       help: "Default DataForSEO language code.",
                     },
                   ]
-                : [];
+                : integration.provider === "meta-ads"
+                  ? [
+                      {
+                        key: "graphVersion",
+                        label: "Graph API version",
+                        required: false,
+                        placeholder: "v23.0",
+                        help: "Pin a Meta Graph version. Leave empty to use the version this build was written against.",
+                      },
+                      {
+                        key: "businessId",
+                        label: "Business Manager ID",
+                        required: false,
+                        placeholder: "123456789",
+                        help: "Optional. Limits cabinet discovery to one Business Manager instead of every account the token reaches.",
+                      },
+                    ]
+                  : [];
   return {
     id: integration.provider,
     name: integration.label,
@@ -1090,10 +1251,16 @@ function integrationForDashboard(integration: Integration) {
     description: manifest?.capabilities.join(", ") ?? null,
     accountLabel: integration.maskedIdentifier,
     lastSyncAt: integration.lastSyncAt,
+    // A pasted long-lived token has a deadline the operator was never told
+    // about by the product until now. Surfacing the date is what turns "it
+    // stopped working one day" into something they can plan a rotation around.
+    expiresAt: integration.expiresAt,
     quota: integration.quota,
     lastError:
       integration.status === "expired"
-        ? "The credential has expired. Reconnect or rotate it."
+        ? auth === "long-lived-token"
+          ? "The token expired. Generate a new System User token in the provider's console and paste it; this credential type does not refresh."
+          : "The credential has expired. Reconnect or rotate it."
         : integration.status === "rate_limited"
           ? "The provider rate limit is active. Try again after the reset window."
           : integration.status === "failed"
@@ -1102,7 +1269,10 @@ function integrationForDashboard(integration: Integration) {
               ? "Credentials are stored, but the connection still needs verification or attention."
               : null,
     permissions: integration.scopes,
-    supportsApiKey: auth === "api-key" || auth === "basic",
+    // A pasted credential, whatever it is called, gets the paste form. The
+    // token's expiry is what distinguishes it, and that travels separately.
+    supportsApiKey:
+      auth === "api-key" || auth === "basic" || auth === "long-lived-token",
     setupUrl:
       auth === "oauth-pkce"
         ? `/api/v1/integrations/${integration.provider}/auth/start`
@@ -1133,6 +1303,23 @@ export async function createLocalServer(
       } catch (error) {
         done(error as Error);
       }
+    },
+  );
+  /**
+   * Media uploads arrive as a raw body with the filename in a header, rather
+   * than as multipart.
+   *
+   * A multipart parser is a dependency and a parsing surface, and it would buy
+   * nothing here: there is exactly one file per request and no other fields.
+   * The declared filename is metadata for the operator to recognize the asset
+   * by — the actual media type is decided by sniffing the bytes, so nothing
+   * downstream trusts what this header says.
+   */
+  app.addContentTypeParser(
+    "application/octet-stream",
+    { parseAs: "buffer" },
+    (_request, body, done) => {
+      done(null, body);
     },
   );
   const bootstrapNow = options.bootstrapNow ?? Date.now;
@@ -1170,9 +1357,14 @@ export async function createLocalServer(
   });
   await app.register(cookie);
   await app.register(rateLimit, {
-    max: 240,
+    max: 600,
     timeWindow: "1 minute",
     keyGenerator: () => "loopback",
+    // The brake exists to slow a hostile local process probing the API, not
+    // to meter the sole legitimate operator. Static assets and the SPA shell
+    // are exempt — one dashboard load is ~35 files, and counting them starved
+    // a real session into "rate limit exceeded" after a few page moves.
+    allowList: (request) => !request.url.startsWith("/api/"),
   });
   await app.register(swagger, {
     openapi: {
@@ -1321,6 +1513,16 @@ export async function createLocalServer(
           instance: request.id,
           code: error.code,
         });
+    }
+    if (error instanceof WorkspaceWebsiteError) {
+      return reply.code(error.status).type("application/problem+json").send({
+        type: "urn:marketingovo:problem:workspace-has-no-website",
+        title: "This workspace has no website",
+        status: error.status,
+        detail: error.message,
+        instance: request.id,
+        code: error.code,
+      });
     }
     if (error instanceof ExtractionRulesError) {
       return reply
@@ -1702,6 +1904,42 @@ export async function createLocalServer(
       return options.runtime.projects.overview(
         (request.params as { id: string }).id,
       );
+    },
+  );
+  // What this workspace can do right now. Clients use it to explain a locked
+  // surface instead of hiding it, so the answer carries the remedy rather than
+  // only the verdict.
+  app.get(
+    "/api/v1/projects/:id/capabilities",
+    {
+      schema: {
+        params: IdentifierParamsSchema,
+        response: {
+          200: Type.Union([
+            WorkspaceCapabilitiesSchema,
+            DashboardEnvelopeSchema(WorkspaceCapabilitiesSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The project was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const capabilities = await options.runtime.projects.capabilities(
+        (request.params as { id: string }).id,
+      );
+      if (!capabilities) {
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:project-not-found",
+          title: "Project not found",
+          status: 404,
+          detail: "The selected project does not exist.",
+          code: "project_not_found",
+        });
+      }
+      return isDashboardRequest(request)
+        ? envelope(capabilities)
+        : capabilities;
     },
   );
   app.get(
@@ -3283,6 +3521,2089 @@ export async function createLocalServer(
       }),
   );
 
+  /* ------------------------------------------------------------------ */
+  /* Ad cabinets and campaign staging                                     */
+  /* ------------------------------------------------------------------ */
+
+  /** Maps a typed channel failure onto RFC 9457 without inventing a status. */
+  const channelProblem = (reply: FastifyReply, error: unknown) => {
+    if (error instanceof ChannelError) {
+      return reply
+        .code(error.status)
+        .type("application/problem+json")
+        .send({
+          type: `urn:marketingovo:problem:${error.code.replaceAll("_", "-")}`,
+          title: "Channel request was rejected",
+          status: error.status,
+          detail: error.message,
+          code: error.code,
+        });
+    }
+    const detail =
+      error instanceof Error
+        ? error.message
+        : "The channel request could not be completed.";
+    const notFound = /not found/iu.test(detail);
+    return reply
+      .code(notFound ? 404 : 400)
+      .type("application/problem+json")
+      .send({
+        type: "urn:marketingovo:problem:channel-request-failed",
+        title: notFound ? "Not found" : "Channel request failed",
+        status: notFound ? 404 : 400,
+        detail,
+        code: notFound ? "not_found" : "channel_request_failed",
+      });
+  };
+
+  app.get(
+    "/api/v1/channels/accounts",
+    {
+      schema: {
+        querystring: Type.Object(
+          {
+            projectId: Type.String({ minLength: 1, maxLength: 160 }),
+            kind: Type.Optional(ChannelKindSchema),
+            includeArchived: Type.Optional(Type.Boolean()),
+          },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            Type.Array(ChannelAccountSchema),
+            DashboardEnvelopeSchema(
+              Type.Object(
+                {
+                  items: Type.Array(ChannelAccountSchema),
+                  total: Type.Integer({ minimum: 0 }),
+                },
+                { additionalProperties: false },
+              ),
+            ),
+          ]),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const query = request.query as {
+        projectId: string;
+        kind?: ChannelAccount["kind"];
+        includeArchived?: boolean;
+      };
+      const items = await options.runtime.channels.list(query.projectId, {
+        ...(query.kind ? { kind: query.kind } : {}),
+        ...(query.includeArchived ? { includeArchived: true } : {}),
+      });
+      return isDashboardRequest(request)
+        ? envelope({ items, total: items.length })
+        : items;
+    },
+  );
+
+  app.get(
+    "/api/v1/channels/discover",
+    {
+      schema: {
+        querystring: Type.Object(
+          {
+            projectId: Type.String({ minLength: 1, maxLength: 160 }),
+            provider: Type.Optional(
+              Type.String({ minLength: 1, maxLength: 64 }),
+            ),
+            account: Type.Optional(
+              Type.String({ minLength: 1, maxLength: 64 }),
+            ),
+          },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            Type.Array(DiscoveredChannelAccountSchema),
+            DashboardEnvelopeSchema(
+              Type.Object(
+                {
+                  items: Type.Array(DiscoveredChannelAccountSchema),
+                  total: Type.Integer({ minimum: 0 }),
+                },
+                { additionalProperties: false },
+              ),
+            ),
+          ]),
+          ...StandardProblemResponses,
+          422: ProblemResponse(
+            "The provider credential is missing or expired.",
+          ),
+          503: ProblemResponse("The provider is unavailable."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const query = request.query as {
+        projectId: string;
+        provider?: string;
+        account?: string;
+      };
+      try {
+        const items = await options.runtime.channels.discover(
+          query.projectId,
+          query.provider ?? "meta-ads",
+          query.account ?? "default",
+        );
+        return isDashboardRequest(request)
+          ? envelope({ items, total: items.length })
+          : items;
+      } catch (error) {
+        return channelProblem(reply, error);
+      }
+    },
+  );
+
+  app.post(
+    "/api/v1/channels/accounts",
+    {
+      schema: {
+        body: LinkChannelAccountInputSchema,
+        response: {
+          201: Type.Union([
+            ChannelAccountSchema,
+            DashboardEnvelopeSchema(ChannelAccountSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The project was not found."),
+          422: ProblemResponse("The provider is not a registered connector."),
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const linked = await options.runtime.channels.link(
+          request.body as LinkChannelAccountInput,
+        );
+        return reply
+          .code(201)
+          .send(isDashboardRequest(request) ? envelope(linked) : linked);
+      } catch (error) {
+        return channelProblem(reply, error);
+      }
+    },
+  );
+
+  app.patch(
+    "/api/v1/channels/accounts/:id",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        body: UpdateChannelAccountInputSchema,
+        response: {
+          200: Type.Union([
+            ChannelAccountSchema,
+            DashboardEnvelopeSchema(ChannelAccountSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The cabinet was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const updated = await options.runtime.channels.update(
+        id,
+        request.body as UpdateChannelAccountInput,
+      );
+      if (!updated) {
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:cabinet-not-found",
+          title: "Cabinet not found",
+          status: 404,
+          detail: "The requested ad cabinet does not exist.",
+          code: "cabinet_not_found",
+        });
+      }
+      return isDashboardRequest(request) ? envelope(updated) : updated;
+    },
+  );
+
+  app.delete(
+    "/api/v1/channels/accounts/:id",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          204: {
+            description: "The cabinet and its recorded facts were removed.",
+          },
+          ...StandardProblemResponses,
+          404: ProblemResponse("The cabinet was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const removed = await options.runtime.channels.remove(id);
+      if (!removed) {
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:cabinet-not-found",
+          title: "Cabinet not found",
+          status: 404,
+          detail: "The requested ad cabinet does not exist.",
+          code: "cabinet_not_found",
+        });
+      }
+      return reply.code(204).send();
+    },
+  );
+
+  app.get(
+    "/api/v1/channels/accounts/:id/performance",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        querystring: Type.Object(
+          {
+            start: Type.Optional(
+              Type.String({ pattern: "^\\d{4}-\\d{2}-\\d{2}$" }),
+            ),
+            end: Type.Optional(
+              Type.String({ pattern: "^\\d{4}-\\d{2}-\\d{2}$" }),
+            ),
+          },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            ChannelPerformanceSchema,
+            DashboardEnvelopeSchema(ChannelPerformanceSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The cabinet was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const query = request.query as { start?: string; end?: string };
+      const performance = await options.runtime.channels.performance(id, {
+        ...(query.start ? { start: query.start } : {}),
+        ...(query.end ? { end: query.end } : {}),
+      });
+      if (!performance) {
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:cabinet-not-found",
+          title: "Cabinet not found",
+          status: 404,
+          detail: "The requested ad cabinet does not exist.",
+          code: "cabinet_not_found",
+        });
+      }
+      // A cabinet that has never synced is reported with its summaries in
+      // their unavailable state rather than as an error, so the surface can
+      // render the shape and say exactly what is missing.
+      return isDashboardRequest(request)
+        ? envelope(
+            performance,
+            performance.lastSyncedAt === null ? "missing" : "fresh",
+            performance.lastSyncedAt === null
+              ? ["This cabinet has not been synced yet. Run a paid audit."]
+              : [],
+          )
+        : performance;
+    },
+  );
+
+  /**
+   * The queries that triggered ads on one account.
+   *
+   * Google Ads only — nothing else reports queries at all, and the response
+   * is simply empty for a Meta cabinet rather than an error, because "this
+   * provider has no such report" is a fact about the provider rather than a
+   * bad request.
+   */
+  app.get(
+    "/api/v1/channels/accounts/:id/search-terms",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        querystring: Type.Object(
+          {
+            start: Type.Optional(
+              Type.String({ pattern: "^\\d{4}-\\d{2}-\\d{2}$" }),
+            ),
+            end: Type.Optional(
+              Type.String({ pattern: "^\\d{4}-\\d{2}-\\d{2}$" }),
+            ),
+            /** Drops terms already added as keywords or negatives. */
+            actionableOnly: Type.Optional(Type.Boolean()),
+            limit: Type.Optional(
+              Type.Integer({ minimum: 1, maximum: 2_000, default: 200 }),
+            ),
+          },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            Type.Array(SearchTermRecordSchema),
+            DashboardEnvelopeSchema(
+              Type.Object(
+                {
+                  items: Type.Array(SearchTermRecordSchema),
+                  total: Type.Integer({ minimum: 0 }),
+                },
+                { additionalProperties: false },
+              ),
+            ),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The ad account was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const query = request.query as {
+        start?: string;
+        end?: string;
+        actionableOnly?: boolean;
+        limit?: number;
+      };
+      const account = await options.runtime.channels.get(id);
+      if (!account) {
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:cabinet-not-found",
+          title: "Cabinet not found",
+          status: 404,
+          detail: "The requested ad account does not exist.",
+          code: "cabinet_not_found",
+        });
+      }
+      const items = await options.runtime.channels.searchTerms(id, {
+        ...(query.start ? { windowStart: query.start } : {}),
+        ...(query.end ? { windowEnd: query.end } : {}),
+        ...(query.actionableOnly === undefined
+          ? {}
+          : { actionableOnly: query.actionableOnly }),
+        ...(query.limit === undefined ? {} : { limit: query.limit }),
+      });
+      return isDashboardRequest(request)
+        ? envelope(
+            { items, total: items.length },
+            items.length > 0 ? "fresh" : "missing",
+            items.length > 0
+              ? []
+              : account.provider === "google-ads"
+                ? [
+                    "No search terms have been synced yet. Run a paid audit, and note that Performance Max reports none at all.",
+                  ]
+                : ["Only Google Ads reports the queries that triggered ads."],
+          )
+        : items;
+    },
+  );
+
+  app.get(
+    "/api/v1/campaigns",
+    {
+      schema: {
+        querystring: Type.Object(
+          { projectId: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            Type.Array(CampaignBriefSchema),
+            DashboardEnvelopeSchema(
+              Type.Object(
+                {
+                  items: Type.Array(CampaignBriefSchema),
+                  total: Type.Integer({ minimum: 0 }),
+                },
+                { additionalProperties: false },
+              ),
+            ),
+          ]),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const { projectId } = request.query as { projectId: string };
+      const items = await options.runtime.campaigns.list(projectId);
+      return isDashboardRequest(request)
+        ? envelope({ items, total: items.length })
+        : items;
+    },
+  );
+
+  app.post(
+    "/api/v1/campaigns",
+    {
+      schema: {
+        body: CreateCampaignBriefInputSchema,
+        response: {
+          201: Type.Union([
+            CampaignBriefSchema,
+            DashboardEnvelopeSchema(CampaignBriefSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The project was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const brief = await options.runtime.campaigns.create(
+          request.body as CreateCampaignBriefInput,
+          requestActor(request),
+        );
+        return reply
+          .code(201)
+          .send(isDashboardRequest(request) ? envelope(brief) : brief);
+      } catch (error) {
+        return channelProblem(reply, error);
+      }
+    },
+  );
+
+  app.get(
+    "/api/v1/campaigns/:briefId",
+    {
+      schema: {
+        params: Type.Object(
+          { briefId: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            CampaignWorkspaceSchema,
+            DashboardEnvelopeSchema(CampaignWorkspaceSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The campaign brief was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { briefId } = request.params as { briefId: string };
+      const workspace = await options.runtime.campaigns.workspace(briefId);
+      if (!workspace) {
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:brief-not-found",
+          title: "Campaign brief not found",
+          status: 404,
+          detail: "The requested campaign brief does not exist.",
+          code: "brief_not_found",
+        });
+      }
+      return isDashboardRequest(request) ? envelope(workspace) : workspace;
+    },
+  );
+
+  app.post(
+    "/api/v1/campaigns/:briefId/deliverables",
+    {
+      schema: {
+        params: Type.Object(
+          { briefId: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        body: CreateCampaignDeliverableInputSchema,
+        response: {
+          201: Type.Union([
+            CampaignDeliverableSchema,
+            DashboardEnvelopeSchema(CampaignDeliverableSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The campaign brief was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { briefId } = request.params as { briefId: string };
+      try {
+        const deliverable = await options.runtime.campaigns.addDeliverable(
+          briefId,
+          request.body as CreateCampaignDeliverableInput,
+          requestActor(request),
+        );
+        return reply
+          .code(201)
+          .send(
+            isDashboardRequest(request) ? envelope(deliverable) : deliverable,
+          );
+      } catch (error) {
+        return channelProblem(reply, error);
+      }
+    },
+  );
+
+  app.get(
+    "/api/v1/publish-intents",
+    {
+      schema: {
+        querystring: Type.Object(
+          {
+            projectId: Type.String({ minLength: 1, maxLength: 160 }),
+            state: Type.Optional(PublishIntentStateSchema),
+          },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            Type.Array(PublishIntentSchema),
+            DashboardEnvelopeSchema(
+              Type.Object(
+                {
+                  items: Type.Array(PublishIntentSchema),
+                  total: Type.Integer({ minimum: 0 }),
+                },
+                { additionalProperties: false },
+              ),
+            ),
+          ]),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const query = request.query as {
+        projectId: string;
+        state?: PublishIntent["state"];
+      };
+      const items = await options.runtime.campaigns.intents({
+        projectId: query.projectId,
+        ...(query.state ? { state: query.state } : {}),
+      });
+      return isDashboardRequest(request)
+        ? envelope({ items, total: items.length })
+        : items;
+    },
+  );
+
+  app.post(
+    "/api/v1/projects/:projectId/publish-intents",
+    {
+      schema: {
+        params: Type.Object(
+          { projectId: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        body: StagePublishIntentInputSchema,
+        response: {
+          201: Type.Union([
+            PublishIntentSchema,
+            DashboardEnvelopeSchema(PublishIntentSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The deliverable or cabinet was not found."),
+          422: ProblemResponse(
+            "The budget exceeds the cabinet's locally set spend cap.",
+          ),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { projectId } = request.params as { projectId: string };
+      try {
+        const intent = await options.runtime.campaigns.stage(
+          projectId,
+          request.body as StagePublishIntentInput,
+          requestActor(request),
+        );
+        return reply
+          .code(201)
+          .send(isDashboardRequest(request) ? envelope(intent) : intent);
+      } catch (error) {
+        return channelProblem(reply, error);
+      }
+    },
+  );
+
+  /**
+   * The approval gate.
+   *
+   * An agent holding the local service token can create a brief, write every
+   * deliverable and stage every payload. It cannot cross this line. Approval
+   * requires the browser's own session cookie and CSRF token — the transport a
+   * human operator uses — and the service token is refused here even though it
+   * is accepted everywhere else in this API.
+   *
+   * This is deliberately not a permission flag or a confirmation the model
+   * answers. Both are things a sufficiently confused or prompt-injected agent
+   * talks its way past, because their enforcement lives inside the thing being
+   * controlled. The transport split already means "a person did this in a
+   * browser", and spending money under the operator's brand is exactly the
+   * operation that should be pinned to it.
+   */
+  app.post(
+    "/api/v1/publish-intents/:id/approve",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        body: ApprovePublishIntentInputSchema,
+        response: {
+          200: Type.Union([
+            PublishIntentSchema,
+            DashboardEnvelopeSchema(PublishIntentSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The publish intent was not found."),
+          409: ProblemResponse(
+            "The intent is no longer staged, or its payload changed since it was rendered.",
+          ),
+          422: ProblemResponse(
+            "The budget exceeds the cabinet's locally set spend cap.",
+          ),
+        },
+      },
+    },
+    async (request, reply) => {
+      const operator = browserOperator(request);
+      if (!operator) {
+        return reply.code(403).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:approval-requires-operator",
+          title: "Approval requires a person",
+          status: 403,
+          detail:
+            "Publish approvals must come from the dashboard in a browser. Agent tooling may draft and stage a campaign, but a person approves what is sent under your brand.",
+          code: "approval_requires_operator",
+        });
+      }
+      const { id } = request.params as { id: string };
+      const { payloadHash } = request.body as ApprovePublishIntentInput;
+      try {
+        const approved = await options.runtime.campaigns.approve(
+          id,
+          payloadHash,
+          operator,
+        );
+        return isDashboardRequest(request) ? envelope(approved) : approved;
+      } catch (error) {
+        return channelProblem(reply, error);
+      }
+    },
+  );
+
+  app.post(
+    "/api/v1/publish-intents/:id/withdraw",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        body: Type.Object(
+          { note: Type.String({ minLength: 1, maxLength: 400 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            PublishIntentSchema,
+            DashboardEnvelopeSchema(PublishIntentSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The publish intent was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const { note } = request.body as { note: string };
+      const withdrawn = await options.runtime.campaigns.withdraw(
+        id,
+        note,
+        requestActor(request),
+      );
+      if (!withdrawn) {
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:intent-not-found",
+          title: "Publish intent not found",
+          status: 404,
+          detail: "The requested publish intent does not exist.",
+          code: "intent_not_staged",
+        });
+      }
+      return isDashboardRequest(request) ? envelope(withdrawn) : withdrawn;
+    },
+  );
+
+  /* ------------------------------------------------------------------ */
+  /* Media library and the content calendar                               */
+  /* ------------------------------------------------------------------ */
+
+  const mediaProblem = (reply: FastifyReply, error: unknown) => {
+    if (error instanceof MediaError) {
+      return reply
+        .code(error.status)
+        .type("application/problem+json")
+        .send({
+          type: `urn:marketingovo:problem:${error.code.replaceAll("_", "-")}`,
+          title: "Media request was rejected",
+          status: error.status,
+          detail: error.message,
+          code: error.code,
+        });
+    }
+    return channelProblem(reply, error);
+  };
+
+  app.post(
+    "/api/v1/projects/:projectId/media",
+    {
+      // Raised for this route alone. Everything else on this API is JSON and
+      // has no business accepting a hundred megabytes.
+      bodyLimit: 100 * 1024 * 1024,
+      schema: {
+        params: Type.Object(
+          { projectId: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        headers: Type.Object(
+          {
+            "x-marketingovo-filename": Type.Optional(
+              Type.String({ minLength: 1, maxLength: 240 }),
+            ),
+          },
+          { additionalProperties: true },
+        ),
+        response: {
+          201: Type.Union([
+            MediaAssetSchema,
+            DashboardEnvelopeSchema(MediaAssetSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The project was not found."),
+          413: ProblemResponse("The file exceeds the upload limit."),
+          415: ProblemResponse("The file format is not supported."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { projectId } = request.params as { projectId: string };
+      const body = request.body;
+      if (!Buffer.isBuffer(body)) {
+        return reply.code(400).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:media-unreadable",
+          title: "Upload body is invalid",
+          status: 400,
+          detail:
+            "Send the file as a raw body with Content-Type: application/octet-stream.",
+          code: "media_unreadable",
+        });
+      }
+      try {
+        const asset = await options.runtime.media.upload({
+          projectId,
+          filename: headerValue(request, "x-marketingovo-filename") ?? "upload",
+          bytes: new Uint8Array(body),
+        });
+        return reply
+          .code(201)
+          .send(isDashboardRequest(request) ? envelope(asset) : asset);
+      } catch (error) {
+        return mediaProblem(reply, error);
+      }
+    },
+  );
+
+  app.get(
+    "/api/v1/projects/:projectId/media",
+    {
+      schema: {
+        params: Type.Object(
+          { projectId: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            Type.Array(MediaAssetSchema),
+            DashboardEnvelopeSchema(
+              Type.Object(
+                {
+                  items: Type.Array(MediaAssetSchema),
+                  total: Type.Integer({ minimum: 0 }),
+                },
+                { additionalProperties: false },
+              ),
+            ),
+          ]),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const { projectId } = request.params as { projectId: string };
+      const items = await options.runtime.media.list(projectId);
+      return isDashboardRequest(request)
+        ? envelope({ items, total: items.length })
+        : items;
+    },
+  );
+
+  app.post(
+    "/api/v1/media/:id/public-url",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        body: AttachPublicMediaUrlInputSchema,
+        response: {
+          200: Type.Union([
+            MediaAssetSchema,
+            DashboardEnvelopeSchema(MediaAssetSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The asset was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const { publicUrl } = request.body as AttachPublicMediaUrlInput;
+      try {
+        const asset = await options.runtime.media.attachPublicUrl(
+          id,
+          publicUrl,
+        );
+        return isDashboardRequest(request) ? envelope(asset) : asset;
+      } catch (error) {
+        return mediaProblem(reply, error);
+      }
+    },
+  );
+
+  /**
+   * Uploads an asset to the operator's own object storage.
+   *
+   * Browser-only. This is the one path that sends a file off the machine
+   * without publishing it, and "my files stay local" is a property a person
+   * should decide to relax, not an agent.
+   */
+  app.post(
+    "/api/v1/media/:id/relay",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            MediaAssetSchema,
+            DashboardEnvelopeSchema(MediaAssetSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The asset was not found."),
+          422: ProblemResponse("Object storage is not configured."),
+        },
+      },
+    },
+    async (request, reply) => {
+      if (!browserOperator(request)) {
+        return reply.code(403).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:relay-requires-operator",
+          title: "Sending a file off this machine requires a person",
+          status: 403,
+          detail:
+            "Publishing a local file to public storage must be done from the dashboard in a browser. Agent tooling can compose posts, but a person decides which files leave this machine.",
+          code: "approval_requires_operator",
+        });
+      }
+      const { id } = request.params as { id: string };
+      try {
+        const asset = await options.runtime.media.publishToRelay(id);
+        return isDashboardRequest(request) ? envelope(asset) : asset;
+      } catch (error) {
+        return mediaProblem(reply, error);
+      }
+    },
+  );
+
+  app.delete(
+    "/api/v1/media/:id",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          204: { description: "The asset was removed." },
+          ...StandardProblemResponses,
+          404: ProblemResponse("The asset was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const removed = await options.runtime.media.remove(id);
+      if (!removed) {
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:media-not-found",
+          title: "Asset not found",
+          status: 404,
+          detail: "The requested media asset does not exist.",
+          code: "media_not_found",
+        });
+      }
+      return reply.code(204).send();
+    },
+  );
+
+  app.get(
+    "/api/v1/calendar",
+    {
+      schema: {
+        querystring: Type.Object(
+          {
+            projectId: Type.String({ minLength: 1, maxLength: 160 }),
+            start: Type.Optional(Type.String({ format: "date-time" })),
+            end: Type.Optional(Type.String({ format: "date-time" })),
+          },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            ContentCalendarSchema,
+            DashboardEnvelopeSchema(ContentCalendarSchema),
+          ]),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const query = request.query as {
+        projectId: string;
+        start?: string;
+        end?: string;
+      };
+      const now = Date.now();
+      const start = query.start ?? new Date(now - 7 * 86_400_000).toISOString();
+      const end = query.end ?? new Date(now + 60 * 86_400_000).toISOString();
+      const calendar = await options.runtime.campaigns.calendar(
+        query.projectId,
+        start,
+        end,
+      );
+      return isDashboardRequest(request) ? envelope(calendar) : calendar;
+    },
+  );
+
+  /**
+   * Places a post on the calendar.
+   *
+   * Open to agent tooling on purpose: scheduling an approved post clears its
+   * approval, so an agent proposing a time cannot cause a send — a person
+   * still has to approve the post at that time before anything leaves.
+   */
+  app.post(
+    "/api/v1/publish-intents/:id/schedule",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        body: ScheduleIntentInputSchema,
+        response: {
+          200: Type.Union([
+            PublishIntentSchema,
+            DashboardEnvelopeSchema(PublishIntentSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The publish intent was not found."),
+          409: ProblemResponse("The post is already publishing or published."),
+          422: ProblemResponse("The scheduled time is in the past."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      try {
+        const scheduled = await options.runtime.campaigns.schedule(
+          id,
+          request.body as ScheduleIntentInput,
+        );
+        return isDashboardRequest(request) ? envelope(scheduled) : scheduled;
+      } catch (error) {
+        return channelProblem(reply, error);
+      }
+    },
+  );
+
+  /**
+   * Sends an approved post immediately.
+   *
+   * Browser-only, on the same reasoning as approval: this is the moment
+   * something becomes public under the operator's name, and the transport is
+   * what decides that a person did it.
+   */
+  app.post(
+    "/api/v1/publish-intents/:id/publish-now",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            PublishOutcomeSchema,
+            DashboardEnvelopeSchema(PublishOutcomeSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The publish intent was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      if (!browserOperator(request)) {
+        return reply.code(403).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:approval-requires-operator",
+          title: "Publishing requires a person",
+          status: 403,
+          detail:
+            "Posts are published from the dashboard in a browser. Agent tooling may draft, stage and schedule, but a person decides what goes out under your name.",
+          code: "approval_requires_operator",
+        });
+      }
+      const { id } = request.params as { id: string };
+      try {
+        const outcome = await options.runtime.campaigns.publishNow(id);
+        const body = {
+          state: outcome.state,
+          reason: outcome.reason,
+          intent: outcome.intent,
+          record: outcome.record,
+        };
+        return isDashboardRequest(request) ? envelope(body) : body;
+      } catch (error) {
+        return channelProblem(reply, error);
+      }
+    },
+  );
+
+  app.get(
+    "/api/v1/publish-records",
+    {
+      schema: {
+        querystring: Type.Object(
+          {
+            projectId: Type.String({ minLength: 1, maxLength: 160 }),
+            intentId: Type.Optional(
+              Type.String({ minLength: 1, maxLength: 160 }),
+            ),
+          },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            Type.Array(PublishRecordSchema),
+            DashboardEnvelopeSchema(
+              Type.Object(
+                {
+                  items: Type.Array(PublishRecordSchema),
+                  total: Type.Integer({ minimum: 0 }),
+                },
+                { additionalProperties: false },
+              ),
+            ),
+          ]),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const query = request.query as { projectId: string; intentId?: string };
+      const items = await options.runtime.campaigns.records(
+        query.projectId,
+        query.intentId,
+      );
+      return isDashboardRequest(request)
+        ? envelope({ items, total: items.length })
+        : items;
+    },
+  );
+
+  /* ------------------------------------------------------------------ */
+  /* Cross-channel reports                                                */
+  /* ------------------------------------------------------------------ */
+
+  const reportProblem = (reply: FastifyReply, error: unknown) => {
+    if (error instanceof ReportError) {
+      return reply
+        .code(error.status)
+        .type("application/problem+json")
+        .send({
+          type: `urn:marketingovo:problem:${error.code.replaceAll("_", "-")}`,
+          title: "Report request was rejected",
+          status: error.status,
+          detail: error.message,
+          code: error.code,
+        });
+    }
+    return channelProblem(reply, error);
+  };
+
+  app.get(
+    "/api/v1/marketing-reports",
+    {
+      schema: {
+        querystring: Type.Object(
+          { projectId: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            Type.Array(MarketingReportSummarySchema),
+            DashboardEnvelopeSchema(
+              Type.Object(
+                {
+                  items: Type.Array(MarketingReportSummarySchema),
+                  total: Type.Integer({ minimum: 0 }),
+                },
+                { additionalProperties: false },
+              ),
+            ),
+          ]),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const { projectId } = request.query as { projectId: string };
+      const items = await options.runtime.marketingReports.list(projectId);
+      return isDashboardRequest(request)
+        ? envelope({ items, total: items.length })
+        : items;
+    },
+  );
+
+  app.post(
+    "/api/v1/marketing-reports",
+    {
+      schema: {
+        body: GenerateReportInputSchema,
+        response: {
+          201: Type.Union([
+            MarketingReportSchema,
+            DashboardEnvelopeSchema(MarketingReportSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The project was not found."),
+          503: ProblemResponse("The report composer is unavailable."),
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const report = await options.runtime.marketingReports.generate(
+          request.body as GenerateReportInput,
+        );
+        return reply
+          .code(201)
+          .send(isDashboardRequest(request) ? envelope(report) : report);
+      } catch (error) {
+        return reportProblem(reply, error);
+      }
+    },
+  );
+
+  app.get(
+    "/api/v1/marketing-reports/:id",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            MarketingReportSchema,
+            DashboardEnvelopeSchema(MarketingReportSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The report was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const report = await options.runtime.marketingReports.get(id);
+      if (!report) {
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:report-not-found",
+          title: "Report not found",
+          status: 404,
+          detail: "The requested report does not exist.",
+          code: "report_not_found",
+        });
+      }
+      return isDashboardRequest(request) ? envelope(report) : report;
+    },
+  );
+
+  /** The client-facing document, styled from the brand kit. */
+  app.get(
+    "/api/v1/marketing-reports/:id/render",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        querystring: Type.Object(
+          {
+            format: Type.Optional(
+              Type.Union([
+                Type.Literal("html"),
+                Type.Literal("text"),
+                Type.Literal("pdf"),
+              ]),
+            ),
+          },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: {
+            description: "The rendered report.",
+            headers: {
+              "content-disposition": {
+                description: "Attachment filename for the PDF form.",
+                schema: { type: "string" },
+              },
+            },
+            content: {
+              "text/html": {
+                schema: Type.String({ contentEncoding: "binary" }),
+              },
+              "text/plain": {
+                schema: Type.String({ contentEncoding: "binary" }),
+              },
+              "application/pdf": {
+                schema: Type.String({ contentEncoding: "binary" }),
+              },
+            },
+          },
+          ...StandardProblemResponses,
+          404: ProblemResponse("The report was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const { format } = request.query as {
+        format?: "html" | "text" | "pdf";
+      };
+      const rendered = await options.runtime.marketingReports.render(
+        id,
+        format ?? "html",
+      );
+      if (rendered === null) {
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:report-not-found",
+          title: "Report not found",
+          status: 404,
+          detail: "The requested report does not exist.",
+          code: "report_not_found",
+        });
+      }
+      if (format === "pdf") {
+        return reply
+          .type("application/pdf")
+          .header(
+            "content-disposition",
+            `attachment; filename="marketing-report-${id}.pdf"`,
+          )
+          .send(Buffer.from(rendered as Uint8Array));
+      }
+      return reply
+        .type(
+          format === "text"
+            ? "text/plain; charset=utf-8"
+            : "text/html; charset=utf-8",
+        )
+        .send(rendered);
+    },
+  );
+
+  app.delete(
+    "/api/v1/marketing-reports/:id",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          204: { description: "The report was removed." },
+          ...StandardProblemResponses,
+          404: ProblemResponse("The report was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const removed = await options.runtime.marketingReports.remove(id);
+      if (!removed) {
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:report-not-found",
+          title: "Report not found",
+          status: 404,
+          detail: "The requested report does not exist.",
+          code: "report_not_found",
+        });
+      }
+      return reply.code(204).send();
+    },
+  );
+
+  /* ------------------------------------------------------------------ */
+  /* Campaign links and QR codes                                          */
+  /* ------------------------------------------------------------------ */
+
+  /**
+   * The refusal shape, which carries its findings.
+   *
+   * The standard problem response would serialize them away, leaving "the link
+   * was rejected" and nothing to act on — the one answer that helps nobody
+   * here, since the caller is usually a single edit from a valid link.
+   */
+  const CampaignLinkProblemResponse = (description: string) => ({
+    description,
+    content: {
+      "application/problem+json": { schema: CampaignLinkProblemSchema },
+    },
+  });
+
+  const campaignLinkProblem = (reply: FastifyReply, error: unknown) => {
+    if (error instanceof CampaignLinkError) {
+      return reply
+        .code(error.status)
+        .type("application/problem+json")
+        .send({
+          type: `urn:marketingovo:problem:${error.code.replaceAll("_", "-")}`,
+          title: "Campaign link was rejected",
+          status: error.status,
+          detail: error.message,
+          code: error.code,
+          // The findings ride along so the caller can point at the parameter
+          // to change rather than restating that something was wrong.
+          findings: error.findings,
+        });
+    }
+    return channelProblem(reply, error);
+  };
+
+  const campaignLinkNotFound = (reply: FastifyReply) =>
+    reply.code(404).type("application/problem+json").send({
+      type: "urn:marketingovo:problem:campaign-link-not-found",
+      title: "Campaign link not found",
+      status: 404,
+      detail: "The requested campaign link does not exist.",
+      code: "campaign_link_not_found",
+    });
+
+  app.get(
+    "/api/v1/projects/:projectId/campaign-links",
+    {
+      schema: {
+        params: Type.Object(
+          { projectId: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            Type.Array(CampaignLinkSchema),
+            DashboardEnvelopeSchema(
+              Type.Object(
+                {
+                  items: Type.Array(CampaignLinkSchema),
+                  total: Type.Integer({ minimum: 0 }),
+                },
+                { additionalProperties: false },
+              ),
+            ),
+          ]),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const { projectId } = request.params as { projectId: string };
+      const items = await options.runtime.campaignLinks.list(projectId);
+      return isDashboardRequest(request)
+        ? envelope({ items, total: items.length })
+        : items;
+    },
+  );
+
+  /**
+   * Checks tagging without saving.
+   *
+   * Called on every edit in the dashboard, so the operator sees what a tagging
+   * choice costs while it is still free to change.
+   */
+  app.post(
+    "/api/v1/projects/:projectId/campaign-links/preview",
+    {
+      schema: {
+        params: Type.Object(
+          { projectId: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        body: Type.Object(
+          {
+            destinationUrl: Type.String({ minLength: 1, maxLength: 2000 }),
+            utm: UtmParametersSchema,
+            style: Type.Optional(Type.Partial(QrStyleSchema)),
+            placement: Type.Optional(QrPlacementSchema),
+            printedWidthMm: Type.Optional(Type.Number({ minimum: 1 })),
+          },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            CampaignLinkPreviewSchema,
+            DashboardEnvelopeSchema(CampaignLinkPreviewSchema),
+          ]),
+          ...StandardProblemResponses,
+          503: ProblemResponse("QR generation is unavailable."),
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const preview = await options.runtime.campaignLinks.preview(
+          request.body as Parameters<
+            typeof options.runtime.campaignLinks.preview
+          >[0],
+        );
+        return isDashboardRequest(request) ? envelope(preview) : preview;
+      } catch (error) {
+        return campaignLinkProblem(reply, error);
+      }
+    },
+  );
+
+  app.post(
+    "/api/v1/projects/:projectId/campaign-links",
+    {
+      schema: {
+        params: Type.Object(
+          { projectId: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        body: CreateCampaignLinkInputSchema,
+        response: {
+          201: Type.Union([
+            CampaignLinkSchema,
+            DashboardEnvelopeSchema(CampaignLinkSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The project was not found."),
+          409: ProblemResponse("A link with this exact tagging exists."),
+          422: CampaignLinkProblemResponse(
+            "The tagging would lose data. The findings name what to change.",
+          ),
+          503: ProblemResponse("QR generation is unavailable."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { projectId } = request.params as { projectId: string };
+      try {
+        const link = await options.runtime.campaignLinks.create(
+          projectId,
+          request.body as CreateCampaignLinkInput,
+        );
+        return reply
+          .code(201)
+          .send(isDashboardRequest(request) ? envelope(link) : link);
+      } catch (error) {
+        return campaignLinkProblem(reply, error);
+      }
+    },
+  );
+
+  app.patch(
+    "/api/v1/campaign-links/:id",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        body: Type.Object(
+          {
+            // Declared, and impossible to satisfy. Leaving them out entirely
+            // would let the validator strip them and answer 200, and a caller
+            // who believes they re-pointed a printed code is worse off than
+            // one who was told they cannot: the physical object would still
+            // point at the old destination with nothing to reveal the gap.
+            destinationUrl: Type.Optional(
+              Type.Never({
+                description:
+                  "A printed code cannot follow an edit. A new destination is a new link.",
+              }),
+            ),
+            utm: Type.Optional(
+              Type.Never({
+                description:
+                  "Re-tagging would disagree with any code already printed. Create a new link instead.",
+              }),
+            ),
+            label: Type.Optional(Type.String({ minLength: 1, maxLength: 160 })),
+            placement: Type.Optional(QrPlacementSchema),
+            style: Type.Optional(Type.Partial(QrStyleSchema)),
+            printedWidthMm: Type.Optional(
+              Type.Union([Type.Number({ minimum: 1 }), Type.Null()]),
+            ),
+          },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            CampaignLinkSchema,
+            DashboardEnvelopeSchema(CampaignLinkSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The campaign link was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const updated = await options.runtime.campaignLinks.update(
+        id,
+        request.body as Parameters<
+          typeof options.runtime.campaignLinks.update
+        >[1],
+      );
+      if (!updated) return campaignLinkNotFound(reply);
+      return isDashboardRequest(request) ? envelope(updated) : updated;
+    },
+  );
+
+  /** Records that the code has gone to print, which freezes it. */
+  app.post(
+    "/api/v1/campaign-links/:id/printed",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            CampaignLinkSchema,
+            DashboardEnvelopeSchema(CampaignLinkSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The campaign link was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const marked = await options.runtime.campaignLinks.markPrinted(id);
+      if (!marked) return campaignLinkNotFound(reply);
+      return isDashboardRequest(request) ? envelope(marked) : marked;
+    },
+  );
+
+  /** The code itself. Served as an image so it can be dropped into artwork. */
+  app.get(
+    "/api/v1/campaign-links/:id/qr",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        querystring: Type.Object(
+          {
+            format: Type.Optional(
+              Type.Union([Type.Literal("svg"), Type.Literal("png")]),
+            ),
+            /** Pixels per module. PNG only; SVG has no fixed size. */
+            scale: Type.Optional(Type.Integer({ minimum: 1, maximum: 64 })),
+          },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: { description: "The QR code." },
+          ...StandardProblemResponses,
+          404: ProblemResponse("The campaign link was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const { format, scale } = request.query as {
+        format?: "svg" | "png";
+        scale?: number;
+      };
+      try {
+        const rendered = await options.runtime.campaignLinks.render(
+          id,
+          format ?? "svg",
+          scale ?? 8,
+        );
+        if (!rendered) return campaignLinkNotFound(reply);
+        return (
+          reply
+            .type(rendered.contentType)
+            // Immutable: the tagged URL cannot change, so neither can the image.
+            .header("cache-control", "private, max-age=31536000, immutable")
+            .send(
+              rendered.body instanceof Uint8Array
+                ? Buffer.from(rendered.body)
+                : rendered.body,
+            )
+        );
+      } catch (error) {
+        return campaignLinkProblem(reply, error);
+      }
+    },
+  );
+
+  /**
+   * Config for a short link on the operator's own domain.
+   *
+   * The honest form of a "dynamic" QR code: the redirect runs somewhere they
+   * already control, so nothing here can stop resolving it.
+   */
+  app.post(
+    "/api/v1/projects/:projectId/campaign-links/redirect-config",
+    {
+      schema: {
+        params: Type.Object(
+          { projectId: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        body: Type.Object(
+          {
+            target: RedirectTargetSchema,
+            shortHost: Type.Optional(
+              Type.Union([Type.String({ maxLength: 253 }), Type.Null()]),
+            ),
+            linkIds: Type.Optional(
+              Type.Array(Type.String({ minLength: 1, maxLength: 160 }), {
+                maxItems: 200,
+              }),
+            ),
+            expiresAt: Type.Optional(
+              Type.Union([Type.String({ format: "date-time" }), Type.Null()]),
+            ),
+            fallbackUrl: Type.Optional(
+              Type.Union([Type.String({ maxLength: 2000 }), Type.Null()]),
+            ),
+          },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            RedirectConfigResponseSchema,
+            DashboardEnvelopeSchema(RedirectConfigResponseSchema),
+          ]),
+          ...StandardProblemResponses,
+          503: ProblemResponse("Redirect configuration is unavailable."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { projectId } = request.params as { projectId: string };
+      try {
+        const config = await options.runtime.campaignLinks.redirectConfig({
+          projectId,
+          ...(request.body as Omit<
+            Parameters<typeof options.runtime.campaignLinks.redirectConfig>[0],
+            "projectId"
+          >),
+        });
+        return isDashboardRequest(request) ? envelope(config) : config;
+      } catch (error) {
+        return campaignLinkProblem(reply, error);
+      }
+    },
+  );
+
+  app.delete(
+    "/api/v1/campaign-links/:id",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          204: { description: "The campaign link was removed." },
+          ...StandardProblemResponses,
+          404: ProblemResponse("The campaign link was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const removed = await options.runtime.campaignLinks.remove(id);
+      if (!removed) return campaignLinkNotFound(reply);
+      return reply.code(204).send();
+    },
+  );
+
+  /* ------------------------------------------------------------------ */
+  /* Email builder                                                        */
+  /* ------------------------------------------------------------------ */
+
+  const emailProblem = (reply: FastifyReply, error: unknown) => {
+    if (error instanceof EmailError) {
+      return reply
+        .code(error.status)
+        .type("application/problem+json")
+        .send({
+          type: `urn:marketingovo:problem:${error.code.replaceAll("_", "-")}`,
+          title: "Email request was rejected",
+          status: error.status,
+          detail: error.message,
+          code: error.code,
+        });
+    }
+    return channelProblem(reply, error);
+  };
+
+  app.get(
+    "/api/v1/projects/:projectId/brand-kit",
+    {
+      schema: {
+        params: Type.Object(
+          { projectId: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            BrandKitWorkspaceSchema,
+            DashboardEnvelopeSchema(BrandKitWorkspaceSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The project was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { projectId } = request.params as { projectId: string };
+      const workspace = await options.runtime.email.brandKit(projectId);
+      if (!workspace) {
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:email-project-not-found",
+          title: "Project not found",
+          status: 404,
+          detail: "The requested project does not exist.",
+          code: "email_project_not_found",
+        });
+      }
+      return isDashboardRequest(request) ? envelope(workspace) : workspace;
+    },
+  );
+
+  /**
+   * Revises the brand kit.
+   *
+   * Open to agent tooling: proposing colours and type from an uploaded
+   * guideline document is exactly the work an agent should do, every revision
+   * is appended rather than overwriting, and the actor is recorded from the
+   * transport so the history says truthfully who changed what.
+   */
+  app.put(
+    "/api/v1/projects/:projectId/brand-kit",
+    {
+      schema: {
+        params: Type.Object(
+          { projectId: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        body: UpdateBrandKitInputSchema,
+        response: {
+          200: Type.Union([
+            BrandKitWorkspaceSchema,
+            DashboardEnvelopeSchema(BrandKitWorkspaceSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The project was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { projectId } = request.params as { projectId: string };
+      try {
+        const workspace = await options.runtime.email.reviseBrandKit(
+          projectId,
+          request.body as UpdateBrandKitInput,
+          requestActor(request),
+        );
+        return isDashboardRequest(request) ? envelope(workspace) : workspace;
+      } catch (error) {
+        return emailProblem(reply, error);
+      }
+    },
+  );
+
+  app.get(
+    "/api/v1/email-templates",
+    {
+      schema: {
+        querystring: Type.Object(
+          { projectId: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            Type.Array(EmailTemplateSchema),
+            DashboardEnvelopeSchema(
+              Type.Object(
+                {
+                  items: Type.Array(EmailTemplateSchema),
+                  total: Type.Integer({ minimum: 0 }),
+                },
+                { additionalProperties: false },
+              ),
+            ),
+          ]),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request) => {
+      const { projectId } = request.query as { projectId: string };
+      const items = await options.runtime.email.templates(projectId);
+      return isDashboardRequest(request)
+        ? envelope({ items, total: items.length })
+        : items;
+    },
+  );
+
+  app.post(
+    "/api/v1/email-templates",
+    {
+      schema: {
+        body: CreateEmailTemplateInputSchema,
+        response: {
+          201: Type.Union([
+            EmailTemplateSchema,
+            DashboardEnvelopeSchema(EmailTemplateSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The project was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const template = await options.runtime.email.createTemplate(
+          request.body as CreateEmailTemplateInput,
+        );
+        return reply
+          .code(201)
+          .send(isDashboardRequest(request) ? envelope(template) : template);
+      } catch (error) {
+        return emailProblem(reply, error);
+      }
+    },
+  );
+
+  app.get(
+    "/api/v1/email-templates/:id",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            EmailTemplateWorkspaceSchema,
+            DashboardEnvelopeSchema(EmailTemplateWorkspaceSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The template was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const workspace = await options.runtime.email.template(id);
+      if (!workspace) {
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:email-template-not-found",
+          title: "Template not found",
+          status: 404,
+          detail: "The requested email template does not exist.",
+          code: "email_template_not_found",
+        });
+      }
+      return isDashboardRequest(request) ? envelope(workspace) : workspace;
+    },
+  );
+
+  /**
+   * Compiles without storing.
+   *
+   * The agent's iteration loop lives here: submit HTML, read the report, fix,
+   * submit again. Nothing is persisted, so twenty passes do not become twenty
+   * revisions a person has to scroll past.
+   */
+  app.post(
+    "/api/v1/projects/:projectId/email-preview",
+    {
+      schema: {
+        params: Type.Object(
+          { projectId: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        body: CompileEmailInputSchema,
+        response: {
+          200: Type.Union([
+            EmailPreviewSchema,
+            DashboardEnvelopeSchema(EmailPreviewSchema),
+          ]),
+          ...StandardProblemResponses,
+          503: ProblemResponse("The email compiler is unavailable."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { projectId } = request.params as { projectId: string };
+      try {
+        const preview = await options.runtime.email.preview(
+          projectId,
+          request.body as CompileEmailInput,
+        );
+        return isDashboardRequest(request) ? envelope(preview) : preview;
+      } catch (error) {
+        return emailProblem(reply, error);
+      }
+    },
+  );
+
+  app.post(
+    "/api/v1/email-templates/:id/versions",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        body: CompileEmailInputSchema,
+        response: {
+          201: Type.Union([
+            EmailTemplateWorkspaceSchema,
+            DashboardEnvelopeSchema(EmailTemplateWorkspaceSchema),
+          ]),
+          ...StandardProblemResponses,
+          404: ProblemResponse("The template was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      try {
+        const workspace = await options.runtime.email.saveVersion(
+          id,
+          request.body as CompileEmailInput,
+          requestActor(request),
+        );
+        return reply
+          .code(201)
+          .send(isDashboardRequest(request) ? envelope(workspace) : workspace);
+      } catch (error) {
+        return emailProblem(reply, error);
+      }
+    },
+  );
+
+  app.get(
+    "/api/v1/projects/:projectId/email-starter",
+    {
+      schema: {
+        params: Type.Object(
+          { projectId: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([
+            Type.Object(
+              { html: Type.String() },
+              { additionalProperties: false },
+            ),
+            DashboardEnvelopeSchema(
+              Type.Object(
+                { html: Type.String() },
+                { additionalProperties: false },
+              ),
+            ),
+          ]),
+          ...StandardProblemResponses,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { projectId } = request.params as { projectId: string };
+      try {
+        const html = await options.runtime.email.starter(projectId);
+        return isDashboardRequest(request) ? envelope({ html }) : { html };
+      } catch (error) {
+        return emailProblem(reply, error);
+      }
+    },
+  );
+
+  app.delete(
+    "/api/v1/email-templates/:id",
+    {
+      schema: {
+        params: Type.Object(
+          { id: Type.String({ minLength: 1, maxLength: 160 }) },
+          { additionalProperties: false },
+        ),
+        response: {
+          204: { description: "The template and its revisions were removed." },
+          ...StandardProblemResponses,
+          404: ProblemResponse("The template was not found."),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const removed = await options.runtime.email.removeTemplate(id);
+      if (!removed) {
+        return reply.code(404).type("application/problem+json").send({
+          type: "urn:marketingovo:problem:email-template-not-found",
+          title: "Template not found",
+          status: 404,
+          detail: "The requested email template does not exist.",
+          code: "email_template_not_found",
+        });
+      }
+      return reply.code(204).send();
+    },
+  );
+
   app.get(
     "/api/v1/schedules",
     {
@@ -3325,6 +5646,8 @@ export async function createLocalServer(
         timezone: string;
         enabled: boolean;
         nextRunAt?: string;
+        workflowId?: string;
+        options?: Record<string, unknown>;
       };
       try {
         const nextRunAt =
@@ -3376,6 +5699,8 @@ export async function createLocalServer(
         timezone?: string;
         enabled?: boolean;
         nextRunAt?: string;
+        workflowId?: string;
+        options?: Record<string, unknown>;
       };
       const current = (await options.runtime.schedules.list()).find(
         (schedule) => schedule.id === id,
@@ -3555,10 +5880,13 @@ export async function createLocalServer(
     }),
   );
   app.post("/api/v1/sites", async (request, reply) => {
-    const body = request.body as { name: string; url: string };
+    // `url` stays accepted exactly as before; omitting it is the new path that
+    // creates a workspace with no website yet.
+    const body = request.body as { name: string; url?: string | null };
+    const url = typeof body.url === "string" ? body.url.trim() : "";
     const project = await options.runtime.projects.create({
       name: body.name,
-      canonicalUrl: body.url,
+      ...(url ? { canonicalUrl: url } : {}),
     });
     return reply.code(201).send(
       envelope({
@@ -3970,7 +6298,11 @@ export async function createLocalServer(
     return envelope({
       schedules: schedules.map((schedule) => ({
         id: schedule.id,
-        name: "SEO audit",
+        name:
+          schedule.workflowId === "marketing-report"
+            ? "Cross-channel report"
+            : "SEO audit",
+        workflowId: schedule.workflowId ?? "audit",
         cadence: schedule.cron,
         cron: schedule.cron,
         timezone: schedule.timezone,
@@ -4043,7 +6375,7 @@ export async function createLocalServer(
       }
       const body = request.body as {
         siteName?: string;
-        siteUrl?: string;
+        siteUrl?: string | null;
         timezone?: string | null;
         reportingCurrency?: string | null;
         weeklyDigest?: boolean;
@@ -4060,13 +6392,20 @@ export async function createLocalServer(
           code: "invalid_settings",
         });
       }
-      let siteUrl: string | undefined;
+      // Three distinct intents: absent leaves the website alone, empty or null
+      // removes it, and a URL sets it. Collapsing the middle case into "absent"
+      // would make a website impossible to detach once added.
+      let siteUrl: string | null | undefined;
       if (body.siteUrl !== undefined) {
         try {
-          const parsed = new URL(body.siteUrl);
-          if (parsed.protocol !== "http:" && parsed.protocol !== "https:")
-            throw new Error("unsupported protocol");
-          siteUrl = parsed.href;
+          if (body.siteUrl === null || body.siteUrl.trim() === "") {
+            siteUrl = null;
+          } else {
+            const parsed = new URL(body.siteUrl);
+            if (parsed.protocol !== "http:" && parsed.protocol !== "https:")
+              throw new Error("unsupported protocol");
+            siteUrl = parsed.href;
+          }
         } catch {
           return reply.code(400).type("application/problem+json").send({
             type: "urn:marketingovo:problem:invalid-settings",
