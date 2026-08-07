@@ -34,6 +34,12 @@ human attestations — attestations an agent must never fill in.
   has not reported now states the reason and links to the workspace that can
   change it. The social mentions and brand sentiment panels — which had no
   collector at all — were removed rather than dressed up.
+- **The loopback rate brake no longer starves real sessions.** Static assets
+  and the SPA shell are exempt from the request limiter (one dashboard load
+  is ~35 files), and the API budget rises from 240 to 600 requests a minute —
+  the packaged browser journey was hitting "rate limit exceeded" from
+  ordinary navigation, which a real operator could reproduce by clicking
+  through the console.
 
 ## 1.1.0 — approved
 

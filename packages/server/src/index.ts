@@ -1357,9 +1357,14 @@ export async function createLocalServer(
   });
   await app.register(cookie);
   await app.register(rateLimit, {
-    max: 240,
+    max: 600,
     timeWindow: "1 minute",
     keyGenerator: () => "loopback",
+    // The brake exists to slow a hostile local process probing the API, not
+    // to meter the sole legitimate operator. Static assets and the SPA shell
+    // are exempt — one dashboard load is ~35 files, and counting them starved
+    // a real session into "rate limit exceeded" after a few page moves.
+    allowList: (request) => !request.url.startsWith("/api/"),
   });
   await app.register(swagger, {
     openapi: {
