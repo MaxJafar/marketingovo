@@ -9,16 +9,9 @@ import {
   kpiGlyphs,
   mascotGlyphs,
   panelGlyphs,
-  socialGlyphs,
 } from "../components/pixel-glyphs";
+import { MeterRow, PixelDonut, SparkBars } from "../components/pixel-charts";
 import {
-  MeterRow,
-  PixelDonut,
-  PixelLineChart,
-  SparkBars,
-} from "../components/pixel-charts";
-import {
-  DEMO,
   formatCompact,
   formatScore,
   metricNumber,
@@ -27,31 +20,28 @@ import {
 } from "../lib/intel";
 
 /**
- * The console home. Every panel prefers a live measurement and says plainly
- * when it is showing the sample set instead — see the DEMO note in lib/intel.
+ * The console home. Every mark on this page is a measurement; where a source
+ * has not reported, the panel says so and points at the workspace that can
+ * change that. Nothing here falls back to a sample set — a number a marketer
+ * cannot trust poisons the ones they can.
  */
 
 function Panel({
   title,
   mark,
   span,
-  demo,
   children,
 }: {
   title: string;
   mark?: ReactNode;
   span: string;
-  demo?: boolean;
   children: ReactNode;
 }) {
   return (
     <section className={`pixel-panel ${span}`}>
       <div className="pixel-panel-head">
         <h2>{title}</h2>
-        <span className="pixel-panel-mark">
-          {demo ? <span className="pixel-demo-flag">demo</span> : null}
-          {mark}
-        </span>
+        <span className="pixel-panel-mark">{mark}</span>
       </div>
       <div className="pixel-panel-body">{children}</div>
     </section>
@@ -67,7 +57,7 @@ function Stat({
   accent,
   spark,
   change,
-  demo,
+  note,
 }: {
   label: string;
   value: string;
@@ -77,7 +67,7 @@ function Stat({
   accent: "pink" | "cyan";
   spark: number[];
   change: number | null;
-  demo: boolean;
+  note?: string;
 }) {
   const delta = toDelta(change);
   return (
@@ -86,9 +76,7 @@ function Stat({
         <PixelSprite src={sprite} fallback={glyph} size={40} />
       </span>
       <div className="pixel-stat-body">
-        <span className="pixel-stat-label">
-          {label} {demo ? <span className="pixel-demo-flag">demo</span> : null}
-        </span>
+        <span className="pixel-stat-label">{label}</span>
         <strong className="pixel-stat-value">
           {value}
           {unit ? <span className="pixel-stat-unit">{unit}</span> : null}
@@ -100,13 +88,32 @@ function Stat({
             </span>
           ) : (
             <span className="pixel-delta" data-direction="flat">
-              no trend yet
+              {note ?? "no trend yet"}
             </span>
           )}
           <SparkBars values={spark} accent={accent} />
         </span>
       </div>
     </div>
+  );
+}
+
+function PanelEmpty({
+  message,
+  to,
+  action,
+}: {
+  message: string;
+  to: string;
+  action: string;
+}) {
+  return (
+    <p className="pixel-hero-sub">
+      {message}{" "}
+      <Link to={to} className="pixel-linklike">
+        {action}
+      </Link>
+    </p>
   );
 }
 
@@ -119,50 +126,31 @@ export function DashboardPage() {
   const data = overview.data?.data;
   const health = metricNumber(data?.siteHealth);
   const clicks = metricNumber(data?.organicClicks);
+  const keyEvents = metricNumber(data?.organicKeyEvents);
+  const vitalsPassRate = metricNumber(data?.coreWebVitalsPassRate);
   const trend = (data?.healthTrend ?? [])
     .map((point) => point.value)
     .filter((value): value is number => typeof value === "number");
-
-  // Visibility and traffic have real sources; mentions and sentiment do not.
-  const visibility = health ?? DEMO.visibility;
-  const visibilityDemo = health === null;
-  const traffic = clicks ?? DEMO.traffic;
-  const trafficDemo = clicks === null;
 
   const keywordRows = keywords.data?.data.opportunities ?? [];
   const competitorRows = competitors.data?.data.items ?? [];
   const gapTerms = competitors.data?.data.contentGapTerms ?? [];
 
-  const usingDemoKeywords = keywordRows.length === 0;
-  const usingDemoCompetitors = competitorRows.length === 0;
-  const usingDemoFeed = gapTerms.length === 0;
-
-  const healthBars =
-    data === undefined
-      ? DEMO.health.map((entry) => ({ ...entry, known: false }))
-      : [
-          {
-            name: "Crawlability",
-            value: metricNumber(data.indexableCoverage),
-            known: true,
-          },
-          {
-            name: "Site Performance",
-            value: metricNumber(data.coreWebVitalsPassRate),
-            known: true,
-          },
-          { name: "On-Page SEO", value: health, known: true },
-          {
-            name: "Backlinks",
-            value: null,
-            known: true,
-          },
-          {
-            name: "Content Quality",
-            value: metricNumber(data.organicKeyEvents) === null ? null : health,
-            known: true,
-          },
-        ];
+  const healthBars = [
+    {
+      name: "Crawlability",
+      value: metricNumber(data?.indexableCoverage),
+    },
+    {
+      name: "Site Performance",
+      value: vitalsPassRate,
+    },
+    { name: "On-Page SEO", value: health },
+    {
+      name: "Key events",
+      value: keyEvents,
+    },
+  ];
 
   return (
     <>
@@ -231,53 +219,47 @@ export function DashboardPage() {
       <div className="pixel-stats">
         <Stat
           label="SEO visibility"
-          value={formatScore(visibility)}
-          unit="/100"
+          value={formatScore(health)}
+          unit={health === null ? undefined : "/100"}
           glyph={kpiGlyphs.visibility}
           sprite="/pixel/kpi/visibility.png"
           accent="pink"
-          spark={trend.length > 1 ? toSpark(trend) : [...DEMO.visibilitySpark]}
-          change={
-            visibilityDemo
-              ? DEMO.visibilityChange
-              : (data?.siteHealth?.change ?? null)
-          }
-          demo={visibilityDemo}
+          spark={trend.length > 1 ? toSpark(trend) : []}
+          change={data?.siteHealth?.change ?? null}
+          note={health === null ? "run an audit to measure" : undefined}
         />
         <Stat
           label="Organic traffic"
-          value={formatCompact(traffic)}
+          value={formatCompact(clicks)}
           glyph={kpiGlyphs.traffic}
           sprite="/pixel/kpi/traffic.png"
           accent="cyan"
-          spark={[...DEMO.trafficSpark]}
-          change={
-            trafficDemo
-              ? DEMO.trafficChange
-              : (data?.organicClicks?.change ?? null)
-          }
-          demo={trafficDemo}
+          spark={[]}
+          change={data?.organicClicks?.change ?? null}
+          note={clicks === null ? "connect Search Console" : undefined}
         />
         <Stat
-          label="Social mentions"
-          value={formatCompact(DEMO.mentions)}
+          label="Key events"
+          value={formatCompact(keyEvents)}
           glyph={kpiGlyphs.mentions}
           sprite="/pixel/kpi/mentions.png"
           accent="pink"
-          spark={[...DEMO.mentionsSpark]}
-          change={DEMO.mentionsChange}
-          demo
+          spark={[]}
+          change={data?.organicKeyEvents?.change ?? null}
+          note={keyEvents === null ? "connect Analytics" : undefined}
         />
         <Stat
-          label="Brand sentiment"
-          value={`${DEMO.sentiment}`}
-          unit="%"
+          label="CWV pass rate"
+          value={formatScore(vitalsPassRate)}
+          unit={vitalsPassRate === null ? undefined : "%"}
           glyph={kpiGlyphs.sentiment}
           sprite="/pixel/kpi/sentiment.png"
           accent="cyan"
-          spark={[...DEMO.sentimentSpark]}
-          change={DEMO.sentimentChange}
-          demo
+          spark={[]}
+          change={data?.coreWebVitalsPassRate?.change ?? null}
+          note={
+            vitalsPassRate === null ? "run an audit with vitals" : undefined
+          }
         />
       </div>
 
@@ -285,7 +267,6 @@ export function DashboardPage() {
         <Panel
           title="SEO overview"
           span="pixel-col-5"
-          demo={data === undefined}
           mark={
             <PixelSprite
               src="/pixel/panel/coffee.png"
@@ -297,23 +278,30 @@ export function DashboardPage() {
           <p className="pixel-hero-sub" style={{ marginBottom: 12 }}>
             Domain health
           </p>
-          <div className="pixel-donut-row">
-            <PixelDonut
-              value={health ?? DEMO.domainHealth}
-              label={`Domain health ${Math.round(health ?? DEMO.domainHealth)} out of 100`}
+          {health === null ? (
+            <PanelEmpty
+              message="No audit has measured this site yet, so there is no health score to draw — a placeholder number would be an invention."
+              to="/audits"
+              action="Run an audit →"
             />
-            <div className="pixel-meters">
-              {healthBars.map((bar) => (
-                <MeterRow key={bar.name} name={bar.name} value={bar.value} />
-              ))}
+          ) : (
+            <div className="pixel-donut-row">
+              <PixelDonut
+                value={health}
+                label={`Domain health ${Math.round(health)} out of 100`}
+              />
+              <div className="pixel-meters">
+                {healthBars.map((bar) => (
+                  <MeterRow key={bar.name} name={bar.name} value={bar.value} />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </Panel>
 
         <Panel
-          title="Social media research"
+          title="Cross-channel report"
           span="pixel-col-7"
-          demo
           mark={
             <PixelSprite
               src="/pixel/panel/chat.png"
@@ -322,42 +310,25 @@ export function DashboardPage() {
             />
           }
         >
-          <div className="pixel-social-split">
-            <div>
-              <p className="pixel-hero-sub" style={{ marginBottom: 10 }}>
-                Mentions trend (30d)
-              </p>
-              <PixelLineChart
-                title="Mentions trend over the last 30 days"
-                series={DEMO.mentionsSeries.map((entry) => ({
-                  ...entry,
-                  points: [...entry.points],
-                }))}
-                xLabels={[...DEMO.mentionsAxis]}
-              />
-            </div>
-            <div className="pixel-platforms">
-              {DEMO.platforms.map((platform) => (
-                <div className="pixel-platform" key={platform.id}>
-                  <PixelSprite
-                    src={`/pixel/social/${platform.id}.png`}
-                    fallback={socialGlyphs[platform.id]}
-                    size={20}
-                  />
-                  <span className="pixel-platform-name">{platform.name}</span>
-                  <span className="pixel-platform-count">
-                    {formatCompact(platform.count)}
-                  </span>
-                </div>
-              ))}
-            </div>
+          <p className="pixel-hero-sub">
+            The client-facing document across paid, organic, social, email,
+            competitors and completed work — charts drawn only from measured
+            values, exported as PDF, and generated on a daily, weekly or monthly
+            schedule.
+          </p>
+          <div className="pixel-row-actions" style={{ marginTop: 12 }}>
+            <Link to="/report" className="pixel-button pixel-button-primary">
+              Open the report →
+            </Link>
+            <Link to="/monitoring" className="pixel-button">
+              Schedule it →
+            </Link>
           </div>
         </Panel>
 
         <Panel
           title="Top keywords"
           span="pixel-col-4"
-          demo={usingDemoKeywords}
           mark={
             <span style={{ color: "var(--px-gold)" }}>
               <PixelSprite
@@ -368,52 +339,54 @@ export function DashboardPage() {
             </span>
           }
         >
-          <table className="pixel-table">
-            <thead>
-              <tr>
-                <th scope="col">Keyword</th>
-                <th scope="col" className="is-numeric">
-                  Pos.
-                </th>
-                <th scope="col" className="is-numeric">
-                  Vol.
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {(usingDemoKeywords
-                ? DEMO.keywords.map((entry) => ({
-                    id: entry.keyword,
-                    keyword: entry.keyword,
-                    position: entry.position as number | null,
-                    volume: entry.volume as number | null,
-                  }))
-                : keywordRows.slice(0, 5).map((entry) => ({
-                    id: entry.id,
-                    keyword: entry.keyword,
-                    position: entry.position ?? null,
-                    volume: entry.volume ?? entry.impressions ?? null,
-                  }))
-              ).map((row) => (
-                <tr key={row.id}>
-                  <td>{row.keyword}</td>
-                  <td className="is-numeric">
-                    {row.position === null ? "—" : row.position}
-                  </td>
-                  <td className="is-numeric">{formatCompact(row.volume)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <Link to="/keywords" className="pixel-panel-action">
-            View all keywords →
-          </Link>
+          {keywordRows.length === 0 ? (
+            <PanelEmpty
+              message="No keyword research has run for this workspace yet."
+              to="/keywords"
+              action="Open the keyword lab →"
+            />
+          ) : (
+            <>
+              <table className="pixel-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Keyword</th>
+                    <th scope="col" className="is-numeric">
+                      Pos.
+                    </th>
+                    <th scope="col" className="is-numeric">
+                      Vol.
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {keywordRows.slice(0, 5).map((entry) => (
+                    <tr key={entry.id}>
+                      <td>{entry.keyword}</td>
+                      <td className="is-numeric">
+                        {entry.position === null || entry.position === undefined
+                          ? "—"
+                          : entry.position}
+                      </td>
+                      <td className="is-numeric">
+                        {formatCompact(
+                          entry.volume ?? entry.impressions ?? null,
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <Link to="/keywords" className="pixel-panel-action">
+                View all keywords →
+              </Link>
+            </>
+          )}
         </Panel>
 
         <Panel
           title="Competitor insights"
           span="pixel-col-4"
-          demo={usingDemoCompetitors}
           mark={
             <span style={{ color: "var(--px-pink)" }}>
               <PixelSprite
@@ -424,55 +397,48 @@ export function DashboardPage() {
             </span>
           }
         >
-          <table className="pixel-table">
-            <thead>
-              <tr>
-                <th scope="col">Domain</th>
-                <th scope="col" className="is-numeric">
-                  Visibility
-                </th>
-                <th scope="col" className="is-numeric">
-                  Traffic
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr data-self="true">
-                <td>you ({site?.name?.toLowerCase() ?? "this site"})</td>
-                <td className="is-numeric">{formatScore(visibility)}</td>
-                <td className="is-numeric">{formatCompact(traffic)}</td>
-              </tr>
-              {(usingDemoCompetitors
-                ? DEMO.competitors.map((entry) => ({
-                    id: entry.domain,
-                    domain: entry.domain,
-                    visibility: entry.visibility as number | null,
-                    traffic: entry.traffic as number | null,
-                  }))
-                : competitorRows.slice(0, 4).map((entry) => ({
-                    id: entry.id,
-                    domain: entry.domain,
-                    visibility: entry.technicalHealth ?? null,
-                    traffic: null as number | null,
-                  }))
-              ).map((row) => (
-                <tr key={row.id}>
-                  <td>{row.domain}</td>
-                  <td className="is-numeric">{formatScore(row.visibility)}</td>
-                  <td className="is-numeric">{formatCompact(row.traffic)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <Link to="/competitors" className="pixel-panel-action">
-            View competitors →
-          </Link>
+          {competitorRows.length === 0 ? (
+            <PanelEmpty
+              message="No competitor comparison has run yet, so there is nothing measured to rank."
+              to="/competitors"
+              action="Research competitors →"
+            />
+          ) : (
+            <>
+              <table className="pixel-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Domain</th>
+                    <th scope="col" className="is-numeric">
+                      Visibility
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr data-self="true">
+                    <td>you ({site?.name?.toLowerCase() ?? "this site"})</td>
+                    <td className="is-numeric">{formatScore(health)}</td>
+                  </tr>
+                  {competitorRows.slice(0, 4).map((entry) => (
+                    <tr key={entry.id}>
+                      <td>{entry.domain}</td>
+                      <td className="is-numeric">
+                        {formatScore(entry.technicalHealth ?? null)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <Link to="/competitors" className="pixel-panel-action">
+                View competitors →
+              </Link>
+            </>
+          )}
         </Panel>
 
         <Panel
           title="Content intel feed"
           span="pixel-col-4"
-          demo={usingDemoFeed}
           mark={
             <PixelSprite
               src="/pixel/panel/feed.png"
@@ -481,29 +447,16 @@ export function DashboardPage() {
             />
           }
         >
-          <div className="pixel-feed">
-            {usingDemoFeed
-              ? DEMO.feed.map((item) => (
-                  <article className="pixel-feed-item" key={item.id}>
-                    <PixelSprite
-                      src={`/pixel/feed/${item.glyph}.png`}
-                      fallback={feedGlyphs[item.glyph]}
-                      size={28}
-                    />
-                    <div className="pixel-feed-body">
-                      <h3 className="pixel-feed-title">{item.title}</h3>
-                      <div className="pixel-feed-meta">
-                        <span>◉ {formatCompact(item.views)}</span>
-                        <span>▣ {item.comments}</span>
-                        <span>⚯ {item.links}</span>
-                      </div>
-                    </div>
-                    <span className="pixel-tag" data-tone={item.tone}>
-                      {item.tag}
-                    </span>
-                  </article>
-                ))
-              : gapTerms.slice(0, 3).map((gap) => (
+          {gapTerms.length === 0 ? (
+            <PanelEmpty
+              message="Content gaps appear here after a competitor comparison measures them."
+              to="/content"
+              action="Open content intel →"
+            />
+          ) : (
+            <>
+              <div className="pixel-feed">
+                {gapTerms.slice(0, 3).map((gap) => (
                   <article className="pixel-feed-item" key={gap.term}>
                     <PixelSprite
                       src="/pixel/feed/trend.png"
@@ -523,10 +476,16 @@ export function DashboardPage() {
                     </span>
                   </article>
                 ))}
-          </div>
-          <Link to="/content" className="pixel-panel-action" data-accent="pink">
-            View content feed →
-          </Link>
+              </div>
+              <Link
+                to="/content"
+                className="pixel-panel-action"
+                data-accent="pink"
+              >
+                View content feed →
+              </Link>
+            </>
+          )}
         </Panel>
       </div>
 

@@ -85,8 +85,8 @@ The REST API, OpenAPI document, SDK, nineteen-tool agent contract registry, CLI 
   gate.
 - Every operating-system matrix has not completed final validation.
 - Provider authorization and fixtures are not equally exercised across providers.
-- The demo-flagged console panels — social mentions, brand sentiment, and the
-  mentions trend — have no connector behind them and say so in the interface.
+- Social listening — mentions, sentiment, engagement — has no collector; the
+  console says so and shows no such figures rather than sampling them.
   Backlinks states plainly that crawling your own site cannot measure referring
   domains.
 - Schedules require the local service to remain running. Native launchers

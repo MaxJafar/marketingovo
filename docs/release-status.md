@@ -29,6 +29,11 @@ human attestations — attestations an agent must never fill in.
   Monitoring page can create daily, weekly, or monthly report schedules.
 - **Report CLI.** `marketingovo report list|generate|show|export` brings the
   report surface to the terminal, including PDF export.
+- **The demo sample set is gone.** The console home and the social research
+  page no longer fall back to labelled sample numbers; a panel whose source
+  has not reported now states the reason and links to the workspace that can
+  change it. The social mentions and brand sentiment panels — which had no
+  collector at all — were removed rather than dressed up.
 
 ## 1.1.0 — approved
 

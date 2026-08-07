@@ -1476,18 +1476,6 @@ img.pixel-sprite {
   color: var(--px-red);
 }
 
-.pixel-demo-flag {
-  display: inline-block;
-  padding: 1px 5px;
-  border: 1px solid var(--px-gold);
-  color: var(--px-gold);
-  font-size: 8px;
-  line-height: 12px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  vertical-align: middle;
-}
-
 .pixel-skip {
   position: absolute;
   left: -9999px;

@@ -33,7 +33,7 @@ credible rather than a rewrite:
   ([ADR 0003](adr/0003-optional-website-and-capabilities.md)).
 - **Missing data never becomes a zero.** Metrics are nullable with a separate
   availability state, from the SQLite schema up through the API contracts to the
-  dashboard's `Unavailable` rendering and its labelled `demo` flag. This is the
+  dashboard's `Unavailable` rendering. This is the
   single most important property to preserve: a cross-channel dashboard that
   quietly fills gaps with zeros is worse than no dashboard, because it produces
   confident wrong answers.

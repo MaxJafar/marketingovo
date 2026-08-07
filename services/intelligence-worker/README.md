@@ -1,10 +1,14 @@
 # Marketingovo intelligence worker
 
 This process is the bounded Python analytics boundary for the Marketingovo
-walking skeleton. It does not collect data, hold credentials, open network
-connections, or mutate the control plane. The Go daemon gives it one verified
-NDJSON spool and one output directory; the worker emits schema-exact Arrow,
-Parquet, a cited report, and a hash-addressed result manifest.
+walking skeleton. On the `protocol` and `analyze` paths it does not collect
+data, hold credentials, open network connections, or mutate the control
+plane. The Go daemon gives it one verified NDJSON spool and one output
+directory; the worker emits schema-exact Arrow, Parquet, a cited report, and
+a hash-addressed result manifest.
+
+The one deliberate exception is the operator-invoked `trends` subcommand
+below, which reaches Google Trends and nothing else.
 
 ## Production protocol
 
@@ -42,6 +46,33 @@ for missing values. Accepted rows normalize to the unchanged
 observation_id)` order. Missing and contradictory evidence is represented by
 metric availability states and metric-scoped canonical observation IDs, not by
 zero fill or source-order selection.
+
+## Trends research (pytrends)
+
+```console
+uv run --project services/intelligence-worker marketingovo-worker trends \
+  --keyword "pixel art" --keyword "retro branding" \
+  --timeframe "today 12-m" --geo ""
+```
+
+The one network-enabled adapter in this package, and only when the operator
+runs it themselves — the `protocol` and `analyze` paths cannot reach it.
+[pytrends](https://github.com/GeneralMills/pytrends) reads the public Google
+Trends UI endpoints, which are not an official API; that is the same
+ToS-grey ground the product's TypeScript trends integration stands on, and
+the emitted document says so in its `policy` field. No credential is
+involved and the only egress is to Google Trends for the exact keywords
+supplied.
+
+The output is one canonical-JSON `marketingovo.trends-research.v1` document
+on stdout: per keyword, Google's 0–100 relative interest series with the
+still-filling current bucket dropped, an average, momentum and a monthly
+slope in the same vocabulary as the TypeScript integration, a
+growing/steady/declining verdict, and top/rising related queries. A keyword
+Google returned nothing for is `no-data` with its reason; a blocked or
+throttled request is `unavailable` with the error text; neither is ever a
+row of zeros. The command exits 0 even when everything was unavailable,
+because on an offline machine the stated reasons are the honest answer.
 
 ## Diagnostic adapter
 

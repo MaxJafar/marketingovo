@@ -4,10 +4,13 @@
   <img src="assets/brand/marketingovo-readme-poster.png" alt="Marketingovo — local-first marketing intelligence for SEO audits, competitor intelligence, content signals, and verified results">
 </p>
 
-**A local-first marketing system covering SEO, paid media, social publishing,
-email and public-web research — turning crawl, Search Console, GA4, ad
-platform, performance and SERP signals into verified actions, and saying
-plainly what it could not measure.**
+**The 360° marketing terminal — email, social, SEO, ads, competitors and
+trends under one roof.** A marketer's data lives fragmented across a dozen
+consoles that do not talk to each other and quietly disagree. Marketingovo
+exists to consolidate it: one local-first dashboard that turns crawl, Search
+Console, GA4, ad platform, publishing, performance, SERP and trend signals
+into verified actions and one client-ready report — and says plainly what it
+could not measure.
 
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-5b63ff)](LICENSE)
 [![Telemetry](https://img.shields.io/badge/telemetry-off%20by%20default-242b36)](PRIVACY.md)
@@ -18,6 +21,13 @@ keeps projects and credentials under your control. It does more than produce an
 issue dump: it connects technical evidence to organic exposure, conversion
 exposure, reach, confidence, and effort so a marketer can decide what to fix
 first and verify the result after the next audit.
+
+The mission is consolidation without fabrication. Every channel's console
+shows its own numbers on its own model; pulling them under a single roof is
+only useful if the seams stay visible. So Marketingovo joins the channels
+where joining is arithmetic — spend, published posts, resolved issues — and
+refuses the joins that would be inventions, with the refusal printed where
+the number would have been.
 
 One rule runs through all of it: **a value that was not measured is `null` with
 a stated reason, never a zero.** "This campaign spent nothing" and "we could not
@@ -51,6 +61,11 @@ could not inspect rather than treating silence as a clean bill.
 > See [release status](docs/release-status.md) for exactly what was verified.
 
 ## Why Marketingovo
+
+One terminal for the channels a marketing team actually runs — SEO audits,
+Google and Meta ads, the social calendar, email production, competitor
+research and search-trend signals — with one action queue and one report
+across all of them.
 
 - **Actions, not noise.** Every prioritized action explains impact, effort,
   confidence, affected URLs, evidence, and verification state.
@@ -141,6 +156,13 @@ could not inspect rather than treating silence as a clean bill.
   and explicitly supplied public targets, with source states, publishing cadence,
   public social/profile links, business paths, an exact-match graph, and cited
   repeat-pass changes.
+- **Search-trend research.** Keyword work reads Google Trends interest,
+  momentum and a growing/steady/declining verdict through the built-in
+  integration, and the opt-in Python worker ships a `pytrends` adapter
+  (`marketingovo-worker trends`) that emits the same vocabulary as portable
+  JSON. Both state that Google's unofficial endpoints report relative
+  interest rather than search volumes, and both degrade to stated reasons —
+  never zeros — when a keyword has no data or the endpoint refuses.
 - **Audit evidence workbench.** Paginated crawl paths, redirect chains,
   reciprocal hreflang, sitemap coverage, and bounded custom extractions expose
   the exact source state behind a finding instead of collapsing missing data to
