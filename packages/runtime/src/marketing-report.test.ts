@@ -88,4 +88,43 @@ describe("cross-channel report generation", () => {
 
     expect(await runtime.marketingReports.render("missing", "pdf")).toBeNull();
   });
+
+  it("produces the report through the workflow executor, as a schedule would", async () => {
+    const runtime = setup();
+    const project = await runtime.projects.create({
+      name: "Scheduled workspace",
+      canonicalUrl: "https://example.com/",
+    });
+    // The exact shape DurableScheduler submits: workflow id from the schedule
+    // row, the schedule's options, and a per-occurrence idempotency key.
+    const run = await runtime.runs.start(
+      {
+        projectId: project.id,
+        workflowId: "marketing-report",
+        options: { compare: true, scheduleId: "schedule-under-test" },
+      },
+      "schedule:schedule-under-test:2026-02-01T08:00:00.000Z",
+    );
+    let finished = await runtime.runs.get(run.id);
+    for (let attempt = 0; attempt < 200; attempt += 1) {
+      if (
+        finished &&
+        ["succeeded", "partial", "failed", "cancelled"].includes(
+          finished.status,
+        )
+      )
+        break;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      finished = await runtime.runs.get(run.id);
+    }
+    // An empty workspace yields real coverage gaps, so the run lands partial —
+    // the document exists and says what it could not see.
+    expect(["succeeded", "partial"]).toContain(finished?.status);
+    const summaries = await runtime.marketingReports.list(project.id);
+    expect(summaries).toHaveLength(1);
+    const stored = await runtime.marketingReports.get(summaries[0]!.id);
+    expect(stored?.sections.map((section) => section.id)).toContain(
+      "competitors",
+    );
+  });
 });
