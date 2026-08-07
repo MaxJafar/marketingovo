@@ -10,6 +10,11 @@ import type {
   ReportMetric,
   ReportSection,
 } from "../api/contracts";
+import {
+  MeterRow,
+  PixelPairedBars,
+  type PairedBarRow,
+} from "../components/pixel-charts";
 
 /**
  * The cross-channel report.
@@ -89,6 +94,104 @@ function MetricCell({ metric }: { metric: ReportMetric }) {
   );
 }
 
+/** The one breakdown metric each section charts, when it has one. */
+const BREAKDOWN_CHART: Partial<
+  Record<ReportSection["id"], { key: string; title: string }>
+> = {
+  paid: { key: "spend", title: "Spend by account and platform" },
+  social: { key: "published", title: "Posts published by platform" },
+  competitors: { key: "signals", title: "Public signals by competitor" },
+};
+
+/**
+ * The section's charts. A mark is only drawn from a measured value — an
+ * unmeasured row is named below the chart with its reason, never drawn as an
+ * empty bar, because an empty bar reads as zero at exactly the glance a chart
+ * exists for.
+ */
+function SectionCharts({ section }: { section: ReportSection }) {
+  const compareRows: PairedBarRow[] = [];
+  for (const metric of section.metrics) {
+    // change is only non-null when both periods were measured, so the
+    // previous value can be recovered exactly from the stored figures.
+    if (metric.value === null || metric.change === null) continue;
+    if (1 + metric.change <= 0) continue;
+    const previous = metric.value / (1 + metric.change);
+    compareRows.push({
+      name: metric.label,
+      current: metric.value,
+      currentDisplay: formatValue(metric),
+      previous,
+      previousDisplay: formatValue({ ...metric, value: previous }),
+    });
+  }
+
+  const config = BREAKDOWN_CHART[section.id];
+  const measuredRows: Array<{ label: string; metric: ReportMetric }> = [];
+  const omittedRows: Array<{ label: string; reason: string }> = [];
+  const currencies = new Set<string | null>();
+  if (config) {
+    for (const row of section.breakdown) {
+      const metric = row.metrics.find((entry) => entry.key === config.key);
+      if (!metric) continue;
+      if (metric.value === null) {
+        omittedRows.push({
+          label: row.label,
+          reason: metric.note ?? "Not measured in this period.",
+        });
+        continue;
+      }
+      currencies.add(metric.currency);
+      measuredRows.push({ label: row.label, metric });
+    }
+  }
+  // Bars invite comparison along one axis; rows in two currencies would put
+  // unlike quantities on it, so the drawing is declined and the table stands.
+  const barsDrawable =
+    config && measuredRows.length > 0 && currencies.size <= 1;
+  const barMax = Math.max(
+    ...measuredRows.map((row) => row.metric.value ?? 0),
+    1e-9,
+  );
+
+  if (compareRows.length === 0 && !barsDrawable) return null;
+  return (
+    <>
+      {compareRows.length > 0 ? (
+        <div className="pixel-subsection">
+          <h4>This period against the one before it</h4>
+          <PixelPairedBars rows={compareRows} />
+        </div>
+      ) : null}
+      {barsDrawable ? (
+        <div className="pixel-subsection">
+          <h4>{config.title}</h4>
+          <div className="pixel-meters">
+            {measuredRows.map((row) => (
+              <MeterRow
+                key={row.label}
+                name={row.label}
+                value={row.metric.value}
+                max={barMax}
+                display={formatValue(row.metric)}
+              />
+            ))}
+          </div>
+          {omittedRows.map((row) => (
+            <p
+              key={row.label}
+              className="pixel-hero-sub"
+              style={{ fontStyle: "italic" }}
+            >
+              Not drawn — {row.label}: {row.reason}
+            </p>
+          ))}
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 function SectionPanel({ section }: { section: ReportSection }) {
   return (
     <section className="pixel-panel">
@@ -108,6 +211,8 @@ function SectionPanel({ section }: { section: ReportSection }) {
             ))}
           </ul>
         ) : null}
+
+        <SectionCharts section={section} />
 
         {section.breakdown.length > 0 ? (
           <div className="pixel-subsection">
@@ -190,6 +295,13 @@ function ReportView({ report }: { report: MarketingReport }) {
               rel="noreferrer noopener"
             >
               Plain text
+            </a>
+            <a
+              className="pixel-button"
+              href={`/api/v1/marketing-reports/${encodeURIComponent(report.id)}/render?format=pdf`}
+              download={`marketing-report-${report.id}.pdf`}
+            >
+              Download PDF
             </a>
           </div>
         </div>
@@ -276,9 +388,11 @@ export function MarketingReportPage() {
         </div>
         <div className="pixel-panel-body">
           <p className="pixel-hero-sub">
-            Spans paid, organic search, social publishing and email. Leave the
-            dates empty for the last complete 30 days — the current day is
-            excluded because providers restate it.
+            Spans paid, organic search, social publishing, email, the
+            competitive landscape and completed work — with charts for what was
+            measured and a downloadable PDF. Leave the dates empty for the last
+            complete 30 days — the current day is excluded because providers
+            restate it.
           </p>
           {generate.isError ? (
             <p className="pixel-hero-sub" role="alert">

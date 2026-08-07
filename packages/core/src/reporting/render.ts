@@ -5,6 +5,8 @@
 // monthly report. Where a number is missing, its reason takes the number's
 // place — in the same visual slot, at the same weight.
 
+import type { ChartSpec } from "./charts.js";
+import { renderChartSvg, reportChartSpecs } from "./charts.js";
 import type { MarketingReport, ReportMetric, ReportSection } from "./types.js";
 
 export interface ReportBrand {
@@ -88,7 +90,26 @@ function metricCell(metric: ReportMetric, brand: ReportBrand): string {
 </td>`;
 }
 
-function sectionHtml(section: ReportSection, brand: ReportBrand): string {
+function chartHtml(spec: ChartSpec, brand: ReportBrand): string {
+  return `<figure style="margin:18px 0 0;">
+  <figcaption style="font-size:11px;letter-spacing:0.6px;text-transform:uppercase;color:${brand.muted};margin-bottom:8px;">${escapeHtml(spec.title)}</figcaption>
+  ${renderChartSvg(spec, brand)}
+  ${spec.omitted
+    .map(
+      // A row that could not be measured is named, not drawn: an empty bar
+      // reads as zero at exactly the glance a chart exists for.
+      (row) =>
+        `<div style="font-size:12px;font-style:italic;color:${brand.muted};margin-top:6px;">Not drawn — ${escapeHtml(row.label)}: ${escapeHtml(row.reason)}</div>`,
+    )
+    .join("")}
+</figure>`;
+}
+
+function sectionHtml(
+  section: ReportSection,
+  brand: ReportBrand,
+  charts: ChartSpec[] = [],
+): string {
   const stateLabel =
     section.state === "available"
       ? ""
@@ -118,6 +139,7 @@ function sectionHtml(section: ReportSection, brand: ReportBrand): string {
       ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">${metricRows.join("")}</table>`
       : ""
   }
+  ${charts.map((spec) => chartHtml(spec, brand)).join("")}
   ${
     section.breakdown.length > 0
       ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin-top:16px;">
@@ -155,6 +177,12 @@ export function renderReportHtml(
   brand: ReportBrand = DEFAULT_REPORT_BRAND,
 ): string {
   const period = `${report.period.start} to ${report.period.end}`;
+  const chartsBySection = new Map<string, ChartSpec[]>();
+  for (const spec of reportChartSpecs(report)) {
+    const existing = chartsBySection.get(spec.sectionId) ?? [];
+    existing.push(spec);
+    chartsBySection.set(spec.sectionId, existing);
+  }
 
   return `<!doctype html>
 <html lang="en">
@@ -172,7 +200,7 @@ export function renderReportHtml(
     ${report.narrative ? `<p style="margin:18px 0 0;font-size:15px;line-height:1.6;color:${brand.text};">${escapeHtml(report.narrative)}</p>` : ""}
   </header>
 
-  ${report.sections.map((section) => sectionHtml(section, brand)).join("")}
+  ${report.sections.map((section) => sectionHtml(section, brand, chartsBySection.get(section.id) ?? [])).join("")}
 
   ${
     report.coverageGaps.length > 0

@@ -7,7 +7,7 @@ description: What 1.1.0 contains, which gates were observed passing, and which c
 
 ## 1.1.0
 
-The REST API, OpenAPI document, SDK, ten-tool agent contract registry, CLI and `.marketingovo` bundle format are stable: breaking changes to them require a major version. 1.1.0 is additive on top of 1.0.0 and breaks no existing integration.
+The REST API, OpenAPI document, SDK, nineteen-tool agent contract registry, CLI and `.marketingovo` bundle format are stable: breaking changes to them require a major version. 1.1.0 is additive on top of 1.0.0 and breaks no existing integration.
 
 <div class="status-banner">
   <strong>Approved, with deferred channels</strong>
@@ -45,9 +45,20 @@ The REST API, OpenAPI document, SDK, ten-tool agent contract registry, CLI and `
 - bounded public-web OSINT dossiers with exact source links, evidence states,
   target graphs, repeat-pass change history, and explicit privacy/collection
   limits;
+- Meta and Google Ads read-only cabinet audits filing paid findings into the
+  shared action queue, with landing alignment joining ad destinations to crawl
+  evidence;
+- a content calendar staging posts to Telegram, X, Facebook Pages, and
+  Instagram with immutable publish records, and a brand-kit email builder that
+  compiles and validates but never sends;
+- campaign links and locally generated QR codes with pre-generation tagging
+  checks;
+- the cross-channel report spanning paid, organic, social, email, competitors,
+  and completed work — charts drawn only from measured values, a locally
+  rendered PDF download, and daily/weekly/monthly schedule support;
 - CLI and typed REST SDK;
 - versioned `/api/v1`, OpenAPI, asynchronous runs, SSE events, and problem details;
-- ten workflow-level agent tools and read-only resources, plus a separate five-tool terminal session registry;
+- nineteen workflow-level agent tools and read-only resources, plus a separate five-tool terminal session registry;
 - Codex and OpenClaw bundles over the same local contracts;
 - connector manifests for GSC, GA4, PageSpeed Insights, Trends, SerpAPI, and DataForSEO;
 - BYOK credential boundary and encrypted CLI vault option;
@@ -97,7 +108,7 @@ The REST API, OpenAPI document, SDK, ten-tool agent contract registry, CLI and `
   CodeQL, and SBOM evidence.
 - Claims of commercial-tool replacement require a reproducible public corpus.
 
-The checked-in contract projection currently covers 20 public schemas and 38
+The checked-in contract projection currently covers 20 public schemas and 37
 API operations. CI rejects drift between TypeBox contracts, OpenAPI, the typed
 SDK, CLI behavior, and dashboard consumers.
 

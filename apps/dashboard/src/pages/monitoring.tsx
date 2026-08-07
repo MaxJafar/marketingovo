@@ -24,10 +24,13 @@ import {
   formatDate,
 } from "../components/ui";
 
-type ScheduleFrequency = "daily" | "weekly" | "custom";
+type ScheduleFrequency = "daily" | "weekly" | "monthly" | "custom";
+
+type ScheduleWorkflow = "audit" | "marketing-report";
 
 interface ScheduleEditor {
   id: string | null;
+  workflow: ScheduleWorkflow;
   frequency: ScheduleFrequency;
   time: string;
   weekday: string;
@@ -53,6 +56,7 @@ function localTimezone(): string {
 function blankEditor(): ScheduleEditor {
   return {
     id: null,
+    workflow: "audit",
     frequency: "daily",
     time: "06:00",
     weekday: "1",
@@ -62,14 +66,34 @@ function blankEditor(): ScheduleEditor {
   };
 }
 
+function scheduleWorkflow(schedule: MonitoringSchedule): ScheduleWorkflow {
+  return schedule.workflowId === "marketing-report"
+    ? "marketing-report"
+    : "audit";
+}
+
 function editorForSchedule(schedule: MonitoringSchedule): ScheduleEditor {
   const cron = schedule.cron ?? schedule.cadence;
+  const monthly = /^(\d{1,2})\s+(\d{1,2})\s+1\s+\*\s+\*$/u.exec(cron.trim());
+  if (monthly) {
+    return {
+      id: schedule.id,
+      workflow: scheduleWorkflow(schedule),
+      frequency: "monthly",
+      time: `${monthly[2]!.padStart(2, "0")}:${monthly[1]!.padStart(2, "0")}`,
+      weekday: "1",
+      cron,
+      timezone: schedule.timezone ?? localTimezone(),
+      enabled: schedule.enabled,
+    };
+  }
   const match = /^(\d{1,2})\s+(\d{1,2})\s+\*\s+\*\s+(\*|[0-7])$/u.exec(
     cron.trim(),
   );
   if (!match) {
     return {
       id: schedule.id,
+      workflow: scheduleWorkflow(schedule),
       frequency: "custom",
       time: "06:00",
       weekday: "1",
@@ -83,6 +107,7 @@ function editorForSchedule(schedule: MonitoringSchedule): ScheduleEditor {
   const weekday = match[3] === "7" ? "0" : match[3]!;
   return {
     id: schedule.id,
+    workflow: scheduleWorkflow(schedule),
     frequency: weekday === "*" ? "daily" : "weekly",
     time: `${hour}:${minute}`,
     weekday: weekday === "*" ? "1" : weekday,
@@ -95,11 +120,17 @@ function editorForSchedule(schedule: MonitoringSchedule): ScheduleEditor {
 function cronForEditor(editor: ScheduleEditor): string {
   if (editor.frequency === "custom") return editor.cron.trim();
   const [hour = "6", minute = "0"] = editor.time.split(":");
+  if (editor.frequency === "monthly")
+    return `${Number(minute)} ${Number(hour)} 1 * *`;
   return `${Number(minute)} ${Number(hour)} * * ${editor.frequency === "weekly" ? editor.weekday : "*"}`;
 }
 
 function cadenceLabel(schedule: MonitoringSchedule): string {
   const cron = schedule.cron ?? schedule.cadence;
+  const monthly = /^(\d{1,2})\s+(\d{1,2})\s+1\s+\*\s+\*$/u.exec(cron.trim());
+  if (monthly) {
+    return `Monthly on the 1st at ${monthly[2]!.padStart(2, "0")}:${monthly[1]!.padStart(2, "0")}`;
+  }
   const match = /^(\d{1,2})\s+(\d{1,2})\s+\*\s+\*\s+(\*|[0-7])$/u.exec(
     cron.trim(),
   );
@@ -136,6 +167,7 @@ export function MonitoringPage() {
       cron: cronForEditor(editor),
       timezone: editor.timezone.trim(),
       enabled: editor.enabled,
+      workflowId: editor.workflow,
     };
     if (editor.id) {
       updateSchedule.mutate(
@@ -171,14 +203,11 @@ export function MonitoringPage() {
             <form onSubmit={submitSchedule}>
               <div className="schedule-editor-heading">
                 <div>
-                  <h2>
-                    {editor.id
-                      ? "Edit audit schedule"
-                      : "Create an audit schedule"}
-                  </h2>
+                  <h2>{editor.id ? "Edit schedule" : "Create a schedule"}</h2>
                   <p>
-                    Choose a marketer-friendly cadence or use a standard
-                    five-field cron expression.
+                    Run a site audit or generate the cross-channel report on a
+                    marketer-friendly cadence, or use a standard five-field cron
+                    expression.
                   </p>
                 </div>
                 {editor.id ? (
@@ -193,6 +222,23 @@ export function MonitoringPage() {
               </div>
               <div className="schedule-form-grid">
                 <label>
+                  What to run
+                  <select
+                    name="workflow"
+                    value={editor.workflow}
+                    onChange={(event) => {
+                      const workflow = event.currentTarget
+                        .value as ScheduleWorkflow;
+                      setEditor((current) => ({ ...current, workflow }));
+                    }}
+                  >
+                    <option value="audit">Site audit</option>
+                    <option value="marketing-report">
+                      Cross-channel report
+                    </option>
+                  </select>
+                </label>
+                <label>
                   Frequency
                   <select
                     name="frequency"
@@ -205,6 +251,7 @@ export function MonitoringPage() {
                   >
                     <option value="daily">Daily</option>
                     <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly (1st)</option>
                     <option value="custom">Custom cron</option>
                   </select>
                 </label>
@@ -270,6 +317,13 @@ export function MonitoringPage() {
                   />
                 </label>
               </div>
+              {editor.workflow === "marketing-report" ? (
+                <InlineNotice tone="info" title="Reports quote audits">
+                  A report only cites an audit that ran inside its own period.
+                  Pair a report schedule with an audit schedule, or its organic
+                  section will say it was not measured.
+                </InlineNotice>
+              ) : null}
               <div className="form-actions">
                 <Button type="submit" disabled={editorPending || !siteId}>
                   {editorPending

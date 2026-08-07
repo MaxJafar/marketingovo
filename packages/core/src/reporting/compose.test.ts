@@ -93,6 +93,33 @@ function input(
       ],
     },
     email: { templatesBuilt: 3, revisionsSaved: 7, withBlockingFindings: 0 },
+    competitors: {
+      noResearchInPeriod: false,
+      targets: [
+        {
+          name: "rival.example",
+          state: "available",
+          reason: "",
+          signals: measured(24),
+          cadencePerWeek: measured(2.5),
+        },
+        {
+          name: "blocked.example",
+          state: "partial",
+          reason: "Robots rules kept most of this site out of reach.",
+          signals: measured(3),
+          cadencePerWeek: missing(
+            "No public feed made publishing cadence measurable.",
+          ),
+        },
+      ],
+      changes: {
+        added: measured(5),
+        removed: measured(1),
+        changed: measured(2),
+      },
+      observedAt: "2026-07-20T10:00:00.000Z",
+    },
     actions: { opened: 14, resolved: 9, verified: 6, noAuditInPeriod: false },
     brandRevision: 2,
     generatedAt: "2026-08-01T09:00:00.000Z",
@@ -326,6 +353,78 @@ describe("state roll-up", () => {
       input({ paid: { notConnected: true, cabinets: [] } }),
     );
     expect(reportState(report)).toBe("unavailable");
+  });
+});
+
+describe("the competitive landscape stays observational", () => {
+  it("reports citation counts and per-target rows", () => {
+    const report = composeReport(input());
+    const competitors = section(report, "competitors");
+
+    expect(competitors.state).toBe("partial");
+    expect(findMetric(report, "competitors", "targets")?.value).toBe(2);
+    // Only measured targets are summed, and the total says it is partial.
+    const signals = findMetric(report, "competitors", "signals");
+    expect(signals?.value).toBe(27);
+    expect(signals?.state).toBe("available");
+    expect(findMetric(report, "competitors", "signalsAdded")?.value).toBe(5);
+    expect(competitors.breakdown.map((row) => row.label)).toEqual([
+      "rival.example",
+      "blocked.example",
+    ]);
+  });
+
+  it("refuses traffic, spend and market-share figures", () => {
+    const report = composeReport(input());
+    const refusal = section(report, "competitors").refusals.find((entry) =>
+      /traffic, spend and revenue/i.test(entry.expected),
+    );
+    expect(refusal).toBeDefined();
+    expect(refusal?.explanation).toMatch(/public pages only/i);
+  });
+
+  it("says when a first pass has nothing to compare against", () => {
+    const report = composeReport(
+      input({
+        competitors: {
+          ...input().competitors,
+          changes: {
+            added: missing("This is the first research pass."),
+            removed: missing("This is the first research pass."),
+            changed: missing("This is the first research pass."),
+          },
+        },
+      }),
+    );
+    const added = findMetric(report, "competitors", "signalsAdded");
+    expect(added?.value).toBeNull();
+    expect(added?.note).toMatch(/first research pass/i);
+  });
+
+  it("keeps the section when no research ran, with the reason", () => {
+    const report = composeReport(
+      input({
+        competitors: {
+          noResearchInPeriod: true,
+          targets: [],
+          changes: {
+            added: missing(),
+            removed: missing(),
+            changed: missing(),
+          },
+          observedAt: null,
+        },
+      }),
+    );
+    const competitors = section(report, "competitors");
+    expect(competitors.state).toBe("unavailable");
+    expect(competitors.summary).toMatch(/not evidence that competitors/i);
+    // And the absence lands in the coverage gaps a skimming reader meets.
+    expect(
+      report.coverageGaps.some((gap) =>
+        /competitive landscape/i.test(gap.source),
+      ),
+    ).toBe(true);
   });
 });
 

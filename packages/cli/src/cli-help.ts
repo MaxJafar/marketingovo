@@ -7,6 +7,7 @@ Usage:
   marketingovo audit <project-id> [--render static|js] [--collect-vitals]
   marketingovo osint <project-id> [public-target-url ...] [--max-urls N]
   marketingovo run list|show|compare|links|replay|watch|cancel|issues
+  marketingovo report list --project ID | generate --project ID [--start YYYY-MM-DD] [--end YYYY-MM-DD] [--title TEXT] [--no-compare] | show <report-id> | export <report-id> --out FILE [--format pdf|html|text]
   marketingovo issue list <project-id> [--status STATE] [--severity LEVEL] [--search TEXT] | review <project-id> <fingerprint> <open|ignored|false-positive> [--reason-file PATH]
   marketingovo context show <project-id> | update <project-id> --profile-file PATH --change-summary-file PATH | append <project-id> <kind> --title-file PATH --detail-file PATH [--source-run ID]
   marketingovo integration list | test <provider> [--project ID] | remove <provider>

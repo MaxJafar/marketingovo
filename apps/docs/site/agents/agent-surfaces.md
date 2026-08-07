@@ -49,7 +49,7 @@ Paid numbers carry one more obligation. Every metric Marketingovo could not meas
 
 ## Five terminal session tools
 
-The dashboard's bottom edge is a console with no model of its own. It waits for an agent to attach and answer. These five tools are that other half, and they live in a registry separate from the ten workflow tools so an operator can grant conversational access without granting crawl access, or the reverse.
+The dashboard's bottom edge is a console with no model of its own. It waits for an agent to attach and answer. These five tools are that other half, and they live in a registry separate from the nineteen workflow tools so an operator can grant conversational access without granting crawl access, or the reverse.
 
 | Tool                          | Mode                   | Purpose                                                              |
 | ----------------------------- | ---------------------- | -------------------------------------------------------------------- |

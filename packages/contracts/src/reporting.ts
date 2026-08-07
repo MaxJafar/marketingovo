@@ -97,6 +97,7 @@ export const ReportSectionSchema = Type.Object(
       Type.Literal("organic"),
       Type.Literal("social"),
       Type.Literal("email"),
+      Type.Literal("competitors"),
       Type.Literal("actions"),
     ]),
     title: Type.String({ minLength: 1, maxLength: 120 }),

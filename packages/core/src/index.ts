@@ -259,6 +259,8 @@ export {
   reportState,
   worstState,
   type ActionsInput,
+  type CompetitorsInput,
+  type CompetitorTargetInput,
   type ComposeReportInput,
   type EmailInput,
   type OrganicInput,
@@ -273,6 +275,16 @@ export {
   renderReportText,
   type ReportBrand,
 } from "./reporting/render.js";
+export {
+  donutSlices,
+  renderChartSvg,
+  reportChartSpecs,
+  sliceOpacity,
+  type ChartBarRow,
+  type ChartCompareRow,
+  type ChartOmittedRow,
+  type ChartSpec,
+} from "./reporting/charts.js";
 export type {
   MarketingReport,
   ReportAvailability,

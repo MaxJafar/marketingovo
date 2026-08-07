@@ -1,5 +1,35 @@
 # Release status
 
+## Unreleased — in preparation
+
+The tree has grown past the approved 1.1.0 record and the additions below are
+**not yet covered by any acceptance record**. They ship with the next approved
+release (1.2.0 by the additive-change precedent of ADR 0003), which needs its
+own `release/acceptance/1.2.0.json` with all seven gates re-observed and both
+human attestations — attestations an agent must never fill in.
+
+**What the tree adds since the 1.1.0 record:**
+
+- **Multi-channel marketing.** Meta and Google Ads read-only audits into the
+  shared action queue, landing alignment between ads and the crawl, the
+  content calendar, the brand-kit email builder, campaign links and QR codes,
+  and bounded public-web OSINT — growing the workflow tool registry from nine
+  to nineteen tools (the five terminal session tools are unchanged).
+- **The cross-channel report is the full 360° view.** A competitors section
+  quotes the newest public-web research inside the period and compares it
+  against the pass before — citation counts with stated availability, never
+  market share. Sections carry charts drawn only from measured values (an
+  unmeasured row is named beneath the chart, never drawn as an empty bar), and
+  the client document exports as a PDF rendered locally with pdf-lib, so the
+  download works on installs with no browser.
+- **Scheduled reports.** Schedules carry the workflow they run end to end:
+  `claimDueSchedules` now returns `workflow_id`/`options_json` (previously
+  dropped on the claim path, so every schedule executed an audit), the REST
+  schedule inputs accept `workflowId`/`options`, and the dashboard's
+  Monitoring page can create daily, weekly, or monthly report schedules.
+- **Report CLI.** `marketingovo report list|generate|show|export` brings the
+  report surface to the terminal, including PDF export.
+
 ## 1.1.0 — approved
 
 Every engineering gate passes and the evidence is recorded in

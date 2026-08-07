@@ -454,6 +454,59 @@ async function osint(args: ParsedArgs): Promise<void> {
   json(run);
 }
 
+async function reportCommand(args: ParsedArgs): Promise<void> {
+  const [subcommand = "list", id] = args.rest;
+  const client = await clientFor(args.flags);
+  if (subcommand === "list") {
+    const projectId = optionalStringFlag(args.flags, "project");
+    if (!projectId)
+      throw new Error("usage: marketingovo report list --project <project-id>");
+    return json(await client.marketingReports.list(projectId));
+  }
+  if (subcommand === "generate") {
+    const projectId = optionalStringFlag(args.flags, "project");
+    if (!projectId) {
+      throw new Error(
+        "usage: marketingovo report generate --project <project-id> [--start YYYY-MM-DD] [--end YYYY-MM-DD] [--title TEXT] [--no-compare]",
+      );
+    }
+    const start = optionalStringFlag(args.flags, "start");
+    const end = optionalStringFlag(args.flags, "end");
+    const title = optionalStringFlag(args.flags, "title");
+    return json(
+      await client.marketingReports.generate({
+        projectId,
+        ...(start ? { start } : {}),
+        ...(end ? { end } : {}),
+        ...(title ? { title } : {}),
+        compare: !args.flags.has("no-compare"),
+      }),
+    );
+  }
+  if (!id)
+    throw new Error(`usage: marketingovo report ${subcommand} <report-id>`);
+  if (subcommand === "show") return json(await client.marketingReports.get(id));
+  if (subcommand === "export") {
+    const output = optionalStringFlag(args.flags, "out");
+    const format = optionalStringFlag(args.flags, "format") ?? "pdf";
+    if (format !== "pdf" && format !== "html" && format !== "text") {
+      throw new Error("--format must be pdf, html, or text");
+    }
+    if (!output) {
+      throw new Error(
+        "usage: marketingovo report export <report-id> --out <file> [--format pdf|html|text]",
+      );
+    }
+    const destination = resolve(output);
+    const bytes = await client.marketingReports.render(id, format);
+    writeFileSync(destination, bytes, { mode: 0o600, flag: "wx" });
+    return json({ path: destination, format, bytes: bytes.byteLength });
+  }
+  throw new Error(
+    "usage: marketingovo report <list|generate|show|export> — the client-facing cross-channel report",
+  );
+}
+
 async function runCommand(args: ParsedArgs): Promise<void> {
   const [subcommand = "list", id] = args.rest;
   const client = await clientFor(args.flags);
@@ -1078,6 +1131,8 @@ async function main(): Promise<void> {
       return osint(args);
     case "run":
       return runCommand(args);
+    case "report":
+      return reportCommand(args);
     case "issue":
       return issueCommand(args);
     case "context":

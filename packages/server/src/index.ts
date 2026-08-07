@@ -49,6 +49,7 @@ import {
   OsintEvidenceSchema,
   ScheduleSchema,
   StartRunInputSchema,
+  WorkflowIdSchema,
   PreviewExtractionRulesInputSchema,
   UpdateExtractionRulesInputSchema,
   UpdateActionInputSchema,
@@ -441,6 +442,12 @@ const CreateScheduleInputSchema = Type.Object(
     timezone: Type.String({ minLength: 1, maxLength: 80 }),
     enabled: Type.Boolean(),
     nextRunAt: Type.Optional(Type.String({ format: "date-time" })),
+    /**
+     * What the schedule starts. Omitted means `audit`, which is what every
+     * schedule ran before schedules could name a workflow.
+     */
+    workflowId: Type.Optional(WorkflowIdSchema),
+    options: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
   },
   { additionalProperties: false },
 );
@@ -451,6 +458,8 @@ const UpdateScheduleInputSchema = Type.Partial(
     timezone: Type.String({ minLength: 1, maxLength: 80 }),
     enabled: Type.Boolean(),
     nextRunAt: Type.String({ format: "date-time" }),
+    workflowId: WorkflowIdSchema,
+    options: Type.Record(Type.String(), Type.Unknown()),
   }),
   { additionalProperties: false, minProperties: 1 },
 );
@@ -4757,13 +4766,36 @@ export async function createLocalServer(
         querystring: Type.Object(
           {
             format: Type.Optional(
-              Type.Union([Type.Literal("html"), Type.Literal("text")]),
+              Type.Union([
+                Type.Literal("html"),
+                Type.Literal("text"),
+                Type.Literal("pdf"),
+              ]),
             ),
           },
           { additionalProperties: false },
         ),
         response: {
-          200: { description: "The rendered report." },
+          200: {
+            description: "The rendered report.",
+            headers: {
+              "content-disposition": {
+                description: "Attachment filename for the PDF form.",
+                schema: { type: "string" },
+              },
+            },
+            content: {
+              "text/html": {
+                schema: Type.String({ contentEncoding: "binary" }),
+              },
+              "text/plain": {
+                schema: Type.String({ contentEncoding: "binary" }),
+              },
+              "application/pdf": {
+                schema: Type.String({ contentEncoding: "binary" }),
+              },
+            },
+          },
           ...StandardProblemResponses,
           404: ProblemResponse("The report was not found."),
         },
@@ -4771,7 +4803,9 @@ export async function createLocalServer(
     },
     async (request, reply) => {
       const { id } = request.params as { id: string };
-      const { format } = request.query as { format?: "html" | "text" };
+      const { format } = request.query as {
+        format?: "html" | "text" | "pdf";
+      };
       const rendered = await options.runtime.marketingReports.render(
         id,
         format ?? "html",
@@ -4784,6 +4818,15 @@ export async function createLocalServer(
           detail: "The requested report does not exist.",
           code: "report_not_found",
         });
+      }
+      if (format === "pdf") {
+        return reply
+          .type("application/pdf")
+          .header(
+            "content-disposition",
+            `attachment; filename="marketing-report-${id}.pdf"`,
+          )
+          .send(Buffer.from(rendered as Uint8Array));
       }
       return reply
         .type(
@@ -5598,6 +5641,8 @@ export async function createLocalServer(
         timezone: string;
         enabled: boolean;
         nextRunAt?: string;
+        workflowId?: string;
+        options?: Record<string, unknown>;
       };
       try {
         const nextRunAt =
@@ -5649,6 +5694,8 @@ export async function createLocalServer(
         timezone?: string;
         enabled?: boolean;
         nextRunAt?: string;
+        workflowId?: string;
+        options?: Record<string, unknown>;
       };
       const current = (await options.runtime.schedules.list()).find(
         (schedule) => schedule.id === id,
@@ -6246,7 +6293,11 @@ export async function createLocalServer(
     return envelope({
       schedules: schedules.map((schedule) => ({
         id: schedule.id,
-        name: "SEO audit",
+        name:
+          schedule.workflowId === "marketing-report"
+            ? "Cross-channel report"
+            : "SEO audit",
+        workflowId: schedule.workflowId ?? "audit",
         cadence: schedule.cron,
         cron: schedule.cron,
         timezone: schedule.timezone,

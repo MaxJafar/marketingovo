@@ -5116,7 +5116,10 @@ export class MarketingovoDatabase {
   updateSchedule(
     id: string,
     patch: Partial<
-      Pick<Schedule, "cron" | "timezone" | "enabled" | "nextRunAt">
+      Pick<
+        Schedule,
+        "cron" | "timezone" | "enabled" | "nextRunAt" | "workflowId" | "options"
+      >
     >,
   ): Schedule | null {
     const current = this.listSchedules().find((schedule) => schedule.id === id);
@@ -5124,13 +5127,15 @@ export class MarketingovoDatabase {
     const next = { ...current, ...patch, updatedAt: now() };
     this.db
       .prepare(
-        "UPDATE schedules SET cron=?,timezone=?,enabled=?,next_run_at=?,updated_at=? WHERE id=?",
+        "UPDATE schedules SET cron=?,timezone=?,enabled=?,next_run_at=?,workflow_id=?,options_json=?,updated_at=? WHERE id=?",
       )
       .run(
         next.cron,
         next.timezone,
         next.enabled ? 1 : 0,
         next.nextRunAt,
+        next.workflowId ?? "audit",
+        JSON.stringify(next.options ?? {}),
         next.updatedAt,
         id,
       );
@@ -5180,6 +5185,10 @@ export class MarketingovoDatabase {
           timezone: String(row.timezone),
           enabled: Boolean(row.enabled),
           nextRunAt: String(row.next_run_at),
+          // Without these two, every claimed schedule fell back to the audit
+          // default at execution even when the row named another workflow.
+          workflowId: String(row.workflow_id ?? "audit"),
+          options: json<Record<string, unknown>>(row.options_json, {}),
           createdAt: String(row.created_at),
           updatedAt: String(row.updated_at),
           leaseOwner: workerId,

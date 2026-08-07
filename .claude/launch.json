@@ -7,6 +7,17 @@
       "runtimeArgs": ["--filter", "@marketingovo/dashboard", "dev"],
       "port": 4318,
       "url": "http://127.0.0.1:4318"
+    },
+    {
+      "name": "marketingovo",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "packages/cli/dist/cli.js",
+        "serve",
+        "--data-dir",
+        ".preview-data"
+      ],
+      "port": 3210
     }
   ]
 }

@@ -11027,7 +11027,13 @@ export type paths = {
                         value: number | null;
                       }[];
                     }[];
-                    id: "paid" | "organic" | "social" | "email" | "actions";
+                    id:
+                      | "paid"
+                      | "organic"
+                      | "social"
+                      | "email"
+                      | "competitors"
+                      | "actions";
                     metrics: {
                       change: number | null;
                       currency: string | null;
@@ -11090,7 +11096,13 @@ export type paths = {
                           value: number | null;
                         }[];
                       }[];
-                      id: "paid" | "organic" | "social" | "email" | "actions";
+                      id:
+                        | "paid"
+                        | "organic"
+                        | "social"
+                        | "email"
+                        | "competitors"
+                        | "actions";
                       metrics: {
                         change: number | null;
                         currency: string | null;
@@ -11316,7 +11328,13 @@ export type paths = {
                         value: number | null;
                       }[];
                     }[];
-                    id: "paid" | "organic" | "social" | "email" | "actions";
+                    id:
+                      | "paid"
+                      | "organic"
+                      | "social"
+                      | "email"
+                      | "competitors"
+                      | "actions";
                     metrics: {
                       change: number | null;
                       currency: string | null;
@@ -11379,7 +11397,13 @@ export type paths = {
                           value: number | null;
                         }[];
                       }[];
-                      id: "paid" | "organic" | "social" | "email" | "actions";
+                      id:
+                        | "paid"
+                        | "organic"
+                        | "social"
+                        | "email"
+                        | "competitors"
+                        | "actions";
                       metrics: {
                         change: number | null;
                         currency: string | null;
@@ -11664,7 +11688,7 @@ export type paths = {
     get: {
       parameters: {
         query?: {
-          format?: "html" | "text";
+          format?: "html" | "text" | "pdf";
         };
         header?: never;
         path: {
@@ -11677,10 +11701,14 @@ export type paths = {
         /** @description The rendered report. */
         200: {
           headers: {
+            /** @description Attachment filename for the PDF form. */
+            "content-disposition"?: unknown;
             [name: string]: unknown;
           };
           content: {
-            "application/json": unknown;
+            "application/pdf": string;
+            "text/html": string;
+            "text/plain": string;
           };
         };
         /** @description The request is invalid. */
@@ -21998,8 +22026,19 @@ export type paths = {
             enabled: boolean;
             /** Format: date-time */
             nextRunAt?: string;
+            options?: {
+              [key: string]: unknown;
+            };
             projectId: string;
             timezone: string;
+            workflowId?:
+              | "audit"
+              | "compare"
+              | "keyword-research"
+              | "content-plan"
+              | "osint-research"
+              | "ads-audit"
+              | "marketing-report";
           };
         };
       };
@@ -22291,7 +22330,18 @@ export type paths = {
             enabled?: boolean;
             /** Format: date-time */
             nextRunAt?: string;
+            options?: {
+              [key: string]: unknown;
+            };
             timezone?: string;
+            workflowId?:
+              | "audit"
+              | "compare"
+              | "keyword-research"
+              | "content-plan"
+              | "osint-research"
+              | "ads-audit"
+              | "marketing-report";
           };
         };
       };

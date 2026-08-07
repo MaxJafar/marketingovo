@@ -898,6 +898,8 @@ export interface CompetitorWorkspace {
 export interface MonitoringSchedule {
   id: string;
   name: string;
+  /** What the schedule starts; absent on rows written before reports. */
+  workflowId?: "audit" | "marketing-report" | string;
   cadence: string;
   cron?: string;
   timezone?: string;
@@ -1561,7 +1563,7 @@ export interface ReportRefusal {
 }
 
 export interface ReportSection {
-  id: "paid" | "organic" | "social" | "email" | "actions";
+  id: "paid" | "organic" | "social" | "email" | "competitors" | "actions";
   title: string;
   state: ReportAvailability;
   summary: string;

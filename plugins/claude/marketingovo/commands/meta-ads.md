@@ -13,9 +13,10 @@ Audit the Meta ad cabinets linked to the project in $ARGUMENTS.
 3. Read `marketingovo_ads_performance` for each cabinet and report Facebook and
    Instagram separately. They are different auctions with different costs, and
    an account total hides which one is working.
-4. A null metric was not measured. Say so and give the stated reason — never
-   report it as zero spend, zero conversions, or a cost per result derived from
-   a missing denominator. Reach and frequency have no window total by design.
+4. A null metric was not measured. Say so and give the stated reason rather
+   than filling the gap with generic advice — never report it as zero spend,
+   zero conversions, or a cost per result derived from a missing denominator.
+   Reach and frequency have no window total by design.
 5. Rank findings by measured money at stake, not by rule severity alone.
 
 You may draft campaigns with `marketingovo_campaign_stage`. You cannot approve

@@ -306,15 +306,15 @@ importers:
 
   packages/mcp:
     dependencies:
-      '@modelcontextprotocol/server':
-        specifier: 2.0.0-beta.3
-        version: 2.0.0-beta.3
       '@marketingovo/contracts':
         specifier: workspace:*
         version: link:../contracts
       '@marketingovo/sdk':
         specifier: workspace:*
         version: link:../sdk
+      '@modelcontextprotocol/server':
+        specifier: 2.0.0-beta.3
+        version: 2.0.0-beta.3
       zod:
         specifier: 4.4.3
         version: 4.4.3

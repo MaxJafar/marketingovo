@@ -1287,6 +1287,9 @@ export interface ScheduleDefinitionInput {
   cron: string;
   timezone: string;
   enabled: boolean;
+  /** What the schedule starts. Omitted means a site audit. */
+  workflowId?: "audit" | "marketing-report";
+  options?: Record<string, unknown>;
 }
 
 export function useCreateSchedule(siteId: string) {

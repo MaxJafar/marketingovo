@@ -23,6 +23,7 @@ import {
   createWorkflowRegistry,
   executePlan,
   priorityScoreV1FromInputs,
+  runtimeWorkflowIds,
   scorePriorityV1,
   selectMatchedControlCohort,
   validateWorkflowOutput,
@@ -203,6 +204,7 @@ import {
   type PublishAttemptOutcome,
   type PublishExecutor,
 } from "./publishing.js";
+import { createMarketingReportPdf } from "./marketing-report-pdf.js";
 import { gatherEvidence, resolveReportWindow } from "./reporting.js";
 import {
   DurableJobWorker,
@@ -230,6 +232,7 @@ export {
 
 const MAX_MEDIA_BYTES = 100 * 1024 * 1024;
 
+export { createMarketingReportPdf } from "./marketing-report-pdf.js";
 export { gatherEvidence, resolveReportWindow } from "./reporting.js";
 
 export type ReportErrorCode =
@@ -1770,6 +1773,12 @@ function validateScheduleDefinition(
   if (!Number.isFinite(cursor.getTime()))
     throw new Error("nextRunAt must be an absolute ISO date-time");
   nextCronOccurrence(cron, timezone, new Date(cursor.getTime() - 60_000));
+}
+
+function validateScheduleWorkflow(workflowId: string | undefined): void {
+  if (workflowId === undefined) return;
+  if (!(runtimeWorkflowIds as readonly string[]).includes(workflowId))
+    throw new Error(`Unknown workflow '${workflowId}'`);
 }
 
 function issueFingerprint(
@@ -5687,20 +5696,19 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
     /** The client-facing document, styled from the brand kit. */
     render: async (
       id: string,
-      format: "html" | "text",
-    ): Promise<string | null> => {
+      format: "html" | "text" | "pdf",
+    ): Promise<string | Uint8Array | null> => {
       const report = this.database.getMarketingReport(id);
       if (!report) return null;
       const engine = await this.loadEngine();
       if (format === "text") {
         return engine.renderReportText ? engine.renderReportText(report) : null;
       }
-      if (!engine.renderReportHtml) return null;
       const profile = this.database.getBrandKit(report.projectId)?.current
         ?.profile;
       const color = (index: number, fallback: string): string =>
         profile?.colors?.[index]?.value ?? fallback;
-      return engine.renderReportHtml(report, {
+      const brand = {
         companyName: profile?.footer?.companyName ?? "",
         text: color(0, "#101828"),
         background: color(1, "#f4f4f5"),
@@ -5719,7 +5727,14 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
           ? (this.database.getMediaAsset(profile.logoMediaId)?.publicUrl ??
             null)
           : null,
-      });
+      };
+      if (format === "pdf") {
+        // Drawn locally with pdf-lib rather than printed through a browser, so
+        // the download works on installs that have no Chromium at all.
+        return createMarketingReportPdf(report, brand);
+      }
+      if (!engine.renderReportHtml) return null;
+      return engine.renderReportHtml(report, brand);
     },
   };
 
@@ -6069,12 +6084,21 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
       if (!this.database.getProject(input.projectId))
         throw new Error("Project not found");
       validateScheduleDefinition(input.cron, input.timezone, input.nextRunAt);
+      validateScheduleWorkflow(input.workflowId);
       return this.database.createSchedule(input);
     },
     update: async (
       id: string,
       input: Partial<
-        Pick<Schedule, "cron" | "timezone" | "enabled" | "nextRunAt">
+        Pick<
+          Schedule,
+          | "cron"
+          | "timezone"
+          | "enabled"
+          | "nextRunAt"
+          | "workflowId"
+          | "options"
+        >
       >,
     ) => {
       const current = this.database
@@ -6083,6 +6107,7 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
       if (!current) return null;
       const next = { ...current, ...input };
       validateScheduleDefinition(next.cron, next.timezone, next.nextRunAt);
+      validateScheduleWorkflow(next.workflowId);
       return this.database.updateSchedule(id, input);
     },
     remove: async (id: string) => this.database.deleteSchedule(id),

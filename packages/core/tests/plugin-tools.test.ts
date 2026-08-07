@@ -1,5 +1,6 @@
 // The core package is an engine library, not an agent plugin or CLI package.
-// Public agent tools live behind the exact six-tool MCP/OpenClaw/Codex surface.
+// Public agent tools live behind the contract-registry MCP/OpenClaw/Codex
+// surface, whose exact tool list is pinned in @marketingovo/contracts tests.
 
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";

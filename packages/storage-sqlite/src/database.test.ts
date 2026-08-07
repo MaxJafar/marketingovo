@@ -267,6 +267,44 @@ describe("MarketingovoDatabase", () => {
     database.close();
   });
 
+  it("returns the schedule's workflow and options on claim and on update", () => {
+    const root = mkdtempSync(join(tmpdir(), "marketingovo-schedule-wf-"));
+    const database = new MarketingovoDatabase({
+      path: join(root, "marketingovo.db"),
+    });
+    const project = database.createProject({
+      name: "Schedule",
+      canonicalUrl: "https://example.com",
+    });
+    const schedule = database.createSchedule({
+      projectId: project.id,
+      cron: "0 8 * * 1",
+      timezone: "UTC",
+      enabled: true,
+      nextRunAt: "2026-01-05T08:00:00.000Z",
+      workflowId: "marketing-report",
+      options: { compare: true },
+    });
+    const claimed = database.claimDueSchedules(
+      "scheduler-a",
+      10,
+      60_000,
+      new Date("2026-01-05T08:00:00.000Z"),
+    );
+    // The claim path is what the scheduler executes from; dropping these two
+    // fields here is exactly the bug that made every schedule run an audit.
+    expect(claimed[0]?.workflowId).toBe("marketing-report");
+    expect(claimed[0]?.options).toEqual({ compare: true });
+    database.releaseSchedule(schedule.id, "scheduler-a");
+    const updated = database.updateSchedule(schedule.id, {
+      workflowId: "audit",
+      options: {},
+    });
+    expect(updated?.workflowId).toBe("audit");
+    expect(updated?.options).toEqual({});
+    database.close();
+  });
+
   it("keeps non-secret connector configuration isolated per project", () => {
     const root = mkdtempSync(join(tmpdir(), "marketingovo-integrations-"));
     const database = new MarketingovoDatabase({

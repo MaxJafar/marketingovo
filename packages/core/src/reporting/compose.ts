@@ -101,6 +101,36 @@ export interface ActionsInput {
   noAuditInPeriod: boolean;
 }
 
+export interface CompetitorTargetInput {
+  name: string;
+  state: ReportAvailability;
+  /** Stated for anything not fully available. Empty when it was. */
+  reason: string;
+  /** Cited public signals observed for this target in the research pass. */
+  signals: PeriodTotals;
+  /** Published items per week, when a public feed made cadence measurable. */
+  cadencePerWeek: PeriodTotals;
+}
+
+export interface CompetitorsInput {
+  /** True when no competitor research ran inside the reporting period. */
+  noResearchInPeriod: boolean;
+  /** Why nothing is reported, stated in the client's terms. */
+  reason?: string | null;
+  targets: CompetitorTargetInput[];
+  /**
+   * Cited changes against the previous research pass. Null values mean there
+   * was no previous pass to compare against, which is different from nothing
+   * having changed.
+   */
+  changes: {
+    added: PeriodTotals;
+    removed: PeriodTotals;
+    changed: PeriodTotals;
+  };
+  observedAt: string | null;
+}
+
 export interface ComposeReportInput {
   projectId: string;
   title: string;
@@ -110,6 +140,7 @@ export interface ComposeReportInput {
   organic: OrganicInput;
   social: SocialInput;
   email: EmailInput;
+  competitors: CompetitorsInput;
   actions: ActionsInput;
   brandRevision: number | null;
   generatedAt: string;
@@ -667,6 +698,122 @@ function emailSection(input: ComposeReportInput): ReportSection {
   };
 }
 
+function competitorsSection(input: ComposeReportInput): ReportSection {
+  const competitors = input.competitors;
+  if (competitors.noResearchInPeriod) {
+    return {
+      id: "competitors",
+      title: "Competitive landscape",
+      state: "unavailable",
+      summary:
+        competitors.reason ??
+        "No competitor research ran inside this reporting period, so competitor movement is not reported. This is not evidence that competitors were static.",
+      metrics: [],
+      sources: [],
+      refusals: [],
+      breakdown: [],
+    };
+  }
+
+  const measuredSignals = competitors.targets.filter(
+    (target) =>
+      target.signals.value !== null &&
+      (target.signals.state === "available" ||
+        target.signals.state === "partial"),
+  );
+  const signalTotals: PeriodTotals =
+    measuredSignals.length === 0
+      ? {
+          value: null,
+          state: "unavailable",
+          note: "No target's public signals could be read in this pass.",
+        }
+      : {
+          value: measuredSignals.reduce(
+            (total, target) => total + (target.signals.value ?? 0),
+            0,
+          ),
+          state:
+            measuredSignals.length === competitors.targets.length
+              ? "available"
+              : "partial",
+        };
+
+  const metrics: ReportMetric[] = [
+    metric({
+      key: "targets",
+      label: "Competitors researched",
+      unit: "count",
+      current: { value: competitors.targets.length, state: "available" },
+    }),
+    metric({
+      key: "signals",
+      label: "Public signals cited",
+      unit: "count",
+      current: signalTotals,
+    }),
+    metric({
+      key: "signalsAdded",
+      label: "New signals since the last pass",
+      unit: "count",
+      current: competitors.changes.added,
+    }),
+    metric({
+      key: "signalsRemoved",
+      label: "Signals gone since the last pass",
+      unit: "count",
+      current: competitors.changes.removed,
+    }),
+    metric({
+      key: "signalsChanged",
+      label: "Signals changed since the last pass",
+      unit: "count",
+      current: competitors.changes.changed,
+    }),
+  ];
+
+  return {
+    id: "competitors",
+    title: "Competitive landscape",
+    state: worstState(competitors.targets.map((target) => target.state)),
+    summary: `${competitors.targets.length} competitor${competitors.targets.length === 1 ? "" : "s"} observed from public sources. Every figure is a citation count, not a market share.`,
+    metrics,
+    sources: competitors.targets.map((target) => ({
+      id: `competitor:${target.name}`,
+      label: target.name,
+      state: target.state,
+      reason: target.state === "available" ? "" : target.reason,
+      observedAt: competitors.observedAt,
+    })),
+    refusals: [
+      {
+        expected: "Competitor traffic, spend and revenue",
+        // Public-web observation sees what a competitor publishes, not what
+        // they measure. A traffic or share figure here would be invented.
+        explanation:
+          "Competitor research reads public pages only. It cannot see a competitor's analytics, ad spend or sales, so no traffic, spend or market-share figure is reported. What is reported is what changed in their public presence, with a citation for each claim.",
+      },
+    ],
+    breakdown: competitors.targets.map((target) => ({
+      label: target.name,
+      metrics: [
+        metric({
+          key: "signals",
+          label: "Public signals",
+          unit: "count",
+          current: target.signals,
+        }),
+        metric({
+          key: "cadence",
+          label: "Published items per week",
+          unit: "count",
+          current: target.cadencePerWeek,
+        }),
+      ],
+    })),
+  };
+}
+
 function actionsSection(input: ComposeReportInput): ReportSection {
   const actions = input.actions;
   if (actions.noAuditInPeriod) {
@@ -733,6 +880,7 @@ export function composeReport(input: ComposeReportInput): MarketingReport {
     organicSection(input),
     socialSection(input),
     emailSection(input),
+    competitorsSection(input),
     actionsSection(input),
   ];
 

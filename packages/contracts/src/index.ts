@@ -1787,20 +1787,25 @@ export const OsintDossierSchema = Type.Object(
 );
 export type OsintDossier = Static<typeof OsintDossierSchema>;
 
+/**
+ * Every workflow a run can execute. Shared by StartRunInput and the schedule
+ * surfaces so a schedule can only name a workflow the runtime actually has.
+ */
+export const WorkflowIdSchema = Type.Union([
+  Type.Literal("audit"),
+  Type.Literal("compare"),
+  Type.Literal("keyword-research"),
+  Type.Literal("content-plan"),
+  Type.Literal("osint-research"),
+  Type.Literal("ads-audit"),
+  Type.Literal("marketing-report"),
+]);
+export type WorkflowId = Static<typeof WorkflowIdSchema>;
+
 export const StartRunInputSchema = Type.Object(
   {
     projectId: IdentifierSchema,
-    workflowId: Type.Optional(
-      Type.Union([
-        Type.Literal("audit"),
-        Type.Literal("compare"),
-        Type.Literal("keyword-research"),
-        Type.Literal("content-plan"),
-        Type.Literal("osint-research"),
-        Type.Literal("ads-audit"),
-        Type.Literal("marketing-report"),
-      ]),
-    ),
+    workflowId: Type.Optional(WorkflowIdSchema),
     goal: Type.Optional(Type.String({ maxLength: 240 })),
     options: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
   },

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import type { MarketingReport } from "@marketingovo/contracts/reporting";
 import type { MarketingReport as EngineMarketingReport } from "@marketingovo/core";
 import type { MarketingovoDatabase } from "@marketingovo/storage-sqlite";
@@ -143,6 +144,19 @@ export interface GatheredEvidence {
     templatesBuilt: number;
     revisionsSaved: number;
     withBlockingFindings: number;
+  };
+  competitors: {
+    noResearchInPeriod: boolean;
+    reason?: string | null;
+    targets: Array<{
+      name: string;
+      state: Totals["state"];
+      reason: string;
+      signals: Totals;
+      cadencePerWeek: Totals;
+    }>;
+    changes: { added: Totals; removed: Totals; changed: Totals };
+    observedAt: string | null;
   };
   actions: {
     opened: number;
@@ -474,6 +488,246 @@ export function gatherActions(
   };
 }
 
+/** A stored osint-research dossier, in the fields this report reads. */
+interface StoredDossierTarget {
+  targetUrl?: unknown;
+  host?: unknown;
+  status?: unknown;
+  pagesObserved?: unknown;
+  error?: unknown;
+  evidence?: unknown;
+  publishingCadence?: unknown;
+}
+
+function readDossier(
+  database: MarketingovoDatabase,
+  runId: string,
+): { targets: StoredDossierTarget[]; generatedAt: string | null } | null {
+  const artifact = database.getArtifact(runId, "report.json");
+  if (!artifact) return null;
+  try {
+    const parsed = JSON.parse(readFileSync(artifact.path, "utf8")) as {
+      schemaVersion?: unknown;
+      targets?: unknown;
+      generatedAt?: unknown;
+    };
+    if (parsed.schemaVersion !== "osint-dossier.v1") return null;
+    if (!Array.isArray(parsed.targets)) return null;
+    return {
+      targets: parsed.targets as StoredDossierTarget[],
+      generatedAt:
+        typeof parsed.generatedAt === "string" ? parsed.generatedAt : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A target whose crawl failed, or returned nothing, is skipped by the pass
+ * comparison entirely: a blocked second pass must not turn every previously
+ * observed signal into a false removal.
+ */
+function targetUnreadable(target: StoredDossierTarget): boolean {
+  return (
+    target.status === "failed" ||
+    (target.status === "partial" && Number(target.pagesObserved ?? 0) === 0)
+  );
+}
+
+function targetEvidence(
+  target: StoredDossierTarget,
+): Array<{ id: string; fingerprint: string }> {
+  if (!Array.isArray(target.evidence)) return [];
+  return target.evidence.flatMap((item) => {
+    const entry = item as {
+      id?: unknown;
+      claimHash?: unknown;
+      state?: unknown;
+      sourceUrl?: unknown;
+      value?: unknown;
+    };
+    if (typeof entry.id !== "string" || entry.id.length === 0) return [];
+    return [
+      {
+        id: entry.id,
+        fingerprint:
+          typeof entry.claimHash === "string"
+            ? entry.claimHash
+            : JSON.stringify([
+                entry.state ?? null,
+                entry.sourceUrl ?? null,
+                entry.value ?? null,
+              ]),
+      },
+    ];
+  });
+}
+
+/**
+ * Competitor evidence from the most recent public-web research inside the
+ * window, compared against the pass before it (wherever that pass falls —
+ * "changed since last time" is a statement about the research trail, not
+ * about the reporting period).
+ */
+export function gatherCompetitors(
+  database: MarketingovoDatabase,
+  projectId: string,
+  window: ReportWindow,
+): GatheredEvidence["competitors"] {
+  const noComparison: Totals = {
+    value: null,
+    state: "unavailable",
+    note: "This is the first research pass, so there is no previous pass to compare against.",
+  };
+  const research = database
+    .listRuns(projectId)
+    .filter(
+      (run) =>
+        run.workflowId === "osint-research" &&
+        (run.status === "succeeded" || run.status === "partial"),
+    );
+  const latest = research.find(
+    (run) =>
+      run.requestedAt.slice(0, 10) >= window.start &&
+      run.requestedAt.slice(0, 10) <= window.end,
+  );
+  if (!latest) {
+    return {
+      noResearchInPeriod: true,
+      targets: [],
+      changes: {
+        added: noComparison,
+        removed: noComparison,
+        changed: noComparison,
+      },
+      observedAt: null,
+    };
+  }
+
+  const dossier = readDossier(database, latest.id);
+  if (!dossier) {
+    return {
+      noResearchInPeriod: true,
+      reason:
+        "Competitor research ran in this period, but its stored results could not be read back, so nothing from it is reported.",
+      targets: [],
+      changes: {
+        added: noComparison,
+        removed: noComparison,
+        changed: noComparison,
+      },
+      observedAt: null,
+    };
+  }
+
+  const previousRun = research.find(
+    (run) => run.requestedAt < latest.requestedAt,
+  );
+  const previous = previousRun ? readDossier(database, previousRun.id) : null;
+
+  let changes: GatheredEvidence["competitors"]["changes"];
+  if (!previous) {
+    changes = {
+      added: noComparison,
+      removed: noComparison,
+      changed: noComparison,
+    };
+  } else {
+    let added = 0;
+    let removed = 0;
+    let changed = 0;
+    const currentByUrl = new Map(
+      dossier.targets.map((target) => [String(target.targetUrl), target]),
+    );
+    const previousByUrl = new Map(
+      previous.targets.map((target) => [String(target.targetUrl), target]),
+    );
+    for (const [url, current] of currentByUrl) {
+      const prior = previousByUrl.get(url);
+      if (!prior || targetUnreadable(current) || targetUnreadable(prior))
+        continue;
+      const currentEvidence = new Map(
+        targetEvidence(current).map((item) => [item.id, item.fingerprint]),
+      );
+      const priorEvidence = new Map(
+        targetEvidence(prior).map((item) => [item.id, item.fingerprint]),
+      );
+      for (const [id, fingerprint] of currentEvidence) {
+        const before = priorEvidence.get(id);
+        if (before === undefined) added += 1;
+        else if (before !== fingerprint) changed += 1;
+      }
+      for (const id of priorEvidence.keys()) {
+        if (!currentEvidence.has(id)) removed += 1;
+      }
+    }
+    changes = {
+      added: { value: added, state: "available" },
+      removed: { value: removed, state: "available" },
+      changed: { value: changed, state: "available" },
+    };
+  }
+
+  return {
+    noResearchInPeriod: false,
+    targets: dossier.targets.map((target) => {
+      const name =
+        typeof target.host === "string" && target.host.length > 0
+          ? target.host
+          : String(target.targetUrl ?? "unknown target");
+      const state: Totals["state"] =
+        target.status === "available"
+          ? "available"
+          : target.status === "partial"
+            ? "partial"
+            : "failed";
+      const reason =
+        typeof target.error === "string" && target.error.length > 0
+          ? target.error
+          : state === "available"
+            ? ""
+            : "Parts of this target could not be read.";
+      const evidenceCount = Array.isArray(target.evidence)
+        ? target.evidence.length
+        : null;
+      const cadenceOutcome = target.publishingCadence as {
+        cadence?: { cadenceDays?: unknown } | null;
+        unavailable?: unknown;
+        detail?: unknown;
+      } | null;
+      const cadenceDays = Number(cadenceOutcome?.cadence?.cadenceDays);
+      return {
+        name,
+        state,
+        reason,
+        signals:
+          state === "failed" || evidenceCount === null
+            ? {
+                value: null,
+                state: "unavailable" as const,
+                note: reason || "This target could not be read.",
+              }
+            : { value: evidenceCount, state },
+        cadencePerWeek:
+          Number.isFinite(cadenceDays) && cadenceDays > 0
+            ? { value: 7 / cadenceDays, state: "available" as const }
+            : {
+                value: null,
+                state: "unavailable" as const,
+                note:
+                  typeof cadenceOutcome?.detail === "string" &&
+                  cadenceOutcome.detail.length > 0
+                    ? cadenceOutcome.detail
+                    : "No public feed made publishing cadence measurable.",
+              },
+      };
+    }),
+    changes,
+    observedAt: dossier.generatedAt,
+  };
+}
+
 export function gatherEvidence(
   database: MarketingovoDatabase,
   projectId: string,
@@ -484,6 +738,7 @@ export function gatherEvidence(
     organic: gatherOrganic(database, projectId, window),
     social: gatherSocial(database, projectId, window),
     email: gatherEmail(database, projectId, window),
+    competitors: gatherCompetitors(database, projectId, window),
     actions: gatherActions(database, projectId, window),
   };
 }

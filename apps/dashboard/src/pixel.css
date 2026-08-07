@@ -996,6 +996,16 @@ body:has(.pixel-frame) {
   background: var(--px-cyan);
 }
 
+/* Paired period bars: pink is always this period and cyan always the
+   previous one, so the alternating row tint must not repaint the legend. */
+.pixel-meter.pixel-meter-paired .pixel-meter-fill {
+  background: var(--px-pink);
+}
+
+.pixel-meter.pixel-meter-paired .pixel-meter-fill-previous {
+  background: var(--px-cyan);
+}
+
 .pixel-chart {
   display: block;
   width: 100%;

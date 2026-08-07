@@ -69,13 +69,17 @@ could not inspect rather than treating silence as a clean bill.
 - **Cross-source evidence.** Crawl, GSC, GA4, Lighthouse, PSI, Trends, SerpAPI,
   DataForSEO, Meta Ads and Google Ads use one normalized model.
 - **One report across every channel, with its gaps stated.** The document you
-  send a client on the first of the month — paid, organic, social and email in
-  one place. It refuses the totals that would be fabrications and says why:
-  conversions are never summed across channels, because Meta's attributed
-  conversions and Analytics' key events count the same purchase on different
-  models. A disconnected source shows its reason where the number would be,
-  never a zero, and a change is only reported when both periods were measured.
-  See the [cross-channel report guide](docs/cross-channel-report.md).
+  send a client on the first of the month — paid, organic, social, email, the
+  competitive landscape and completed work in one place, with charts for what
+  was measured and a PDF download drawn locally with no browser involved. It
+  refuses the totals that would be fabrications and says why: conversions are
+  never summed across channels, because Meta's attributed conversions and
+  Analytics' key events count the same purchase on different models. A
+  disconnected source shows its reason where the number would be, never a
+  zero; a change is only reported when both periods were measured; and an
+  unmeasured row is named beneath a chart, never drawn as an empty bar.
+  Schedules can generate the report daily, weekly, or monthly. See the
+  [cross-channel report guide](docs/cross-channel-report.md).
 - **The join between the ads and the site.** An SEO tool knows what a page
   says; an ads tool knows where the money goes; neither knows the other. This
   holds both, so the paid audit also checks the pages the ads land on: a

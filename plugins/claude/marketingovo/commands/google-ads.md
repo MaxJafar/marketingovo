@@ -37,8 +37,9 @@ Two things to state plainly about the numbers:
 
 - A null metric was not measured. Give the stated reason — never report it as
   zero spend, zero conversions, or a cost per result derived from a missing
-  denominator. Impression share is absent whenever the auction pool was too
-  small for Google to anonymise.
+  denominator, and name what could not be read rather than filling the gap
+  with generic advice. Impression share is absent whenever the auction pool
+  was too small for Google to anonymise.
 - Google dates a conversion to the click that led to it, not to the day it
   happened. Recent days are still filling in and will rise afterwards without
   anything having changed. Do not present them as final, and do not describe a

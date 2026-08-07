@@ -36,7 +36,7 @@ export interface ReportRefusal {
 }
 
 export interface ReportSection {
-  id: "paid" | "organic" | "social" | "email" | "actions";
+  id: "paid" | "organic" | "social" | "email" | "competitors" | "actions";
   title: string;
   state: ReportAvailability;
   summary: string;

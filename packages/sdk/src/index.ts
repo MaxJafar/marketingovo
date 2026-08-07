@@ -772,6 +772,15 @@ export class MarketingovoClient {
         method: "POST",
         body: JSON.stringify(input),
       }),
+    /** The rendered client-facing document; `pdf` returns the download bytes. */
+    render: (id: string, format: "html" | "text" | "pdf" = "html") =>
+      this.requestBytes(
+        `/marketing-reports/${encodeURIComponent(id)}/render?format=${encodeURIComponent(format)}`,
+      ),
+    remove: (id: string) =>
+      this.request<void>(`/marketing-reports/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      }),
   };
 
   /**
@@ -946,7 +955,15 @@ export class MarketingovoClient {
     update: (
       id: string,
       input: Partial<
-        Pick<Schedule, "cron" | "timezone" | "enabled" | "nextRunAt">
+        Pick<
+          Schedule,
+          | "cron"
+          | "timezone"
+          | "enabled"
+          | "nextRunAt"
+          | "workflowId"
+          | "options"
+        >
       >,
     ) =>
       this.request<Schedule>(`/schedules/${encodeURIComponent(id)}`, {

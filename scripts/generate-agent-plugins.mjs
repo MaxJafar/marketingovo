@@ -119,7 +119,8 @@ Do not infer a competitor's traffic or rankings; Marketingovo does not measure t
    is ambiguous — never guess or add a target on the user's behalf.
 2. Poll \`marketingovo_run_get\` until the run finishes, then read its JSON
    report. Summarize coverage, target status, findings, and the evidence URLs.
-3. Keep missing and insufficient observations visible. A linked social URL is
+3. Keep missing and insufficient observations visible — do not invent what a
+   blocked or unreachable page would have shown. A linked social URL is
    linkage evidence, not proof of account ownership, audience, or engagement.
 4. Never request credentials or pivot to people lookup, contact enrichment,
    authenticated scraping, identity resolution, breach data, or dark-web work.
@@ -140,9 +141,10 @@ Do not infer a competitor's traffic or rankings; Marketingovo does not measure t
 3. Read \`marketingovo_ads_performance\` for each cabinet and report Facebook and
    Instagram separately. They are different auctions with different costs, and
    an account total hides which one is working.
-4. A null metric was not measured. Say so and give the stated reason — never
-   report it as zero spend, zero conversions, or a cost per result derived from
-   a missing denominator. Reach and frequency have no window total by design.
+4. A null metric was not measured. Say so and give the stated reason rather
+   than filling the gap with generic advice — never report it as zero spend,
+   zero conversions, or a cost per result derived from a missing denominator.
+   Reach and frequency have no window total by design.
 5. Rank findings by measured money at stake, not by rule severity alone.
 
 You may draft campaigns with \`marketingovo_campaign_stage\`. You cannot approve

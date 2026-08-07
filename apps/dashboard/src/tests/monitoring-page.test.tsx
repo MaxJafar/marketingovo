@@ -91,6 +91,35 @@ describe("MonitoringPage", () => {
         cron: "30 9 * * 3",
         timezone: "America/New_York",
         enabled: true,
+        workflowId: "audit",
+      },
+      expect.objectContaining({ onSuccess: expect.any(Function) }),
+    );
+  });
+
+  it("creates a monthly cross-channel report schedule", async () => {
+    const user = userEvent.setup();
+    render(<MonitoringPage />);
+
+    await user.selectOptions(
+      screen.getByLabelText("What to run"),
+      "marketing-report",
+    );
+    await user.selectOptions(screen.getByLabelText("Frequency"), "monthly");
+    await user.clear(screen.getByLabelText("Local time"));
+    await user.type(screen.getByLabelText("Local time"), "08:00");
+    await user.clear(screen.getByLabelText("Timezone"));
+    await user.type(screen.getByLabelText("Timezone"), "UTC");
+    // The report only cites an audit from its own period; the editor says so.
+    expect(screen.getByText(/pair a report schedule/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Create schedule" }));
+
+    expect(mocks.create).toHaveBeenCalledWith(
+      {
+        cron: "0 8 1 * *",
+        timezone: "UTC",
+        enabled: true,
+        workflowId: "marketing-report",
       },
       expect.objectContaining({ onSuccess: expect.any(Function) }),
     );
@@ -111,14 +140,19 @@ describe("MonitoringPage", () => {
 
     await user.click(screen.getByRole("button", { name: "Edit" }));
     expect(
-      screen.getByRole("heading", { name: "Edit audit schedule" }),
+      screen.getByRole("heading", { name: "Edit schedule" }),
     ).toBeInTheDocument();
     await user.selectOptions(screen.getByLabelText("Frequency"), "daily");
     await user.click(screen.getByRole("button", { name: "Save schedule" }));
     expect(mocks.update).toHaveBeenLastCalledWith(
       {
         scheduleId: "schedule-1",
-        input: { cron: "0 6 * * *", timezone: "UTC", enabled: true },
+        input: {
+          cron: "0 6 * * *",
+          timezone: "UTC",
+          enabled: true,
+          workflowId: "audit",
+        },
       },
       expect.objectContaining({ onSuccess: expect.any(Function) }),
     );

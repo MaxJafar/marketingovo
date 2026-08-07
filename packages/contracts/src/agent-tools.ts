@@ -448,7 +448,7 @@ export const AgentMarketingReportTool = agentTool({
   name: "marketingovo_marketing_report",
   title: "Generate or read a cross-channel report",
   description:
-    "Generate a client-facing report spanning paid, organic search, social publishing and email for a period, or read an existing one with report_id. Each section carries its own coverage, and the report names the totals it deliberately refuses to compute — conversions are never summed across channels because Meta's attributed conversions and Analytics key events count overlapping things on different models. Report each channel's own figures and repeat the refusals; never present a combined number the report declined to produce.",
+    "Generate a client-facing report spanning paid, organic search, social publishing, email, the competitive landscape and completed work for a period, or read an existing one with report_id. The operator can download the same document as a chart-carrying PDF from the dashboard. Each section carries its own coverage, and the report names the totals it deliberately refuses to compute — conversions are never summed across channels because Meta's attributed conversions and Analytics key events count overlapping things on different models, and competitor figures are citation counts, never market share. Report each channel's own figures and repeat the refusals; never present a combined number the report declined to produce.",
   optional: true,
   inputSchema: AgentMarketingReportInputSchema,
   annotations: {
@@ -606,7 +606,7 @@ export const PUBLIC_AGENT_TOOL_NAMES: readonly PublicAgentToolName[] =
   PUBLIC_AGENT_TOOL_CONTRACTS.map((contract) => contract.name);
 
 /**
- * Terminal session tools are a separate group from the ten workflow tools
+ * Terminal session tools are a separate group from the nineteen workflow tools
  * above, and the split is intentional rather than tidiness.
  *
  * The workflow tools answer "do this SEO job". These answer "a human is typing
@@ -614,7 +614,7 @@ export const PUBLIC_AGENT_TOOL_NAMES: readonly PublicAgentToolName[] =
  * capability without the other: an operator may want an agent that audits but
  * never speaks into the browser, or a conversational session that only reads.
  * Keeping the registries apart lets an adapter allowlist them independently,
- * and keeps the documented public workflow surface stable at ten.
+ * and keeps the documented public workflow surface stable at nineteen.
  *
  * None of these tools touch the network beyond the loopback daemon, and none
  * of them start crawls — so the whole group is closed-world.
