@@ -1,5 +1,5 @@
 ---
-description: Build a client-facing report across paid, organic, social and email.
+description: Build a client-facing report across paid, organic, social, email, competitors and completed work.
 ---
 
 Build the cross-channel report for the period in $ARGUMENTS.

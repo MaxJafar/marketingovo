@@ -626,17 +626,31 @@ export function gatherCompetitors(
   );
   const previous = previousRun ? readDossier(database, previousRun.id) : null;
 
+  const unmeasuredChanges = (note: string): Totals => ({
+    value: null,
+    state: "unavailable",
+    note,
+  });
+
   let changes: GatheredEvidence["competitors"]["changes"];
-  if (!previous) {
+  if (!previousRun) {
     changes = {
       added: noComparison,
       removed: noComparison,
       changed: noComparison,
     };
+  } else if (!previous) {
+    // A previous pass exists; calling this a first pass would be a different
+    // false statement than the zero it replaces.
+    const unreadable = unmeasuredChanges(
+      "The previous research pass exists, but its stored results could not be read back, so no comparison was possible.",
+    );
+    changes = { added: unreadable, removed: unreadable, changed: unreadable };
   } else {
     let added = 0;
     let removed = 0;
     let changed = 0;
+    let comparedPairs = 0;
     const currentByUrl = new Map(
       dossier.targets.map((target) => [String(target.targetUrl), target]),
     );
@@ -647,6 +661,7 @@ export function gatherCompetitors(
       const prior = previousByUrl.get(url);
       if (!prior || targetUnreadable(current) || targetUnreadable(prior))
         continue;
+      comparedPairs += 1;
       const currentEvidence = new Map(
         targetEvidence(current).map((item) => [item.id, item.fingerprint]),
       );
@@ -662,11 +677,25 @@ export function gatherCompetitors(
         if (!currentEvidence.has(id)) removed += 1;
       }
     }
-    changes = {
-      added: { value: added, state: "available" },
-      removed: { value: removed, state: "available" },
-      changed: { value: changed, state: "available" },
-    };
+    if (comparedPairs === 0) {
+      // Both passes exist but no target pair was readable in both. A zero
+      // here would tell the client the landscape was static when nothing was
+      // actually compared.
+      const nothingComparable = unmeasuredChanges(
+        "No target could be compared between the two passes — targets changed or could not be read in one of them — so pass-to-pass changes were not measured.",
+      );
+      changes = {
+        added: nothingComparable,
+        removed: nothingComparable,
+        changed: nothingComparable,
+      };
+    } else {
+      changes = {
+        added: { value: added, state: "available" },
+        removed: { value: removed, state: "available" },
+        changed: { value: changed, state: "available" },
+      };
+    }
   }
 
   return {

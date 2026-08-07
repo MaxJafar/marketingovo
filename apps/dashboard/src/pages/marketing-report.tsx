@@ -111,11 +111,21 @@ const BREAKDOWN_CHART: Partial<
  */
 function SectionCharts({ section }: { section: ReportSection }) {
   const compareRows: PairedBarRow[] = [];
+  const compareOmitted: Array<{ label: string; reason: string }> = [];
   for (const metric of section.metrics) {
     // change is only non-null when both periods were measured, so the
     // previous value can be recovered exactly from the stored figures.
     if (metric.value === null || metric.change === null) continue;
-    if (1 + metric.change <= 0) continue;
+    if (1 + metric.change <= 1e-9) {
+      // Fell to a measured zero: the previous value is unrecoverable from
+      // value/(1+change), so the fall is stated rather than silently dropped.
+      compareOmitted.push({
+        label: metric.label,
+        reason:
+          "Fell to zero against the previous period; the pair cannot be drawn from the stored figures.",
+      });
+      continue;
+    }
     const previous = metric.value / (1 + metric.change);
     compareRows.push({
       name: metric.label,
@@ -154,13 +164,23 @@ function SectionCharts({ section }: { section: ReportSection }) {
     1e-9,
   );
 
-  if (compareRows.length === 0 && !barsDrawable) return null;
+  if (compareRows.length === 0 && compareOmitted.length === 0 && !barsDrawable)
+    return null;
   return (
     <>
-      {compareRows.length > 0 ? (
+      {compareRows.length > 0 || compareOmitted.length > 0 ? (
         <div className="pixel-subsection">
           <h4>This period against the one before it</h4>
           <PixelPairedBars rows={compareRows} />
+          {compareOmitted.map((row) => (
+            <p
+              key={row.label}
+              className="pixel-hero-sub"
+              style={{ fontStyle: "italic" }}
+            >
+              Not drawn — {row.label}: {row.reason}
+            </p>
+          ))}
         </div>
       ) : null}
       {barsDrawable ? (

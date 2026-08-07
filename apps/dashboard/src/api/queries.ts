@@ -1287,8 +1287,12 @@ export interface ScheduleDefinitionInput {
   cron: string;
   timezone: string;
   enabled: boolean;
-  /** What the schedule starts. Omitted means a site audit. */
-  workflowId?: "audit" | "marketing-report";
+  /**
+   * What the schedule starts. Omitted means a site audit. Any registered
+   * workflow id is legal — the editor offers two, but a schedule created over
+   * the API keeps whatever it was created with.
+   */
+  workflowId?: string;
   options?: Record<string, unknown>;
 }
 

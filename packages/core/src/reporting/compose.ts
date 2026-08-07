@@ -733,9 +733,13 @@ function competitorsSection(input: ComposeReportInput): ReportSection {
             (total, target) => total + (target.signals.value ?? 0),
             0,
           ),
+          // A sum of partial readings is itself partial, even when every
+          // target contributed one.
           state:
             measuredSignals.length === competitors.targets.length
-              ? "available"
+              ? worstState(
+                  measuredSignals.map((target) => target.signals.state),
+                )
               : "partial",
         };
 

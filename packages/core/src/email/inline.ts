@@ -35,9 +35,26 @@ export interface ParsedStylesheet {
   retained: string;
 }
 
-/** Strips comments without disturbing the offsets of anything that matters. */
+/**
+ * Strips comments with an index scan rather than `\/\*[\s\S]*?\*\//`, whose
+ * lazy quantifier backtracks polynomially on hostile unterminated comments.
+ * An unterminated comment runs to the end of the text, as CSS defines it.
+ */
 function stripComments(css: string): string {
-  return css.replace(/\/\*[\s\S]*?\*\//g, " ");
+  let output = "";
+  let index = 0;
+  while (index < css.length) {
+    const start = css.indexOf("/*", index);
+    if (start === -1) {
+      output += css.slice(index);
+      break;
+    }
+    output += css.slice(index, start) + " ";
+    const end = css.indexOf("*/", start + 2);
+    if (end === -1) break;
+    index = end + 2;
+  }
+  return output;
 }
 
 function parseDeclarations(block: string): CssDeclaration[] {
@@ -65,7 +82,10 @@ function parseDeclarations(block: string): CssDeclaration[] {
  * the override an author wrote to fix it.
  */
 export function specificityOf(selector: string): [number, number, number] {
-  const cleaned = selector.replace(/\[[^\]]*\]/g, " [] ");
+  // Bounded so a hostile run of unclosed brackets cannot make the regex
+  // backtrack polynomially; a real attribute selector is far shorter, and an
+  // absurd one merely keeps its literal characters in this approximation.
+  const cleaned = selector.replace(/\[[^\]]{0,256}\]/g, " [] ");
   const ids = (cleaned.match(/#[\w-]+/g) ?? []).length;
   const classes =
     (cleaned.match(/\.[\w-]+/g) ?? []).length +

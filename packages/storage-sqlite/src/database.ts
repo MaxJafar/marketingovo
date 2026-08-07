@@ -5653,8 +5653,8 @@ export class MarketingovoDatabase {
 
       const insertSchedule = this.db.prepare(
         `INSERT INTO schedules
-        (id,project_id,cron,timezone,enabled,next_run_at,created_at,updated_at)
-        VALUES(?,?,?,?,0,?,?,?)`,
+        (id,project_id,cron,timezone,enabled,next_run_at,workflow_id,options_json,created_at,updated_at)
+        VALUES(?,?,?,?,0,?,?,?,?,?)`,
       );
       for (const schedule of input.schedules) {
         insertSchedule.run(
@@ -5663,6 +5663,10 @@ export class MarketingovoDatabase {
           schedule.cron,
           schedule.timezone,
           schedule.nextRunAt,
+          // Without these two, an imported report schedule silently becomes
+          // an audit the moment somebody re-enables it.
+          schedule.workflowId ?? "audit",
+          JSON.stringify(schedule.options ?? {}),
           schedule.createdAt,
           schedule.updatedAt,
         );

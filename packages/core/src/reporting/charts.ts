@@ -79,6 +79,7 @@ function breakdownSpecs(section: ReportSection): ChartSpec[] {
   const rows: ChartBarRow[] = [];
   const omitted: ChartOmittedRow[] = [];
   const currencies = new Set<string | null>();
+  let allFullyMeasured = true;
   for (const entry of section.breakdown) {
     const metric = entry.metrics.find((m) => m.key === config.key);
     if (!metric) continue;
@@ -89,6 +90,7 @@ function breakdownSpecs(section: ReportSection): ChartSpec[] {
       });
       continue;
     }
+    if (metric.state !== "available") allFullyMeasured = false;
     currencies.add(metric.currency);
     rows.push({
       label: entry.label,
@@ -115,13 +117,15 @@ function breakdownSpecs(section: ReportSection): ChartSpec[] {
   ];
 
   // A donut claims to show the whole. It is only drawn when every row was
-  // measured — a share of an incomplete total misstates every slice — and
-  // competitor citation counts never become one, because a share of citations
-  // reads as market share, which nobody measured.
+  // FULLY measured — a partial row's sum is an incomplete total, and a share
+  // of an incomplete total misstates every slice — and competitor citation
+  // counts never become one, because a share of citations reads as market
+  // share, which nobody measured.
   const total = rows.reduce((sum, row) => sum + row.value, 0);
   if (
     section.id !== "competitors" &&
     omitted.length === 0 &&
+    allFullyMeasured &&
     rows.length >= 2 &&
     rows.length <= MAX_DONUT_SLICES &&
     rows.every((row) => row.value >= 0) &&
@@ -141,11 +145,24 @@ function breakdownSpecs(section: ReportSection): ChartSpec[] {
 
 function compareSpec(section: ReportSection): ChartSpec | null {
   const rows: ChartCompareRow[] = [];
+  const omitted: ChartOmittedRow[] = [];
   for (const metric of section.metrics) {
     // change is only ever non-null when BOTH periods were measured, so the
     // previous value can be recovered exactly: change = (cur - prev) / |prev|.
     if (!measured(metric) || metric.change === null) continue;
-    if (1 + metric.change <= 0) continue;
+    if (1 + metric.change <= 1e-9) {
+      // A change of exactly -1 means the figure fell to a measured zero; the
+      // previous value is unrecoverable from value/(1+change), and near -1 the
+      // division amplifies float error into a wrong printed figure. The fall
+      // is stated instead of drawn — silence would hide the sharpest move in
+      // the period.
+      omitted.push({
+        label: metric.label,
+        reason:
+          "Fell to zero against the previous period. The stored figures cannot reconstruct the previous value for a bar, so the fall is stated here instead.",
+      });
+      continue;
+    }
     const previous = metric.value! / (1 + metric.change);
     rows.push({
       label: metric.label,
@@ -155,14 +172,14 @@ function compareSpec(section: ReportSection): ChartSpec | null {
       previousDisplay: formatMetricValue({ ...metric, value: previous }),
     });
   }
-  if (rows.length === 0) return null;
+  if (rows.length === 0 && omitted.length === 0) return null;
   return {
     sectionId: section.id,
     kind: "compare",
     title: "This period against the one before it",
     rows: [],
     compareRows: rows,
-    omitted: [],
+    omitted,
   };
 }
 
@@ -335,6 +352,9 @@ function barsSvg(spec: ChartSpec, brand: ReportBrand): string {
 }
 
 function compareSvg(spec: ChartSpec, brand: ReportBrand): string {
+  // Every row may have been omitted (e.g. all fell to zero); the omitted
+  // notes carry the story and an empty frame with a legend would be noise.
+  if (spec.compareRows.length === 0) return "";
   const rowHeight = 46;
   const top = 4;
   const legendHeight = 22;

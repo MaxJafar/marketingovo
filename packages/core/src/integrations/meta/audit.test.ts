@@ -87,7 +87,11 @@ describe("Meta paid-media rules", () => {
     // Insights alone cannot see this: a rejected ad simply stops spending,
     // which reads as a creative that went quiet.
     expect(issues[0]?.fix).toMatch(/Personal attributes policy/);
-    expect(issues[0]?.urls[0]).toMatch(/adsmanager\.facebook\.com/);
+    // Anchored to the authority: an unanchored host pattern would also accept
+    // a URL like https://adsmanager.facebook.com.evil.example/.
+    expect(issues[0]?.urls[0]).toMatch(
+      /^https:\/\/adsmanager\.facebook\.com\//,
+    );
   });
 
   it("flags spend with no conversion signal reaching Meta", () => {

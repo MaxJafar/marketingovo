@@ -157,6 +157,43 @@ describe("what a chart may draw", () => {
     expect(specs).toEqual([]);
   });
 
+  it("declines a share donut when any slice is only partially measured", () => {
+    const specs = reportChartSpecs(
+      report([
+        section({
+          breakdown: [
+            { label: "telegram", metrics: [measuredMetric("published", 12)] },
+            {
+              label: "x",
+              metrics: [measuredMetric("published", 4, { state: "partial" })],
+            },
+          ],
+        }),
+      ]),
+    );
+    // A partial row's sum is an incomplete total; a share of an incomplete
+    // total misstates every slice. The bars remain — each is its own figure.
+    expect(specs.some((spec) => spec.kind === "bars")).toBe(true);
+    expect(specs.some((spec) => spec.kind === "donut")).toBe(false);
+  });
+
+  it("states a fall to zero instead of dropping it from the comparison", () => {
+    const specs = reportChartSpecs(
+      report([
+        section({
+          metrics: [
+            measuredMetric("clicks", 120, { change: 0.2 }),
+            measuredMetric("conversions", 0, { change: -1 }),
+          ],
+        }),
+      ]),
+    );
+    const compare = specs.find((spec) => spec.kind === "compare")!;
+    expect(compare.compareRows.map((row) => row.label)).toEqual(["clicks"]);
+    expect(compare.omitted).toHaveLength(1);
+    expect(compare.omitted[0]!.reason).toMatch(/fell to zero/i);
+  });
+
   it("compares periods only where the composer allowed a change", () => {
     const specs = reportChartSpecs(
       report([

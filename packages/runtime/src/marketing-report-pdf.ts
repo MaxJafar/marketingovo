@@ -34,6 +34,18 @@ function hexColor(value: string, fallback: RGB): RGB {
   );
 }
 
+/**
+ * The PDF page is always white, whatever the brand kit's background is. A
+ * dark-themed kit carries near-white text colors that would render this
+ * document unreadable, so anything too light for white paper falls back to
+ * the default rather than being printed invisibly.
+ */
+function readableOnWhite(color: RGB, fallback: RGB, ceiling: number): RGB {
+  const luminance =
+    0.2126 * color.red + 0.7152 * color.green + 0.0722 * color.blue;
+  return luminance > ceiling ? fallback : color;
+}
+
 function mix(color: RGB, towards: RGB, amount: number): RGB {
   return rgb(
     color.red + (towards.red - color.red) * amount,
@@ -63,9 +75,24 @@ export async function createMarketingReportPdf(
   const BOTTOM = 56;
   const WIDTH = 595 - MARGIN * 2;
   const white = rgb(1, 1, 1);
-  const ink = hexColor(brand.text, rgb(0.12, 0.16, 0.23));
-  const muted = hexColor(brand.muted, rgb(0.42, 0.46, 0.53));
-  const accent = hexColor(brand.accent, rgb(0.08, 0.44, 0.94));
+  const defaultInk = rgb(0.12, 0.16, 0.23);
+  const defaultMuted = rgb(0.42, 0.46, 0.53);
+  const defaultAccent = rgb(0.08, 0.44, 0.94);
+  const ink = readableOnWhite(
+    hexColor(brand.text, defaultInk),
+    defaultInk,
+    0.62,
+  );
+  const muted = readableOnWhite(
+    hexColor(brand.muted, defaultMuted),
+    defaultMuted,
+    0.75,
+  );
+  const accent = readableOnWhite(
+    hexColor(brand.accent, defaultAccent),
+    defaultAccent,
+    0.85,
+  );
   const track = mix(ink, white, 0.92);
 
   let page = pdf.addPage([595, 842]);
@@ -207,9 +234,11 @@ export async function createMarketingReportPdf(
     chartTitle(`${spec.title} (upper bar: this period; lower: previous)`);
     for (const row of spec.compareRows) {
       // Scaled within the row only — the rows carry different units, so the
-      // printed figures are the comparison across rows.
+      // printed figures are the comparison across rows. The reservation must
+      // cover the whole pair (two 16pt rows plus the 2pt gap) or a period
+      // pair can split across a page break.
       const max = Math.max(row.current, row.previous, 1e-9);
-      need(30);
+      need(36);
       barRow(row.label, row.currentDisplay, row.current / max, accent, 8);
       barRow(
         "",

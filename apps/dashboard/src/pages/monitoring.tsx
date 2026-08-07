@@ -26,7 +26,12 @@ import {
 
 type ScheduleFrequency = "daily" | "weekly" | "monthly" | "custom";
 
-type ScheduleWorkflow = "audit" | "marketing-report";
+/**
+ * The editor offers the two workflows it has affordances for, but a schedule
+ * created over the API can name any registered workflow — editing one must
+ * never silently retarget it, so the raw id is carried through as-is.
+ */
+type ScheduleWorkflow = string;
 
 interface ScheduleEditor {
   id: string | null;
@@ -67,9 +72,7 @@ function blankEditor(): ScheduleEditor {
 }
 
 function scheduleWorkflow(schedule: MonitoringSchedule): ScheduleWorkflow {
-  return schedule.workflowId === "marketing-report"
-    ? "marketing-report"
-    : "audit";
+  return schedule.workflowId ?? "audit";
 }
 
 function editorForSchedule(schedule: MonitoringSchedule): ScheduleEditor {
@@ -227,8 +230,7 @@ export function MonitoringPage() {
                     name="workflow"
                     value={editor.workflow}
                     onChange={(event) => {
-                      const workflow = event.currentTarget
-                        .value as ScheduleWorkflow;
+                      const workflow = event.currentTarget.value;
                       setEditor((current) => ({ ...current, workflow }));
                     }}
                   >
@@ -236,6 +238,12 @@ export function MonitoringPage() {
                     <option value="marketing-report">
                       Cross-channel report
                     </option>
+                    {editor.workflow !== "audit" &&
+                    editor.workflow !== "marketing-report" ? (
+                      <option value={editor.workflow}>
+                        {editor.workflow} (as created)
+                      </option>
+                    ) : null}
                   </select>
                 </label>
                 <label>

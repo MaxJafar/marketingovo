@@ -186,7 +186,7 @@ operator's own email service; never describe a campaign as sent.`,
   {
     file: "marketing-report.md",
     description:
-      "Build a client-facing report across paid, organic, social and email.",
+      "Build a client-facing report across paid, organic, social, email, competitors and completed work.",
     tool: "marketingovo_marketing_report",
     body: `Build the cross-channel report for the period in $ARGUMENTS.
 

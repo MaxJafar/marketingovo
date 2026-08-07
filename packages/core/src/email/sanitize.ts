@@ -142,6 +142,70 @@ function isAcceptableUrl(value: string): boolean {
   }
 }
 
+const WHITESPACE = /^\s$/;
+
+/**
+ * Removes `name(...)` calls with a hand-rolled scan.
+ *
+ * This runs on hostile input, and the obvious regex — `name\s*\([^)]*\)` —
+ * backtracks polynomially on unterminated calls, which hands an attacker a
+ * CPU knob on the daemon. The scan is linear by construction, and it treats
+ * an unterminated call as running to the end of the text, which is also what
+ * a CSS parser would do.
+ */
+function stripCssCalls(
+  source: string,
+  name: string,
+  replaceWith: string,
+  isUnsafe: (inner: string) => boolean,
+): { output: string; found: boolean } {
+  const lower = source.toLowerCase();
+  let output = "";
+  let index = 0;
+  let found = false;
+  while (index < source.length) {
+    const hit = lower.indexOf(name, index);
+    if (hit === -1) {
+      output += source.slice(index);
+      break;
+    }
+    let cursor = hit + name.length;
+    while (cursor < source.length && WHITESPACE.test(source[cursor]!))
+      cursor += 1;
+    if (source[cursor] !== "(") {
+      output += source.slice(index, hit + name.length);
+      index = hit + name.length;
+      continue;
+    }
+    const close = source.indexOf(")", cursor + 1);
+    const end = close === -1 ? source.length : close + 1;
+    const inner = source.slice(
+      cursor + 1,
+      close === -1 ? source.length : close,
+    );
+    if (isUnsafe(inner)) {
+      output += source.slice(index, hit) + replaceWith;
+      found = true;
+    } else {
+      output += source.slice(index, end);
+    }
+    index = end;
+  }
+  return { output, found };
+}
+
+/** True when a `url(...)` body resolves to a scheme that executes or embeds. */
+function unsafeUrlBody(inner: string): boolean {
+  // Collapse quotes and every kind of whitespace before reading the scheme,
+  // so padding cannot smuggle `javascript:` past a width-limited pattern.
+  const normalized = inner.replace(/["'\s]+/g, "").toLowerCase();
+  return (
+    normalized.startsWith("javascript:") ||
+    normalized.startsWith("vbscript:") ||
+    normalized.startsWith("data:")
+  );
+}
+
 /** Strips CSS that can execute or reach out, wherever it appears. */
 export function sanitizeCssText(css: string): {
   css: string;
@@ -151,9 +215,10 @@ export function sanitizeCssText(css: string): {
   let output = css;
 
   // `expression()` executes JavaScript in old Outlook/IE rendering paths.
-  if (/expression\s*\(/i.test(output)) {
+  const expressions = stripCssCalls(output, "expression", "", () => true);
+  if (expressions.found) {
     removed.push("expression()");
-    output = output.replace(/expression\s*\([^)]*\)/gi, "");
+    output = expressions.output;
   }
   // `behavior` and `-moz-binding` attach scripts to elements.
   if (/(behavior|-moz-binding)\s*:/i.test(output)) {
@@ -165,12 +230,10 @@ export function sanitizeCssText(css: string): {
     removed.push("@import");
     output = output.replace(/@import[^;]*;?/gi, "");
   }
-  if (/url\s*\(\s*['"]?\s*(javascript|vbscript|data)\s*:/i.test(output)) {
+  const urls = stripCssCalls(output, "url", "none", unsafeUrlBody);
+  if (urls.found) {
     removed.push("unsafe url()");
-    output = output.replace(
-      /url\s*\(\s*['"]?\s*(javascript|vbscript|data)\s*:[^)]*\)/gi,
-      "none",
-    );
+    output = urls.output;
   }
   return { css: output, removed };
 }

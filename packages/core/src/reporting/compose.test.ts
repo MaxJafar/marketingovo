@@ -383,6 +383,37 @@ describe("the competitive landscape stays observational", () => {
     expect(refusal?.explanation).toMatch(/public pages only/i);
   });
 
+  it("marks the signal total partial when every reading was partial", () => {
+    const report = composeReport(
+      input({
+        competitors: {
+          ...input().competitors,
+          targets: [
+            {
+              name: "rival.example",
+              state: "partial",
+              reason: "Robots rules kept part of the site out of reach.",
+              signals: { value: 10, state: "partial" },
+              cadencePerWeek: missing(),
+            },
+            {
+              name: "other.example",
+              state: "partial",
+              reason: "Robots rules kept part of the site out of reach.",
+              signals: { value: 5, state: "partial" },
+              cadencePerWeek: missing(),
+            },
+          ],
+        },
+      }),
+    );
+    const signals = findMetric(report, "competitors", "signals");
+    // Every target contributed a reading, but each covered only part of its
+    // site — the sum inherits that, it does not launder it to "available".
+    expect(signals?.value).toBe(15);
+    expect(signals?.state).toBe("partial");
+  });
+
   it("says when a first pass has nothing to compare against", () => {
     const report = composeReport(
       input({
