@@ -6211,7 +6211,7 @@ export class MarketingovoLocalRuntime implements MarketingovoRuntime {
     this.credentialStore =
       options.credentialStore ?? new MemoryCredentialStore();
     this.engine = options.engine;
-    this.version = options.version ?? "1.1.0";
+    this.version = options.version ?? "1.2.0";
     this.googleDesktopClientId = resolveGoogleDesktopClientId(
       options.googleDesktopClientId,
     );

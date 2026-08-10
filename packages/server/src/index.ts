@@ -1370,7 +1370,7 @@ export async function createLocalServer(
     openapi: {
       info: {
         title: "Marketingovo Local API",
-        version: "1.1.0",
+        version: "1.2.0",
         description:
           "Loopback API for the local-first Marketingovo application",
       },

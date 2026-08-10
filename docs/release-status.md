@@ -1,12 +1,13 @@
 # Release status
 
-## Unreleased — in preparation
+## 1.2.0 — prepared, not yet approved
 
-The tree has grown past the approved 1.1.0 record and the additions below are
-**not yet covered by any acceptance record**. They ship with the next approved
-release (1.2.0 by the additive-change precedent of ADR 0003), which needs its
-own `release/acceptance/1.2.0.json` with all seven gates re-observed and both
-human attestations — attestations an agent must never fill in.
+The tree is versioned 1.2.0 by the additive-change precedent of ADR 0003 and
+its engineering gates pass, but the additions below are **not yet covered by an
+acceptance record**. `release/acceptance/1.2.0.json` still needs both human
+attestations before `node scripts/validate-public-release-approval.mjs --tag
+v1.2.0` can pass — attestations an agent must never fill in. Until they are
+signed, 1.1.0 remains the last approved release.
 
 **What the tree adds since the 1.1.0 record:**
 

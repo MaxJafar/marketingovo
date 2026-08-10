@@ -1,7 +1,7 @@
 {
   "schemaVersion": "marketingovo.launch-loop.v1",
   "cycleId": "2026-08-initial-public-loop",
-  "productVersion": "1.1.0",
+  "productVersion": "1.2.0",
   "status": "ready",
   "ownerRole": "launch-owner",
   "primaryCta": "install-from-source",

@@ -14,7 +14,7 @@ could not measure.
 
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-5b63ff)](LICENSE)
 [![Telemetry](https://img.shields.io/badge/telemetry-off%20by%20default-242b36)](PRIVACY.md)
-[![Version](https://img.shields.io/badge/version-1.1.0-20b486)](docs/release-status.md)
+[![Version](https://img.shields.io/badge/version-1.2.0-20b486)](docs/release-status.md)
 
 Marketingovo runs on your machine, requires no account, and
 keeps projects and credentials under your control. It does more than produce an
@@ -47,15 +47,19 @@ could not inspect rather than treating silence as a clean bill.
 > authenticated-scraping, contact-enrichment, breach, or dark-web tool. See the
 > [OSINT layer guide](docs/osint-layer.md).
 
-> **Status: 1.1.0.** The REST API, OpenAPI document, SDK, nineteen-tool agent
-> contract registry, CLI and `.marketingovo` bundle format are stable; breaking
-> changes to them require a major version. Every release gate is recorded with
-> the command that produced it in
-> [`release/acceptance/1.1.0.json`](release/acceptance/1.1.0.json), including
-> the two named human attestations.
+> **Status: 1.2.0 in preparation; 1.1.0 is the last approved record.** The REST
+> API, OpenAPI document, SDK, nineteen-tool agent contract registry, CLI and
+> `.marketingovo` bundle format are stable; breaking changes to them require a
+> major version. 1.2.0 is additive and breaks none of them.
 >
-> Install from source today. The public npm distribution graph is now prepared
-> and verified; after a canonical tag publishes it, the shortest install will be
+> The tree is versioned 1.2.0 and its engineering gates pass, but a stable tag
+> fails closed until `release/acceptance/1.2.0.json` records both the machine
+> evidence and the two named human attestations — which no automation may sign.
+> Until then, [`release/acceptance/1.1.0.json`](release/acceptance/1.1.0.json)
+> is the last complete record.
+>
+> Install from source today. The public npm distribution graph is prepared and
+> verified; after a canonical tag publishes it, the shortest install will be
 > `npx marketingovo serve`. Signed desktop installers and the updater channel
 > remain deferred until their signing identities and lifecycle evidence exist.
 > See [release status](docs/release-status.md) for exactly what was verified.
