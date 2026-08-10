@@ -42,10 +42,24 @@ intent, SERP evidence, business value, and the site's own historical baseline.
    signals, or measured publishing cadence, start
    `marketingovo_osint_research_start` with only the project and targets the
    user explicitly supplied.
-6. If the user asks whether monitoring is active or recent jobs are healthy,
-   call `marketingovo_monitoring_status`.
-7. If a run id already exists, call `marketingovo_run_get`; do not start a
-   duplicate job.
+6. If the user asks about Facebook or Instagram advertising — spend, delivery,
+   creative performance, or what is wasting budget — read
+   `marketingovo_ads_cabinets`, then start `marketingovo_ads_audit_start` and
+   read `marketingovo_ads_performance` per cabinet.
+7. If the user asks for ad copy, a post, a reel script, or a whole campaign,
+   write it with `marketingovo_campaign_stage`. It saves drafts locally for a
+   person to approve; it does not publish and does not commit budget.
+8. If the user asks for an email, a newsletter or a campaign in HTML, read
+   `marketingovo_brand_kit` and then iterate with `marketingovo_email_draft`.
+   `marketingovo_email_templates` reads what already exists.
+9. If the user asks for a monthly report, a client update or "how did we do",
+   call `marketingovo_marketing_report`.
+10. If the user asks for a tracked link, a UTM, or a QR code, call
+    `marketingovo_campaign_link`. Ask where the code will be used first.
+11. If the user asks whether monitoring is active or recent jobs are healthy,
+    call `marketingovo_monitoring_status`.
+12. If a run id already exists, call `marketingovo_run_get`; do not start a
+    duplicate job.
 
 OSINT is public-web-only. It never performs people lookup, email/phone
 registration, breach or contact enrichment, authenticated scraping, account
@@ -71,6 +85,158 @@ over restating a summary, and cite what they return:
   regression by diffing two summaries yourself; the runtime already separates new
   and worsened issues from resolved and reduced ones, and accounts for
   configuration drift and reviewed-noise exclusions.
+
+## Paid media
+
+Two platforms arrive here. Facebook and Instagram reach this product through
+one Meta credential and one set of cabinets; Google Ads arrives through a
+Google sign-in plus the operator's own developer token.
+
+- `marketingovo_ads_cabinets` — which accounts the workspace reads, their
+  provider, currency, and the daily and total spend caps the operator set
+  locally. Read this before quoting any number, because a workspace can hold
+  several clients' accounts in different currencies and on both platforms.
+- `marketingovo_ads_performance` — one account's measured window, split by the
+  surface it ran on. Report the surfaces separately: Facebook and Instagram are
+  different auctions, and so are Google Search and Search Partners. Pass
+  `include_search_terms` on a Google account to get the queries worth acting
+  on.
+- `marketingovo_ads_audit_start` — sync every account and run the paid rules.
+  Findings land in the same prioritized action queue as SEO work.
+
+Four rules govern how you talk about paid numbers, and they are the whole
+reason to trust the surface:
+
+1. **A null is not a zero.** Every unmeasured metric comes back null with a
+   stated reason. "We spent nothing" and "we could not read this account" call
+   for opposite actions, so say which one you are looking at.
+2. **Never add conversions across platforms.** Meta counts what it attributes
+   on its own click-and-view window; Google credits the click that preceded the
+   sale on its own model. One purchase can be counted by both, so a combined
+   figure is larger than what happened. Spend can be totalled — no platform
+   double-counts another's budget — but conversions cannot.
+3. **Reach and frequency have no window total.** Reach counts unique people;
+   adding it across days would count the same person repeatedly. The surface
+   declines to total them, and so should you.
+4. **Currency never gets assumed.** A total whose rows disagreed on currency
+   comes back with `currency: null`. Report it as not comparable rather than
+   summing across currencies without a rate.
+
+The paid audit also checks the pages the ads land on, and those findings carry
+the module id `landing:paid-alignment`. Two of them outrank almost anything
+else in the queue, so lead with them when they appear:
+
+- **A destination returning 404.** Every click is billed and none arrive, and
+  the ad platform will keep charging indefinitely because from its side the
+  click happened.
+- **A redirect that drops the click identifier.** The page loads, the visitor
+  arrives, nothing looks wrong — and the platform never learns the sale
+  happened. Say explicitly that the campaign's measured return is understated
+  until it is fixed, because the obvious reading of the numbers is to cut a
+  campaign that is actually working.
+
+A finding marked `landing.destination-unchecked` is coverage, not a defect. A
+dedicated landing page is normally absent from a crawl because nothing links to
+it. Report what was not checked rather than treating the rest as a clean bill.
+
+Two things about Google Ads specifically:
+
+- **Its conversions are dated to the click, not to the sale.** A purchase today
+  from an ad clicked last week is added to last week. Recent days are still
+  filling in and will rise later without anything having changed — say so
+  rather than reporting them as final.
+- **Search terms cover Search and Shopping only.** Performance Max and Demand
+  Gen report no queries at all. A short list of wasteful queries on an account
+  dominated by them is not evidence that nothing is being wasted, and the audit
+  raises the uninspectable share as its own finding. Repeat that finding rather
+  than summarising the account as healthy.
+
+You may draft a full campaign — ad copy, a reel script, an article — with
+`marketingovo_campaign_stage`. You cannot approve or publish one. Approval
+requires the dashboard in a browser and is refused for agent tooling by design,
+so a mistaken or prompt-injected agent cannot spend money under the operator's
+brand. When you finish drafting, say the work is staged for review. Never
+describe a campaign as launched, live, or running.
+
+## Cross-channel reporting
+
+`marketingovo_marketing_report` builds the document a client receives. It is
+the only thing you produce that is read by someone who cannot check it, and
+three rules follow from that:
+
+1. **Conversions are never added across channels.** Meta attributes on its own
+   click-and-view window; Analytics counts key events on a last-click session
+   model. The same purchase appears in both, so a total is larger than what
+   happened. The report refuses it and gives the sentence explaining why —
+   repeat that sentence rather than quietly omitting the number.
+2. **An unavailable source is never a zero.** "Search Console was disconnected"
+   and "organic clicks: 0" are different claims and only one is true.
+3. **A change needs both periods.** The report withholds percentages measured
+   against a period nobody measured; do not reconstruct them.
+
+Report each section, including the ones marked unavailable — a section that
+could not be read is a finding, not an omission. A report whose gaps are stated
+is worth more to a client than one that reads as complete.
+
+## Campaign links and QR codes
+
+`marketingovo_campaign_link` builds a UTM-tagged link and its QR code. It is
+the only tool here that refuses rather than warns, and the reason is that a
+printed code has no second attempt: everything else in this product records a
+problem and carries on, which is no use to someone holding a leaflet.
+
+Ask where the code will be used before building it. Placement decides the
+error-correction level and the minimum printed size and cannot be inferred from
+a URL — packaging gets scuffed and curved, a poster is read from across a room,
+a screen is neither.
+
+Three refusals worth understanding:
+
+1. **Capitals and spaces in the tagging.** They split one campaign into two
+   rows that no reporting tool can merge afterwards. On a screen this costs
+   nothing to correct; on ten thousand leaflets it costs a quarter of the data.
+2. **Manual tags on an already auto-tagged link.** A destination carrying a
+   `gclid` is already tagged by the platform, and UTM parameters override the
+   identifier that supplies cost and conversion data. The reporting gets worse.
+3. **A code too small to scan.** Error correction recovers damaged modules, not
+   ones the camera never resolved, so nothing rescues a code printed too small.
+
+Tell the operator two things about what they get. The code encodes the URL
+directly, so nothing resolves it and it cannot be revoked, metered or put
+behind a paywall — it works as long as the paper does. For the same reason it
+cannot be re-pointed: if they need to change the destination later, generate a
+redirect config and print a short link on a domain they already own.
+
+## Email
+
+Email HTML is not web HTML, and the gap is the whole difficulty. Outlook on
+Windows renders with Microsoft Word — no flexbox, no grid, no positioning, no
+shadows. Gmail strips `<style>` from a forwarded message and clips anything
+past 102KB. Outlook blocks remote images by default, so alt text is what most
+recipients read first.
+
+You are not expected to hold all of that. The loop does it for you:
+
+1. `marketingovo_brand_kit` — colours with their intended use, type stacks,
+   content width, voice, prohibitions, and the legal footer. The postal address
+   and unsubscribe merge tag are legally required in commercial mail, not
+   styling choices.
+2. Write HTML with nested tables, inline styles, `role="presentation"` on
+   layout tables, `alt` and `width` on every image, and a generic family at the
+   end of every font stack.
+3. `marketingovo_email_draft` without a `template_id` — the response sanitizes
+   what you wrote, inlines the CSS, and returns findings naming the client and
+   the behaviour. Fix them and resubmit.
+4. Save once, with a `template_id`, when nothing blocking or error-level is
+   left.
+
+Treat the findings as a specification rather than advice. A `blocking` finding
+means the compiler removed something you wrote, so the document you now have is
+not the one you submitted. Never argue a finding away in your summary; either
+fix it or say plainly which warning you left and why.
+
+Marketingovo does not send email. The output is HTML to export into the
+operator's own email service, and describing a campaign as sent is wrong.
 
 Use goal-specific sequences when one run cannot answer the question:
 

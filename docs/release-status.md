@@ -1,5 +1,65 @@
 # Release status
 
+## 1.2.0 — prepared, not yet approved
+
+The tree is versioned 1.2.0 by the additive-change precedent of ADR 0003 and
+its engineering gates pass, but the additions below are **not yet covered by an
+acceptance record**. `release/acceptance/1.2.0.json` still needs both human
+attestations before `node scripts/validate-public-release-approval.mjs --tag
+v1.2.0` can pass — attestations an agent must never fill in. Until they are
+signed, 1.1.0 remains the last approved release.
+
+**What the tree adds since the 1.1.0 record:**
+
+- **The console speaks six languages.** English, Azerbaijani, German, Russian,
+  Dutch, and Spanish, switchable from a `--lang=` flag in the command bar or
+  from Settings, stored per device and defaulting to the browser's preference.
+  Roughly 1,990 interface strings moved out of the components into a typed
+  catalog under `apps/dashboard/src/i18n/`; English stays the reference locale
+  and the unit suite asserts its rendered copy unchanged. Completeness is not a
+  convention: `tsc` refuses to build a locale missing a key, and
+  `src/tests/i18n.test.tsx` refuses one whose `{placeholder}` markers drifted,
+  so a language ships whole or not at all. Numbers and dates format through
+  `Intl` in the active locale and `<html lang>` follows the selection. Data,
+  generated reports, and agent surfaces are deliberately not translated.
+- **The pixel art is real art now.** The generated source images are replaced
+  by hand-sized sprites with a recorded provenance ledger and style lock, and
+  the console vendors Departure Mono under the SIL Open Font License, recorded
+  in `NOTICE` with the license text beside the font.
+- **A dependency advisory was fixed, not waived.** `nanoid` 3.3.16 (transitively
+  via vite/vitest) carried a HIGH advisory that failed `pnpm audit:dependencies`
+  closed; the lockfile now resolves 3.3.18 and the gate passes.
+- **Multi-channel marketing.** Meta and Google Ads read-only audits into the
+  shared action queue, landing alignment between ads and the crawl, the
+  content calendar, the brand-kit email builder, campaign links and QR codes,
+  and bounded public-web OSINT — growing the workflow tool registry from nine
+  to nineteen tools (the five terminal session tools are unchanged).
+- **The cross-channel report is the full 360° view.** A competitors section
+  quotes the newest public-web research inside the period and compares it
+  against the pass before — citation counts with stated availability, never
+  market share. Sections carry charts drawn only from measured values (an
+  unmeasured row is named beneath the chart, never drawn as an empty bar), and
+  the client document exports as a PDF rendered locally with pdf-lib, so the
+  download works on installs with no browser.
+- **Scheduled reports.** Schedules carry the workflow they run end to end:
+  `claimDueSchedules` now returns `workflow_id`/`options_json` (previously
+  dropped on the claim path, so every schedule executed an audit), the REST
+  schedule inputs accept `workflowId`/`options`, and the dashboard's
+  Monitoring page can create daily, weekly, or monthly report schedules.
+- **Report CLI.** `marketingovo report list|generate|show|export` brings the
+  report surface to the terminal, including PDF export.
+- **The demo sample set is gone.** The console home and the social research
+  page no longer fall back to labelled sample numbers; a panel whose source
+  has not reported now states the reason and links to the workspace that can
+  change it. The social mentions and brand sentiment panels — which had no
+  collector at all — were removed rather than dressed up.
+- **The loopback rate brake no longer starves real sessions.** Static assets
+  and the SPA shell are exempt from the request limiter (one dashboard load
+  is ~35 files), and the API budget rises from 240 to 600 requests a minute —
+  the packaged browser journey was hitting "rate limit exceeded" from
+  ordinary navigation, which a real operator could reproduce by clicking
+  through the console.
+
 ## 1.1.0 — approved
 
 Every engineering gate passes and the evidence is recorded in

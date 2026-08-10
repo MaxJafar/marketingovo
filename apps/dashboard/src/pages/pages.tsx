@@ -3,8 +3,14 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { PageRecord } from "../api/contracts";
 import { usePages } from "../api/queries";
 import { useSite } from "../context/site-context";
+import { fmt, useI18n } from "../i18n";
 import { DataTable } from "../components/data-table";
-import { FreshnessNotice, QueryState } from "../components/data-state";
+import {
+  CapabilityGate,
+  FreshnessNotice,
+  QueryState,
+} from "../components/data-state";
+import { NEEDS_WEBSITE, useWorkspaceCapabilities } from "../lib/capabilities";
 import { Icon } from "../components/icon";
 import { InternalLinkExplorer } from "../components/internal-link-explorer";
 import {
@@ -19,7 +25,9 @@ import {
 import { indexabilityReasonLabel } from "./page-indexability";
 
 export function PagesPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
+  const { capabilities } = useWorkspaceCapabilities(siteId);
   const query = usePages(siteId);
   const [search, setSearch] = useState("");
   const [selectedPageUrl, setSelectedPageUrl] = useState("");
@@ -39,7 +47,7 @@ export function PagesPage() {
     () => [
       {
         id: "page",
-        header: "Page",
+        header: t.pages.columns.page,
         cell: ({ row }) => {
           const url = safeExternalUrl(row.original.url);
           return (
@@ -58,37 +66,41 @@ export function PagesPage() {
       },
       {
         id: "statusCode",
-        header: "HTTP",
+        header: t.pages.columns.http,
         cell: ({ row }) => formatNumber(row.original.statusCode),
       },
       {
         id: "indexability",
-        header: "Indexability",
+        header: t.pages.columns.indexability,
         cell: ({ row }) => (
           <div className="indexability-cell">
             <StatusBadge status={row.original.indexability ?? "unknown"} />
-            <small>{indexabilityReasonLabel(row.original)}</small>
+            <small>{indexabilityReasonLabel(row.original, t.pages)}</small>
           </div>
         ),
       },
       {
         id: "clicks",
-        header: "Clicks",
+        header: t.pages.columns.clicks,
         cell: ({ row }) => formatNumber(row.original.organicClicks),
       },
       {
         id: "links",
-        header: "Internal links",
+        header: t.pages.columns.internalLinks,
         cell: ({ row }) => (
           <div className="page-link-cell">
             {row.original.linkGraphState === "available" ? (
               <>
                 <strong>
-                  {formatNumber(row.original.inlinkSources)} in ·{" "}
-                  {formatNumber(row.original.outlinkTargets)} out
+                  {fmt(t.pages.linkCounts, {
+                    inCount: formatNumber(row.original.inlinkSources),
+                    outCount: formatNumber(row.original.outlinkTargets),
+                  })}
                 </strong>
                 <small>
-                  Depth {formatNumber(row.original.crawlDepth)} · distinct pages
+                  {fmt(t.pages.linkDepth, {
+                    depth: formatNumber(row.original.crawlDepth),
+                  })}
                 </small>
               </>
             ) : (
@@ -98,95 +110,99 @@ export function PagesPage() {
               type="button"
               variant="ghost"
               onClick={() => setSelectedPageUrl(row.original.url)}
-              aria-label={`Explore internal links for ${row.original.title ?? row.original.url}`}
+              aria-label={fmt(t.pages.exploreLinksFor, {
+                page: row.original.title ?? row.original.url,
+              })}
             >
-              Explore
+              {t.pages.explore}
             </Button>
           </div>
         ),
       },
       {
         id: "organicKeyEvents",
-        header: "Organic key events",
+        header: t.pages.columns.organicKeyEvents,
         cell: ({ row }) => formatNumber(row.original.organicKeyEvents),
       },
       {
         id: "issues",
-        header: "Issues",
+        header: t.pages.columns.issues,
         cell: ({ row }) => formatNumber(row.original.issues),
       },
       {
         id: "cwv",
-        header: "Core Web Vitals",
+        header: t.pages.columns.coreWebVitals,
         cell: ({ row }) => (
           <StatusBadge status={row.original.coreWebVitals ?? "unavailable"} />
         ),
       },
       {
         id: "crawled",
-        header: "Last crawled",
+        header: t.pages.columns.lastCrawled,
         cell: ({ row }) => formatDate(row.original.lastCrawledAt, true),
       },
     ],
-    [],
+    [t],
   );
 
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="URL inventory"
-        title="Pages"
-        description="Connect technical crawl evidence with organic traffic and conversion context at URL level."
+        eyebrow={t.pages.eyebrow}
+        title={t.pages.title}
+        description={t.pages.description}
       />
-      <QueryState
-        isLoading={query.isLoading}
-        error={query.error}
-        siteId={siteId}
-        onRetry={() => void query.refetch()}
-      >
-        <FreshnessNotice meta={query.data?.meta} />
-        {selectedPage ? (
-          <InternalLinkExplorer
-            key={`${selectedPage.runId ?? "legacy"}:${selectedPage.url}`}
-            page={selectedPage}
-            onClose={() => setSelectedPageUrl("")}
-          />
-        ) : null}
-        {pages.length > 0 ? (
-          <>
-            <div className="search-field">
-              <Icon name="search" />
-              <label className="sr-only" htmlFor="page-search">
-                Search pages
-              </label>
-              <input
-                id="page-search"
-                type="search"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search by title or URL"
-              />
-            </div>
-            {filtered.length > 0 ? (
-              <DataTable
-                data={filtered}
-                columns={columns}
-                label="Crawled pages"
-              />
-            ) : (
-              <EmptyState
-                title="No pages match"
-                description="Try a broader title or URL search."
-              />
-            )}
-          </>
-        ) : (
-          <EmptyState
-            title="No crawled pages"
-            description="The API returned an empty page inventory. Run an audit to collect URL-level evidence."
-          />
-        )}
-      </QueryState>
+      <CapabilityGate capabilities={capabilities} requires={NEEDS_WEBSITE}>
+        <QueryState
+          isLoading={query.isLoading}
+          error={query.error}
+          siteId={siteId}
+          onRetry={() => void query.refetch()}
+        >
+          <FreshnessNotice meta={query.data?.meta} />
+          {selectedPage ? (
+            <InternalLinkExplorer
+              key={`${selectedPage.runId ?? "legacy"}:${selectedPage.url}`}
+              page={selectedPage}
+              onClose={() => setSelectedPageUrl("")}
+            />
+          ) : null}
+          {pages.length > 0 ? (
+            <>
+              <div className="search-field">
+                <Icon name="search" />
+                <label className="sr-only" htmlFor="page-search">
+                  {t.pages.searchLabel}
+                </label>
+                <input
+                  id="page-search"
+                  type="search"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder={t.pages.searchPlaceholder}
+                />
+              </div>
+              {filtered.length > 0 ? (
+                <DataTable
+                  data={filtered}
+                  columns={columns}
+                  label={t.pages.tableLabel}
+                />
+              ) : (
+                <EmptyState
+                  title={t.pages.noMatchTitle}
+                  description={t.pages.noMatchBody}
+                />
+              )}
+            </>
+          ) : (
+            <EmptyState
+              title={t.pages.emptyTitle}
+              description={t.pages.emptyBody}
+            />
+          )}
+        </QueryState>
+      </CapabilityGate>
     </div>
   );
 }

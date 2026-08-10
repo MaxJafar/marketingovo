@@ -124,7 +124,9 @@ describe("Onboarding accessibility and completion gates", () => {
 
     const goalProgress = screen.getByText("Choose a goal").closest("li");
     expect(goalProgress).toHaveAttribute("aria-current", "step");
-    expect(screen.getByText(/Step 3 of 6: Choose a goal/i)).toBeInTheDocument();
+    // Four of seven: "Add a website" is now its own optional step between
+    // creating the workspace and connecting data.
+    expect(screen.getByText(/Step 4 of 7: Choose a goal/i)).toBeInTheDocument();
 
     const goal = screen.getByRole("button", {
       name: /Grow qualified traffic/i,

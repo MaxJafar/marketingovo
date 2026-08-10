@@ -1,0 +1,93 @@
+/** The audit comparison card: run pair selection and the evidence delta. */
+export const auditComparison = {
+  eyebrow: "Snapshot intelligence",
+  title: "Compare audit runs",
+  description:
+    "Separate regressions from verified fixes using immutable issue and page evidence. No new crawl is started.",
+  state: {
+    comparable: "Comparable",
+    partial: "Partial evidence",
+    unavailable: "Page evidence unavailable",
+  },
+  emptyTitle: "Two completed audits are required",
+  emptyBody:
+    "Run a baseline and one follow-up audit. Keyword, content, and competitor research runs are excluded from technical history.",
+  baselineAudit: "Baseline audit",
+  currentAudit: "Current audit",
+  openBaselineEvidence: "Open baseline evidence",
+  openCurrentEvidence: "Open current evidence",
+  loading: "Calculating the evidence delta…",
+  errorTitle: "Comparison unavailable",
+  regressionPressure: "Regression pressure",
+  scoreExplainer:
+    "New issues add severity weight (critical 8, high 5, medium 3, low 1); fixes subtract it. HTTP regressions add 3 and indexability regressions add 2. Negative is net improvement.",
+  summary: {
+    newWorse: "New / worse issues",
+    resolvedReduced: "Resolved / reduced",
+    healthChange: "SEO Health change",
+    pageRegressions: "Page regressions",
+    pagesCaptured: "Pages captured",
+    reviewedExcluded: "Reviewed noise excluded",
+  },
+  configuration: "Configuration",
+  configMatched: "Stored crawl settings match across both snapshots.",
+  configDifferent: "Different inputs: {differences}.",
+  configUnavailable:
+    "Stored settings are unavailable, so scope equivalence cannot be proven.",
+  configFingerprints: "Config fingerprints: {baseline}… → {current}…",
+  warningsTitle: "Interpretation notes",
+  columns: {
+    finding: "Finding",
+    change: "Change",
+    url: "URL",
+    before: "Before",
+    after: "After",
+    source: "Source",
+    target: "Target",
+    beforeAfter: "Before → after",
+  },
+  regressions: {
+    title: "Issue regressions",
+    description: "New findings and findings whose severity increased.",
+    caption: "New and worsened SEO issues",
+    empty: "No new or worsened effective issues were detected.",
+  },
+  fixes: {
+    title: "Verified fixes",
+    description: "Findings absent or reduced in the current snapshot.",
+    caption: "Resolved and reduced SEO issues",
+    empty: "No issue resolution was verified in this pair.",
+  },
+  pages: {
+    title: "Page changes",
+    description: "Status, indexability, additions, and removals.",
+    caption: "Page-level changes between audit snapshots",
+    empty: "No page-level changes were captured for this pair.",
+  },
+  links: {
+    title: "Internal-link changes",
+    description:
+      "Exact source-to-target edges from immutable crawl graphs. Broken-link creation and recovery are classified; editorial structure stays neutral.",
+    graphCoverage: "Graph coverage",
+    edgesCaptured: "Edges captured",
+    addedRemoved: "Added / removed",
+    modified: "Modified",
+    regressionsRecoveries: "Regressions / recoveries",
+    warningsTitle: "Link comparison notes",
+    caption: "Internal-link changes between audit snapshots",
+    emptyUnavailable:
+      "Replay both audits to capture comparable internal-link evidence.",
+    empty: "No internal-link edge changes were captured for this pair.",
+  },
+  siteWide: "Site-wide",
+  notInSnapshot: "Not in snapshot",
+  indexabilityUnknown: "indexability unknown",
+  indexable: "indexable",
+  notIndexable: "not indexable",
+  statusUnavailable: "status unavailable",
+  notPresent: "Not present",
+  occurrenceOne: "{count} occurrence",
+  occurrenceOther: "{count} occurrences",
+  truncationNotice:
+    "The API response reached a safety limit. Export the run data or use the SDK for the full stored corpus.",
+} as const;

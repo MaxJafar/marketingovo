@@ -213,6 +213,10 @@ body:has(.pixel-frame) {
 }
 
 .pixel-panel-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
   margin-left: auto;
 }
 
@@ -240,6 +244,15 @@ body:has(.pixel-frame) {
 .pixel-brand:focus-visible {
   outline: 2px solid var(--px-cyan);
   outline-offset: 2px;
+}
+
+.pixel-brand-lockup {
+  display: block;
+  width: min(100%, 232px);
+  height: auto;
+  image-rendering: pixelated;
+  object-fit: contain;
+  object-position: left center;
 }
 
 /* Faux-bold, pixel style. The fallback console faces ship no bold weight and
@@ -462,7 +475,7 @@ body:has(.pixel-frame) {
 .pixel-nav {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   /* The rail scrolls too, so the section list must keep its size and let the
      boot log below it absorb the slack instead. */
   flex: none;
@@ -471,8 +484,8 @@ body:has(.pixel-frame) {
 .pixel-nav-link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 10px;
+  padding: 8px 12px;
   border: 1px solid transparent;
   color: var(--px-ink-soft);
   text-decoration: none;
@@ -983,6 +996,16 @@ body:has(.pixel-frame) {
   background: var(--px-cyan);
 }
 
+/* Paired period bars: pink is always this period and cyan always the
+   previous one, so the alternating row tint must not repaint the legend. */
+.pixel-meter.pixel-meter-paired .pixel-meter-fill {
+  background: var(--px-pink);
+}
+
+.pixel-meter.pixel-meter-paired .pixel-meter-fill-previous {
+  background: var(--px-cyan);
+}
+
 .pixel-chart {
   display: block;
   width: 100%;
@@ -1453,16 +1476,6 @@ img.pixel-sprite {
   color: var(--px-red);
 }
 
-.pixel-demo-flag {
-  display: inline-block;
-  padding: 2px 6px;
-  border: 1px solid var(--px-gold);
-  color: var(--px-gold);
-  font-size: 9px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
 .pixel-skip {
   position: absolute;
   left: -9999px;
@@ -1580,4 +1593,206 @@ img.pixel-sprite {
   .pixel-donut {
     justify-self: center;
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* Channel surfaces: ad cabinets and the content calendar              */
+/* ------------------------------------------------------------------ */
+
+.pixel-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pixel-list > li {
+  padding: 10px;
+  border: 1px solid var(--px-line-soft);
+  background: var(--px-sunken);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pixel-list-row strong {
+  color: var(--px-ink);
+  font-size: 12px;
+}
+
+.pixel-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.pixel-subsection {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--px-line-soft);
+}
+
+.pixel-subsection h4 {
+  margin: 0 0 8px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--px-ink-faint);
+}
+
+.pixel-input {
+  padding: 7px 9px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--px-ink);
+  background: var(--px-void);
+  border: 1px solid var(--px-line);
+  min-width: 0;
+}
+
+.pixel-input:focus-visible {
+  outline: 2px solid var(--px-cyan);
+  outline-offset: 1px;
+}
+
+/*
+ * A labelled control, with room under it for the sentence explaining what the
+ * field decides. The earlier forms label their inputs with `aria-label` alone,
+ * which reads correctly to a screen reader and tells a sighted operator
+ * nothing — so anything asking for a judgement call uses this instead.
+ */
+.pixel-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 12px;
+  min-width: 0;
+}
+
+.pixel-field > span {
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--px-ink-faint);
+}
+
+.pixel-field > small {
+  font-size: 11px;
+}
+
+/* Fields side by side, collapsing to one column when the panel is narrow. */
+.pixel-grid-2,
+.pixel-grid-3 {
+  display: grid;
+  gap: 12px;
+}
+
+@media (min-width: 680px) {
+  .pixel-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pixel-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.pixel-code {
+  margin: 0;
+  padding: 10px;
+  overflow-x: auto;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--px-ink-soft);
+  background: var(--px-void);
+  border: 1px solid var(--px-line-soft);
+}
+
+.pixel-button-primary {
+  border-color: var(--px-cyan-dim);
+  color: var(--px-cyan-lift);
+}
+
+/* The calendar is a scrolling column of days rather than a month grid: a
+   fourteen-day strip stays readable at the rail width, and a post's copy is
+   the thing an operator needs to read before approving it. */
+.pixel-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pixel-calendar-day {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--px-line-soft);
+}
+
+.pixel-calendar-day:last-child {
+  border-bottom: none;
+}
+
+.pixel-calendar-day h4 {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--px-ink-faint);
+}
+
+/* Send states. `bad` and the unknown-outcome case deliberately read
+   differently from each other: an operator told "failed" about a post that
+   actually went out will publish it a second time. */
+.pixel-tag-ok {
+  color: var(--px-green);
+  border-color: var(--px-green);
+}
+
+.pixel-tag-ready {
+  color: var(--px-cyan);
+  border-color: var(--px-cyan-dim);
+}
+
+.pixel-tag-pending {
+  color: var(--px-gold);
+  border-color: var(--px-gold);
+}
+
+.pixel-tag-bad {
+  color: var(--px-red);
+  border-color: var(--px-red);
+}
+
+.pixel-tag-muted {
+  color: var(--px-ink-faint);
+  border-color: var(--px-line);
+}
+
+/* ------------------------------------------------------------------ */
+/* Email builder                                                       */
+/* ------------------------------------------------------------------ */
+
+.pixel-code-editor {
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+/* White, always. The email is rendered against the client's canvas, not the
+   dashboard's, and previewing it on a dark panel would hide exactly the
+   contrast problems the validator reports. */
+.pixel-email-preview {
+  display: block;
+  height: 620px;
+  max-width: 100%;
+  margin: 0 auto;
+  border: 1px solid var(--px-line);
+  background: #ffffff;
 }

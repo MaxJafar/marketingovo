@@ -1,5 +1,11 @@
 import type { IntegrationStatus } from "@marketingovo/contracts";
 import { connectorEgressHosts, type ConnectorId } from "./egress.js";
+import {
+  isGoogleAdsCustomerId,
+  normalizeCustomerId,
+  normalizeGoogleAdsVersion,
+} from "./google-ads.js";
+import { metaGraphUrl, normalizeGraphVersion } from "./meta-graph.js";
 import { safeConnectorFetch } from "./provider-fetch.js";
 
 export type { ConnectorId } from "./egress.js";
@@ -39,11 +45,25 @@ const HEALTH_ENDPOINTS: Readonly<Record<ConnectorId, string>> = {
   "google-search-console": "https://www.googleapis.com/webmasters/v3/sites/",
   "google-analytics-4":
     "https://analyticsdata.googleapis.com/v1beta/properties/",
+  // The version segment is appended per call, because the operator may pin a
+  // different API version than the default.
+  "google-ads": "https://googleads.googleapis.com/",
   "pagespeed-insights":
     "https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed",
   "google-trends": "https://trends.google.com/",
   serpapi: "https://serpapi.com/account.json",
   dataforseo: "https://api.dataforseo.com/v3/appendix/user_data",
+  // The version segment is appended per call, because the operator may pin a
+  // different Graph version than the default.
+  "meta-ads": "https://graph.facebook.com/",
+  // The bot token is a path segment in Telegram's API, so the URL is built per
+  // call rather than stored whole — a constant here would have to contain a
+  // credential.
+  telegram: "https://api.telegram.org/",
+  x: "https://api.twitter.com/2/users/me",
+  // Never fetched. The relay's host is operator-declared, so it has no
+  // constant endpoint and its health is established by an actual upload.
+  "media-relay": "",
 };
 
 function result(
@@ -156,6 +176,72 @@ function buildProbe(
       };
     }
 
+    /**
+     * Reads the customer's own record.
+     *
+     * `listAccessibleCustomers` would be a lighter probe, but it succeeds
+     * whenever the credential is valid at all — including when it cannot see
+     * the account this workspace is configured for. Selecting one row from the
+     * configured customer is the check that answers the question actually
+     * being asked, and it exercises the developer token and the manager header
+     * on the same call.
+     */
+    case "google-ads": {
+      const developerToken = requiredString(
+        options.credentials,
+        "developerToken",
+      );
+      const customerId = normalizeCustomerId(
+        requiredString(options.configuration, "customerId") ?? "",
+      );
+      if (
+        !accessToken ||
+        !developerToken ||
+        !isGoogleAdsCustomerId(customerId)
+      ) {
+        return result(
+          "not_configured",
+          "A current Google sign-in, a developer token, and a ten-digit customer ID are required.",
+          now,
+        );
+      }
+      const loginCustomerId = normalizeCustomerId(
+        requiredString(options.configuration, "loginCustomerId") ?? "",
+      );
+      const version = normalizeGoogleAdsVersion(
+        options.configuration?.apiVersion,
+      );
+      return {
+        url: new URL(
+          `${version}/customers/${customerId}/googleAds:searchStream`,
+          HEALTH_ENDPOINTS[options.provider],
+        ),
+        init: {
+          ...baseInit({
+            authorization: `Bearer ${accessToken}`,
+            "developer-token": developerToken,
+            "content-type": "application/json",
+            // Required whenever the account is reached through a manager,
+            // which is how every agency is arranged. Its absence produces a
+            // permission error that never mentions managers.
+            ...(isGoogleAdsCustomerId(loginCustomerId)
+              ? { "login-customer-id": loginCustomerId }
+              : {}),
+          }),
+          method: "POST",
+          body: JSON.stringify({
+            query:
+              "SELECT customer.id, customer.currency_code FROM customer LIMIT 1",
+          }),
+        },
+        // searchStream answers with an array of result chunks rather than an
+        // object, so a valid empty read is `[]` and still proves access.
+        isValidPayload: (value) =>
+          Array.isArray(value) ||
+          (isRecord(value) && Array.isArray(value.results)),
+      };
+    }
+
     case "pagespeed-insights": {
       let target: URL;
       try {
@@ -232,6 +318,99 @@ function buildProbe(
           );
         },
       };
+    }
+
+    case "meta-ads": {
+      const token = requiredString(options.credentials, "accessToken");
+      if (!token) {
+        return result(
+          "not_configured",
+          "A Meta System User access token is required.",
+          now,
+        );
+      }
+      // Listing one ad account proves three things at once: the token parses,
+      // it still carries `ads_read`, and it actually reaches a cabinet. A bare
+      // identity call would pass for a token that can read nothing, which is
+      // the failure an operator most needs this check to catch.
+      const url = metaGraphUrl(
+        normalizeGraphVersion(options.configuration?.graphVersion),
+        "me/adaccounts",
+        { limit: "1", fields: "id,name,account_status" },
+      );
+      return {
+        url,
+        // The token travels in the header rather than the query string, so no
+        // credential can be copied out of a URL by a log line or an error.
+        init: baseInit({ authorization: `Bearer ${token}` }),
+        isValidPayload: (value) =>
+          isRecord(value) &&
+          (Array.isArray(value.data) || isRecord(value.paging)),
+      };
+    }
+
+    case "telegram": {
+      const botToken = requiredString(options.credentials, "botToken");
+      if (!botToken) {
+        return result(
+          "not_configured",
+          "A Telegram bot token from @BotFather is required.",
+          now,
+        );
+      }
+      // `getMe` is Telegram's identity call: it proves the token parses, the
+      // bot exists and has not been revoked, in one request that changes
+      // nothing.
+      //
+      // The token is a path segment here because Telegram's API has no header
+      // form. It is encoded, the URL is never logged, and the transport
+      // refuses redirects so it cannot be forwarded elsewhere.
+      const url = new URL(
+        `bot${encodeURIComponent(botToken)}/getMe`,
+        HEALTH_ENDPOINTS[options.provider],
+      );
+      return {
+        url,
+        init: baseInit(),
+        isValidPayload: (value) =>
+          isRecord(value) && value.ok === true && isRecord(value.result),
+      };
+    }
+
+    case "x": {
+      if (!accessToken) {
+        return result(
+          "not_configured",
+          "Connect X to authorize posting; a current access token is required.",
+          now,
+        );
+      }
+      return {
+        url: new URL(HEALTH_ENDPOINTS[options.provider]),
+        init: baseInit({ authorization: `Bearer ${accessToken}` }),
+        isValidPayload: (value) => isRecord(value) && isRecord(value.data),
+      };
+    }
+
+    case "media-relay": {
+      const accessKeyId = requiredString(options.credentials, "accessKeyId");
+      const bucket = requiredString(options.configuration, "bucket");
+      const endpoint = requiredString(options.configuration, "endpoint");
+      if (!accessKeyId || !bucket || !endpoint) {
+        return result(
+          "not_configured",
+          "Object storage needs an endpoint, region, bucket, public base URL and access key.",
+          now,
+        );
+      }
+      // Not probed. A signed HEAD would be a real request against the
+      // operator's bucket from a code path whose whole job is uploads, and the
+      // first upload establishes the same fact with no extra permission.
+      return result(
+        "degraded",
+        "Object storage settings are stored. The connection is verified by the first upload, which is also the only thing this connector does.",
+        now,
+      );
     }
 
     case "dataforseo": {

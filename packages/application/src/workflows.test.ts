@@ -28,6 +28,8 @@ function leafRegistry(): LeafModuleRegistry {
     leaf("research-keyword-research"),
     leaf("research-content-plan"),
     leaf("research-osint-research"),
+    leaf("research-ads-audit"),
+    leaf("research-marketing-report"),
   ];
   return new Map(modules.map((module) => [module.id, module]));
 }
@@ -51,6 +53,8 @@ describe("workflow registry", () => {
       ["keyword-research", "research-keyword-research"],
       ["content-plan", "research-content-plan"],
       ["osint-research", "research-osint-research"],
+      ["ads-audit", "research-ads-audit"],
+      ["marketing-report", "research-marketing-report"],
     ]);
     for (const id of runtimeWorkflowIds) {
       const workflow = workflowById(workflows, id);

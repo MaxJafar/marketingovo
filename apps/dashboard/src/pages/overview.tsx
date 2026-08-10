@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useOverview, useStartAudit } from "../api/queries";
 import { useSite } from "../context/site-context";
+import { fmt, useI18n } from "../i18n";
 import { ActionCard } from "../components/action-card";
 import { FreshnessNotice, QueryState } from "../components/data-state";
 import { Icon } from "../components/icon";
@@ -20,6 +21,7 @@ import {
 } from "../components/ui";
 
 export function OverviewPage() {
+  const { t } = useI18n();
   const { siteId, site } = useSite();
   const overviewQuery = useOverview(siteId);
   const startAudit = useStartAudit();
@@ -30,9 +32,13 @@ export function OverviewPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Decision center"
-        title={site ? `${site.name} overview` : "Your marketing overview"}
-        description="See what changed, what matters, and which move is most likely to improve results."
+        eyebrow={t.overview.eyebrow}
+        title={
+          site
+            ? fmt(t.overview.siteTitle, { name: site.name })
+            : t.overview.fallbackTitle
+        }
+        description={t.overview.description}
         actions={
           <Button
             onClick={() =>
@@ -41,18 +47,20 @@ export function OverviewPage() {
             disabled={!siteId || startAudit.isPending}
           >
             <Icon name="audits" />{" "}
-            {startAudit.isPending ? "Starting audit…" : "Run full audit"}
+            {startAudit.isPending
+              ? t.overview.startingAudit
+              : t.overview.runFullAudit}
           </Button>
         }
       />
       {startAudit.isError ? (
-        <InlineNotice tone="danger" title="Audit could not start">
+        <InlineNotice tone="danger" title={t.overview.auditNotStartedTitle}>
           {startAudit.error.message}
         </InlineNotice>
       ) : null}
       {startAudit.isSuccess ? (
-        <InlineNotice tone="success" title="Audit queued">
-          The audit was accepted. Track progress from the Audits workspace.
+        <InlineNotice tone="success" title={t.overview.auditQueuedTitle}>
+          {t.overview.auditQueuedBody}
         </InlineNotice>
       ) : null}
       <QueryState
@@ -67,32 +75,29 @@ export function OverviewPage() {
             <section className="overview-hero" aria-labelledby="health-title">
               <Card className="health-card">
                 <div className="health-copy">
-                  <p className="eyebrow">Site health</p>
-                  <h2 id="health-title">
-                    A clear baseline for your next decision
-                  </h2>
-                  <p>
-                    The health score combines the signals returned by your
-                    configured audit sources. Missing inputs remain visible.
-                  </p>
+                  <p className="eyebrow">{t.overview.health.eyebrow}</p>
+                  <h2 id="health-title">{t.overview.health.title}</h2>
+                  <p>{t.overview.health.body}</p>
                   <Link to="/actions" className="text-link">
-                    Review prioritized actions <Icon name="arrow" />
+                    {t.overview.health.reviewActions} <Icon name="arrow" />
                   </Link>
                 </div>
                 <div
                   className={`health-score ${overview.siteHealth.value === null || overview.siteHealth.value === undefined ? "health-score-missing" : ""}`}
                 >
-                  <span>Current score</span>
+                  <span>{t.overview.health.currentScore}</span>
                   <strong>{formatMetric(overview.siteHealth)}</strong>
                   {overview.siteHealth.change !== null &&
                   overview.siteHealth.change !== undefined ? (
                     <small>
-                      {overview.siteHealth.change >= 0 ? "+" : ""}
-                      {formatNumber(overview.siteHealth.change)} health points
-                      vs prior audit
+                      {fmt(t.overview.health.pointsVsPriorAudit, {
+                        change:
+                          (overview.siteHealth.change >= 0 ? "+" : "") +
+                          formatNumber(overview.siteHealth.change),
+                      })}
                     </small>
                   ) : (
-                    <small>Comparison unavailable</small>
+                    <small>{t.overview.health.comparisonUnavailable}</small>
                   )}
                 </div>
               </Card>
@@ -101,13 +106,13 @@ export function OverviewPage() {
                   <span className="regression-icon">
                     <Icon name="warning" />
                   </span>
-                  <p className="eyebrow">Watch now</p>
+                  <p className="eyebrow">{t.overview.regressions.eyebrow}</p>
                 </div>
                 <strong>{formatMetric(overview.criticalRegressions)}</strong>
-                <h2>Critical regressions</h2>
-                <p>Issues that may need immediate triage.</p>
+                <h2>{t.overview.regressions.title}</h2>
+                <p>{t.overview.regressions.body}</p>
                 <Link to="/actions" className="text-link">
-                  Open action queue <Icon name="arrow" />
+                  {t.overview.regressions.openQueue} <Icon name="arrow" />
                 </Link>
               </Card>
             </section>
@@ -115,27 +120,27 @@ export function OverviewPage() {
             <section aria-labelledby="performance-title">
               <SectionHeading
                 id="performance-title"
-                title="Performance at a glance"
-                description="Marketing outcomes and technical coverage, without turning missing data into zero."
+                title={t.overview.performance.title}
+                description={t.overview.performance.description}
               />
               <div className="metric-grid">
                 <MetricCard
-                  label="Organic clicks"
+                  label={t.overview.performance.organicClicks}
                   metric={overview.organicClicks}
-                  help="Connect Search Console for comparisons"
+                  help={t.overview.performance.organicClicksHelp}
                 />
                 <MetricCard
-                  label="Organic key events"
+                  label={t.overview.performance.organicKeyEvents}
                   metric={overview.organicKeyEvents}
                   tone="positive"
-                  help="Connect GA4 to measure organic outcomes"
+                  help={t.overview.performance.organicKeyEventsHelp}
                 />
                 <MetricCard
-                  label="Indexable coverage"
+                  label={t.overview.performance.indexableCoverage}
                   metric={overview.indexableCoverage}
                 />
                 <MetricCard
-                  label="Core Web Vitals pass rate"
+                  label={t.overview.performance.coreWebVitalsPassRate}
                   metric={overview.coreWebVitalsPassRate}
                 />
               </div>
@@ -144,11 +149,11 @@ export function OverviewPage() {
             <section aria-labelledby="actions-title">
               <SectionHeading
                 id="actions-title"
-                title="Top 5 actions"
-                description="Ranked by estimated impact, effort, confidence, and the evidence supplied by the API."
+                title={t.overview.topActions.title}
+                description={t.overview.topActions.description}
                 action={
                   <Link to="/actions" className="text-link">
-                    View all actions <Icon name="arrow" />
+                    {t.overview.topActions.viewAll} <Icon name="arrow" />
                   </Link>
                 }
               />
@@ -164,8 +169,8 @@ export function OverviewPage() {
                 </div>
               ) : (
                 <EmptyState
-                  title="No prioritized actions yet"
-                  description="Run a baseline audit after connecting your data sources. A valid empty result is shown as empty—not as a perfect score."
+                  title={t.overview.topActions.emptyTitle}
+                  description={t.overview.topActions.emptyDescription}
                 />
               )}
             </section>
@@ -173,15 +178,15 @@ export function OverviewPage() {
             <div className="overview-lower-grid">
               <TrendChart
                 points={overview.healthTrend ?? []}
-                title="Health score trend"
+                title={t.overview.trendTitle}
               />
               <Card className="source-health">
                 <SectionHeading
-                  title="Data source health"
-                  description="Know which inputs support this view."
+                  title={t.overview.sources.title}
+                  description={t.overview.sources.description}
                   action={
                     <Link to="/integrations" className="text-link">
-                      Manage
+                      {t.overview.sources.manage}
                     </Link>
                   }
                 />
@@ -197,7 +202,9 @@ export function OverviewPage() {
                             <strong>{source.name}</strong>
                             <small>
                               {source.message ??
-                                `Updated ${formatDate(source.updatedAt, true)}`}
+                                fmt(t.overview.sources.updated, {
+                                  date: formatDate(source.updatedAt, true),
+                                })}
                             </small>
                           </div>
                         </div>
@@ -206,7 +213,9 @@ export function OverviewPage() {
                           {source.coverage !== null &&
                           source.coverage !== undefined ? (
                             <small>
-                              {formatNumber(source.coverage)}% coverage
+                              {fmt(t.overview.sources.coverage, {
+                                value: formatNumber(source.coverage),
+                              })}
                             </small>
                           ) : null}
                         </div>
@@ -216,9 +225,9 @@ export function OverviewPage() {
                 ) : (
                   <InlineNotice
                     tone="warning"
-                    title="Source status unavailable"
+                    title={t.overview.sources.unavailableTitle}
                   >
-                    The API did not identify the sources behind this overview.
+                    {t.overview.sources.unavailableBody}
                   </InlineNotice>
                 )}
               </Card>

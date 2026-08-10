@@ -396,7 +396,7 @@ test("turns the one-time local bootstrap into a real audit and prioritized actio
   await expectNoWcagViolations(page, "Setup checklist");
   await page.getByLabel("Workspace name").fill("Synthetic marketer site");
   await page.getByLabel("Canonical URL").fill(`${fixtureOrigin}/`);
-  await page.getByRole("button", { name: "Add site" }).click();
+  await page.getByRole("button", { name: /Create workspace/u }).click();
 
   await expect(
     page.getByRole("heading", { name: "Synthetic marketer site" }),

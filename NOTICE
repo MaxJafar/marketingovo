@@ -21,3 +21,9 @@ locally and every capability in this repository is available to everyone.
 
 Third-party notices are generated for each release from the dependency lockfile
 and are distributed with release artifacts.
+
+Departure Mono v1.500 is included in the dashboard as a web font. Copyright
+2022–2024 Helena Zhang (helenazhang.com), licensed under the SIL Open Font
+License, Version 1.1. The complete license text is vendored at
+apps/dashboard/public/pixel/font/OFL.txt; the license permits embedding and
+redistribution with software subject to its terms.

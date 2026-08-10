@@ -1,28 +1,42 @@
 import type { PageRecord } from "../api/contracts";
+import type { Messages } from "../i18n";
 
-const REASON_LABELS: Record<string, string> = {
-  indexable: "Verified from crawl evidence",
-  robots_blocked: "Blocked by robots.txt",
-  meta_noindex: "Meta robots noindex",
-  x_robots_noindex: "X-Robots-Tag noindex",
-  canonicalized: "Canonical points to another URL",
-  non_html: "Non-HTML response",
-  redirect: "Redirect response",
-  http_error: "HTTP error response",
-  no_content: "No response content",
-  fetch_error: "Fetch failed",
-  missing_status: "HTTP status unavailable",
-  unexpected_status: "Unexpected HTTP status",
-  missing_content_type: "Content type unavailable",
-  robots_unknown: "Robots evidence unavailable",
-  parse_failed: "HTML evidence unavailable",
+/**
+ * API reason codes mapped onto their message keys in `pages.indexability`.
+ * The codes are wire values, so an unrecognized one falls through to the
+ * humanized raw string below rather than disappearing.
+ */
+const REASON_KEYS: Record<
+  string,
+  keyof Messages["pages"]["indexability"]["reasons"]
+> = {
+  indexable: "indexable",
+  robots_blocked: "robotsBlocked",
+  meta_noindex: "metaNoindex",
+  x_robots_noindex: "xRobotsNoindex",
+  canonicalized: "canonicalized",
+  non_html: "nonHtml",
+  redirect: "redirect",
+  http_error: "httpError",
+  no_content: "noContent",
+  fetch_error: "fetchError",
+  missing_status: "missingStatus",
+  unexpected_status: "unexpectedStatus",
+  missing_content_type: "missingContentType",
+  robots_unknown: "robotsUnknown",
+  parse_failed: "parseFailed",
 };
 
-export function indexabilityReasonLabel(page: PageRecord): string {
+export function indexabilityReasonLabel(
+  page: PageRecord,
+  messages: Messages["pages"],
+): string {
+  const labels = messages.indexability;
   const reason = page.indexabilityReason;
-  if (reason && REASON_LABELS[reason]) return REASON_LABELS[reason];
+  const key = reason ? REASON_KEYS[reason] : undefined;
+  if (key) return labels.reasons[key];
   if (reason) return reason.replaceAll("_", " ");
-  if (page.indexability === "indexable") return REASON_LABELS.indexable;
-  if (page.indexability === "unknown") return "Evidence unavailable";
-  return "Legacy audit result";
+  if (page.indexability === "indexable") return labels.reasons.indexable;
+  if (page.indexability === "unknown") return labels.evidenceUnavailable;
+  return labels.legacyResult;
 }

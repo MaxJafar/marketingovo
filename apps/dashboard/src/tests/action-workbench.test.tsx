@@ -81,6 +81,15 @@ vi.mock("../context/site-context", () => ({
 }));
 
 vi.mock("../api/queries", () => ({
+  useCapabilities: () => ({
+    data: {
+      data: {
+        projectId: "project-1",
+        available: ["website", "search-console", "analytics", "serp"],
+        states: [],
+      },
+    },
+  }),
   useActions: () => ({
     data: {
       data: { items: mocks.actions, total: mocks.actions.length },

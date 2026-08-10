@@ -1,4 +1,5 @@
 import type { TrendPoint } from "../api/contracts";
+import { fmt, useI18n } from "../i18n";
 import { Card, EmptyState } from "./ui";
 
 export function TrendChart({
@@ -8,6 +9,7 @@ export function TrendChart({
   points: TrendPoint[];
   title: string;
 }) {
+  const { t } = useI18n();
   const valid = points.filter(
     (point): point is TrendPoint & { value: number } =>
       typeof point.value === "number",
@@ -15,8 +17,8 @@ export function TrendChart({
   if (valid.length < 2) {
     return (
       <EmptyState
-        title="Trend unavailable"
-        description="At least two dated measurements are needed to draw a trustworthy trend."
+        title={t.common.trendUnavailable}
+        description={t.common.trendEmptyBody}
       />
     );
   }
@@ -35,16 +37,16 @@ export function TrendChart({
     <Card className="trend-card">
       <div className="trend-header">
         <div>
-          <p className="eyebrow">Historical signal</p>
+          <p className="eyebrow">{t.common.historicalSignal}</p>
           <h2>{title}</h2>
         </div>
-        <span>{valid.length} observations</span>
+        <span>{fmt(t.common.observations, { count: valid.length })}</span>
       </div>
       <svg
         className="trend-chart"
         viewBox="0 0 600 200"
         role="img"
-        aria-label={`${title}, from ${min} to ${max}`}
+        aria-label={fmt(t.common.trendRange, { title, min, max })}
       >
         <defs>
           <linearGradient id="trend-fill" x1="0" y1="0" x2="0" y2="1">

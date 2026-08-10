@@ -112,7 +112,7 @@ that run belongs to the same project. Entries have stable sequences and no
 update or delete endpoint. A later entry records a correction explicitly.
 
 These records guide interpretation but do not replace crawl or provider
-evidence. MCP exposes them as a read-only project resource; the six workflow
+evidence. MCP exposes them as a read-only project resource; the workflow
 tools remain unchanged. Secret-like text and local paths are rejected before a
 write, while audit events record only structural metadata. `.marketingovo` transfer
 includes the complete stored context and remaps project, entry, and linked-run
@@ -220,9 +220,9 @@ redirected, broken, and uncrawled targets. Active runs, non-audit workflows,
 malformed URLs, and cross-snapshot page guesses fail through typed Problem
 Details.
 
-The six workflow-level agent tools have one TypeBox/JSON Schema registry in
-`@marketingovo/contracts`. MCP derives Zod validators from those schemas and
+The nineteen workflow-level agent tools have one TypeBox/JSON Schema registry
+in `@marketingovo/contracts`. MCP derives Zod validators from those schemas and
 OpenClaw derives typed `Unsafe` projections without redefining their fields.
 Build and bundle tests verify strict objects, defaults, numeric and collection
-limits, URL protocols, safety metadata, manifest parity, and the exact six-tool
-surface across MCP, Codex, and OpenClaw.
+limits, URL protocols, safety metadata, manifest parity, and the exact
+nineteen-tool surface across MCP, Codex, and OpenClaw.

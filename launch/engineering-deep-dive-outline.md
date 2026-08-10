@@ -6,7 +6,7 @@
 
 ## Audience and promise
 
-Audience: TypeScript engineers, agent-platform builders, technical SEOs, and contributors evaluating Marketingovo `1.1.0`.
+Audience: TypeScript engineers, agent-platform builders, technical SEOs, and contributors evaluating Marketingovo `1.2.0`.
 
 Promise: explain the product’s decision model, runtime boundaries, and honest data-state handling with reproducible code references. Do not frame the article as a production-readiness announcement.
 
@@ -146,7 +146,7 @@ Explain:
 
 Use the phrase “open source under the Apache License 2.0” for Marketingovo.
 
-## 10. What 1.1.0 does not prove yet
+## 10. What 1.2.0 does not prove yet
 
 Repeat the known limits from [`docs/release-status.md`](../docs/release-status.md):
 

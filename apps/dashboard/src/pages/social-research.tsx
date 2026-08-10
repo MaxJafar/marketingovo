@@ -1,19 +1,16 @@
 import { Link } from "@tanstack/react-router";
 import { useSite } from "../context/site-context";
 import { useIntegrations } from "../api/queries";
-import { PixelSprite } from "../components/pixel-sprite";
-import { panelGlyphs, socialGlyphs } from "../components/pixel-glyphs";
-import { PixelLineChart, SparkBars } from "../components/pixel-charts";
-import { DEMO, formatCompact } from "../lib/intel";
+import { fmt, useI18n } from "../i18n";
 
 /**
  * Social research.
  *
- * Marketingovo has no social connector yet, and this page says so rather than
- * dressing the sample set up as measurement. The charts are here because the
- * shape of the answer is worth showing before the data source exists — but
- * every one of them carries a demo flag, and the first thing the page states is
- * which sources are actually connected.
+ * Marketingovo has no social listening collector, and this page says so
+ * plainly instead of drawing sample charts. What IS measured lives elsewhere:
+ * the content calendar records exactly what was published where, and the
+ * cross-channel report counts those sends with their availability stated.
+ * A chart of invented mentions would poison both.
  */
 
 const SOCIAL_CONNECTOR_HINT = [
@@ -26,6 +23,7 @@ const SOCIAL_CONNECTOR_HINT = [
 ];
 
 export function SocialResearchPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const integrations = useIntegrations(siteId);
   const items = integrations.data?.data.items ?? [];
@@ -44,21 +42,23 @@ export function SocialResearchPage() {
     <>
       <section className="pixel-panel">
         <div className="pixel-panel-head">
-          <h2>Source status</h2>
+          <h2>{t.socialResearch.status.title}</h2>
         </div>
         <div className="pixel-panel-body">
           {connected.length > 0 ? (
             <p className="pixel-hero-sub">
-              {connected.length} social source
-              {connected.length === 1 ? "" : "s"} connected. Mention volumes
-              below still come from the sample set until the collector ships.
+              {fmt(
+                connected.length === 1
+                  ? t.socialResearch.status.connectedSingular
+                  : t.socialResearch.status.connectedPlural,
+                { count: connected.length },
+              )}
             </p>
           ) : (
             <p className="pixel-hero-sub">
-              No social source is connected, so nothing on this page is measured
-              from your accounts. Everything below is a labelled sample.{" "}
+              {t.socialResearch.status.none}{" "}
               <Link to="/integrations" className="pixel-linklike">
-                connect a source
+                {t.socialResearch.status.connectLink}
               </Link>
             </p>
           )}
@@ -66,83 +66,35 @@ export function SocialResearchPage() {
       </section>
 
       <div className="pixel-grid">
-        <section className="pixel-panel pixel-col-8">
+        <section className="pixel-panel pixel-col-6">
           <div className="pixel-panel-head">
-            <h2>Mentions trend</h2>
-            <span className="pixel-panel-mark">
-              <span className="pixel-demo-flag">demo</span>
-              <PixelSprite
-                src="/pixel/panel/chat.png"
-                fallback={panelGlyphs.chat}
-                size={22}
-              />
-            </span>
+            <h2>{t.socialResearch.measured.title}</h2>
           </div>
           <div className="pixel-panel-body">
-            <PixelLineChart
-              title="Sample mentions trend over thirty days"
-              series={DEMO.mentionsSeries.map((entry) => ({
-                ...entry,
-                points: [...entry.points],
-              }))}
-              xLabels={[...DEMO.mentionsAxis]}
-              height={220}
-            />
-            <div className="pixel-feed-meta" style={{ marginTop: 12 }}>
-              {DEMO.mentionsSeries.map((entry) => (
-                <span key={entry.id}>
-                  <span style={{ color: entry.colour }}>■</span> {entry.label}
-                </span>
-              ))}
+            <p className="pixel-hero-sub">{t.socialResearch.measured.body}</p>
+            <div className="pixel-row-actions" style={{ marginTop: 12 }}>
+              <Link
+                to="/calendar"
+                className="pixel-button pixel-button-primary"
+              >
+                {t.socialResearch.measured.openCalendar}
+              </Link>
+              <Link to="/report" className="pixel-button">
+                {t.socialResearch.measured.openReport}
+              </Link>
             </div>
           </div>
         </section>
 
-        <section className="pixel-panel pixel-col-4">
+        <section className="pixel-panel pixel-col-6">
           <div className="pixel-panel-head">
-            <h2>By platform</h2>
-            <span className="pixel-panel-mark">
-              <span className="pixel-demo-flag">demo</span>
-            </span>
-          </div>
-          <div className="pixel-panel-body">
-            <div className="pixel-platforms">
-              {DEMO.platforms.map((platform) => (
-                <div className="pixel-platform" key={platform.id}>
-                  <PixelSprite
-                    src={`/pixel/social/${platform.id}.png`}
-                    fallback={socialGlyphs[platform.id]}
-                    size={20}
-                  />
-                  <span className="pixel-platform-name">{platform.name}</span>
-                  <SparkBars
-                    values={[...DEMO.mentionsSpark]}
-                    accent="cyan"
-                    width={52}
-                    height={18}
-                  />
-                  <span className="pixel-platform-count">
-                    {formatCompact(platform.count)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="pixel-panel pixel-col-12">
-          <div className="pixel-panel-head">
-            <h2>Ask the agent</h2>
+            <h2>{t.socialResearch.agent.title}</h2>
           </div>
           <div className="pixel-panel-body">
             <p className="pixel-hero-sub">
-              Social listening is not yet a Marketingovo collector. An attached
-              agent can still research this for you from its own tools — try
-              asking it in the terminal below, for example{" "}
-              <code>
-                summarise what people said about us on Reddit this month
-              </code>
-              .
+              {t.socialResearch.agent.bodyBefore}{" "}
+              <code>{t.socialResearch.agent.examplePrompt}</code>
+              {t.socialResearch.agent.bodyAfter}
             </p>
           </div>
         </section>

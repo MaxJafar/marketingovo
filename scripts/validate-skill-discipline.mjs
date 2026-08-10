@@ -183,9 +183,14 @@ const commandFiles = (await readdir(commandsRoot)).filter((name) =>
   name.endsWith(".md"),
 );
 
+// Only commands that start durable runs must poll before reporting. The
+// run-starting tools are exactly the `_start`-suffixed names — the contract
+// tests pin that naming — while the other non-read-only tools (draft an email,
+// generate a report, create a campaign link) answer synchronously and have no
+// run to poll; telling an agent to poll one would be a false instruction.
 const startTools = new Set(
-  PUBLIC_AGENT_TOOL_CONTRACTS.filter(
-    (contract) => contract.annotations?.readOnlyHint !== true,
+  PUBLIC_AGENT_TOOL_CONTRACTS.filter((contract) =>
+    contract.name.endsWith("_start"),
   ).map((contract) => contract.name),
 );
 

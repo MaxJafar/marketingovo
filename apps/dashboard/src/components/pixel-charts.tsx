@@ -119,9 +119,17 @@ export interface MeterRowProps {
   value: number | null;
   max?: number;
   suffix?: string;
+  /** Pre-formatted value text; overrides the rounded `value/max` default. */
+  display?: string;
 }
 
-export function MeterRow({ name, value, max = 100, suffix }: MeterRowProps) {
+export function MeterRow({
+  name,
+  value,
+  max = 100,
+  suffix,
+  display,
+}: MeterRowProps) {
   const known = value !== null && Number.isFinite(value);
   const ratio = known ? Math.max(0, Math.min(1, value / max)) : 0;
   return (
@@ -129,7 +137,8 @@ export function MeterRow({ name, value, max = 100, suffix }: MeterRowProps) {
       <span className="pixel-meter-name">{name}</span>
       <span className="pixel-meter-value">
         {known
-          ? `${Math.round(value)}${suffix ?? `/${Math.round(max)}`}`
+          ? (display ??
+            `${Math.round(value)}${suffix ?? `/${Math.round(max)}`}`)
           : "no data"}
       </span>
       <span className="pixel-meter-track">
@@ -138,6 +147,50 @@ export function MeterRow({ name, value, max = 100, suffix }: MeterRowProps) {
           style={{ width: `${ratio * 100}%` }}
         />
       </span>
+    </div>
+  );
+}
+
+export interface PairedBarRow {
+  name: string;
+  current: number;
+  currentDisplay: string;
+  previous: number;
+  previousDisplay: string;
+}
+
+/**
+ * Two periods of the same figure, one above the other. Bars are scaled within
+ * their own row — rows carry different units, so only the printed figures are
+ * comparable across rows. Pink is this period, cyan the previous one.
+ */
+export function PixelPairedBars({ rows }: { rows: PairedBarRow[] }) {
+  if (rows.length === 0) return null;
+  return (
+    <div className="pixel-meters">
+      {rows.map((row) => {
+        const max = Math.max(row.current, row.previous, 1e-9);
+        return (
+          <div key={row.name} className="pixel-meter pixel-meter-paired">
+            <span className="pixel-meter-name">{row.name}</span>
+            <span className="pixel-meter-value">
+              {row.currentDisplay} · was {row.previousDisplay}
+            </span>
+            <span className="pixel-meter-track">
+              <span
+                className="pixel-meter-fill"
+                style={{ width: `${(row.current / max) * 100}%` }}
+              />
+            </span>
+            <span className="pixel-meter-track">
+              <span
+                className="pixel-meter-fill pixel-meter-fill-previous"
+                style={{ width: `${(row.previous / max) * 100}%` }}
+              />
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }

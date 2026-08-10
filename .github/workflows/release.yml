@@ -29,9 +29,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if gh release view "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
-            gh release edit "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --draft --title "Marketingovo ${GITHUB_REF_NAME}" --notes "Platform-verified installers, signed updater artifacts, reproducible npm packages, checksums, SBOM and provenance. Marketingovo is open source under the Apache License 2.0. See the attached verification records."
+            gh release edit "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --draft --title "Marketingovo ${GITHUB_REF_NAME}" --notes "Draft release, created before the verification matrix runs. Nothing here is verified until the pipeline completes and attaches its evidence records, and any distribution channel declared deferred in release/acceptance/ is not part of this release. Marketingovo is open source under the Apache License 2.0."
           else
-            gh release create "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --draft --verify-tag --title "Marketingovo ${GITHUB_REF_NAME}" --notes "Platform-verified installers, signed updater artifacts, reproducible npm packages, checksums, SBOM and provenance. Marketingovo is open source under the Apache License 2.0. See the attached verification records."
+            gh release create "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --draft --verify-tag --title "Marketingovo ${GITHUB_REF_NAME}" --notes "Draft release, created before the verification matrix runs. Nothing here is verified until the pipeline completes and attaches its evidence records, and any distribution channel declared deferred in release/acceptance/ is not part of this release. Marketingovo is open source under the Apache License 2.0."
           fi
 
   release-approval:

@@ -9,7 +9,13 @@ import type {
 } from "../api/contracts";
 import { useActions, useUpdateAction } from "../api/queries";
 import { useSite } from "../context/site-context";
-import { FreshnessNotice, QueryState } from "../components/data-state";
+import { fmt, useI18n } from "../i18n";
+import {
+  CapabilityGate,
+  FreshnessNotice,
+  QueryState,
+} from "../components/data-state";
+import { NEEDS_WEBSITE, useWorkspaceCapabilities } from "../lib/capabilities";
 import { Icon } from "../components/icon";
 import {
   Button,
@@ -40,10 +46,6 @@ const verificationStates: readonly ActionVerification[] = [
   "regressed",
 ];
 
-function displayLabel(value: string): string {
-  return value.replaceAll("_", " ");
-}
-
 function normalizedEffort(
   effort: ActionEffort | null | undefined,
 ): Exclude<EffortFilter, "all"> | null {
@@ -73,7 +75,9 @@ function compareNumberDescending(
 }
 
 export function ActionsPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
+  const { capabilities } = useWorkspaceCapabilities(siteId);
   const query = useActions(siteId);
   const updateAction = useUpdateAction(siteId);
   const [search, setSearch] = useState("");
@@ -141,293 +145,319 @@ export function ActionsPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Evidence-to-outcome workbench"
-        title="Actions"
-        description="Prioritize, investigate, assign, and verify SEO work without separating technical evidence from business exposure."
+        eyebrow={t.actions.eyebrow}
+        title={t.actions.title}
+        description={t.actions.description}
       />
-      <QueryState
-        isLoading={query.isLoading}
-        error={query.error}
-        siteId={siteId}
-        onRetry={() => void query.refetch()}
-      >
-        <FreshnessNotice meta={query.data?.meta} />
-        {updateAction.isError ? (
-          <InlineNotice tone="danger" title="Action status was not saved">
-            {updateAction.error.message}
-          </InlineNotice>
-        ) : null}
-        <section
-          className="workbench-controls"
-          aria-labelledby="action-filter-title"
+      <CapabilityGate capabilities={capabilities} requires={NEEDS_WEBSITE}>
+        <QueryState
+          isLoading={query.isLoading}
+          error={query.error}
+          siteId={siteId}
+          onRetry={() => void query.refetch()}
         >
-          <div className="workbench-control-heading">
-            <div>
-              <h2 id="action-filter-title">Find the work that matters now</h2>
-              <p>
-                Search by recommendation, rule, module, or owner. Missing
-                evidence stays unavailable and never becomes zero.
-              </p>
+          <FreshnessNotice meta={query.data?.meta} />
+          {updateAction.isError ? (
+            <InlineNotice tone="danger" title={t.actions.statusNotSavedTitle}>
+              {updateAction.error.message}
+            </InlineNotice>
+          ) : null}
+          <section
+            className="workbench-controls"
+            aria-labelledby="action-filter-title"
+          >
+            <div className="workbench-control-heading">
+              <div>
+                <h2 id="action-filter-title">{t.actions.filterTitle}</h2>
+                <p>{t.actions.filterDescription}</p>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={resetFilters}
+                disabled={!filtersActive}
+              >
+                {t.actions.resetFilters}
+              </Button>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={resetFilters}
-              disabled={!filtersActive}
-            >
-              Reset filters
-            </Button>
-          </div>
-          <div className="workbench-filter-grid">
-            <label className="workbench-search">
-              <span>Search actions</span>
-              <span className="search-field">
-                <Icon name="search" />
-                <input
-                  type="search"
-                  value={search}
-                  onChange={(event) => setSearch(event.currentTarget.value)}
-                  placeholder="Canonical, broken links, owner…"
-                />
-              </span>
-            </label>
-            <label>
-              Status
-              <select
-                value={status}
-                onChange={(event) =>
-                  setStatus(event.currentTarget.value as StatusFilter)
-                }
-              >
-                <option value="all">All statuses</option>
-                {actionStatuses.map((value) => (
-                  <option key={value} value={value}>
-                    {displayLabel(value)}
+            <div className="workbench-filter-grid">
+              <label className="workbench-search">
+                <span>{t.actions.searchLabel}</span>
+                <span className="search-field">
+                  <Icon name="search" />
+                  <input
+                    type="search"
+                    value={search}
+                    onChange={(event) => setSearch(event.currentTarget.value)}
+                    placeholder={t.actions.searchPlaceholder}
+                  />
+                </span>
+              </label>
+              <label>
+                {t.actions.statusFilterLabel}
+                <select
+                  value={status}
+                  onChange={(event) =>
+                    setStatus(event.currentTarget.value as StatusFilter)
+                  }
+                >
+                  <option value="all">{t.actions.allStatuses}</option>
+                  {actionStatuses.map((value) => (
+                    <option key={value} value={value}>
+                      {t.actions.statusLabel[value]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                {t.actions.verificationFilterLabel}
+                <select
+                  value={verification}
+                  onChange={(event) =>
+                    setVerification(
+                      event.currentTarget.value as VerificationFilter,
+                    )
+                  }
+                >
+                  <option value="all">{t.actions.allVerification}</option>
+                  {verificationStates.map((value) => (
+                    <option key={value} value={value}>
+                      {t.actions.verificationLabel[value]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                {t.actions.effortFilterLabel}
+                <select
+                  value={effort}
+                  onChange={(event) =>
+                    setEffort(event.currentTarget.value as EffortFilter)
+                  }
+                >
+                  <option value="all">{t.actions.allEffort}</option>
+                  <option value="low">{t.actions.effortOption.low}</option>
+                  <option value="medium">
+                    {t.actions.effortOption.medium}
                   </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Verification
-              <select
-                value={verification}
-                onChange={(event) =>
-                  setVerification(
-                    event.currentTarget.value as VerificationFilter,
-                  )
-                }
-              >
-                <option value="all">All verification</option>
-                {verificationStates.map((value) => (
-                  <option key={value} value={value}>
-                    {displayLabel(value)}
+                  <option value="high">{t.actions.effortOption.high}</option>
+                </select>
+              </label>
+              <label>
+                {t.actions.sortByLabel}
+                <select
+                  value={sort}
+                  onChange={(event) =>
+                    setSort(event.currentTarget.value as ActionSort)
+                  }
+                >
+                  <option value="priority">
+                    {t.actions.sortOption.priority}
                   </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Effort
-              <select
-                value={effort}
-                onChange={(event) =>
-                  setEffort(event.currentTarget.value as EffortFilter)
-                }
-              >
-                <option value="all">All effort</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </label>
-            <label>
-              Sort by
-              <select
-                value={sort}
-                onChange={(event) =>
-                  setSort(event.currentTarget.value as ActionSort)
-                }
-              >
-                <option value="priority">Priority score</option>
-                <option value="updated">Most recently updated</option>
-                <option value="affected">Affected URLs</option>
-                <option value="confidence">Confidence</option>
-              </select>
-            </label>
-          </div>
-          <fieldset className="priority-filter-fieldset">
-            <legend>Priority</legend>
-            <div
-              className="filter-bar"
-              role="group"
-              aria-label="Filter actions by priority"
-            >
-              {(["all", "critical", "high", "medium", "low"] as const).map(
-                (value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={priority === value ? "filter-active" : ""}
-                    aria-pressed={priority === value}
-                    onClick={() => setPriority(value)}
-                  >
-                    {value[0].toUpperCase() + value.slice(1)}
-                  </button>
-                ),
-              )}
+                  <option value="updated">
+                    {t.actions.sortOption.updated}
+                  </option>
+                  <option value="affected">
+                    {t.actions.sortOption.affected}
+                  </option>
+                  <option value="confidence">
+                    {t.actions.sortOption.confidence}
+                  </option>
+                </select>
+              </label>
             </div>
-          </fieldset>
-        </section>
+            <fieldset className="priority-filter-fieldset">
+              <legend>{t.actions.priorityLegend}</legend>
+              <div
+                className="filter-bar"
+                role="group"
+                aria-label={t.actions.priorityGroupLabel}
+              >
+                {(["all", "critical", "high", "medium", "low"] as const).map(
+                  (value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={priority === value ? "filter-active" : ""}
+                      aria-pressed={priority === value}
+                      onClick={() => setPriority(value)}
+                    >
+                      {t.actions.priorityFilter[value]}
+                    </button>
+                  ),
+                )}
+              </div>
+            </fieldset>
+          </section>
 
-        <p className="workbench-result-count" role="status" aria-live="polite">
-          Showing {formatNumber(visibleActions.length)} of{" "}
-          {formatNumber(actions.length)} actions
-        </p>
+          <p
+            className="workbench-result-count"
+            role="status"
+            aria-live="polite"
+          >
+            {fmt(t.actions.showingCount, {
+              visible: formatNumber(visibleActions.length),
+              total: formatNumber(actions.length),
+            })}
+          </p>
 
-        {visibleActions.length > 0 ? (
-          <div className="table-shell action-workbench-table">
-            <table aria-label="Prioritized SEO actions">
-              <thead>
-                <tr>
-                  <th scope="col">Priority</th>
-                  <th scope="col">Action and evidence group</th>
-                  <th scope="col">Scope</th>
-                  <th scope="col">Effort</th>
-                  <th scope="col">Confidence</th>
-                  <th scope="col">Workflow</th>
-                  <th scope="col">Verification</th>
-                  <th scope="col">Updated</th>
-                </tr>
-              </thead>
-              <tbody>
-                {visibleActions.map((action) => {
-                  const isUpdating =
-                    updateAction.isPending &&
-                    updateAction.variables?.actionId === action.id;
-                  const count = affectedCount(action);
-                  return (
-                    <tr key={action.id}>
-                      <td>
-                        <div className="priority-cell">
-                          <strong>{formatNumber(action.priorityScore)}</strong>
-                          <StatusBadge
-                            status={action.priority ?? "unknown"}
-                            label={action.priority ?? "Unavailable"}
-                          />
-                        </div>
-                      </td>
-                      <td>
-                        <div className="action-title-cell">
-                          <Link
-                            to="/actions/$actionId"
-                            params={{ actionId: action.id }}
-                            className="table-link"
-                          >
-                            {action.title}
-                          </Link>
-                          <p>{action.summary}</p>
-                          <small>
-                            {action.moduleId ?? "Module unavailable"} ·{" "}
-                            {action.ruleId ?? "Rule unavailable"}
-                          </small>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="scope-cell">
-                          <strong>{formatNumber(count)}</strong>
-                          <span>affected URLs</span>
-                          {action.trafficAtRisk !== null &&
-                          action.trafficAtRisk !== undefined ? (
+          {visibleActions.length > 0 ? (
+            <div className="table-shell action-workbench-table">
+              <table aria-label={t.actions.tableLabel}>
+                <thead>
+                  <tr>
+                    <th scope="col">{t.actions.columnPriority}</th>
+                    <th scope="col">{t.actions.columnAction}</th>
+                    <th scope="col">{t.actions.columnScope}</th>
+                    <th scope="col">{t.actions.columnEffort}</th>
+                    <th scope="col">{t.actions.columnConfidence}</th>
+                    <th scope="col">{t.actions.columnWorkflow}</th>
+                    <th scope="col">{t.actions.columnVerification}</th>
+                    <th scope="col">{t.actions.columnUpdated}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleActions.map((action) => {
+                    const isUpdating =
+                      updateAction.isPending &&
+                      updateAction.variables?.actionId === action.id;
+                    const count = affectedCount(action);
+                    return (
+                      <tr key={action.id}>
+                        <td>
+                          <div className="priority-cell">
+                            <strong>
+                              {formatNumber(action.priorityScore)}
+                            </strong>
+                            <StatusBadge
+                              status={action.priority ?? "unknown"}
+                              label={action.priority ?? t.common.unavailable}
+                            />
+                          </div>
+                        </td>
+                        <td>
+                          <div className="action-title-cell">
+                            <Link
+                              to="/actions/$actionId"
+                              params={{ actionId: action.id }}
+                              className="table-link"
+                            >
+                              {action.title}
+                            </Link>
+                            <p>{action.summary}</p>
                             <small>
-                              {formatNumber(action.trafficAtRisk)} organic
-                              visits exposed
+                              {action.moduleId ?? t.actions.moduleUnavailable} ·{" "}
+                              {action.ruleId ?? t.actions.ruleUnavailable}
                             </small>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="scope-cell">
+                            <strong>{formatNumber(count)}</strong>
+                            <span>{t.actions.affectedUrls}</span>
+                            {action.trafficAtRisk !== null &&
+                            action.trafficAtRisk !== undefined ? (
+                              <small>
+                                {fmt(t.actions.organicVisitsExposed, {
+                                  count: formatNumber(action.trafficAtRisk),
+                                })}
+                              </small>
+                            ) : (
+                              <small>
+                                {t.actions.businessExposureUnavailable}
+                              </small>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          {normalizedEffort(action.effort) ? (
+                            <StatusBadge
+                              status={normalizedEffort(action.effort)!}
+                            />
                           ) : (
-                            <small>Business exposure unavailable</small>
+                            t.common.unavailable
                           )}
-                        </div>
-                      </td>
-                      <td>
-                        {normalizedEffort(action.effort) ? (
+                        </td>
+                        <td>
+                          {action.confidence === null ||
+                          action.confidence === undefined
+                            ? t.common.unavailable
+                            : `${formatNumber(action.confidence * 100)}%`}
+                        </td>
+                        <td>
+                          <label className="table-status-control">
+                            <span className="sr-only">
+                              {fmt(t.actions.workflowStatusFor, {
+                                title: action.title,
+                              })}
+                            </span>
+                            <select
+                              aria-label={fmt(t.actions.workflowStatusFor, {
+                                title: action.title,
+                              })}
+                              value={action.status ?? "open"}
+                              disabled={isUpdating}
+                              onChange={(event) =>
+                                updateAction.mutate({
+                                  actionId: action.id,
+                                  status: event.currentTarget
+                                    .value as ActionStatus,
+                                })
+                              }
+                            >
+                              {actionStatuses.map((value) => (
+                                <option key={value} value={value}>
+                                  {t.actions.statusLabel[value]}
+                                </option>
+                              ))}
+                            </select>
+                            {isUpdating ? (
+                              <small role="status">{t.actions.saving}</small>
+                            ) : null}
+                          </label>
+                        </td>
+                        <td>
                           <StatusBadge
-                            status={normalizedEffort(action.effort)!}
-                          />
-                        ) : (
-                          "Unavailable"
-                        )}
-                      </td>
-                      <td>
-                        {action.confidence === null ||
-                        action.confidence === undefined
-                          ? "Unavailable"
-                          : `${formatNumber(action.confidence * 100)}%`}
-                      </td>
-                      <td>
-                        <label className="table-status-control">
-                          <span className="sr-only">
-                            Workflow status for {action.title}
-                          </span>
-                          <select
-                            aria-label={`Workflow status for ${action.title}`}
-                            value={action.status ?? "open"}
-                            disabled={isUpdating}
-                            onChange={(event) =>
-                              updateAction.mutate({
-                                actionId: action.id,
-                                status: event.currentTarget
-                                  .value as ActionStatus,
-                              })
+                            status={action.verification ?? "unknown"}
+                            label={
+                              action.verification
+                                ? t.actions.verificationLabel[
+                                    action.verification
+                                  ]
+                                : t.common.unavailable
                             }
-                          >
-                            {actionStatuses.map((value) => (
-                              <option key={value} value={value}>
-                                {displayLabel(value)}
-                              </option>
-                            ))}
-                          </select>
-                          {isUpdating ? (
-                            <small role="status">Saving…</small>
-                          ) : null}
-                        </label>
-                      </td>
-                      <td>
-                        <StatusBadge
-                          status={action.verification ?? "unknown"}
-                          label={
-                            action.verification
-                              ? displayLabel(action.verification)
-                              : "Unavailable"
-                          }
-                        />
-                      </td>
-                      <td>{formatDate(action.updatedAt, true)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <EmptyState
-            title={
-              actions.length > 0
-                ? "No actions match these filters"
-                : "No prioritized actions yet"
-            }
-            description={
-              actions.length > 0
-                ? "Reset one or more filters to return to the complete evidence-backed queue."
-                : "Run an audit to generate the first action queue. A valid empty result is never presented as a perfect score."
-            }
-            action={
-              actions.length > 0 ? (
-                <Button variant="secondary" onClick={resetFilters}>
-                  Reset filters
-                </Button>
-              ) : undefined
-            }
-          />
-        )}
-      </QueryState>
+                          />
+                        </td>
+                        <td>{formatDate(action.updatedAt, true)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <EmptyState
+              title={
+                actions.length > 0
+                  ? t.actions.emptyFilteredTitle
+                  : t.actions.emptyQueueTitle
+              }
+              description={
+                actions.length > 0
+                  ? t.actions.emptyFilteredDescription
+                  : t.actions.emptyQueueDescription
+              }
+              action={
+                actions.length > 0 ? (
+                  <Button variant="secondary" onClick={resetFilters}>
+                    {t.actions.resetFilters}
+                  </Button>
+                ) : undefined
+              }
+            />
+          )}
+        </QueryState>
+      </CapabilityGate>
     </div>
   );
 }

@@ -144,8 +144,16 @@ export class DurableScheduler {
       await this.options.startRun(
         {
           projectId: schedule.projectId,
-          workflowId: "audit",
-          options: { scheduleId: schedule.id },
+          // Was hardcoded to `audit`, which is all a schedule could ever run.
+          // A monthly report is the first thing that needed a schedule to say
+          // what it starts; rows written before this default to the audit they
+          // already meant.
+          workflowId: (schedule.workflowId ??
+            "audit") as StartRunInput["workflowId"],
+          // The schedule's own options, plus the id so a run can say which
+          // schedule produced it. `scheduleId` is written last on purpose: a
+          // schedule must not be able to lie about which one it is.
+          options: { ...(schedule.options ?? {}), scheduleId: schedule.id },
         },
         `schedule:${schedule.id}:${schedule.nextRunAt}`,
       );

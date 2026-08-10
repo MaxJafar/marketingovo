@@ -534,10 +534,14 @@ export async function importLegacyData(
     },
     warnings: [],
   };
+  // Legacy records are matched to a workspace purely by canonical URL, so a
+  // workspace with no website can never be one of their targets and is left
+  // out of the lookup rather than keyed under a null.
   const projects = new Map(
     ownedDatabase
       .listProjects()
-      .map((project) => [project.canonicalUrl, project]),
+      .filter((project) => project.canonicalUrl !== null)
+      .map((project) => [project.canonicalUrl!, project]),
   );
   const beforeProjects = projects.size;
   const inputs = [

@@ -1,0 +1,163 @@
+import type { MessagesFor } from "../types";
+
+/**
+ * The action evidence and verification workbench: summary cards, the score
+ * explanation, source health, occurrence history, and per-URL evidence.
+ */
+export const actionDetail: MessagesFor<"actionDetail"> = {
+  backToActions: "Назад к действиям",
+  eyebrow: "Доказательства и проверка действия",
+  fallbackTitle: "Рабочая область действия",
+  description:
+    "Проследите рекомендацию до каждого наблюдаемого URL, отделите технические доказательства от бизнес-контекста и проверьте исправление устойчивым контрольным запуском.",
+  workflowStatus: "Статус рабочего процесса",
+  statusLabel: {
+    open: "открыто",
+    acknowledged: "принято",
+    in_progress: "в работе",
+    resolved: "решено",
+  },
+  workflowNotSavedTitle: "Статус рабочего процесса не был сохранен",
+  summaryLabel: "Сводка действия",
+  technicalEvidence: "Технические доказательства",
+  affectedUrls: "Затронутые URL",
+  issueOccurrences:
+    "Вхождений проблемы в загруженной истории аудитов: {count}.",
+  lifecycleSummary: {
+    new: "Новые",
+    persistent: "Устойчивые",
+    resolved: "Решенные",
+    reappeared: "Вернувшиеся",
+  },
+  businessContext: "Бизнес-контекст",
+  businessSummary: {
+    observedClicks: "наблюдаемые клики",
+    impressions: "показы",
+    organicKeyEvents: "органические ключевые события",
+  },
+  exposureNote:
+    "Экспозиция объясняет, почему действие важно. Это наблюдаемый контекст, а не обещание, что решение проблемы принесет столько же дополнительного трафика.",
+  whyNow: "Почему сейчас",
+  module: "Модуль",
+  impact: "Влияние",
+  effort: "Трудозатраты",
+  confidence: "Уверенность",
+  created: "Создано",
+  updated: "Обновлено",
+  proofLoop: "Цикл доказательства",
+  proofLoopTitle: "Исправление → контрольная точка → проверка",
+  verificationTitle: "Проверка: {state}",
+  verificationStateLabel: {
+    not_started: "не начата",
+    queued: "в очереди",
+    running: "выполняется",
+    verified: "подтверждена",
+    regressed: "регресс",
+    inconclusive: "неубедительна",
+  },
+  verificationFallback:
+    "Создайте контрольную точку до внедрения, а после развертывания исправления запустите точечную проверку.",
+  checkpoint: "Контрольная точка",
+  notCreated: "Не создана",
+  verificationRun: "Проверочный запуск",
+  notStarted: "Не начат",
+  coverage: "Покрытие",
+  checked: "Проверено",
+  checkpointNotCreatedTitle: "Контрольная точка не была создана",
+  verificationNotStartedTitle: "Проверка не началась",
+  creatingCheckpoint: "Создание контрольной точки…",
+  replaceCheckpoint: "Заменить контрольную точку",
+  createCheckpoint: "Создать контрольную точку",
+  verificationRunning: "Проверка выполняется…",
+  verifyCurrentFix: "Проверить текущее исправление",
+  checkpointHelp:
+    "Контрольная точка сохраняет исходное состояние, необходимое для доказуемого результата проверки.",
+  scoreInputsUnavailableTitle: "Входные данные оценки недоступны",
+  scoreInputsUnavailableBody:
+    "API вернул оценку приоритета без ее воспроизводимых входных данных.",
+  scoreTitle: "Почему это действие в приоритете",
+  scoreDescription:
+    "Оценка — прозрачная эвристика приоритизации, а не прогноз трафика. Все нормализованные входные значения лежат в диапазоне 0–1.",
+  unknownModel: "Неизвестная модель",
+  formulaLabel: "Формула первой версии приоритета",
+  formula:
+    "приоритет = 100 × (0.35×серьезность + 0.25×органическая экспозиция + 0.15×конверсионная экспозиция + 0.15×охват URL + 0.10×уверенность) × множитель трудозатрат",
+  scoreTermLabel: {
+    severity: "Серьезность",
+    organicExposure: "Органическая экспозиция",
+    conversionExposure: "Конверсионная экспозиция",
+    urlReach: "Охват URL",
+    confidence: "Уверенность",
+  },
+  weightContribution: "Вес {weight}% · вклад {contribution}",
+  neutralSubstitute: "Нейтральная замена 0.50; уверенность снижена.",
+  effortMultiplier: "Множитель трудозатрат",
+  effortUnavailable: "Трудозатраты недоступны",
+  storedScore: "Сохраненная оценка",
+  reproducedScore: "Воспроизведена из входных данных",
+  noEvidenceValues: "Значения доказательств не были возвращены.",
+  observedAt: "Наблюдалось {date}",
+  structuredEvidence: "Структурированные доказательства",
+  sourceStateUnavailableTitle: "Состояние источников недоступно",
+  sourceStateUnavailableBody:
+    "API не указал, какие источники поддерживают эти доказательства.",
+  sourceUpdated: "Обновлено {date}",
+  coverageUnavailable: "Покрытие недоступно",
+  coveragePercent: "покрытие {coverage}%",
+  indexable: "Индексируется",
+  notIndexable: "Не индексируется",
+  indexabilityUnavailable: "Индексируемость недоступна",
+  httpStatus: "HTTP {code}",
+  firstLastSeen: "Впервые замечено {firstSeen} · Последний раз {lastSeen}",
+  noActiveIssue: "К этому снимку не привязано активное вхождение проблемы.",
+  metric: {
+    lcp: "LCP",
+    cls: "CLS",
+    ttfb: "TTFB",
+    clicks: "Клики",
+    impressions: "Показы",
+    ctr: "CTR",
+    position: "Позиция",
+    sessions: "Сеансы",
+    keyEvents: "Ключевые события",
+  },
+  searchExposure: "Поисковая экспозиция",
+  searchExposureNote:
+    "Наблюдаемый спрос из Search Console, а не прогноз прироста трафика.",
+  organicOutcomes: "Органические результаты",
+  organicOutcomesNote:
+    "Наблюдаемые результаты GA4; корреляция не гарантирует прироста.",
+  periodUnavailable: "Период недоступен",
+  periodRange: "{start} – {end}",
+  inspectRawEvidence: "Изучить сырые доказательства ({count})",
+  sourceHealthTitle: "Здоровье источников доказательств",
+  sourceHealthDescription:
+    "Свежесть и покрытие уточняют каждое техническое или бизнес-утверждение выше.",
+  historyTitle: "История вхождений",
+  historyDescription:
+    "Та же группа доказательств в завершенных запусках аудита.",
+  historyUrls: "URL: {count}",
+  openRun: "Открыть запуск",
+  noHistoryTitle: "Истории вхождений нет",
+  noHistoryDescription:
+    "Нужен второй аудит, чтобы различать новые, устойчивые, решенные и вернувшиеся доказательства.",
+  affectedUrlEvidenceTitle: "Доказательства по затронутым URL",
+  affectedUrlEvidenceDescription:
+    "Изучайте технические факты, экспозицию Search Console, результаты GA4 и сырые доказательства проблем, не смешивая их утверждения.",
+  searchLoadedUrls: "Поиск по загруженным URL",
+  urlSearchPlaceholder: "URL, заголовок страницы или проблема",
+  lifecycle: "Жизненный цикл",
+  allLifecycleStates: "Все состояния жизненного цикла",
+  lifecycleLabel: {
+    new: "новое",
+    persistent: "устойчивое",
+    resolved: "решенное",
+    reappeared: "вернувшееся",
+  },
+  matchingCount: "{matching} совпадает · загружено {loaded} из {total}",
+  noLoadedUrlsTitle: "Ни один загруженный URL не совпадает",
+  noLoadedUrlsDescription:
+    "Измените поиск по URL или фильтр жизненного цикла. Отсутствующие доказательства остаются видимыми в нефильтрованных результатах.",
+  loadingEvidence: "Загрузка доказательств…",
+  loadMoreUrls: "Загрузить еще 100 URL",
+};

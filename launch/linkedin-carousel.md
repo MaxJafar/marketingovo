@@ -14,7 +14,7 @@ Which five deserve attention this week?
 
 **Footer**
 
-Marketingovo `1.1.0`
+Marketingovo `1.2.0`
 
 **Visual direction**
 

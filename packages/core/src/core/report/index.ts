@@ -152,6 +152,18 @@ export interface Report {
     /** Added in 0.11 evidence reports; optional for legacy report readers. */
     crawlDepth?: number | null;
     discoveredFrom?: string | null;
+    /**
+     * The words a page actually shows.
+     *
+     * Carried so the paid-alignment rules can ask whether a landing page says
+     * anything about the terms being bid on. Optional, because a report from
+     * before that module existed has none, and the rule declines rather than
+     * judging a page on its title alone.
+     */
+    h1?: string[];
+    h2?: string[];
+    metaDescription?: string | null;
+    wordCount?: number | null;
     htmlLang?: string | null;
     hreflang?: HreflangPageEvidence | null;
     extractions?: Array<{
@@ -345,6 +357,10 @@ export function buildReport(
       vitals: p.vitals ?? null,
       crawlDepth: p.crawlDepth ?? null,
       discoveredFrom: p.discoveredFrom ?? null,
+      h1: p.parsed?.h1 ?? [],
+      h2: p.parsed?.h2 ?? [],
+      metaDescription: p.parsed?.metaDescription ?? null,
+      wordCount: p.parsed?.wordCount ?? null,
       htmlLang: p.parsed?.htmlLang ?? null,
       hreflang: hreflang.get(p.url) ?? null,
       extractions: p.extractions ?? [],

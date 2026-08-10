@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getMessages } from "../i18n";
 import { API_BASE_URL, apiRequest } from "./client";
 
 /**
@@ -194,7 +195,7 @@ export function useTerminalSession(
         setError(
           cause instanceof Error
             ? cause.message
-            : "The local service is unreachable.",
+            : getMessages().common.serviceUnreachable,
         );
       });
 
@@ -294,7 +295,9 @@ export function useTerminalSession(
         setError(null);
       } catch (cause: unknown) {
         setError(
-          cause instanceof Error ? cause.message : "That message was not sent.",
+          cause instanceof Error
+            ? cause.message
+            : getMessages().common.messageNotSent,
         );
       } finally {
         setSending(false);

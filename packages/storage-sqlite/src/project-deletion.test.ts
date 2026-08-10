@@ -155,6 +155,13 @@ describe("project deletion storage", () => {
       contextVersions: 1,
       contextEntries: 1,
       extractionRuleVersions: 0,
+      // Channel-layer rows are counted even when a workspace holds none. A
+      // receipt that silently omitted them would under-report what a deletion
+      // removed, and the receipt exists precisely so it does not.
+      channelAccounts: 0,
+      channelMetrics: 0,
+      campaignBriefs: 0,
+      publishIntents: 0,
     });
     expect(database.getProject(first.id)).toBeNull();
     expect(database.getRun(firstRun.id)).toBeNull();

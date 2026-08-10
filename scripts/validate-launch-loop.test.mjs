@@ -16,13 +16,13 @@ function draft() {
 test("the committed launch loop is readiness-only and evidence-linked", async () => {
   const report = await validateLaunchLoop(manifest, {
     root,
-    packageVersion: "1.1.0",
+    packageVersion: "1.2.0",
     now: Date.parse("2026-08-03T12:00:00.000Z"),
   });
   assert.deepEqual(report, {
     schemaVersion: "marketingovo.launch-loop.v1",
     cycleId: "2026-08-initial-public-loop",
-    productVersion: "1.1.0",
+    productVersion: "1.2.0",
     status: "ready",
     evidenceCount: 3,
     signalCount: 3,
@@ -44,7 +44,7 @@ test("the loop fails closed when release claims or evidence drift", async () => 
     await assert.rejects(
       validateLaunchLoop(value, {
         root,
-        packageVersion: "1.1.0",
+        packageVersion: "1.2.0",
         now: Date.parse("2026-08-03T12:00:00.000Z"),
       }),
     );
@@ -69,7 +69,7 @@ test("the loop rejects personal data and unmeasured claims in ready state", asyn
   await assert.rejects(
     validateLaunchLoop(sensitive, {
       root,
-      packageVersion: "1.1.0",
+      packageVersion: "1.2.0",
       now: Date.parse("2026-08-03T12:00:00.000Z"),
     }),
     /not allowed/u,
@@ -80,7 +80,7 @@ test("the loop rejects personal data and unmeasured claims in ready state", asyn
   await assert.rejects(
     validateLaunchLoop(measured, {
       root,
-      packageVersion: "1.1.0",
+      packageVersion: "1.2.0",
       now: Date.parse("2026-08-03T12:00:00.000Z"),
     }),
     /ready launch loop cannot claim measured/u,

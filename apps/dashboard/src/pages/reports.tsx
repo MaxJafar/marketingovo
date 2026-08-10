@@ -1,5 +1,6 @@
 import { useReports } from "../api/queries";
 import { useSite } from "../context/site-context";
+import { fmt, useI18n } from "../i18n";
 import { FreshnessNotice, QueryState } from "../components/data-state";
 import { Icon } from "../components/icon";
 import {
@@ -14,6 +15,7 @@ import {
 const REPORT_FORMATS = ["html", "pdf", "csv", "json"] as const;
 
 export function ReportsPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const query = useReports(siteId);
   const reports = query.data?.data.items ?? [];
@@ -21,9 +23,9 @@ export function ReportsPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Share outcomes"
-        title="Reports"
-        description="Keep stakeholders aligned with exportable snapshots and scheduled performance summaries."
+        eyebrow={t.reports.eyebrow}
+        title={t.reports.title}
+        description={t.reports.description}
       />
       <QueryState
         isLoading={query.isLoading}
@@ -55,32 +57,45 @@ export function ReportsPage() {
                   <div className="report-body">
                     <div>
                       <StatusBadge status={report.status ?? "unknown"} />
-                      <span>{report.type ?? "SEO report"}</span>
+                      <span>{report.type ?? t.reports.typeFallback}</span>
                     </div>
                     <h2>{report.name}</h2>
                     <p>
                       {report.generatedAt
-                        ? `Generated ${formatDate(report.generatedAt, true)}`
+                        ? fmt(t.reports.generated, {
+                            date: formatDate(report.generatedAt, true),
+                          })
                         : report.scheduledFor
-                          ? `Scheduled for ${formatDate(report.scheduledFor, true)}`
-                          : "Schedule unavailable"}
+                          ? fmt(t.reports.scheduledFor, {
+                              date: formatDate(report.scheduledFor, true),
+                            })
+                          : t.reports.scheduleUnavailable}
                     </p>
                     {(report.recipients ?? []).length > 0 ? (
-                      <small>Recipients: {report.recipients?.join(", ")}</small>
+                      <small>
+                        {fmt(t.reports.recipients, {
+                          list: report.recipients?.join(", ") ?? "",
+                        })}
+                      </small>
                     ) : null}
                   </div>
                   {downloadUrls.length > 0 ? (
                     <div
                       className="report-downloads"
                       role="group"
-                      aria-label={`Download ${report.name}`}
+                      aria-label={fmt(t.reports.downloadGroupLabel, {
+                        name: report.name,
+                      })}
                     >
                       {downloadUrls.map(({ format, url }) => (
                         <a
                           className="button button-secondary"
                           href={url}
                           download
-                          aria-label={`Download ${format.toUpperCase()} report: ${report.name}`}
+                          aria-label={fmt(t.reports.downloadFormatLabel, {
+                            format: format.toUpperCase(),
+                            name: report.name,
+                          })}
                           key={format}
                         >
                           {format.toUpperCase()}
@@ -88,7 +103,9 @@ export function ReportsPage() {
                       ))}
                     </div>
                   ) : (
-                    <span className="muted">Download unavailable</span>
+                    <span className="muted">
+                      {t.reports.downloadUnavailable}
+                    </span>
                   )}
                 </Card>
               );
@@ -96,8 +113,8 @@ export function ReportsPage() {
           </div>
         ) : (
           <EmptyState
-            title="No reports yet"
-            description="Generate reports through the API or configure a schedule once your baseline data is available."
+            title={t.reports.emptyTitle}
+            description={t.reports.emptyDescription}
           />
         )}
       </QueryState>

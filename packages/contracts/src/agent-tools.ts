@@ -71,6 +71,69 @@ export const AgentMonitoringStatusInputSchema = strictObject({
 });
 
 /**
+ * Paid media.
+ *
+ * An agent gets full read access to ad cabinets and their measured
+ * performance, and may draft and stage a campaign. It cannot approve one:
+ * that transition requires the browser's own transport and is refused for the
+ * service token these tools authenticate with. There is deliberately no
+ * publish tool, because nothing in this product publishes yet.
+ */
+
+export const AgentAdsCabinetsInputSchema = strictObject({
+  project_id: Type.String({ minLength: 1 }),
+  /** Include cabinets the operator archived. Default is only the active set. */
+  include_archived: Type.Optional(Type.Boolean({ default: false })),
+});
+
+export const AgentAdsPerformanceInputSchema = strictObject({
+  channel_account_id: Type.String({ minLength: 1 }),
+  start: Type.Optional(Type.String({ pattern: "^\\d{4}-\\d{2}-\\d{2}$" })),
+  end: Type.Optional(Type.String({ pattern: "^\\d{4}-\\d{2}-\\d{2}$" })),
+  /**
+   * Also return the queries that triggered ads, most expensive first.
+   *
+   * Google Ads only, and off by default because it is a large payload that
+   * most questions do not need. Terms already added as keywords or negatives
+   * are omitted, so what comes back is the list worth acting on.
+   */
+  include_search_terms: Type.Optional(Type.Boolean({ default: false })),
+});
+
+export const AgentAdsAuditStartInputSchema = strictObject({
+  project_id: Type.String({ minLength: 1 }),
+  start: Type.Optional(Type.String({ pattern: "^\\d{4}-\\d{2}-\\d{2}$" })),
+  end: Type.Optional(Type.String({ pattern: "^\\d{4}-\\d{2}-\\d{2}$" })),
+});
+
+export const AgentCampaignStageInputSchema = strictObject({
+  project_id: Type.String({ minLength: 1 }),
+  brief_title: Type.String({ minLength: 1, maxLength: 240 }),
+  objective: Type.String({ minLength: 1, maxLength: 2_000 }),
+  audience: Type.Optional(Type.String({ maxLength: 2_000 })),
+  deliverables: Type.Array(
+    strictObject({
+      channel: Type.Union([
+        Type.Literal("facebook-ad"),
+        Type.Literal("instagram-ad"),
+        Type.Literal("instagram-post"),
+        Type.Literal("instagram-reel"),
+        Type.Literal("facebook-post"),
+        Type.Literal("seo-article"),
+      ]),
+      headline: Type.Optional(Type.String({ maxLength: 240 })),
+      body: Type.String({ minLength: 1, maxLength: 20_000 }),
+      call_to_action: Type.Optional(Type.String({ maxLength: 80 })),
+      destination_url: Type.Optional(
+        Type.String({ format: "uri", pattern: "^https://", maxLength: 2_000 }),
+      ),
+      creative_notes: Type.Optional(Type.String({ maxLength: 4_000 })),
+    }),
+    { minItems: 1, maxItems: 10 },
+  ),
+});
+
+/**
  * The three read tools below expose stored evidence that agents previously
  * could not reach at all: the paginated evidence workbench, the internal-link
  * graph, and the server-computed run comparison. They read immutable per-run
@@ -123,6 +186,27 @@ export type AgentMonitoringStatusInput = Static<
 export type AgentRunEvidenceInput = Static<typeof AgentRunEvidenceInputSchema>;
 export type AgentRunLinksInput = Static<typeof AgentRunLinksInputSchema>;
 export type AgentRunCompareInput = Static<typeof AgentRunCompareInputSchema>;
+export type AgentAdsCabinetsInput = Static<typeof AgentAdsCabinetsInputSchema>;
+export type AgentAdsPerformanceInput = Static<
+  typeof AgentAdsPerformanceInputSchema
+>;
+export type AgentAdsAuditStartInput = Static<
+  typeof AgentAdsAuditStartInputSchema
+>;
+export type AgentCampaignStageInput = Static<
+  typeof AgentCampaignStageInputSchema
+>;
+export type AgentBrandKitInput = Static<typeof AgentBrandKitInputSchema>;
+export type AgentMarketingReportInput = Static<
+  typeof AgentMarketingReportInputSchema
+>;
+export type AgentCampaignLinkInput = Static<
+  typeof AgentCampaignLinkInputSchema
+>;
+export type AgentEmailDraftInput = Static<typeof AgentEmailDraftInputSchema>;
+export type AgentEmailTemplatesInput = Static<
+  typeof AgentEmailTemplatesInputSchema
+>;
 
 export interface AgentToolSafetyAnnotations {
   readonly readOnlyHint?: boolean;
@@ -289,6 +373,209 @@ export const AgentRunCompareTool = agentTool({
   },
 } as const);
 
+/**
+ * Email.
+ *
+ * The loop these exist for: read the brand kit, write HTML, submit it, read
+ * the validation report, fix what it names, submit again. The report is what
+ * makes this work — a model cannot be relied on to remember that Outlook
+ * renders with Word, but it can act on being told so about the line it wrote.
+ */
+
+export const AgentBrandKitInputSchema = strictObject({
+  project_id: Type.String({ minLength: 1 }),
+});
+
+export const AgentEmailDraftInputSchema = strictObject({
+  project_id: Type.String({ minLength: 1 }),
+  subject: Type.String({ minLength: 1, maxLength: 240 }),
+  preheader: Type.Optional(Type.String({ maxLength: 240 })),
+  html: Type.String({ minLength: 1, maxLength: 1_000_000 }),
+  /**
+   * Where to keep it. Omit while iterating — a draft that is not worth an
+   * operator's attention should not become a revision they scroll past.
+   */
+  template_id: Type.Optional(Type.String({ minLength: 1 })),
+});
+
+export const AgentEmailTemplatesInputSchema = strictObject({
+  project_id: Type.String({ minLength: 1 }),
+  template_id: Type.Optional(Type.String({ minLength: 1 })),
+});
+
+export const AgentMarketingReportInputSchema = strictObject({
+  project_id: Type.String({ minLength: 1 }),
+  /** Read an existing report instead of generating one. */
+  report_id: Type.Optional(Type.String({ minLength: 1 })),
+  start: Type.Optional(Type.String({ pattern: "^\\d{4}-\\d{2}-\\d{2}$" })),
+  end: Type.Optional(Type.String({ pattern: "^\\d{4}-\\d{2}-\\d{2}$" })),
+  /**
+   * The opening paragraph a client reads.
+   *
+   * Supplied by you, never derived from the metrics: a sentence assembled
+   * from numbers reads as insight while being arithmetic, and a client learns
+   * to distrust it.
+   */
+  narrative: Type.Optional(Type.String({ maxLength: 4_000 })),
+});
+
+export const AgentCampaignLinkInputSchema = strictObject({
+  project_id: Type.String({ minLength: 1 }),
+  /** Omit everything else to list the workspace's existing links. */
+  destination_url: Type.Optional(
+    Type.String({ minLength: 1, maxLength: 2000 }),
+  ),
+  utm_source: Type.Optional(Type.String({ minLength: 1, maxLength: 120 })),
+  utm_medium: Type.Optional(Type.String({ minLength: 1, maxLength: 120 })),
+  utm_campaign: Type.Optional(Type.String({ minLength: 1, maxLength: 160 })),
+  utm_term: Type.Optional(Type.String({ maxLength: 160 })),
+  utm_content: Type.Optional(Type.String({ maxLength: 160 })),
+  /** Where the code will live. Decides the error-correction level and size. */
+  placement: Type.Optional(
+    Type.Union([
+      Type.Literal("screen"),
+      Type.Literal("print-handheld"),
+      Type.Literal("print-poster"),
+      Type.Literal("packaging"),
+      Type.Literal("outdoor"),
+    ]),
+  ),
+  /** The width the code will be printed at, so scannability can be judged. */
+  printed_width_mm: Type.Optional(Type.Number({ minimum: 1, maximum: 5000 })),
+});
+
+export const AgentMarketingReportTool = agentTool({
+  name: "marketingovo_marketing_report",
+  title: "Generate or read a cross-channel report",
+  description:
+    "Generate a client-facing report spanning paid, organic search, social publishing, email, the competitive landscape and completed work for a period, or read an existing one with report_id. The operator can download the same document as a chart-carrying PDF from the dashboard. Each section carries its own coverage, and the report names the totals it deliberately refuses to compute — conversions are never summed across channels because Meta's attributed conversions and Analytics key events count overlapping things on different models, and competitor figures are citation counts, never market share. Report each channel's own figures and repeat the refusals; never present a combined number the report declined to produce.",
+  optional: true,
+  inputSchema: AgentMarketingReportInputSchema,
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
+} as const);
+
+export const AgentBrandKitTool = agentTool({
+  name: "marketingovo_brand_kit",
+  title: "Read the brand kit",
+  description:
+    "Read the workspace's brand kit: colours with their intended use, type stacks and sizes, logo, content width, voice, prohibitions, and the legal footer including the postal address and the ESP's unsubscribe merge tag. Read this before writing any email — the validator checks the result against it.",
+  optional: false,
+  inputSchema: AgentBrandKitInputSchema,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+} as const);
+
+export const AgentEmailDraftTool = agentTool({
+  name: "marketingovo_email_draft",
+  title: "Compile and check an email",
+  description:
+    "Submit email HTML and get back the sanitized, CSS-inlined document, a plain-text alternative, and a validation report naming every problem a real client will have with it — Outlook's Word engine ignoring flexbox, images without alt text that Outlook blocks by default, Gmail clipping past 102KB, missing unsubscribe or postal address, contrast below WCAG AA. Iterate against the report until it is clean. Nothing is stored unless you pass template_id.",
+  optional: true,
+  inputSchema: AgentEmailDraftInputSchema,
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
+} as const);
+
+export const AgentEmailTemplatesTool = agentTool({
+  name: "marketingovo_email_templates",
+  title: "Read email templates",
+  description:
+    "List a workspace's email templates, or read one with its revision history, compiled HTML and the validation report each revision was saved with. Supply template_id for the full history; omit it for the list.",
+  optional: false,
+  inputSchema: AgentEmailTemplatesInputSchema,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+} as const);
+
+export const AgentAdsCabinetsTool = agentTool({
+  name: "marketingovo_ads_cabinets",
+  title: "List ad cabinets",
+  description:
+    "List the ad accounts linked to a workspace — Meta cabinets covering Facebook and Instagram, and Google Ads customers — with their provider, currency, and the daily and total spend caps the operator set locally. Reads stored local state; contacts no provider.",
+  optional: false,
+  inputSchema: AgentAdsCabinetsInputSchema,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+} as const);
+
+export const AgentAdsPerformanceTool = agentTool({
+  name: "marketingovo_ads_performance",
+  title: "Read ad cabinet performance",
+  description:
+    "Read one ad account's measured spend, impressions, clicks, conversions and derived costs over a date window, split by the surface it ran on — Facebook and Instagram for Meta, Search, Search Partners, Display, YouTube and Performance Max for Google. A metric that was not measured is returned as null with the reason stated, never as zero; reach and frequency have no window total by design. Never add conversions from two providers together: each counts what it takes credit for, on its own attribution model, so one sale can appear in both. Reads stored evidence from the last sync; run marketingovo_ads_audit_start first for current numbers.",
+  optional: false,
+  inputSchema: AgentAdsPerformanceInputSchema,
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+} as const);
+
+export const AgentAdsAuditStartTool = agentTool({
+  name: "marketingovo_ads_audit_start",
+  title: "Start paid media audit",
+  description:
+    "Sync every linked ad account — Meta and Google Ads — for a date window and run the paid-media rules over it. Meta: disapproved ads, missing conversion signal, cost-per-conversion drift, creative fatigue, budget under-pacing, local spend-cap breaches. Google: search terms that took money and converted nothing, queries wasting spend across several campaigns, broken conversion tracking, campaigns held back by budget versus by ad rank, broad match without conversion-based bidding, disapproved ads, low quality scores weighted by cost, and duplicate keywords. It also reports how much spend sits in Performance Max and similar, whose queries Google does not expose at all — read a quiet search-term result on such an account as covering only the part that could be inspected. Findings enter the same prioritized action queue as SEO work. Returns a run id; poll marketingovo_run_get until terminal.",
+  optional: true,
+  inputSchema: AgentAdsAuditStartInputSchema,
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: true,
+  },
+} as const);
+
+export const AgentCampaignStageTool = agentTool({
+  name: "marketingovo_campaign_stage",
+  title: "Draft and stage a campaign",
+  description:
+    "Create a campaign brief and its per-channel deliverables — Facebook and Instagram ad copy, organic posts, an article — as drafts for a person to review. Nothing is sent to any provider and nothing spends money. Approval happens in the dashboard, in a browser, and is refused for agent tooling by design: you draft and stage, a human decides what runs under their brand.",
+  optional: true,
+  inputSchema: AgentCampaignStageInputSchema,
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
+} as const);
+
+export const AgentCampaignLinkTool = agentTool({
+  name: "marketingovo_campaign_link",
+  title: "Build a tagged campaign link and QR code",
+  description:
+    "Build a UTM-tagged campaign link and its QR code, or list the workspace's existing ones. Checks the tagging before the code exists, because a printed code cannot be corrected: mixed case and spaces split one campaign into two rows no report can merge, source and medium swapped files it under a channel that does not exist, and manual tags on an already auto-tagged platform link destroy the cost data only that platform can supply. Also judges whether the code can physically be scanned at the width it will be printed. Tagging that would lose data is refused rather than recorded. Codes are generated locally and encode the URL directly, so they never expire and no service resolves them.",
+  // Creates records, so an operator can allowlist it apart from the read-only
+  // tools — the same treatment every other state-changing tool gets.
+  optional: true,
+  inputSchema: AgentCampaignLinkInputSchema,
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
+} as const);
+
 export const PUBLIC_AGENT_TOOL_CONTRACTS = [
   AgentAuditStartTool,
   AgentRunGetTool,
@@ -300,6 +587,15 @@ export const PUBLIC_AGENT_TOOL_CONTRACTS = [
   AgentContentPlanStartTool,
   AgentOsintResearchStartTool,
   AgentMonitoringStatusTool,
+  AgentAdsCabinetsTool,
+  AgentAdsPerformanceTool,
+  AgentAdsAuditStartTool,
+  AgentCampaignStageTool,
+  AgentBrandKitTool,
+  AgentEmailTemplatesTool,
+  AgentEmailDraftTool,
+  AgentMarketingReportTool,
+  AgentCampaignLinkTool,
 ] as const;
 
 export type PublicAgentToolContract =
@@ -310,7 +606,7 @@ export const PUBLIC_AGENT_TOOL_NAMES: readonly PublicAgentToolName[] =
   PUBLIC_AGENT_TOOL_CONTRACTS.map((contract) => contract.name);
 
 /**
- * Terminal session tools are a separate group from the ten workflow tools
+ * Terminal session tools are a separate group from the nineteen workflow tools
  * above, and the split is intentional rather than tidiness.
  *
  * The workflow tools answer "do this SEO job". These answer "a human is typing
@@ -318,7 +614,7 @@ export const PUBLIC_AGENT_TOOL_NAMES: readonly PublicAgentToolName[] =
  * capability without the other: an operator may want an agent that audits but
  * never speaks into the browser, or a conversational session that only reads.
  * Keeping the registries apart lets an adapter allowlist them independently,
- * and keeps the documented public workflow surface stable at ten.
+ * and keeps the documented public workflow surface stable at nineteen.
  *
  * None of these tools touch the network beyond the loopback daemon, and none
  * of them start crawls — so the whole group is closed-world.

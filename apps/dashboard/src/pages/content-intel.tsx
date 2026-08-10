@@ -4,6 +4,7 @@ import { useCompetitors, useKeywords } from "../api/queries";
 import { PixelSprite } from "../components/pixel-sprite";
 import { feedGlyphs, panelGlyphs } from "../components/pixel-glyphs";
 import { formatCompact } from "../lib/intel";
+import { fmt, useI18n } from "../i18n";
 
 /**
  * Content intel.
@@ -15,6 +16,7 @@ import { formatCompact } from "../lib/intel";
  */
 
 export function ContentIntelPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const competitors = useCompetitors(siteId);
   const keywords = useKeywords(siteId);
@@ -27,7 +29,7 @@ export function ContentIntelPage() {
     <div className="pixel-grid">
       <section className="pixel-panel pixel-col-7">
         <div className="pixel-panel-head">
-          <h2>Content gaps</h2>
+          <h2>{t.contentIntel.gaps.title}</h2>
           <span className="pixel-panel-mark">
             <PixelSprite
               src="/pixel/panel/feed.png"
@@ -38,13 +40,12 @@ export function ContentIntelPage() {
         </div>
         <div className="pixel-panel-body">
           {loading ? (
-            <p className="pixel-note">Reading the comparison…</p>
+            <p className="pixel-note">{t.contentIntel.gaps.loading}</p>
           ) : gaps.length === 0 ? (
             <p className="pixel-note">
-              No content gaps recorded yet. Add competitors and run a comparison
-              to populate this.{" "}
+              {t.contentIntel.gaps.empty}{" "}
               <Link to="/competitors" className="pixel-linklike">
-                open competitors
+                {t.contentIntel.gaps.emptyLink}
               </Link>
             </p>
           ) : (
@@ -60,17 +61,27 @@ export function ContentIntelPage() {
                     <h3 className="pixel-feed-title">{gap.term}</h3>
                     <div className="pixel-feed-meta">
                       <span>
-                        ◉ covered by {gap.referencesCovering} reference
-                        {gap.referencesCovering === 1 ? "" : "s"}
+                        ◉{" "}
+                        {fmt(
+                          gap.referencesCovering === 1
+                            ? t.contentIntel.gaps.coveredSingular
+                            : t.contentIntel.gaps.coveredPlural,
+                          { count: gap.referencesCovering },
+                        )}
                       </span>
                       {gap.referenceDensity !== null &&
                       gap.referenceDensity !== undefined ? (
-                        <span>▣ density {gap.referenceDensity.toFixed(2)}</span>
+                        <span>
+                          ▣{" "}
+                          {fmt(t.contentIntel.gaps.density, {
+                            value: gap.referenceDensity.toFixed(2),
+                          })}
+                        </span>
                       ) : null}
                     </div>
                   </div>
                   <span className="pixel-tag" data-tone="hot">
-                    Gap
+                    {t.contentIntel.gaps.tag}
                   </span>
                 </article>
               ))}
@@ -81,28 +92,28 @@ export function ContentIntelPage() {
 
       <section className="pixel-panel pixel-col-5">
         <div className="pixel-panel-head">
-          <h2>Topic clusters</h2>
+          <h2>{t.contentIntel.clusters.title}</h2>
         </div>
         <div className="pixel-panel-body">
           {loading ? (
-            <p className="pixel-note">Reading the keyword workspace…</p>
+            <p className="pixel-note">{t.contentIntel.clusters.loading}</p>
           ) : clusters.length === 0 ? (
             <p className="pixel-note">
-              No clusters yet. Run a content plan from the keyword lab.{" "}
+              {t.contentIntel.clusters.empty}{" "}
               <Link to="/keywords" className="pixel-linklike">
-                open keyword lab
+                {t.contentIntel.clusters.emptyLink}
               </Link>
             </p>
           ) : (
             <table className="pixel-table">
               <thead>
                 <tr>
-                  <th scope="col">Cluster</th>
+                  <th scope="col">{t.contentIntel.clusters.cluster}</th>
                   <th scope="col" className="is-numeric">
-                    Keywords
+                    {t.contentIntel.clusters.keywords}
                   </th>
                   <th scope="col" className="is-numeric">
-                    Coverage
+                    {t.contentIntel.clusters.coverage}
                   </th>
                 </tr>
               </thead>

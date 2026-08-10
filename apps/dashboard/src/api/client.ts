@@ -1,3 +1,4 @@
+import { getMessages } from "../i18n";
 import type { ApiEnvelope, DataMeta } from "./contracts";
 
 const API_VERSION_PATH = "/api/v1";
@@ -74,7 +75,7 @@ async function ensureSession(): Promise<void> {
     if (!response.ok) throw errorFromBody(body, response.status);
     if (!body?.csrf) {
       throw new ApiError(
-        "The local service returned an invalid session response.",
+        getMessages().common.invalidSessionResponse,
         502,
         "invalid_session_response",
       );

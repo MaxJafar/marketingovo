@@ -1,0 +1,133 @@
+/** The audit run page: replay, sitemap coverage, and the evidence workbench. */
+export const auditDetail = {
+  backToAudits: "Back to audits",
+  eyebrow: "Audit run",
+  runTitle: "Run {id}",
+  fallbackTitle: "Audit details",
+  description:
+    "Inspect source coverage and exact evidence, or replay the stored run configuration against the site's current state.",
+  queuingReplay: "Queuing replay…",
+  replayConfiguration: "Replay configuration",
+  replayErrorTitle: "Replay could not start",
+  replayQueuedTitle: "Independent replay queued",
+  replayQueuedBefore:
+    "Stored configuration v{version} was copied without changing this run. The replay reads the current site and provider state.",
+  replayQueuedLink: "Open replay",
+  replayQueuedAfter: ".",
+  boundaryTitle: "Replay boundary",
+  boundaryBody:
+    "Replay creates a new run from this stored workflow and its exact options. It never edits this result; live pages and integrations are queried again so changes remain measurable.",
+  summary: {
+    status: "Status",
+    started: "Started",
+    completed: "Completed",
+    issueInstances: "Issue instances",
+  },
+  breakdownTitle: "Issue breakdown",
+  breakdownEmptyTitle: "Breakdown unavailable",
+  breakdownEmptyBody: "The run did not return severity totals.",
+  runLogTitle: "Run log",
+  runLogEmptyTitle: "No log entries",
+  runLogEmptyBody: "The API did not return a run log.",
+  sitemap: {
+    eyebrow: "Captured source",
+    title: "Sitemap coverage",
+    description:
+      "Coverage compares captured indexable crawl URLs with the sitemap snapshot used by this exact run.",
+    declaredUrls: "Declared URLs",
+    indexableDiscovered: "Indexable discovered",
+    matched: "Matched",
+    coverage: "Coverage",
+    snapshotBefore: "Snapshot:",
+    httpStatusSuffix: " · HTTP {status}",
+    filesLabel: "Captured sitemap files",
+    fileColumn: "Sitemap file",
+    typeColumn: "Type",
+    httpColumn: "HTTP",
+    locationsColumn: "Locations",
+    missingIndexable: "Indexable but absent",
+    declaredNotCrawled: "Declared but not crawled",
+    brokenDeclared: "Declared HTTP errors",
+    sampleUnavailable:
+      "Unavailable because no verified sitemap snapshot was captured.",
+    sampleTruncated:
+      "Showing the first {shown} of {total} URLs. The JSON report preserves the complete captured cohort.",
+  },
+  tabs: {
+    crawl: {
+      label: "Crawl paths",
+      description: "Shortest captured discovery path and first referrer.",
+    },
+    redirects: {
+      label: "Redirects",
+      description: "Requested URL, every redirect hop, and the final response.",
+    },
+    hreflang: {
+      label: "Hreflang",
+      description:
+        "Language targets, self-references, and reciprocal evidence.",
+    },
+    extractions: {
+      label: "Extractions",
+      description: "Custom fields captured by the configured extractor rules.",
+    },
+  },
+  crawl: {
+    tableLabel: "Crawl path evidence",
+    pageColumn: "Page",
+    depthColumn: "Depth",
+    referrerColumn: "First referrer",
+    httpColumn: "HTTP",
+    indexableColumn: "Indexable",
+    seed: "Seed",
+  },
+  redirects: {
+    tableLabel: "Redirect path evidence",
+    requestedColumn: "Requested URL",
+    pathColumn: "Captured path",
+    hopsColumn: "Hops",
+    finalHttpColumn: "Final HTTP",
+  },
+  hreflang: {
+    tableLabel: "Hreflang evidence matrix",
+    sourceColumn: "Source page",
+    languageColumn: "HTML / self language",
+    alternateColumn: "Alternate",
+    targetColumn: "Target",
+    reciprocalColumn: "Reciprocal",
+    missing: "Missing",
+    selfReference: "Self-reference",
+    mismatch: "Expected {expected}; observed {observed}",
+    sourceFallback: "source",
+    noneFallback: "none",
+  },
+  extractions: {
+    tableLabel: "Custom extraction evidence",
+    pageColumn: "Page",
+    fieldsColumn: "Captured fields",
+    noMatch: "No match",
+    truncatedSuffix: " (truncated)",
+  },
+  workbench: {
+    eyebrow: "Versioned audit evidence",
+    title: "Evidence workbench",
+    description:
+      "The UI paginates stored evidence; it never truncates a cohort without showing the total.",
+    tablistLabel: "Evidence sections",
+    searchLabel: "Search evidence by page URL or title",
+    searchPlaceholder: "Search page URL or title",
+    search: "Search",
+    clear: "Clear",
+    paginationLabel: "Evidence pages",
+    previous: "Previous",
+    next: "Next",
+    pageIndicator: "Page {page} of {pages} · {records} records",
+  },
+  emptyTitle: "No {section} captured",
+  emptyUnavailable:
+    "This run does not contain versioned page evidence. Run a new audit to populate the workbench.",
+  emptyFiltered:
+    "The selected run has no matching {section}. This is a measured empty state, not a failed query.",
+  fallbackEvidence: "evidence",
+  fallbackRecords: "records",
+} as const;

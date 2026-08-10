@@ -16,7 +16,7 @@ provenance record, install the local service with:
 npx marketingovo serve
 ```
 
-The current source version is not itself evidence that `marketingovo@1.1.0`
+The current source version is not itself evidence that `marketingovo@1.2.0`
 has reached the registry; release evidence is the authority.
 
 ## Release invariants

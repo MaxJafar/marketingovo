@@ -8,6 +8,7 @@ import {
   useTestIntegration,
 } from "../api/queries";
 import { useSite } from "../context/site-context";
+import { fmt, useI18n } from "../i18n";
 import { FreshnessNotice, QueryState } from "../components/data-state";
 import { Icon } from "../components/icon";
 
@@ -31,11 +32,12 @@ function CredentialForm({
   siteId: string;
   onClose: () => void;
 }) {
+  const { t } = useI18n();
   const save = useSaveIntegrationCredentials(siteId);
   const fields = integration.credentialFields ?? [
     {
       key: "apiKey",
-      label: "API key",
+      label: t.integrations.credentialForm.apiKeyLabel,
       type: "secret" as const,
       required: true,
     },
@@ -64,17 +66,18 @@ function CredentialForm({
     <form className="credential-form" onSubmit={submit} autoComplete="off">
       <div className="credential-heading">
         <div>
-          <h3>Connect {integration.name}</h3>
-          <p>
-            Credentials are sent directly to the local API. This dashboard never
-            stores them in browser storage or reads them back.
-          </p>
+          <h3>
+            {fmt(t.integrations.credentialForm.title, {
+              name: integration.name,
+            })}
+          </h3>
+          <p>{t.integrations.credentialForm.intro}</p>
         </div>
         <button
           type="button"
           className="icon-button"
           onClick={onClose}
-          aria-label="Close credential form"
+          aria-label={t.integrations.credentialForm.closeAria}
         >
           <Icon name="close" />
         </button>
@@ -92,26 +95,29 @@ function CredentialForm({
           <small>
             {field.help ??
               (field.type === "text"
-                ? "Enter the account identifier supplied by the platform."
-                : "Stored by the API credential vault; never returned to the browser.")}
+                ? t.integrations.credentialForm.textHelp
+                : t.integrations.credentialForm.secretHelp)}
           </small>
         </label>
       ))}
       {save.isError ? (
-        <InlineNotice tone="danger" title="Credentials were not saved">
+        <InlineNotice
+          tone="danger"
+          title={t.integrations.credentialForm.notSavedTitle}
+        >
           {save.error.message}
         </InlineNotice>
       ) : null}
       <div className="form-actions">
         <Button type="submit" disabled={save.isPending}>
           {save.isPending
-            ? "Saving securely…"
+            ? t.integrations.credentialForm.saving
             : fields.some((field) => field.required)
-              ? "Save and connect"
-              : "Continue"}
+              ? t.integrations.credentialForm.saveAndConnect
+              : t.integrations.credentialForm.continue}
         </Button>
         <Button type="button" variant="ghost" onClick={onClose}>
-          Cancel
+          {t.integrations.cancel}
         </Button>
       </div>
     </form>
@@ -127,6 +133,7 @@ function ConfigurationForm({
   siteId: string;
   onClose: () => void;
 }) {
+  const { t } = useI18n();
   const save = useSaveIntegrationConfiguration(siteId);
   const fields = integration.configurationFields ?? [];
 
@@ -149,17 +156,18 @@ function ConfigurationForm({
     <form className="credential-form" onSubmit={submit} autoComplete="off">
       <div className="credential-heading">
         <div>
-          <h3>Configure {integration.name}</h3>
-          <p>
-            These non-secret settings are stored per site, so one local
-            workspace can map several sites to different provider properties.
-          </p>
+          <h3>
+            {fmt(t.integrations.configurationForm.title, {
+              name: integration.name,
+            })}
+          </h3>
+          <p>{t.integrations.configurationForm.intro}</p>
         </div>
         <button
           type="button"
           className="icon-button"
           onClick={onClose}
-          aria-label="Close configuration form"
+          aria-label={t.integrations.configurationForm.closeAria}
         >
           <Icon name="close" />
         </button>
@@ -176,23 +184,25 @@ function ConfigurationForm({
             spellCheck={false}
             autoCapitalize="none"
           />
-          <small>
-            {field.help ??
-              "This setting contains no secret credential material."}
-          </small>
+          <small>{field.help ?? t.integrations.configurationForm.help}</small>
         </label>
       ))}
       {save.isError ? (
-        <InlineNotice tone="danger" title="Configuration was not saved">
+        <InlineNotice
+          tone="danger"
+          title={t.integrations.configurationForm.notSavedTitle}
+        >
           {save.error.message}
         </InlineNotice>
       ) : null}
       <div className="form-actions">
         <Button type="submit" disabled={save.isPending}>
-          {save.isPending ? "Saving…" : "Save configuration"}
+          {save.isPending
+            ? t.integrations.configurationForm.saving
+            : t.integrations.configurationForm.save}
         </Button>
         <Button type="button" variant="ghost" onClick={onClose}>
-          Cancel
+          {t.integrations.cancel}
         </Button>
       </div>
     </form>
@@ -212,6 +222,7 @@ function RemovalConfirmation({
   onConfirm: () => void;
   onClose: () => void;
 }) {
+  const { t } = useI18n();
   const [confirmed, setConfirmed] = useState(false);
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -223,27 +234,26 @@ function RemovalConfirmation({
     <form className="integration-removal-form" onSubmit={submit}>
       <div className="credential-heading">
         <div>
-          <h3>Revoke local access to {integration.name}</h3>
-          <p>
-            Delete this credential from the operating-system-backed local vault
-            and disconnect it from every local project. Non-secret site mappings
-            stay in place for a later reconnect.
-          </p>
+          <h3>
+            {fmt(t.integrations.removal.title, { name: integration.name })}
+          </h3>
+          <p>{t.integrations.removal.intro}</p>
         </div>
         <button
           type="button"
           className="icon-button"
           onClick={onClose}
-          aria-label="Close credential removal"
+          aria-label={t.integrations.removal.closeAria}
           disabled={isPending}
         >
           <Icon name="close" />
         </button>
       </div>
-      <InlineNotice tone="warning" title="Provider access may remain active">
-        Marketingovo can delete its local copy, but it cannot deactivate an API
-        key or OAuth grant at the provider. Use the provider setup page when you
-        need to revoke the credential at its source.
+      <InlineNotice
+        tone="warning"
+        title={t.integrations.removal.providerNoticeTitle}
+      >
+        {t.integrations.removal.providerNoticeBody}
       </InlineNotice>
       <label className="integration-removal-confirmation">
         <input
@@ -252,12 +262,16 @@ function RemovalConfirmation({
           onChange={(event) => setConfirmed(event.currentTarget.checked)}
         />
         <span>
-          I understand this disconnects {integration.name} across every local
-          project.
+          {fmt(t.integrations.removal.acknowledgement, {
+            name: integration.name,
+          })}
         </span>
       </label>
       {error ? (
-        <InlineNotice tone="danger" title="Credential was not removed">
+        <InlineNotice
+          tone="danger"
+          title={t.integrations.removal.notRemovedTitle}
+        >
           {error.message}
         </InlineNotice>
       ) : null}
@@ -267,7 +281,9 @@ function RemovalConfirmation({
           variant="danger"
           disabled={!confirmed || isPending}
         >
-          {isPending ? "Removing…" : "Remove local credential"}
+          {isPending
+            ? t.integrations.removal.removing
+            : t.integrations.removal.remove}
         </Button>
         <Button
           type="button"
@@ -275,7 +291,7 @@ function RemovalConfirmation({
           onClick={onClose}
           disabled={isPending}
         >
-          Cancel
+          {t.integrations.cancel}
         </Button>
       </div>
     </form>
@@ -283,6 +299,7 @@ function RemovalConfirmation({
 }
 
 export function IntegrationsPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const query = useIntegrations(siteId);
   const testIntegration = useTestIntegration(siteId);
@@ -295,29 +312,27 @@ export function IntegrationsPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Connected data"
-        title="Integrations"
-        description="Bring search, analytics, crawling, and content signals into one defensible decision layer."
+        eyebrow={t.integrations.eyebrow}
+        title={t.integrations.title}
+        description={t.integrations.description}
       />
-      <InlineNotice tone="info" title="Credentials stay out of the browser">
-        Secret values are submitted to the local API for encrypted server-side
-        storage. The UI only receives connection status and safe account labels.
+      <InlineNotice tone="info" title={t.integrations.vaultNoticeTitle}>
+        {t.integrations.vaultNoticeBody}
       </InlineNotice>
 
       {testIntegration.isError ? (
-        <InlineNotice tone="danger" title="Connection test failed">
+        <InlineNotice tone="danger" title={t.integrations.testFailedTitle}>
           {testIntegration.error.message}
         </InlineNotice>
       ) : null}
       {testIntegration.isSuccess ? (
-        <InlineNotice tone="success" title="Connection test complete">
-          The integration status has been refreshed.
+        <InlineNotice tone="success" title={t.integrations.testCompleteTitle}>
+          {t.integrations.testCompleteBody}
         </InlineNotice>
       ) : null}
       {removeIntegration.isSuccess ? (
-        <InlineNotice tone="success" title="Local credential removed">
-          The provider is disconnected from Marketingovo. Any non-secret site
-          mapping remains available for a later reconnect.
+        <InlineNotice tone="success" title={t.integrations.removedTitle}>
+          {t.integrations.removedBody}
         </InlineNotice>
       ) : null}
       <QueryState
@@ -388,33 +403,37 @@ export function IntegrationsPage() {
                       </div>
                       <div>
                         <span className="integration-category">
-                          {integration.category ?? "Data source"}
+                          {integration.category ??
+                            t.integrations.card.categoryFallback}
                         </span>
                         <h2>{integration.name}</h2>
                         <p>
                           {integration.description ??
-                            "No integration description was returned."}
+                            t.integrations.card.descriptionFallback}
                         </p>
                       </div>
                       <dl className="integration-meta">
                         <div>
-                          <dt>Account</dt>
-                          <dd>{integration.accountLabel ?? "Not connected"}</dd>
-                        </div>
-                        <div>
-                          <dt>Last verified sync</dt>
-                          <dd>{formatDate(integration.lastSyncAt, true)}</dd>
-                        </div>
-                        <div>
-                          <dt>Quota remaining</dt>
+                          <dt>{t.integrations.card.account}</dt>
                           <dd>
-                            {integration.quota
-                              ? `${integration.quota.remaining}${integration.quota.limit === null ? "" : ` / ${integration.quota.limit}`}`
-                              : "Unavailable"}
+                            {integration.accountLabel ??
+                              t.integrations.card.notConnected}
                           </dd>
                         </div>
                         <div>
-                          <dt>Quota reset</dt>
+                          <dt>{t.integrations.card.lastVerifiedSync}</dt>
+                          <dd>{formatDate(integration.lastSyncAt, true)}</dd>
+                        </div>
+                        <div>
+                          <dt>{t.integrations.card.quotaRemaining}</dt>
+                          <dd>
+                            {integration.quota
+                              ? `${integration.quota.remaining}${integration.quota.limit === null ? "" : ` / ${integration.quota.limit}`}`
+                              : t.common.unavailable}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>{t.integrations.card.quotaReset}</dt>
                           <dd>
                             {formatDate(integration.quota?.resetsAt, true)}
                           </dd>
@@ -436,12 +455,12 @@ export function IntegrationsPage() {
                             onClick={() => setEditingId(integration.id)}
                           >
                             {integration.status !== "not_configured"
-                              ? "Rotate credentials"
+                              ? t.integrations.card.rotateCredentials
                               : !hasRequiredCredentials
-                                ? "Add optional API key"
+                                ? t.integrations.card.addOptionalApiKey
                                 : usesSingleApiKey
-                                  ? "Connect API key"
-                                  : "Connect credentials"}
+                                  ? t.integrations.card.connectApiKey
+                                  : t.integrations.card.connectCredentials}
                           </Button>
                         ) : null}
                         {setupUrl ? (
@@ -452,8 +471,8 @@ export function IntegrationsPage() {
                             rel="noreferrer"
                           >
                             {integration.status === "not_configured"
-                              ? "Connect account"
-                              : "Reconnect account"}{" "}
+                              ? t.integrations.card.connectAccount
+                              : t.integrations.card.reconnectAccount}{" "}
                             <Icon name="external" />
                           </a>
                         ) : null}
@@ -463,8 +482,8 @@ export function IntegrationsPage() {
                             onClick={() => setConfiguringId(integration.id)}
                           >
                             {Object.keys(integration.configuration ?? {}).length
-                              ? "Edit site mapping"
-                              : "Configure site"}
+                              ? t.integrations.card.editSiteMapping
+                              : t.integrations.card.configureSite}
                           </Button>
                         ) : null}
                         <Button
@@ -472,15 +491,17 @@ export function IntegrationsPage() {
                           onClick={() => testIntegration.mutate(integration.id)}
                           disabled={testIntegration.isPending}
                         >
-                          Test connection
+                          {t.integrations.card.testConnection}
                         </Button>
                         {integration.status !== "not_configured" ? (
                           <Button
                             variant="ghost"
-                            aria-label={`Revoke ${integration.name} local access`}
+                            aria-label={fmt(t.integrations.card.revokeAria, {
+                              name: integration.name,
+                            })}
                             onClick={() => setRemovingId(integration.id)}
                           >
-                            Revoke local access
+                            {t.integrations.card.revoke}
                           </Button>
                         ) : null}
                       </div>
@@ -492,8 +513,8 @@ export function IntegrationsPage() {
           </div>
         ) : (
           <EmptyState
-            title="No integrations available"
-            description="The API did not return an integration catalog. Check system health and server configuration."
+            title={t.integrations.emptyTitle}
+            description={t.integrations.emptyDescription}
           />
         )}
       </QueryState>

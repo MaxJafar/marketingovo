@@ -78,4 +78,47 @@ describe("durable local work", () => {
     expect(await scheduler.runOnce()).toBe(0);
     database.close();
   });
+
+  it("starts the workflow the schedule names, with its options", async () => {
+    const root = mkdtempSync(join(tmpdir(), "marketingovo-report-schedule-"));
+    const database = new MarketingovoDatabase({
+      path: join(root, "marketingovo.db"),
+    });
+    const project = database.createProject({
+      name: "Example",
+      canonicalUrl: "https://example.com",
+    });
+    const schedule = database.createSchedule({
+      projectId: project.id,
+      cron: "0 8 1 * *",
+      timezone: "UTC",
+      enabled: true,
+      nextRunAt: "2026-02-01T08:00:00.000Z",
+      workflowId: "marketing-report",
+      options: { title: "Monthly report", compare: true },
+    });
+    const startRun = vi.fn(async () => undefined);
+    const scheduler = new DurableScheduler({
+      database,
+      startRun,
+      workerId: "scheduler-test",
+      now: () => new Date("2026-02-01T08:00:00.000Z"),
+    });
+    expect(await scheduler.runOnce()).toBe(1);
+    expect(startRun).toHaveBeenCalledWith(
+      {
+        projectId: project.id,
+        workflowId: "marketing-report",
+        options: {
+          title: "Monthly report",
+          compare: true,
+          // The scheduler stamps the provenance id last so a schedule cannot
+          // claim to be a different one through its own options.
+          scheduleId: schedule.id,
+        },
+      },
+      `schedule:${schedule.id}:2026-02-01T08:00:00.000Z`,
+    );
+    database.close();
+  });
 });

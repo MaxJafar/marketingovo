@@ -1,4 +1,7 @@
-export function exactUrlHostname(value: string | undefined): string | null {
+/** `null` covers both "no website configured" and "not a usable URL". */
+export function exactUrlHostname(
+  value: string | null | undefined,
+): string | null {
   if (!value) return null;
   try {
     const url = new URL(value);

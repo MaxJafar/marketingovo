@@ -5,6 +5,7 @@ import type {
   PageRecord,
 } from "../api/contracts";
 import { useRunLinks } from "../api/queries";
+import { fmt, useI18n } from "../i18n";
 import {
   Button,
   Card,
@@ -28,6 +29,7 @@ export function InternalLinkExplorer({
   page: PageRecord;
   onClose: () => void;
 }) {
+  const { t } = useI18n();
   const [direction, setDirection] = useState<InternalLinkDirection>("inlinks");
   const [draftSearch, setDraftSearch] = useState("");
   const [search, setSearch] = useState("");
@@ -51,34 +53,41 @@ export function InternalLinkExplorer({
     <Card
       className="internal-link-explorer"
       role="region"
-      aria-label={`Internal links for ${title}`}
+      aria-label={fmt(t.internalLinkExplorer.regionLabel, { title })}
     >
       <header className="link-explorer-header">
         <div>
-          <p className="eyebrow">Immutable crawl graph</p>
+          <p className="eyebrow">{t.internalLinkExplorer.eyebrow}</p>
           <h2>{title}</h2>
           <p className="link-explorer-url">{page.url}</p>
         </div>
         <Button variant="ghost" type="button" onClick={onClose}>
-          Close explorer
+          {t.internalLinkExplorer.closeExplorer}
         </Button>
       </header>
 
       {page.linkGraphState !== "available" || !page.runId ? (
-        <InlineNotice tone="warning" title="Link evidence unavailable">
-          Replay this audit to capture versioned inlink and outlink evidence.
-          Existing page and issue history remains unchanged.
+        <InlineNotice
+          tone="warning"
+          title={t.internalLinkExplorer.unavailableTitle}
+        >
+          {t.internalLinkExplorer.unavailableBody}
         </InlineNotice>
       ) : (
         <>
-          <div className="link-explorer-tabs" aria-label="Link direction">
+          <div
+            className="link-explorer-tabs"
+            aria-label={t.internalLinkExplorer.directionTabsLabel}
+          >
             <button
               type="button"
               aria-pressed={direction === "inlinks"}
               className={direction === "inlinks" ? "is-active" : ""}
               onClick={() => selectDirection("inlinks")}
             >
-              Inlinks · {formatNumber(page.inlinkSources)} sources
+              {fmt(t.internalLinkExplorer.inlinksTab, {
+                count: formatNumber(page.inlinkSources),
+              })}
             </button>
             <button
               type="button"
@@ -86,7 +95,9 @@ export function InternalLinkExplorer({
               className={direction === "outlinks" ? "is-active" : ""}
               onClick={() => selectDirection("outlinks")}
             >
-              Outlinks · {formatNumber(page.outlinkTargets)} targets
+              {fmt(t.internalLinkExplorer.outlinksTab, {
+                count: formatNumber(page.outlinkTargets),
+              })}
             </button>
           </div>
 
@@ -100,28 +111,31 @@ export function InternalLinkExplorer({
             }}
           >
             <label htmlFor="link-explorer-search">
-              Search this direction
+              {t.internalLinkExplorer.searchLabel}
               <input
                 id="link-explorer-search"
                 type="search"
                 value={draftSearch}
                 onChange={(event) => setDraftSearch(event.currentTarget.value)}
-                placeholder="URL, page title, or anchor text"
+                placeholder={t.internalLinkExplorer.searchPlaceholder}
                 maxLength={160}
               />
             </label>
             <Button type="submit" variant="secondary">
-              Search
+              {t.internalLinkExplorer.search}
             </Button>
           </form>
 
           {query.isLoading ? (
             <p className="link-explorer-loading" role="status">
-              Reading the stored link graph…
+              {t.internalLinkExplorer.loading}
             </p>
           ) : null}
           {query.isError ? (
-            <InlineNotice tone="danger" title="Link graph unavailable">
+            <InlineNotice
+              tone="danger"
+              title={t.internalLinkExplorer.graphUnavailableTitle}
+            >
               {query.error.message}
             </InlineNotice>
           ) : null}
@@ -130,53 +144,60 @@ export function InternalLinkExplorer({
             <>
               <dl className="link-summary-grid">
                 <div>
-                  <dt>Inlink sources</dt>
+                  <dt>{t.internalLinkExplorer.summary.inlinkSources}</dt>
                   <dd>
                     <strong>
                       {formatNumber(explorer.summary.inlinkSources)}
                     </strong>
                     <small>
-                      {formatNumber(explorer.summary.inlinkOccurrences)} total
-                      occurrences
+                      {fmt(t.internalLinkExplorer.summary.totalOccurrences, {
+                        count: formatNumber(explorer.summary.inlinkOccurrences),
+                      })}
                     </small>
                   </dd>
                 </div>
                 <div>
-                  <dt>Outlink targets</dt>
+                  <dt>{t.internalLinkExplorer.summary.outlinkTargets}</dt>
                   <dd>
                     <strong>
                       {formatNumber(explorer.summary.outlinkTargets)}
                     </strong>
                     <small>
-                      {formatNumber(explorer.summary.outlinkOccurrences)} total
-                      occurrences
+                      {fmt(t.internalLinkExplorer.summary.totalOccurrences, {
+                        count: formatNumber(
+                          explorer.summary.outlinkOccurrences,
+                        ),
+                      })}
                     </small>
                   </dd>
                 </div>
                 <div>
-                  <dt>Redirected targets</dt>
+                  <dt>{t.internalLinkExplorer.summary.redirectedTargets}</dt>
                   <dd>
                     <strong>
                       {formatNumber(explorer.summary.redirectedOutlinkTargets)}
                     </strong>
                     <small>
-                      Internal links that should point to the final URL
+                      {t.internalLinkExplorer.summary.redirectedHelp}
                     </small>
                   </dd>
                 </div>
                 <div>
-                  <dt>Broken targets</dt>
+                  <dt>{t.internalLinkExplorer.summary.brokenTargets}</dt>
                   <dd>
                     <strong>
                       {formatNumber(explorer.summary.brokenOutlinkTargets)}
                     </strong>
-                    <small>Destinations returning HTTP 4xx or 5xx</small>
+                    <small>{t.internalLinkExplorer.summary.brokenHelp}</small>
                   </dd>
                 </div>
               </dl>
 
               {explorer.warnings.length > 0 ? (
-                <InlineNotice tone="warning" title="Coverage limitation">
+                <InlineNotice
+                  tone="warning"
+                  title={t.internalLinkExplorer.coverageLimitationTitle}
+                >
                   <ul>
                     {explorer.warnings.map((warning) => (
                       <li key={warning}>{warning}</li>
@@ -187,22 +208,33 @@ export function InternalLinkExplorer({
 
               {explorer.items.length > 0 ? (
                 <div className="link-evidence-table-wrap">
-                  <table aria-label={`${direction} for ${title}`}>
+                  <table
+                    aria-label={fmt(t.internalLinkExplorer.table.label, {
+                      direction,
+                      title,
+                    })}
+                  >
                     <caption>
                       {direction === "inlinks"
-                        ? "Pages linking to the selected URL"
-                        : "Internal destinations linked from the selected URL"}
+                        ? t.internalLinkExplorer.table.captionInlinks
+                        : t.internalLinkExplorer.table.captionOutlinks}
                     </caption>
                     <thead>
                       <tr>
                         <th scope="col">
                           {direction === "inlinks"
-                            ? "Source page"
-                            : "Destination"}
+                            ? t.internalLinkExplorer.table.sourcePageColumn
+                            : t.internalLinkExplorer.table.destinationColumn}
                         </th>
-                        <th scope="col">State</th>
-                        <th scope="col">Anchor evidence</th>
-                        <th scope="col">Follow</th>
+                        <th scope="col">
+                          {t.internalLinkExplorer.table.stateColumn}
+                        </th>
+                        <th scope="col">
+                          {t.internalLinkExplorer.table.anchorColumn}
+                        </th>
+                        <th scope="col">
+                          {t.internalLinkExplorer.table.followColumn}
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -228,14 +260,21 @@ export function InternalLinkExplorer({
                                 {direction === "outlinks" &&
                                 edge.targetPageUrl &&
                                 edge.targetPageUrl !== edge.targetUrl ? (
-                                  <small>Final URL: {edge.targetPageUrl}</small>
+                                  <small>
+                                    {fmt(
+                                      t.internalLinkExplorer.table.finalUrl,
+                                      { url: edge.targetPageUrl },
+                                    )}
+                                  </small>
                                 ) : null}
                               </div>
                             </td>
                             <td>
                               <StatusBadge status={edge.targetState} />
                               <small className="link-http-state">
-                                HTTP {formatNumber(edge.targetStatusCode)}
+                                {fmt(t.internalLinkExplorer.table.httpStatus, {
+                                  status: formatNumber(edge.targetStatusCode),
+                                })}
                               </small>
                             </td>
                             <td>
@@ -247,20 +286,29 @@ export function InternalLinkExplorer({
                                 </ul>
                               ) : (
                                 <span className="muted-value">
-                                  No text captured
+                                  {t.internalLinkExplorer.table.noTextCaptured}
                                 </span>
                               )}
                               <small>
                                 {edge.placements.join(", ") ||
-                                  "Placement unavailable"}
+                                  t.internalLinkExplorer.table
+                                    .placementUnavailable}
                               </small>
                             </td>
                             <td>
                               <strong>{formatNumber(edge.occurrences)}</strong>
                               <small>
-                                {formatNumber(edge.followOccurrences)} follow ·{" "}
-                                {formatNumber(edge.nofollowOccurrences)}{" "}
-                                nofollow
+                                {fmt(
+                                  t.internalLinkExplorer.table.followSummary,
+                                  {
+                                    follow: formatNumber(
+                                      edge.followOccurrences,
+                                    ),
+                                    nofollow: formatNumber(
+                                      edge.nofollowOccurrences,
+                                    ),
+                                  },
+                                )}
                               </small>
                             </td>
                           </tr>
@@ -271,20 +319,26 @@ export function InternalLinkExplorer({
                 </div>
               ) : (
                 <EmptyState
-                  title={search ? "No links match" : `No ${direction} captured`}
+                  title={
+                    search
+                      ? t.internalLinkExplorer.empty.noLinksMatch
+                      : fmt(t.internalLinkExplorer.empty.noDirectionCaptured, {
+                          direction,
+                        })
+                  }
                   description={
                     search
-                      ? "Try a broader URL, title, or anchor-text search."
+                      ? t.internalLinkExplorer.empty.searchHint
                       : direction === "inlinks"
-                        ? "No crawled page links to this URL in the selected snapshot."
-                        : "This page has no captured internal destinations."
+                        ? t.internalLinkExplorer.empty.inlinksHint
+                        : t.internalLinkExplorer.empty.outlinksHint
                   }
                 />
               )}
 
               <nav
                 className="link-explorer-pagination"
-                aria-label="Link evidence pages"
+                aria-label={t.internalLinkExplorer.paginationLabel}
               >
                 <Button
                   type="button"
@@ -294,14 +348,18 @@ export function InternalLinkExplorer({
                     setOffset(Math.max(0, offset - explorer.pageInfo.limit))
                   }
                 >
-                  Previous
+                  {t.internalLinkExplorer.previous}
                 </Button>
                 <span>
                   {explorer.pageInfo.total === 0
-                    ? "0 results"
-                    : `${formatNumber(explorer.pageInfo.offset + 1)}–${formatNumber(
-                        explorer.pageInfo.offset + explorer.items.length,
-                      )} of ${formatNumber(explorer.pageInfo.total)}`}
+                    ? t.internalLinkExplorer.zeroResults
+                    : fmt(t.internalLinkExplorer.resultsRange, {
+                        from: formatNumber(explorer.pageInfo.offset + 1),
+                        to: formatNumber(
+                          explorer.pageInfo.offset + explorer.items.length,
+                        ),
+                        total: formatNumber(explorer.pageInfo.total),
+                      })}
                 </span>
                 <Button
                   type="button"
@@ -313,7 +371,7 @@ export function InternalLinkExplorer({
                     )
                   }
                 >
-                  Next
+                  {t.internalLinkExplorer.next}
                 </Button>
               </nav>
             </>

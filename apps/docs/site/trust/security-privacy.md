@@ -8,7 +8,7 @@ description: Understand localhost authorization, egress controls, credential han
 Security is a release gate because Marketingovo processes hostile crawled pages, confidential marketing evidence, browser sessions, and provider credentials.
 
 <div class="status-banner">
-  <strong>1.1.0</strong>
+  <strong>1.2.0</strong>
   <p>Security fixes land on the latest 1.x. Review the supported-version table and report a vulnerability privately rather than in a public issue.</p>
 </div>
 

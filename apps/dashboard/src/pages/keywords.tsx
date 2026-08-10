@@ -3,8 +3,17 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { KeywordOpportunity } from "../api/contracts";
 import { useKeywords, useStartWorkflow } from "../api/queries";
 import { useSite } from "../context/site-context";
+import { fmt, useI18n } from "../i18n";
 import { DataTable } from "../components/data-table";
-import { FreshnessNotice, QueryState } from "../components/data-state";
+import {
+  CapabilityGate,
+  FreshnessNotice,
+  QueryState,
+} from "../components/data-state";
+import {
+  NEEDS_WEBSITE_OR_SEARCH_CONSOLE,
+  useWorkspaceCapabilities,
+} from "../lib/capabilities";
 import {
   Button,
   Card,
@@ -18,7 +27,9 @@ import {
 } from "../components/ui";
 
 export function KeywordsPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
+  const { capabilities } = useWorkspaceCapabilities(siteId);
   const query = useKeywords(siteId);
   const start = useStartWorkflow();
   const [seed, setSeed] = useState("");
@@ -30,52 +41,54 @@ export function KeywordsPage() {
     () => [
       {
         id: "keyword",
-        header: "Keyword",
+        header: t.keywords.opportunities.columns.keyword,
         cell: ({ row }) => (
           <div className="keyword-cell">
             <strong>{row.original.keyword}</strong>
-            <small>{row.original.cluster ?? "No cluster"}</small>
+            <small>
+              {row.original.cluster ?? t.keywords.opportunities.noCluster}
+            </small>
           </div>
         ),
       },
       {
         id: "intent",
-        header: "Intent",
+        header: t.keywords.opportunities.columns.intent,
         cell: ({ row }) => (
           <StatusBadge status={row.original.intent ?? "unknown"} />
         ),
       },
       {
         id: "position",
-        header: "Position",
+        header: t.keywords.opportunities.columns.position,
         cell: ({ row }) => formatNumber(row.original.position),
       },
       {
         id: "volume",
-        header: "Volume",
+        header: t.keywords.opportunities.columns.volume,
         cell: ({ row }) => formatNumber(row.original.volume),
       },
       {
         id: "difficulty",
-        header: "Difficulty",
+        header: t.keywords.opportunities.columns.difficulty,
         cell: ({ row }) =>
           row.original.difficulty === null ||
           row.original.difficulty === undefined
-            ? "Unavailable"
+            ? t.common.unavailable
             : `${formatNumber(row.original.difficulty)}/100`,
       },
       {
         id: "opportunity",
-        header: "Opportunity",
+        header: t.keywords.opportunities.columns.opportunity,
         cell: ({ row }) =>
           row.original.opportunityScore === null ||
           row.original.opportunityScore === undefined
-            ? "Unavailable"
+            ? t.common.unavailable
             : `${formatNumber(row.original.opportunityScore)}/100`,
       },
       {
         id: "target",
-        header: "Target page",
+        header: t.keywords.opportunities.columns.target,
         cell: ({ row }) => {
           const url = safeExternalUrl(row.original.targetUrl);
           return url ? (
@@ -85,17 +98,17 @@ export function KeywordsPage() {
               target="_blank"
               rel="noreferrer"
             >
-              Open page
+              {t.keywords.opportunities.openPage}
             </a>
           ) : row.original.targetUrl ? (
-            "Invalid URL"
+            t.keywords.opportunities.invalidUrl
           ) : (
-            "Unassigned"
+            t.keywords.opportunities.unassigned
           );
         },
       },
     ],
-    [],
+    [t],
   );
 
   function startKeywordResearch(event: FormEvent<HTMLFormElement>) {
@@ -132,19 +145,19 @@ export function KeywordsPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Demand intelligence"
-        title="Keywords & content"
-        description="Find query opportunities, group intent, and turn search demand into a focused content plan."
+        eyebrow={t.keywords.eyebrow}
+        title={t.keywords.title}
+        description={t.keywords.description}
       />
       <div className="two-column-grid">
         <Card className="schedule-editor">
           <form onSubmit={startKeywordResearch}>
             <SectionHeading
-              title="Research one market"
-              description="Expand a seed across suggestions, intent, Trends, PAA, and related searches."
+              title={t.keywords.research.title}
+              description={t.keywords.research.description}
             />
             <label>
-              Seed keyword
+              {t.keywords.research.seedLabel}
               <input
                 value={seed}
                 onChange={(event) => setSeed(event.currentTarget.value)}
@@ -154,7 +167,9 @@ export function KeywordsPage() {
             </label>
             <div className="form-actions">
               <Button type="submit" disabled={!siteId || start.isPending}>
-                {start.isPending ? "Starting…" : "Start keyword research"}
+                {start.isPending
+                  ? t.keywords.starting
+                  : t.keywords.research.start}
               </Button>
             </div>
           </form>
@@ -162,11 +177,11 @@ export function KeywordsPage() {
         <Card className="schedule-editor">
           <form onSubmit={startContentPlan}>
             <SectionHeading
-              title="Build a content plan"
-              description="Enter up to ten seed topics, separated by commas or new lines."
+              title={t.keywords.plan.title}
+              description={t.keywords.plan.description}
             />
             <label>
-              Seed topics
+              {t.keywords.plan.seedsLabel}
               <textarea
                 value={planSeeds}
                 onChange={(event) => setPlanSeeds(event.currentTarget.value)}
@@ -177,112 +192,124 @@ export function KeywordsPage() {
             </label>
             <div className="form-actions">
               <Button type="submit" disabled={!siteId || start.isPending}>
-                {start.isPending ? "Starting…" : "Generate content plan"}
+                {start.isPending
+                  ? t.keywords.starting
+                  : t.keywords.plan.generate}
               </Button>
             </div>
           </form>
         </Card>
       </div>
       {start.isError ? (
-        <InlineNotice tone="danger" title="Research could not start">
+        <InlineNotice tone="danger" title={t.keywords.notStartedTitle}>
           {start.error.message}
         </InlineNotice>
       ) : null}
       {start.isSuccess ? (
-        <InlineNotice tone="success" title="Research queued">
-          The durable run is visible under Audits. This page will show the
-          latest completed research result.
+        <InlineNotice tone="success" title={t.keywords.queuedTitle}>
+          {t.keywords.queuedBody}
         </InlineNotice>
       ) : null}
       {workspace?.providerUsage ? (
-        <InlineNotice tone="info" title="Latest research provider usage">
-          ${workspace.providerUsage.actualCostUsd.toFixed(4)} was reported by
-          metered providers across {workspace.providerUsage.billableRequests}{" "}
-          billable request(s).
+        <InlineNotice tone="info" title={t.keywords.usage.title}>
+          {fmt(t.keywords.usage.reported, {
+            cost: workspace.providerUsage.actualCostUsd.toFixed(4),
+            billable: workspace.providerUsage.billableRequests,
+          })}
           {workspace.providerUsage.unreportedBillableRequests > 0
-            ? ` ${workspace.providerUsage.unreportedBillableRequests} billable request(s) did not report a per-call cost and are not shown as zero.`
-            : " All billable calls in this result reported their cost."}
+            ? ` ${fmt(t.keywords.usage.unreported, {
+                count: workspace.providerUsage.unreportedBillableRequests,
+              })}`
+            : ` ${t.keywords.usage.allReported}`}
           {workspace.providerUsage.freeRequests > 0
-            ? ` ${workspace.providerUsage.freeRequests} completed request(s) used known-free sources.`
+            ? ` ${fmt(t.keywords.usage.free, {
+                count: workspace.providerUsage.freeRequests,
+              })}`
             : ""}
         </InlineNotice>
       ) : null}
-      <QueryState
-        isLoading={query.isLoading}
-        error={query.error}
-        siteId={siteId}
-        onRetry={() => void query.refetch()}
+      <CapabilityGate
+        capabilities={capabilities}
+        requires={NEEDS_WEBSITE_OR_SEARCH_CONSOLE}
       >
-        <FreshnessNotice meta={query.data?.meta} />
-        <section>
-          <SectionHeading
-            title="Content clusters"
-            description="Coverage and brief guidance from the connected keyword source."
-          />
-          {clusters.length > 0 ? (
-            <div className="cluster-grid">
-              {clusters.map((cluster) => (
-                <Card key={cluster.id} className="cluster-card">
-                  <span className="cluster-count">
-                    {formatNumber(cluster.keywords)} keywords
-                  </span>
-                  <h3>{cluster.name}</h3>
-                  <div className="progress-row">
-                    <span>Content coverage</span>
-                    <strong>
-                      {cluster.contentCoverage === null ||
-                      cluster.contentCoverage === undefined
-                        ? "Unavailable"
-                        : `${formatNumber(cluster.contentCoverage)}%`}
-                    </strong>
-                  </div>
-                  {cluster.contentCoverage !== null &&
-                  cluster.contentCoverage !== undefined ? (
-                    <div className="progress-track" aria-hidden="true">
-                      <span
-                        style={{
-                          width: `${Math.max(0, Math.min(100, cluster.contentCoverage))}%`,
-                        }}
-                      />
+        <QueryState
+          isLoading={query.isLoading}
+          error={query.error}
+          siteId={siteId}
+          onRetry={() => void query.refetch()}
+        >
+          <FreshnessNotice meta={query.data?.meta} />
+          <section>
+            <SectionHeading
+              title={t.keywords.clusters.title}
+              description={t.keywords.clusters.description}
+            />
+            {clusters.length > 0 ? (
+              <div className="cluster-grid">
+                {clusters.map((cluster) => (
+                  <Card key={cluster.id} className="cluster-card">
+                    <span className="cluster-count">
+                      {fmt(t.keywords.clusters.keywordCount, {
+                        count: formatNumber(cluster.keywords),
+                      })}
+                    </span>
+                    <h3>{cluster.name}</h3>
+                    <div className="progress-row">
+                      <span>{t.keywords.clusters.coverage}</span>
+                      <strong>
+                        {cluster.contentCoverage === null ||
+                        cluster.contentCoverage === undefined
+                          ? t.common.unavailable
+                          : `${formatNumber(cluster.contentCoverage)}%`}
+                      </strong>
                     </div>
-                  ) : (
-                    <div className="progress-unavailable">
-                      Coverage measurement unavailable
-                    </div>
-                  )}
-                  <p>
-                    {cluster.recommendedBrief ??
-                      "No brief recommendation available."}
-                  </p>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              title="No content clusters"
-              description="Connect a keyword provider or import keyword data to build topic clusters."
+                    {cluster.contentCoverage !== null &&
+                    cluster.contentCoverage !== undefined ? (
+                      <div className="progress-track" aria-hidden="true">
+                        <span
+                          style={{
+                            width: `${Math.max(0, Math.min(100, cluster.contentCoverage))}%`,
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="progress-unavailable">
+                        {t.keywords.clusters.coverageUnavailable}
+                      </div>
+                    )}
+                    <p>
+                      {cluster.recommendedBrief ?? t.keywords.clusters.noBrief}
+                    </p>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                title={t.keywords.clusters.emptyTitle}
+                description={t.keywords.clusters.emptyBody}
+              />
+            )}
+          </section>
+          <section>
+            <SectionHeading
+              title={t.keywords.opportunities.title}
+              description={t.keywords.opportunities.description}
             />
-          )}
-        </section>
-        <section>
-          <SectionHeading
-            title="Keyword opportunities"
-            description="Prioritize demand using position, search volume, difficulty, and opportunity score."
-          />
-          {opportunities.length > 0 ? (
-            <DataTable
-              data={opportunities}
-              columns={columns}
-              label="Keyword opportunities"
-            />
-          ) : (
-            <EmptyState
-              title="No keyword opportunities"
-              description="The API returned a valid empty opportunity set."
-            />
-          )}
-        </section>
-      </QueryState>
+            {opportunities.length > 0 ? (
+              <DataTable
+                data={opportunities}
+                columns={columns}
+                label={t.keywords.opportunities.tableLabel}
+              />
+            ) : (
+              <EmptyState
+                title={t.keywords.opportunities.emptyTitle}
+                description={t.keywords.opportunities.emptyBody}
+              />
+            )}
+          </section>
+        </QueryState>
+      </CapabilityGate>
     </div>
   );
 }

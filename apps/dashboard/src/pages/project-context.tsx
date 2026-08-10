@@ -10,6 +10,7 @@ import {
   useUpdateProjectContext,
 } from "../api/queries";
 import { useSite } from "../context/site-context";
+import { fmt, useI18n, type Messages } from "../i18n";
 import { FreshnessNotice, QueryState } from "../components/data-state";
 import {
   Button,
@@ -33,55 +34,16 @@ const emptyProfile: ProjectContextProfile = {
   constraints: [],
 };
 
-const profileLists: ReadonlyArray<{
-  key: Exclude<keyof ProjectContextProfile, "summary">;
-  label: string;
-  help: string;
-  placeholder: string;
-}> = [
-  {
-    key: "audiences",
-    label: "Priority audiences",
-    help: "Who must find, trust, and act on this site?",
-    placeholder: "Technical SEO leads\nB2B growth teams",
-  },
-  {
-    key: "markets",
-    label: "Markets",
-    help: "Countries, regions, or commercial segments that change intent.",
-    placeholder: "United States\nUnited Kingdom",
-  },
-  {
-    key: "languages",
-    label: "Languages",
-    help: "Use the labels your team recognizes; include locale when relevant.",
-    placeholder: "English (en-US)\nGerman (de-DE)",
-  },
-  {
-    key: "conversionGoals",
-    label: "Conversion goals",
-    help: "Name the events that make organic work valuable.",
-    placeholder: "Qualified demo request\nTrial activation",
-  },
-  {
-    key: "priorityTopics",
-    label: "Priority topics",
-    help: "Products, problems, or themes the current strategy must support.",
-    placeholder: "Technical SEO automation\nLocal-first analytics",
-  },
-  {
-    key: "competitors",
-    label: "Known competitors",
-    help: "Brands or domains used for fair, explicit comparison.",
-    placeholder: "example-competitor.com\nAlternative category leader",
-  },
-  {
-    key: "constraints",
-    label: "Constraints and guardrails",
-    help: "Legal, brand, platform, migration, or resourcing limits.",
-    placeholder:
-      "Do not change checkout URLs\nLegal review required for claims",
-  },
+const profileListKeys: ReadonlyArray<
+  Exclude<keyof ProjectContextProfile, "summary" | "brandProfiles">
+> = [
+  "audiences",
+  "markets",
+  "languages",
+  "conversionGoals",
+  "priorityTopics",
+  "competitors",
+  "constraints",
 ];
 
 function lines(value: FormDataEntryValue | null): string[] {
@@ -95,11 +57,16 @@ function lines(value: FormDataEntryValue | null): string[] {
   return [...unique.values()];
 }
 
-function journalLabel(kind: ProjectContextJournalEntry["kind"]): string {
-  return kind[0]!.toUpperCase() + kind.slice(1);
+function journalLabel(
+  kind: ProjectContextJournalEntry["kind"],
+  t: Messages,
+): string {
+  const label: string | undefined = t.projectContext.journalKinds[kind];
+  return label ?? kind[0]!.toUpperCase() + kind.slice(1);
 }
 
 export function ProjectContextPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const query = useProjectContext(siteId);
   const runs = useRuns(siteId);
@@ -149,27 +116,39 @@ export function ProjectContextPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Reusable strategy memory"
-        title="Project context"
-        description="Keep business goals, audiences, markets, constraints, and decisions beside crawl evidence so every human and agent starts from the same facts."
+        eyebrow={t.projectContext.eyebrow}
+        title={t.projectContext.title}
+        description={t.projectContext.description}
       />
       {update.isSuccess ? (
-        <InlineNotice tone="success" title="Context revision saved">
-          The previous revision remains immutable and available in history.
+        <InlineNotice
+          tone="success"
+          title={t.projectContext.revisionSavedTitle}
+        >
+          {t.projectContext.revisionSavedBody}
         </InlineNotice>
       ) : null}
       {update.isError ? (
-        <InlineNotice tone="danger" title="Context was not saved">
+        <InlineNotice
+          tone="danger"
+          title={t.projectContext.revisionNotSavedTitle}
+        >
           {update.error.message}
         </InlineNotice>
       ) : null}
       {append.isSuccess ? (
-        <InlineNotice tone="success" title="Journal entry appended">
-          The entry is immutable and now available to local agent resources.
+        <InlineNotice
+          tone="success"
+          title={t.projectContext.journalAppendedTitle}
+        >
+          {t.projectContext.journalAppendedBody}
         </InlineNotice>
       ) : null}
       {append.isError ? (
-        <InlineNotice tone="danger" title="Journal entry was not appended">
+        <InlineNotice
+          tone="danger"
+          title={t.projectContext.journalNotAppendedTitle}
+        >
           {append.error.message}
         </InlineNotice>
       ) : null}
@@ -186,16 +165,20 @@ export function ProjectContextPage() {
             <Card className="context-profile-card">
               <div className="context-card-heading">
                 <div>
-                  <p className="eyebrow">Versioned profile</p>
+                  <p className="eyebrow">{t.projectContext.profile.eyebrow}</p>
                   <h2>
                     {workspace.current
-                      ? `Revision ${workspace.current.revision}`
-                      : "Create the first revision"}
+                      ? fmt(t.projectContext.revisionLabel, {
+                          revision: workspace.current.revision,
+                        })
+                      : t.projectContext.profile.createFirstRevision}
                   </h2>
                 </div>
                 {workspace.current ? (
                   <span className="muted-copy">
-                    Saved {formatDate(workspace.current.createdAt, true)}
+                    {fmt(t.projectContext.profile.savedAt, {
+                      date: formatDate(workspace.current.createdAt, true),
+                    })}
                   </span>
                 ) : null}
               </div>
@@ -206,7 +189,7 @@ export function ProjectContextPage() {
               >
                 <div className="context-field">
                   <label htmlFor="context-summary">
-                    Business and search summary
+                    {t.projectContext.profile.summaryLabel}
                   </label>
                   <textarea
                     id="context-summary"
@@ -214,27 +197,28 @@ export function ProjectContextPage() {
                     rows={5}
                     maxLength={4_000}
                     defaultValue={profile.summary ?? ""}
-                    placeholder="What does the business offer, to whom, and what must organic search accomplish now?"
+                    placeholder={t.projectContext.profile.summaryPlaceholder}
                   />
                 </div>
                 <div className="context-list-grid">
-                  {profileLists.map((field) => {
-                    const inputId = `context-${field.key}`;
+                  {profileListKeys.map((key) => {
+                    const field = t.projectContext.profileLists[key];
+                    const inputId = `context-${key}`;
                     const helpId = `${inputId}-help`;
                     return (
-                      <div className="context-field" key={field.key}>
+                      <div className="context-field" key={key}>
                         <label htmlFor={inputId}>{field.label}</label>
                         <textarea
                           id={inputId}
-                          name={field.key}
+                          name={key}
                           rows={4}
                           maxLength={8_000}
-                          defaultValue={profile[field.key].join("\n")}
+                          defaultValue={profile[key].join("\n")}
                           placeholder={field.placeholder}
                           aria-describedby={helpId}
                         />
                         <small id={helpId}>
-                          {field.help} One item per line.
+                          {field.help} {t.projectContext.profile.oneItemPerLine}
                         </small>
                       </div>
                     );
@@ -242,7 +226,7 @@ export function ProjectContextPage() {
                 </div>
                 <div className="context-field">
                   <label htmlFor="context-change-summary">
-                    Revision summary
+                    {t.projectContext.profile.changeSummaryLabel}
                   </label>
                   <input
                     id="context-change-summary"
@@ -250,19 +234,20 @@ export function ProjectContextPage() {
                     minLength={3}
                     maxLength={240}
                     required
-                    placeholder="Added UK market and clarified demo conversion"
+                    placeholder={
+                      t.projectContext.profile.changeSummaryPlaceholder
+                    }
                     aria-describedby="context-change-summary-help"
                   />
                   <small id="context-change-summary-help">
-                    Explain what changed. Saving always creates a new immutable
-                    revision.
+                    {t.projectContext.profile.changeSummaryHelp}
                   </small>
                 </div>
                 <div className="form-actions">
                   <Button type="submit" disabled={update.isPending}>
                     {update.isPending
-                      ? "Saving revision…"
-                      : "Save new revision"}
+                      ? t.projectContext.profile.saving
+                      : t.projectContext.profile.save}
                   </Button>
                 </div>
               </form>
@@ -271,25 +256,37 @@ export function ProjectContextPage() {
             <Card className="context-journal-card">
               <div className="context-card-heading">
                 <div>
-                  <p className="eyebrow">Append-only journal</p>
-                  <h2>Record what changed the strategy</h2>
+                  <p className="eyebrow">
+                    {t.projectContext.journalForm.eyebrow}
+                  </p>
+                  <h2>{t.projectContext.journalForm.heading}</h2>
                 </div>
               </div>
               <form className="context-journal-form" onSubmit={appendJournal}>
                 <div className="form-grid">
                   <label>
-                    Entry type
+                    {t.projectContext.journalForm.kindLabel}
                     <select name="kind" defaultValue="observation">
-                      <option value="observation">Observation</option>
-                      <option value="decision">Decision</option>
-                      <option value="constraint">Constraint</option>
-                      <option value="experiment">Experiment</option>
+                      <option value="observation">
+                        {t.projectContext.journalKinds.observation}
+                      </option>
+                      <option value="decision">
+                        {t.projectContext.journalKinds.decision}
+                      </option>
+                      <option value="constraint">
+                        {t.projectContext.journalKinds.constraint}
+                      </option>
+                      <option value="experiment">
+                        {t.projectContext.journalKinds.experiment}
+                      </option>
                     </select>
                   </label>
                   <label>
-                    Source audit (optional)
+                    {t.projectContext.journalForm.sourceLabel}
                     <select name="sourceRunId" defaultValue="">
-                      <option value="">No linked audit</option>
+                      <option value="">
+                        {t.projectContext.journalForm.noLinkedAudit}
+                      </option>
                       {(runs.data?.data.items ?? []).slice(0, 25).map((run) => (
                         <option key={run.id} value={run.id}>
                           {formatDate(run.completedAt ?? run.startedAt, true)} ·{" "}
@@ -300,33 +297,34 @@ export function ProjectContextPage() {
                   </label>
                 </div>
                 <label>
-                  Entry title
+                  {t.projectContext.journalForm.titleLabel}
                   <input
                     name="title"
                     minLength={3}
                     maxLength={160}
                     required
-                    placeholder="UK comparison pages convert qualified demos"
+                    placeholder={t.projectContext.journalForm.titlePlaceholder}
                   />
                 </label>
                 <label>
-                  Evidence and implication
+                  {t.projectContext.journalForm.detailLabel}
                   <textarea
                     name="detail"
                     minLength={3}
                     maxLength={2_000}
                     rows={5}
                     required
-                    placeholder="State what was observed or decided, why it matters, and what would invalidate it."
+                    placeholder={t.projectContext.journalForm.detailPlaceholder}
                   />
                 </label>
                 <div className="form-actions">
                   <Button type="submit" disabled={append.isPending}>
-                    {append.isPending ? "Appending…" : "Append journal entry"}
+                    {append.isPending
+                      ? t.projectContext.journalForm.appending
+                      : t.projectContext.journalForm.append}
                   </Button>
                   <span className="muted-copy">
-                    Entries cannot be edited in place. Add a later decision when
-                    evidence changes.
+                    {t.projectContext.journalForm.immutableNote}
                   </span>
                 </div>
               </form>
@@ -338,10 +336,10 @@ export function ProjectContextPage() {
           <section aria-labelledby="context-journal-history">
             <div className="section-heading">
               <div>
-                <h2 id="context-journal-history">Decision journal</h2>
-                <p>
-                  Newest entries appear first; sequence numbers never change.
-                </p>
+                <h2 id="context-journal-history">
+                  {t.projectContext.journalHistory.heading}
+                </h2>
+                <p>{t.projectContext.journalHistory.description}</p>
               </div>
             </div>
             <ol className="context-journal-list">
@@ -351,7 +349,7 @@ export function ProjectContextPage() {
                     <div className="context-entry-heading">
                       <StatusBadge
                         status={entry.kind}
-                        label={journalLabel(entry.kind)}
+                        label={journalLabel(entry.kind, t)}
                       />
                       <span>#{entry.sequence}</span>
                       <time dateTime={entry.createdAt}>
@@ -361,7 +359,11 @@ export function ProjectContextPage() {
                     <h3>{entry.title}</h3>
                     <p>{entry.detail}</p>
                     {entry.sourceRunId ? (
-                      <small>Source run: {entry.sourceRunId}</small>
+                      <small>
+                        {fmt(t.projectContext.journalHistory.sourceRun, {
+                          id: entry.sourceRunId,
+                        })}
+                      </small>
                     ) : null}
                   </Card>
                 </li>
@@ -370,8 +372,8 @@ export function ProjectContextPage() {
           </section>
         ) : (
           <EmptyState
-            title="No strategy journal yet"
-            description="Append an observation, decision, constraint, or experiment when evidence changes how the team should act."
+            title={t.projectContext.journalHistory.emptyTitle}
+            description={t.projectContext.journalHistory.emptyDescription}
           />
         )}
 
@@ -379,14 +381,20 @@ export function ProjectContextPage() {
           <section aria-labelledby="context-revision-history">
             <div className="section-heading">
               <div>
-                <h2 id="context-revision-history">Revision history</h2>
-                <p>Profile revisions are immutable and newest-first.</p>
+                <h2 id="context-revision-history">
+                  {t.projectContext.revisionHistory.heading}
+                </h2>
+                <p>{t.projectContext.revisionHistory.description}</p>
               </div>
             </div>
             <ol className="context-revision-list">
               {workspace.history.map((version) => (
                 <li key={version.revision}>
-                  <strong>Revision {version.revision}</strong>
+                  <strong>
+                    {fmt(t.projectContext.revisionLabel, {
+                      revision: version.revision,
+                    })}
+                  </strong>
                   <span>{version.changeSummary}</span>
                   <time dateTime={version.createdAt}>
                     {formatDate(version.createdAt, true)}

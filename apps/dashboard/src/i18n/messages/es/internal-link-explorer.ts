@@ -1,0 +1,57 @@
+/** Per-page internal link explorer: direction tabs, summary, evidence table. */
+import type { MessagesFor } from "../types";
+
+export const internalLinkExplorer: MessagesFor<"internalLinkExplorer"> = {
+  regionLabel: "Enlaces internos de {title}",
+  eyebrow: "Grafo de rastreo inmutable",
+  closeExplorer: "Cerrar explorador",
+  unavailableTitle: "Evidencia de enlaces no disponible",
+  unavailableBody:
+    "Reproduce esta auditoría para capturar evidencia versionada de enlaces entrantes y salientes. El historial existente de páginas y problemas permanece sin cambios.",
+  directionTabsLabel: "Dirección del enlace",
+  inlinksTab: "Entrantes · {count} orígenes",
+  outlinksTab: "Salientes · {count} destinos",
+  searchLabel: "Buscar en esta dirección",
+  searchPlaceholder: "URL, título de página o texto ancla",
+  search: "Buscar",
+  loading: "Leyendo el grafo de enlaces guardado…",
+  graphUnavailableTitle: "Grafo de enlaces no disponible",
+  summary: {
+    inlinkSources: "Orígenes de enlaces entrantes",
+    outlinkTargets: "Destinos de enlaces salientes",
+    totalOccurrences: "{count} apariciones en total",
+    redirectedTargets: "Destinos redirigidos",
+    redirectedHelp: "Enlaces internos que deberían apuntar a la URL final",
+    brokenTargets: "Destinos rotos",
+    brokenHelp: "Destinos que devuelven HTTP 4xx o 5xx",
+  },
+  coverageLimitationTitle: "Limitación de cobertura",
+  table: {
+    label: "{direction} de {title}",
+    captionInlinks: "Páginas que enlazan a la URL seleccionada",
+    captionOutlinks: "Destinos internos enlazados desde la URL seleccionada",
+    sourcePageColumn: "Página de origen",
+    destinationColumn: "Destino",
+    stateColumn: "Estado",
+    anchorColumn: "Evidencia del ancla",
+    followColumn: "Follow",
+    finalUrl: "URL final: {url}",
+    httpStatus: "HTTP {status}",
+    noTextCaptured: "Sin texto capturado",
+    placementUnavailable: "Ubicación no disponible",
+    followSummary: "{follow} follow · {nofollow} nofollow",
+  },
+  empty: {
+    noLinksMatch: "Ningún enlace coincide",
+    noDirectionCaptured: "No se capturaron {direction}",
+    searchHint: "Prueba una búsqueda más amplia de URL, título o texto ancla.",
+    inlinksHint:
+      "Ninguna página rastreada enlaza a esta URL en la instantánea seleccionada.",
+    outlinksHint: "Esta página no tiene destinos internos capturados.",
+  },
+  paginationLabel: "Páginas de evidencia de enlaces",
+  previous: "Anterior",
+  next: "Siguiente",
+  zeroResults: "0 resultados",
+  resultsRange: "{from}–{to} de {total}",
+} as const;

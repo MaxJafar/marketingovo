@@ -6,6 +6,7 @@ import type {
   RunComparisonPageSnapshot,
 } from "../api/contracts";
 import { useRunComparison } from "../api/queries";
+import { fmt, useI18n, type Messages } from "../i18n";
 import {
   Card,
   InlineNotice,
@@ -26,26 +27,38 @@ function runOptionLabel(run: AuditRun): string {
   return `${formatDate(run.startedAt, true)} · ${run.status} · ${run.id.slice(0, 8)}`;
 }
 
-function signed(value: number | null): string {
-  if (value === null) return "Unavailable";
+function signed(value: number | null, messages: Messages): string {
+  if (value === null) return messages.common.unavailable;
   return `${value > 0 ? "+" : ""}${formatNumber(value)}`;
 }
 
-function snapshotLabel(snapshot: RunComparisonPageSnapshot | null): string {
-  if (!snapshot) return "Not in snapshot";
+function snapshotLabel(
+  snapshot: RunComparisonPageSnapshot | null,
+  messages: Messages,
+): string {
+  const labels = messages.auditComparison;
+  if (!snapshot) return labels.notInSnapshot;
   const indexability =
     snapshot.indexable === null
-      ? "indexability unknown"
+      ? labels.indexabilityUnknown
       : snapshot.indexable
-        ? "indexable"
-        : "not indexable";
-  return `${snapshot.statusCode ?? "status unavailable"} · ${indexability}`;
+        ? labels.indexable
+        : labels.notIndexable;
+  return `${snapshot.statusCode ?? labels.statusUnavailable} · ${indexability}`;
 }
 
-function linkSnapshotLabel(snapshot: RunComparisonLinkSnapshot | null): string {
-  if (!snapshot) return "Not present";
-  const status = snapshot.targetStatusCode ?? "status unavailable";
-  return `${snapshot.targetState} · ${status} · ${formatNumber(snapshot.occurrences)} occurrence${snapshot.occurrences === 1 ? "" : "s"}`;
+function linkSnapshotLabel(
+  snapshot: RunComparisonLinkSnapshot | null,
+  messages: Messages,
+): string {
+  const labels = messages.auditComparison;
+  if (!snapshot) return labels.notPresent;
+  const status = snapshot.targetStatusCode ?? labels.statusUnavailable;
+  const occurrences = fmt(
+    snapshot.occurrences === 1 ? labels.occurrenceOne : labels.occurrenceOther,
+    { count: formatNumber(snapshot.occurrences) },
+  );
+  return `${snapshot.targetState} · ${status} · ${occurrences}`;
 }
 
 function linkReasonLabel(reason: string): string {
@@ -53,6 +66,7 @@ function linkReasonLabel(reason: string): string {
 }
 
 export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
+  const { t } = useI18n();
   const eligibleRuns = useMemo(
     () =>
       runs
@@ -98,22 +112,19 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
     <Card className="audit-comparison-card">
       <header className="audit-comparison-header">
         <div>
-          <p className="eyebrow">Snapshot intelligence</p>
-          <h2>Compare audit runs</h2>
-          <p>
-            Separate regressions from verified fixes using immutable issue and
-            page evidence. No new crawl is started.
-          </p>
+          <p className="eyebrow">{t.auditComparison.eyebrow}</p>
+          <h2>{t.auditComparison.title}</h2>
+          <p>{t.auditComparison.description}</p>
         </div>
         {comparison ? (
           <StatusBadge
             status={comparison.state}
             label={
               comparison.state === "available"
-                ? "Comparable"
+                ? t.auditComparison.state.comparable
                 : comparison.state === "partial"
-                  ? "Partial evidence"
-                  : "Page evidence unavailable"
+                  ? t.auditComparison.state.partial
+                  : t.auditComparison.state.unavailable
             }
           />
         ) : null}
@@ -121,17 +132,14 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
 
       {currentOptions.length === 0 ? (
         <div className="comparison-empty">
-          <strong>Two completed audits are required</strong>
-          <p>
-            Run a baseline and one follow-up audit. Keyword, content, and
-            competitor research runs are excluded from technical history.
-          </p>
+          <strong>{t.auditComparison.emptyTitle}</strong>
+          <p>{t.auditComparison.emptyBody}</p>
         </div>
       ) : (
         <>
           <div className="comparison-selectors">
             <label htmlFor="comparison-baseline">
-              Baseline audit
+              {t.auditComparison.baselineAudit}
               <select
                 id="comparison-baseline"
                 value={baselineRun?.id ?? ""}
@@ -150,7 +158,7 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
               →
             </span>
             <label htmlFor="comparison-current">
-              Current audit
+              {t.auditComparison.currentAudit}
               <select
                 id="comparison-current"
                 value={currentRun?.id ?? ""}
@@ -174,7 +182,7 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                 params={{ runId: baselineRun.id }}
                 className="text-link"
               >
-                Open baseline evidence
+                {t.auditComparison.openBaselineEvidence}
               </Link>
             ) : null}
             {currentRun ? (
@@ -183,18 +191,18 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                 params={{ runId: currentRun.id }}
                 className="text-link"
               >
-                Open current evidence
+                {t.auditComparison.openCurrentEvidence}
               </Link>
             ) : null}
           </div>
 
           {comparisonQuery.isLoading ? (
             <p className="comparison-loading" role="status">
-              Calculating the evidence delta…
+              {t.auditComparison.loading}
             </p>
           ) : null}
           {comparisonQuery.isError ? (
-            <InlineNotice tone="danger" title="Comparison unavailable">
+            <InlineNotice tone="danger" title={t.auditComparison.errorTitle}>
               {comparisonQuery.error.message}
             </InlineNotice>
           ) : null}
@@ -203,7 +211,7 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
             <div className="comparison-results">
               <div className="comparison-score-row">
                 <div>
-                  <span>Regression pressure</span>
+                  <span>{t.auditComparison.regressionPressure}</span>
                   <strong
                     className={
                       comparison.summary.regressionScore > 0
@@ -213,20 +221,16 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                           : ""
                     }
                   >
-                    {signed(comparison.summary.regressionScore)}
+                    {signed(comparison.summary.regressionScore, t)}
                   </strong>
                   <small>{comparison.scoreVersion}</small>
                 </div>
-                <p>
-                  New issues add severity weight (critical 8, high 5, medium 3,
-                  low 1); fixes subtract it. HTTP regressions add 3 and
-                  indexability regressions add 2. Negative is net improvement.
-                </p>
+                <p>{t.auditComparison.scoreExplainer}</p>
               </div>
 
               <dl className="comparison-summary-grid">
                 <div>
-                  <dt>New / worse issues</dt>
+                  <dt>{t.auditComparison.summary.newWorse}</dt>
                   <dd>
                     {formatNumber(
                       comparison.summary.newIssues +
@@ -235,7 +239,7 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                   </dd>
                 </div>
                 <div>
-                  <dt>Resolved / reduced</dt>
+                  <dt>{t.auditComparison.summary.resolvedReduced}</dt>
                   <dd>
                     {formatNumber(
                       comparison.summary.resolvedIssues +
@@ -244,11 +248,11 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                   </dd>
                 </div>
                 <div>
-                  <dt>SEO Health change</dt>
-                  <dd>{signed(comparison.summary.healthDelta)}</dd>
+                  <dt>{t.auditComparison.summary.healthChange}</dt>
+                  <dd>{signed(comparison.summary.healthDelta, t)}</dd>
                 </div>
                 <div>
-                  <dt>Page regressions</dt>
+                  <dt>{t.auditComparison.summary.pageRegressions}</dt>
                   <dd>
                     {formatNumber(
                       comparison.pageChanges.filter(
@@ -258,14 +262,14 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                   </dd>
                 </div>
                 <div>
-                  <dt>Pages captured</dt>
+                  <dt>{t.auditComparison.summary.pagesCaptured}</dt>
                   <dd>
                     {formatNumber(comparison.summary.baselinePages)} →{" "}
                     {formatNumber(comparison.summary.currentPages)}
                   </dd>
                 </div>
                 <div>
-                  <dt>Reviewed noise excluded</dt>
+                  <dt>{t.auditComparison.summary.reviewedExcluded}</dt>
                   <dd>
                     {formatNumber(
                       comparison.summary.reviewedExcludedBaseline +
@@ -277,28 +281,41 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
 
               <div className="comparison-configuration">
                 <div>
-                  <span>Configuration</span>
+                  <span>{t.auditComparison.configuration}</span>
                   <StatusBadge status={comparison.configuration.state} />
                 </div>
                 <p>
                   {comparison.configuration.state === "matched"
-                    ? "Stored crawl settings match across both snapshots."
+                    ? t.auditComparison.configMatched
                     : comparison.configuration.state === "different"
-                      ? `Different inputs: ${comparison.configuration.differences.join(", ")}.`
-                      : "Stored settings are unavailable, so scope equivalence cannot be proven."}
+                      ? fmt(t.auditComparison.configDifferent, {
+                          differences:
+                            comparison.configuration.differences.join(", "),
+                        })
+                      : t.auditComparison.configUnavailable}
                 </p>
                 {comparison.configuration.baselineHash &&
                 comparison.configuration.currentHash ? (
                   <small>
-                    Config fingerprints:{" "}
-                    {comparison.configuration.baselineHash.slice(0, 12)}… →{" "}
-                    {comparison.configuration.currentHash.slice(0, 12)}…
+                    {fmt(t.auditComparison.configFingerprints, {
+                      baseline: comparison.configuration.baselineHash.slice(
+                        0,
+                        12,
+                      ),
+                      current: comparison.configuration.currentHash.slice(
+                        0,
+                        12,
+                      ),
+                    })}
                   </small>
                 ) : null}
               </div>
 
               {comparison.warnings.length > 0 ? (
-                <InlineNotice tone="warning" title="Interpretation notes">
+                <InlineNotice
+                  tone="warning"
+                  title={t.auditComparison.warningsTitle}
+                >
                   <ul className="comparison-warning-list">
                     {comparison.warnings.map((warning) => (
                       <li key={warning}>{warning}</li>
@@ -310,8 +327,10 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
               <section aria-labelledby="issue-regressions-heading">
                 <div className="comparison-section-heading">
                   <div>
-                    <h3 id="issue-regressions-heading">Issue regressions</h3>
-                    <p>New findings and findings whose severity increased.</p>
+                    <h3 id="issue-regressions-heading">
+                      {t.auditComparison.regressions.title}
+                    </h3>
+                    <p>{t.auditComparison.regressions.description}</p>
                   </div>
                   <span>
                     {formatNumber(comparison.issueRegressions.length)}
@@ -321,13 +340,17 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                   <div className="table-shell">
                     <table>
                       <caption className="sr-only">
-                        New and worsened SEO issues
+                        {t.auditComparison.regressions.caption}
                       </caption>
                       <thead>
                         <tr>
-                          <th scope="col">Finding</th>
-                          <th scope="col">Change</th>
-                          <th scope="col">URL</th>
+                          <th scope="col">
+                            {t.auditComparison.columns.finding}
+                          </th>
+                          <th scope="col">
+                            {t.auditComparison.columns.change}
+                          </th>
+                          <th scope="col">{t.auditComparison.columns.url}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -362,7 +385,7 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                                       {item.canonicalUrl}
                                     </a>
                                   ) : (
-                                    "Site-wide"
+                                    t.auditComparison.siteWide
                                   )}
                                 </td>
                               </tr>
@@ -373,7 +396,7 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                   </div>
                 ) : (
                   <p className="comparison-zero-state">
-                    No new or worsened effective issues were detected.
+                    {t.auditComparison.regressions.empty}
                   </p>
                 )}
               </section>
@@ -381,8 +404,10 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
               <section aria-labelledby="issue-improvements-heading">
                 <div className="comparison-section-heading">
                   <div>
-                    <h3 id="issue-improvements-heading">Verified fixes</h3>
-                    <p>Findings absent or reduced in the current snapshot.</p>
+                    <h3 id="issue-improvements-heading">
+                      {t.auditComparison.fixes.title}
+                    </h3>
+                    <p>{t.auditComparison.fixes.description}</p>
                   </div>
                   <span>
                     {formatNumber(comparison.issueImprovements.length)}
@@ -392,13 +417,17 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                   <div className="table-shell">
                     <table>
                       <caption className="sr-only">
-                        Resolved and reduced SEO issues
+                        {t.auditComparison.fixes.caption}
                       </caption>
                       <thead>
                         <tr>
-                          <th scope="col">Finding</th>
-                          <th scope="col">Change</th>
-                          <th scope="col">URL</th>
+                          <th scope="col">
+                            {t.auditComparison.columns.finding}
+                          </th>
+                          <th scope="col">
+                            {t.auditComparison.columns.change}
+                          </th>
+                          <th scope="col">{t.auditComparison.columns.url}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -429,7 +458,7 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                                       {item.canonicalUrl}
                                     </a>
                                   ) : (
-                                    "Site-wide"
+                                    t.auditComparison.siteWide
                                   )}
                                 </td>
                               </tr>
@@ -440,7 +469,7 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                   </div>
                 ) : (
                   <p className="comparison-zero-state">
-                    No issue resolution was verified in this pair.
+                    {t.auditComparison.fixes.empty}
                   </p>
                 )}
               </section>
@@ -448,8 +477,10 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
               <section aria-labelledby="page-changes-heading">
                 <div className="comparison-section-heading">
                   <div>
-                    <h3 id="page-changes-heading">Page changes</h3>
-                    <p>Status, indexability, additions, and removals.</p>
+                    <h3 id="page-changes-heading">
+                      {t.auditComparison.pages.title}
+                    </h3>
+                    <p>{t.auditComparison.pages.description}</p>
                   </div>
                   <span>{formatNumber(comparison.pageChanges.length)}</span>
                 </div>
@@ -457,14 +488,18 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                   <div className="table-shell">
                     <table>
                       <caption className="sr-only">
-                        Page-level changes between audit snapshots
+                        {t.auditComparison.pages.caption}
                       </caption>
                       <thead>
                         <tr>
-                          <th scope="col">URL</th>
-                          <th scope="col">Change</th>
-                          <th scope="col">Before</th>
-                          <th scope="col">After</th>
+                          <th scope="col">{t.auditComparison.columns.url}</th>
+                          <th scope="col">
+                            {t.auditComparison.columns.change}
+                          </th>
+                          <th scope="col">
+                            {t.auditComparison.columns.before}
+                          </th>
+                          <th scope="col">{t.auditComparison.columns.after}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -492,8 +527,8 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                                   label={item.kind.replaceAll("_", " ")}
                                 />
                               </td>
-                              <td>{snapshotLabel(item.before)}</td>
-                              <td>{snapshotLabel(item.after)}</td>
+                              <td>{snapshotLabel(item.before, t)}</td>
+                              <td>{snapshotLabel(item.after, t)}</td>
                             </tr>
                           );
                         })}
@@ -502,7 +537,7 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                   </div>
                 ) : (
                   <p className="comparison-zero-state">
-                    No page-level changes were captured for this pair.
+                    {t.auditComparison.pages.empty}
                   </p>
                 )}
               </section>
@@ -510,12 +545,10 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
               <section aria-labelledby="link-changes-heading">
                 <div className="comparison-section-heading">
                   <div>
-                    <h3 id="link-changes-heading">Internal-link changes</h3>
-                    <p>
-                      Exact source-to-target edges from immutable crawl graphs.
-                      Broken-link creation and recovery are classified;
-                      editorial structure stays neutral.
-                    </p>
+                    <h3 id="link-changes-heading">
+                      {t.auditComparison.links.title}
+                    </h3>
+                    <p>{t.auditComparison.links.description}</p>
                   </div>
                   <StatusBadge
                     status={comparison.linkGraph.state}
@@ -525,7 +558,7 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
 
                 <dl className="comparison-summary-grid comparison-link-summary">
                   <div>
-                    <dt>Graph coverage</dt>
+                    <dt>{t.auditComparison.links.graphCoverage}</dt>
                     <dd>
                       {formatNumber(
                         comparison.linkGraph.baseline.graphPageCount,
@@ -538,27 +571,27 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                     </dd>
                   </div>
                   <div>
-                    <dt>Edges captured</dt>
+                    <dt>{t.auditComparison.links.edgesCaptured}</dt>
                     <dd>
                       {formatNumber(comparison.linkGraph.baseline.edgeCount)} →{" "}
                       {formatNumber(comparison.linkGraph.current.edgeCount)}
                     </dd>
                   </div>
                   <div>
-                    <dt>Added / removed</dt>
+                    <dt>{t.auditComparison.links.addedRemoved}</dt>
                     <dd>
                       {formatNumber(comparison.linkGraph.summary.addedEdges)} /{" "}
                       {formatNumber(comparison.linkGraph.summary.removedEdges)}
                     </dd>
                   </div>
                   <div>
-                    <dt>Modified</dt>
+                    <dt>{t.auditComparison.links.modified}</dt>
                     <dd>
                       {formatNumber(comparison.linkGraph.summary.changedEdges)}
                     </dd>
                   </div>
                   <div>
-                    <dt>Regressions / recoveries</dt>
+                    <dt>{t.auditComparison.links.regressionsRecoveries}</dt>
                     <dd>
                       {formatNumber(comparison.linkGraph.summary.regressions)} /{" "}
                       {formatNumber(comparison.linkGraph.summary.improvements)}
@@ -567,7 +600,10 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                 </dl>
 
                 {comparison.linkGraph.warnings.length > 0 ? (
-                  <InlineNotice tone="warning" title="Link comparison notes">
+                  <InlineNotice
+                    tone="warning"
+                    title={t.auditComparison.links.warningsTitle}
+                  >
                     <ul className="comparison-warning-list">
                       {comparison.linkGraph.warnings.map((warning) => (
                         <li key={warning}>{warning}</li>
@@ -580,14 +616,22 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                   <div className="table-shell">
                     <table>
                       <caption className="sr-only">
-                        Internal-link changes between audit snapshots
+                        {t.auditComparison.links.caption}
                       </caption>
                       <thead>
                         <tr>
-                          <th scope="col">Source</th>
-                          <th scope="col">Target</th>
-                          <th scope="col">Change</th>
-                          <th scope="col">Before → after</th>
+                          <th scope="col">
+                            {t.auditComparison.columns.source}
+                          </th>
+                          <th scope="col">
+                            {t.auditComparison.columns.target}
+                          </th>
+                          <th scope="col">
+                            {t.auditComparison.columns.change}
+                          </th>
+                          <th scope="col">
+                            {t.auditComparison.columns.beforeAfter}
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -640,8 +684,8 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                                   </small>
                                 </td>
                                 <td>
-                                  {linkSnapshotLabel(item.before)} →{" "}
-                                  {linkSnapshotLabel(item.after)}
+                                  {linkSnapshotLabel(item.before, t)} →{" "}
+                                  {linkSnapshotLabel(item.after, t)}
                                 </td>
                               </tr>
                             );
@@ -652,8 +696,8 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
                 ) : (
                   <p className="comparison-zero-state">
                     {comparison.linkGraph.state === "unavailable"
-                      ? "Replay both audits to capture comparable internal-link evidence."
-                      : "No internal-link edge changes were captured for this pair."}
+                      ? t.auditComparison.links.emptyUnavailable
+                      : t.auditComparison.links.empty}
                   </p>
                 )}
               </section>
@@ -663,8 +707,7 @@ export function AuditComparisonCard({ runs }: { runs: AuditRun[] }) {
               comparison.truncated.pageChanges ||
               comparison.linkGraph.truncated ? (
                 <p className="comparison-truncation">
-                  The API response reached a safety limit. Export the run data
-                  or use the SDK for the full stored corpus.
+                  {t.auditComparison.truncationNotice}
                 </p>
               ) : null}
             </div>

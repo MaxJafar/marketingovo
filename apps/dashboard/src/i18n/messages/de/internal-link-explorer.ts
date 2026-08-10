@@ -1,0 +1,57 @@
+import type { MessagesFor } from "../types";
+
+/** Per-page internal link explorer: direction tabs, summary, evidence table. */
+export const internalLinkExplorer: MessagesFor<"internalLinkExplorer"> = {
+  regionLabel: "Interne Links für {title}",
+  eyebrow: "Unveränderlicher Crawl-Graph",
+  closeExplorer: "Explorer schließen",
+  unavailableTitle: "Link-Evidenz nicht verfügbar",
+  unavailableBody:
+    "Wiederhole dieses Audit, um versionierte Inlink- und Outlink-Evidenz zu erfassen. Bestehende Seiten- und Problemhistorie bleibt unverändert.",
+  directionTabsLabel: "Link-Richtung",
+  inlinksTab: "Inlinks · {count} Quellen",
+  outlinksTab: "Outlinks · {count} Ziele",
+  searchLabel: "Diese Richtung durchsuchen",
+  searchPlaceholder: "URL, Seitentitel oder Ankertext",
+  search: "Suchen",
+  loading: "Gespeicherter Link-Graph wird gelesen…",
+  graphUnavailableTitle: "Link-Graph nicht verfügbar",
+  summary: {
+    inlinkSources: "Inlink-Quellen",
+    outlinkTargets: "Outlink-Ziele",
+    totalOccurrences: "{count} Vorkommen insgesamt",
+    redirectedTargets: "Umgeleitete Ziele",
+    redirectedHelp: "Interne Links, die auf die finale URL zeigen sollten",
+    brokenTargets: "Defekte Ziele",
+    brokenHelp: "Ziele, die mit HTTP 4xx oder 5xx antworten",
+  },
+  coverageLimitationTitle: "Einschränkung der Abdeckung",
+  table: {
+    label: "{direction} für {title}",
+    captionInlinks: "Seiten, die auf die ausgewählte URL verlinken",
+    captionOutlinks: "Interne Ziele, auf die die ausgewählte URL verlinkt",
+    sourcePageColumn: "Quellseite",
+    destinationColumn: "Ziel",
+    stateColumn: "Zustand",
+    anchorColumn: "Anker-Evidenz",
+    followColumn: "Follow",
+    finalUrl: "Finale URL: {url}",
+    httpStatus: "HTTP {status}",
+    noTextCaptured: "Kein Text erfasst",
+    placementUnavailable: "Platzierung nicht verfügbar",
+    followSummary: "{follow} follow · {nofollow} nofollow",
+  },
+  empty: {
+    noLinksMatch: "Keine Links passen",
+    noDirectionCaptured: "Keine {direction} erfasst",
+    searchHint: "Versuche eine breitere Suche nach URL, Titel oder Ankertext.",
+    inlinksHint:
+      "Im ausgewählten Snapshot verlinkt keine gecrawlte Seite auf diese URL.",
+    outlinksHint: "Diese Seite hat keine erfassten internen Ziele.",
+  },
+  paginationLabel: "Seiten der Link-Evidenz",
+  previous: "Zurück",
+  next: "Weiter",
+  zeroResults: "0 Ergebnisse",
+  resultsRange: "{from}–{to} von {total}",
+} as const;

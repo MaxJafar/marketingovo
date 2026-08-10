@@ -26,6 +26,47 @@ export const navGlyphs: Record<string, ReactNode> = {
       <path d="m15 15 5 5" />
     </>
   ),
+  // A page with a rising bar chart on it, which is what a client report is.
+  report: (
+    <>
+      {FRAME}
+      <path d="M7 16.5v-3M11 16.5v-6M15 16.5v-4M17 16.5v-8" />
+    </>
+  ),
+  // An envelope: the frame plus the flap fold.
+  email: (
+    <>
+      {FRAME}
+      <path d="M2.5 6.5 12 13l9.5-6.5" />
+    </>
+  ),
+  // A QR code, reduced to the part that makes one recognisable: three finder
+  // squares and a missing fourth corner. The absent corner is what tells a
+  // scanner the orientation, so leaving it out is accurate as well as legible.
+  links: (
+    <>
+      <rect x="3.5" y="3.5" width="6" height="6" />
+      <rect x="14.5" y="3.5" width="6" height="6" />
+      <rect x="3.5" y="14.5" width="6" height="6" />
+      <path d="M14.5 14.5h3v3h-3zM19.5 19.5h1M14.5 20.5h1M19.5 14.5h1" />
+    </>
+  ),
+  // A month grid with its header bar, which is what a content calendar is.
+  calendar: (
+    <>
+      {FRAME}
+      <path d="M2.5 8h19M8 2.5v3M16 2.5v3M8 12h2M13 12h3M8 16h2M13 16h3" />
+    </>
+  ),
+  // A filing cabinet: two drawers with handles. "Cabinet" is the marketer's
+  // word for an ad account, and the drawer reads as the thing that holds
+  // several of them under one login.
+  "ad-cabinets": (
+    <>
+      {FRAME}
+      <path d="M5 12h14M9.5 8.5h5M9.5 15.5h5" />
+    </>
+  ),
   "social-research": (
     <path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9Z" />
   ),

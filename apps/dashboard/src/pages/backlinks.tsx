@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useSite } from "../context/site-context";
 import { useRuns } from "../api/queries";
+import { useI18n } from "../i18n";
 import { PixelSprite } from "../components/pixel-sprite";
 import { navGlyphs } from "../components/pixel-glyphs";
 
@@ -16,6 +17,7 @@ import { navGlyphs } from "../components/pixel-glyphs";
  */
 
 export function BacklinksPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const runs = useRuns(siteId);
   const items = runs.data?.data.items ?? [];
@@ -27,7 +29,7 @@ export function BacklinksPage() {
     <div className="pixel-grid">
       <section className="pixel-panel pixel-col-7">
         <div className="pixel-panel-head">
-          <h2>Internal link graph</h2>
+          <h2>{t.backlinks.internalTitle}</h2>
           <span
             className="pixel-panel-mark"
             style={{ color: "var(--px-cyan)" }}
@@ -41,27 +43,23 @@ export function BacklinksPage() {
         </div>
         <div className="pixel-panel-body">
           {runs.isLoading ? (
-            <p className="pixel-note">Looking for a completed audit…</p>
+            <p className="pixel-note">{t.backlinks.lookingForAudit}</p>
           ) : latest ? (
             <>
-              <p className="pixel-hero-sub">
-                The most recent audit mapped every internal link on the site.
-                Open its explorer to trace inlinks and outlinks for any page.
-              </p>
+              <p className="pixel-hero-sub">{t.backlinks.latestAuditBody}</p>
               <Link
                 to="/audits/$runId"
                 params={{ runId: latest.id }}
                 className="pixel-panel-action"
               >
-                Open link explorer →
+                {t.backlinks.openExplorer}
               </Link>
             </>
           ) : (
             <p className="pixel-note">
-              No completed audit yet. Run one and the internal link graph
-              appears here.{" "}
+              {t.backlinks.noAuditYet}{" "}
               <Link to="/audits" className="pixel-linklike">
-                open audits
+                {t.backlinks.openAudits}
               </Link>
             </p>
           )}
@@ -70,18 +68,14 @@ export function BacklinksPage() {
 
       <section className="pixel-panel pixel-col-5">
         <div className="pixel-panel-head">
-          <h2>External backlinks</h2>
+          <h2>{t.backlinks.externalTitle}</h2>
         </div>
         <div className="pixel-panel-body">
-          <p className="pixel-hero-sub">
-            Marketingovo crawls your site, not the rest of the web, so it cannot
-            measure referring domains on its own. There is no backlink number to
-            show here and none is estimated.
-          </p>
+          <p className="pixel-hero-sub">{t.backlinks.externalBody}</p>
           <p className="pixel-hero-sub" style={{ marginTop: 12 }}>
-            An attached agent can research this with its own tools. Ask it in
-            the terminal below — for example{" "}
-            <code>which sites linked to our pricing page this quarter</code>.
+            {t.backlinks.agentBodyBefore}{" "}
+            <code>{t.backlinks.agentExample}</code>
+            {t.backlinks.agentBodyAfter}
           </p>
         </div>
       </section>

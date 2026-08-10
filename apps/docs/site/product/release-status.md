@@ -1,13 +1,22 @@
 ---
 title: Release status
-description: What 1.1.0 contains, which gates were observed passing, and which channels are deliberately deferred.
+description: What 1.2.0 contains, which gates were observed passing, and which channels are deliberately deferred.
 ---
 
 # Release status
 
+## 1.2.0
+
+The tree is versioned 1.2.0. It is additive on top of 1.1.0 — the REST API, OpenAPI document, SDK, agent contract registry, CLI and `.marketingovo` bundle format are unchanged — and it adds the six-language console, the multi-channel marketing surfaces, and the cross-channel report.
+
+<div class="status-banner">
+  <strong>Prepared, not yet approved</strong>
+  <p>The engineering gates pass, but a stable tag fails closed until <code>release/acceptance/1.2.0.json</code> records the machine evidence and both named human attestations. No automation may sign those. Until they exist, 1.1.0 below is the last approved release.</p>
+</div>
+
 ## 1.1.0
 
-The REST API, OpenAPI document, SDK, ten-tool agent contract registry, CLI and `.marketingovo` bundle format are stable: breaking changes to them require a major version. 1.1.0 is additive on top of 1.0.0 and breaks no existing integration.
+The REST API, OpenAPI document, SDK, nineteen-tool agent contract registry, CLI and `.marketingovo` bundle format are stable: breaking changes to them require a major version. 1.1.0 is additive on top of 1.0.0 and breaks no existing integration.
 
 <div class="status-banner">
   <strong>Approved, with deferred channels</strong>
@@ -45,9 +54,20 @@ The REST API, OpenAPI document, SDK, ten-tool agent contract registry, CLI and `
 - bounded public-web OSINT dossiers with exact source links, evidence states,
   target graphs, repeat-pass change history, and explicit privacy/collection
   limits;
+- Meta and Google Ads read-only cabinet audits filing paid findings into the
+  shared action queue, with landing alignment joining ad destinations to crawl
+  evidence;
+- a content calendar staging posts to Telegram, X, Facebook Pages, and
+  Instagram with immutable publish records, and a brand-kit email builder that
+  compiles and validates but never sends;
+- campaign links and locally generated QR codes with pre-generation tagging
+  checks;
+- the cross-channel report spanning paid, organic, social, email, competitors,
+  and completed work — charts drawn only from measured values, a locally
+  rendered PDF download, and daily/weekly/monthly schedule support;
 - CLI and typed REST SDK;
 - versioned `/api/v1`, OpenAPI, asynchronous runs, SSE events, and problem details;
-- ten workflow-level agent tools and read-only resources, plus a separate five-tool terminal session registry;
+- nineteen workflow-level agent tools and read-only resources, plus a separate five-tool terminal session registry;
 - Codex and OpenClaw bundles over the same local contracts;
 - connector manifests for GSC, GA4, PageSpeed Insights, Trends, SerpAPI, and DataForSEO;
 - BYOK credential boundary and encrypted CLI vault option;
@@ -74,8 +94,8 @@ The REST API, OpenAPI document, SDK, ten-tool agent contract registry, CLI and `
   gate.
 - Every operating-system matrix has not completed final validation.
 - Provider authorization and fixtures are not equally exercised across providers.
-- The demo-flagged console panels — social mentions, brand sentiment, and the
-  mentions trend — have no connector behind them and say so in the interface.
+- Social listening — mentions, sentiment, engagement — has no collector; the
+  console says so and shows no such figures rather than sampling them.
   Backlinks states plainly that crawling your own site cannot measure referring
   domains.
 - Schedules require the local service to remain running. Native launchers
@@ -97,7 +117,7 @@ The REST API, OpenAPI document, SDK, ten-tool agent contract registry, CLI and `
   CodeQL, and SBOM evidence.
 - Claims of commercial-tool replacement require a reproducible public corpus.
 
-The checked-in contract projection currently covers 20 public schemas and 38
+The checked-in contract projection currently covers 20 public schemas and 37
 API operations. CI rejects drift between TypeBox contracts, OpenAPI, the typed
 SDK, CLI behavior, and dashboard consumers.
 
@@ -117,7 +137,8 @@ passing and recorded with the command that produced it:
 | Packaged real-browser journey with axe            | `pnpm test:e2e`           |
 
 Two further gates are human attestations rather than commands: a release-owner
-approval and a licence-compliance review. Both are pending for 1.1.0.
+approval and a licence-compliance review. Both are named and approved in the
+1.1.0 record; both are still owed for 1.2.0.
 
 Two requirements that earlier versions of this policy carried — an external
 legal review of the Elastic License, trademarks and a CLA, and three

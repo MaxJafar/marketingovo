@@ -6,6 +6,7 @@ import {
   usePreviewExtractionRules,
   useUpdateExtractionRules,
 } from "../api/queries";
+import { fmt, useI18n } from "../i18n";
 import { FreshnessNotice } from "./data-state";
 import { Button, Card, InlineNotice } from "./ui";
 
@@ -28,6 +29,7 @@ export function ExtractionRulesCard({
   siteId: string;
   siteUrl: string;
 }) {
+  const { t } = useI18n();
   const query = useExtractionRules(siteId);
   const templatesQuery = useExtractionRuleTemplates();
   const update = useUpdateExtractionRules(siteId);
@@ -127,17 +129,20 @@ export function ExtractionRulesCard({
     <Card className="settings-card extraction-rules-card">
       <div className="extraction-rules-heading">
         <div>
-          <p className="eyebrow">Evidence configuration</p>
-          <h2>Custom extraction rules</h2>
-          <p>
-            Capture prices, authors, product IDs, CMS markers, or any other page
-            field on every audit. Rules belong to this project and each saved
-            revision remains available for reproducible run replay.
-          </p>
+          <p className="eyebrow">{t.extractionRules.eyebrow}</p>
+          <h2>{t.extractionRules.title}</h2>
+          <p>{t.extractionRules.description}</p>
         </div>
         {workspace?.current ? (
-          <div className="extraction-revision" aria-label="Current rule set">
-            <strong>Revision {workspace.current.revision}</strong>
+          <div
+            className="extraction-revision"
+            aria-label={t.extractionRules.currentRuleSet}
+          >
+            <strong>
+              {fmt(t.extractionRules.revisionLabel, {
+                revision: workspace.current.revision,
+              })}
+            </strong>
             <code title={workspace.current.configurationHash}>
               {workspace.current.configurationHash.slice(0, 12)}
             </code>
@@ -145,23 +150,33 @@ export function ExtractionRulesCard({
         ) : null}
       </div>
       <FreshnessNotice meta={query.data?.meta} />
-      {query.isLoading ? <p role="status">Loading extraction rules…</p> : null}
+      {query.isLoading ? (
+        <p role="status">{t.extractionRules.loadingRules}</p>
+      ) : null}
       {!query.isLoading && workspace && !editorReady ? (
-        <p role="status">Preparing the extraction editor…</p>
+        <p role="status">{t.extractionRules.preparingEditor}</p>
       ) : null}
       {query.error ? (
-        <InlineNotice tone="danger" title="Extraction rules unavailable">
+        <InlineNotice
+          tone="danger"
+          title={t.extractionRules.rulesUnavailableTitle}
+        >
           {query.error.message}
         </InlineNotice>
       ) : null}
       {update.isSuccess ? (
-        <InlineNotice tone="success" title="Rule revision saved">
-          New audits will snapshot this revision. Existing runs and their
-          evidence remain unchanged.
+        <InlineNotice
+          tone="success"
+          title={t.extractionRules.revisionSavedTitle}
+        >
+          {t.extractionRules.revisionSavedBody}
         </InlineNotice>
       ) : null}
       {update.isError ? (
-        <InlineNotice tone="danger" title="Rule revision was rejected">
+        <InlineNotice
+          tone="danger"
+          title={t.extractionRules.revisionRejectedTitle}
+        >
           {update.error.message}
         </InlineNotice>
       ) : null}
@@ -172,26 +187,32 @@ export function ExtractionRulesCard({
       >
         <div className="extraction-template-heading">
           <div>
-            <p className="eyebrow">Review-first library</p>
-            <h3 id="extraction-template-heading">Extraction templates</h3>
-            <p>
-              Start from a curated evidence pack, inspect every selector, then
-              add it to the unsaved draft. Templates never write a revision or
-              start a crawl on their own.
-            </p>
+            <p className="eyebrow">{t.extractionRules.template.eyebrow}</p>
+            <h3 id="extraction-template-heading">
+              {t.extractionRules.template.title}
+            </h3>
+            <p>{t.extractionRules.template.description}</p>
           </div>
-          <span className="template-policy-pill">Review required</span>
+          <span className="template-policy-pill">
+            {t.extractionRules.template.policyPill}
+          </span>
         </div>
         {templatesQuery.isLoading ? (
-          <p role="status">Loading extraction templates…</p>
+          <p role="status">{t.extractionRules.template.loading}</p>
         ) : null}
         {templatesQuery.isError ? (
-          <InlineNotice tone="danger" title="Template catalog unavailable">
+          <InlineNotice
+            tone="danger"
+            title={t.extractionRules.template.catalogUnavailableTitle}
+          >
             {templatesQuery.error.message}
           </InlineNotice>
         ) : null}
         {templates.length > 0 ? (
-          <div className="extraction-template-grid" aria-label="Templates">
+          <div
+            className="extraction-template-grid"
+            aria-label={t.extractionRules.template.gridLabel}
+          >
             {templates.map((template) => (
               <button
                 type="button"
@@ -201,7 +222,9 @@ export function ExtractionRulesCard({
                     : ""
                 }`}
                 aria-pressed={selectedTemplateId === template.id}
-                aria-label={`Review ${template.name}`}
+                aria-label={fmt(t.extractionRules.template.review, {
+                  name: template.name,
+                })}
                 onClick={() => {
                   setSelectedTemplateId(template.id);
                   setImportedTemplateName(null);
@@ -211,16 +234,23 @@ export function ExtractionRulesCard({
                 <span>{template.category}</span>
                 <strong>{template.name}</strong>
                 <small>{template.description}</small>
-                <b>{template.rules.length} fields</b>
+                <b>
+                  {fmt(t.extractionRules.template.fieldsCount, {
+                    count: template.rules.length,
+                  })}
+                </b>
               </button>
             ))}
           </div>
         ) : null}
         {importedTemplateName ? (
-          <InlineNotice tone="success" title="Template added to draft">
-            {importedTemplateName} fields are ready for review or preview below.
-            Nothing is persisted until you provide a revision summary and choose
-            Save revision.
+          <InlineNotice
+            tone="success"
+            title={t.extractionRules.template.addedTitle}
+          >
+            {fmt(t.extractionRules.template.addedBody, {
+              name: importedTemplateName,
+            })}
           </InlineNotice>
         ) : null}
 
@@ -228,7 +258,9 @@ export function ExtractionRulesCard({
           <div className="extraction-template-review">
             <div className="extraction-template-review-heading">
               <div>
-                <p className="eyebrow">Draft import review</p>
+                <p className="eyebrow">
+                  {t.extractionRules.template.reviewEyebrow}
+                </p>
                 <h4>{selectedTemplate.name}</h4>
                 <p>{selectedTemplate.description}</p>
               </div>
@@ -237,25 +269,22 @@ export function ExtractionRulesCard({
                 variant="ghost"
                 onClick={() => setSelectedTemplateId(null)}
               >
-                Close review
+                {t.extractionRules.template.closeReview}
               </Button>
             </div>
             <dl className="extraction-template-guidance">
               <div>
-                <dt>Preview on</dt>
+                <dt>{t.extractionRules.template.previewOn}</dt>
                 <dd>{selectedTemplate.recommendedPage}</dd>
               </div>
               <div>
-                <dt>Before saving</dt>
-                <dd>
-                  Preview a representative URL and remove or rename fields that
-                  do not match this site.
-                </dd>
+                <dt>{t.extractionRules.template.beforeSaving}</dt>
+                <dd>{t.extractionRules.template.beforeSavingBody}</dd>
               </div>
             </dl>
             <div>
               <strong className="template-assumption-label">
-                Assumptions to verify
+                {t.extractionRules.template.assumptionsLabel}
               </strong>
               <ul className="template-assumption-list">
                 {selectedTemplate.assumptions.map((assumption) => (
@@ -264,12 +293,16 @@ export function ExtractionRulesCard({
               </ul>
             </div>
             <div className="table-shell extraction-template-table">
-              <table aria-label={`${selectedTemplate.name} fields`}>
+              <table
+                aria-label={fmt(t.extractionRules.template.fieldsTable, {
+                  name: selectedTemplate.name,
+                })}
+              >
                 <thead>
                   <tr>
-                    <th>Field</th>
-                    <th>CSS selector</th>
-                    <th>Capture</th>
+                    <th>{t.extractionRules.template.fieldColumn}</th>
+                    <th>{t.extractionRules.template.selectorColumn}</th>
+                    <th>{t.extractionRules.template.captureColumn}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -281,10 +314,12 @@ export function ExtractionRulesCard({
                       </td>
                       <td>
                         {rule.type === "attribute"
-                          ? `Attribute: ${rule.attribute}`
+                          ? fmt(t.extractionRules.template.attributeCapture, {
+                              attribute: String(rule.attribute),
+                            })
                           : rule.type === "html"
-                            ? "Inner HTML"
-                            : "Text content"}
+                            ? t.extractionRules.captureOptions.html
+                            : t.extractionRules.captureOptions.text}
                       </td>
                     </tr>
                   ))}
@@ -292,17 +327,29 @@ export function ExtractionRulesCard({
               </table>
             </div>
             {conflictingTemplateRules.length > 0 ? (
-              <InlineNotice tone="danger" title="Resolve field conflicts">
-                Rename or remove the existing draft field
-                {conflictingTemplateRules.length === 1 ? "" : "s"}:{" "}
-                {conflictingTemplateRules.map((rule) => rule.label).join(", ")}.
-                Template labels must stay unique.
+              <InlineNotice
+                tone="danger"
+                title={t.extractionRules.template.conflictTitle}
+              >
+                {conflictingTemplateRules.length === 1
+                  ? fmt(t.extractionRules.template.conflictBodyOne, {
+                      labels: conflictingTemplateRules
+                        .map((rule) => rule.label)
+                        .join(", "),
+                    })
+                  : fmt(t.extractionRules.template.conflictBodyMany, {
+                      labels: conflictingTemplateRules
+                        .map((rule) => rule.label)
+                        .join(", "),
+                    })}
               </InlineNotice>
             ) : null}
             {templateExceedsCapacity ? (
-              <InlineNotice tone="danger" title="Rule limit exceeded">
-                This pack would exceed the 50-rule project boundary. Remove
-                draft rules before importing it.
+              <InlineNotice
+                tone="danger"
+                title={t.extractionRules.template.capacityTitle}
+              >
+                {t.extractionRules.template.capacityBody}
               </InlineNotice>
             ) : null}
             <div className="extraction-template-review-actions">
@@ -315,31 +362,37 @@ export function ExtractionRulesCard({
                   templateExceedsCapacity
                 }
               >
-                Add {selectedTemplate.rules.length} field
-                {selectedTemplate.rules.length === 1 ? "" : "s"} to draft
+                {selectedTemplate.rules.length === 1
+                  ? fmt(t.extractionRules.template.addFieldsOne, {
+                      count: selectedTemplate.rules.length,
+                    })
+                  : fmt(t.extractionRules.template.addFieldsMany, {
+                      count: selectedTemplate.rules.length,
+                    })}
               </Button>
-              <small>
-                Fresh rule IDs are created locally; catalog IDs are never
-                persisted as if they were user-owned configuration.
-              </small>
+              <small>{t.extractionRules.template.freshIdsNote}</small>
             </div>
           </div>
         ) : null}
       </section>
 
       <form className="extraction-rules-form" onSubmit={saveRules}>
-        <div className="extraction-rule-list" aria-label="Extraction rules">
+        <div
+          className="extraction-rule-list"
+          aria-label={t.extractionRules.editor.listLabel}
+        >
           {rules.length === 0 ? (
-            <p className="empty-rule-state">
-              No rules yet. Add one to turn page-specific data into auditable
-              evidence.
-            </p>
+            <p className="empty-rule-state">{t.extractionRules.editor.empty}</p>
           ) : null}
           {rules.map((rule, index) => {
             const prefix = `extraction-rule-${rule.id}`;
             return (
               <fieldset className="extraction-rule-row" key={rule.id}>
-                <legend>Rule {index + 1}</legend>
+                <legend>
+                  {fmt(t.extractionRules.editor.ruleLegend, {
+                    number: index + 1,
+                  })}
+                </legend>
                 <div className="extraction-rule-toolbar">
                   <label className="checkbox-label compact-checkbox">
                     <input
@@ -351,7 +404,7 @@ export function ExtractionRulesCard({
                         })
                       }
                     />
-                    <span>Enabled</span>
+                    <span>{t.extractionRules.editor.enabled}</span>
                   </label>
                   <Button
                     type="button"
@@ -361,14 +414,16 @@ export function ExtractionRulesCard({
                         current.filter((candidate) => candidate.id !== rule.id),
                       )
                     }
-                    aria-label={`Remove rule ${index + 1}`}
+                    aria-label={fmt(t.extractionRules.editor.removeRule, {
+                      number: index + 1,
+                    })}
                   >
-                    Remove
+                    {t.extractionRules.editor.remove}
                   </Button>
                 </div>
                 <div className="form-grid extraction-rule-grid">
                   <label htmlFor={`${prefix}-label`}>
-                    Field label
+                    {t.extractionRules.editor.fieldLabel}
                     <input
                       id={`${prefix}-label`}
                       value={rule.label}
@@ -381,7 +436,7 @@ export function ExtractionRulesCard({
                     />
                   </label>
                   <label htmlFor={`${prefix}-type`}>
-                    Capture
+                    {t.extractionRules.editor.capture}
                     <select
                       id={`${prefix}-type`}
                       value={rule.type}
@@ -392,16 +447,22 @@ export function ExtractionRulesCard({
                         })
                       }
                     >
-                      <option value="text">Text content</option>
-                      <option value="html">Inner HTML</option>
-                      <option value="attribute">Attribute</option>
+                      <option value="text">
+                        {t.extractionRules.captureOptions.text}
+                      </option>
+                      <option value="html">
+                        {t.extractionRules.captureOptions.html}
+                      </option>
+                      <option value="attribute">
+                        {t.extractionRules.captureOptions.attribute}
+                      </option>
                     </select>
                   </label>
                   <label
                     className="extraction-selector-field"
                     htmlFor={`${prefix}-selector`}
                   >
-                    CSS selector
+                    {t.extractionRules.editor.cssSelector}
                     <input
                       id={`${prefix}-selector`}
                       value={rule.selector}
@@ -418,7 +479,7 @@ export function ExtractionRulesCard({
                   </label>
                   {rule.type === "attribute" ? (
                     <label htmlFor={`${prefix}-attribute`}>
-                      Attribute name
+                      {t.extractionRules.editor.attributeName}
                       <input
                         id={`${prefix}-attribute`}
                         value={rule.attribute ?? ""}
@@ -438,7 +499,8 @@ export function ExtractionRulesCard({
                     className="extraction-regex-field"
                     htmlFor={`${prefix}-regex`}
                   >
-                    Safe regex filter <span>(optional)</span>
+                    {t.extractionRules.editor.regexLabel}{" "}
+                    <span>{t.extractionRules.editor.regexOptional}</span>
                     <input
                       id={`${prefix}-regex`}
                       value={rule.regex ?? ""}
@@ -451,10 +513,7 @@ export function ExtractionRulesCard({
                         })
                       }
                     />
-                    <small>
-                      Capture group 1 is kept when present. Backreferences,
-                      lookarounds, and ambiguous repetition are rejected.
-                    </small>
+                    <small>{t.extractionRules.editor.regexHelp}</small>
                   </label>
                 </div>
               </fieldset>
@@ -468,10 +527,10 @@ export function ExtractionRulesCard({
             onClick={() => setRules((current) => [...current, createRule()])}
             disabled={!editorReady || rules.length >= 50}
           >
-            Add rule
+            {t.extractionRules.editor.addRule}
           </Button>
           <label className="revision-summary-field">
-            Revision summary
+            {t.extractionRules.editor.revisionSummary}
             <input
               value={changeSummary}
               minLength={3}
@@ -482,28 +541,29 @@ export function ExtractionRulesCard({
             />
           </label>
           <Button type="submit" disabled={update.isPending || !editorReady}>
-            {update.isPending ? "Saving revision…" : "Save revision"}
+            {update.isPending
+              ? t.extractionRules.editor.savingRevision
+              : t.extractionRules.editor.saveRevision}
           </Button>
         </div>
       </form>
 
       <div className="extraction-preview-section">
         <div>
-          <h3>Safe live preview</h3>
-          <p>
-            Fetch one URL on the project&apos;s exact origin through the same
-            redirect-aware egress policy used by audits. Draft rules are never
-            saved by previewing them.
-          </p>
+          <h3>{t.extractionRules.preview.title}</h3>
+          <p>{t.extractionRules.preview.description}</p>
         </div>
         {preview.isError ? (
-          <InlineNotice tone="danger" title="Preview failed">
+          <InlineNotice
+            tone="danger"
+            title={t.extractionRules.preview.failedTitle}
+          >
             {preview.error.message}
           </InlineNotice>
         ) : null}
         <form className="extraction-preview-form" onSubmit={previewRules}>
           <label className="preview-url-field">
-            Page URL
+            {t.extractionRules.preview.pageUrl}
             <input
               type="url"
               value={previewUrl}
@@ -512,15 +572,19 @@ export function ExtractionRulesCard({
             />
           </label>
           <label>
-            Rendering
+            {t.extractionRules.preview.rendering}
             <select
               value={renderMode}
               onChange={(event) =>
                 setRenderMode(event.currentTarget.value as "static" | "js")
               }
             >
-              <option value="static">Static HTML</option>
-              <option value="js">JavaScript</option>
+              <option value="static">
+                {t.extractionRules.preview.renderOptions.static}
+              </option>
+              <option value="js">
+                {t.extractionRules.preview.renderOptions.js}
+              </option>
             </select>
           </label>
           <label className="checkbox-label compact-checkbox private-preview-optin">
@@ -532,11 +596,8 @@ export function ExtractionRulesCard({
               }
             />
             <span>
-              <strong>Allow this exact private host</strong>
-              <small>
-                Required only for localhost or an approved internal site. Cloud
-                metadata addresses remain blocked.
-              </small>
+              <strong>{t.extractionRules.preview.allowPrivateHost}</strong>
+              <small>{t.extractionRules.preview.allowPrivateHostHelp}</small>
             </span>
           </label>
           <Button
@@ -548,31 +609,39 @@ export function ExtractionRulesCard({
               !rules.some((rule) => rule.enabled)
             }
           >
-            {preview.isPending ? "Rendering preview…" : "Preview draft"}
+            {preview.isPending
+              ? t.extractionRules.preview.renderingPreview
+              : t.extractionRules.preview.previewDraft}
           </Button>
         </form>
         {preview.data ? (
           <div className="extraction-preview-results" aria-live="polite">
             <div className="extraction-preview-meta">
               <strong>
-                HTTP {preview.data.data.statusCode} ·{" "}
-                {preview.data.data.renderMode}
+                {fmt(t.extractionRules.preview.httpStatus, {
+                  status: preview.data.data.statusCode,
+                })}{" "}
+                · {preview.data.data.renderMode}
               </strong>
-              <span>{Math.round(preview.data.data.responseTimeMs)} ms</span>
+              <span>
+                {fmt(t.extractionRules.preview.responseTime, {
+                  ms: Math.round(preview.data.data.responseTimeMs),
+                })}
+              </span>
               <a
                 href={preview.data.data.finalUrl}
                 target="_blank"
                 rel="noreferrer"
               >
-                Final URL
+                {t.extractionRules.preview.finalUrl}
               </a>
             </div>
             <div className="table-shell">
-              <table aria-label="Extraction preview results">
+              <table aria-label={t.extractionRules.preview.resultsTable}>
                 <thead>
                   <tr>
-                    <th>Field</th>
-                    <th>Result</th>
+                    <th>{t.extractionRules.preview.fieldColumn}</th>
+                    <th>{t.extractionRules.preview.resultColumn}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -581,15 +650,14 @@ export function ExtractionRulesCard({
                       <th scope="row">{field.label}</th>
                       <td>
                         {field.value === null ? (
-                          <span className="evidence-unavailable">No match</span>
+                          <span className="evidence-unavailable">
+                            {t.extractionRules.preview.noMatch}
+                          </span>
                         ) : (
                           <code>{field.value}</code>
                         )}
                         {field.truncated ? (
-                          <small>
-                            {" "}
-                            Value truncated at the evidence boundary.
-                          </small>
+                          <small> {t.extractionRules.preview.truncated}</small>
                         ) : null}
                       </td>
                     </tr>

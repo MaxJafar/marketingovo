@@ -14,6 +14,8 @@ export const runtimeWorkflowIds = [
   "keyword-research",
   "content-plan",
   "osint-research",
+  "ads-audit",
+  "marketing-report",
 ] as const;
 export type RuntimeWorkflowId = (typeof runtimeWorkflowIds)[number];
 
@@ -77,6 +79,66 @@ const ContentPlanOutputSchema = Type.Object(
   { additionalProperties: true },
 );
 
+/**
+ * One entry per cabinet the run touched, including the ones it could not read.
+ *
+ * A cabinet that failed is present with `state: "failed"` rather than absent.
+ * Omitting it would make a partial sync indistinguishable from a workspace
+ * that simply has fewer cabinets.
+ */
+const AdsAuditOutputSchema = Type.Object(
+  {
+    generatedAt: Type.String({ minLength: 1 }),
+    start: Type.String({ minLength: 10, maxLength: 10 }),
+    end: Type.String({ minLength: 10, maxLength: 10 }),
+    cabinets: Type.Array(
+      Type.Object(
+        {
+          channelAccountId: Type.String({ minLength: 1 }),
+          externalId: Type.String({ minLength: 1 }),
+          displayName: Type.String(),
+          state: Type.Union([
+            Type.Literal("available"),
+            Type.Literal("partial"),
+            Type.Literal("failed"),
+          ]),
+          reason: Type.Union([Type.String(), Type.Null()]),
+          metricsWritten: Type.Integer({ minimum: 0 }),
+          issueCount: Type.Integer({ minimum: 0 }),
+        },
+        { additionalProperties: true },
+      ),
+    ),
+  },
+  { additionalProperties: true },
+);
+
+/**
+ * The stored report, kept loose here on purpose.
+ *
+ * The authority on a report's shape is `@marketingovo/contracts/reporting`,
+ * and restating it in this registry would be a second definition to keep in
+ * step. What this schema is for is catching a workflow that returned something
+ * structurally wrong before it reaches storage.
+ */
+const MarketingReportOutputSchema = Type.Object(
+  {
+    reportId: Type.String({ minLength: 1 }),
+    title: Type.String({ minLength: 1 }),
+    periodStart: Type.String({ minLength: 10, maxLength: 10 }),
+    periodEnd: Type.String({ minLength: 10, maxLength: 10 }),
+    state: Type.Union([
+      Type.Literal("available"),
+      Type.Literal("partial"),
+      Type.Literal("unavailable"),
+      Type.Literal("failed"),
+    ]),
+    sections: Type.Array(Type.Object({}, { additionalProperties: true })),
+    coverageGaps: Type.Array(Type.Object({}, { additionalProperties: true })),
+  },
+  { additionalProperties: true },
+);
+
 function researchWorkflowOutput(output: TSchema): TSchema {
   return Type.Object(
     {
@@ -133,6 +195,16 @@ export function createWorkflowRegistry(): WorkflowRegistry {
       "osint-research",
       "research-osint-research",
       researchWorkflowOutput(OsintDossierSchema),
+    ),
+    singleLeafWorkflow(
+      "ads-audit",
+      "research-ads-audit",
+      researchWorkflowOutput(AdsAuditOutputSchema),
+    ),
+    singleLeafWorkflow(
+      "marketing-report",
+      "research-marketing-report",
+      researchWorkflowOutput(MarketingReportOutputSchema),
     ),
   ];
   return new Map(workflows.map((workflow) => [workflow.id, workflow]));

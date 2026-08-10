@@ -2923,6 +2923,1965 @@ export type paths = {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/calendar": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query: {
+          end?: string;
+          projectId: string;
+          start?: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  /** Format: date-time */
+                  end: string;
+                  entries: {
+                    accountName: string;
+                    attachmentCount: number;
+                    briefId: string;
+                    briefTitle: string;
+                    channelAccountId: string;
+                    deliverableId: string;
+                    intentId: string;
+                    platform: "telegram" | "x" | "facebook-page" | "instagram";
+                    preview: string;
+                    record: {
+                      /** Format: date-time */
+                      attemptedAt: string;
+                      channelAccountId: string;
+                      completedAt: string | null;
+                      error: string | null;
+                      id: string;
+                      idempotencyKey: string;
+                      intentId: string;
+                      permalink: string | null;
+                      platform:
+                        "telegram" | "x" | "facebook-page" | "instagram";
+                      projectId: string;
+                      providerId: string | null;
+                      request: {
+                        [key: string]: unknown;
+                      };
+                      state:
+                        "attempting" | "published" | "failed" | "indeterminate";
+                    } | null;
+                    scheduledAt: string | null;
+                    state: string;
+                    timezone: string | null;
+                  }[];
+                  overdue: {
+                    accountName: string;
+                    attachmentCount: number;
+                    briefId: string;
+                    briefTitle: string;
+                    channelAccountId: string;
+                    deliverableId: string;
+                    intentId: string;
+                    platform: "telegram" | "x" | "facebook-page" | "instagram";
+                    preview: string;
+                    record: {
+                      /** Format: date-time */
+                      attemptedAt: string;
+                      channelAccountId: string;
+                      completedAt: string | null;
+                      error: string | null;
+                      id: string;
+                      idempotencyKey: string;
+                      intentId: string;
+                      permalink: string | null;
+                      platform:
+                        "telegram" | "x" | "facebook-page" | "instagram";
+                      projectId: string;
+                      providerId: string | null;
+                      request: {
+                        [key: string]: unknown;
+                      };
+                      state:
+                        "attempting" | "published" | "failed" | "indeterminate";
+                    } | null;
+                    scheduledAt: string | null;
+                    state: string;
+                    timezone: string | null;
+                  }[];
+                  projectId: string;
+                  /** Format: date-time */
+                  start: string;
+                  unscheduled: {
+                    accountName: string;
+                    attachmentCount: number;
+                    briefId: string;
+                    briefTitle: string;
+                    channelAccountId: string;
+                    deliverableId: string;
+                    intentId: string;
+                    platform: "telegram" | "x" | "facebook-page" | "instagram";
+                    preview: string;
+                    record: {
+                      /** Format: date-time */
+                      attemptedAt: string;
+                      channelAccountId: string;
+                      completedAt: string | null;
+                      error: string | null;
+                      id: string;
+                      idempotencyKey: string;
+                      intentId: string;
+                      permalink: string | null;
+                      platform:
+                        "telegram" | "x" | "facebook-page" | "instagram";
+                      projectId: string;
+                      providerId: string | null;
+                      request: {
+                        [key: string]: unknown;
+                      };
+                      state:
+                        "attempting" | "published" | "failed" | "indeterminate";
+                    } | null;
+                    scheduledAt: string | null;
+                    state: string;
+                    timezone: string | null;
+                  }[];
+                }
+              | {
+                  data: {
+                    /** Format: date-time */
+                    end: string;
+                    entries: {
+                      accountName: string;
+                      attachmentCount: number;
+                      briefId: string;
+                      briefTitle: string;
+                      channelAccountId: string;
+                      deliverableId: string;
+                      intentId: string;
+                      platform:
+                        "telegram" | "x" | "facebook-page" | "instagram";
+                      preview: string;
+                      record: {
+                        /** Format: date-time */
+                        attemptedAt: string;
+                        channelAccountId: string;
+                        completedAt: string | null;
+                        error: string | null;
+                        id: string;
+                        idempotencyKey: string;
+                        intentId: string;
+                        permalink: string | null;
+                        platform:
+                          "telegram" | "x" | "facebook-page" | "instagram";
+                        projectId: string;
+                        providerId: string | null;
+                        request: {
+                          [key: string]: unknown;
+                        };
+                        state:
+                          | "attempting"
+                          | "published"
+                          | "failed"
+                          | "indeterminate";
+                      } | null;
+                      scheduledAt: string | null;
+                      state: string;
+                      timezone: string | null;
+                    }[];
+                    overdue: {
+                      accountName: string;
+                      attachmentCount: number;
+                      briefId: string;
+                      briefTitle: string;
+                      channelAccountId: string;
+                      deliverableId: string;
+                      intentId: string;
+                      platform:
+                        "telegram" | "x" | "facebook-page" | "instagram";
+                      preview: string;
+                      record: {
+                        /** Format: date-time */
+                        attemptedAt: string;
+                        channelAccountId: string;
+                        completedAt: string | null;
+                        error: string | null;
+                        id: string;
+                        idempotencyKey: string;
+                        intentId: string;
+                        permalink: string | null;
+                        platform:
+                          "telegram" | "x" | "facebook-page" | "instagram";
+                        projectId: string;
+                        providerId: string | null;
+                        request: {
+                          [key: string]: unknown;
+                        };
+                        state:
+                          | "attempting"
+                          | "published"
+                          | "failed"
+                          | "indeterminate";
+                      } | null;
+                      scheduledAt: string | null;
+                      state: string;
+                      timezone: string | null;
+                    }[];
+                    projectId: string;
+                    /** Format: date-time */
+                    start: string;
+                    unscheduled: {
+                      accountName: string;
+                      attachmentCount: number;
+                      briefId: string;
+                      briefTitle: string;
+                      channelAccountId: string;
+                      deliverableId: string;
+                      intentId: string;
+                      platform:
+                        "telegram" | "x" | "facebook-page" | "instagram";
+                      preview: string;
+                      record: {
+                        /** Format: date-time */
+                        attemptedAt: string;
+                        channelAccountId: string;
+                        completedAt: string | null;
+                        error: string | null;
+                        id: string;
+                        idempotencyKey: string;
+                        intentId: string;
+                        permalink: string | null;
+                        platform:
+                          "telegram" | "x" | "facebook-page" | "instagram";
+                        projectId: string;
+                        providerId: string | null;
+                        request: {
+                          [key: string]: unknown;
+                        };
+                        state:
+                          | "attempting"
+                          | "published"
+                          | "failed"
+                          | "indeterminate";
+                      } | null;
+                      scheduledAt: string | null;
+                      state: string;
+                      timezone: string | null;
+                    }[];
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/campaign-links/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description The campaign link was removed. */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": unknown;
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The campaign link was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            /** @description A printed code cannot follow an edit. A new destination is a new link. */
+            destinationUrl?: unknown;
+            label?: string;
+            placement?:
+              | "screen"
+              | "print-handheld"
+              | "print-poster"
+              | "packaging"
+              | "outdoor";
+            printedWidthMm?: number | null;
+            style?: {
+              darkColor?: string;
+              errorCorrection?: "L" | "M" | "Q" | "H";
+              lightColor?: string;
+              quietZone?: number;
+              transparent?: boolean;
+            };
+            /** @description Re-tagging would disagree with any code already printed. Create a new link instead. */
+            utm?: unknown;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  /** Format: date-time */
+                  createdAt: string;
+                  /** Format: uri */
+                  destinationUrl: string;
+                  findings: {
+                    field: string | null;
+                    message: string;
+                    remedy: string | null;
+                    rule: string;
+                    severity: "blocking" | "warning" | "advice";
+                  }[];
+                  id: string;
+                  label: string;
+                  placement:
+                    | "screen"
+                    | "print-handheld"
+                    | "print-poster"
+                    | "packaging"
+                    | "outdoor";
+                  printedAt: string | null;
+                  printedWidthMm: number | null;
+                  projectId: string;
+                  style: {
+                    darkColor: string;
+                    errorCorrection: "L" | "M" | "Q" | "H";
+                    lightColor: string;
+                    quietZone: number;
+                    transparent: boolean;
+                  };
+                  taggedUrl: string;
+                  /** Format: date-time */
+                  updatedAt: string;
+                  utm: {
+                    campaign: string;
+                    content: string | null;
+                    medium: string;
+                    source: string;
+                    term: string | null;
+                  };
+                }
+              | {
+                  data: {
+                    /** Format: date-time */
+                    createdAt: string;
+                    /** Format: uri */
+                    destinationUrl: string;
+                    findings: {
+                      field: string | null;
+                      message: string;
+                      remedy: string | null;
+                      rule: string;
+                      severity: "blocking" | "warning" | "advice";
+                    }[];
+                    id: string;
+                    label: string;
+                    placement:
+                      | "screen"
+                      | "print-handheld"
+                      | "print-poster"
+                      | "packaging"
+                      | "outdoor";
+                    printedAt: string | null;
+                    printedWidthMm: number | null;
+                    projectId: string;
+                    style: {
+                      darkColor: string;
+                      errorCorrection: "L" | "M" | "Q" | "H";
+                      lightColor: string;
+                      quietZone: number;
+                      transparent: boolean;
+                    };
+                    taggedUrl: string;
+                    /** Format: date-time */
+                    updatedAt: string;
+                    utm: {
+                      campaign: string;
+                      content: string | null;
+                      medium: string;
+                      source: string;
+                      term: string | null;
+                    };
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The campaign link was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  "/api/v1/campaign-links/{id}/printed": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  /** Format: date-time */
+                  createdAt: string;
+                  /** Format: uri */
+                  destinationUrl: string;
+                  findings: {
+                    field: string | null;
+                    message: string;
+                    remedy: string | null;
+                    rule: string;
+                    severity: "blocking" | "warning" | "advice";
+                  }[];
+                  id: string;
+                  label: string;
+                  placement:
+                    | "screen"
+                    | "print-handheld"
+                    | "print-poster"
+                    | "packaging"
+                    | "outdoor";
+                  printedAt: string | null;
+                  printedWidthMm: number | null;
+                  projectId: string;
+                  style: {
+                    darkColor: string;
+                    errorCorrection: "L" | "M" | "Q" | "H";
+                    lightColor: string;
+                    quietZone: number;
+                    transparent: boolean;
+                  };
+                  taggedUrl: string;
+                  /** Format: date-time */
+                  updatedAt: string;
+                  utm: {
+                    campaign: string;
+                    content: string | null;
+                    medium: string;
+                    source: string;
+                    term: string | null;
+                  };
+                }
+              | {
+                  data: {
+                    /** Format: date-time */
+                    createdAt: string;
+                    /** Format: uri */
+                    destinationUrl: string;
+                    findings: {
+                      field: string | null;
+                      message: string;
+                      remedy: string | null;
+                      rule: string;
+                      severity: "blocking" | "warning" | "advice";
+                    }[];
+                    id: string;
+                    label: string;
+                    placement:
+                      | "screen"
+                      | "print-handheld"
+                      | "print-poster"
+                      | "packaging"
+                      | "outdoor";
+                    printedAt: string | null;
+                    printedWidthMm: number | null;
+                    projectId: string;
+                    style: {
+                      darkColor: string;
+                      errorCorrection: "L" | "M" | "Q" | "H";
+                      lightColor: string;
+                      quietZone: number;
+                      transparent: boolean;
+                    };
+                    taggedUrl: string;
+                    /** Format: date-time */
+                    updatedAt: string;
+                    utm: {
+                      campaign: string;
+                      content: string | null;
+                      medium: string;
+                      source: string;
+                      term: string | null;
+                    };
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The campaign link was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/campaign-links/{id}/qr": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: {
+          format?: "svg" | "png";
+          scale?: number;
+        };
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description The QR code. */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": unknown;
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The campaign link was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/campaigns": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query: {
+          projectId: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  audience: string | null;
+                  constraints: string | null;
+                  /** Format: date-time */
+                  createdAt: string;
+                  createdBy: string;
+                  id: string;
+                  keyMessage: string | null;
+                  objective: string;
+                  projectId: string;
+                  status: "draft" | "in_review" | "archived";
+                  title: string;
+                  /** Format: date-time */
+                  updatedAt: string;
+                }[]
+              | {
+                  data: {
+                    items: {
+                      audience: string | null;
+                      constraints: string | null;
+                      /** Format: date-time */
+                      createdAt: string;
+                      createdBy: string;
+                      id: string;
+                      keyMessage: string | null;
+                      objective: string;
+                      projectId: string;
+                      status: "draft" | "in_review" | "archived";
+                      title: string;
+                      /** Format: date-time */
+                      updatedAt: string;
+                    }[];
+                    total: number;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            audience?: string | null;
+            constraints?: string | null;
+            keyMessage?: string | null;
+            objective: string;
+            projectId: string;
+            title: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  audience: string | null;
+                  constraints: string | null;
+                  /** Format: date-time */
+                  createdAt: string;
+                  createdBy: string;
+                  id: string;
+                  keyMessage: string | null;
+                  objective: string;
+                  projectId: string;
+                  status: "draft" | "in_review" | "archived";
+                  title: string;
+                  /** Format: date-time */
+                  updatedAt: string;
+                }
+              | {
+                  data: {
+                    audience: string | null;
+                    constraints: string | null;
+                    /** Format: date-time */
+                    createdAt: string;
+                    createdBy: string;
+                    id: string;
+                    keyMessage: string | null;
+                    objective: string;
+                    projectId: string;
+                    status: "draft" | "in_review" | "archived";
+                    title: string;
+                    /** Format: date-time */
+                    updatedAt: string;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The project was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/campaigns/{briefId}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          briefId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  brief: {
+                    audience: string | null;
+                    constraints: string | null;
+                    /** Format: date-time */
+                    createdAt: string;
+                    createdBy: string;
+                    id: string;
+                    keyMessage: string | null;
+                    objective: string;
+                    projectId: string;
+                    status: "draft" | "in_review" | "archived";
+                    title: string;
+                    /** Format: date-time */
+                    updatedAt: string;
+                  };
+                  deliverables: {
+                    body: string;
+                    briefId: string;
+                    callToAction: string | null;
+                    channel:
+                      | "facebook-ad"
+                      | "instagram-ad"
+                      | "instagram-post"
+                      | "instagram-reel"
+                      | "facebook-post"
+                      | "seo-article"
+                      | "social-post"
+                      | "telegram-post"
+                      | "x-post";
+                    /** Format: date-time */
+                    createdAt: string;
+                    createdBy: string;
+                    creativeNotes: string | null;
+                    destinationUrl: string | null;
+                    headline: string | null;
+                    id: string;
+                    /** Format: date-time */
+                    updatedAt: string;
+                  }[];
+                  intents: {
+                    approvedAt: string | null;
+                    approvedBy: string | null;
+                    approvedPayloadHash: string | null;
+                    budget: {
+                      currency: string | null;
+                      dailyBudget: number | null;
+                      lifetimeBudget: number | null;
+                    };
+                    channelAccountId: string;
+                    deliverableId: string;
+                    id: string;
+                    idempotencyKey: string | null;
+                    note: string | null;
+                    payload: {
+                      [key: string]: unknown;
+                    };
+                    payloadHash: string;
+                    projectId: string;
+                    scheduledAt: string | null;
+                    /** Format: date-time */
+                    stagedAt: string;
+                    stagedBy: string;
+                    state:
+                      | "staged"
+                      | "approved"
+                      | "publishing"
+                      | "published"
+                      | "failed"
+                      | "void"
+                      | "withdrawn";
+                    timezone: string | null;
+                  }[];
+                }
+              | {
+                  data: {
+                    brief: {
+                      audience: string | null;
+                      constraints: string | null;
+                      /** Format: date-time */
+                      createdAt: string;
+                      createdBy: string;
+                      id: string;
+                      keyMessage: string | null;
+                      objective: string;
+                      projectId: string;
+                      status: "draft" | "in_review" | "archived";
+                      title: string;
+                      /** Format: date-time */
+                      updatedAt: string;
+                    };
+                    deliverables: {
+                      body: string;
+                      briefId: string;
+                      callToAction: string | null;
+                      channel:
+                        | "facebook-ad"
+                        | "instagram-ad"
+                        | "instagram-post"
+                        | "instagram-reel"
+                        | "facebook-post"
+                        | "seo-article"
+                        | "social-post"
+                        | "telegram-post"
+                        | "x-post";
+                      /** Format: date-time */
+                      createdAt: string;
+                      createdBy: string;
+                      creativeNotes: string | null;
+                      destinationUrl: string | null;
+                      headline: string | null;
+                      id: string;
+                      /** Format: date-time */
+                      updatedAt: string;
+                    }[];
+                    intents: {
+                      approvedAt: string | null;
+                      approvedBy: string | null;
+                      approvedPayloadHash: string | null;
+                      budget: {
+                        currency: string | null;
+                        dailyBudget: number | null;
+                        lifetimeBudget: number | null;
+                      };
+                      channelAccountId: string;
+                      deliverableId: string;
+                      id: string;
+                      idempotencyKey: string | null;
+                      note: string | null;
+                      payload: {
+                        [key: string]: unknown;
+                      };
+                      payloadHash: string;
+                      projectId: string;
+                      scheduledAt: string | null;
+                      /** Format: date-time */
+                      stagedAt: string;
+                      stagedBy: string;
+                      state:
+                        | "staged"
+                        | "approved"
+                        | "publishing"
+                        | "published"
+                        | "failed"
+                        | "void"
+                        | "withdrawn";
+                      timezone: string | null;
+                    }[];
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The campaign brief was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/campaigns/{briefId}/deliverables": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          briefId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            body: string;
+            callToAction?: string | null;
+            channel:
+              | "facebook-ad"
+              | "instagram-ad"
+              | "instagram-post"
+              | "instagram-reel"
+              | "facebook-post"
+              | "seo-article"
+              | "social-post"
+              | "telegram-post"
+              | "x-post";
+            creativeNotes?: string | null;
+            destinationUrl?: string | null;
+            headline?: string | null;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  body: string;
+                  briefId: string;
+                  callToAction: string | null;
+                  channel:
+                    | "facebook-ad"
+                    | "instagram-ad"
+                    | "instagram-post"
+                    | "instagram-reel"
+                    | "facebook-post"
+                    | "seo-article"
+                    | "social-post"
+                    | "telegram-post"
+                    | "x-post";
+                  /** Format: date-time */
+                  createdAt: string;
+                  createdBy: string;
+                  creativeNotes: string | null;
+                  destinationUrl: string | null;
+                  headline: string | null;
+                  id: string;
+                  /** Format: date-time */
+                  updatedAt: string;
+                }
+              | {
+                  data: {
+                    body: string;
+                    briefId: string;
+                    callToAction: string | null;
+                    channel:
+                      | "facebook-ad"
+                      | "instagram-ad"
+                      | "instagram-post"
+                      | "instagram-reel"
+                      | "facebook-post"
+                      | "seo-article"
+                      | "social-post"
+                      | "telegram-post"
+                      | "x-post";
+                    /** Format: date-time */
+                    createdAt: string;
+                    createdBy: string;
+                    creativeNotes: string | null;
+                    destinationUrl: string | null;
+                    headline: string | null;
+                    id: string;
+                    /** Format: date-time */
+                    updatedAt: string;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The campaign brief was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/capabilities": {
     parameters: {
       query?: never;
@@ -2986,6 +4945,1350 @@ export type paths = {
         };
         /** @description Capabilities could not be loaded. */
         500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/channels/accounts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query: {
+          includeArchived?: boolean;
+          kind?: "search" | "analytics" | "ads" | "social";
+          projectId: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  account: string;
+                  archivedAt: string | null;
+                  /** Format: date-time */
+                  createdAt: string;
+                  currency: string | null;
+                  dailySpendCap: number | null;
+                  displayName: string;
+                  externalId: string;
+                  id: string;
+                  kind: "search" | "analytics" | "ads" | "social";
+                  provider: string;
+                  totalSpendCap: number | null;
+                  workspaceId: string;
+                }[]
+              | {
+                  data: {
+                    items: {
+                      account: string;
+                      archivedAt: string | null;
+                      /** Format: date-time */
+                      createdAt: string;
+                      currency: string | null;
+                      dailySpendCap: number | null;
+                      displayName: string;
+                      externalId: string;
+                      id: string;
+                      kind: "search" | "analytics" | "ads" | "social";
+                      provider: string;
+                      totalSpendCap: number | null;
+                      workspaceId: string;
+                    }[];
+                    total: number;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            account?: string;
+            currency?: string | null;
+            dailySpendCap?: number | null;
+            displayName: string;
+            externalId: string;
+            kind: "search" | "analytics" | "ads" | "social";
+            projectId: string;
+            provider: string;
+            totalSpendCap?: number | null;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  account: string;
+                  archivedAt: string | null;
+                  /** Format: date-time */
+                  createdAt: string;
+                  currency: string | null;
+                  dailySpendCap: number | null;
+                  displayName: string;
+                  externalId: string;
+                  id: string;
+                  kind: "search" | "analytics" | "ads" | "social";
+                  provider: string;
+                  totalSpendCap: number | null;
+                  workspaceId: string;
+                }
+              | {
+                  data: {
+                    account: string;
+                    archivedAt: string | null;
+                    /** Format: date-time */
+                    createdAt: string;
+                    currency: string | null;
+                    dailySpendCap: number | null;
+                    displayName: string;
+                    externalId: string;
+                    id: string;
+                    kind: "search" | "analytics" | "ads" | "social";
+                    provider: string;
+                    totalSpendCap: number | null;
+                    workspaceId: string;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The project was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The provider is not a registered connector. */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/channels/accounts/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description The cabinet and its recorded facts were removed. */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": unknown;
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The cabinet was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            archived?: boolean;
+            dailySpendCap?: number | null;
+            displayName?: string;
+            totalSpendCap?: number | null;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  account: string;
+                  archivedAt: string | null;
+                  /** Format: date-time */
+                  createdAt: string;
+                  currency: string | null;
+                  dailySpendCap: number | null;
+                  displayName: string;
+                  externalId: string;
+                  id: string;
+                  kind: "search" | "analytics" | "ads" | "social";
+                  provider: string;
+                  totalSpendCap: number | null;
+                  workspaceId: string;
+                }
+              | {
+                  data: {
+                    account: string;
+                    archivedAt: string | null;
+                    /** Format: date-time */
+                    createdAt: string;
+                    currency: string | null;
+                    dailySpendCap: number | null;
+                    displayName: string;
+                    externalId: string;
+                    id: string;
+                    kind: "search" | "analytics" | "ads" | "social";
+                    provider: string;
+                    totalSpendCap: number | null;
+                    workspaceId: string;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The cabinet was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    trace?: never;
+  };
+  "/api/v1/channels/accounts/{id}/performance": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: {
+          end?: string;
+          start?: string;
+        };
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  account: {
+                    account: string;
+                    archivedAt: string | null;
+                    /** Format: date-time */
+                    createdAt: string;
+                    currency: string | null;
+                    dailySpendCap: number | null;
+                    displayName: string;
+                    externalId: string;
+                    id: string;
+                    kind: "search" | "analytics" | "ads" | "social";
+                    provider: string;
+                    totalSpendCap: number | null;
+                    workspaceId: string;
+                  };
+                  end: string;
+                  lastSyncedAt: string | null;
+                  start: string;
+                  summaries: {
+                    currency: string | null;
+                    metricKey:
+                      | "impressions"
+                      | "clicks"
+                      | "spend"
+                      | "reach"
+                      | "frequency"
+                      | "conversions"
+                      | "conversion_value"
+                      | "cost_per_conversion"
+                      | "ctr"
+                      | "cpc"
+                      | "cpm"
+                      | "engagements"
+                      | "video_plays"
+                      | "link_clicks"
+                      | "search_impression_share"
+                      | "search_budget_lost_impression_share"
+                      | "search_rank_lost_impression_share";
+                    note: string | null;
+                    observedDays: number;
+                    platform:
+                      | "all"
+                      | "facebook"
+                      | "instagram"
+                      | "messenger"
+                      | "audience_network"
+                      | "google_search"
+                      | "google_search_partners"
+                      | "google_display"
+                      | "google_youtube"
+                      | "google_performance_max"
+                      | "unknown";
+                    requestedDays: number;
+                    state: "available" | "partial" | "unavailable" | "failed";
+                    value: number | null;
+                  }[];
+                }
+              | {
+                  data: {
+                    account: {
+                      account: string;
+                      archivedAt: string | null;
+                      /** Format: date-time */
+                      createdAt: string;
+                      currency: string | null;
+                      dailySpendCap: number | null;
+                      displayName: string;
+                      externalId: string;
+                      id: string;
+                      kind: "search" | "analytics" | "ads" | "social";
+                      provider: string;
+                      totalSpendCap: number | null;
+                      workspaceId: string;
+                    };
+                    end: string;
+                    lastSyncedAt: string | null;
+                    start: string;
+                    summaries: {
+                      currency: string | null;
+                      metricKey:
+                        | "impressions"
+                        | "clicks"
+                        | "spend"
+                        | "reach"
+                        | "frequency"
+                        | "conversions"
+                        | "conversion_value"
+                        | "cost_per_conversion"
+                        | "ctr"
+                        | "cpc"
+                        | "cpm"
+                        | "engagements"
+                        | "video_plays"
+                        | "link_clicks"
+                        | "search_impression_share"
+                        | "search_budget_lost_impression_share"
+                        | "search_rank_lost_impression_share";
+                      note: string | null;
+                      observedDays: number;
+                      platform:
+                        | "all"
+                        | "facebook"
+                        | "instagram"
+                        | "messenger"
+                        | "audience_network"
+                        | "google_search"
+                        | "google_search_partners"
+                        | "google_display"
+                        | "google_youtube"
+                        | "google_performance_max"
+                        | "unknown";
+                      requestedDays: number;
+                      state: "available" | "partial" | "unavailable" | "failed";
+                      value: number | null;
+                    }[];
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The cabinet was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/channels/accounts/{id}/search-terms": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: {
+          actionableOnly?: boolean;
+          end?: string;
+          limit?: number;
+          start?: string;
+        };
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  adGroupId: string;
+                  adGroupName: string | null;
+                  campaignId: string;
+                  campaignName: string | null;
+                  channelAccountId: string;
+                  clicks: number | null;
+                  conversions: number | null;
+                  conversionValue: number | null;
+                  cost: number | null;
+                  currency: string | null;
+                  /** Format: date-time */
+                  fetchedAt: string;
+                  impressions: number | null;
+                  matchedKeyword: string | null;
+                  matchType:
+                    | "exact"
+                    | "phrase"
+                    | "broad"
+                    | "near_exact"
+                    | "near_phrase"
+                    | "unknown";
+                  query: string;
+                  status:
+                    | "added"
+                    | "excluded"
+                    | "added_excluded"
+                    | "none"
+                    | "unknown";
+                  windowEnd: string;
+                  windowStart: string;
+                }[]
+              | {
+                  data: {
+                    items: {
+                      adGroupId: string;
+                      adGroupName: string | null;
+                      campaignId: string;
+                      campaignName: string | null;
+                      channelAccountId: string;
+                      clicks: number | null;
+                      conversions: number | null;
+                      conversionValue: number | null;
+                      cost: number | null;
+                      currency: string | null;
+                      /** Format: date-time */
+                      fetchedAt: string;
+                      impressions: number | null;
+                      matchedKeyword: string | null;
+                      matchType:
+                        | "exact"
+                        | "phrase"
+                        | "broad"
+                        | "near_exact"
+                        | "near_phrase"
+                        | "unknown";
+                      query: string;
+                      status:
+                        | "added"
+                        | "excluded"
+                        | "added_excluded"
+                        | "none"
+                        | "unknown";
+                      windowEnd: string;
+                      windowStart: string;
+                    }[];
+                    total: number;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The ad account was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/channels/discover": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query: {
+          account?: string;
+          projectId: string;
+          provider?: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  account: string;
+                  currency: string | null;
+                  displayName: string;
+                  externalId: string;
+                  kind: "search" | "analytics" | "ads" | "social";
+                  linked: boolean;
+                  provider: string;
+                  status: string | null;
+                }[]
+              | {
+                  data: {
+                    items: {
+                      account: string;
+                      currency: string | null;
+                      displayName: string;
+                      externalId: string;
+                      kind: "search" | "analytics" | "ads" | "social";
+                      linked: boolean;
+                      provider: string;
+                      status: string | null;
+                    }[];
+                    total: number;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The provider credential is missing or expired. */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The provider is unavailable. */
+        503: {
           headers: {
             [name: string]: unknown;
           };
@@ -3156,6 +6459,1057 @@ export type paths = {
     };
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/email-templates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query: {
+          projectId: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  /** Format: date-time */
+                  createdAt: string;
+                  id: string;
+                  latestRevision: number;
+                  name: string;
+                  projectId: string;
+                  purpose: string | null;
+                  /** Format: date-time */
+                  updatedAt: string;
+                }[]
+              | {
+                  data: {
+                    items: {
+                      /** Format: date-time */
+                      createdAt: string;
+                      id: string;
+                      latestRevision: number;
+                      name: string;
+                      projectId: string;
+                      purpose: string | null;
+                      /** Format: date-time */
+                      updatedAt: string;
+                    }[];
+                    total: number;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            name: string;
+            projectId: string;
+            purpose?: string | null;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  /** Format: date-time */
+                  createdAt: string;
+                  id: string;
+                  latestRevision: number;
+                  name: string;
+                  projectId: string;
+                  purpose: string | null;
+                  /** Format: date-time */
+                  updatedAt: string;
+                }
+              | {
+                  data: {
+                    /** Format: date-time */
+                    createdAt: string;
+                    id: string;
+                    latestRevision: number;
+                    name: string;
+                    projectId: string;
+                    purpose: string | null;
+                    /** Format: date-time */
+                    updatedAt: string;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The project was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/email-templates/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  current: {
+                    brandRevision: number | null;
+                    compiledHtml: string;
+                    /** Format: date-time */
+                    createdAt: string;
+                    createdBy: string;
+                    plainText: string;
+                    preheader: string;
+                    report: {
+                      counts: {
+                        blocking: number;
+                        error: number;
+                        info: number;
+                        warning: number;
+                      };
+                      findings: {
+                        affects: string[];
+                        message: string;
+                        remedy: string | null;
+                        rule: string;
+                        severity: "blocking" | "error" | "warning" | "info";
+                        where: string | null;
+                      }[];
+                      gmailClips: boolean;
+                      ok: boolean;
+                      sizeBytes: number;
+                    };
+                    revision: number;
+                    sourceHtml: string;
+                    subject: string;
+                    templateId: string;
+                  } | null;
+                  history: {
+                    brandRevision: number | null;
+                    compiledHtml: string;
+                    /** Format: date-time */
+                    createdAt: string;
+                    createdBy: string;
+                    plainText: string;
+                    preheader: string;
+                    report: {
+                      counts: {
+                        blocking: number;
+                        error: number;
+                        info: number;
+                        warning: number;
+                      };
+                      findings: {
+                        affects: string[];
+                        message: string;
+                        remedy: string | null;
+                        rule: string;
+                        severity: "blocking" | "error" | "warning" | "info";
+                        where: string | null;
+                      }[];
+                      gmailClips: boolean;
+                      ok: boolean;
+                      sizeBytes: number;
+                    };
+                    revision: number;
+                    sourceHtml: string;
+                    subject: string;
+                    templateId: string;
+                  }[];
+                  template: {
+                    /** Format: date-time */
+                    createdAt: string;
+                    id: string;
+                    latestRevision: number;
+                    name: string;
+                    projectId: string;
+                    purpose: string | null;
+                    /** Format: date-time */
+                    updatedAt: string;
+                  };
+                }
+              | {
+                  data: {
+                    current: {
+                      brandRevision: number | null;
+                      compiledHtml: string;
+                      /** Format: date-time */
+                      createdAt: string;
+                      createdBy: string;
+                      plainText: string;
+                      preheader: string;
+                      report: {
+                        counts: {
+                          blocking: number;
+                          error: number;
+                          info: number;
+                          warning: number;
+                        };
+                        findings: {
+                          affects: string[];
+                          message: string;
+                          remedy: string | null;
+                          rule: string;
+                          severity: "blocking" | "error" | "warning" | "info";
+                          where: string | null;
+                        }[];
+                        gmailClips: boolean;
+                        ok: boolean;
+                        sizeBytes: number;
+                      };
+                      revision: number;
+                      sourceHtml: string;
+                      subject: string;
+                      templateId: string;
+                    } | null;
+                    history: {
+                      brandRevision: number | null;
+                      compiledHtml: string;
+                      /** Format: date-time */
+                      createdAt: string;
+                      createdBy: string;
+                      plainText: string;
+                      preheader: string;
+                      report: {
+                        counts: {
+                          blocking: number;
+                          error: number;
+                          info: number;
+                          warning: number;
+                        };
+                        findings: {
+                          affects: string[];
+                          message: string;
+                          remedy: string | null;
+                          rule: string;
+                          severity: "blocking" | "error" | "warning" | "info";
+                          where: string | null;
+                        }[];
+                        gmailClips: boolean;
+                        ok: boolean;
+                        sizeBytes: number;
+                      };
+                      revision: number;
+                      sourceHtml: string;
+                      subject: string;
+                      templateId: string;
+                    }[];
+                    template: {
+                      /** Format: date-time */
+                      createdAt: string;
+                      id: string;
+                      latestRevision: number;
+                      name: string;
+                      projectId: string;
+                      purpose: string | null;
+                      /** Format: date-time */
+                      updatedAt: string;
+                    };
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The template was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description The template and its revisions were removed. */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": unknown;
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The template was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/email-templates/{id}/versions": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            html: string;
+            preheader?: string;
+            subject: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  current: {
+                    brandRevision: number | null;
+                    compiledHtml: string;
+                    /** Format: date-time */
+                    createdAt: string;
+                    createdBy: string;
+                    plainText: string;
+                    preheader: string;
+                    report: {
+                      counts: {
+                        blocking: number;
+                        error: number;
+                        info: number;
+                        warning: number;
+                      };
+                      findings: {
+                        affects: string[];
+                        message: string;
+                        remedy: string | null;
+                        rule: string;
+                        severity: "blocking" | "error" | "warning" | "info";
+                        where: string | null;
+                      }[];
+                      gmailClips: boolean;
+                      ok: boolean;
+                      sizeBytes: number;
+                    };
+                    revision: number;
+                    sourceHtml: string;
+                    subject: string;
+                    templateId: string;
+                  } | null;
+                  history: {
+                    brandRevision: number | null;
+                    compiledHtml: string;
+                    /** Format: date-time */
+                    createdAt: string;
+                    createdBy: string;
+                    plainText: string;
+                    preheader: string;
+                    report: {
+                      counts: {
+                        blocking: number;
+                        error: number;
+                        info: number;
+                        warning: number;
+                      };
+                      findings: {
+                        affects: string[];
+                        message: string;
+                        remedy: string | null;
+                        rule: string;
+                        severity: "blocking" | "error" | "warning" | "info";
+                        where: string | null;
+                      }[];
+                      gmailClips: boolean;
+                      ok: boolean;
+                      sizeBytes: number;
+                    };
+                    revision: number;
+                    sourceHtml: string;
+                    subject: string;
+                    templateId: string;
+                  }[];
+                  template: {
+                    /** Format: date-time */
+                    createdAt: string;
+                    id: string;
+                    latestRevision: number;
+                    name: string;
+                    projectId: string;
+                    purpose: string | null;
+                    /** Format: date-time */
+                    updatedAt: string;
+                  };
+                }
+              | {
+                  data: {
+                    current: {
+                      brandRevision: number | null;
+                      compiledHtml: string;
+                      /** Format: date-time */
+                      createdAt: string;
+                      createdBy: string;
+                      plainText: string;
+                      preheader: string;
+                      report: {
+                        counts: {
+                          blocking: number;
+                          error: number;
+                          info: number;
+                          warning: number;
+                        };
+                        findings: {
+                          affects: string[];
+                          message: string;
+                          remedy: string | null;
+                          rule: string;
+                          severity: "blocking" | "error" | "warning" | "info";
+                          where: string | null;
+                        }[];
+                        gmailClips: boolean;
+                        ok: boolean;
+                        sizeBytes: number;
+                      };
+                      revision: number;
+                      sourceHtml: string;
+                      subject: string;
+                      templateId: string;
+                    } | null;
+                    history: {
+                      brandRevision: number | null;
+                      compiledHtml: string;
+                      /** Format: date-time */
+                      createdAt: string;
+                      createdBy: string;
+                      plainText: string;
+                      preheader: string;
+                      report: {
+                        counts: {
+                          blocking: number;
+                          error: number;
+                          info: number;
+                          warning: number;
+                        };
+                        findings: {
+                          affects: string[];
+                          message: string;
+                          remedy: string | null;
+                          rule: string;
+                          severity: "blocking" | "error" | "warning" | "info";
+                          where: string | null;
+                        }[];
+                        gmailClips: boolean;
+                        ok: boolean;
+                        sizeBytes: number;
+                      };
+                      revision: number;
+                      sourceHtml: string;
+                      subject: string;
+                      templateId: string;
+                    }[];
+                    template: {
+                      /** Format: date-time */
+                      createdAt: string;
+                      id: string;
+                      latestRevision: number;
+                      name: string;
+                      projectId: string;
+                      purpose: string | null;
+                      /** Format: date-time */
+                      updatedAt: string;
+                    };
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The template was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
     delete?: never;
     options?: never;
     head?: never;
@@ -3765,8 +8119,7 @@ export type paths = {
               title: string | null;
             }[];
             project: {
-              /** Format: uri */
-              canonicalUrl: string;
+              canonicalUrl: string | null;
               /** Format: date-time */
               createdAt: string;
               id: string;
@@ -3861,10 +8214,14 @@ export type paths = {
               id: string;
               /** Format: date-time */
               nextRunAt: string;
+              options?: {
+                [key: string]: unknown;
+              };
               projectId: string;
               timezone: string;
               /** Format: date-time */
               updatedAt: string;
+              workflowId?: string;
             }[];
             /** @enum {boolean} */
             secretsIncluded: false;
@@ -4053,8 +8410,7 @@ export type paths = {
               title: string | null;
             }[];
             project: {
-              /** Format: uri */
-              canonicalUrl: string;
+              canonicalUrl: string | null;
               /** Format: date-time */
               createdAt: string;
               id: string;
@@ -4149,10 +8505,14 @@ export type paths = {
               id: string;
               /** Format: date-time */
               nextRunAt: string;
+              options?: {
+                [key: string]: unknown;
+              };
               projectId: string;
               timezone: string;
               /** Format: date-time */
               updatedAt: string;
+              workflowId?: string;
             }[];
             /** @enum {boolean} */
             secretsIncluded: false;
@@ -4197,8 +8557,7 @@ export type paths = {
               /** Format: date-time */
               importedAt: string;
               project: {
-                /** Format: uri */
-                canonicalUrl: string;
+                canonicalUrl: string | null;
                 /** Format: date-time */
                 createdAt: string;
                 id: string;
@@ -4431,6 +8790,7 @@ export type paths = {
                         type: "text" | "secret";
                       }[];
                       description: string | null;
+                      expiresAt: string | null;
                       id: string;
                       lastError: string | null;
                       lastSyncAt: string | null;
@@ -5161,6 +9521,7 @@ export type paths = {
                       type: "text" | "secret";
                     }[];
                     description: string | null;
+                    expiresAt: string | null;
                     id: string;
                     lastError: string | null;
                     lastSyncAt: string | null;
@@ -5380,6 +9741,7 @@ export type paths = {
                       type: "text" | "secret";
                     }[];
                     description: string | null;
+                    expiresAt: string | null;
                     id: string;
                     lastError: string | null;
                     lastSyncAt: string | null;
@@ -5617,6 +9979,7 @@ export type paths = {
                       type: "text" | "secret";
                     }[];
                     description: string | null;
+                    expiresAt: string | null;
                     id: string;
                     lastError: string | null;
                     lastSyncAt: string | null;
@@ -6455,6 +10818,1534 @@ export type paths = {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/marketing-reports": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query: {
+          projectId: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  /** Format: date-time */
+                  generatedAt: string;
+                  id: string;
+                  periodEnd: string;
+                  periodStart: string;
+                  projectId: string;
+                  state: "available" | "partial" | "unavailable" | "failed";
+                  title: string;
+                }[]
+              | {
+                  data: {
+                    items: {
+                      /** Format: date-time */
+                      generatedAt: string;
+                      id: string;
+                      periodEnd: string;
+                      periodStart: string;
+                      projectId: string;
+                      state: "available" | "partial" | "unavailable" | "failed";
+                      title: string;
+                    }[];
+                    total: number;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            compare?: boolean;
+            end?: string;
+            narrative?: string | null;
+            projectId: string;
+            start?: string;
+            timezone?: string;
+            title?: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  brandRevision: number | null;
+                  coverageGaps: {
+                    reason: string;
+                    remedy: string | null;
+                    source: string;
+                  }[];
+                  /** Format: date-time */
+                  generatedAt: string;
+                  id: string;
+                  narrative: string | null;
+                  period: {
+                    comparisonEnd: string | null;
+                    comparisonStart: string | null;
+                    end: string;
+                    start: string;
+                    timezone: string;
+                  };
+                  projectId: string;
+                  sections: {
+                    breakdown: {
+                      label: string;
+                      metrics: {
+                        change: number | null;
+                        currency: string | null;
+                        key: string;
+                        label: string;
+                        note: string | null;
+                        state:
+                          "available" | "partial" | "unavailable" | "failed";
+                        unit: string;
+                        value: number | null;
+                      }[];
+                    }[];
+                    id:
+                      | "paid"
+                      | "organic"
+                      | "social"
+                      | "email"
+                      | "competitors"
+                      | "actions";
+                    metrics: {
+                      change: number | null;
+                      currency: string | null;
+                      key: string;
+                      label: string;
+                      note: string | null;
+                      state: "available" | "partial" | "unavailable" | "failed";
+                      unit: string;
+                      value: number | null;
+                    }[];
+                    refusals: {
+                      expected: string;
+                      explanation: string;
+                    }[];
+                    sources: {
+                      id: string;
+                      label: string;
+                      observedAt: string | null;
+                      reason: string;
+                      state: "available" | "partial" | "unavailable" | "failed";
+                    }[];
+                    state: "available" | "partial" | "unavailable" | "failed";
+                    summary: string;
+                    title: string;
+                  }[];
+                  title: string;
+                }
+              | {
+                  data: {
+                    brandRevision: number | null;
+                    coverageGaps: {
+                      reason: string;
+                      remedy: string | null;
+                      source: string;
+                    }[];
+                    /** Format: date-time */
+                    generatedAt: string;
+                    id: string;
+                    narrative: string | null;
+                    period: {
+                      comparisonEnd: string | null;
+                      comparisonStart: string | null;
+                      end: string;
+                      start: string;
+                      timezone: string;
+                    };
+                    projectId: string;
+                    sections: {
+                      breakdown: {
+                        label: string;
+                        metrics: {
+                          change: number | null;
+                          currency: string | null;
+                          key: string;
+                          label: string;
+                          note: string | null;
+                          state:
+                            "available" | "partial" | "unavailable" | "failed";
+                          unit: string;
+                          value: number | null;
+                        }[];
+                      }[];
+                      id:
+                        | "paid"
+                        | "organic"
+                        | "social"
+                        | "email"
+                        | "competitors"
+                        | "actions";
+                      metrics: {
+                        change: number | null;
+                        currency: string | null;
+                        key: string;
+                        label: string;
+                        note: string | null;
+                        state:
+                          "available" | "partial" | "unavailable" | "failed";
+                        unit: string;
+                        value: number | null;
+                      }[];
+                      refusals: {
+                        expected: string;
+                        explanation: string;
+                      }[];
+                      sources: {
+                        id: string;
+                        label: string;
+                        observedAt: string | null;
+                        reason: string;
+                        state:
+                          "available" | "partial" | "unavailable" | "failed";
+                      }[];
+                      state: "available" | "partial" | "unavailable" | "failed";
+                      summary: string;
+                      title: string;
+                    }[];
+                    title: string;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The project was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The report composer is unavailable. */
+        503: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/marketing-reports/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  brandRevision: number | null;
+                  coverageGaps: {
+                    reason: string;
+                    remedy: string | null;
+                    source: string;
+                  }[];
+                  /** Format: date-time */
+                  generatedAt: string;
+                  id: string;
+                  narrative: string | null;
+                  period: {
+                    comparisonEnd: string | null;
+                    comparisonStart: string | null;
+                    end: string;
+                    start: string;
+                    timezone: string;
+                  };
+                  projectId: string;
+                  sections: {
+                    breakdown: {
+                      label: string;
+                      metrics: {
+                        change: number | null;
+                        currency: string | null;
+                        key: string;
+                        label: string;
+                        note: string | null;
+                        state:
+                          "available" | "partial" | "unavailable" | "failed";
+                        unit: string;
+                        value: number | null;
+                      }[];
+                    }[];
+                    id:
+                      | "paid"
+                      | "organic"
+                      | "social"
+                      | "email"
+                      | "competitors"
+                      | "actions";
+                    metrics: {
+                      change: number | null;
+                      currency: string | null;
+                      key: string;
+                      label: string;
+                      note: string | null;
+                      state: "available" | "partial" | "unavailable" | "failed";
+                      unit: string;
+                      value: number | null;
+                    }[];
+                    refusals: {
+                      expected: string;
+                      explanation: string;
+                    }[];
+                    sources: {
+                      id: string;
+                      label: string;
+                      observedAt: string | null;
+                      reason: string;
+                      state: "available" | "partial" | "unavailable" | "failed";
+                    }[];
+                    state: "available" | "partial" | "unavailable" | "failed";
+                    summary: string;
+                    title: string;
+                  }[];
+                  title: string;
+                }
+              | {
+                  data: {
+                    brandRevision: number | null;
+                    coverageGaps: {
+                      reason: string;
+                      remedy: string | null;
+                      source: string;
+                    }[];
+                    /** Format: date-time */
+                    generatedAt: string;
+                    id: string;
+                    narrative: string | null;
+                    period: {
+                      comparisonEnd: string | null;
+                      comparisonStart: string | null;
+                      end: string;
+                      start: string;
+                      timezone: string;
+                    };
+                    projectId: string;
+                    sections: {
+                      breakdown: {
+                        label: string;
+                        metrics: {
+                          change: number | null;
+                          currency: string | null;
+                          key: string;
+                          label: string;
+                          note: string | null;
+                          state:
+                            "available" | "partial" | "unavailable" | "failed";
+                          unit: string;
+                          value: number | null;
+                        }[];
+                      }[];
+                      id:
+                        | "paid"
+                        | "organic"
+                        | "social"
+                        | "email"
+                        | "competitors"
+                        | "actions";
+                      metrics: {
+                        change: number | null;
+                        currency: string | null;
+                        key: string;
+                        label: string;
+                        note: string | null;
+                        state:
+                          "available" | "partial" | "unavailable" | "failed";
+                        unit: string;
+                        value: number | null;
+                      }[];
+                      refusals: {
+                        expected: string;
+                        explanation: string;
+                      }[];
+                      sources: {
+                        id: string;
+                        label: string;
+                        observedAt: string | null;
+                        reason: string;
+                        state:
+                          "available" | "partial" | "unavailable" | "failed";
+                      }[];
+                      state: "available" | "partial" | "unavailable" | "failed";
+                      summary: string;
+                      title: string;
+                    }[];
+                    title: string;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The report was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description The report was removed. */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": unknown;
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The report was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/marketing-reports/{id}/render": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: {
+          format?: "html" | "text" | "pdf";
+        };
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description The rendered report. */
+        200: {
+          headers: {
+            /** @description Attachment filename for the PDF form. */
+            "content-disposition"?: unknown;
+            [name: string]: unknown;
+          };
+          content: {
+            "application/pdf": string;
+            "text/html": string;
+            "text/plain": string;
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The report was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/media/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description The asset was removed. */
+        204: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json": unknown;
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The asset was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/media/{id}/public-url": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            /** Format: uri */
+            publicUrl: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  /** Format: date-time */
+                  createdAt: string;
+                  filename: string;
+                  height: number | null;
+                  id: string;
+                  kind: "image" | "video";
+                  mediaType: string;
+                  projectId: string;
+                  publicUrl: string | null;
+                  publicUrlAt: string | null;
+                  publicUrlSource: string | null;
+                  sha256: string;
+                  sizeBytes: number;
+                  width: number | null;
+                }
+              | {
+                  data: {
+                    /** Format: date-time */
+                    createdAt: string;
+                    filename: string;
+                    height: number | null;
+                    id: string;
+                    kind: "image" | "video";
+                    mediaType: string;
+                    projectId: string;
+                    publicUrl: string | null;
+                    publicUrlAt: string | null;
+                    publicUrlSource: string | null;
+                    sha256: string;
+                    sizeBytes: number;
+                    width: number | null;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The asset was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/media/{id}/relay": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  /** Format: date-time */
+                  createdAt: string;
+                  filename: string;
+                  height: number | null;
+                  id: string;
+                  kind: "image" | "video";
+                  mediaType: string;
+                  projectId: string;
+                  publicUrl: string | null;
+                  publicUrlAt: string | null;
+                  publicUrlSource: string | null;
+                  sha256: string;
+                  sizeBytes: number;
+                  width: number | null;
+                }
+              | {
+                  data: {
+                    /** Format: date-time */
+                    createdAt: string;
+                    filename: string;
+                    height: number | null;
+                    id: string;
+                    kind: "image" | "video";
+                    mediaType: string;
+                    projectId: string;
+                    publicUrl: string | null;
+                    publicUrlAt: string | null;
+                    publicUrlSource: string | null;
+                    sha256: string;
+                    sizeBytes: number;
+                    width: number | null;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The asset was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Object storage is not configured. */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/monitoring": {
     parameters: {
       query?: never;
@@ -6936,8 +12827,7 @@ export type paths = {
           };
           content: {
             "application/json": {
-              /** Format: uri */
-              canonicalUrl: string;
+              canonicalUrl: string | null;
               /** Format: date-time */
               createdAt: string;
               id: string;
@@ -7046,7 +12936,7 @@ export type paths = {
         content: {
           "application/json": {
             /** Format: uri */
-            canonicalUrl: string;
+            canonicalUrl?: string;
             name: string;
           };
         };
@@ -7059,8 +12949,7 @@ export type paths = {
           };
           content: {
             "application/json": {
-              /** Format: uri */
-              canonicalUrl: string;
+              canonicalUrl: string | null;
               /** Format: date-time */
               createdAt: string;
               id: string;
@@ -7219,11 +13108,15 @@ export type paths = {
                   counts: {
                     actions: number;
                     artifacts: number;
+                    campaignBriefs: number;
+                    channelAccounts: number;
+                    channelMetrics: number;
                     contextEntries: number;
                     contextVersions: number;
                     extractionRuleVersions: number;
                     issueInstances: number;
                     pages: number;
+                    publishIntents: number;
                     runs: number;
                     schedules: number;
                   };
@@ -7239,11 +13132,15 @@ export type paths = {
                     counts: {
                       actions: number;
                       artifacts: number;
+                      campaignBriefs: number;
+                      channelAccounts: number;
+                      channelMetrics: number;
                       contextEntries: number;
                       contextVersions: number;
                       extractionRuleVersions: number;
                       issueInstances: number;
                       pages: number;
+                      publishIntents: number;
                       runs: number;
                       schedules: number;
                     };
@@ -7401,6 +13298,206 @@ export type paths = {
         };
       };
     };
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/projects/{id}/capabilities": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  available: (
+                    | "website"
+                    | "search-console"
+                    | "analytics"
+                    | "serp"
+                    | "ads"
+                    | "social"
+                  )[];
+                  projectId: string;
+                  states: {
+                    available: boolean;
+                    capability:
+                      | "website"
+                      | "search-console"
+                      | "analytics"
+                      | "serp"
+                      | "ads"
+                      | "social";
+                    reason: string;
+                    remedy: {
+                      href: string;
+                      label: string;
+                    } | null;
+                  }[];
+                }
+              | {
+                  data: {
+                    available: (
+                      | "website"
+                      | "search-console"
+                      | "analytics"
+                      | "serp"
+                      | "ads"
+                      | "social"
+                    )[];
+                    projectId: string;
+                    states: {
+                      available: boolean;
+                      capability:
+                        | "website"
+                        | "search-console"
+                        | "analytics"
+                        | "serp"
+                        | "ads"
+                        | "social";
+                      reason: string;
+                      remedy: {
+                        href: string;
+                        label: string;
+                      } | null;
+                    }[];
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The project was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -8966,8 +15063,7 @@ export type paths = {
                 value: number | null;
               };
               project: {
-                /** Format: uri */
-                canonicalUrl: string;
+                canonicalUrl: string | null;
                 /** Format: date-time */
                 createdAt: string;
                 id: string;
@@ -9070,6 +15166,3897 @@ export type paths = {
         };
         /** @description The project was not found. */
         404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/projects/{projectId}/brand-kit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          projectId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  current: {
+                    actor: string;
+                    changeSummary: string;
+                    /** Format: date-time */
+                    createdAt: string;
+                    profile: {
+                      buttonRadiusPx: number;
+                      colors: {
+                        name: string;
+                        usage: string | null;
+                        value: string;
+                      }[];
+                      contentWidthPx: number;
+                      footer: {
+                        companyName: string;
+                        legalNotes: string | null;
+                        postalAddress: string;
+                        unsubscribePlaceholder: string;
+                      };
+                      logoAltText: string | null;
+                      logoMediaId: string | null;
+                      prohibitions: string[];
+                      referenceMediaId: string | null;
+                      referenceNotes: string | null;
+                      typefaces: {
+                        lineHeight: number;
+                        role: "heading" | "body" | "mono";
+                        sizePx: number;
+                        stack: string;
+                        weight: number;
+                      }[];
+                      voice: string | null;
+                    };
+                    projectId: string;
+                    revision: number;
+                  } | null;
+                  history: {
+                    actor: string;
+                    changeSummary: string;
+                    /** Format: date-time */
+                    createdAt: string;
+                    profile: {
+                      buttonRadiusPx: number;
+                      colors: {
+                        name: string;
+                        usage: string | null;
+                        value: string;
+                      }[];
+                      contentWidthPx: number;
+                      footer: {
+                        companyName: string;
+                        legalNotes: string | null;
+                        postalAddress: string;
+                        unsubscribePlaceholder: string;
+                      };
+                      logoAltText: string | null;
+                      logoMediaId: string | null;
+                      prohibitions: string[];
+                      referenceMediaId: string | null;
+                      referenceNotes: string | null;
+                      typefaces: {
+                        lineHeight: number;
+                        role: "heading" | "body" | "mono";
+                        sizePx: number;
+                        stack: string;
+                        weight: number;
+                      }[];
+                      voice: string | null;
+                    };
+                    projectId: string;
+                    revision: number;
+                  }[];
+                  projectId: string;
+                }
+              | {
+                  data: {
+                    current: {
+                      actor: string;
+                      changeSummary: string;
+                      /** Format: date-time */
+                      createdAt: string;
+                      profile: {
+                        buttonRadiusPx: number;
+                        colors: {
+                          name: string;
+                          usage: string | null;
+                          value: string;
+                        }[];
+                        contentWidthPx: number;
+                        footer: {
+                          companyName: string;
+                          legalNotes: string | null;
+                          postalAddress: string;
+                          unsubscribePlaceholder: string;
+                        };
+                        logoAltText: string | null;
+                        logoMediaId: string | null;
+                        prohibitions: string[];
+                        referenceMediaId: string | null;
+                        referenceNotes: string | null;
+                        typefaces: {
+                          lineHeight: number;
+                          role: "heading" | "body" | "mono";
+                          sizePx: number;
+                          stack: string;
+                          weight: number;
+                        }[];
+                        voice: string | null;
+                      };
+                      projectId: string;
+                      revision: number;
+                    } | null;
+                    history: {
+                      actor: string;
+                      changeSummary: string;
+                      /** Format: date-time */
+                      createdAt: string;
+                      profile: {
+                        buttonRadiusPx: number;
+                        colors: {
+                          name: string;
+                          usage: string | null;
+                          value: string;
+                        }[];
+                        contentWidthPx: number;
+                        footer: {
+                          companyName: string;
+                          legalNotes: string | null;
+                          postalAddress: string;
+                          unsubscribePlaceholder: string;
+                        };
+                        logoAltText: string | null;
+                        logoMediaId: string | null;
+                        prohibitions: string[];
+                        referenceMediaId: string | null;
+                        referenceNotes: string | null;
+                        typefaces: {
+                          lineHeight: number;
+                          role: "heading" | "body" | "mono";
+                          sizePx: number;
+                          stack: string;
+                          weight: number;
+                        }[];
+                        voice: string | null;
+                      };
+                      projectId: string;
+                      revision: number;
+                    }[];
+                    projectId: string;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The project was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          projectId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            changeSummary: string;
+            profile: {
+              buttonRadiusPx: number;
+              colors: {
+                name: string;
+                usage: string | null;
+                value: string;
+              }[];
+              contentWidthPx: number;
+              footer: {
+                companyName: string;
+                legalNotes: string | null;
+                postalAddress: string;
+                unsubscribePlaceholder: string;
+              };
+              logoAltText: string | null;
+              logoMediaId: string | null;
+              prohibitions: string[];
+              referenceMediaId: string | null;
+              referenceNotes: string | null;
+              typefaces: {
+                lineHeight: number;
+                role: "heading" | "body" | "mono";
+                sizePx: number;
+                stack: string;
+                weight: number;
+              }[];
+              voice: string | null;
+            };
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  current: {
+                    actor: string;
+                    changeSummary: string;
+                    /** Format: date-time */
+                    createdAt: string;
+                    profile: {
+                      buttonRadiusPx: number;
+                      colors: {
+                        name: string;
+                        usage: string | null;
+                        value: string;
+                      }[];
+                      contentWidthPx: number;
+                      footer: {
+                        companyName: string;
+                        legalNotes: string | null;
+                        postalAddress: string;
+                        unsubscribePlaceholder: string;
+                      };
+                      logoAltText: string | null;
+                      logoMediaId: string | null;
+                      prohibitions: string[];
+                      referenceMediaId: string | null;
+                      referenceNotes: string | null;
+                      typefaces: {
+                        lineHeight: number;
+                        role: "heading" | "body" | "mono";
+                        sizePx: number;
+                        stack: string;
+                        weight: number;
+                      }[];
+                      voice: string | null;
+                    };
+                    projectId: string;
+                    revision: number;
+                  } | null;
+                  history: {
+                    actor: string;
+                    changeSummary: string;
+                    /** Format: date-time */
+                    createdAt: string;
+                    profile: {
+                      buttonRadiusPx: number;
+                      colors: {
+                        name: string;
+                        usage: string | null;
+                        value: string;
+                      }[];
+                      contentWidthPx: number;
+                      footer: {
+                        companyName: string;
+                        legalNotes: string | null;
+                        postalAddress: string;
+                        unsubscribePlaceholder: string;
+                      };
+                      logoAltText: string | null;
+                      logoMediaId: string | null;
+                      prohibitions: string[];
+                      referenceMediaId: string | null;
+                      referenceNotes: string | null;
+                      typefaces: {
+                        lineHeight: number;
+                        role: "heading" | "body" | "mono";
+                        sizePx: number;
+                        stack: string;
+                        weight: number;
+                      }[];
+                      voice: string | null;
+                    };
+                    projectId: string;
+                    revision: number;
+                  }[];
+                  projectId: string;
+                }
+              | {
+                  data: {
+                    current: {
+                      actor: string;
+                      changeSummary: string;
+                      /** Format: date-time */
+                      createdAt: string;
+                      profile: {
+                        buttonRadiusPx: number;
+                        colors: {
+                          name: string;
+                          usage: string | null;
+                          value: string;
+                        }[];
+                        contentWidthPx: number;
+                        footer: {
+                          companyName: string;
+                          legalNotes: string | null;
+                          postalAddress: string;
+                          unsubscribePlaceholder: string;
+                        };
+                        logoAltText: string | null;
+                        logoMediaId: string | null;
+                        prohibitions: string[];
+                        referenceMediaId: string | null;
+                        referenceNotes: string | null;
+                        typefaces: {
+                          lineHeight: number;
+                          role: "heading" | "body" | "mono";
+                          sizePx: number;
+                          stack: string;
+                          weight: number;
+                        }[];
+                        voice: string | null;
+                      };
+                      projectId: string;
+                      revision: number;
+                    } | null;
+                    history: {
+                      actor: string;
+                      changeSummary: string;
+                      /** Format: date-time */
+                      createdAt: string;
+                      profile: {
+                        buttonRadiusPx: number;
+                        colors: {
+                          name: string;
+                          usage: string | null;
+                          value: string;
+                        }[];
+                        contentWidthPx: number;
+                        footer: {
+                          companyName: string;
+                          legalNotes: string | null;
+                          postalAddress: string;
+                          unsubscribePlaceholder: string;
+                        };
+                        logoAltText: string | null;
+                        logoMediaId: string | null;
+                        prohibitions: string[];
+                        referenceMediaId: string | null;
+                        referenceNotes: string | null;
+                        typefaces: {
+                          lineHeight: number;
+                          role: "heading" | "body" | "mono";
+                          sizePx: number;
+                          stack: string;
+                          weight: number;
+                        }[];
+                        voice: string | null;
+                      };
+                      projectId: string;
+                      revision: number;
+                    }[];
+                    projectId: string;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The project was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/projects/{projectId}/campaign-links": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          projectId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  /** Format: date-time */
+                  createdAt: string;
+                  /** Format: uri */
+                  destinationUrl: string;
+                  findings: {
+                    field: string | null;
+                    message: string;
+                    remedy: string | null;
+                    rule: string;
+                    severity: "blocking" | "warning" | "advice";
+                  }[];
+                  id: string;
+                  label: string;
+                  placement:
+                    | "screen"
+                    | "print-handheld"
+                    | "print-poster"
+                    | "packaging"
+                    | "outdoor";
+                  printedAt: string | null;
+                  printedWidthMm: number | null;
+                  projectId: string;
+                  style: {
+                    darkColor: string;
+                    errorCorrection: "L" | "M" | "Q" | "H";
+                    lightColor: string;
+                    quietZone: number;
+                    transparent: boolean;
+                  };
+                  taggedUrl: string;
+                  /** Format: date-time */
+                  updatedAt: string;
+                  utm: {
+                    campaign: string;
+                    content: string | null;
+                    medium: string;
+                    source: string;
+                    term: string | null;
+                  };
+                }[]
+              | {
+                  data: {
+                    items: {
+                      /** Format: date-time */
+                      createdAt: string;
+                      /** Format: uri */
+                      destinationUrl: string;
+                      findings: {
+                        field: string | null;
+                        message: string;
+                        remedy: string | null;
+                        rule: string;
+                        severity: "blocking" | "warning" | "advice";
+                      }[];
+                      id: string;
+                      label: string;
+                      placement:
+                        | "screen"
+                        | "print-handheld"
+                        | "print-poster"
+                        | "packaging"
+                        | "outdoor";
+                      printedAt: string | null;
+                      printedWidthMm: number | null;
+                      projectId: string;
+                      style: {
+                        darkColor: string;
+                        errorCorrection: "L" | "M" | "Q" | "H";
+                        lightColor: string;
+                        quietZone: number;
+                        transparent: boolean;
+                      };
+                      taggedUrl: string;
+                      /** Format: date-time */
+                      updatedAt: string;
+                      utm: {
+                        campaign: string;
+                        content: string | null;
+                        medium: string;
+                        source: string;
+                        term: string | null;
+                      };
+                    }[];
+                    total: number;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          projectId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            /** Format: uri */
+            destinationUrl: string;
+            label: string;
+            placement?:
+              | "screen"
+              | "print-handheld"
+              | "print-poster"
+              | "packaging"
+              | "outdoor";
+            printedWidthMm?: number;
+            style?: {
+              darkColor?: string;
+              errorCorrection?: "L" | "M" | "Q" | "H";
+              lightColor?: string;
+              quietZone?: number;
+              transparent?: boolean;
+            };
+            utm: {
+              campaign: string;
+              content: string | null;
+              medium: string;
+              source: string;
+              term: string | null;
+            };
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  /** Format: date-time */
+                  createdAt: string;
+                  /** Format: uri */
+                  destinationUrl: string;
+                  findings: {
+                    field: string | null;
+                    message: string;
+                    remedy: string | null;
+                    rule: string;
+                    severity: "blocking" | "warning" | "advice";
+                  }[];
+                  id: string;
+                  label: string;
+                  placement:
+                    | "screen"
+                    | "print-handheld"
+                    | "print-poster"
+                    | "packaging"
+                    | "outdoor";
+                  printedAt: string | null;
+                  printedWidthMm: number | null;
+                  projectId: string;
+                  style: {
+                    darkColor: string;
+                    errorCorrection: "L" | "M" | "Q" | "H";
+                    lightColor: string;
+                    quietZone: number;
+                    transparent: boolean;
+                  };
+                  taggedUrl: string;
+                  /** Format: date-time */
+                  updatedAt: string;
+                  utm: {
+                    campaign: string;
+                    content: string | null;
+                    medium: string;
+                    source: string;
+                    term: string | null;
+                  };
+                }
+              | {
+                  data: {
+                    /** Format: date-time */
+                    createdAt: string;
+                    /** Format: uri */
+                    destinationUrl: string;
+                    findings: {
+                      field: string | null;
+                      message: string;
+                      remedy: string | null;
+                      rule: string;
+                      severity: "blocking" | "warning" | "advice";
+                    }[];
+                    id: string;
+                    label: string;
+                    placement:
+                      | "screen"
+                      | "print-handheld"
+                      | "print-poster"
+                      | "packaging"
+                      | "outdoor";
+                    printedAt: string | null;
+                    printedWidthMm: number | null;
+                    projectId: string;
+                    style: {
+                      darkColor: string;
+                      errorCorrection: "L" | "M" | "Q" | "H";
+                      lightColor: string;
+                      quietZone: number;
+                      transparent: boolean;
+                    };
+                    taggedUrl: string;
+                    /** Format: date-time */
+                    updatedAt: string;
+                    utm: {
+                      campaign: string;
+                      content: string | null;
+                      medium: string;
+                      source: string;
+                      term: string | null;
+                    };
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The project was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description A link with this exact tagging exists. */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The tagging would lose data. The findings name what to change. */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              findings: {
+                field: string | null;
+                message: string;
+                remedy: string | null;
+                rule: string;
+                severity: "blocking" | "warning" | "advice";
+              }[];
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description QR generation is unavailable. */
+        503: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/projects/{projectId}/campaign-links/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          projectId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            destinationUrl: string;
+            placement?:
+              | "screen"
+              | "print-handheld"
+              | "print-poster"
+              | "packaging"
+              | "outdoor";
+            printedWidthMm?: number;
+            style?: {
+              darkColor?: string;
+              errorCorrection?: "L" | "M" | "Q" | "H";
+              lightColor?: string;
+              quietZone?: number;
+              transparent?: boolean;
+            };
+            utm: {
+              campaign: string;
+              content: string | null;
+              medium: string;
+              source: string;
+              term: string | null;
+            };
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  advice: {
+                    contrastRatio: number;
+                    errorCorrection: "L" | "M" | "Q" | "H";
+                    findings: {
+                      field: string | null;
+                      message: string;
+                      remedy: string | null;
+                      rule: string;
+                      severity: "blocking" | "warning" | "advice";
+                    }[];
+                    maxScanDistanceMm: number;
+                    moduleCount: number;
+                    moduleSizeMm: number;
+                    printedWidthMm: number;
+                    recommendedWidthMm: number;
+                    verdict: "comfortable" | "tight" | "unscannable";
+                    version: number;
+                  } | null;
+                  findings: {
+                    field: string | null;
+                    message: string;
+                    remedy: string | null;
+                    rule: string;
+                    severity: "blocking" | "warning" | "advice";
+                  }[];
+                  normalizedUtm: {
+                    campaign: string;
+                    content: string | null;
+                    medium: string;
+                    source: string;
+                    term: string | null;
+                  };
+                  svg: string | null;
+                  taggedUrl: string;
+                }
+              | {
+                  data: {
+                    advice: {
+                      contrastRatio: number;
+                      errorCorrection: "L" | "M" | "Q" | "H";
+                      findings: {
+                        field: string | null;
+                        message: string;
+                        remedy: string | null;
+                        rule: string;
+                        severity: "blocking" | "warning" | "advice";
+                      }[];
+                      maxScanDistanceMm: number;
+                      moduleCount: number;
+                      moduleSizeMm: number;
+                      printedWidthMm: number;
+                      recommendedWidthMm: number;
+                      verdict: "comfortable" | "tight" | "unscannable";
+                      version: number;
+                    } | null;
+                    findings: {
+                      field: string | null;
+                      message: string;
+                      remedy: string | null;
+                      rule: string;
+                      severity: "blocking" | "warning" | "advice";
+                    }[];
+                    normalizedUtm: {
+                      campaign: string;
+                      content: string | null;
+                      medium: string;
+                      source: string;
+                      term: string | null;
+                    };
+                    svg: string | null;
+                    taggedUrl: string;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description QR generation is unavailable. */
+        503: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/projects/{projectId}/campaign-links/redirect-config": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          projectId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            expiresAt?: string | null;
+            fallbackUrl?: string | null;
+            linkIds?: string[];
+            shortHost?: string | null;
+            target:
+              "cloudflare-worker" | "netlify" | "vercel" | "nginx" | "apache";
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  contents: string;
+                  enforcesExpiry: boolean;
+                  filename: string;
+                  findings: {
+                    field: string | null;
+                    message: string;
+                    remedy: string | null;
+                    rule: string;
+                    severity: "blocking" | "warning" | "advice";
+                  }[];
+                  notes: string[];
+                }
+              | {
+                  data: {
+                    contents: string;
+                    enforcesExpiry: boolean;
+                    filename: string;
+                    findings: {
+                      field: string | null;
+                      message: string;
+                      remedy: string | null;
+                      rule: string;
+                      severity: "blocking" | "warning" | "advice";
+                    }[];
+                    notes: string[];
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Redirect configuration is unavailable. */
+        503: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/projects/{projectId}/email-preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          projectId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            html: string;
+            preheader?: string;
+            subject: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  compiledHtml: string;
+                  plainText: string;
+                  preheader: string;
+                  report: {
+                    counts: {
+                      blocking: number;
+                      error: number;
+                      info: number;
+                      warning: number;
+                    };
+                    findings: {
+                      affects: string[];
+                      message: string;
+                      remedy: string | null;
+                      rule: string;
+                      severity: "blocking" | "error" | "warning" | "info";
+                      where: string | null;
+                    }[];
+                    gmailClips: boolean;
+                    ok: boolean;
+                    sizeBytes: number;
+                  };
+                  subject: string;
+                }
+              | {
+                  data: {
+                    compiledHtml: string;
+                    plainText: string;
+                    preheader: string;
+                    report: {
+                      counts: {
+                        blocking: number;
+                        error: number;
+                        info: number;
+                        warning: number;
+                      };
+                      findings: {
+                        affects: string[];
+                        message: string;
+                        remedy: string | null;
+                        rule: string;
+                        severity: "blocking" | "error" | "warning" | "info";
+                        where: string | null;
+                      }[];
+                      gmailClips: boolean;
+                      ok: boolean;
+                      sizeBytes: number;
+                    };
+                    subject: string;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The email compiler is unavailable. */
+        503: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/projects/{projectId}/email-starter": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          projectId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  html: string;
+                }
+              | {
+                  data: {
+                    html: string;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/projects/{projectId}/media": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          projectId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  /** Format: date-time */
+                  createdAt: string;
+                  filename: string;
+                  height: number | null;
+                  id: string;
+                  kind: "image" | "video";
+                  mediaType: string;
+                  projectId: string;
+                  publicUrl: string | null;
+                  publicUrlAt: string | null;
+                  publicUrlSource: string | null;
+                  sha256: string;
+                  sizeBytes: number;
+                  width: number | null;
+                }[]
+              | {
+                  data: {
+                    items: {
+                      /** Format: date-time */
+                      createdAt: string;
+                      filename: string;
+                      height: number | null;
+                      id: string;
+                      kind: "image" | "video";
+                      mediaType: string;
+                      projectId: string;
+                      publicUrl: string | null;
+                      publicUrlAt: string | null;
+                      publicUrlSource: string | null;
+                      sha256: string;
+                      sizeBytes: number;
+                      width: number | null;
+                    }[];
+                    total: number;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: {
+          "x-marketingovo-filename"?: string;
+        };
+        path: {
+          projectId: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  /** Format: date-time */
+                  createdAt: string;
+                  filename: string;
+                  height: number | null;
+                  id: string;
+                  kind: "image" | "video";
+                  mediaType: string;
+                  projectId: string;
+                  publicUrl: string | null;
+                  publicUrlAt: string | null;
+                  publicUrlSource: string | null;
+                  sha256: string;
+                  sizeBytes: number;
+                  width: number | null;
+                }
+              | {
+                  data: {
+                    /** Format: date-time */
+                    createdAt: string;
+                    filename: string;
+                    height: number | null;
+                    id: string;
+                    kind: "image" | "video";
+                    mediaType: string;
+                    projectId: string;
+                    publicUrl: string | null;
+                    publicUrlAt: string | null;
+                    publicUrlSource: string | null;
+                    sha256: string;
+                    sizeBytes: number;
+                    width: number | null;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The project was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The file exceeds the upload limit. */
+        413: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The file format is not supported. */
+        415: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/projects/{projectId}/publish-intents": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          projectId: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            budget?: {
+              currency?: string | null;
+              dailyBudget?: number | null;
+              lifetimeBudget?: number | null;
+            };
+            channelAccountId: string;
+            deliverableId: string;
+            payload: {
+              [key: string]: unknown;
+            };
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        201: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  approvedAt: string | null;
+                  approvedBy: string | null;
+                  approvedPayloadHash: string | null;
+                  budget: {
+                    currency: string | null;
+                    dailyBudget: number | null;
+                    lifetimeBudget: number | null;
+                  };
+                  channelAccountId: string;
+                  deliverableId: string;
+                  id: string;
+                  idempotencyKey: string | null;
+                  note: string | null;
+                  payload: {
+                    [key: string]: unknown;
+                  };
+                  payloadHash: string;
+                  projectId: string;
+                  scheduledAt: string | null;
+                  /** Format: date-time */
+                  stagedAt: string;
+                  stagedBy: string;
+                  state:
+                    | "staged"
+                    | "approved"
+                    | "publishing"
+                    | "published"
+                    | "failed"
+                    | "void"
+                    | "withdrawn";
+                  timezone: string | null;
+                }
+              | {
+                  data: {
+                    approvedAt: string | null;
+                    approvedBy: string | null;
+                    approvedPayloadHash: string | null;
+                    budget: {
+                      currency: string | null;
+                      dailyBudget: number | null;
+                      lifetimeBudget: number | null;
+                    };
+                    channelAccountId: string;
+                    deliverableId: string;
+                    id: string;
+                    idempotencyKey: string | null;
+                    note: string | null;
+                    payload: {
+                      [key: string]: unknown;
+                    };
+                    payloadHash: string;
+                    projectId: string;
+                    scheduledAt: string | null;
+                    /** Format: date-time */
+                    stagedAt: string;
+                    stagedBy: string;
+                    state:
+                      | "staged"
+                      | "approved"
+                      | "publishing"
+                      | "published"
+                      | "failed"
+                      | "void"
+                      | "withdrawn";
+                    timezone: string | null;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The deliverable or cabinet was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The budget exceeds the cabinet's locally set spend cap. */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/publish-intents": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query: {
+          projectId: string;
+          state?:
+            | "staged"
+            | "approved"
+            | "publishing"
+            | "published"
+            | "failed"
+            | "void"
+            | "withdrawn";
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  approvedAt: string | null;
+                  approvedBy: string | null;
+                  approvedPayloadHash: string | null;
+                  budget: {
+                    currency: string | null;
+                    dailyBudget: number | null;
+                    lifetimeBudget: number | null;
+                  };
+                  channelAccountId: string;
+                  deliverableId: string;
+                  id: string;
+                  idempotencyKey: string | null;
+                  note: string | null;
+                  payload: {
+                    [key: string]: unknown;
+                  };
+                  payloadHash: string;
+                  projectId: string;
+                  scheduledAt: string | null;
+                  /** Format: date-time */
+                  stagedAt: string;
+                  stagedBy: string;
+                  state:
+                    | "staged"
+                    | "approved"
+                    | "publishing"
+                    | "published"
+                    | "failed"
+                    | "void"
+                    | "withdrawn";
+                  timezone: string | null;
+                }[]
+              | {
+                  data: {
+                    items: {
+                      approvedAt: string | null;
+                      approvedBy: string | null;
+                      approvedPayloadHash: string | null;
+                      budget: {
+                        currency: string | null;
+                        dailyBudget: number | null;
+                        lifetimeBudget: number | null;
+                      };
+                      channelAccountId: string;
+                      deliverableId: string;
+                      id: string;
+                      idempotencyKey: string | null;
+                      note: string | null;
+                      payload: {
+                        [key: string]: unknown;
+                      };
+                      payloadHash: string;
+                      projectId: string;
+                      scheduledAt: string | null;
+                      /** Format: date-time */
+                      stagedAt: string;
+                      stagedBy: string;
+                      state:
+                        | "staged"
+                        | "approved"
+                        | "publishing"
+                        | "published"
+                        | "failed"
+                        | "void"
+                        | "withdrawn";
+                      timezone: string | null;
+                    }[];
+                    total: number;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/publish-intents/{id}/approve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            payloadHash: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  approvedAt: string | null;
+                  approvedBy: string | null;
+                  approvedPayloadHash: string | null;
+                  budget: {
+                    currency: string | null;
+                    dailyBudget: number | null;
+                    lifetimeBudget: number | null;
+                  };
+                  channelAccountId: string;
+                  deliverableId: string;
+                  id: string;
+                  idempotencyKey: string | null;
+                  note: string | null;
+                  payload: {
+                    [key: string]: unknown;
+                  };
+                  payloadHash: string;
+                  projectId: string;
+                  scheduledAt: string | null;
+                  /** Format: date-time */
+                  stagedAt: string;
+                  stagedBy: string;
+                  state:
+                    | "staged"
+                    | "approved"
+                    | "publishing"
+                    | "published"
+                    | "failed"
+                    | "void"
+                    | "withdrawn";
+                  timezone: string | null;
+                }
+              | {
+                  data: {
+                    approvedAt: string | null;
+                    approvedBy: string | null;
+                    approvedPayloadHash: string | null;
+                    budget: {
+                      currency: string | null;
+                      dailyBudget: number | null;
+                      lifetimeBudget: number | null;
+                    };
+                    channelAccountId: string;
+                    deliverableId: string;
+                    id: string;
+                    idempotencyKey: string | null;
+                    note: string | null;
+                    payload: {
+                      [key: string]: unknown;
+                    };
+                    payloadHash: string;
+                    projectId: string;
+                    scheduledAt: string | null;
+                    /** Format: date-time */
+                    stagedAt: string;
+                    stagedBy: string;
+                    state:
+                      | "staged"
+                      | "approved"
+                      | "publishing"
+                      | "published"
+                      | "failed"
+                      | "void"
+                      | "withdrawn";
+                    timezone: string | null;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The publish intent was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The intent is no longer staged, or its payload changed since it was rendered. */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The budget exceeds the cabinet's locally set spend cap. */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/publish-intents/{id}/publish-now": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  intent: {
+                    approvedAt: string | null;
+                    approvedBy: string | null;
+                    approvedPayloadHash: string | null;
+                    budget: {
+                      currency: string | null;
+                      dailyBudget: number | null;
+                      lifetimeBudget: number | null;
+                    };
+                    channelAccountId: string;
+                    deliverableId: string;
+                    id: string;
+                    idempotencyKey: string | null;
+                    note: string | null;
+                    payload: {
+                      [key: string]: unknown;
+                    };
+                    payloadHash: string;
+                    projectId: string;
+                    scheduledAt: string | null;
+                    /** Format: date-time */
+                    stagedAt: string;
+                    stagedBy: string;
+                    state:
+                      | "staged"
+                      | "approved"
+                      | "publishing"
+                      | "published"
+                      | "failed"
+                      | "void"
+                      | "withdrawn";
+                    timezone: string | null;
+                  };
+                  reason: string | null;
+                  record: {
+                    /** Format: date-time */
+                    attemptedAt: string;
+                    channelAccountId: string;
+                    completedAt: string | null;
+                    error: string | null;
+                    id: string;
+                    idempotencyKey: string;
+                    intentId: string;
+                    permalink: string | null;
+                    platform: "telegram" | "x" | "facebook-page" | "instagram";
+                    projectId: string;
+                    providerId: string | null;
+                    request: {
+                      [key: string]: unknown;
+                    };
+                    state:
+                      "attempting" | "published" | "failed" | "indeterminate";
+                  } | null;
+                  state: "published" | "failed" | "indeterminate" | "skipped";
+                }
+              | {
+                  data: {
+                    intent: {
+                      approvedAt: string | null;
+                      approvedBy: string | null;
+                      approvedPayloadHash: string | null;
+                      budget: {
+                        currency: string | null;
+                        dailyBudget: number | null;
+                        lifetimeBudget: number | null;
+                      };
+                      channelAccountId: string;
+                      deliverableId: string;
+                      id: string;
+                      idempotencyKey: string | null;
+                      note: string | null;
+                      payload: {
+                        [key: string]: unknown;
+                      };
+                      payloadHash: string;
+                      projectId: string;
+                      scheduledAt: string | null;
+                      /** Format: date-time */
+                      stagedAt: string;
+                      stagedBy: string;
+                      state:
+                        | "staged"
+                        | "approved"
+                        | "publishing"
+                        | "published"
+                        | "failed"
+                        | "void"
+                        | "withdrawn";
+                      timezone: string | null;
+                    };
+                    reason: string | null;
+                    record: {
+                      /** Format: date-time */
+                      attemptedAt: string;
+                      channelAccountId: string;
+                      completedAt: string | null;
+                      error: string | null;
+                      id: string;
+                      idempotencyKey: string;
+                      intentId: string;
+                      permalink: string | null;
+                      platform:
+                        "telegram" | "x" | "facebook-page" | "instagram";
+                      projectId: string;
+                      providerId: string | null;
+                      request: {
+                        [key: string]: unknown;
+                      };
+                      state:
+                        "attempting" | "published" | "failed" | "indeterminate";
+                    } | null;
+                    state: "published" | "failed" | "indeterminate" | "skipped";
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The publish intent was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/publish-intents/{id}/schedule": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            /** Format: date-time */
+            scheduledAt: string;
+            timezone: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  approvedAt: string | null;
+                  approvedBy: string | null;
+                  approvedPayloadHash: string | null;
+                  budget: {
+                    currency: string | null;
+                    dailyBudget: number | null;
+                    lifetimeBudget: number | null;
+                  };
+                  channelAccountId: string;
+                  deliverableId: string;
+                  id: string;
+                  idempotencyKey: string | null;
+                  note: string | null;
+                  payload: {
+                    [key: string]: unknown;
+                  };
+                  payloadHash: string;
+                  projectId: string;
+                  scheduledAt: string | null;
+                  /** Format: date-time */
+                  stagedAt: string;
+                  stagedBy: string;
+                  state:
+                    | "staged"
+                    | "approved"
+                    | "publishing"
+                    | "published"
+                    | "failed"
+                    | "void"
+                    | "withdrawn";
+                  timezone: string | null;
+                }
+              | {
+                  data: {
+                    approvedAt: string | null;
+                    approvedBy: string | null;
+                    approvedPayloadHash: string | null;
+                    budget: {
+                      currency: string | null;
+                      dailyBudget: number | null;
+                      lifetimeBudget: number | null;
+                    };
+                    channelAccountId: string;
+                    deliverableId: string;
+                    id: string;
+                    idempotencyKey: string | null;
+                    note: string | null;
+                    payload: {
+                      [key: string]: unknown;
+                    };
+                    payloadHash: string;
+                    projectId: string;
+                    scheduledAt: string | null;
+                    /** Format: date-time */
+                    stagedAt: string;
+                    stagedBy: string;
+                    state:
+                      | "staged"
+                      | "approved"
+                      | "publishing"
+                      | "published"
+                      | "failed"
+                      | "void"
+                      | "withdrawn";
+                    timezone: string | null;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The publish intent was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The post is already publishing or published. */
+        409: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The scheduled time is in the past. */
+        422: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/publish-intents/{id}/withdraw": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: {
+      parameters: {
+        query?: never;
+        header?: never;
+        path: {
+          id: string;
+        };
+        cookie?: never;
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            note: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  approvedAt: string | null;
+                  approvedBy: string | null;
+                  approvedPayloadHash: string | null;
+                  budget: {
+                    currency: string | null;
+                    dailyBudget: number | null;
+                    lifetimeBudget: number | null;
+                  };
+                  channelAccountId: string;
+                  deliverableId: string;
+                  id: string;
+                  idempotencyKey: string | null;
+                  note: string | null;
+                  payload: {
+                    [key: string]: unknown;
+                  };
+                  payloadHash: string;
+                  projectId: string;
+                  scheduledAt: string | null;
+                  /** Format: date-time */
+                  stagedAt: string;
+                  stagedBy: string;
+                  state:
+                    | "staged"
+                    | "approved"
+                    | "publishing"
+                    | "published"
+                    | "failed"
+                    | "void"
+                    | "withdrawn";
+                  timezone: string | null;
+                }
+              | {
+                  data: {
+                    approvedAt: string | null;
+                    approvedBy: string | null;
+                    approvedPayloadHash: string | null;
+                    budget: {
+                      currency: string | null;
+                      dailyBudget: number | null;
+                      lifetimeBudget: number | null;
+                    };
+                    channelAccountId: string;
+                    deliverableId: string;
+                    id: string;
+                    idempotencyKey: string | null;
+                    note: string | null;
+                    payload: {
+                      [key: string]: unknown;
+                    };
+                    payloadHash: string;
+                    projectId: string;
+                    scheduledAt: string | null;
+                    /** Format: date-time */
+                    stagedAt: string;
+                    stagedBy: string;
+                    state:
+                      | "staged"
+                      | "approved"
+                      | "publishing"
+                      | "published"
+                      | "failed"
+                      | "void"
+                      | "withdrawn";
+                    timezone: string | null;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The publish intent was not found. */
+        404: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request Host header is not accepted. */
+        421: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The local service could not complete the request. */
+        500: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+      };
+    };
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/publish-records": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: {
+      parameters: {
+        query: {
+          intentId?: string;
+          projectId: string;
+        };
+        header?: never;
+        path?: never;
+        cookie?: never;
+      };
+      requestBody?: never;
+      responses: {
+        /** @description Default Response */
+        200: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/json":
+              | {
+                  /** Format: date-time */
+                  attemptedAt: string;
+                  channelAccountId: string;
+                  completedAt: string | null;
+                  error: string | null;
+                  id: string;
+                  idempotencyKey: string;
+                  intentId: string;
+                  permalink: string | null;
+                  platform: "telegram" | "x" | "facebook-page" | "instagram";
+                  projectId: string;
+                  providerId: string | null;
+                  request: {
+                    [key: string]: unknown;
+                  };
+                  state:
+                    "attempting" | "published" | "failed" | "indeterminate";
+                }[]
+              | {
+                  data: {
+                    items: {
+                      /** Format: date-time */
+                      attemptedAt: string;
+                      channelAccountId: string;
+                      completedAt: string | null;
+                      error: string | null;
+                      id: string;
+                      idempotencyKey: string;
+                      intentId: string;
+                      permalink: string | null;
+                      platform:
+                        "telegram" | "x" | "facebook-page" | "instagram";
+                      projectId: string;
+                      providerId: string | null;
+                      request: {
+                        [key: string]: unknown;
+                      };
+                      state:
+                        "attempting" | "published" | "failed" | "indeterminate";
+                    }[];
+                    total: number;
+                  };
+                  meta: {
+                    /** Format: date-time */
+                    generatedAt: string;
+                    state:
+                      "fresh" | "stale" | "missing" | "unavailable" | "unknown";
+                    warnings: string[];
+                  };
+                };
+          };
+        };
+        /** @description The request is invalid. */
+        400: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description Authentication is required. */
+        401: {
+          headers: {
+            [name: string]: unknown;
+          };
+          content: {
+            "application/problem+json": {
+              code?: string;
+              detail?: string;
+              instance?: string;
+              status: number;
+              title: string;
+              /** Format: uri-reference */
+              type: string;
+            };
+          };
+        };
+        /** @description The request failed CSRF or authorization checks. */
+        403: {
           headers: {
             [name: string]: unknown;
           };
@@ -9354,7 +19341,9 @@ export type paths = {
                   | "compare"
                   | "keyword-research"
                   | "content-plan"
-                  | "osint-research";
+                  | "osint-research"
+                  | "ads-audit"
+                  | "marketing-report";
               }
             | {
                 mode?: "full" | "incremental";
@@ -11924,10 +21913,14 @@ export type paths = {
               id: string;
               /** Format: date-time */
               nextRunAt: string;
+              options?: {
+                [key: string]: unknown;
+              };
               projectId: string;
               timezone: string;
               /** Format: date-time */
               updatedAt: string;
+              workflowId?: string;
             }[];
           };
         };
@@ -12033,8 +22026,19 @@ export type paths = {
             enabled: boolean;
             /** Format: date-time */
             nextRunAt?: string;
+            options?: {
+              [key: string]: unknown;
+            };
             projectId: string;
             timezone: string;
+            workflowId?:
+              | "audit"
+              | "compare"
+              | "keyword-research"
+              | "content-plan"
+              | "osint-research"
+              | "ads-audit"
+              | "marketing-report";
           };
         };
       };
@@ -12053,10 +22057,14 @@ export type paths = {
               id: string;
               /** Format: date-time */
               nextRunAt: string;
+              options?: {
+                [key: string]: unknown;
+              };
               projectId: string;
               timezone: string;
               /** Format: date-time */
               updatedAt: string;
+              workflowId?: string;
             };
           };
         };
@@ -12322,7 +22330,18 @@ export type paths = {
             enabled?: boolean;
             /** Format: date-time */
             nextRunAt?: string;
+            options?: {
+              [key: string]: unknown;
+            };
             timezone?: string;
+            workflowId?:
+              | "audit"
+              | "compare"
+              | "keyword-research"
+              | "content-plan"
+              | "osint-research"
+              | "ads-audit"
+              | "marketing-report";
           };
         };
       };
@@ -12341,10 +22360,14 @@ export type paths = {
               id: string;
               /** Format: date-time */
               nextRunAt: string;
+              options?: {
+                [key: string]: unknown;
+              };
               projectId: string;
               timezone: string;
               /** Format: date-time */
               updatedAt: string;
+              workflowId?: string;
             };
           };
         };
@@ -12774,7 +22797,7 @@ export type paths = {
             dataRetentionDays?: number | null;
             reportingCurrency?: string | "" | null;
             siteName?: string;
-            siteUrl?: string;
+            siteUrl?: string | "" | null;
             timezone?: string | null;
             weeklyDigest?: boolean;
           };

@@ -1,0 +1,153 @@
+{
+  "schema_version": "1.0.0",
+  "lock_id": "marketingovo_terminal_ui_asset_style_lock_v1",
+  "status": "draft",
+  "version": "1.0.0",
+  "brand": {
+    "game": "Marketingovo terminal UI",
+    "tone": "friendly kawaii CRT terminal with disciplined neon pixel art",
+    "audience_boundary": "marketing operators and developers who need a readable intelligence console, not a game-world illustration",
+    "identity_statement": "A local-first marketing intelligence terminal expressed through crisp, low-resolution pixel sprites, live terminal typography, and restrained pink/cyan structure."
+  },
+  "references": [
+    {
+      "id": "packet",
+      "path": "docs/design/terminal-ui-asset-packet.md",
+      "role": "style_reference",
+      "scope": "authoritative palette, grids, roles, silhouettes, placement, and delivery constraints",
+      "approval_state": "approved"
+    },
+    {
+      "id": "runbook",
+      "path": "docs/design/codex-image-generation-packet.md",
+      "role": "style_reference",
+      "scope": "generation prompts, conform command, and verification workflow",
+      "approval_state": "approved"
+    },
+    {
+      "id": "reference-screen",
+      "path": "user-provided: codex-clipboard-1b13522e-fd65-43b5-ba13-0b760f552717.png",
+      "role": "style_reference",
+      "scope": "review-only mood, layout, and character placement; not a palette or geometry authority",
+      "approval_state": "review_only"
+    }
+  ],
+  "visual_invariants": {
+    "medium_materials": [
+      "native low-resolution pixel grid",
+      "flat solid colour blocks",
+      "one-design-pixel outlines",
+      "lossless PNG output"
+    ],
+    "shape_layout": [
+      "chunky readable silhouettes",
+      "square corners and shared framed-nav geometry",
+      "transparent gaps are intentional in mask glyphs",
+      "centred subjects with protected negative space"
+    ],
+    "hierarchy": [
+      "pink marks active or primary UI states",
+      "cyan marks secondary or idle UI states",
+      "simple facial features remain legible at native size",
+      "mutable UI text stays outside raster art"
+    ],
+    "palette_rules": [
+      "use the exact terminal packet palette",
+      "use pink/cyan/green/gold/red ramps only as specified",
+      "Twitter blue #3fa8f0 and Reddit orange #ff7a3c are platform-only exceptions",
+      "no off-palette transition colours"
+    ],
+    "lighting_depth": [
+      "flat graphic lighting",
+      "palette-step shading only",
+      "no gradients, blur, glow, bloom, bevel, or drop shadow"
+    ],
+    "texture_restraint": [
+      "no texture inside sprites",
+      "no noise or photographic detail",
+      "CRT atmosphere comes from live CSS, not baked raster effects"
+    ]
+  },
+  "prohibited": [
+    "anti-aliased or semi-transparent edge pixels",
+    "mixed-size grid cells or non-integer scaling",
+    "AI-rendered UI text or wordmarks",
+    "literal third-party social-logo geometry",
+    "unapproved characters, props, or trade dress",
+    "using the 3D installer icon as a terminal-art reference"
+  ],
+  "asset_families": {
+    "nav_mask": {
+      "purpose": "CSS-masked section-rail glyphs",
+      "text_strategy": "live_engine_text",
+      "output_contract": "16x16 native grid, 64x64 export, pure white silhouette, transparent binary alpha, scale 4",
+      "allowed_variation": [
+        "subject silhouette and transparent interior gaps only",
+        "framed glyphs reuse the shared 1px rounded-square frame"
+      ],
+      "prohibited": [
+        "colour or shading",
+        "baked labels or numbers",
+        "different frame geometry between framed glyphs"
+      ]
+    },
+    "full_colour_sprite": {
+      "purpose": "KPI, panel, feed, social, and decorative marks",
+      "text_strategy": "live_engine_text",
+      "output_contract": "packet native grid, 4x nearest-neighbour export, palette-snapped binary-alpha PNG",
+      "allowed_variation": [
+        "packet-approved palette ramp steps",
+        "bounded silhouette details needed for readability"
+      ],
+      "prohibited": [
+        "gradients, blur, glow, or soft shadow",
+        "unapproved hues except sanctioned platform colours",
+        "literal third-party logo geometry"
+      ]
+    },
+    "mascot": {
+      "purpose": "cat, monitor, and blob personality sprites",
+      "text_strategy": "live_engine_text",
+      "output_contract": "packet mascot grid, 4x export, transparent binary-alpha PNG, readable at runtime crop",
+      "allowed_variation": [
+        "palette-step shading within the locked ramps",
+        "small pose or expression refinement that preserves the named anchor"
+      ],
+      "prohibited": [
+        "missing raised paw, monitor smile, or blob scallops",
+        "speech bubbles, labels, or extra props",
+        "realistic or soft-rendered character treatment"
+      ]
+    },
+    "brand_favicon": {
+      "purpose": "pixel wordmark and browser/app identity assets",
+      "text_strategy": "live_engine_text for UI wordmark; licensed type rasterization for the pixel lockup",
+      "output_contract": "wordmark rasterized at integer scale; favicons derived from conformed cat-mark on opaque #12101f",
+      "allowed_variation": [
+        "two-tone marketing/ovo colouring",
+        "favicon size-specific nearest-neighbour framing"
+      ],
+      "prohibited": [
+        "AI-rendered lettering",
+        "derivation from the 3D installer icon",
+        "transparent favicon backgrounds"
+      ]
+    }
+  },
+  "production_rules": {
+    "text_strategy": "Keep labels and UI copy live in the DOM; do not bake text into generated sprites.",
+    "logo_strategy": "Use the cat mark as a conformed sprite and draw the wordmark with licensed Departure Mono at integer scale.",
+    "font_strategy": "Vend Departure Mono v1.500 by Helena Zhang under SIL OFL 1.1 with local and vendored WOFF2/WOFF fallbacks.",
+    "transparency": "Clean simple chroma-key source images with the imagegen helper, then require binary alpha after pixelize-asset; favicons are opaque #12101f.",
+    "provenance_record": "Record source path, reference roles, prompt/workflow, conform command, dimensions, hashes, review result, and promotion state in docs/design/asset-ledger.md."
+  },
+  "change_control": {
+    "owner": "Marketingovo product owner with Codex implementation review",
+    "update_trigger": "Any change to palette, grid, silhouette anchor, type/logo strategy, or asset-family contract",
+    "versioning": "Amend ASSET_ART_BIBLE.md and this lock together with a version bump and migration note before regenerating affected assets."
+  },
+  "open_decisions": [
+    "Owner approval is required before promoting the draft lock to approved or locked production authority.",
+    "Confirm whether a future font subset should retain the full box-drawing set or use only the packet's explicit symbol list."
+  ]
+}
