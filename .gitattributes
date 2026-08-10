@@ -1,0 +1,22 @@
+# Every text file is stored and checked out with LF, on every platform.
+#
+# This is not a style preference. Several gates read files line by line and
+# fail on CRLF: the skill-discipline validator cannot find frontmatter, the
+# dependency audit cannot find the lockfile's sections, and the generated
+# agent-surface check reports every generated file as stale. A contributor on
+# Windows with the common `core.autocrlf=true` therefore could not run
+# `pnpm check` at all, while CI on Linux passed — the worst shape for a bug,
+# because the person who hits it is the one least able to tell it is not their
+# fault.
+* text=auto eol=lf
+
+# Binary assets are never line-ending converted. `text=auto` already detects
+# most of these; naming them is cheaper than discovering a corrupted font or
+# sprite after it ships.
+*.png binary
+*.ico binary
+*.svg text eol=lf
+*.woff binary
+*.woff2 binary
+*.pdf binary
+*.parquet binary
