@@ -33,7 +33,7 @@ Three things are **not** shipped and must not be implied:
 - the Tauri updater channel,
 - npm registry publication.
 
-They are declared as deferred channels in [`release/acceptance/1.1.0.json`](../release/acceptance/1.1.0.json), not left to be inferred. Building from source is currently the only install route.
+They are declared as deferred channels in [`release/acceptance/1.2.0.json`](../release/acceptance/1.2.0.json), not left to be inferred. Building from source is currently the only install route.
 
 ## Launch loop
 

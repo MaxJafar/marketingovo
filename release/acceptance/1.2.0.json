@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 2,
+  "version": "1.2.0",
+  "evidence": {
+    "workspaceGate": {
+      "command": "pnpm check",
+      "result": "passed",
+      "observedAt": "2026-08-10T15:18:36.000Z",
+      "environment": "GitHub Actions ubuntu-24.04, Node 24.15.0, pnpm 10.34.5 (run 31402467593, head 8b63846)"
+    },
+    "correctnessCorpus": {
+      "command": "pnpm benchmark",
+      "result": "passed",
+      "observedAt": "2026-08-10T15:14:14.000Z",
+      "environment": "Windows 11 x64, Node 24.19.0, pnpm 10.34.5"
+    },
+    "dependencyAdvisories": {
+      "command": "pnpm audit:dependencies",
+      "result": "passed",
+      "observedAt": "2026-08-10T15:15:16.000Z",
+      "environment": "Windows 11 x64, Node 24.19.0, pnpm 10.34.5"
+    },
+    "licencePolicy": {
+      "command": "pnpm validate:licenses",
+      "result": "passed",
+      "observedAt": "2026-08-10T15:15:18.000Z",
+      "environment": "Windows 11 x64, Node 24.19.0, pnpm 10.34.5"
+    },
+    "agentSurfaces": {
+      "command": "pnpm validate:plugins",
+      "result": "passed",
+      "observedAt": "2026-08-10T15:15:20.000Z",
+      "environment": "Windows 11 x64, Node 24.19.0, pnpm 10.34.5"
+    },
+    "instructionGuardrails": {
+      "command": "pnpm validate:skills",
+      "result": "passed",
+      "observedAt": "2026-08-10T15:15:22.000Z",
+      "environment": "Windows 11 x64, Node 24.19.0, pnpm 10.34.5"
+    },
+    "packagedBrowserJourney": {
+      "command": "pnpm test:e2e",
+      "result": "passed",
+      "observedAt": "2026-08-10T15:14:52.000Z",
+      "environment": "Windows 11 x64, Node 24.19.0, pnpm 10.34.5, Chromium 1228"
+    }
+  },
+  "deferredChannels": [
+    {
+      "channel": "signed-desktop-installers",
+      "reason": "No Apple Developer ID or Windows signing certificate has been procured, so no notarized DMG, signed MSI, deb or AppImage exists. The native release policy still requires a verified upgrade from an older signed installer before any stable native artifact ships."
+    },
+    {
+      "channel": "updater-latest-json",
+      "reason": "The Tauri updater channel depends on signed native artifacts and is deferred with them."
+    },
+    {
+      "channel": "npm-registry-publication",
+      "reason": "Packages are version-locked and pack cleanly, but publication requires the maintainer's npm account and GitHub Actions OIDC on the canonical tag workflow."
+    }
+  ],
+  "notes": [
+    "INCOMPLETE RECORD. This file carries machine evidence only. `releaseOwner` and `licenceCompliance` are absent because both are human attestations that no automation may sign, so `node scripts/validate-public-release-approval.mjs --tag v1.2.0` fails closed until a person adds them. Their required shape is in release/acceptance/README.md; the 1.1.0 record is a filled example.",
+    "1.2.0 is additive over 1.1.0. The REST surface, OpenAPI document, SDK, nineteen-tool workflow registry, five-tool terminal session registry, CLI and .marketingovo bundle format are unchanged, so no existing integration breaks.",
+    "What it adds: the six-language console (English, Azerbaijani, German, Russian, Dutch, Spanish) with a picker in the command bar and in Settings; roughly 1,990 interface strings moved into a typed catalog under apps/dashboard/src/i18n where tsc refuses a locale missing a key and a unit test refuses one whose {placeholder} markers drifted; the hand-made pixel sprite set with its provenance ledger; and the vendored Departure Mono web font under the SIL Open Font License, recorded in NOTICE with the licence text beside the font.",
+    "The terminal-ui-pixel-assets channel that 1.1.0 declared deferred has shipped in this release and is therefore no longer listed. The console no longer falls back to inline SVG stand-ins or the platform monospace stack.",
+    "All seven gates were observed against tree 8b63846, which is this repository's main tip, rather than carried forward from the 1.1.0 record.",
+    "workspaceGate was observed on Linux CI rather than on the maintainer's host. `pnpm check` cannot complete on Windows: packages/credentials' native-broker test spawns a POSIX-shebang script directly and fails with EFTYPE, and five other suites assert chmod modes, symlinks, executability, or delete a temp directory SQLite still holds open. The same command passes on ubuntu-24.04 in the run named above. The other six gates were observed locally on Windows and also passed in that CI run.",
+    "A dependency advisory was fixed rather than waived while preparing this release: nanoid 3.3.16, reached transitively through vite and vitest, carried a HIGH advisory that failed pnpm audit:dependencies closed. The lockfile now resolves 3.3.18.",
+    "The repository had no .gitattributes, so a contributor whose git uses core.autocrlf=true received a CRLF working tree, and three gates that read files line by line failed on it: validate:skills could not find command frontmatter, audit:dependencies could not find the lockfile's packages and snapshots sections, and validate:plugins reported every generated agent surface as stale against byte-identical output. CI runs on Linux and never observed it. Text files are now checked out with LF on every platform.",
+    "Three version pins did not move with the bump at first and were caught by the gates rather than by review: the Codex bundle's .codex-plugin/plugin.json, which is hand-maintained rather than produced by pnpm plugins:generate; the CLI packable assertion in scripts/npm-release-policy.test.mjs, which wrote the version as the regex /marketingovo@1\\.1\\.0/u where escaped dots hide it from a search for the version, and which now reads the version from package.json; and the Tauri crate version in Cargo.toml, which would have shipped a 1.2.0 bundle whose launcher reported 1.1.0.",
+    "One CI job was not reproduced locally: `cargo check` for packages/credential-broker-native and apps/desktop/src-tauri. Rust is not installed on the maintainer's host, so that gate rests on the CI matrix rather than on a local observation, as it did for 1.1.0.",
+    "CodeQL reports open alerts on this tree. They are not introduced by the changes in this release — main carried 39 open alerts before it, and the alerts attributed to the merged pull request sit in files whose only change was a version string. They are unreviewed rather than accepted, and triaging them is outstanding work, not evidence recorded here."
+  ]
+}
