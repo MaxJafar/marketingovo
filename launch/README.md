@@ -1,6 +1,6 @@
 # Marketingovo launch kit
 
-This directory contains the English launch narrative for Marketingovo `1.1.0`. The assets are ready to adapt for GitHub, LinkedIn, X, a short product demo, engineering content, marketer case studies, and a six-week build-in-public cycle.
+This directory contains the English launch narrative for Marketingovo `1.2.0`. The assets are ready to adapt for GitHub, LinkedIn, X, a short product demo, engineering content, marketer case studies, and a six-week build-in-public cycle.
 
 ## Launch thesis
 
@@ -25,7 +25,7 @@ Use these claims consistently. Every one of them is checkable against the reposi
 
 ## Status language
 
-1.1.0 declares a stable public surface — the REST API and its OpenAPI document, the SDK, the agent contract registry, the CLI, and the `.marketingovo` bundle format. Breaking changes to those require a major version.
+1.2.0 declares a stable public surface — the REST API and its OpenAPI document, the SDK, the agent contract registry, the CLI, and the `.marketingovo` bundle format. Breaking changes to those require a major version.
 
 Three things are **not** shipped and must not be implied:
 
@@ -105,7 +105,7 @@ utm_content=<asset-and-variant>
 ## Pre-publish checklist
 
 - [ ] Every sentence is English.
-- [ ] The version stated is `1.1.0`.
+- [ ] The version stated is `1.2.0`.
 - [ ] The license is described as Apache-2.0 open source.
 - [ ] No sentence implies a paid tier, hosted edition, or commercial support.
 - [ ] No asset tells a reader to run `npx @marketingovo/cli` — it is not published.

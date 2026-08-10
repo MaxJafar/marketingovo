@@ -58,7 +58,7 @@ features:
 ---
 
 <div class="status-banner">
-  <strong>1.1.0</strong>
+  <strong>1.2.0</strong>
   <p>The REST API, OpenAPI document, SDK, agent contract registry, CLI and <code>.marketingovo</code> bundle format are stable. Signed desktop installers, the updater channel, and npm registry publication are not part of this release.</p>
 </div>
 

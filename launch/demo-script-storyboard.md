@@ -13,7 +13,7 @@ Target runtime: 82 seconds. Record at 1440p or higher, then export landscape and
 | 34–49s | Open the first action. Highlight evidence, affected URLs, impact, effort, confidence, and verification. | “The output is an action queue. Every useful action explains what matters, where the evidence came from, how much work it may take, and how to verify the fix.”                         | `Impact · Effort · Confidence · Evidence · Verification`                                                                              | Use an actual action shape from the fixture, not a composited card.             |
 | 49–61s | Open the priority explanation and reveal the documented weighted inputs.                                | “The current priority model is transparent. It ranks work with severity, exposure, reach, confidence, and effort. It is a heuristic — not a traffic forecast.”                          | `priority-v1 is documented and inspectable`                                                                                           | Keep the formula readable for at least two seconds.                             |
 | 61–71s | Change one demo action to done or show a before/after comparison, then start a verification run.        | “After the change, re-run the audit and record whether the action verifies. The workflow closes the loop instead of ending at export.”                                                  | `Fix → re-audit → verify`                                                                                                             | If using comparison data, show the two run dates or run IDs.                    |
-| 71–82s | End card with the source install commands and the GitHub link.                                          | “Marketingovo `1.1.0` is Apache-2.0 open source — one edition, no paid tier, no hosted service. Build it from source and run it on your own machine.”                                   | `Apache-2.0 open source`<br>`git clone github.com/MaxJafar/marketingovo`<br>`pnpm install && pnpm build`<br>`pnpm marketingovo serve` | Keep the version, licence, and “source install only” note on screen.            |
+| 71–82s | End card with the source install commands and the GitHub link.                                          | “Marketingovo `1.2.0` is Apache-2.0 open source — one edition, no paid tier, no hosted service. Build it from source and run it on your own machine.”                                   | `Apache-2.0 open source`<br>`git clone github.com/MaxJafar/marketingovo`<br>`pnpm install && pnpm build`<br>`pnpm marketingovo serve` | Keep the version, licence, and “source install only” note on screen.            |
 
 ## Clean voiceover transcript
 
@@ -31,7 +31,7 @@ The current priority model is transparent. It ranks work with severity, exposure
 
 After the change, re-run the audit and record whether the action verifies. The workflow closes the loop instead of ending at export.
 
-Marketingovo 1.1.0 is Apache-2.0 open source — one edition, no paid tier, no hosted service. Build it from source and run it on your own machine.
+Marketingovo 1.2.0 is Apache-2.0 open source — one edition, no paid tier, no hosted service. Build it from source and run it on your own machine.
 
 ## Recording checklist
 
