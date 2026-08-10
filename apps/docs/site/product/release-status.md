@@ -1,9 +1,18 @@
 ---
 title: Release status
-description: What 1.1.0 contains, which gates were observed passing, and which channels are deliberately deferred.
+description: What 1.2.0 contains, which gates were observed passing, and which channels are deliberately deferred.
 ---
 
 # Release status
+
+## 1.2.0
+
+The tree is versioned 1.2.0. It is additive on top of 1.1.0 — the REST API, OpenAPI document, SDK, agent contract registry, CLI and `.marketingovo` bundle format are unchanged — and it adds the six-language console, the multi-channel marketing surfaces, and the cross-channel report.
+
+<div class="status-banner">
+  <strong>Prepared, not yet approved</strong>
+  <p>The engineering gates pass, but a stable tag fails closed until <code>release/acceptance/1.2.0.json</code> records the machine evidence and both named human attestations. No automation may sign those. Until they exist, 1.1.0 below is the last approved release.</p>
+</div>
 
 ## 1.1.0
 
@@ -128,7 +137,8 @@ passing and recorded with the command that produced it:
 | Packaged real-browser journey with axe            | `pnpm test:e2e`           |
 
 Two further gates are human attestations rather than commands: a release-owner
-approval and a licence-compliance review. Both are pending for 1.1.0.
+approval and a licence-compliance review. Both are named and approved in the
+1.1.0 record; both are still owed for 1.2.0.
 
 Two requirements that earlier versions of this policy carried — an external
 legal review of the Elastic License, trademarks and a CLA, and three
