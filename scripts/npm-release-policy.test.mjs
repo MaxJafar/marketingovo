@@ -138,12 +138,23 @@ test("the legacy direct publisher also fails before registry access", () => {
   );
 });
 
-test("the CLI package is publicly packable", () => {
+test("the CLI package is publicly packable", async () => {
+  const cliDirectory = resolve(root, "packages/cli");
+  // Read the version rather than pinning it. What this test is for is that the
+  // tarball npm would publish is the CLI at the version the workspace declares;
+  // a literal here only restates the release number in a second place, and the
+  // release that forgot to update it learned that the hard way.
+  const { version } = JSON.parse(
+    await readFile(resolve(cliDirectory, "package.json"), "utf8"),
+  );
   const result = spawnSync("npm", ["publish", "--dry-run", "--tag", "next"], {
-    cwd: resolve(root, "packages/cli"),
+    cwd: cliDirectory,
     encoding: "utf8",
     shell: false,
   });
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
-  assert.match(`${result.stdout}${result.stderr}`, /marketingovo@1\.1\.0/u);
+  assert.match(
+    `${result.stdout}${result.stderr}`,
+    new RegExp(`marketingovo@${version.replace(/\./gu, "\\.")}`, "u"),
+  );
 });
