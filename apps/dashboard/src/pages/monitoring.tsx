@@ -7,6 +7,7 @@ import {
   useUpdateSchedule,
 } from "../api/queries";
 import { useSite } from "../context/site-context";
+import { fmt, useI18n, type Messages } from "../i18n";
 import {
   CapabilityGate,
   FreshnessNotice,
@@ -44,15 +45,18 @@ interface ScheduleEditor {
   enabled: boolean;
 }
 
-const WEEKDAYS = [
-  { value: "1", label: "Monday" },
-  { value: "2", label: "Tuesday" },
-  { value: "3", label: "Wednesday" },
-  { value: "4", label: "Thursday" },
-  { value: "5", label: "Friday" },
-  { value: "6", label: "Saturday" },
-  { value: "0", label: "Sunday" },
-] as const;
+const WEEKDAYS: ReadonlyArray<{
+  value: string;
+  key: keyof Messages["monitoring"]["weekdays"];
+}> = [
+  { value: "1", key: "monday" },
+  { value: "2", key: "tuesday" },
+  { value: "3", key: "wednesday" },
+  { value: "4", key: "thursday" },
+  { value: "5", key: "friday" },
+  { value: "6", key: "saturday" },
+  { value: "0", key: "sunday" },
+];
 
 function localTimezone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
@@ -128,26 +132,32 @@ function cronForEditor(editor: ScheduleEditor): string {
   return `${Number(minute)} ${Number(hour)} * * ${editor.frequency === "weekly" ? editor.weekday : "*"}`;
 }
 
-function cadenceLabel(schedule: MonitoringSchedule): string {
+function cadenceLabel(schedule: MonitoringSchedule, t: Messages): string {
   const cron = schedule.cron ?? schedule.cadence;
   const monthly = /^(\d{1,2})\s+(\d{1,2})\s+1\s+\*\s+\*$/u.exec(cron.trim());
   if (monthly) {
-    return `Monthly on the 1st at ${monthly[2]!.padStart(2, "0")}:${monthly[1]!.padStart(2, "0")}`;
+    return fmt(t.monitoring.cadenceMonthly, {
+      time: `${monthly[2]!.padStart(2, "0")}:${monthly[1]!.padStart(2, "0")}`,
+    });
   }
   const match = /^(\d{1,2})\s+(\d{1,2})\s+\*\s+\*\s+(\*|[0-7])$/u.exec(
     cron.trim(),
   );
   if (!match) return cron;
   const time = `${match[2]!.padStart(2, "0")}:${match[1]!.padStart(2, "0")}`;
-  if (match[3] === "*") return `Daily at ${time}`;
+  if (match[3] === "*") return fmt(t.monitoring.cadenceDaily, { time });
   const normalizedWeekday = match[3] === "7" ? "0" : match[3]!;
-  const weekday =
-    WEEKDAYS.find((item) => item.value === normalizedWeekday)?.label ??
-    `day ${match[3]}`;
-  return `Every ${weekday} at ${time}`;
+  const weekdayKey = WEEKDAYS.find(
+    (item) => item.value === normalizedWeekday,
+  )?.key;
+  const weekday = weekdayKey
+    ? t.monitoring.weekdays[weekdayKey]
+    : fmt(t.monitoring.cadenceDayFallback, { day: match[3]! });
+  return fmt(t.monitoring.cadenceWeekly, { weekday, time });
 }
 
 export function MonitoringPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const { capabilities } = useWorkspaceCapabilities(siteId);
   const query = useMonitoring(siteId);
@@ -185,12 +195,12 @@ export function MonitoringPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Always-on assurance"
-        title="Monitoring"
-        description="Schedule local audits and surface regressions before they become reporting surprises. Schedules run while the Marketingovo background service is active."
+        eyebrow={t.monitoring.eyebrow}
+        title={t.monitoring.title}
+        description={t.monitoring.description}
       />
       {mutationError ? (
-        <InlineNotice tone="danger" title="Schedule change failed">
+        <InlineNotice tone="danger" title={t.monitoring.mutationErrorTitle}>
           {mutationError.message}
         </InlineNotice>
       ) : null}
@@ -206,12 +216,12 @@ export function MonitoringPage() {
             <form onSubmit={submitSchedule}>
               <div className="schedule-editor-heading">
                 <div>
-                  <h2>{editor.id ? "Edit schedule" : "Create a schedule"}</h2>
-                  <p>
-                    Run a site audit or generate the cross-channel report on a
-                    marketer-friendly cadence, or use a standard five-field cron
-                    expression.
-                  </p>
+                  <h2>
+                    {editor.id
+                      ? t.monitoring.editor.editTitle
+                      : t.monitoring.editor.createTitle}
+                  </h2>
+                  <p>{t.monitoring.editor.intro}</p>
                 </div>
                 {editor.id ? (
                   <Button
@@ -219,13 +229,13 @@ export function MonitoringPage() {
                     variant="ghost"
                     onClick={() => setEditor(blankEditor())}
                   >
-                    Cancel edit
+                    {t.monitoring.editor.cancelEdit}
                   </Button>
                 ) : null}
               </div>
               <div className="schedule-form-grid">
                 <label>
-                  What to run
+                  {t.monitoring.editor.workflowLabel}
                   <select
                     name="workflow"
                     value={editor.workflow}
@@ -234,20 +244,24 @@ export function MonitoringPage() {
                       setEditor((current) => ({ ...current, workflow }));
                     }}
                   >
-                    <option value="audit">Site audit</option>
+                    <option value="audit">
+                      {t.monitoring.editor.workflowAudit}
+                    </option>
                     <option value="marketing-report">
-                      Cross-channel report
+                      {t.monitoring.editor.workflowReport}
                     </option>
                     {editor.workflow !== "audit" &&
                     editor.workflow !== "marketing-report" ? (
                       <option value={editor.workflow}>
-                        {editor.workflow} (as created)
+                        {fmt(t.monitoring.editor.workflowAsCreated, {
+                          workflow: editor.workflow,
+                        })}
                       </option>
                     ) : null}
                   </select>
                 </label>
                 <label>
-                  Frequency
+                  {t.monitoring.editor.frequencyLabel}
                   <select
                     name="frequency"
                     value={editor.frequency}
@@ -257,15 +271,23 @@ export function MonitoringPage() {
                       setEditor((current) => ({ ...current, frequency }));
                     }}
                   >
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly (1st)</option>
-                    <option value="custom">Custom cron</option>
+                    <option value="daily">
+                      {t.monitoring.editor.frequencyDaily}
+                    </option>
+                    <option value="weekly">
+                      {t.monitoring.editor.frequencyWeekly}
+                    </option>
+                    <option value="monthly">
+                      {t.monitoring.editor.frequencyMonthly}
+                    </option>
+                    <option value="custom">
+                      {t.monitoring.editor.frequencyCustom}
+                    </option>
                   </select>
                 </label>
                 {editor.frequency === "custom" ? (
                   <label>
-                    Cron expression
+                    {t.monitoring.editor.cronLabel}
                     <input
                       name="cron"
                       value={editor.cron}
@@ -279,7 +301,7 @@ export function MonitoringPage() {
                   </label>
                 ) : (
                   <label>
-                    Local time
+                    {t.monitoring.editor.timeLabel}
                     <input
                       name="time"
                       type="time"
@@ -294,7 +316,7 @@ export function MonitoringPage() {
                 )}
                 {editor.frequency === "weekly" ? (
                   <label>
-                    Day
+                    {t.monitoring.editor.dayLabel}
                     <select
                       name="weekday"
                       value={editor.weekday}
@@ -305,14 +327,14 @@ export function MonitoringPage() {
                     >
                       {WEEKDAYS.map((weekday) => (
                         <option key={weekday.value} value={weekday.value}>
-                          {weekday.label}
+                          {t.monitoring.weekdays[weekday.key]}
                         </option>
                       ))}
                     </select>
                   </label>
                 ) : null}
                 <label>
-                  Timezone
+                  {t.monitoring.editor.timezoneLabel}
                   <input
                     name="timezone"
                     value={editor.timezone}
@@ -326,19 +348,20 @@ export function MonitoringPage() {
                 </label>
               </div>
               {editor.workflow === "marketing-report" ? (
-                <InlineNotice tone="info" title="Reports quote audits">
-                  A report only cites an audit that ran inside its own period.
-                  Pair a report schedule with an audit schedule, or its organic
-                  section will say it was not measured.
+                <InlineNotice
+                  tone="info"
+                  title={t.monitoring.editor.reportNoticeTitle}
+                >
+                  {t.monitoring.editor.reportNoticeBody}
                 </InlineNotice>
               ) : null}
               <div className="form-actions">
                 <Button type="submit" disabled={editorPending || !siteId}>
                   {editorPending
-                    ? "Saving…"
+                    ? t.monitoring.editor.saving
                     : editor.id
-                      ? "Save schedule"
-                      : "Create schedule"}
+                      ? t.monitoring.editor.save
+                      : t.monitoring.editor.create}
                 </Button>
               </div>
             </form>
@@ -346,8 +369,8 @@ export function MonitoringPage() {
           <div className="two-column-grid monitoring-grid">
             <section>
               <SectionHeading
-                title="Schedules"
-                description="Durable audit schedules for this project."
+                title={t.monitoring.schedules.title}
+                description={t.monitoring.schedules.description}
               />
               {schedules.length > 0 ? (
                 <div className="stack-list">
@@ -363,7 +386,12 @@ export function MonitoringPage() {
                           <button
                             type="button"
                             className={`schedule-toggle ${schedule.enabled ? "toggle-on" : ""}`}
-                            aria-label={`${schedule.enabled ? "Pause" : "Enable"} ${schedule.name} schedule`}
+                            aria-label={fmt(
+                              schedule.enabled
+                                ? t.monitoring.schedules.pauseAria
+                                : t.monitoring.schedules.enableAria,
+                              { name: schedule.name },
+                            )}
                             aria-pressed={schedule.enabled}
                             disabled={rowPending}
                             onClick={() =>
@@ -376,15 +404,18 @@ export function MonitoringPage() {
                           <div>
                             <h3>{schedule.name}</h3>
                             <p>
-                              {cadenceLabel(schedule)} ·{" "}
-                              {schedule.timezone ?? "Timezone unavailable"}
+                              {cadenceLabel(schedule, t)} ·{" "}
+                              {schedule.timezone ??
+                                t.monitoring.schedules.timezoneUnavailable}
                             </p>
                           </div>
                         </div>
                         <div className="schedule-details">
                           <StatusBadge status={schedule.status ?? "unknown"} />
                           <small>
-                            Next: {formatDate(schedule.nextRunAt, true)}
+                            {fmt(t.monitoring.schedules.nextRun, {
+                              date: formatDate(schedule.nextRunAt, true),
+                            })}
                           </small>
                           <div className="schedule-actions">
                             <Button
@@ -395,7 +426,7 @@ export function MonitoringPage() {
                                 setEditor(editorForSchedule(schedule))
                               }
                             >
-                              Edit
+                              {t.monitoring.schedules.edit}
                             </Button>
                             <Button
                               type="button"
@@ -404,13 +435,15 @@ export function MonitoringPage() {
                               onClick={() => {
                                 if (
                                   window.confirm(
-                                    `Delete the ${schedule.name} schedule?`,
+                                    fmt(t.monitoring.schedules.deleteConfirm, {
+                                      name: schedule.name,
+                                    }),
                                   )
                                 )
                                   deleteSchedule.mutate(schedule.id);
                               }}
                             >
-                              Delete
+                              {t.monitoring.schedules.delete}
                             </Button>
                           </div>
                         </div>
@@ -420,15 +453,15 @@ export function MonitoringPage() {
                 </div>
               ) : (
                 <EmptyState
-                  title="No schedules"
-                  description="Create a schedule above to run repeat audits while the background service is active."
+                  title={t.monitoring.schedules.emptyTitle}
+                  description={t.monitoring.schedules.emptyDescription}
                 />
               )}
             </section>
             <section>
               <SectionHeading
-                title="Recent alerts"
-                description="Open and acknowledged changes that need review."
+                title={t.monitoring.alerts.title}
+                description={t.monitoring.alerts.description}
               />
               {alerts.length > 0 ? (
                 <div className="stack-list">
@@ -439,20 +472,21 @@ export function MonitoringPage() {
                         <time>{formatDate(alert.createdAt, true)}</time>
                       </div>
                       <h3>{alert.title}</h3>
-                      <p>
-                        {alert.detail ?? "No additional detail was returned."}
-                      </p>
+                      <p>{alert.detail ?? t.monitoring.alerts.noDetail}</p>
                       <small>
-                        Status:{" "}
-                        {alert.status?.replaceAll("_", " ") ?? "Unavailable"}
+                        {fmt(t.monitoring.alerts.status, {
+                          status:
+                            alert.status?.replaceAll("_", " ") ??
+                            t.common.unavailable,
+                        })}
                       </small>
                     </Card>
                   ))}
                 </div>
               ) : (
                 <EmptyState
-                  title="No monitoring alerts"
-                  description="A valid empty alert stream means no alerts were returned—not that every source is healthy."
+                  title={t.monitoring.alerts.emptyTitle}
+                  description={t.monitoring.alerts.emptyDescription}
                 />
               )}
             </section>

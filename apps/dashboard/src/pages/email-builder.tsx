@@ -15,6 +15,7 @@ import type {
   EmailFinding,
   EmailValidationReport,
 } from "../api/contracts";
+import { fmt, useI18n } from "../i18n";
 
 /**
  * The email builder.
@@ -80,6 +81,7 @@ const EMPTY_PROFILE: BrandKitProfile = {
 };
 
 function ReportPanel({ report }: { report: EmailValidationReport }) {
+  const { t } = useI18n();
   const order: EmailFinding["severity"][] = [
     "blocking",
     "error",
@@ -96,20 +98,31 @@ function ReportPanel({ report }: { report: EmailValidationReport }) {
       <p className="pixel-hero-sub">
         {report.ok ? (
           <>
-            Nothing blocking or broken. {Math.round(report.sizeBytes / 1024)}KB
-            compiled
+            {fmt(t.emailBuilder.report.okSummary, {
+              size: Math.round(report.sizeBytes / 1024),
+            })}
             {report.counts.warning > 0
-              ? `, with ${report.counts.warning} warning${report.counts.warning === 1 ? "" : "s"} worth reading.`
-              : "."}
+              ? fmt(
+                  report.counts.warning === 1
+                    ? t.emailBuilder.report.okWarningSingular
+                    : t.emailBuilder.report.okWarningPlural,
+                  { count: report.counts.warning },
+                )
+              : t.emailBuilder.report.okNoWarnings}
           </>
         ) : (
           <>
             {report.counts.blocking > 0
-              ? `${report.counts.blocking} thing(s) were removed from what you submitted, so the document you have is not the one you wrote. `
+              ? fmt(t.emailBuilder.report.blockingRemoved, {
+                  count: report.counts.blocking,
+                })
               : ""}
-            {report.counts.error} error
-            {report.counts.error === 1 ? "" : "s"} will visibly break in at
-            least one client.
+            {fmt(
+              report.counts.error === 1
+                ? t.emailBuilder.report.errorSingular
+                : t.emailBuilder.report.errorPlural,
+              { count: report.counts.error },
+            )}
           </>
         )}
       </p>
@@ -141,6 +154,7 @@ function ReportPanel({ report }: { report: EmailValidationReport }) {
 }
 
 function BrandKitEditor({ siteId }: { siteId: string }) {
+  const { t } = useI18n();
   const brandKit = useBrandKit(siteId);
   const revise = useReviseBrandKit(siteId);
   const [draft, setDraft] = useState<BrandKitProfile | null>(null);
@@ -155,28 +169,28 @@ function BrandKitEditor({ siteId }: { siteId: string }) {
   return (
     <section className="pixel-panel">
       <div className="pixel-panel-head">
-        <h2>Brand kit</h2>
+        <h2>{t.emailBuilder.brandKit.title}</h2>
         <span className="pixel-panel-mark">
           {brandKit.data?.data.current
-            ? `revision ${brandKit.data.data.current.revision}`
-            : "not set up"}
+            ? fmt(t.emailBuilder.brandKit.revisionMark, {
+                revision: brandKit.data.data.current.revision,
+              })
+            : t.emailBuilder.brandKit.notSetUp}
         </span>
       </div>
       <div className="pixel-panel-body">
-        <p className="pixel-hero-sub">
-          What an agent writes emails against, and what the compiler checks the
-          result for. The postal address and the unsubscribe tag are not
-          styling: commercial email is legally required to carry both.
-        </p>
+        <p className="pixel-hero-sub">{t.emailBuilder.brandKit.intro}</p>
 
         <div className="pixel-subsection">
-          <h4>Colours</h4>
+          <h4>{t.emailBuilder.brandKit.colours}</h4>
           {profile.colors.map((color, index) => (
             <div key={index} className="pixel-row-actions">
               <input
                 className="pixel-input"
                 value={color.name}
-                aria-label={`Colour ${index + 1} name`}
+                aria-label={fmt(t.emailBuilder.brandKit.colourNameLabel, {
+                  number: index + 1,
+                })}
                 onChange={(event) =>
                   update({
                     colors: profile.colors.map((entry, position) =>
@@ -191,7 +205,9 @@ function BrandKitEditor({ siteId }: { siteId: string }) {
                 className="pixel-input"
                 type="color"
                 value={color.value}
-                aria-label={`Colour ${index + 1} value`}
+                aria-label={fmt(t.emailBuilder.brandKit.colourValueLabel, {
+                  number: index + 1,
+                })}
                 onChange={(event) =>
                   update({
                     colors: profile.colors.map((entry, position) =>
@@ -203,21 +219,24 @@ function BrandKitEditor({ siteId }: { siteId: string }) {
                 }
               />
               <span className="pixel-hero-sub">
-                {color.value} · {color.usage ?? "no stated use"}
+                {color.value} ·{" "}
+                {color.usage ?? t.emailBuilder.brandKit.noStatedUse}
               </span>
             </div>
           ))}
         </div>
 
         <div className="pixel-subsection">
-          <h4>Type</h4>
+          <h4>{t.emailBuilder.brandKit.type}</h4>
           {profile.typefaces.map((face, index) => (
             <div key={index} className="pixel-row-actions">
               <span className="pixel-hero-sub">{face.role}</span>
               <input
                 className="pixel-input"
                 value={face.stack}
-                aria-label={`${face.role} font stack`}
+                aria-label={fmt(t.emailBuilder.brandKit.fontStackLabel, {
+                  role: face.role,
+                })}
                 onChange={(event) =>
                   update({
                     typefaces: profile.typefaces.map((entry, position) =>
@@ -231,20 +250,18 @@ function BrandKitEditor({ siteId }: { siteId: string }) {
             </div>
           ))}
           <p className="pixel-hero-sub">
-            End every stack with a generic family. Outlook and Gmail's mobile
-            apps ignore web fonts, and with nothing to fall back to they pick
-            their own default.
+            {t.emailBuilder.brandKit.fontStackHelp}
           </p>
         </div>
 
         <div className="pixel-subsection">
-          <h4>Legal footer</h4>
+          <h4>{t.emailBuilder.brandKit.legalFooter}</h4>
           <div className="pixel-row-actions">
             <input
               className="pixel-input"
-              placeholder="Company name"
+              placeholder={t.emailBuilder.brandKit.companyName}
               value={profile.footer.companyName}
-              aria-label="Company name"
+              aria-label={t.emailBuilder.brandKit.companyName}
               onChange={(event) =>
                 update({
                   footer: {
@@ -256,9 +273,9 @@ function BrandKitEditor({ siteId }: { siteId: string }) {
             />
             <input
               className="pixel-input"
-              placeholder="Postal address"
+              placeholder={t.emailBuilder.brandKit.postalAddress}
               value={profile.footer.postalAddress}
-              aria-label="Postal address"
+              aria-label={t.emailBuilder.brandKit.postalAddress}
               onChange={(event) =>
                 update({
                   footer: {
@@ -272,7 +289,7 @@ function BrandKitEditor({ siteId }: { siteId: string }) {
               className="pixel-input"
               placeholder="{{unsubscribe_url}}"
               value={profile.footer.unsubscribePlaceholder}
-              aria-label="Unsubscribe merge tag"
+              aria-label={t.emailBuilder.brandKit.unsubscribeLabel}
               onChange={(event) =>
                 update({
                   footer: {
@@ -284,24 +301,23 @@ function BrandKitEditor({ siteId }: { siteId: string }) {
             />
           </div>
           <p className="pixel-hero-sub">
-            The unsubscribe tag is whatever your email service substitutes —
-            Mailchimp uses <code>*|UNSUB|*</code>, most others use a{" "}
+            {t.emailBuilder.brandKit.unsubHelpBefore} <code>*|UNSUB|*</code>
+            {t.emailBuilder.brandKit.unsubHelpMiddle}{" "}
             <code>
               {"{{"}handlebars{"}}"}
             </code>{" "}
-            form. Stored verbatim, because guessing it produces a dead link in a
-            legally required place.
+            {t.emailBuilder.brandKit.unsubHelpAfter}
           </p>
         </div>
 
         <div className="pixel-subsection">
-          <h4>Voice</h4>
+          <h4>{t.emailBuilder.brandKit.voice}</h4>
           <textarea
             className="pixel-input"
             rows={3}
-            placeholder="How the brand sounds. Read by the agent writing the copy."
+            placeholder={t.emailBuilder.brandKit.voicePlaceholder}
             value={profile.voice ?? ""}
-            aria-label="Brand voice"
+            aria-label={t.emailBuilder.brandKit.voiceLabel}
             onChange={(event) => update({ voice: event.target.value || null })}
           />
         </div>
@@ -309,9 +325,9 @@ function BrandKitEditor({ siteId }: { siteId: string }) {
         <div className="pixel-row-actions">
           <input
             className="pixel-input"
-            placeholder="What changed, and why"
+            placeholder={t.emailBuilder.brandKit.changeSummaryPlaceholder}
             value={summary}
-            aria-label="Change summary"
+            aria-label={t.emailBuilder.brandKit.changeSummaryLabel}
             onChange={(event) => setSummary(event.target.value)}
           />
           <button
@@ -330,19 +346,17 @@ function BrandKitEditor({ siteId }: { siteId: string }) {
               )
             }
           >
-            Save a revision
+            {t.emailBuilder.brandKit.saveRevision}
           </button>
         </div>
-        <p className="pixel-hero-sub">
-          Every save appends a revision. An email built last quarter can still
-          say which brand it was built against.
-        </p>
+        <p className="pixel-hero-sub">{t.emailBuilder.brandKit.revisionNote}</p>
       </div>
     </section>
   );
 }
 
 export function EmailBuilderPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const templates = useEmailTemplates(siteId);
   const createTemplate = useCreateEmailTemplate(siteId);
@@ -384,13 +398,13 @@ export function EmailBuilderPage() {
 
       <section className="pixel-panel">
         <div className="pixel-panel-head">
-          <h2>Templates</h2>
+          <h2>{t.emailBuilder.templates.title}</h2>
           <div className="pixel-row-actions">
             <input
               className="pixel-input"
-              placeholder="New template name"
+              placeholder={t.emailBuilder.templates.newNameLabel}
               value={newName}
-              aria-label="New template name"
+              aria-label={t.emailBuilder.templates.newNameLabel}
               onChange={(event) => setNewName(event.target.value)}
             />
             <button
@@ -409,16 +423,13 @@ export function EmailBuilderPage() {
                 )
               }
             >
-              Create
+              {t.emailBuilder.templates.create}
             </button>
           </div>
         </div>
         <div className="pixel-panel-body">
           {items.length === 0 ? (
-            <p className="pixel-hero-sub">
-              No templates yet. Create one, then write the HTML here or ask an
-              attached agent to draft it against your brand kit.
-            </p>
+            <p className="pixel-hero-sub">{t.emailBuilder.templates.empty}</p>
           ) : (
             <ul className="pixel-list">
               {items.map((template) => (
@@ -434,8 +445,11 @@ export function EmailBuilderPage() {
                   </label>
                   <p className="pixel-hero-sub">
                     {template.latestRevision === 0
-                      ? "no revisions yet"
-                      : `revision ${template.latestRevision} · updated ${new Date(template.updatedAt).toLocaleString()}`}
+                      ? t.emailBuilder.templates.noRevisions
+                      : fmt(t.emailBuilder.templates.revisionMeta, {
+                          revision: template.latestRevision,
+                          time: new Date(template.updatedAt).toLocaleString(),
+                        })}
                   </p>
                 </li>
               ))}
@@ -447,7 +461,7 @@ export function EmailBuilderPage() {
       {selectedId ? (
         <section className="pixel-panel">
           <div className="pixel-panel-head">
-            <h2>Compose</h2>
+            <h2>{t.emailBuilder.compose.title}</h2>
             <div className="pixel-row-actions">
               <button
                 type="button"
@@ -458,9 +472,9 @@ export function EmailBuilderPage() {
                     onSuccess: (result) => setHtml(result.data.html),
                   })
                 }
-                title="A table-based document already built from your brand kit that passes every check."
+                title={t.emailBuilder.compose.starterTitle}
               >
-                Start from the brand kit
+                {t.emailBuilder.compose.starter}
               </button>
               <button
                 type="button"
@@ -468,7 +482,9 @@ export function EmailBuilderPage() {
                 disabled={!subject.trim() || !html.trim() || preview.isPending}
                 onClick={() => preview.mutate({ subject, preheader, html })}
               >
-                {preview.isPending ? "Checking…" : "Check"}
+                {preview.isPending
+                  ? t.emailBuilder.compose.checking
+                  : t.emailBuilder.compose.check}
               </button>
               <button
                 type="button"
@@ -476,7 +492,7 @@ export function EmailBuilderPage() {
                 disabled={!canSave || save.isPending}
                 onClick={() => save.mutate({ subject, preheader, html })}
               >
-                Save revision
+                {t.emailBuilder.compose.saveRevision}
               </button>
             </div>
           </div>
@@ -484,16 +500,16 @@ export function EmailBuilderPage() {
             <div className="pixel-row-actions">
               <input
                 className="pixel-input"
-                placeholder="Subject"
+                placeholder={t.emailBuilder.compose.subject}
                 value={subject}
-                aria-label="Subject"
+                aria-label={t.emailBuilder.compose.subject}
                 onChange={(event) => setSubject(event.target.value)}
               />
               <input
                 className="pixel-input"
-                placeholder="Preheader — the line the inbox shows after the subject"
+                placeholder={t.emailBuilder.compose.preheaderPlaceholder}
                 value={preheader}
-                aria-label="Preheader"
+                aria-label={t.emailBuilder.compose.preheaderLabel}
                 onChange={(event) => setPreheader(event.target.value)}
               />
             </div>
@@ -501,16 +517,16 @@ export function EmailBuilderPage() {
               className="pixel-input pixel-code-editor"
               rows={18}
               spellCheck={false}
-              placeholder="Email HTML"
+              placeholder={t.emailBuilder.compose.emailHtml}
               value={html}
-              aria-label="Email HTML"
+              aria-label={t.emailBuilder.compose.emailHtml}
               onChange={(event) => setHtml(event.target.value)}
             />
             {preview.isError ? (
               <p className="pixel-hero-sub" role="alert">
                 {preview.error instanceof Error
                   ? preview.error.message
-                  : "The email could not be compiled."}
+                  : t.emailBuilder.compose.compileFailed}
               </p>
             ) : null}
           </div>
@@ -520,7 +536,7 @@ export function EmailBuilderPage() {
       {report ? (
         <section className="pixel-panel">
           <div className="pixel-panel-head">
-            <h2>What clients will do with it</h2>
+            <h2>{t.emailBuilder.report.title}</h2>
           </div>
           <div className="pixel-panel-body">
             <ReportPanel report={report} />
@@ -531,21 +547,21 @@ export function EmailBuilderPage() {
       {rendered ? (
         <section className="pixel-panel">
           <div className="pixel-panel-head">
-            <h2>Preview</h2>
+            <h2>{t.emailBuilder.preview.title}</h2>
             <div className="pixel-row-actions">
               <button
                 type="button"
                 className={`pixel-button${width === "desktop" ? " pixel-button-primary" : ""}`}
                 onClick={() => setWidth("desktop")}
               >
-                Desktop
+                {t.emailBuilder.preview.desktop}
               </button>
               <button
                 type="button"
                 className={`pixel-button${width === "mobile" ? " pixel-button-primary" : ""}`}
                 onClick={() => setWidth("mobile")}
               >
-                Mobile
+                {t.emailBuilder.preview.mobile}
               </button>
             </div>
           </div>
@@ -554,7 +570,7 @@ export function EmailBuilderPage() {
                 compiler already stripped what it could; a preview that ran
                 what it displays would undo that. */}
             <iframe
-              title="Email preview"
+              title={t.emailBuilder.preview.frameTitle}
               sandbox=""
               srcDoc={rendered}
               className="pixel-email-preview"
@@ -562,22 +578,20 @@ export function EmailBuilderPage() {
             />
             <details>
               <summary className="pixel-hero-sub">
-                Compiled HTML — this is what you export
+                {t.emailBuilder.preview.compiledSummary}
               </summary>
               <pre className="pixel-code">{rendered}</pre>
             </details>
             <details>
               <summary className="pixel-hero-sub">
-                Plain-text alternative
+                {t.emailBuilder.preview.plainTextSummary}
               </summary>
               <pre className="pixel-code">
                 {preview.data?.data.plainText ?? current?.plainText ?? ""}
               </pre>
             </details>
             <p className="pixel-hero-sub">
-              Marketingovo does not send email. Copy the compiled HTML into your
-              own email service, which already owns your list, your consent
-              records and your unsubscribe handling.
+              {t.emailBuilder.preview.exportNote}
             </p>
           </div>
         </section>

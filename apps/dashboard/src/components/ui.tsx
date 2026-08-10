@@ -4,6 +4,7 @@ import type {
   MetricValue,
   ServiceStatus,
 } from "../api/contracts";
+import { currentIntlLocale, fmt, getMessages, useI18n } from "../i18n";
 import { Icon } from "./icon";
 
 export function PageHeader({
@@ -67,8 +68,8 @@ export function formatNumber(
   options?: Intl.NumberFormatOptions,
 ) {
   if (value === null || value === undefined || Number.isNaN(value))
-    return "Unavailable";
-  return new Intl.NumberFormat("en-US", {
+    return getMessages().common.unavailable;
+  return new Intl.NumberFormat(currentIntlLocale(), {
     maximumFractionDigits: 1,
     ...options,
   }).format(value);
@@ -76,13 +77,13 @@ export function formatNumber(
 
 export function formatMetric(metric: MetricValue | undefined): string {
   if (!metric || metric.value === null || metric.value === undefined)
-    return "Unavailable";
+    return getMessages().common.unavailable;
   const value = metric.value;
   if (metric.unit === "percent") return `${formatNumber(value)}%`;
   if (metric.unit === "milliseconds") return `${formatNumber(value)} ms`;
   if (metric.unit === "seconds") return `${formatNumber(value)} s`;
   if (metric.unit === "currency") {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat(currentIntlLocale(), {
       style: "currency",
       currency: metric.currency ?? "USD",
       maximumFractionDigits: 0,
@@ -97,10 +98,11 @@ export function formatDate(
   value: string | null | undefined,
   withTime = false,
 ): string {
-  if (!value) return "Unavailable";
+  const unavailable = getMessages().common.unavailable;
+  if (!value) return unavailable;
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Unavailable";
-  return new Intl.DateTimeFormat("en-US", {
+  if (Number.isNaN(date.getTime())) return unavailable;
+  return new Intl.DateTimeFormat(currentIntlLocale(), {
     dateStyle: "medium",
     ...(withTime ? { timeStyle: "short" as const } : {}),
   }).format(date);
@@ -139,6 +141,7 @@ export function MetricCard({
   tone?: "default" | "positive" | "warning";
   help?: string;
 }) {
+  const { t } = useI18n();
   const unavailable = metric?.value === null || metric?.value === undefined;
   const change = metric?.change;
   return (
@@ -155,11 +158,12 @@ export function MetricCard({
       <div className="metric-support">
         {change !== null && change !== undefined ? (
           <span className={change >= 0 ? "change-positive" : "change-negative"}>
-            {change >= 0 ? "+" : ""}
-            {formatNumber(change)}% vs prior period
+            {fmt(t.common.vsPriorPeriod, {
+              change: `${change >= 0 ? "+" : ""}${formatNumber(change)}`,
+            })}
           </span>
         ) : (
-          <span>{help ?? metric?.note ?? "No comparison available"}</span>
+          <span>{help ?? metric?.note ?? t.common.noComparison}</span>
         )}
       </div>
     </Card>

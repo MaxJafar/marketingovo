@@ -1,0 +1,57 @@
+/** Per-page internal link explorer: direction tabs, summary, evidence table. */
+import type { MessagesFor } from "../types";
+
+export const internalLinkExplorer: MessagesFor<"internalLinkExplorer"> = {
+  regionLabel: "{title} üçün daxili bağlantılar",
+  eyebrow: "Dəyişməz tarama qrafı",
+  closeExplorer: "Tədqiqatçını bağla",
+  unavailableTitle: "Bağlantı sübutu əlçatan deyil",
+  unavailableBody:
+    "Versiyalanmış daxil olan və çıxan bağlantı sübutunu tutmaq üçün bu auditi yenidən işlədin. Mövcud səhifə və problem tarixçəsi dəyişməz qalır.",
+  directionTabsLabel: "Bağlantı istiqaməti",
+  inlinksTab: "Daxil olan · {count} mənbə",
+  outlinksTab: "Çıxan · {count} hədəf",
+  searchLabel: "Bu istiqamətdə axtar",
+  searchPlaceholder: "URL, səhifə başlığı və ya lövbər mətni",
+  search: "Axtar",
+  loading: "Saxlanılan bağlantı qrafı oxunur…",
+  graphUnavailableTitle: "Bağlantı qrafı əlçatan deyil",
+  summary: {
+    inlinkSources: "Daxil olan bağlantı mənbələri",
+    outlinkTargets: "Çıxan bağlantı hədəfləri",
+    totalOccurrences: "cəmi {count} rast gəlmə",
+    redirectedTargets: "Yönləndirilmiş hədəflər",
+    redirectedHelp: "Son URL-ə yönəlməli olan daxili bağlantılar",
+    brokenTargets: "Qırıq hədəflər",
+    brokenHelp: "HTTP 4xx və ya 5xx qaytaran təyinatlar",
+  },
+  coverageLimitationTitle: "Əhatə məhdudiyyəti",
+  table: {
+    label: "{title} üçün {direction}",
+    captionInlinks: "Seçilmiş URL-ə bağlantı verən səhifələr",
+    captionOutlinks: "Seçilmiş URL-dən bağlantı verilən daxili təyinatlar",
+    sourcePageColumn: "Mənbə səhifə",
+    destinationColumn: "Təyinat",
+    stateColumn: "Vəziyyət",
+    anchorColumn: "Lövbər sübutu",
+    followColumn: "Follow",
+    finalUrl: "Son URL: {url}",
+    httpStatus: "HTTP {status}",
+    noTextCaptured: "Mətn tutulmayıb",
+    placementUnavailable: "Yerləşdirmə əlçatan deyil",
+    followSummary: "{follow} follow · {nofollow} nofollow",
+  },
+  empty: {
+    noLinksMatch: "Uyğun bağlantı yoxdur",
+    noDirectionCaptured: "{direction} tutulmayıb",
+    searchHint: "Daha geniş URL, başlıq və ya lövbər mətni axtarışı sınayın.",
+    inlinksHint:
+      "Seçilmiş anlıq görüntüdə heç bir taranmış səhifə bu URL-ə bağlantı vermir.",
+    outlinksHint: "Bu səhifənin tutulmuş daxili təyinatı yoxdur.",
+  },
+  paginationLabel: "Bağlantı sübutu səhifələri",
+  previous: "Əvvəlki",
+  next: "Növbəti",
+  zeroResults: "0 nəticə",
+  resultsRange: "{total} nəticədən {from}–{to}",
+};

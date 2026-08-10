@@ -1,4 +1,5 @@
 import type { MetricValue } from "../api/contracts";
+import { getMessages } from "../i18n";
 
 /**
  * Formatting helpers for the console dashboard.
@@ -39,7 +40,12 @@ export function toDelta(change: number | null | undefined): Delta | null {
   if (change === null || change === undefined || !Number.isFinite(change)) {
     return null;
   }
-  if (Math.abs(change) < 0.05) return { direction: "flat", label: "no change" };
+  if (Math.abs(change) < 0.05) {
+    return {
+      direction: "flat",
+      label: getMessages().dashboard.stats.noChange,
+    };
+  }
   const direction = change > 0 ? "up" : "down";
   const arrow = change > 0 ? "▲" : "▼";
   return { direction, label: `${arrow} ${Math.abs(change).toFixed(1)}%` };

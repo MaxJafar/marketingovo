@@ -12,6 +12,7 @@ import {
   type IssueReviewFilters,
 } from "../api/queries";
 import { useSite } from "../context/site-context";
+import { fmt, useI18n } from "../i18n";
 import {
   CapabilityGate,
   FreshnessNotice,
@@ -36,7 +37,7 @@ function displayLabel(value: string): string {
   return value.replaceAll("_", " ");
 }
 
-function evidenceValue(value: unknown): string | null {
+function evidenceValue(value: unknown, fallback: string): string | null {
   if (value === undefined || value === null || value === "") return null;
   if (typeof value === "string") return value;
   if (typeof value === "number" || typeof value === "boolean")
@@ -47,7 +48,7 @@ function evidenceValue(value: unknown): string | null {
       ? `${serialized.slice(0, 497)}…`
       : serialized;
   } catch {
-    return "Structured evidence";
+    return fallback;
   }
 }
 
@@ -60,6 +61,7 @@ function IssueReviewEditor({
   siteId: string;
   onClose: () => void;
 }) {
+  const { t } = useI18n();
   const mutation = useUpdateIssueAdjudication(siteId);
   const originalStatus = item.adjudication?.status ?? "open";
   const originalNote = item.adjudication?.note ?? "";
@@ -96,40 +98,43 @@ function IssueReviewEditor({
     <Card className="issue-review-editor" aria-labelledby="issue-review-title">
       <div className="issue-review-editor-heading">
         <div>
-          <p className="eyebrow">Evidence review</p>
+          <p className="eyebrow">{t.issues.editor.eyebrow}</p>
           <h2 id="issue-review-title">{item.issue.title}</h2>
           <p>{item.issue.description}</p>
         </div>
         <Button type="button" variant="ghost" onClick={onClose}>
-          Close review
+          {t.issues.editor.close}
         </Button>
       </div>
 
       <dl className="issue-review-facts">
         <div>
-          <dt>Rule</dt>
+          <dt>{t.issues.editor.rule}</dt>
           <dd>{item.issue.ruleId}</dd>
         </div>
         <div>
-          <dt>Module</dt>
+          <dt>{t.issues.editor.module}</dt>
           <dd>{item.issue.moduleId}</dd>
         </div>
         <div>
-          <dt>First seen</dt>
+          <dt>{t.issues.editor.firstSeen}</dt>
           <dd>{formatDate(item.issue.firstSeenAt, true)}</dd>
         </div>
         <div>
-          <dt>Occurrences</dt>
+          <dt>{t.issues.editor.occurrences}</dt>
           <dd>{formatNumber(item.occurrenceCount)}</dd>
         </div>
       </dl>
 
       {item.issue.evidence.length > 0 ? (
         <section aria-labelledby="issue-evidence-title">
-          <h3 id="issue-evidence-title">Captured evidence</h3>
+          <h3 id="issue-evidence-title">{t.issues.editor.evidenceTitle}</h3>
           <ul className="issue-evidence-list">
             {item.issue.evidence.map((evidence, index) => {
-              const value = evidenceValue(evidence.value);
+              const value = evidenceValue(
+                evidence.value,
+                t.issues.editor.structuredEvidence,
+              );
               return (
                 <li key={`${evidence.kind}-${evidence.label}-${index}`}>
                   <div>
@@ -148,15 +153,12 @@ function IssueReviewEditor({
           </ul>
         </section>
       ) : (
-        <p className="muted-copy">
-          This finding has no structured evidence payload. Review the rule, URL,
-          and audit history before classifying it.
-        </p>
+        <p className="muted-copy">{t.issues.editor.noEvidence}</p>
       )}
 
       <form className="issue-adjudication-form" onSubmit={submit}>
         <fieldset>
-          <legend>Review decision</legend>
+          <legend>{t.issues.editor.decision}</legend>
           <label>
             <input
               type="radio"
@@ -169,10 +171,8 @@ function IssueReviewEditor({
               }}
             />
             <span>
-              <strong>Keep actionable</strong>
-              <small>
-                Remove any manual override and evaluate future runs normally.
-              </small>
+              <strong>{t.issues.editor.keepTitle}</strong>
+              <small>{t.issues.editor.keepBody}</small>
             </span>
           </label>
           <label>
@@ -187,10 +187,8 @@ function IssueReviewEditor({
               }}
             />
             <span>
-              <strong>Ignore intentionally</strong>
-              <small>
-                The behavior is real, understood, and accepted for this site.
-              </small>
+              <strong>{t.issues.editor.ignoreTitle}</strong>
+              <small>{t.issues.editor.ignoreBody}</small>
             </span>
           </label>
           <label>
@@ -205,17 +203,17 @@ function IssueReviewEditor({
               }}
             />
             <span>
-              <strong>Mark false positive</strong>
-              <small>
-                The rule does not correctly describe this page or
-                implementation.
-              </small>
+              <strong>{t.issues.editor.falsePositiveTitle}</strong>
+              <small>{t.issues.editor.falsePositiveBody}</small>
             </span>
           </label>
         </fieldset>
 
         <label htmlFor={`issue-note-${item.issue.fingerprint}`}>
-          Review reason {noteRequired ? "(required)" : "(optional)"}
+          {t.issues.editor.reasonLabel}{" "}
+          {noteRequired
+            ? t.issues.editor.reasonRequired
+            : t.issues.editor.reasonOptional}
           <textarea
             id={`issue-note-${item.issue.fingerprint}`}
             value={note}
@@ -223,13 +221,17 @@ function IssueReviewEditor({
             maxLength={2_000}
             required={noteRequired}
             rows={4}
-            placeholder="Explain the site context so another marketer can verify this decision later."
+            placeholder={t.issues.editor.reasonPlaceholder}
             onChange={(event) => {
               setNote(event.currentTarget.value);
               setConfirmed(false);
             }}
           />
-          <small>{formatNumber(note.length)} / 2,000 characters</small>
+          <small>
+            {fmt(t.issues.editor.charCount, {
+              count: formatNumber(note.length),
+            })}
+          </small>
         </label>
 
         {noteRequired ? (
@@ -239,10 +241,7 @@ function IssueReviewEditor({
               checked={confirmed}
               onChange={(event) => setConfirmed(event.currentTarget.checked)}
             />
-            <span>
-              I reviewed the evidence. Keep this classification on future audits
-              until someone reopens it.
-            </span>
+            <span>{t.issues.editor.confirmation}</span>
           </label>
         ) : null}
 
@@ -253,17 +252,15 @@ function IssueReviewEditor({
         ) : null}
         {mutation.isSuccess ? (
           <p className="form-success" role="status">
-            Review saved. Actions and overview priorities were refreshed.
+            {t.issues.editor.saved}
           </p>
         ) : null}
 
         <div className="form-actions">
           <Button type="submit" disabled={!canSave}>
-            {mutation.isPending ? "Saving…" : "Save review"}
+            {mutation.isPending ? t.issues.editor.saving : t.issues.editor.save}
           </Button>
-          <span className="muted-copy">
-            Raw audit evidence and history are never deleted.
-          </span>
+          <span className="muted-copy">{t.issues.editor.retention}</span>
         </div>
       </form>
     </Card>
@@ -271,6 +268,7 @@ function IssueReviewEditor({
 }
 
 export function IssuesPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const { capabilities } = useWorkspaceCapabilities(siteId);
   const [search, setSearch] = useState("");
@@ -315,9 +313,9 @@ export function IssuesPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Quality control"
-        title="Issue review"
-        description="Inspect crawl evidence, document intentional exceptions, and keep false positives out of future priorities without erasing audit history."
+        eyebrow={t.issues.eyebrow}
+        title={t.issues.title}
+        description={t.issues.description}
       />
       <CapabilityGate capabilities={capabilities} requires={NEEDS_WEBSITE}>
         <QueryState
@@ -333,13 +331,8 @@ export function IssuesPage() {
           >
             <div className="workbench-control-heading">
               <div>
-                <h2 id="issue-filter-title">
-                  Separate signal from accepted behavior
-                </h2>
-                <p>
-                  Search titles, rules, modules, fingerprints, and canonical
-                  URLs. Decisions are scoped to the selected site.
-                </p>
+                <h2 id="issue-filter-title">{t.issues.filters.title}</h2>
+                <p>{t.issues.filters.description}</p>
               </div>
               <Button
                 type="button"
@@ -347,12 +340,12 @@ export function IssuesPage() {
                 onClick={resetFilters}
                 disabled={!filtersActive}
               >
-                Reset filters
+                {t.issues.filters.reset}
               </Button>
             </div>
             <div className="workbench-filter-grid issue-filter-grid">
               <label className="workbench-search">
-                <span>Search issues</span>
+                <span>{t.issues.filters.searchLabel}</span>
                 <span className="search-field">
                   <Icon name="search" />
                   <input
@@ -360,39 +353,49 @@ export function IssuesPage() {
                     value={search}
                     maxLength={160}
                     onChange={(event) => setSearch(event.currentTarget.value)}
-                    placeholder="Rule, URL, title, fingerprint…"
+                    placeholder={t.issues.filters.searchPlaceholder}
                   />
                 </span>
               </label>
               <label>
-                Status
+                {t.issues.filters.status}
                 <select
                   value={status}
                   onChange={(event) =>
                     setStatus(event.currentTarget.value as IssueStatus | "all")
                   }
                 >
-                  <option value="all">All statuses</option>
-                  <option value="open">Open</option>
-                  <option value="resolved">Resolved by audit</option>
-                  <option value="ignored">Ignored intentionally</option>
-                  <option value="false_positive">False positives</option>
+                  <option value="all">{t.issues.filters.allStatuses}</option>
+                  <option value="open">{t.issues.filters.statusOpen}</option>
+                  <option value="resolved">
+                    {t.issues.filters.statusResolved}
+                  </option>
+                  <option value="ignored">
+                    {t.issues.filters.statusIgnored}
+                  </option>
+                  <option value="false_positive">
+                    {t.issues.filters.statusFalsePositive}
+                  </option>
                 </select>
               </label>
               <label>
-                Severity
+                {t.issues.filters.severity}
                 <select
                   value={severity}
                   onChange={(event) =>
                     setSeverity(event.currentTarget.value as Severity | "all")
                   }
                 >
-                  <option value="all">All severities</option>
-                  <option value="critical">Critical</option>
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
-                  <option value="info">Info</option>
+                  <option value="all">{t.issues.filters.allSeverities}</option>
+                  <option value="critical">
+                    {t.issues.filters.severityCritical}
+                  </option>
+                  <option value="high">{t.issues.filters.severityHigh}</option>
+                  <option value="medium">
+                    {t.issues.filters.severityMedium}
+                  </option>
+                  <option value="low">{t.issues.filters.severityLow}</option>
+                  <option value="info">{t.issues.filters.severityInfo}</option>
                 </select>
               </label>
             </div>
@@ -405,20 +408,23 @@ export function IssuesPage() {
                 role="status"
                 aria-live="polite"
               >
-                Showing {formatNumber(page.offset + 1)}–{formatNumber(end)} of{" "}
-                {formatNumber(page.total)} issues
+                {fmt(t.issues.showingRange, {
+                  start: formatNumber(page.offset + 1),
+                  end: formatNumber(end),
+                  total: formatNumber(page.total),
+                })}
               </p>
               <div className="table-shell issue-review-table">
-                <table aria-label="SEO issues awaiting or carrying review decisions">
+                <table aria-label={t.issues.tableLabel}>
                   <thead>
                     <tr>
-                      <th scope="col">Severity</th>
-                      <th scope="col">Issue</th>
-                      <th scope="col">URL</th>
-                      <th scope="col">Status</th>
-                      <th scope="col">Occurrences</th>
-                      <th scope="col">Last seen</th>
-                      <th scope="col">Review</th>
+                      <th scope="col">{t.issues.columns.severity}</th>
+                      <th scope="col">{t.issues.columns.issue}</th>
+                      <th scope="col">{t.issues.columns.url}</th>
+                      <th scope="col">{t.issues.columns.status}</th>
+                      <th scope="col">{t.issues.columns.occurrences}</th>
+                      <th scope="col">{t.issues.columns.lastSeen}</th>
+                      <th scope="col">{t.issues.columns.review}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -450,13 +456,18 @@ export function IssuesPage() {
                                 {item.issue.canonicalUrl}
                               </a>
                             ) : (
-                              <span className="muted-copy">Site-wide</span>
+                              <span className="muted-copy">
+                                {t.issues.siteWide}
+                              </span>
                             )}
                           </td>
                           <td>
                             <StatusBadge
                               status={item.issue.status}
-                              label={displayLabel(item.issue.status)}
+                              label={
+                                t.issues.statusLabel[item.issue.status] ??
+                                displayLabel(item.issue.status)
+                              }
                             />
                           </td>
                           <td>{formatNumber(item.occurrenceCount)}</td>
@@ -473,7 +484,7 @@ export function IssuesPage() {
                                 )
                               }
                             >
-                              {active ? "Hide" : "Review"}
+                              {active ? t.issues.hide : t.issues.review}
                             </Button>
                           </td>
                         </tr>
@@ -482,7 +493,10 @@ export function IssuesPage() {
                   </tbody>
                 </table>
               </div>
-              <nav className="pagination-controls" aria-label="Issue pages">
+              <nav
+                className="pagination-controls"
+                aria-label={t.issues.paginationLabel}
+              >
                 <Button
                   type="button"
                   variant="secondary"
@@ -492,14 +506,17 @@ export function IssuesPage() {
                     setSelectedFingerprint(null);
                   }}
                 >
-                  Previous
+                  {t.issues.previous}
                 </Button>
                 <span>
-                  Page {formatNumber(Math.floor(page.offset / page.limit) + 1)}{" "}
-                  of{" "}
-                  {formatNumber(
-                    Math.max(1, Math.ceil(page.total / page.limit)),
-                  )}
+                  {fmt(t.issues.pageOf, {
+                    page: formatNumber(
+                      Math.floor(page.offset / page.limit) + 1,
+                    ),
+                    total: formatNumber(
+                      Math.max(1, Math.ceil(page.total / page.limit)),
+                    ),
+                  })}
                 </span>
                 <Button
                   type="button"
@@ -510,17 +527,21 @@ export function IssuesPage() {
                     setSelectedFingerprint(null);
                   }}
                 >
-                  Next
+                  {t.issues.next}
                 </Button>
               </nav>
             </>
           ) : (
             <EmptyState
-              title={filtersActive ? "No issues match" : "No open issues"}
+              title={
+                filtersActive
+                  ? t.issues.emptyFilteredTitle
+                  : t.issues.emptyOpenTitle
+              }
               description={
                 filtersActive
-                  ? "Broaden the filters or search another rule, module, title, or URL."
-                  : "Run an audit to collect issue evidence, or switch the status filter to review resolved findings."
+                  ? t.issues.emptyFilteredBody
+                  : t.issues.emptyOpenBody
               }
             />
           )}

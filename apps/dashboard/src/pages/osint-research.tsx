@@ -8,6 +8,7 @@ import type {
 } from "../api/contracts";
 import { useOsintDossier, useStartWorkflow } from "../api/queries";
 import { useSite } from "../context/site-context";
+import { fmt, getMessages, useI18n } from "../i18n";
 import { FreshnessNotice, QueryState } from "../components/data-state";
 import {
   Button,
@@ -23,22 +24,26 @@ import {
 
 function displayEvidenceValue(value: unknown): string {
   if (value === null || value === undefined || value === "")
-    return "Unavailable";
+    return getMessages().common.unavailable;
   if (typeof value === "string") return value;
   if (typeof value === "number" || typeof value === "boolean")
     return String(value);
   try {
     return JSON.stringify(value);
   } catch {
-    return "Unavailable";
+    return getMessages().common.unavailable;
   }
 }
 
 function evidenceLabel(item: OsintEvidence): string {
-  return `${item.label} · ${Math.round(item.confidence * 100)}% confidence`;
+  return fmt(getMessages().osintResearch.evidence.confidence, {
+    label: item.label,
+    confidence: Math.round(item.confidence * 100),
+  });
 }
 
 function EvidenceRow({ item }: { item: OsintEvidence }) {
+  const { t } = useI18n();
   const source = safeExternalUrl(item.sourceUrl);
   return (
     <li>
@@ -48,11 +53,14 @@ function EvidenceRow({ item }: { item: OsintEvidence }) {
       </div>
       <p>{displayEvidenceValue(item.value)}</p>
       <small>
-        {evidenceLabel(item)} · observed {formatDate(item.observedAt, true)}
+        {evidenceLabel(item)}{" "}
+        {fmt(t.osintResearch.evidence.observedAt, {
+          date: formatDate(item.observedAt, true),
+        })}
         {item.claimHash ? (
           <>
             {" "}
-            · claim{" "}
+            {t.osintResearch.evidence.claimLabel}{" "}
             <code title={item.claimHash}>{item.claimHash.slice(0, 12)}…</code>
           </>
         ) : null}
@@ -61,7 +69,7 @@ function EvidenceRow({ item }: { item: OsintEvidence }) {
             {" "}
             ·{" "}
             <a href={source} target="_blank" rel="noreferrer">
-              source
+              {t.osintResearch.sourceLink}
             </a>
           </>
         ) : null}
@@ -71,6 +79,7 @@ function EvidenceRow({ item }: { item: OsintEvidence }) {
 }
 
 function TargetCard({ target }: { target: OsintTargetDossier }) {
+  const { t } = useI18n();
   const targetUrl = safeExternalUrl(target.targetUrl);
   const finalUrl = safeExternalUrl(target.finalUrl);
   const usefulEvidence = target.evidence.filter((item) =>
@@ -89,7 +98,7 @@ function TargetCard({ target }: { target: OsintTargetDossier }) {
     <Card className="osint-target-card">
       <div className="osint-target-heading">
         <div>
-          <p className="eyebrow">Target dossier</p>
+          <p className="eyebrow">{t.osintResearch.target.eyebrow}</p>
           <h3>{target.host ?? target.targetUrl}</h3>
           <small>
             {targetUrl ? (
@@ -106,11 +115,11 @@ function TargetCard({ target }: { target: OsintTargetDossier }) {
 
       <div className="evidence-metric-grid osint-metrics">
         <div>
-          <span>Pages observed</span>
+          <span>{t.osintResearch.target.pagesObserved}</span>
           <strong>{formatNumber(target.pagesObserved)}</strong>
         </div>
         <div>
-          <span>Available evidence</span>
+          <span>{t.osintResearch.target.availableEvidence}</span>
           <strong>
             {formatNumber(
               target.evidence.filter((item) => item.state === "available")
@@ -119,18 +128,18 @@ function TargetCard({ target }: { target: OsintTargetDossier }) {
           </strong>
         </div>
         <div>
-          <span>Graph entities</span>
+          <span>{t.osintResearch.target.graphEntities}</span>
           <strong>{formatNumber(target.entities.length)}</strong>
         </div>
         <div>
-          <span>Graph links</span>
+          <span>{t.osintResearch.target.graphLinks}</span>
           <strong>{formatNumber(target.relationships.length)}</strong>
         </div>
       </div>
 
       {finalUrl && finalUrl !== targetUrl ? (
         <p className="evidence-source-link">
-          Final URL:{" "}
+          {t.osintResearch.target.finalUrl}{" "}
           <a href={finalUrl} target="_blank" rel="noreferrer">
             {target.finalUrl}
           </a>
@@ -138,18 +147,31 @@ function TargetCard({ target }: { target: OsintTargetDossier }) {
       ) : null}
 
       {cadence ? (
-        <InlineNotice tone="info" title="Public publishing signal">
-          {cadence.datedItems} dated item{cadence.datedItems === 1 ? "" : "s"}{" "}
-          in the observed feed
+        <InlineNotice
+          tone="info"
+          title={t.osintResearch.target.publishingSignalTitle}
+        >
+          {cadence.datedItems === 1
+            ? fmt(t.osintResearch.target.cadenceItemsOne, {
+                count: cadence.datedItems,
+              })
+            : fmt(t.osintResearch.target.cadenceItemsMany, {
+                count: cadence.datedItems,
+              })}
           {cadence.cadenceDays === null
-            ? "; cadence is unavailable without a measured interval."
-            : `; average interval ${cadence.cadenceDays.toFixed(1)} days.`}{" "}
-          This is publication evidence, not reach or engagement.
+            ? t.osintResearch.target.cadenceUnavailable
+            : fmt(t.osintResearch.target.cadenceAverage, {
+                days: cadence.cadenceDays.toFixed(1),
+              })}{" "}
+          {t.osintResearch.target.cadenceDisclaimer}
         </InlineNotice>
       ) : null}
 
       {target.error ? (
-        <InlineNotice tone="warning" title="Target was not fully observed">
+        <InlineNotice
+          tone="warning"
+          title={t.osintResearch.target.notObservedTitle}
+        >
           {target.error}
         </InlineNotice>
       ) : null}
@@ -166,50 +188,64 @@ function TargetCard({ target }: { target: OsintTargetDossier }) {
 }
 
 function Coverage({ dossier }: { dossier: OsintDossier }) {
+  const { t } = useI18n();
   return (
     <Card>
       <SectionHeading
-        title="Coverage and policy"
-        description="Every observation keeps its source and evidence state. A missing signal is never turned into zero."
+        title={t.osintResearch.coverage.title}
+        description={t.osintResearch.coverage.description}
       />
       <div className="evidence-metric-grid osint-metrics">
         <div>
-          <span>Coverage</span>
+          <span>{t.osintResearch.coverage.coverage}</span>
           <strong>
             <StatusBadge status={dossier.coverage.state} />
           </strong>
         </div>
         <div>
-          <span>Targets completed</span>
+          <span>{t.osintResearch.coverage.targetsCompleted}</span>
           <strong>
             {formatNumber(dossier.coverage.targetsCompleted)} /{" "}
             {formatNumber(dossier.coverage.targetsRequested)}
           </strong>
         </div>
         <div>
-          <span>Pages observed</span>
+          <span>{t.osintResearch.coverage.pagesObserved}</span>
           <strong>{formatNumber(dossier.coverage.pagesObserved)}</strong>
         </div>
         <div>
-          <span>Evidence available</span>
+          <span>{t.osintResearch.coverage.evidenceAvailable}</span>
           <strong>{formatNumber(dossier.coverage.evidenceAvailable)}</strong>
         </div>
       </div>
       <div className="osint-policy-list">
-        <StatusBadge status="available" label="Public web only" />
-        <StatusBadge status="missing" label="Personal data disabled" />
-        <StatusBadge status="missing" label="Identity resolution disabled" />
+        <StatusBadge
+          status="available"
+          label={t.osintResearch.coverage.publicWebOnly}
+        />
         <StatusBadge
           status="missing"
-          label="Authenticated collection disabled"
+          label={t.osintResearch.coverage.personalDataDisabled}
         />
-        <StatusBadge status="missing" label="Dark web disabled" />
+        <StatusBadge
+          status="missing"
+          label={t.osintResearch.coverage.identityResolutionDisabled}
+        />
+        <StatusBadge
+          status="missing"
+          label={t.osintResearch.coverage.authenticatedCollectionDisabled}
+        />
+        <StatusBadge
+          status="missing"
+          label={t.osintResearch.coverage.darkWebDisabled}
+        />
       </div>
     </Card>
   );
 }
 
 function TrustSummary({ dossier }: { dossier: OsintDossier }) {
+  const { t } = useI18n();
   const evidence = dossier.targets.flatMap((target) => target.evidence);
   const fingerprinted = evidence.filter((item) =>
     item.claimHash ? /^[a-f0-9]{64}$/u.test(item.claimHash) : false,
@@ -230,70 +266,68 @@ function TrustSummary({ dossier }: { dossier: OsintDossier }) {
   return (
     <Card>
       <SectionHeading
-        title="Trust and provenance"
-        description="Stable claim fingerprints make repeat passes auditable without presenting a public-web observation as independently verified truth."
+        title={t.osintResearch.trust.title}
+        description={t.osintResearch.trust.description}
       />
       <div className="evidence-metric-grid osint-metrics">
         <div>
-          <span>Claim fingerprints</span>
+          <span>{t.osintResearch.trust.claimFingerprints}</span>
           <strong>
             {formatNumber(fingerprinted)} / {formatNumber(evidence.length)}
           </strong>
         </div>
         <div>
-          <span>Source URLs recorded</span>
+          <span>{t.osintResearch.trust.sourceUrlsRecorded}</span>
           <strong>{formatNumber(provenance?.sourceCount ?? 0)}</strong>
         </div>
         <div>
-          <span>Integrity record</span>
+          <span>{t.osintResearch.trust.integrityRecord}</span>
           <strong>
             <StatusBadge
               status={integrityRecorded ? "available" : "insufficient"}
               label={
                 integrityRecorded
-                  ? "Recorded"
+                  ? t.osintResearch.trust.recorded
                   : provenance
-                    ? "Incomplete"
-                    : "Legacy dossier"
+                    ? t.osintResearch.trust.incomplete
+                    : t.osintResearch.trust.legacyDossier
               }
             />
           </strong>
         </div>
         <div>
-          <span>Fingerprint algorithm</span>
+          <span>{t.osintResearch.trust.fingerprintAlgorithm}</span>
           <strong>{provenance?.claimHashAlgorithm.toUpperCase() ?? "—"}</strong>
         </div>
       </div>
       {provenance ? (
         <p className="osint-provenance-digest">
-          Evidence digest: <code>{provenance.evidenceDigest}</code>
+          {t.osintResearch.trust.evidenceDigest}{" "}
+          <code>{provenance.evidenceDigest}</code>
         </p>
       ) : (
-        <InlineNotice tone="info" title="Older dossier format">
-          This saved pass predates claim fingerprints. Run a new public-web pass
-          to record provenance for every observation.
+        <InlineNotice
+          tone="info"
+          title={t.osintResearch.trust.olderFormatTitle}
+        >
+          {t.osintResearch.trust.olderFormatBody}
         </InlineNotice>
       )}
-      <p className="muted-copy">
-        Fingerprints cover the observed claim fields and intentionally exclude
-        capture time. The digest detects report changes; it does not certify
-        that a source is accurate or authoritative.
-      </p>
+      <p className="muted-copy">{t.osintResearch.trust.fingerprintScope}</p>
     </Card>
   );
 }
 
 function Findings({ dossier }: { dossier: OsintDossier }) {
+  const { t } = useI18n();
   return (
     <Card>
       <SectionHeading
-        title="Findings"
-        description="Descriptive, evidence-linked observations from the public web."
+        title={t.osintResearch.findings.title}
+        description={t.osintResearch.findings.description}
       />
       {dossier.findings.length === 0 ? (
-        <p className="muted-copy">
-          No findings were supported by the observed evidence.
-        </p>
+        <p className="muted-copy">{t.osintResearch.findings.empty}</p>
       ) : (
         <ul className="stack-list">
           {dossier.findings.map((finding) => (
@@ -304,9 +338,17 @@ function Findings({ dossier }: { dossier: OsintDossier }) {
               </div>
               <p>{finding.statement}</p>
               <small>
-                {finding.evidenceIds.length} cited evidence item
-                {finding.evidenceIds.length === 1 ? "" : "s"} ·{" "}
-                {Math.round(finding.confidence * 100)}% confidence
+                {finding.evidenceIds.length === 1
+                  ? fmt(t.osintResearch.citedEvidenceOne, {
+                      count: finding.evidenceIds.length,
+                    })
+                  : fmt(t.osintResearch.citedEvidenceMany, {
+                      count: finding.evidenceIds.length,
+                    })}{" "}
+                ·{" "}
+                {fmt(t.osintResearch.confidencePct, {
+                  confidence: Math.round(finding.confidence * 100),
+                })}
               </small>
             </li>
           ))}
@@ -317,24 +359,23 @@ function Findings({ dossier }: { dossier: OsintDossier }) {
 }
 
 function ChangeHistory({ workspace }: { workspace: OsintWorkspace }) {
+  const { t } = useI18n();
   const description =
     workspace.compared && workspace.previousGeneratedAt
-      ? "Cited public-web changes since " +
-        formatDate(workspace.previousGeneratedAt, true) +
-        ". A blocked target is excluded instead of being treated as a disappearance."
-      : "Run a second public-web pass to compare exact signals over time.";
+      ? fmt(t.osintResearch.history.comparedDescription, {
+          date: formatDate(workspace.previousGeneratedAt, true),
+        })
+      : t.osintResearch.history.firstPassDescription;
   return (
     <Card>
-      <SectionHeading title="Pass history" description={description} />
+      <SectionHeading
+        title={t.osintResearch.history.title}
+        description={description}
+      />
       {!workspace.compared ? (
-        <p className="muted-copy">
-          The first pass establishes the baseline. Later passes report added,
-          removed, and changed evidence without making identity claims.
-        </p>
+        <p className="muted-copy">{t.osintResearch.history.baseline}</p>
       ) : workspace.changes.length === 0 ? (
-        <p className="muted-copy">
-          No supported public signal changed since the previous pass.
-        </p>
+        <p className="muted-copy">{t.osintResearch.history.noChanges}</p>
       ) : (
         <ul className="stack-list">
           {workspace.changes.map((change: OsintChange) => {
@@ -354,15 +395,15 @@ function ChangeHistory({ workspace }: { workspace: OsintWorkspace }) {
                 </div>
                 <p>
                   {change.change === "changed"
-                    ? String(before ?? "Unavailable") +
+                    ? String(before ?? t.common.unavailable) +
                       " → " +
-                      String(after ?? "Unavailable")
+                      String(after ?? t.common.unavailable)
                     : change.change === "added"
-                      ? (after ?? "Available")
-                      : (before ?? "Unavailable")}
+                      ? (after ?? t.osintResearch.available)
+                      : (before ?? t.common.unavailable)}
                 </p>
                 <small>
-                  {change.category} · target{" "}
+                  {change.category} {t.osintResearch.history.targetLabel}{" "}
                   {target ? (
                     <a href={target} target="_blank" rel="noreferrer">
                       {change.targetUrl}
@@ -370,15 +411,24 @@ function ChangeHistory({ workspace }: { workspace: OsintWorkspace }) {
                   ) : (
                     change.targetUrl
                   )}{" "}
-                  · {change.evidenceIds.length} cited evidence item
-                  {change.evidenceIds.length === 1 ? "" : "s"} ·{" "}
-                  {Math.round(change.confidence * 100)}% confidence
+                  ·{" "}
+                  {change.evidenceIds.length === 1
+                    ? fmt(t.osintResearch.citedEvidenceOne, {
+                        count: change.evidenceIds.length,
+                      })
+                    : fmt(t.osintResearch.citedEvidenceMany, {
+                        count: change.evidenceIds.length,
+                      })}{" "}
+                  ·{" "}
+                  {fmt(t.osintResearch.confidencePct, {
+                    confidence: Math.round(change.confidence * 100),
+                  })}
                   {source ? (
                     <>
                       {" "}
                       ·{" "}
                       <a href={source} target="_blank" rel="noreferrer">
-                        source
+                        {t.osintResearch.sourceLink}
                       </a>
                     </>
                   ) : null}
@@ -393,6 +443,7 @@ function ChangeHistory({ workspace }: { workspace: OsintWorkspace }) {
 }
 
 export function OsintResearchPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const query = useOsintDossier(siteId);
   const start = useStartWorkflow();
@@ -416,7 +467,7 @@ export function OsintResearchPage() {
       }
     });
     if (invalid) {
-      setInputError(`Use an explicit public https:// URL: ${invalid}`);
+      setInputError(fmt(t.osintResearch.form.invalidTarget, { url: invalid }));
       return;
     }
     setInputError(null);
@@ -430,19 +481,19 @@ export function OsintResearchPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Product priority · intelligence layer"
-        title="Public-web OSINT"
-        description="Build a bounded, source-linked dossier from your site and up to four explicitly supplied public targets. The graph preserves what was observed without turning missing data into a claim."
+        eyebrow={t.osintResearch.eyebrow}
+        title={t.osintResearch.title}
+        description={t.osintResearch.description}
       />
 
       <Card className="schedule-editor">
         <form onSubmit={submit}>
           <SectionHeading
-            title="Start an evidence pass"
-            description="The project site is included automatically. Add public competitor, partner, newsroom, or reference URLs when they are in scope."
+            title={t.osintResearch.form.title}
+            description={t.osintResearch.form.description}
           />
           <label htmlFor="osint-targets">
-            Additional public targets
+            {t.osintResearch.form.targetsLabel}
             <textarea
               id="osint-targets"
               value={targets}
@@ -456,33 +507,31 @@ export function OsintResearchPage() {
             />
           </label>
           <small id="osint-targets-help">
-            Up to four URLs, one per line. HTTPS only; no credentials, cookies,
-            account probes, or people-search pivots.
+            {t.osintResearch.form.targetsHelp}
           </small>
           <div className="form-actions">
             <Button type="submit" disabled={!siteId || start.isPending}>
               {start.isPending
-                ? "Queueing public-web research…"
-                : "Run OSINT pass"}
+                ? t.osintResearch.form.queueing
+                : t.osintResearch.form.run}
             </Button>
           </div>
         </form>
       </Card>
 
       {inputError ? (
-        <InlineNotice tone="warning" title="Target list was not accepted">
+        <InlineNotice tone="warning" title={t.osintResearch.form.rejectedTitle}>
           {inputError}
         </InlineNotice>
       ) : null}
       {start.isError ? (
-        <InlineNotice tone="danger" title="OSINT run could not start">
+        <InlineNotice tone="danger" title={t.osintResearch.form.failedTitle}>
           {start.error.message}
         </InlineNotice>
       ) : null}
       {start.isSuccess ? (
-        <InlineNotice tone="success" title="OSINT run queued">
-          The run is being collected with public-web limits. This page will
-          refresh when its evidence dossier is persisted.
+        <InlineNotice tone="success" title={t.osintResearch.form.queuedTitle}>
+          {t.osintResearch.form.queuedBody}
         </InlineNotice>
       ) : null}
 
@@ -501,8 +550,18 @@ export function OsintResearchPage() {
             {workspace ? <ChangeHistory workspace={workspace} /> : null}
             <section>
               <SectionHeading
-                title="Target dossiers"
-                description={`Generated ${formatDate(dossier.generatedAt, true)} · ${dossier.sourceBudget} bounded source target${dossier.sourceBudget === 1 ? "" : "s"}.`}
+                title={t.osintResearch.dossiers.title}
+                description={
+                  dossier.sourceBudget === 1
+                    ? fmt(t.osintResearch.dossiers.generatedOne, {
+                        date: formatDate(dossier.generatedAt, true),
+                        count: dossier.sourceBudget,
+                      })
+                    : fmt(t.osintResearch.dossiers.generatedMany, {
+                        date: formatDate(dossier.generatedAt, true),
+                        count: dossier.sourceBudget,
+                      })
+                }
               />
               <div className="osint-target-grid">
                 {dossier.targets.map((target) => (
@@ -512,8 +571,8 @@ export function OsintResearchPage() {
             </section>
             <Card>
               <SectionHeading
-                title="Known limitations"
-                description="These constraints are part of the dossier contract, not a hidden gap in the UI."
+                title={t.osintResearch.limitations.title}
+                description={t.osintResearch.limitations.description}
               />
               <ul className="stack-list">
                 {dossier.limitations.map((limitation) => (
@@ -523,9 +582,8 @@ export function OsintResearchPage() {
             </Card>
           </>
         ) : (
-          <InlineNotice tone="info" title="No OSINT dossier yet">
-            Run a public-web pass above to create the first evidence-linked
-            dossier for this project.
+          <InlineNotice tone="info" title={t.osintResearch.noDossierTitle}>
+            {t.osintResearch.noDossierBody}
           </InlineNotice>
         )}
       </QueryState>

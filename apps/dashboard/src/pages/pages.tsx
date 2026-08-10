@@ -3,6 +3,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { PageRecord } from "../api/contracts";
 import { usePages } from "../api/queries";
 import { useSite } from "../context/site-context";
+import { fmt, useI18n } from "../i18n";
 import { DataTable } from "../components/data-table";
 import {
   CapabilityGate,
@@ -24,6 +25,7 @@ import {
 import { indexabilityReasonLabel } from "./page-indexability";
 
 export function PagesPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const { capabilities } = useWorkspaceCapabilities(siteId);
   const query = usePages(siteId);
@@ -45,7 +47,7 @@ export function PagesPage() {
     () => [
       {
         id: "page",
-        header: "Page",
+        header: t.pages.columns.page,
         cell: ({ row }) => {
           const url = safeExternalUrl(row.original.url);
           return (
@@ -64,37 +66,41 @@ export function PagesPage() {
       },
       {
         id: "statusCode",
-        header: "HTTP",
+        header: t.pages.columns.http,
         cell: ({ row }) => formatNumber(row.original.statusCode),
       },
       {
         id: "indexability",
-        header: "Indexability",
+        header: t.pages.columns.indexability,
         cell: ({ row }) => (
           <div className="indexability-cell">
             <StatusBadge status={row.original.indexability ?? "unknown"} />
-            <small>{indexabilityReasonLabel(row.original)}</small>
+            <small>{indexabilityReasonLabel(row.original, t.pages)}</small>
           </div>
         ),
       },
       {
         id: "clicks",
-        header: "Clicks",
+        header: t.pages.columns.clicks,
         cell: ({ row }) => formatNumber(row.original.organicClicks),
       },
       {
         id: "links",
-        header: "Internal links",
+        header: t.pages.columns.internalLinks,
         cell: ({ row }) => (
           <div className="page-link-cell">
             {row.original.linkGraphState === "available" ? (
               <>
                 <strong>
-                  {formatNumber(row.original.inlinkSources)} in ·{" "}
-                  {formatNumber(row.original.outlinkTargets)} out
+                  {fmt(t.pages.linkCounts, {
+                    inCount: formatNumber(row.original.inlinkSources),
+                    outCount: formatNumber(row.original.outlinkTargets),
+                  })}
                 </strong>
                 <small>
-                  Depth {formatNumber(row.original.crawlDepth)} · distinct pages
+                  {fmt(t.pages.linkDepth, {
+                    depth: formatNumber(row.original.crawlDepth),
+                  })}
                 </small>
               </>
             ) : (
@@ -104,45 +110,47 @@ export function PagesPage() {
               type="button"
               variant="ghost"
               onClick={() => setSelectedPageUrl(row.original.url)}
-              aria-label={`Explore internal links for ${row.original.title ?? row.original.url}`}
+              aria-label={fmt(t.pages.exploreLinksFor, {
+                page: row.original.title ?? row.original.url,
+              })}
             >
-              Explore
+              {t.pages.explore}
             </Button>
           </div>
         ),
       },
       {
         id: "organicKeyEvents",
-        header: "Organic key events",
+        header: t.pages.columns.organicKeyEvents,
         cell: ({ row }) => formatNumber(row.original.organicKeyEvents),
       },
       {
         id: "issues",
-        header: "Issues",
+        header: t.pages.columns.issues,
         cell: ({ row }) => formatNumber(row.original.issues),
       },
       {
         id: "cwv",
-        header: "Core Web Vitals",
+        header: t.pages.columns.coreWebVitals,
         cell: ({ row }) => (
           <StatusBadge status={row.original.coreWebVitals ?? "unavailable"} />
         ),
       },
       {
         id: "crawled",
-        header: "Last crawled",
+        header: t.pages.columns.lastCrawled,
         cell: ({ row }) => formatDate(row.original.lastCrawledAt, true),
       },
     ],
-    [],
+    [t],
   );
 
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="URL inventory"
-        title="Pages"
-        description="Connect technical crawl evidence with organic traffic and conversion context at URL level."
+        eyebrow={t.pages.eyebrow}
+        title={t.pages.title}
+        description={t.pages.description}
       />
       <CapabilityGate capabilities={capabilities} requires={NEEDS_WEBSITE}>
         <QueryState
@@ -164,33 +172,33 @@ export function PagesPage() {
               <div className="search-field">
                 <Icon name="search" />
                 <label className="sr-only" htmlFor="page-search">
-                  Search pages
+                  {t.pages.searchLabel}
                 </label>
                 <input
                   id="page-search"
                   type="search"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search by title or URL"
+                  placeholder={t.pages.searchPlaceholder}
                 />
               </div>
               {filtered.length > 0 ? (
                 <DataTable
                   data={filtered}
                   columns={columns}
-                  label="Crawled pages"
+                  label={t.pages.tableLabel}
                 />
               ) : (
                 <EmptyState
-                  title="No pages match"
-                  description="Try a broader title or URL search."
+                  title={t.pages.noMatchTitle}
+                  description={t.pages.noMatchBody}
                 />
               )}
             </>
           ) : (
             <EmptyState
-              title="No crawled pages"
-              description="The API returned an empty page inventory. Run an audit to collect URL-level evidence."
+              title={t.pages.emptyTitle}
+              description={t.pages.emptyBody}
             />
           )}
         </QueryState>

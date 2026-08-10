@@ -1,0 +1,163 @@
+import type { MessagesFor } from "../types";
+
+/**
+ * The action evidence and verification workbench: summary cards, the score
+ * explanation, source health, occurrence history, and per-URL evidence.
+ */
+export const actionDetail: MessagesFor<"actionDetail"> = {
+  backToActions: "Zurück zu den Maßnahmen",
+  eyebrow: "Maßnahmen-Evidenz und Verifikation",
+  fallbackTitle: "Maßnahmen-Workbench",
+  description:
+    "Verfolge die Empfehlung bis zu jeder beobachteten URL, trenne technische Evidenz vom Business-Kontext und verifiziere den Fix mit einem dauerhaften Folgelauf.",
+  workflowStatus: "Workflow-Status",
+  statusLabel: {
+    open: "offen",
+    acknowledged: "bestätigt",
+    in_progress: "in Arbeit",
+    resolved: "gelöst",
+  },
+  workflowNotSavedTitle: "Workflow-Status wurde nicht gespeichert",
+  summaryLabel: "Zusammenfassung der Maßnahme",
+  technicalEvidence: "Technische Evidenz",
+  affectedUrls: "Betroffene URLs",
+  issueOccurrences:
+    "{count} Problem-Vorkommen über die geladene Audit-Historie.",
+  lifecycleSummary: {
+    new: "Neu",
+    persistent: "Bestehend",
+    resolved: "Gelöst",
+    reappeared: "Wieder aufgetreten",
+  },
+  businessContext: "Business-Kontext",
+  businessSummary: {
+    observedClicks: "beobachtete Klicks",
+    impressions: "Impressionen",
+    organicKeyEvents: "organische Key Events",
+  },
+  exposureNote:
+    "Die Exposition erklärt, warum die Maßnahme wichtig ist. Sie ist beobachteter Kontext — kein Versprechen, dass die Behebung des Problems denselben zusätzlichen Traffic erzeugt.",
+  whyNow: "Warum jetzt",
+  module: "Modul",
+  impact: "Impact",
+  effort: "Aufwand",
+  confidence: "Konfidenz",
+  created: "Erstellt",
+  updated: "Aktualisiert",
+  proofLoop: "Beweisschleife",
+  proofLoopTitle: "Fix → Checkpoint → Verifikation",
+  verificationTitle: "Verifikation {state}",
+  verificationStateLabel: {
+    not_started: "nicht gestartet",
+    queued: "in Warteschlange",
+    running: "läuft",
+    verified: "verifiziert",
+    regressed: "verschlechtert",
+    inconclusive: "nicht eindeutig",
+  },
+  verificationFallback:
+    "Lege vor der Umsetzung einen Checkpoint an und starte nach dem Deployment des Fixes eine gezielte Verifikation.",
+  checkpoint: "Checkpoint",
+  notCreated: "Nicht angelegt",
+  verificationRun: "Verifikationslauf",
+  notStarted: "Nicht gestartet",
+  coverage: "Abdeckung",
+  checked: "Geprüft",
+  checkpointNotCreatedTitle: "Checkpoint wurde nicht angelegt",
+  verificationNotStartedTitle: "Verifikation ist nicht gestartet",
+  creatingCheckpoint: "Checkpoint wird angelegt…",
+  replaceCheckpoint: "Checkpoint ersetzen",
+  createCheckpoint: "Checkpoint anlegen",
+  verificationRunning: "Verifikation läuft…",
+  verifyCurrentFix: "Aktuellen Fix verifizieren",
+  checkpointHelp:
+    "Ein Checkpoint bewahrt den Vorher-Zustand, den ein belastbares Verifikationsergebnis braucht.",
+  scoreInputsUnavailableTitle: "Score-Eingaben nicht verfügbar",
+  scoreInputsUnavailableBody:
+    "Die API hat einen Prioritäts-Score ohne seine reproduzierbaren Eingaben zurückgegeben.",
+  scoreTitle: "Warum diese Maßnahme priorisiert ist",
+  scoreDescription:
+    "Der Score ist eine transparente Priorisierungsheuristik, keine Traffic-Prognose. Alle normalisierten Eingaben liegen zwischen 0 und 1.",
+  unknownModel: "Unbekanntes Modell",
+  formulaLabel: "Formel der Prioritätsversion eins",
+  formula:
+    "Priorität = 100 × (0,35×Schweregrad + 0,25×organische Exposition + 0,15×Conversion-Exposition + 0,15×URL-Reichweite + 0,10×Konfidenz) × Aufwandsmultiplikator",
+  scoreTermLabel: {
+    severity: "Schweregrad",
+    organicExposure: "Organische Exposition",
+    conversionExposure: "Conversion-Exposition",
+    urlReach: "URL-Reichweite",
+    confidence: "Konfidenz",
+  },
+  weightContribution: "Gewicht {weight} % · Beitrag {contribution}",
+  neutralSubstitute: "Neutraler Ersatzwert 0,50; die Konfidenz wird gesenkt.",
+  effortMultiplier: "Aufwandsmultiplikator",
+  effortUnavailable: "Aufwand nicht verfügbar",
+  storedScore: "Gespeicherter Score",
+  reproducedScore: "Aus den Eingaben reproduziert",
+  noEvidenceValues: "Es wurden keine Evidenzwerte zurückgegeben.",
+  observedAt: "Beobachtet {date}",
+  structuredEvidence: "Strukturierte Evidenz",
+  sourceStateUnavailableTitle: "Quellenstatus nicht verfügbar",
+  sourceStateUnavailableBody:
+    "Die API hat nicht angegeben, welche Quellen diese Evidenz stützen.",
+  sourceUpdated: "Aktualisiert {date}",
+  coverageUnavailable: "Abdeckung nicht verfügbar",
+  coveragePercent: "{coverage} % Abdeckung",
+  indexable: "Indexierbar",
+  notIndexable: "Nicht indexierbar",
+  indexabilityUnavailable: "Indexierbarkeit nicht verfügbar",
+  httpStatus: "HTTP {code}",
+  firstLastSeen: "Zuerst gesehen {firstSeen} · Zuletzt gesehen {lastSeen}",
+  noActiveIssue: "An diesem Snapshot hängt kein aktives Problem-Vorkommen.",
+  metric: {
+    lcp: "LCP",
+    cls: "CLS",
+    ttfb: "TTFB",
+    clicks: "Klicks",
+    impressions: "Impressionen",
+    ctr: "CTR",
+    position: "Position",
+    sessions: "Sitzungen",
+    keyEvents: "Key Events",
+  },
+  searchExposure: "Suchexposition",
+  searchExposureNote:
+    "Beobachtete Search-Console-Nachfrage, kein prognostizierter Traffic-Zuwachs.",
+  organicOutcomes: "Organische Ergebnisse",
+  organicOutcomesNote:
+    "Beobachtete GA4-Ergebnisse; Korrelation garantiert keinen Uplift.",
+  periodUnavailable: "Zeitraum nicht verfügbar",
+  periodRange: "{start} – {end}",
+  inspectRawEvidence: "Rohe Evidenz prüfen ({count})",
+  sourceHealthTitle: "Zustand der Evidenzquellen",
+  sourceHealthDescription:
+    "Aktualität und Abdeckung qualifizieren jede technische oder geschäftliche Aussage oben.",
+  historyTitle: "Vorkommenshistorie",
+  historyDescription:
+    "Dieselbe Evidenzgruppe über abgeschlossene Audit-Läufe hinweg.",
+  historyUrls: "{count} URLs",
+  openRun: "Lauf öffnen",
+  noHistoryTitle: "Keine Vorkommenshistorie",
+  noHistoryDescription:
+    "Ein zweites Audit ist nötig, um neue, bestehende, gelöste und wieder aufgetretene Evidenz zu unterscheiden.",
+  affectedUrlEvidenceTitle: "Evidenz der betroffenen URLs",
+  affectedUrlEvidenceDescription:
+    "Prüfe technische Fakten, Search-Console-Exposition, GA4-Ergebnisse und rohe Problem-Evidenz, ohne ihre Aussagen zu vermischen.",
+  searchLoadedUrls: "Geladene URLs durchsuchen",
+  urlSearchPlaceholder: "URL, Seitentitel oder Problem",
+  lifecycle: "Lebenszyklus",
+  allLifecycleStates: "Alle Lebenszyklus-Zustände",
+  lifecycleLabel: {
+    new: "neu",
+    persistent: "bestehend",
+    resolved: "gelöst",
+    reappeared: "wieder aufgetreten",
+  },
+  matchingCount: "{matching} passend · {loaded} geladen von {total}",
+  noLoadedUrlsTitle: "Keine geladene URL passt",
+  noLoadedUrlsDescription:
+    "Ändere die URL-Suche oder den Lebenszyklus-Filter. Fehlende Evidenz bleibt in ungefilterten Ergebnissen sichtbar.",
+  loadingEvidence: "Evidenz wird geladen…",
+  loadMoreUrls: "100 weitere URLs laden",
+} as const;

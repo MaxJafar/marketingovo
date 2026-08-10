@@ -9,6 +9,7 @@ import {
   useStartAudit,
 } from "../api/queries";
 import { useSite } from "../context/site-context";
+import { fmt, useI18n } from "../i18n";
 import { exactUrlHostname } from "../lib/url";
 import { Icon } from "../components/icon";
 import {
@@ -19,32 +20,31 @@ import {
   StatusBadge,
 } from "../components/ui";
 
+/**
+ * Goal cards. Titles and descriptions live in the `onboarding.goals` messages;
+ * the runGoal is API data stored with the audit run, so it stays in the
+ * reference language rather than varying with the interface locale.
+ */
 const goals = [
   {
     id: "technical_health",
-    title: "Improve technical health",
-    description:
-      "Prioritize indexability, crawlability, performance, and regressions.",
+    key: "technicalHealth",
     runGoal: "Improve technical health, indexability, and crawl performance",
   },
   {
     id: "qualified_traffic",
-    title: "Grow qualified traffic",
-    description: "Find pages and queries with the strongest realistic upside.",
+    key: "qualifiedTraffic",
     runGoal:
       "Grow qualified organic traffic from existing and new search demand",
   },
   {
     id: "organic_key_events",
-    title: "Increase organic key events",
-    description: "Weight recommendations by analytics and conversion exposure.",
+    key: "organicKeyEvents",
     runGoal: "Increase organic key events from search traffic",
   },
   {
     id: "content_opportunities",
-    title: "Plan content opportunities",
-    description:
-      "Surface topic gaps and turn demand into an evidence-backed plan.",
+    key: "contentOpportunities",
     runGoal: "Build an evidence-backed organic content opportunity plan",
   },
 ] as const;
@@ -102,6 +102,7 @@ function localTimezone(): string {
 }
 
 export function OnboardingPage() {
+  const { t } = useI18n();
   const {
     siteId,
     site,
@@ -141,41 +142,41 @@ export function OnboardingPage() {
 
   const progressSteps = [
     {
-      label: "Create a workspace",
-      description: "Name the brand this workspace is for.",
+      label: t.onboarding.steps.createWorkspace.label,
+      description: t.onboarding.steps.createWorkspace.description,
       complete: Boolean(siteId),
     },
     {
       // Deliberately separate from workspace creation, and skippable. A
       // workspace doing social, ads or research work may never need one.
-      label: "Add a website",
-      description: "Optional. Required only for crawling and SEO audits.",
+      label: t.onboarding.steps.addWebsite.label,
+      description: t.onboarding.steps.addWebsite.description,
       complete: hasWebsite,
       optional: true,
     },
     {
-      label: "Connect data",
-      description: "Connect a source or choose crawl-only analysis.",
+      label: t.onboarding.steps.connectData.label,
+      description: t.onboarding.steps.connectData.description,
       complete: dataReady,
     },
     {
-      label: "Choose a goal",
-      description: "Tell the audit what outcome matters now.",
+      label: t.onboarding.steps.chooseGoal.label,
+      description: t.onboarding.steps.chooseGoal.description,
       complete: Boolean(selectedGoal),
     },
     {
-      label: "Run a baseline",
-      description: "Create your first technical snapshot.",
+      label: t.onboarding.steps.runBaseline.label,
+      description: t.onboarding.steps.runBaseline.description,
       complete: baselineReady,
     },
     {
-      label: "Review actions",
-      description: "Choose the highest-value next move.",
+      label: t.onboarding.steps.reviewActions.label,
+      description: t.onboarding.steps.reviewActions.description,
       complete: actionsReviewed,
     },
     {
-      label: "Activate monitoring",
-      description: "Schedule repeat audits for regressions.",
+      label: t.onboarding.steps.activateMonitoring.label,
+      description: t.onboarding.steps.activateMonitoring.description,
       complete: monitoringActive,
     },
   ];
@@ -240,24 +241,27 @@ export function OnboardingPage() {
   return (
     <div className="page-stack onboarding-page">
       <PageHeader
-        eyebrow="Guided setup"
-        title="Reach your first useful insight"
-        description="Create a workspace, choose the evidence and outcome, then activate repeat monitoring. A website is optional and unlocks crawling and audits."
+        eyebrow={t.onboarding.eyebrow}
+        title={t.onboarding.title}
+        description={t.onboarding.description}
       />
       {sitesError ? (
-        <InlineNotice tone="danger" title="The local API is unavailable">
+        <InlineNotice tone="danger" title={t.onboarding.apiUnavailableTitle}>
           {sitesError.message}
         </InlineNotice>
       ) : null}
       <div className="onboarding-layout">
         <div>
           <p id="onboarding-progress-summary" className="sr-only">
-            Step {currentStepIndex + 1} of {progressSteps.length}:{" "}
-            {progressSteps[currentStepIndex]?.label}.
+            {fmt(t.onboarding.progressSummary, {
+              current: currentStepIndex + 1,
+              total: progressSteps.length,
+              label: progressSteps[currentStepIndex]?.label ?? "",
+            })}
           </p>
           <ol
             className="step-list"
-            aria-label="Onboarding progress"
+            aria-label={t.onboarding.progressLabel}
             aria-describedby="onboarding-progress-summary"
           >
             {progressSteps.map((step, index) => {
@@ -282,12 +286,12 @@ export function OnboardingPage() {
                     <small>{step.description}</small>
                     <span className="sr-only">
                       {step.complete
-                        ? "Completed."
+                        ? t.onboarding.stepCompleted
                         : step.optional
-                          ? "Optional, not completed."
+                          ? t.onboarding.stepOptionalIncomplete
                           : current
-                            ? "Current step."
-                            : "Not completed."}
+                            ? t.onboarding.stepCurrent
+                            : t.onboarding.stepIncomplete}
                     </span>
                   </div>
                 </li>
@@ -298,37 +302,35 @@ export function OnboardingPage() {
         <div className="onboarding-main">
           {sitesLoading ? (
             <Card className="onboarding-card" aria-busy="true">
-              <span className="step-kicker">Checking local API</span>
-              <h2>Loading your workspace…</h2>
-              <p>
-                The dashboard is confirming whether a site is already
-                configured.
-              </p>
+              <span className="step-kicker">{t.onboarding.loading.kicker}</span>
+              <h2>{t.onboarding.loading.title}</h2>
+              <p>{t.onboarding.loading.body}</p>
             </Card>
           ) : null}
           {!siteId && !sitesLoading ? (
             <Card className="onboarding-card">
-              <span className="step-kicker">Step 1 of 7</span>
-              <h2>Create your first workspace</h2>
-              <p>
-                A workspace holds this brand&rsquo;s channels, research and
-                notes. A website is optional — add one only if you want crawling
-                and SEO audits.
-              </p>
+              <span className="step-kicker">{t.onboarding.create.kicker}</span>
+              <h2>{t.onboarding.create.title}</h2>
+              <p>{t.onboarding.create.body}</p>
               {createSite.isError ? (
-                <InlineNotice tone="danger" title="Site was not added">
+                <InlineNotice
+                  tone="danger"
+                  title={t.onboarding.create.notAddedTitle}
+                >
                   {createSite.error.message}
                 </InlineNotice>
               ) : null}
               {created ? (
-                <InlineNotice tone="success" title="Site added">
-                  Continue by connecting at least one source or choosing
-                  crawl-only analysis.
+                <InlineNotice
+                  tone="success"
+                  title={t.onboarding.create.addedTitle}
+                >
+                  {t.onboarding.create.addedBody}
                 </InlineNotice>
               ) : null}
               <form className="onboarding-form" onSubmit={submitSite}>
                 <label>
-                  Workspace name
+                  {t.onboarding.create.nameLabel}
                   <input
                     name="name"
                     required
@@ -336,24 +338,24 @@ export function OnboardingPage() {
                   />
                 </label>
                 <label>
-                  Canonical URL <span className="optional">Optional</span>
+                  {t.onboarding.create.urlLabel}{" "}
+                  <span className="optional">
+                    {t.onboarding.create.optional}
+                  </span>
                   <input
                     name="url"
                     type="url"
                     placeholder="https://example.com"
                   />
-                  <small>
-                    Leave blank to work on social, ads and research first. You
-                    can add a website any time from Settings.
-                  </small>
+                  <small>{t.onboarding.create.urlHelp}</small>
                 </label>
                 <Button
                   type="submit"
                   disabled={createSite.isPending || Boolean(sitesError)}
                 >
                   {createSite.isPending
-                    ? "Creating workspace…"
-                    : "Create workspace"}{" "}
+                    ? t.onboarding.create.creating
+                    : t.onboarding.create.submit}{" "}
                   <Icon name="arrow" />
                 </Button>
               </form>
@@ -363,41 +365,41 @@ export function OnboardingPage() {
             <>
               <Card className="onboarding-card onboarding-summary">
                 <div>
-                  <span className="step-kicker">Active workspace</span>
+                  <span className="step-kicker">
+                    {t.onboarding.workspace.kicker}
+                  </span>
                   <h2>{site?.name}</h2>
-                  <p>
-                    {site?.url ?? "No website — crawling and audits are off."}
-                  </p>
+                  <p>{site?.url ?? t.onboarding.workspace.noWebsite}</p>
                 </div>
                 <StatusBadge status={site?.status ?? "active"} />
               </Card>
 
               <Card className="onboarding-card">
-                <span className="step-kicker">Step 3 of 7</span>
-                <h2>Choose your evidence</h2>
-                <p>
-                  Connect platforms your team trusts, or start with crawl data
-                  and add integrations later. Missing sources reduce confidence;
-                  they never become fake zeroes.
-                </p>
+                <span className="step-kicker">
+                  {t.onboarding.evidence.kicker}
+                </span>
+                <h2>{t.onboarding.evidence.title}</h2>
+                <p>{t.onboarding.evidence.body}</p>
                 <div className="onboarding-stat">
                   <strong>
-                    {integrationsQuery.isError ? "Unavailable" : connectedCount}
+                    {integrationsQuery.isError
+                      ? t.common.unavailable
+                      : connectedCount}
                   </strong>
-                  <span>connected integrations</span>
+                  <span>{t.onboarding.evidence.connectedIntegrations}</span>
                 </div>
                 {preferences.crawlOnly && connectedCount === 0 ? (
                   <InlineNotice
                     tone="info"
-                    title="Crawl-only analysis selected"
+                    title={t.onboarding.evidence.crawlOnlyTitle}
                   >
-                    The baseline can run now. Connect GSC or GA4 later to
-                    improve confidence and exposure scoring.
+                    {t.onboarding.evidence.crawlOnlyBody}
                   </InlineNotice>
                 ) : null}
                 <div className="form-actions">
                   <Link to="/integrations" className="button button-secondary">
-                    Manage integrations <Icon name="arrow" />
+                    {t.onboarding.evidence.manageIntegrations}{" "}
+                    <Icon name="arrow" />
                   </Link>
                   {connectedCount === 0 ? (
                     <Button
@@ -406,23 +408,20 @@ export function OnboardingPage() {
                       aria-pressed={preferences.crawlOnly}
                       onClick={() => updatePreferences({ crawlOnly: true })}
                     >
-                      Continue with crawl data only
+                      {t.onboarding.evidence.crawlOnlyButton}
                     </Button>
                   ) : null}
                 </div>
               </Card>
 
               <Card className="onboarding-card">
-                <span className="step-kicker">Step 4 of 7</span>
-                <h2>Choose the outcome that matters now</h2>
-                <p>
-                  The selected goal is stored with the audit run so its purpose
-                  is explicit in history and agent workflows.
-                </p>
+                <span className="step-kicker">{t.onboarding.goal.kicker}</span>
+                <h2>{t.onboarding.goal.title}</h2>
+                <p>{t.onboarding.goal.body}</p>
                 <div
                   className="goal-choice-grid"
                   role="group"
-                  aria-label="Primary SEO goal"
+                  aria-label={t.onboarding.goal.groupLabel}
                 >
                   {goals.map((goal) => (
                     <button
@@ -432,46 +431,60 @@ export function OnboardingPage() {
                       aria-pressed={preferences.goal === goal.id}
                       onClick={() => updatePreferences({ goal: goal.id })}
                     >
-                      <strong>{goal.title}</strong>
-                      <span>{goal.description}</span>
+                      <strong>{t.onboarding.goals[goal.key].title}</strong>
+                      <span>{t.onboarding.goals[goal.key].description}</span>
                     </button>
                   ))}
                 </div>
               </Card>
 
               <Card className="onboarding-card">
-                <span className="step-kicker">Step 5 of 7</span>
-                <h2>Build the baseline</h2>
-                <p>
-                  A full audit gives actions URL-level evidence and creates a
-                  reference point for monitoring.
-                </p>
+                <span className="step-kicker">
+                  {t.onboarding.baseline.kicker}
+                </span>
+                <h2>{t.onboarding.baseline.title}</h2>
+                <p>{t.onboarding.baseline.body}</p>
                 {!hasWebsite ? (
-                  <InlineNotice tone="info" title="This step needs a website">
-                    A baseline audit crawls your site. Add a website in{" "}
-                    <Link to="/settings">Settings</Link> to unlock it, or skip
-                    ahead — the rest of this workspace works without one.
+                  <InlineNotice
+                    tone="info"
+                    title={t.onboarding.baseline.needsWebsiteTitle}
+                  >
+                    {t.onboarding.baseline.needsWebsiteBefore}{" "}
+                    <Link to="/settings">
+                      {t.onboarding.baseline.needsWebsiteLink}
+                    </Link>{" "}
+                    {t.onboarding.baseline.needsWebsiteAfter}
                   </InlineNotice>
                 ) : null}
                 {hasWebsite && !selectedGoal ? (
-                  <InlineNotice tone="warning" title="Choose a goal first">
-                    Select the outcome above before starting the baseline.
+                  <InlineNotice
+                    tone="warning"
+                    title={t.onboarding.baseline.chooseGoalTitle}
+                  >
+                    {t.onboarding.baseline.chooseGoalBody}
                   </InlineNotice>
                 ) : null}
                 {startAudit.isError ? (
-                  <InlineNotice tone="danger" title="Audit could not start">
+                  <InlineNotice
+                    tone="danger"
+                    title={t.onboarding.baseline.notStartedTitle}
+                  >
                     {startAudit.error.message}
                   </InlineNotice>
                 ) : null}
                 {startAudit.isSuccess ? (
-                  <InlineNotice tone="success" title="Audit queued">
-                    Track the run from audit history. Actions unlock only after
-                    a completed or partial result is available.
+                  <InlineNotice
+                    tone="success"
+                    title={t.onboarding.baseline.queuedTitle}
+                  >
+                    {t.onboarding.baseline.queuedBody}
                   </InlineNotice>
                 ) : null}
                 {privateAccessHost ? (
                   <details className="private-site-access">
-                    <summary>Private-site access</summary>
+                    <summary>
+                      {t.onboarding.baseline.privateAccessSummary}
+                    </summary>
                     <label className="checkbox-label">
                       <input
                         type="checkbox"
@@ -482,13 +495,12 @@ export function OnboardingPage() {
                       />
                       <span>
                         <strong>
-                          Allow this exact hostname to access a private network
-                          for this audit
+                          {t.onboarding.baseline.privateAccessLabel}
                         </strong>
                         <small>
-                          {privateAccessHost} only. Loopback and private
-                          addresses remain blocked unless you approve this host;
-                          cloud metadata always stays blocked.
+                          {fmt(t.onboarding.baseline.privateAccessHelp, {
+                            host: privateAccessHost,
+                          })}
                         </small>
                       </span>
                     </label>
@@ -503,30 +515,28 @@ export function OnboardingPage() {
                     }
                   >
                     {startAudit.isPending
-                      ? "Starting audit…"
-                      : "Run baseline audit"}
+                      ? t.onboarding.baseline.starting
+                      : t.onboarding.baseline.run}
                   </Button>
                   <Link to="/audits" className="button button-ghost">
-                    View audit history
+                    {t.onboarding.baseline.viewHistory}
                   </Link>
                 </div>
               </Card>
 
               <Card className="onboarding-card">
-                <span className="step-kicker">Step 6 of 7</span>
-                <h2>Choose the first move</h2>
-                <p>
-                  Compare impact, effort, confidence, and source evidence before
-                  committing resources. This step unlocks only after the
-                  baseline produces a completed or partial result.
-                </p>
+                <span className="step-kicker">
+                  {t.onboarding.firstMove.kicker}
+                </span>
+                <h2>{t.onboarding.firstMove.title}</h2>
+                <p>{t.onboarding.firstMove.body}</p>
                 {baselineReady ? (
                   <Link
                     to="/actions"
                     className="button button-primary"
                     onClick={() => updatePreferences({ actionsReviewed: true })}
                   >
-                    Review prioritized actions <Icon name="arrow" />
+                    {t.onboarding.firstMove.reviewActions} <Icon name="arrow" />
                   </Link>
                 ) : (
                   <Button
@@ -534,7 +544,7 @@ export function OnboardingPage() {
                     disabled
                     aria-describedby="actions-locked-reason"
                   >
-                    Review prioritized actions
+                    {t.onboarding.firstMove.reviewActions}
                   </Button>
                 )}
                 {!baselineReady ? (
@@ -542,35 +552,39 @@ export function OnboardingPage() {
                     id="actions-locked-reason"
                     className="onboarding-lock-reason"
                   >
-                    Waiting for a completed baseline run.
+                    {t.onboarding.firstMove.lockedReason}
                   </p>
                 ) : null}
               </Card>
 
               <Card className="onboarding-card">
-                <span className="step-kicker">Step 7 of 7</span>
-                <h2>Activate local monitoring</h2>
-                <p>
-                  Create a durable weekly audit at 06:00 every Monday in your
-                  local timezone. You can change the cadence from Monitoring.
-                </p>
+                <span className="step-kicker">
+                  {t.onboarding.monitoring.kicker}
+                </span>
+                <h2>{t.onboarding.monitoring.title}</h2>
+                <p>{t.onboarding.monitoring.body}</p>
                 {createMonitoring.isError ? (
                   <InlineNotice
                     tone="danger"
-                    title="Monitoring was not activated"
+                    title={t.onboarding.monitoring.notActivatedTitle}
                   >
                     {createMonitoring.error.message}
                   </InlineNotice>
                 ) : null}
                 {createMonitoring.isSuccess ? (
-                  <InlineNotice tone="success" title="Monitoring activated">
-                    The local background service will run the weekly schedule
-                    while it is available.
+                  <InlineNotice
+                    tone="success"
+                    title={t.onboarding.monitoring.activatedTitle}
+                  >
+                    {t.onboarding.monitoring.activatedBody}
                   </InlineNotice>
                 ) : null}
                 {monitoringActive ? (
-                  <InlineNotice tone="success" title="Monitoring is active">
-                    At least one enabled schedule protects this property.
+                  <InlineNotice
+                    tone="success"
+                    title={t.onboarding.monitoring.activeTitle}
+                  >
+                    {t.onboarding.monitoring.activeBody}
                   </InlineNotice>
                 ) : null}
                 <div className="form-actions">
@@ -585,18 +599,17 @@ export function OnboardingPage() {
                       }
                     >
                       {createMonitoring.isPending
-                        ? "Activating monitoring…"
-                        : "Activate weekly monitoring"}
+                        ? t.onboarding.monitoring.activating
+                        : t.onboarding.monitoring.activate}
                     </Button>
                   ) : null}
                   <Link to="/monitoring" className="button button-secondary">
-                    Manage monitoring
+                    {t.onboarding.monitoring.manage}
                   </Link>
                 </div>
                 {!monitoringActive && (!baselineReady || !actionsReviewed) ? (
                   <p className="onboarding-lock-reason">
-                    Complete the baseline and open prioritized actions before
-                    activating monitoring.
+                    {t.onboarding.monitoring.lockedReason}
                   </p>
                 ) : null}
               </Card>

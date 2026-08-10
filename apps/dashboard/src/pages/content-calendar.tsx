@@ -17,6 +17,7 @@ import type {
   MediaAsset,
   SocialPlatform,
 } from "../api/contracts";
+import { fmt, useI18n } from "../i18n";
 
 /**
  * The content calendar.
@@ -73,6 +74,7 @@ function EntryCard({
   entry: CalendarEntry;
   siteId: string;
 }) {
+  const { t } = useI18n();
   const approve = useApprovePublishIntent(siteId);
   const publishNow = usePublishNow(siteId);
   const intents = usePublishIntents(siteId);
@@ -95,9 +97,14 @@ function EntryCard({
           </span>
           {entry.scheduledAt
             ? ` · ${new Date(entry.scheduledAt).toLocaleString()}${entry.timezone ? ` (${entry.timezone})` : ""}`
-            : " · no time set"}
+            : ` · ${t.contentCalendar.entry.noTimeSet}`}
           {entry.attachmentCount > 0
-            ? ` · ${entry.attachmentCount} attachment${entry.attachmentCount === 1 ? "" : "s"}`
+            ? ` · ${fmt(
+                entry.attachmentCount === 1
+                  ? t.contentCalendar.entry.attachmentSingular
+                  : t.contentCalendar.entry.attachmentPlural,
+                { count: entry.attachmentCount },
+              )}`
             : ""}
         </p>
       </div>
@@ -106,7 +113,9 @@ function EntryCard({
         <p className="pixel-hero-sub">
           {entry.record.state === "published" ? (
             <>
-              Sent {new Date(entry.record.attemptedAt).toLocaleString()}
+              {fmt(t.contentCalendar.entry.sent, {
+                time: new Date(entry.record.attemptedAt).toLocaleString(),
+              })}
               {entry.record.permalink ? (
                 <>
                   {" · "}
@@ -116,7 +125,7 @@ function EntryCard({
                     rel="noreferrer noopener"
                     className="pixel-linklike"
                   >
-                    open the post
+                    {t.contentCalendar.entry.openPost}
                   </a>
                 </>
               ) : null}
@@ -124,13 +133,13 @@ function EntryCard({
           ) : entry.record.state === "indeterminate" ? (
             // The honest state, kept distinct from failure on purpose.
             <span role="alert">
-              A request was sent and no reply was recorded, so whether this post
-              went out is unknown. Check {PLATFORM_LABEL[entry.platform]} before
-              trying again — Marketingovo will not resend on its own.
+              {fmt(t.contentCalendar.entry.indeterminate, {
+                platform: PLATFORM_LABEL[entry.platform],
+              })}
             </span>
           ) : (
             <span role="alert">
-              {entry.record.error ?? "The provider refused this post."}
+              {entry.record.error ?? t.contentCalendar.entry.refusedFallback}
             </span>
           )}
         </p>
@@ -145,7 +154,7 @@ function EntryCard({
             title={
               entry.scheduledAt
                 ? undefined
-                : "Give the post a time before approving it."
+                : t.contentCalendar.entry.needsTimeTitle
             }
             onClick={() =>
               approve.mutate({
@@ -154,7 +163,7 @@ function EntryCard({
               })
             }
           >
-            Approve for this time
+            {t.contentCalendar.entry.approve}
           </button>
         ) : null}
         {entry.state === "approved" ? (
@@ -164,7 +173,9 @@ function EntryCard({
             disabled={publishNow.isPending}
             onClick={() => publishNow.mutate(entry.intentId)}
           >
-            {publishNow.isPending ? "Sending…" : "Send now"}
+            {publishNow.isPending
+              ? t.contentCalendar.entry.sending
+              : t.contentCalendar.entry.sendNow}
           </button>
         ) : null}
       </div>
@@ -178,6 +189,7 @@ function EntryCard({
 }
 
 function MediaCard({ asset, siteId }: { asset: MediaAsset; siteId: string }) {
+  const { t } = useI18n();
   const relay = useRelayMedia(siteId);
   const attach = useAttachPublicUrl(siteId);
   const [url, setUrl] = useState("");
@@ -187,25 +199,21 @@ function MediaCard({ asset, siteId }: { asset: MediaAsset; siteId: string }) {
       <div>
         <strong>{asset.filename}</strong>
         <p className="pixel-hero-sub">
-          {asset.mediaType} · {Math.round(asset.sizeBytes / 1024)}KB
+          {asset.mediaType} ·{" "}
+          {fmt(t.contentCalendar.media.sizeKb, {
+            size: Math.round(asset.sizeBytes / 1024),
+          })}
           {asset.width && asset.height
             ? ` · ${asset.width}×${asset.height}`
             : ""}
         </p>
         <p className="pixel-hero-sub">
-          {asset.publicUrl ? (
-            <>
-              Publicly reachable ({asset.publicUrlSource}). Instagram can fetch
-              this.
-            </>
-          ) : (
-            // Stated rather than implied: this is the default and the good one.
-            <>
-              Stored on this machine only. Telegram, X and Facebook post it
-              directly; Instagram cannot, because it fetches media from a public
-              URL rather than accepting an upload.
-            </>
-          )}
+          {asset.publicUrl
+            ? fmt(t.contentCalendar.media.publiclyReachable, {
+                source: asset.publicUrlSource ?? "",
+              })
+            : // Stated rather than implied: this is the default and the good one.
+              t.contentCalendar.media.storedLocally}
         </p>
       </div>
       {asset.publicUrl ? null : (
@@ -215,14 +223,16 @@ function MediaCard({ asset, siteId }: { asset: MediaAsset; siteId: string }) {
             className="pixel-button"
             disabled={relay.isPending}
             onClick={() => relay.mutate(asset.id)}
-            title="Uploads this file to the object storage you configured, so Instagram can fetch it."
+            title={t.contentCalendar.media.relayTitle}
           >
-            {relay.isPending ? "Uploading…" : "Publish to my storage"}
+            {relay.isPending
+              ? t.contentCalendar.media.uploading
+              : t.contentCalendar.media.relay}
           </button>
           <input
             type="url"
             className="pixel-input"
-            placeholder="or paste a public https:// URL you host"
+            placeholder={t.contentCalendar.media.urlPlaceholder}
             value={url}
             onChange={(event) => setUrl(event.target.value)}
           />
@@ -232,7 +242,7 @@ function MediaCard({ asset, siteId }: { asset: MediaAsset; siteId: string }) {
             disabled={!url.startsWith("https://") || attach.isPending}
             onClick={() => attach.mutate({ mediaId: asset.id, publicUrl: url })}
           >
-            Use this URL
+            {t.contentCalendar.media.useUrl}
           </button>
         </div>
       )}
@@ -240,7 +250,7 @@ function MediaCard({ asset, siteId }: { asset: MediaAsset; siteId: string }) {
         <p className="pixel-hero-sub" role="alert">
           {relay.error instanceof Error
             ? relay.error.message
-            : "The upload was refused."}
+            : t.contentCalendar.media.uploadRefused}
         </p>
       ) : null}
     </li>
@@ -248,6 +258,7 @@ function MediaCard({ asset, siteId }: { asset: MediaAsset; siteId: string }) {
 }
 
 export function ContentCalendarPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const calendar = useCalendar(siteId);
   const media = useMediaLibrary(siteId);
@@ -278,14 +289,10 @@ export function ContentCalendarPage() {
       {workspace && workspace.overdue.length > 0 ? (
         <section className="pixel-panel">
           <div className="pixel-panel-head">
-            <h2>Past their time and unsent</h2>
+            <h2>{t.contentCalendar.overdue.title}</h2>
           </div>
           <div className="pixel-panel-body">
-            <p className="pixel-hero-sub">
-              These were scheduled for a moment that has passed and were never
-              approved, so nothing was sent. A calendar that only drew cells
-              would have hidden them.
-            </p>
+            <p className="pixel-hero-sub">{t.contentCalendar.overdue.body}</p>
             <ul className="pixel-list">
               {workspace.overdue.map((entry) => (
                 <EntryCard key={entry.intentId} entry={entry} siteId={siteId} />
@@ -297,19 +304,19 @@ export function ContentCalendarPage() {
 
       <section className="pixel-panel">
         <div className="pixel-panel-head">
-          <h2>Next two weeks</h2>
+          <h2>{t.contentCalendar.week.title}</h2>
           <span className="pixel-panel-mark">{timezone}</span>
         </div>
         <div className="pixel-panel-body">
           {calendar.isLoading ? (
-            <p className="pixel-hero-sub">Reading the calendar…</p>
+            <p className="pixel-hero-sub">{t.contentCalendar.week.loading}</p>
           ) : (workspace?.entries.length ?? 0) === 0 ? (
             <p className="pixel-hero-sub">
-              Nothing is scheduled. Draft a post in{" "}
+              {t.contentCalendar.week.emptyBefore}{" "}
               <Link to="/ads" className="pixel-linklike">
-                the composer
+                {t.contentCalendar.week.composerLink}
               </Link>{" "}
-              or ask an attached agent to write one, then give it a time here.
+              {t.contentCalendar.week.emptyAfter}
             </p>
           ) : (
             <div className="pixel-calendar">
@@ -347,13 +354,11 @@ export function ContentCalendarPage() {
       {workspace && workspace.unscheduled.length > 0 ? (
         <section className="pixel-panel">
           <div className="pixel-panel-head">
-            <h2>Drafted, waiting for a time</h2>
+            <h2>{t.contentCalendar.unscheduled.title}</h2>
           </div>
           <div className="pixel-panel-body">
             <p className="pixel-hero-sub">
-              Pick a time and approve. Changing the time of a post that is
-              already approved clears the approval, because the time is part of
-              what you approved.
+              {t.contentCalendar.unscheduled.body}
             </p>
             <div className="pixel-row-actions">
               <input
@@ -361,7 +366,7 @@ export function ContentCalendarPage() {
                 className="pixel-input"
                 value={when}
                 onChange={(event) => setWhen(event.target.value)}
-                aria-label="Scheduled time"
+                aria-label={t.contentCalendar.unscheduled.timeLabel}
               />
               <button
                 type="button"
@@ -375,7 +380,7 @@ export function ContentCalendarPage() {
                   })
                 }
               >
-                Schedule the selected post
+                {t.contentCalendar.unscheduled.schedule}
               </button>
             </div>
             <ul className="pixel-list">
@@ -402,7 +407,7 @@ export function ContentCalendarPage() {
               <p className="pixel-hero-sub" role="alert">
                 {schedule.error instanceof Error
                   ? schedule.error.message
-                  : "The post could not be scheduled."}
+                  : t.contentCalendar.unscheduled.scheduleFailed}
               </p>
             ) : null}
           </div>
@@ -411,7 +416,7 @@ export function ContentCalendarPage() {
 
       <section className="pixel-panel">
         <div className="pixel-panel-head">
-          <h2>Media</h2>
+          <h2>{t.contentCalendar.media.title}</h2>
           <div className="pixel-row-actions">
             <input
               ref={fileInput}
@@ -423,7 +428,7 @@ export function ContentCalendarPage() {
                 if (file) upload.mutate(file);
                 event.target.value = "";
               }}
-              aria-label="Upload media"
+              aria-label={t.contentCalendar.media.uploadLabel}
             />
           </div>
         </div>
@@ -432,14 +437,11 @@ export function ContentCalendarPage() {
             <p className="pixel-hero-sub" role="alert">
               {upload.error instanceof Error
                 ? upload.error.message
-                : "The upload was refused."}
+                : t.contentCalendar.media.uploadRefused}
             </p>
           ) : null}
           {(media.data?.data.items.length ?? 0) === 0 ? (
-            <p className="pixel-hero-sub">
-              No media yet. Files you upload stay on this machine and are sent
-              directly to Telegram, X and Facebook when a post goes out.
-            </p>
+            <p className="pixel-hero-sub">{t.contentCalendar.media.empty}</p>
           ) : (
             <ul className="pixel-list">
               {media.data!.data.items.map((asset) => (

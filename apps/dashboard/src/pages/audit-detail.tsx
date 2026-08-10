@@ -10,6 +10,7 @@ import type {
   SitemapEvidence,
 } from "../api/contracts";
 import { useReplayRun, useRun, useRunEvidence } from "../api/queries";
+import { fmt, useI18n } from "../i18n";
 import { FreshnessNotice, QueryState } from "../components/data-state";
 import { Icon } from "../components/icon";
 import {
@@ -25,31 +26,11 @@ import {
 } from "../components/ui";
 
 const EVIDENCE_PAGE_SIZE = 50;
-const evidenceTabs: Array<{
-  id: RunEvidenceSection;
-  label: string;
-  description: string;
-}> = [
-  {
-    id: "crawl",
-    label: "Crawl paths",
-    description: "Shortest captured discovery path and first referrer.",
-  },
-  {
-    id: "redirects",
-    label: "Redirects",
-    description: "Requested URL, every redirect hop, and the final response.",
-  },
-  {
-    id: "hreflang",
-    label: "Hreflang",
-    description: "Language targets, self-references, and reciprocal evidence.",
-  },
-  {
-    id: "extractions",
-    label: "Extractions",
-    description: "Custom fields captured by the configured extractor rules.",
-  },
+const evidenceTabs: Array<{ id: RunEvidenceSection }> = [
+  { id: "crawl" },
+  { id: "redirects" },
+  { id: "hreflang" },
+  { id: "extractions" },
 ];
 
 function ExternalUrl({ value, label }: { value: string; label?: string }) {
@@ -70,6 +51,7 @@ function SampleList({
   title: string;
   sample: SitemapEvidence["missingIndexable"];
 }) {
+  const { t } = useI18n();
   if (sample.total === 0) return null;
   return (
     <section className="evidence-sample">
@@ -77,7 +59,7 @@ function SampleList({
         {title} <span>{formatNumber(sample.total)}</span>
       </h3>
       {sample.total === null ? (
-        <p>Unavailable because no verified sitemap snapshot was captured.</p>
+        <p>{t.auditDetail.sitemap.sampleUnavailable}</p>
       ) : (
         <>
           <ul>
@@ -89,9 +71,10 @@ function SampleList({
           </ul>
           {!sample.complete ? (
             <small>
-              Showing the first {formatNumber(sample.urls.length)} of{" "}
-              {formatNumber(sample.total)} URLs. The JSON report preserves the
-              complete captured cohort.
+              {fmt(t.auditDetail.sitemap.sampleTruncated, {
+                shown: formatNumber(sample.urls.length),
+                total: formatNumber(sample.total),
+              })}
             </small>
           ) : null}
         </>
@@ -101,58 +84,59 @@ function SampleList({
 }
 
 function SitemapPanel({ sitemap }: { sitemap: SitemapEvidence }) {
+  const { t } = useI18n();
   const coverage =
     sitemap.coverage === null
-      ? "Unavailable"
+      ? t.common.unavailable
       : `${formatNumber(sitemap.coverage * 100)}%`;
   return (
     <Card className="evidence-sitemap" aria-labelledby="sitemap-evidence-title">
       <div className="evidence-panel-heading">
         <div>
-          <p className="eyebrow">Captured source</p>
-          <h2 id="sitemap-evidence-title">Sitemap coverage</h2>
-          <p>
-            Coverage compares captured indexable crawl URLs with the sitemap
-            snapshot used by this exact run.
-          </p>
+          <p className="eyebrow">{t.auditDetail.sitemap.eyebrow}</p>
+          <h2 id="sitemap-evidence-title">{t.auditDetail.sitemap.title}</h2>
+          <p>{t.auditDetail.sitemap.description}</p>
         </div>
         <StatusBadge status={sitemap.state} />
       </div>
       <div className="evidence-metric-grid">
         <div>
-          <span>Declared URLs</span>
+          <span>{t.auditDetail.sitemap.declaredUrls}</span>
           <strong>{formatNumber(sitemap.declaredUrls)}</strong>
         </div>
         <div>
-          <span>Indexable discovered</span>
+          <span>{t.auditDetail.sitemap.indexableDiscovered}</span>
           <strong>{formatNumber(sitemap.discoveredIndexableUrls)}</strong>
         </div>
         <div>
-          <span>Matched</span>
+          <span>{t.auditDetail.sitemap.matched}</span>
           <strong>{formatNumber(sitemap.matchedIndexableUrls)}</strong>
         </div>
         <div>
-          <span>Coverage</span>
+          <span>{t.auditDetail.sitemap.coverage}</span>
           <strong>{coverage}</strong>
         </div>
       </div>
       {sitemap.sourceUrl ? (
         <p className="evidence-source-link">
-          Snapshot: <ExternalUrl value={sitemap.sourceUrl} />
+          {t.auditDetail.sitemap.snapshotBefore}{" "}
+          <ExternalUrl value={sitemap.sourceUrl} />
           {sitemap.fetchStatusCode !== null
-            ? ` · HTTP ${sitemap.fetchStatusCode}`
+            ? fmt(t.auditDetail.sitemap.httpStatusSuffix, {
+                status: sitemap.fetchStatusCode,
+              })
             : ""}
         </p>
       ) : null}
       {sitemap.files.length > 0 ? (
         <div className="table-shell evidence-file-table">
-          <table aria-label="Captured sitemap files">
+          <table aria-label={t.auditDetail.sitemap.filesLabel}>
             <thead>
               <tr>
-                <th scope="col">Sitemap file</th>
-                <th scope="col">Type</th>
-                <th scope="col">HTTP</th>
-                <th scope="col">Locations</th>
+                <th scope="col">{t.auditDetail.sitemap.fileColumn}</th>
+                <th scope="col">{t.auditDetail.sitemap.typeColumn}</th>
+                <th scope="col">{t.auditDetail.sitemap.httpColumn}</th>
+                <th scope="col">{t.auditDetail.sitemap.locationsColumn}</th>
               </tr>
             </thead>
             <tbody>
@@ -172,15 +156,15 @@ function SitemapPanel({ sitemap }: { sitemap: SitemapEvidence }) {
       ) : null}
       <div className="evidence-sample-grid">
         <SampleList
-          title="Indexable but absent"
+          title={t.auditDetail.sitemap.missingIndexable}
           sample={sitemap.missingIndexable}
         />
         <SampleList
-          title="Declared but not crawled"
+          title={t.auditDetail.sitemap.declaredNotCrawled}
           sample={sitemap.declaredNotCrawled}
         />
         <SampleList
-          title="Declared HTTP errors"
+          title={t.auditDetail.sitemap.brokenDeclared}
           sample={sitemap.brokenDeclared}
         />
       </div>
@@ -196,16 +180,17 @@ function SitemapPanel({ sitemap }: { sitemap: SitemapEvidence }) {
 }
 
 function CrawlEvidenceTable({ items }: { items: CrawlPathEvidence[] }) {
+  const { t } = useI18n();
   return (
     <div className="table-shell evidence-table">
-      <table aria-label="Crawl path evidence">
+      <table aria-label={t.auditDetail.crawl.tableLabel}>
         <thead>
           <tr>
-            <th scope="col">Page</th>
-            <th scope="col">Depth</th>
-            <th scope="col">First referrer</th>
-            <th scope="col">HTTP</th>
-            <th scope="col">Indexable</th>
+            <th scope="col">{t.auditDetail.crawl.pageColumn}</th>
+            <th scope="col">{t.auditDetail.crawl.depthColumn}</th>
+            <th scope="col">{t.auditDetail.crawl.referrerColumn}</th>
+            <th scope="col">{t.auditDetail.crawl.httpColumn}</th>
+            <th scope="col">{t.auditDetail.crawl.indexableColumn}</th>
           </tr>
         </thead>
         <tbody>
@@ -223,9 +208,9 @@ function CrawlEvidenceTable({ items }: { items: CrawlPathEvidence[] }) {
                 {item.discoveredFrom ? (
                   <ExternalUrl value={item.discoveredFrom} />
                 ) : item.crawlDepth === 0 ? (
-                  "Seed"
+                  t.auditDetail.crawl.seed
                 ) : (
-                  "Unavailable"
+                  t.common.unavailable
                 )}
               </td>
               <td>{formatNumber(item.statusCode)}</td>
@@ -249,15 +234,16 @@ function CrawlEvidenceTable({ items }: { items: CrawlPathEvidence[] }) {
 }
 
 function RedirectEvidenceTable({ items }: { items: RedirectPathEvidence[] }) {
+  const { t } = useI18n();
   return (
     <div className="table-shell evidence-table">
-      <table aria-label="Redirect path evidence">
+      <table aria-label={t.auditDetail.redirects.tableLabel}>
         <thead>
           <tr>
-            <th scope="col">Requested URL</th>
-            <th scope="col">Captured path</th>
-            <th scope="col">Hops</th>
-            <th scope="col">Final HTTP</th>
+            <th scope="col">{t.auditDetail.redirects.requestedColumn}</th>
+            <th scope="col">{t.auditDetail.redirects.pathColumn}</th>
+            <th scope="col">{t.auditDetail.redirects.hopsColumn}</th>
+            <th scope="col">{t.auditDetail.redirects.finalHttpColumn}</th>
           </tr>
         </thead>
         <tbody>
@@ -286,19 +272,20 @@ function RedirectEvidenceTable({ items }: { items: RedirectPathEvidence[] }) {
 }
 
 function HreflangEvidenceTable({ items }: { items: HreflangPageEvidence[] }) {
+  const { t } = useI18n();
   const rows = items.flatMap((item) =>
     item.alternates.map((alternate, index) => ({ item, alternate, index })),
   );
   return (
     <div className="table-shell evidence-table hreflang-matrix">
-      <table aria-label="Hreflang evidence matrix">
+      <table aria-label={t.auditDetail.hreflang.tableLabel}>
         <thead>
           <tr>
-            <th scope="col">Source page</th>
-            <th scope="col">HTML / self language</th>
-            <th scope="col">Alternate</th>
-            <th scope="col">Target</th>
-            <th scope="col">Reciprocal</th>
+            <th scope="col">{t.auditDetail.hreflang.sourceColumn}</th>
+            <th scope="col">{t.auditDetail.hreflang.languageColumn}</th>
+            <th scope="col">{t.auditDetail.hreflang.alternateColumn}</th>
+            <th scope="col">{t.auditDetail.hreflang.targetColumn}</th>
+            <th scope="col">{t.auditDetail.hreflang.reciprocalColumn}</th>
           </tr>
         </thead>
         <tbody>
@@ -308,13 +295,13 @@ function HreflangEvidenceTable({ items }: { items: HreflangPageEvidence[] }) {
                 <ExternalUrl value={item.sourceUrl} />
               </td>
               <td>
-                {item.htmlLang ?? "Unavailable"} /{" "}
-                {item.selfLanguage ?? "Missing"}
+                {item.htmlLang ?? t.common.unavailable} /{" "}
+                {item.selfLanguage ?? t.auditDetail.hreflang.missing}
               </td>
               <td>
                 <strong>{alternate.lang}</strong>
                 {alternate.selfReference ? (
-                  <small> Self-reference</small>
+                  <small> {t.auditDetail.hreflang.selfReference}</small>
                 ) : null}
               </td>
               <td className="evidence-url-cell">
@@ -329,9 +316,14 @@ function HreflangEvidenceTable({ items }: { items: HreflangPageEvidence[] }) {
                 <StatusBadge status={alternate.reciprocal} />
                 {alternate.reciprocal === "language_mismatch" ? (
                   <small>
-                    Expected {alternate.expectedReturnLanguage ?? "source"};
-                    observed{" "}
-                    {alternate.observedReturnLanguages.join(", ") || "none"}
+                    {fmt(t.auditDetail.hreflang.mismatch, {
+                      expected:
+                        alternate.expectedReturnLanguage ??
+                        t.auditDetail.hreflang.sourceFallback,
+                      observed:
+                        alternate.observedReturnLanguages.join(", ") ||
+                        t.auditDetail.hreflang.noneFallback,
+                    })}
                   </small>
                 ) : null}
               </td>
@@ -348,13 +340,14 @@ function ExtractionEvidenceTable({
 }: {
   items: ExtractionPageEvidence[];
 }) {
+  const { t } = useI18n();
   return (
     <div className="table-shell evidence-table extraction-table">
-      <table aria-label="Custom extraction evidence">
+      <table aria-label={t.auditDetail.extractions.tableLabel}>
         <thead>
           <tr>
-            <th scope="col">Page</th>
-            <th scope="col">Captured fields</th>
+            <th scope="col">{t.auditDetail.extractions.pageColumn}</th>
+            <th scope="col">{t.auditDetail.extractions.fieldsColumn}</th>
           </tr>
         </thead>
         <tbody>
@@ -369,8 +362,10 @@ function ExtractionEvidenceTable({
                     <div key={`${field.label}-${index}`}>
                       <dt>{field.label}</dt>
                       <dd>
-                        {field.value ?? "No match"}
-                        {field.truncated ? " (truncated)" : ""}
+                        {field.value ?? t.auditDetail.extractions.noMatch}
+                        {field.truncated
+                          ? t.auditDetail.extractions.truncatedSuffix
+                          : ""}
                       </dd>
                     </div>
                   ))}
@@ -385,17 +380,23 @@ function ExtractionEvidenceTable({
 }
 
 function EvidenceResults({ evidence }: { evidence: RunEvidencePage }) {
+  const { t } = useI18n();
   if (evidence.items.length === 0) {
     const tab = evidenceTabs.find(
       (candidate) => candidate.id === evidence.section,
     );
+    const label = tab ? t.auditDetail.tabs[tab.id].label : undefined;
     return (
       <EmptyState
-        title={`No ${tab?.label.toLowerCase() ?? "evidence"} captured`}
+        title={fmt(t.auditDetail.emptyTitle, {
+          section: label?.toLowerCase() ?? t.auditDetail.fallbackEvidence,
+        })}
         description={
           evidence.state === "unavailable"
-            ? "This run does not contain versioned page evidence. Run a new audit to populate the workbench."
-            : `The selected run has no matching ${tab?.label.toLowerCase() ?? "records"}. This is a measured empty state, not a failed query.`
+            ? t.auditDetail.emptyUnavailable
+            : fmt(t.auditDetail.emptyFiltered, {
+                section: label?.toLowerCase() ?? t.auditDetail.fallbackRecords,
+              })
         }
       />
     );
@@ -434,6 +435,7 @@ function EvidenceResults({ evidence }: { evidence: RunEvidencePage }) {
 }
 
 export function AuditDetailPage() {
+  const { t } = useI18n();
   const params = useParams({ strict: false }) as { runId?: string };
   const runId = params.runId ?? "";
   const [section, setSection] = useState<RunEvidenceSection>("crawl");
@@ -471,12 +473,16 @@ export function AuditDetailPage() {
   return (
     <div className="page-stack">
       <Link to="/audits" className="back-link">
-        <Icon name="arrow" /> Back to audits
+        <Icon name="arrow" /> {t.auditDetail.backToAudits}
       </Link>
       <PageHeader
-        eyebrow="Audit run"
-        title={run ? `Run ${run.id}` : "Audit details"}
-        description="Inspect source coverage and exact evidence, or replay the stored run configuration against the site's current state."
+        eyebrow={t.auditDetail.eyebrow}
+        title={
+          run
+            ? fmt(t.auditDetail.runTitle, { id: run.id })
+            : t.auditDetail.fallbackTitle
+        }
+        description={t.auditDetail.description}
         actions={
           <Button
             type="button"
@@ -490,24 +496,26 @@ export function AuditDetailPage() {
             onClick={() => replay.mutate()}
           >
             <Icon name="audits" />
-            {replay.isPending ? "Queuing replay…" : "Replay configuration"}
+            {replay.isPending
+              ? t.auditDetail.queuingReplay
+              : t.auditDetail.replayConfiguration}
           </Button>
         }
       />
       {replay.isError ? (
-        <InlineNotice tone="danger" title="Replay could not start">
+        <InlineNotice tone="danger" title={t.auditDetail.replayErrorTitle}>
           {replay.error.message}
         </InlineNotice>
       ) : null}
       {replay.data ? (
-        <InlineNotice tone="success" title="Independent replay queued">
-          Stored configuration v{replay.data.data.configurationVersion} was
-          copied without changing this run. The replay reads the current site
-          and provider state.{" "}
+        <InlineNotice tone="success" title={t.auditDetail.replayQueuedTitle}>
+          {fmt(t.auditDetail.replayQueuedBefore, {
+            version: replay.data.data.configurationVersion,
+          })}{" "}
           <Link to="/audits/$runId" params={{ runId: replay.data.data.run.id }}>
-            Open replay
+            {t.auditDetail.replayQueuedLink}
           </Link>
-          .
+          {t.auditDetail.replayQueuedAfter}
         </InlineNotice>
       ) : null}
       <QueryState
@@ -518,33 +526,39 @@ export function AuditDetailPage() {
         {run ? (
           <>
             <FreshnessNotice meta={query.data?.meta} />
-            <InlineNotice tone="info" title="Replay boundary">
-              Replay creates a new run from this stored workflow and its exact
-              options. It never edits this result; live pages and integrations
-              are queried again so changes remain measurable.
+            <InlineNotice tone="info" title={t.auditDetail.boundaryTitle}>
+              {t.auditDetail.boundaryBody}
             </InlineNotice>
             <div className="detail-summary-grid">
               <Card>
-                <span className="detail-label">Status</span>
+                <span className="detail-label">
+                  {t.auditDetail.summary.status}
+                </span>
                 <StatusBadge status={run.status} />
               </Card>
               <Card>
-                <span className="detail-label">Started</span>
+                <span className="detail-label">
+                  {t.auditDetail.summary.started}
+                </span>
                 <strong>{formatDate(run.startedAt, true)}</strong>
               </Card>
               <Card>
-                <span className="detail-label">Completed</span>
+                <span className="detail-label">
+                  {t.auditDetail.summary.completed}
+                </span>
                 <strong>{formatDate(run.completedAt, true)}</strong>
               </Card>
               <Card>
-                <span className="detail-label">Issue instances</span>
+                <span className="detail-label">
+                  {t.auditDetail.summary.issueInstances}
+                </span>
                 <strong>{formatNumber(run.issuesFound)}</strong>
               </Card>
             </div>
 
             <div className="two-column-grid">
               <Card>
-                <h2>Issue breakdown</h2>
+                <h2>{t.auditDetail.breakdownTitle}</h2>
                 {(run.issueBreakdown ?? []).length > 0 ? (
                   <ul className="breakdown-list">
                     {run.issueBreakdown?.map((item) => (
@@ -556,13 +570,13 @@ export function AuditDetailPage() {
                   </ul>
                 ) : (
                   <EmptyState
-                    title="Breakdown unavailable"
-                    description="The run did not return severity totals."
+                    title={t.auditDetail.breakdownEmptyTitle}
+                    description={t.auditDetail.breakdownEmptyBody}
                   />
                 )}
               </Card>
               <Card>
-                <h2>Run log</h2>
+                <h2>{t.auditDetail.runLogTitle}</h2>
                 {(run.log ?? []).length > 0 ? (
                   <ol className="run-log">
                     {run.log?.map((entry, index) => (
@@ -574,8 +588,8 @@ export function AuditDetailPage() {
                   </ol>
                 ) : (
                   <EmptyState
-                    title="No log entries"
-                    description="The API did not return a run log."
+                    title={t.auditDetail.runLogEmptyTitle}
+                    description={t.auditDetail.runLogEmptyBody}
                   />
                 )}
               </Card>
@@ -596,21 +610,20 @@ export function AuditDetailPage() {
                   >
                     <div className="evidence-panel-heading">
                       <div>
-                        <p className="eyebrow">Versioned audit evidence</p>
-                        <h2 id="evidence-workbench-title">
-                          Evidence workbench
-                        </h2>
-                        <p>
-                          The UI paginates stored evidence; it never truncates a
-                          cohort without showing the total.
+                        <p className="eyebrow">
+                          {t.auditDetail.workbench.eyebrow}
                         </p>
+                        <h2 id="evidence-workbench-title">
+                          {t.auditDetail.workbench.title}
+                        </h2>
+                        <p>{t.auditDetail.workbench.description}</p>
                       </div>
                       <StatusBadge status={evidence.state} />
                     </div>
                     <div
                       className="evidence-tabs"
                       role="tablist"
-                      aria-label="Evidence sections"
+                      aria-label={t.auditDetail.workbench.tablistLabel}
                     >
                       {evidenceTabs.map((tab) => (
                         <button
@@ -618,13 +631,13 @@ export function AuditDetailPage() {
                           type="button"
                           role="tab"
                           aria-selected={section === tab.id}
-                          title={tab.description}
+                          title={t.auditDetail.tabs[tab.id].description}
                           onClick={() => {
                             setSection(tab.id);
                             setOffset(0);
                           }}
                         >
-                          {tab.label}
+                          {t.auditDetail.tabs[tab.id].label}
                         </button>
                       ))}
                     </div>
@@ -632,21 +645,23 @@ export function AuditDetailPage() {
                       <div className="search-field">
                         <Icon name="search" />
                         <label className="sr-only" htmlFor="evidence-search">
-                          Search evidence by page URL or title
+                          {t.auditDetail.workbench.searchLabel}
                         </label>
                         <input
                           id="evidence-search"
                           type="search"
                           value={searchInput}
                           maxLength={160}
-                          placeholder="Search page URL or title"
+                          placeholder={
+                            t.auditDetail.workbench.searchPlaceholder
+                          }
                           onChange={(event) =>
                             setSearchInput(event.currentTarget.value)
                           }
                         />
                       </div>
                       <Button type="submit" variant="secondary">
-                        Search
+                        {t.auditDetail.workbench.search}
                       </Button>
                       {search ? (
                         <Button
@@ -658,14 +673,14 @@ export function AuditDetailPage() {
                             setOffset(0);
                           }}
                         >
-                          Clear
+                          {t.auditDetail.workbench.clear}
                         </Button>
                       ) : null}
                     </form>
                     <EvidenceResults evidence={evidence} />
                     <nav
                       className="pagination-controls"
-                      aria-label="Evidence pages"
+                      aria-label={t.auditDetail.workbench.paginationLabel}
                     >
                       <Button
                         type="button"
@@ -681,25 +696,27 @@ export function AuditDetailPage() {
                           )
                         }
                       >
-                        Previous
+                        {t.auditDetail.workbench.previous}
                       </Button>
                       <span>
-                        Page{" "}
-                        {formatNumber(
-                          Math.floor(
-                            evidence.pageInfo.offset / evidence.pageInfo.limit,
-                          ) + 1,
-                        )}{" "}
-                        of{" "}
-                        {formatNumber(
-                          Math.max(
-                            1,
-                            Math.ceil(
-                              evidence.pageInfo.total / evidence.pageInfo.limit,
+                        {fmt(t.auditDetail.workbench.pageIndicator, {
+                          page: formatNumber(
+                            Math.floor(
+                              evidence.pageInfo.offset /
+                                evidence.pageInfo.limit,
+                            ) + 1,
+                          ),
+                          pages: formatNumber(
+                            Math.max(
+                              1,
+                              Math.ceil(
+                                evidence.pageInfo.total /
+                                  evidence.pageInfo.limit,
+                              ),
                             ),
                           ),
-                        )}{" "}
-                        · {formatNumber(evidence.pageInfo.total)} records
+                          records: formatNumber(evidence.pageInfo.total),
+                        })}
                       </span>
                       <Button
                         type="button"
@@ -709,7 +726,7 @@ export function AuditDetailPage() {
                           setOffset(evidence.pageInfo.nextOffset ?? offset)
                         }
                       >
-                        Next
+                        {t.auditDetail.workbench.next}
                       </Button>
                     </nav>
                   </Card>

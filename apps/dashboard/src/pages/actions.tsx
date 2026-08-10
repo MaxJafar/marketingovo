@@ -9,6 +9,7 @@ import type {
 } from "../api/contracts";
 import { useActions, useUpdateAction } from "../api/queries";
 import { useSite } from "../context/site-context";
+import { fmt, useI18n } from "../i18n";
 import {
   CapabilityGate,
   FreshnessNotice,
@@ -45,10 +46,6 @@ const verificationStates: readonly ActionVerification[] = [
   "regressed",
 ];
 
-function displayLabel(value: string): string {
-  return value.replaceAll("_", " ");
-}
-
 function normalizedEffort(
   effort: ActionEffort | null | undefined,
 ): Exclude<EffortFilter, "all"> | null {
@@ -78,6 +75,7 @@ function compareNumberDescending(
 }
 
 export function ActionsPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const { capabilities } = useWorkspaceCapabilities(siteId);
   const query = useActions(siteId);
@@ -147,9 +145,9 @@ export function ActionsPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Evidence-to-outcome workbench"
-        title="Actions"
-        description="Prioritize, investigate, assign, and verify SEO work without separating technical evidence from business exposure."
+        eyebrow={t.actions.eyebrow}
+        title={t.actions.title}
+        description={t.actions.description}
       />
       <CapabilityGate capabilities={capabilities} requires={NEEDS_WEBSITE}>
         <QueryState
@@ -160,7 +158,7 @@ export function ActionsPage() {
         >
           <FreshnessNotice meta={query.data?.meta} />
           {updateAction.isError ? (
-            <InlineNotice tone="danger" title="Action status was not saved">
+            <InlineNotice tone="danger" title={t.actions.statusNotSavedTitle}>
               {updateAction.error.message}
             </InlineNotice>
           ) : null}
@@ -170,11 +168,8 @@ export function ActionsPage() {
           >
             <div className="workbench-control-heading">
               <div>
-                <h2 id="action-filter-title">Find the work that matters now</h2>
-                <p>
-                  Search by recommendation, rule, module, or owner. Missing
-                  evidence stays unavailable and never becomes zero.
-                </p>
+                <h2 id="action-filter-title">{t.actions.filterTitle}</h2>
+                <p>{t.actions.filterDescription}</p>
               </div>
               <Button
                 type="button"
@@ -182,40 +177,40 @@ export function ActionsPage() {
                 onClick={resetFilters}
                 disabled={!filtersActive}
               >
-                Reset filters
+                {t.actions.resetFilters}
               </Button>
             </div>
             <div className="workbench-filter-grid">
               <label className="workbench-search">
-                <span>Search actions</span>
+                <span>{t.actions.searchLabel}</span>
                 <span className="search-field">
                   <Icon name="search" />
                   <input
                     type="search"
                     value={search}
                     onChange={(event) => setSearch(event.currentTarget.value)}
-                    placeholder="Canonical, broken links, owner…"
+                    placeholder={t.actions.searchPlaceholder}
                   />
                 </span>
               </label>
               <label>
-                Status
+                {t.actions.statusFilterLabel}
                 <select
                   value={status}
                   onChange={(event) =>
                     setStatus(event.currentTarget.value as StatusFilter)
                   }
                 >
-                  <option value="all">All statuses</option>
+                  <option value="all">{t.actions.allStatuses}</option>
                   {actionStatuses.map((value) => (
                     <option key={value} value={value}>
-                      {displayLabel(value)}
+                      {t.actions.statusLabel[value]}
                     </option>
                   ))}
                 </select>
               </label>
               <label>
-                Verification
+                {t.actions.verificationFilterLabel}
                 <select
                   value={verification}
                   onChange={(event) =>
@@ -224,49 +219,59 @@ export function ActionsPage() {
                     )
                   }
                 >
-                  <option value="all">All verification</option>
+                  <option value="all">{t.actions.allVerification}</option>
                   {verificationStates.map((value) => (
                     <option key={value} value={value}>
-                      {displayLabel(value)}
+                      {t.actions.verificationLabel[value]}
                     </option>
                   ))}
                 </select>
               </label>
               <label>
-                Effort
+                {t.actions.effortFilterLabel}
                 <select
                   value={effort}
                   onChange={(event) =>
                     setEffort(event.currentTarget.value as EffortFilter)
                   }
                 >
-                  <option value="all">All effort</option>
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
+                  <option value="all">{t.actions.allEffort}</option>
+                  <option value="low">{t.actions.effortOption.low}</option>
+                  <option value="medium">
+                    {t.actions.effortOption.medium}
+                  </option>
+                  <option value="high">{t.actions.effortOption.high}</option>
                 </select>
               </label>
               <label>
-                Sort by
+                {t.actions.sortByLabel}
                 <select
                   value={sort}
                   onChange={(event) =>
                     setSort(event.currentTarget.value as ActionSort)
                   }
                 >
-                  <option value="priority">Priority score</option>
-                  <option value="updated">Most recently updated</option>
-                  <option value="affected">Affected URLs</option>
-                  <option value="confidence">Confidence</option>
+                  <option value="priority">
+                    {t.actions.sortOption.priority}
+                  </option>
+                  <option value="updated">
+                    {t.actions.sortOption.updated}
+                  </option>
+                  <option value="affected">
+                    {t.actions.sortOption.affected}
+                  </option>
+                  <option value="confidence">
+                    {t.actions.sortOption.confidence}
+                  </option>
                 </select>
               </label>
             </div>
             <fieldset className="priority-filter-fieldset">
-              <legend>Priority</legend>
+              <legend>{t.actions.priorityLegend}</legend>
               <div
                 className="filter-bar"
                 role="group"
-                aria-label="Filter actions by priority"
+                aria-label={t.actions.priorityGroupLabel}
               >
                 {(["all", "critical", "high", "medium", "low"] as const).map(
                   (value) => (
@@ -277,7 +282,7 @@ export function ActionsPage() {
                       aria-pressed={priority === value}
                       onClick={() => setPriority(value)}
                     >
-                      {value[0].toUpperCase() + value.slice(1)}
+                      {t.actions.priorityFilter[value]}
                     </button>
                   ),
                 )}
@@ -290,23 +295,25 @@ export function ActionsPage() {
             role="status"
             aria-live="polite"
           >
-            Showing {formatNumber(visibleActions.length)} of{" "}
-            {formatNumber(actions.length)} actions
+            {fmt(t.actions.showingCount, {
+              visible: formatNumber(visibleActions.length),
+              total: formatNumber(actions.length),
+            })}
           </p>
 
           {visibleActions.length > 0 ? (
             <div className="table-shell action-workbench-table">
-              <table aria-label="Prioritized SEO actions">
+              <table aria-label={t.actions.tableLabel}>
                 <thead>
                   <tr>
-                    <th scope="col">Priority</th>
-                    <th scope="col">Action and evidence group</th>
-                    <th scope="col">Scope</th>
-                    <th scope="col">Effort</th>
-                    <th scope="col">Confidence</th>
-                    <th scope="col">Workflow</th>
-                    <th scope="col">Verification</th>
-                    <th scope="col">Updated</th>
+                    <th scope="col">{t.actions.columnPriority}</th>
+                    <th scope="col">{t.actions.columnAction}</th>
+                    <th scope="col">{t.actions.columnScope}</th>
+                    <th scope="col">{t.actions.columnEffort}</th>
+                    <th scope="col">{t.actions.columnConfidence}</th>
+                    <th scope="col">{t.actions.columnWorkflow}</th>
+                    <th scope="col">{t.actions.columnVerification}</th>
+                    <th scope="col">{t.actions.columnUpdated}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -324,7 +331,7 @@ export function ActionsPage() {
                             </strong>
                             <StatusBadge
                               status={action.priority ?? "unknown"}
-                              label={action.priority ?? "Unavailable"}
+                              label={action.priority ?? t.common.unavailable}
                             />
                           </div>
                         </td>
@@ -339,23 +346,26 @@ export function ActionsPage() {
                             </Link>
                             <p>{action.summary}</p>
                             <small>
-                              {action.moduleId ?? "Module unavailable"} ·{" "}
-                              {action.ruleId ?? "Rule unavailable"}
+                              {action.moduleId ?? t.actions.moduleUnavailable} ·{" "}
+                              {action.ruleId ?? t.actions.ruleUnavailable}
                             </small>
                           </div>
                         </td>
                         <td>
                           <div className="scope-cell">
                             <strong>{formatNumber(count)}</strong>
-                            <span>affected URLs</span>
+                            <span>{t.actions.affectedUrls}</span>
                             {action.trafficAtRisk !== null &&
                             action.trafficAtRisk !== undefined ? (
                               <small>
-                                {formatNumber(action.trafficAtRisk)} organic
-                                visits exposed
+                                {fmt(t.actions.organicVisitsExposed, {
+                                  count: formatNumber(action.trafficAtRisk),
+                                })}
                               </small>
                             ) : (
-                              <small>Business exposure unavailable</small>
+                              <small>
+                                {t.actions.businessExposureUnavailable}
+                              </small>
                             )}
                           </div>
                         </td>
@@ -365,22 +375,26 @@ export function ActionsPage() {
                               status={normalizedEffort(action.effort)!}
                             />
                           ) : (
-                            "Unavailable"
+                            t.common.unavailable
                           )}
                         </td>
                         <td>
                           {action.confidence === null ||
                           action.confidence === undefined
-                            ? "Unavailable"
+                            ? t.common.unavailable
                             : `${formatNumber(action.confidence * 100)}%`}
                         </td>
                         <td>
                           <label className="table-status-control">
                             <span className="sr-only">
-                              Workflow status for {action.title}
+                              {fmt(t.actions.workflowStatusFor, {
+                                title: action.title,
+                              })}
                             </span>
                             <select
-                              aria-label={`Workflow status for ${action.title}`}
+                              aria-label={fmt(t.actions.workflowStatusFor, {
+                                title: action.title,
+                              })}
                               value={action.status ?? "open"}
                               disabled={isUpdating}
                               onChange={(event) =>
@@ -393,12 +407,12 @@ export function ActionsPage() {
                             >
                               {actionStatuses.map((value) => (
                                 <option key={value} value={value}>
-                                  {displayLabel(value)}
+                                  {t.actions.statusLabel[value]}
                                 </option>
                               ))}
                             </select>
                             {isUpdating ? (
-                              <small role="status">Saving…</small>
+                              <small role="status">{t.actions.saving}</small>
                             ) : null}
                           </label>
                         </td>
@@ -407,8 +421,10 @@ export function ActionsPage() {
                             status={action.verification ?? "unknown"}
                             label={
                               action.verification
-                                ? displayLabel(action.verification)
-                                : "Unavailable"
+                                ? t.actions.verificationLabel[
+                                    action.verification
+                                  ]
+                                : t.common.unavailable
                             }
                           />
                         </td>
@@ -423,18 +439,18 @@ export function ActionsPage() {
             <EmptyState
               title={
                 actions.length > 0
-                  ? "No actions match these filters"
-                  : "No prioritized actions yet"
+                  ? t.actions.emptyFilteredTitle
+                  : t.actions.emptyQueueTitle
               }
               description={
                 actions.length > 0
-                  ? "Reset one or more filters to return to the complete evidence-backed queue."
-                  : "Run an audit to generate the first action queue. A valid empty result is never presented as a perfect score."
+                  ? t.actions.emptyFilteredDescription
+                  : t.actions.emptyQueueDescription
               }
               action={
                 actions.length > 0 ? (
                   <Button variant="secondary" onClick={resetFilters}>
-                    Reset filters
+                    {t.actions.resetFilters}
                   </Button>
                 ) : undefined
               }

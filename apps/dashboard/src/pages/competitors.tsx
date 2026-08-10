@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useCompetitors, useStartWorkflow } from "../api/queries";
 import { useSite } from "../context/site-context";
+import { fmt, useI18n } from "../i18n";
 import { FreshnessNotice, QueryState } from "../components/data-state";
 import {
   Button,
@@ -15,6 +16,7 @@ import {
 } from "../components/ui";
 
 export function CompetitorsPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const query = useCompetitors(siteId);
   const start = useStartWorkflow();
@@ -43,18 +45,18 @@ export function CompetitorsPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Market context"
-        title="Competitors"
-        description="Crawl evidence, publishing cadence and content gaps, all gathered from each rival's own site — no provider key required. Keyword-level gaps stay explicitly unavailable until a supporting provider supplies them."
+        eyebrow={t.competitors.eyebrow}
+        title={t.competitors.title}
+        description={t.competitors.description}
       />
       <Card className="schedule-editor">
         <form onSubmit={submit}>
           <SectionHeading
-            title="Run a reproducible comparison"
-            description="Enter one or two competitor domains. Every site is crawled with the same limits; this view reports technical evidence, not invented visibility data."
+            title={t.competitors.form.title}
+            description={t.competitors.form.description}
           />
           <label>
-            Competitor domains
+            {t.competitors.form.domainsLabel}
             <textarea
               value={domains}
               onChange={(event) => setDomains(event.currentTarget.value)}
@@ -65,20 +67,21 @@ export function CompetitorsPage() {
           </label>
           <div className="form-actions">
             <Button type="submit" disabled={!siteId || start.isPending}>
-              {start.isPending ? "Starting…" : "Compare sites"}
+              {start.isPending
+                ? t.competitors.form.starting
+                : t.competitors.form.submit}
             </Button>
           </div>
         </form>
       </Card>
       {start.isError ? (
-        <InlineNotice tone="danger" title="Comparison could not start">
+        <InlineNotice tone="danger" title={t.competitors.notStartedTitle}>
           {start.error.message}
         </InlineNotice>
       ) : null}
       {start.isSuccess ? (
-        <InlineNotice tone="success" title="Comparison queued">
-          The durable run is visible under Audits. This page will show the
-          latest completed comparison.
+        <InlineNotice tone="success" title={t.competitors.queuedTitle}>
+          {t.competitors.queuedBody}
         </InlineNotice>
       ) : null}
       <QueryState
@@ -99,47 +102,55 @@ export function CompetitorsPage() {
                   <div>
                     <h2>{competitor.domain}</h2>
                     <small>
-                      Updated {formatDate(competitor.lastUpdatedAt, true)}
+                      {fmt(t.competitors.card.updated, {
+                        date: formatDate(competitor.lastUpdatedAt, true),
+                      })}
                     </small>
                   </div>
                 </div>
                 <dl>
                   <div>
-                    <dt>Publishes every</dt>
+                    <dt>{t.competitors.card.publishesEvery}</dt>
                     <dd>
                       {typeof competitor.cadenceDays === "number" ? (
-                        `${competitor.cadenceDays.toFixed(1)} days`
+                        fmt(t.competitors.card.cadenceDays, {
+                          count: competitor.cadenceDays.toFixed(1),
+                        })
                       ) : (
-                        <span title="No feed was found, or the feed carried too few dated posts to measure an interval.">
-                          Unavailable
+                        <span title={t.competitors.card.cadenceUnavailableHint}>
+                          {t.common.unavailable}
                         </span>
                       )}
                     </dd>
                   </div>
                   <div>
-                    <dt>Last published</dt>
+                    <dt>{t.competitors.card.lastPublished}</dt>
                     <dd>
                       {typeof competitor.freshnessSeconds === "number"
-                        ? `${Math.round(competitor.freshnessSeconds / 86400)} days ago`
-                        : "Unavailable"}
+                        ? fmt(t.competitors.card.daysAgo, {
+                            count: Math.round(
+                              competitor.freshnessSeconds / 86400,
+                            ),
+                          })
+                        : t.common.unavailable}
                     </dd>
                   </div>
                   <div>
-                    <dt>Technical health</dt>
+                    <dt>{t.competitors.card.technicalHealth}</dt>
                     <dd>
                       {competitor.technicalHealth === null ||
                       competitor.technicalHealth === undefined
-                        ? "Unavailable"
+                        ? t.common.unavailable
                         : `${formatNumber(competitor.technicalHealth)}/100`}
                     </dd>
                   </div>
                   <div>
-                    <dt>Change</dt>
+                    <dt>{t.competitors.card.change}</dt>
                     <dd>
                       {competitor.technicalHealthChange === null ||
                       competitor.technicalHealthChange === undefined ? (
-                        <span title="No earlier comparison includes this site, so there is no baseline to move against.">
-                          Unavailable
+                        <span title={t.competitors.card.changeUnavailableHint}>
+                          {t.common.unavailable}
                         </span>
                       ) : (
                         // Health is a 0-100 score, so its movement is measured
@@ -155,27 +166,29 @@ export function CompetitorsPage() {
                           }
                           label={
                             competitor.technicalHealthChange === 0
-                              ? "No change"
-                              : `${competitor.technicalHealthChange > 0 ? "+" : ""}${formatNumber(competitor.technicalHealthChange)} pts`
+                              ? t.competitors.card.noChange
+                              : fmt(t.competitors.card.changePts, {
+                                  value: `${competitor.technicalHealthChange > 0 ? "+" : ""}${formatNumber(competitor.technicalHealthChange)}`,
+                                })
                           }
                         />
                       )}
                     </dd>
                   </div>
                   <div>
-                    <dt>Shared keywords</dt>
+                    <dt>{t.competitors.card.sharedKeywords}</dt>
                     <dd>{formatNumber(competitor.sharedKeywords)}</dd>
                   </div>
                   <div>
-                    <dt>Keyword gaps</dt>
+                    <dt>{t.competitors.card.keywordGaps}</dt>
                     <dd>{formatNumber(competitor.keywordGaps)}</dd>
                   </div>
                   <div>
-                    <dt>Covers gap topics</dt>
+                    <dt>{t.competitors.card.coversGapTopics}</dt>
                     <dd>
                       {competitor.contentGaps === null ||
                       competitor.contentGaps === undefined
-                        ? "Unavailable"
+                        ? t.common.unavailable
                         : formatNumber(competitor.contentGaps)}
                     </dd>
                   </div>
@@ -185,24 +198,30 @@ export function CompetitorsPage() {
           </div>
         ) : (
           <EmptyState
-            title="No competitors configured"
-            description="Add competitor domains through the API or setup flow to unlock market context."
+            title={t.competitors.emptyTitle}
+            description={t.competitors.emptyBody}
           />
         )}
         {gapTerms.length > 0 ? (
           <Card>
             <SectionHeading
-              title="Topics they cover that you do not"
-              description="Derived from the pages themselves, so no keyword provider is required. Each term appears in the competitor pages at a materially higher density than on your site."
+              title={t.competitors.gaps.title}
+              description={t.competitors.gaps.description}
             />
             <ul className="gap-term-list">
               {gapTerms.map((gap) => (
                 <li key={gap.term}>
                   <span className="gap-term">{gap.term}</span>
                   <small>
-                    on {formatNumber(gap.referencesCovering)} of{" "}
-                    {formatNumber(competitors.length)} compared{" "}
-                    {competitors.length === 1 ? "site" : "sites"}
+                    {competitors.length === 1
+                      ? fmt(t.competitors.gaps.coverageOne, {
+                          covering: formatNumber(gap.referencesCovering),
+                          total: formatNumber(competitors.length),
+                        })
+                      : fmt(t.competitors.gaps.coverageMany, {
+                          covering: formatNumber(gap.referencesCovering),
+                          total: formatNumber(competitors.length),
+                        })}
                   </small>
                 </li>
               ))}

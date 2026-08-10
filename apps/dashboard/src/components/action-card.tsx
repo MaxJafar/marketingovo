@@ -1,4 +1,5 @@
 import type { ActionStatus, SeoAction } from "../api/contracts";
+import { fmt, useI18n } from "../i18n";
 import { Card, StatusBadge, formatNumber } from "./ui";
 
 const ACTION_STATUSES: readonly ActionStatus[] = [
@@ -7,10 +8,6 @@ const ACTION_STATUSES: readonly ActionStatus[] = [
   "in_progress",
   "resolved",
 ];
-
-function labelOrUnavailable(value: string | null | undefined) {
-  return value ? value.replaceAll("_", " ") : "Unavailable";
-}
 
 export function ActionCard({
   action,
@@ -25,49 +22,66 @@ export function ActionCard({
   isUpdating?: boolean;
   updateError?: string;
 }) {
+  const { t } = useI18n();
   const evidence = action.evidence ?? [];
   return (
     <Card className="action-card">
       <div className="action-card-topline">
         <div className="action-rank">
-          {rank ? `#${rank}` : (action.category ?? "Action")}
+          {rank
+            ? fmt(t.actionCard.rankLabel, { rank })
+            : (action.category ?? t.actionCard.fallbackCategory)}
         </div>
         <StatusBadge
           status={action.priority ?? "unknown"}
-          label={`${labelOrUnavailable(action.priority)} priority`}
+          label={fmt(t.actionCard.priorityBadge, {
+            priority: action.priority
+              ? (t.actionCard.priorityLabel[action.priority] ?? action.priority)
+              : t.common.unavailable,
+          })}
         />
       </div>
       <div>
         <h3>{action.title}</h3>
         <p>{action.summary}</p>
       </div>
-      <dl className="action-factors" aria-label="Priority factors">
+      <dl className="action-factors" aria-label={t.actionCard.factorsLabel}>
         <div>
-          <dt>Impact</dt>
-          <dd>{labelOrUnavailable(action.impact)}</dd>
+          <dt>{t.actionCard.impact}</dt>
+          <dd>
+            {action.impact
+              ? (t.actionCard.impactLabel[action.impact] ?? action.impact)
+              : t.common.unavailable}
+          </dd>
         </div>
         <div>
-          <dt>Effort</dt>
-          <dd>{labelOrUnavailable(action.effort)}</dd>
+          <dt>{t.actionCard.effort}</dt>
+          <dd>
+            {action.effort
+              ? (t.actionCard.effortLabel[action.effort] ?? action.effort)
+              : t.common.unavailable}
+          </dd>
         </div>
         <div>
-          <dt>Confidence</dt>
+          <dt>{t.actionCard.confidence}</dt>
           <dd>
             {action.confidence === null || action.confidence === undefined
-              ? "Unavailable"
+              ? t.common.unavailable
               : `${formatNumber(action.confidence * 100)}%`}
           </dd>
         </div>
         <div>
-          <dt>Priority score</dt>
+          <dt>{t.actionCard.priorityScore}</dt>
           <dd>{formatNumber(action.priorityScore)}</dd>
         </div>
       </dl>
       <div className="action-workflow">
-        <span>Workflow status</span>
+        <span>{t.actionCard.workflowStatus}</span>
         {onStatusChange ? (
           <select
-            aria-label={`Workflow status for ${action.title}`}
+            aria-label={fmt(t.actionCard.workflowStatusFor, {
+              title: action.title,
+            })}
             value={action.status ?? "open"}
             disabled={isUpdating}
             onChange={(event) =>
@@ -79,14 +93,16 @@ export function ActionCard({
           >
             {ACTION_STATUSES.map((status) => (
               <option key={status} value={status}>
-                {labelOrUnavailable(status)}
+                {t.actionCard.statusLabel[status]}
               </option>
             ))}
           </select>
         ) : (
           <StatusBadge status={action.status ?? "unknown"} />
         )}
-        {isUpdating ? <small role="status">Saving status…</small> : null}
+        {isUpdating ? (
+          <small role="status">{t.actionCard.savingStatus}</small>
+        ) : null}
         {updateError ? (
           <small className="action-update-error" role="alert">
             {updateError}
@@ -94,14 +110,13 @@ export function ActionCard({
         ) : null}
       </div>
       <div className="priority-reason">
-        <span>Why this is prioritized</span>
+        <span>{t.actionCard.whyPrioritized}</span>
         <p>
-          {action.priorityExplanation ??
-            "The API did not provide a priority explanation."}
+          {action.priorityExplanation ?? t.actionCard.noPriorityExplanation}
         </p>
       </div>
       <details className="action-evidence">
-        <summary>Evidence and scope</summary>
+        <summary>{t.actionCard.evidenceSummary}</summary>
         {evidence.length > 0 ? (
           <ul>
             {evidence.map((item, index) => (
@@ -109,7 +124,7 @@ export function ActionCard({
                 <span>{item.label}</span>
                 <strong>
                   {item.value === null || item.value === undefined
-                    ? "Unavailable"
+                    ? t.common.unavailable
                     : String(item.value)}
                 </strong>
                 {item.source ? <small>{item.source}</small> : null}
@@ -117,7 +132,7 @@ export function ActionCard({
             ))}
           </ul>
         ) : (
-          <p>No supporting evidence was returned for this action.</p>
+          <p>{t.actionCard.noEvidence}</p>
         )}
       </details>
     </Card>

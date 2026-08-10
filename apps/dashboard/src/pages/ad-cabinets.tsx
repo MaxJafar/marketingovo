@@ -21,6 +21,7 @@ import type {
   ChannelMetricSummary,
   PublishIntent,
 } from "../api/contracts";
+import { fmt, useI18n, type Messages } from "../i18n";
 
 /**
  * Ad Cabinets — Meta and Google Ads.
@@ -39,20 +40,6 @@ import type {
  * queue below, unapproved, with the exact payload it would send.
  */
 
-const PLATFORM_LABEL: Record<AdPlatform, string> = {
-  all: "All placements",
-  facebook: "Facebook",
-  instagram: "Instagram",
-  messenger: "Messenger",
-  audience_network: "Audience Network",
-  google_search: "Google Search",
-  google_search_partners: "Search Partners",
-  google_display: "Google Display",
-  google_youtube: "YouTube",
-  google_performance_max: "Performance Max",
-  unknown: "Other placement",
-};
-
 const PROVIDER_LABEL: Record<string, string> = {
   "meta-ads": "Meta",
   "google-ads": "Google Ads",
@@ -67,22 +54,6 @@ const HEADLINE_METRICS = [
   "ctr",
 ] as const;
 
-const METRIC_LABEL: Record<string, string> = {
-  spend: "Spend",
-  impressions: "Impressions",
-  clicks: "Clicks",
-  link_clicks: "Link clicks",
-  conversions: "Conversions",
-  conversion_value: "Conversion value",
-  cost_per_conversion: "Cost per conversion",
-  ctr: "CTR",
-  cpc: "CPC",
-  cpm: "CPM",
-  reach: "Reach",
-  frequency: "Frequency",
-  video_plays: "Video plays",
-};
-
 function formatMetric(summary: ChannelMetricSummary): string {
   if (summary.value === null) return "—";
   const value = summary.value;
@@ -96,39 +67,41 @@ function formatMetric(summary: ChannelMetricSummary): string {
   return summary.currency ? `${rounded} ${summary.currency}` : rounded;
 }
 
-function stateLabel(summary: ChannelMetricSummary): string | null {
+function stateLabel(summary: ChannelMetricSummary, t: Messages): string | null {
   switch (summary.state) {
     case "available":
       return null;
     case "partial":
-      return `partial — ${summary.observedDays}/${summary.requestedDays} days`;
+      return fmt(t.adCabinets.state.partial, {
+        observed: summary.observedDays,
+        requested: summary.requestedDays,
+      });
     case "failed":
-      return "could not read";
+      return t.adCabinets.state.failed;
     case "unavailable":
-      return "not measured";
+      return t.adCabinets.state.unavailable;
   }
 }
 
 function CabinetPerformance({ cabinetId }: { cabinetId: string }) {
+  const { t } = useI18n();
+  // Widened copy: metric keys arrive as free-form API strings, and unknown
+  // ones fall back to the raw key rather than crashing the lookup's typing.
+  const metricLabels: Record<string, string> = { ...t.adCabinets.metricLabel };
   const query = useCabinetPerformance(cabinetId);
   const performance = query.data?.data;
 
   if (query.isLoading) {
-    return <p className="pixel-hero-sub">Reading stored measurements…</p>;
+    return <p className="pixel-hero-sub">{t.adCabinets.performance.loading}</p>;
   }
   if (!performance) {
     return (
-      <p className="pixel-hero-sub">
-        This cabinet's measurements could not be read.
-      </p>
+      <p className="pixel-hero-sub">{t.adCabinets.performance.unreadable}</p>
     );
   }
   if (performance.lastSyncedAt === null) {
     return (
-      <p className="pixel-hero-sub">
-        Never synced. Run a paid audit to read this cabinet's spend and
-        delivery. Nothing is shown until something is measured.
-      </p>
+      <p className="pixel-hero-sub">{t.adCabinets.performance.neverSynced}</p>
     );
   }
 
@@ -159,20 +132,23 @@ function CabinetPerformance({ cabinetId }: { cabinetId: string }) {
   return (
     <>
       <p className="pixel-hero-sub">
-        {performance.start} to {performance.end}. Last synced{" "}
-        {new Date(performance.lastSyncedAt).toLocaleString()}.
+        {fmt(t.adCabinets.performance.syncedRange, {
+          start: performance.start,
+          end: performance.end,
+          date: new Date(performance.lastSyncedAt).toLocaleString(),
+        })}
       </p>
       {order
         .filter((platform) => byPlatform.has(platform))
         .map((platform) => (
           <div key={platform} className="pixel-subsection">
-            <h4>{PLATFORM_LABEL[platform]}</h4>
+            <h4>{t.adCabinets.platformLabel[platform]}</h4>
             <table className="pixel-table">
               <thead>
                 <tr>
-                  <th scope="col">Metric</th>
-                  <th scope="col">Value</th>
-                  <th scope="col">Coverage</th>
+                  <th scope="col">{t.adCabinets.performance.metricHeader}</th>
+                  <th scope="col">{t.adCabinets.performance.valueHeader}</th>
+                  <th scope="col">{t.adCabinets.performance.coverageHeader}</th>
                 </tr>
               </thead>
               <tbody>
@@ -181,10 +157,10 @@ function CabinetPerformance({ cabinetId }: { cabinetId: string }) {
                     .get(platform)!
                     .find((entry) => entry.metricKey === key);
                   if (!summary) return null;
-                  const state = stateLabel(summary);
+                  const state = stateLabel(summary, t);
                   return (
                     <tr key={key}>
-                      <th scope="row">{METRIC_LABEL[key] ?? key}</th>
+                      <th scope="row">{metricLabels[key] ?? key}</th>
                       <td>{formatMetric(summary)}</td>
                       <td>
                         {state ? (
@@ -195,7 +171,7 @@ function CabinetPerformance({ cabinetId }: { cabinetId: string }) {
                             {state}
                           </span>
                         ) : (
-                          "complete"
+                          t.adCabinets.performance.coverageComplete
                         )}
                       </td>
                     </tr>
@@ -210,8 +186,10 @@ function CabinetPerformance({ cabinetId }: { cabinetId: string }) {
               .slice(0, 2)
               .map((entry) => (
                 <p key={entry.metricKey} className="pixel-hero-sub">
-                  {METRIC_LABEL[entry.metricKey] ?? entry.metricKey}:{" "}
-                  {entry.note}
+                  {fmt(t.adCabinets.performance.metricNote, {
+                    metric: metricLabels[entry.metricKey] ?? entry.metricKey,
+                    note: entry.note ?? "",
+                  })}
                 </p>
               ))}
           </div>
@@ -234,27 +212,26 @@ function CabinetPerformance({ cabinetId }: { cabinetId: string }) {
  * off than one who was told the analysis has a limit.
  */
 function WastedQueries({ cabinetId }: { cabinetId: string }) {
+  const { t } = useI18n();
   const query = useSearchTerms(cabinetId, true, { actionableOnly: true });
   const terms = query.data?.data.items ?? [];
 
   return (
     <div className="pixel-subsection">
-      <h4>Queries worth a decision</h4>
+      <h4>{t.adCabinets.wasted.heading}</h4>
       {query.isLoading ? (
-        <p className="pixel-hero-sub">Reading stored search terms…</p>
+        <p className="pixel-hero-sub">{t.adCabinets.wasted.loading}</p>
       ) : terms.length === 0 ? (
-        <p className="pixel-hero-sub">
-          No search terms stored for this account yet. Run a paid audit.
-        </p>
+        <p className="pixel-hero-sub">{t.adCabinets.wasted.empty}</p>
       ) : (
         <table className="pixel-table">
           <thead>
             <tr>
-              <th scope="col">Query</th>
-              <th scope="col">Matched</th>
-              <th scope="col">Clicks</th>
-              <th scope="col">Cost</th>
-              <th scope="col">Conversions</th>
+              <th scope="col">{t.adCabinets.wasted.queryHeader}</th>
+              <th scope="col">{t.adCabinets.wasted.matchedHeader}</th>
+              <th scope="col">{t.adCabinets.wasted.clicksHeader}</th>
+              <th scope="col">{t.adCabinets.wasted.costHeader}</th>
+              <th scope="col">{t.adCabinets.wasted.conversionsHeader}</th>
             </tr>
           </thead>
           <tbody>
@@ -280,17 +257,13 @@ function WastedQueries({ cabinetId }: { cabinetId: string }) {
           </tbody>
         </table>
       )}
-      <p className="pixel-hero-sub">
-        Search and Shopping only. Performance Max and Demand Gen report no
-        queries at all, and Google withholds terms too rare to anonymise, so
-        this never accounts for all of an account's clicks. A short list is not
-        evidence that nothing is being wasted.
-      </p>
+      <p className="pixel-hero-sub">{t.adCabinets.wasted.footnote}</p>
     </div>
   );
 }
 
 function ApprovalQueue({ siteId }: { siteId: string }) {
+  const { t } = useI18n();
   const intents = usePublishIntents(siteId);
   const approve = useApprovePublishIntent(siteId);
   const withdraw = useWithdrawPublishIntent(siteId);
@@ -298,32 +271,33 @@ function ApprovalQueue({ siteId }: { siteId: string }) {
   const items = intents.data?.data.items ?? [];
 
   if (items.length === 0) {
-    return (
-      <p className="pixel-hero-sub">
-        Nothing is waiting for approval. An attached agent can draft a campaign
-        and stage it here; it cannot approve one, and neither can this product
-        send anything to an ad platform yet. Google Ads is read-only by design —
-        see ADR 0008.
-      </p>
-    );
+    return <p className="pixel-hero-sub">{t.adCabinets.queue.empty}</p>;
   }
 
   const budgetLine = (intent: PublishIntent): string => {
     const { dailyBudget, lifetimeBudget, currency } = intent.budget;
     const parts: string[] = [];
     if (dailyBudget !== null)
-      parts.push(`${dailyBudget}${currency ? ` ${currency}` : ""} per day`);
+      parts.push(
+        fmt(t.adCabinets.queue.perDay, {
+          amount: `${dailyBudget}${currency ? ` ${currency}` : ""}`,
+        }),
+      );
     if (lifetimeBudget !== null)
-      parts.push(`${lifetimeBudget}${currency ? ` ${currency}` : ""} lifetime`);
-    return parts.length > 0 ? parts.join(", ") : "No budget named";
+      parts.push(
+        fmt(t.adCabinets.queue.lifetime, {
+          amount: `${lifetimeBudget}${currency ? ` ${currency}` : ""}`,
+        }),
+      );
+    return parts.length > 0 ? parts.join(", ") : t.adCabinets.queue.noBudget;
   };
 
   return (
     <>
       <p className="pixel-hero-sub">
-        {items.length} staged payload{items.length === 1 ? "" : "s"}. Read the
-        exact request before approving — approval binds to this version, and a
-        payload edited afterwards has to be approved again.
+        {items.length === 1
+          ? fmt(t.adCabinets.queue.stagedOne, { count: items.length })
+          : fmt(t.adCabinets.queue.stagedMany, { count: items.length })}
       </p>
       <ul className="pixel-list">
         {items.map((intent) => (
@@ -331,9 +305,11 @@ function ApprovalQueue({ siteId }: { siteId: string }) {
             <div>
               <strong>{budgetLine(intent)}</strong>
               <p className="pixel-hero-sub">
-                Staged by {intent.stagedBy} on{" "}
-                {new Date(intent.stagedAt).toLocaleString()}. Payload{" "}
-                {intent.payloadHash.slice(0, 12)}…
+                {fmt(t.adCabinets.queue.stagedBy, {
+                  name: intent.stagedBy,
+                  date: new Date(intent.stagedAt).toLocaleString(),
+                  hash: intent.payloadHash.slice(0, 12),
+                })}
               </p>
             </div>
             <button
@@ -344,7 +320,9 @@ function ApprovalQueue({ siteId }: { siteId: string }) {
                 setExpanded(expanded === intent.id ? null : intent.id)
               }
             >
-              {expanded === intent.id ? "Hide payload" : "Read payload"}
+              {expanded === intent.id
+                ? t.adCabinets.queue.hidePayload
+                : t.adCabinets.queue.readPayload}
             </button>
             {expanded === intent.id ? (
               <pre className="pixel-code">
@@ -359,7 +337,7 @@ function ApprovalQueue({ siteId }: { siteId: string }) {
                 title={
                   expanded === intent.id
                     ? undefined
-                    : "Read the payload before approving it."
+                    : t.adCabinets.queue.readBeforeApproving
                 }
                 onClick={() =>
                   approve.mutate({
@@ -368,7 +346,7 @@ function ApprovalQueue({ siteId }: { siteId: string }) {
                   })
                 }
               >
-                Approve this exact payload
+                {t.adCabinets.queue.approveExact}
               </button>
               <button
                 type="button"
@@ -381,7 +359,7 @@ function ApprovalQueue({ siteId }: { siteId: string }) {
                   })
                 }
               >
-                Withdraw
+                {t.adCabinets.queue.withdraw}
               </button>
             </div>
           </li>
@@ -391,18 +369,16 @@ function ApprovalQueue({ siteId }: { siteId: string }) {
         <p className="pixel-hero-sub" role="alert">
           {approve.error instanceof Error
             ? approve.error.message
-            : "The approval was refused."}
+            : t.adCabinets.queue.approvalRefused}
         </p>
       ) : null}
-      <p className="pixel-hero-sub">
-        Approving records your consent to this exact payload. It does not send
-        anything: this build has no outbound write path to Meta, by design.
-      </p>
+      <p className="pixel-hero-sub">{t.adCabinets.queue.footnote}</p>
     </>
   );
 }
 
 export function AdCabinetsPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const integrations = useIntegrations(siteId);
   const cabinets = useCabinets(siteId);
@@ -437,61 +413,54 @@ export function AdCabinetsPage() {
     <>
       <section className="pixel-panel">
         <div className="pixel-panel-head">
-          <h2>Connections</h2>
+          <h2>{t.adCabinets.connections.heading}</h2>
         </div>
         <div className="pixel-panel-body">
           {meta?.status === "expired" ? (
             <p className="pixel-hero-sub" role="alert">
-              The Meta access token expired. Meta System User tokens have a
-              fixed lifetime and do not refresh — generate a new one in Business
-              Manager and paste it in{" "}
+              {t.adCabinets.connections.metaExpiredBefore}{" "}
               <Link to="/integrations" className="pixel-linklike">
-                Integrations
+                {t.adCabinets.connections.integrationsLink}
               </Link>
-              . Until then, spend and delivery are unreadable rather than zero.
+              {t.adCabinets.connections.metaExpiredAfter}
             </p>
           ) : metaConnected ? (
             <p className="pixel-hero-sub">
-              Meta is connected
               {meta?.expiresAt
-                ? `. The token expires ${new Date(meta.expiresAt).toLocaleDateString()} — rotate it before then.`
-                : "."}
+                ? fmt(t.adCabinets.connections.metaConnectedExpiry, {
+                    date: new Date(meta.expiresAt).toLocaleDateString(),
+                  })
+                : t.adCabinets.connections.metaConnected}
             </p>
           ) : (
             <p className="pixel-hero-sub">
-              Meta is not connected, so Facebook and Instagram spend cannot be
-              read. Generate a System User token in Meta Business Manager and
-              paste it in{" "}
+              {t.adCabinets.connections.metaMissingBefore}{" "}
               <Link to="/integrations" className="pixel-linklike">
-                Integrations
+                {t.adCabinets.connections.integrationsLink}
               </Link>
-              .
+              {t.adCabinets.connections.metaMissingAfter}
             </p>
           )}
 
           {google?.status === "expired" ? (
             <p className="pixel-hero-sub" role="alert">
-              The Google sign-in for Google Ads expired. Reconnect it in{" "}
+              {t.adCabinets.connections.googleExpiredBefore}{" "}
               <Link to="/integrations" className="pixel-linklike">
-                Integrations
+                {t.adCabinets.connections.integrationsLink}
               </Link>
-              . Until then, Google spend is unreadable rather than zero.
+              {t.adCabinets.connections.googleExpiredAfter}
             </p>
           ) : googleConnected ? (
-            <p className="pixel-hero-sub">Google Ads is connected.</p>
+            <p className="pixel-hero-sub">
+              {t.adCabinets.connections.googleConnected}
+            </p>
           ) : (
             <p className="pixel-hero-sub">
-              Google Ads is not connected. It needs two things: a Google
-              sign-in, and a developer token of your own from the API Center of
-              a Google Ads manager account. Marketingovo ships no developer
-              token — one compiled into the app would make every install a
-              single identity to Google, and its rate limits and terms attach to
-              whoever holds it. Google approves new tokens by hand, so apply
-              before you need it. Both go in{" "}
+              {t.adCabinets.connections.googleMissingBefore}{" "}
               <Link to="/integrations" className="pixel-linklike">
-                Integrations
+                {t.adCabinets.connections.integrationsLink}
               </Link>
-              .
+              {t.adCabinets.connections.googleMissingAfter}
             </p>
           )}
         </div>
@@ -499,11 +468,11 @@ export function AdCabinetsPage() {
 
       <section className="pixel-panel">
         <div className="pixel-panel-head">
-          <h2>Ad cabinets</h2>
+          <h2>{t.adCabinets.cabinets.heading}</h2>
           <div className="pixel-row-actions">
             <select
               className="pixel-input"
-              aria-label="Provider to search for accounts"
+              aria-label={t.adCabinets.cabinets.providerSelectLabel}
               value={discoverProvider}
               onChange={(event) => {
                 setDiscoverProvider(event.target.value);
@@ -520,8 +489,11 @@ export function AdCabinetsPage() {
               onClick={() => setDiscovering(true)}
             >
               {discovery.isFetching
-                ? `Asking ${PROVIDER_LABEL[discoverProvider] ?? discoverProvider}…`
-                : "Find my accounts"}
+                ? fmt(t.adCabinets.cabinets.asking, {
+                    provider:
+                      PROVIDER_LABEL[discoverProvider] ?? discoverProvider,
+                  })
+                : t.adCabinets.cabinets.findAccounts}
             </button>
             <button
               type="button"
@@ -535,30 +507,24 @@ export function AdCabinetsPage() {
                 })
               }
             >
-              {startWorkflow.isPending ? "Starting…" : "Run paid audit"}
+              {startWorkflow.isPending
+                ? t.adCabinets.cabinets.starting
+                : t.adCabinets.cabinets.runPaidAudit}
             </button>
           </div>
         </div>
         <div className="pixel-panel-body">
           {linked.length > 0 ? (
             <p className="pixel-hero-sub">
-              The paid audit also checks the pages these ads send people to —
-              destinations that 404, redirects that drop the click identifier,
-              and landing pages that never mention what is being bid on.
-              Findings appear in{" "}
+              {t.adCabinets.cabinets.auditCheckBefore}{" "}
               <Link to="/actions" className="pixel-linklike">
-                Actions
+                {t.adCabinets.cabinets.actionsLink}
               </Link>
-              . Running an SEO audit first makes the check cheaper and adds page
-              speed to it; without one, every destination is fetched directly.
+              {t.adCabinets.cabinets.auditCheckAfter}
             </p>
           ) : null}
           {linked.length === 0 ? (
-            <p className="pixel-hero-sub">
-              No ad account is linked to this workspace. One login usually
-              reaches several accounts, and which of them this workspace reads
-              is your decision — connecting a provider links nothing on its own.
-            </p>
+            <p className="pixel-hero-sub">{t.adCabinets.cabinets.empty}</p>
           ) : (
             <ul className="pixel-list">
               {linked.map((cabinet: ChannelAccount) => (
@@ -569,11 +535,15 @@ export function AdCabinetsPage() {
                       {cabinet.externalId}
                       {` · ${PROVIDER_LABEL[cabinet.provider] ?? cabinet.provider}`}
                       {cabinet.currency
-                        ? ` · bills in ${cabinet.currency}`
-                        : " · no currency reported for this account"}
+                        ? ` · ${fmt(t.adCabinets.cabinets.billsIn, {
+                            currency: cabinet.currency,
+                          })}`
+                        : ` · ${t.adCabinets.cabinets.noCurrency}`}
                       {cabinet.dailySpendCap !== null
-                        ? ` · daily cap ${cabinet.dailySpendCap}`
-                        : " · no local daily cap set"}
+                        ? ` · ${fmt(t.adCabinets.cabinets.dailyCap, {
+                            cap: cabinet.dailySpendCap,
+                          })}`
+                        : ` · ${t.adCabinets.cabinets.noDailyCap}`}
                     </p>
                   </div>
                   <div className="pixel-row-actions">
@@ -588,8 +558,8 @@ export function AdCabinetsPage() {
                       }
                     >
                       {openCabinet === cabinet.id
-                        ? "Hide performance"
-                        : "Show performance"}
+                        ? t.adCabinets.cabinets.hidePerformance
+                        : t.adCabinets.cabinets.showPerformance}
                     </button>
                     <button
                       type="button"
@@ -602,16 +572,16 @@ export function AdCabinetsPage() {
                         })
                       }
                     >
-                      Archive
+                      {t.adCabinets.cabinets.archive}
                     </button>
                     <button
                       type="button"
                       className="pixel-button"
                       disabled={removeCabinet.isPending}
                       onClick={() => removeCabinet.mutate(cabinet.id)}
-                      title="Removes the cabinet and every measurement recorded against it."
+                      title={t.adCabinets.cabinets.removeTitle}
                     >
-                      Remove
+                      {t.adCabinets.cabinets.remove}
                     </button>
                   </div>
                   {openCabinet === cabinet.id ? (
@@ -631,13 +601,16 @@ export function AdCabinetsPage() {
             <p className="pixel-hero-sub" role="alert">
               {discovery.error instanceof Error
                 ? discovery.error.message
-                : `${PROVIDER_LABEL[discoverProvider] ?? discoverProvider} could not be reached for account discovery.`}
+                : fmt(t.adCabinets.cabinets.discoveryFailed, {
+                    provider:
+                      PROVIDER_LABEL[discoverProvider] ?? discoverProvider,
+                  })}
             </p>
           ) : null}
 
           {discovery.data ? (
             <div className="pixel-subsection">
-              <h4>Accounts this credential can reach</h4>
+              <h4>{t.adCabinets.cabinets.discoveredHeading}</h4>
               <ul className="pixel-list">
                 {discovery.data.data.items.map((candidate) => (
                   <li key={candidate.externalId}>
@@ -664,7 +637,9 @@ export function AdCabinetsPage() {
                         })
                       }
                     >
-                      {candidate.linked ? "Linked" : "Link to this workspace"}
+                      {candidate.linked
+                        ? t.adCabinets.cabinets.linked
+                        : t.adCabinets.cabinets.linkToWorkspace}
                     </button>
                   </li>
                 ))}
@@ -676,7 +651,7 @@ export function AdCabinetsPage() {
 
       <section className="pixel-panel">
         <div className="pixel-panel-head">
-          <h2>Waiting for your approval</h2>
+          <h2>{t.adCabinets.queue.heading}</h2>
         </div>
         <div className="pixel-panel-body">
           <ApprovalQueue siteId={siteId} />

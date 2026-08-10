@@ -1,14 +1,16 @@
 import { Link } from "@tanstack/react-router";
+import { useI18n } from "../i18n";
 import { EmptyState } from "../components/ui";
 
 export function NotFoundPage() {
+  const { t } = useI18n();
   return (
     <EmptyState
-      title="Page not found"
-      description="This control panel route does not exist."
+      title={t.notFound.title}
+      description={t.notFound.description}
       action={
         <Link to="/" className="button button-primary">
-          Return to overview
+          {t.notFound.returnToOverview}
         </Link>
       }
     />

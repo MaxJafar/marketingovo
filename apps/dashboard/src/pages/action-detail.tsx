@@ -16,6 +16,7 @@ import {
   useUpdateAction,
   useVerifyAction,
 } from "../api/queries";
+import { fmt, useI18n, type Messages } from "../i18n";
 import { FreshnessNotice, QueryState } from "../components/data-state";
 import { Icon } from "../components/icon";
 import {
@@ -58,48 +59,49 @@ const scoreTerms: ReadonlyArray<{
     | "confidence"
   >;
   unavailableKey?: string;
-  label: string;
   weight: number;
 }> = [
-  { key: "severity", label: "Severity", weight: 0.35 },
+  { key: "severity", weight: 0.35 },
   {
     key: "organicExposure",
     unavailableKey: "organic_exposure",
-    label: "Organic exposure",
     weight: 0.25,
   },
   {
     key: "conversionExposure",
     unavailableKey: "conversion_exposure",
-    label: "Conversion exposure",
     weight: 0.15,
   },
-  { key: "urlReach", label: "URL reach", weight: 0.15 },
-  { key: "confidence", label: "Confidence", weight: 0.1 },
+  { key: "urlReach", weight: 0.15 },
+  { key: "confidence", weight: 0.1 },
 ];
 
 function displayLabel(value: string): string {
   return value.replaceAll("_", " ");
 }
 
-function evidenceValue(value: unknown): string {
-  if (value === null || value === undefined) return "Unavailable";
+function evidenceValue(value: unknown, t: Messages): string {
+  if (value === null || value === undefined) return t.common.unavailable;
   if (typeof value === "string") return value;
   if (typeof value === "number" || typeof value === "boolean")
     return String(value);
   try {
     return JSON.stringify(value);
   } catch {
-    return "Structured evidence";
+    return t.actionDetail.structuredEvidence;
   }
 }
 
 function periodLabel(
   start: string | null | undefined,
   end: string | null | undefined,
+  t: Messages,
 ): string {
-  if (!start && !end) return "Period unavailable";
-  return `${formatDate(start)} – ${formatDate(end)}`;
+  if (!start && !end) return t.actionDetail.periodUnavailable;
+  return fmt(t.actionDetail.periodRange, {
+    start: formatDate(start),
+    end: formatDate(end),
+  });
 }
 
 function effortMultiplier(effort: SeoAction["effort"]): number {
@@ -120,11 +122,15 @@ function reproducePriority(
 }
 
 function ScoreExplanation({ action }: { action: SeoAction }) {
+  const { t } = useI18n();
   const inputs = action.scoreInputs;
   if (!inputs) {
     return (
-      <InlineNotice tone="warning" title="Score inputs unavailable">
-        The API returned a priority score without its reproducible inputs.
+      <InlineNotice
+        tone="warning"
+        title={t.actionDetail.scoreInputsUnavailableTitle}
+      >
+        {t.actionDetail.scoreInputsUnavailableBody}
       </InlineNotice>
     );
   }
@@ -135,21 +141,17 @@ function ScoreExplanation({ action }: { action: SeoAction }) {
   return (
     <Card className="score-explanation-card">
       <SectionHeading
-        title="Why this action is prioritized"
-        description="The score is a transparent prioritization heuristic, not a traffic forecast. All normalized inputs are 0–1."
+        title={t.actionDetail.scoreTitle}
+        description={t.actionDetail.scoreDescription}
         action={
           <StatusBadge
             status="info"
-            label={action.scoreVersion ?? "Unknown model"}
+            label={action.scoreVersion ?? t.actionDetail.unknownModel}
           />
         }
       />
-      <div className="score-formula" aria-label="Priority version one formula">
-        <code>
-          priority = 100 × (0.35×severity + 0.25×organic exposure +
-          0.15×conversion exposure + 0.15×URL reach + 0.10×confidence) × effort
-          multiplier
-        </code>
+      <div className="score-formula" aria-label={t.actionDetail.formulaLabel}>
+        <code>{t.actionDetail.formula}</code>
       </div>
       <div className="score-input-grid">
         {scoreTerms.map((term) => {
@@ -165,39 +167,41 @@ function ScoreExplanation({ action }: { action: SeoAction }) {
               key={term.key}
               className={missing ? "score-input-missing" : ""}
             >
-              <span>{term.label}</span>
+              <span>{t.actionDetail.scoreTermLabel[term.key]}</span>
               <strong>
                 {missing
-                  ? "Unavailable"
+                  ? t.common.unavailable
                   : formatNumber(raw, { maximumFractionDigits: 2 })}
               </strong>
               <small>
-                Weight {formatNumber(term.weight * 100)}% · contribution{" "}
-                {formatNumber(scoredValue * term.weight, {
-                  maximumFractionDigits: 3,
+                {fmt(t.actionDetail.weightContribution, {
+                  weight: formatNumber(term.weight * 100),
+                  contribution: formatNumber(scoredValue * term.weight, {
+                    maximumFractionDigits: 3,
+                  }),
                 })}
               </small>
               {missing ? (
-                <small>Neutral 0.50 substitute; confidence is reduced.</small>
+                <small>{t.actionDetail.neutralSubstitute}</small>
               ) : null}
             </div>
           );
         })}
         <div>
-          <span>Effort multiplier</span>
+          <span>{t.actionDetail.effortMultiplier}</span>
           <strong>
             {formatNumber(multiplier, { maximumFractionDigits: 2 })}
           </strong>
-          <small>{action.effort ?? "Effort unavailable"}</small>
+          <small>{action.effort ?? t.actionDetail.effortUnavailable}</small>
         </div>
       </div>
       <div className="score-reproduction">
         <div>
-          <span>Stored score</span>
+          <span>{t.actionDetail.storedScore}</span>
           <strong>{formatNumber(action.priorityScore)}</strong>
         </div>
         <div>
-          <span>Reproduced from inputs</span>
+          <span>{t.actionDetail.reproducedScore}</span>
           <strong>{formatNumber(reproduced)}</strong>
         </div>
       </div>
@@ -206,8 +210,9 @@ function ScoreExplanation({ action }: { action: SeoAction }) {
 }
 
 function EvidenceList({ evidence }: { evidence: ActionIssueEvidence[] }) {
+  const { t } = useI18n();
   if (evidence.length === 0)
-    return <p className="muted">No evidence values were returned.</p>;
+    return <p className="muted">{t.actionDetail.noEvidenceValues}</p>;
   return (
     <ul className="issue-evidence-list">
       {evidence.map((item, index) => (
@@ -218,9 +223,13 @@ function EvidenceList({ evidence }: { evidence: ActionIssueEvidence[] }) {
               <StatusBadge status="info" label={item.source} />
             ) : null}
           </div>
-          <code>{evidenceValue(item.value)}</code>
+          <code>{evidenceValue(item.value, t)}</code>
           {item.observedAt ? (
-            <small>Observed {formatDate(item.observedAt, true)}</small>
+            <small>
+              {fmt(t.actionDetail.observedAt, {
+                date: formatDate(item.observedAt, true),
+              })}
+            </small>
           ) : null}
         </li>
       ))}
@@ -229,10 +238,14 @@ function EvidenceList({ evidence }: { evidence: ActionIssueEvidence[] }) {
 }
 
 function SourceStateList({ sources }: { sources: SourceState[] }) {
+  const { t } = useI18n();
   if (sources.length === 0)
     return (
-      <InlineNotice tone="warning" title="Source state unavailable">
-        The API did not identify which sources support this evidence.
+      <InlineNotice
+        tone="warning"
+        title={t.actionDetail.sourceStateUnavailableTitle}
+      >
+        {t.actionDetail.sourceStateUnavailableBody}
       </InlineNotice>
     );
   return (
@@ -243,7 +256,9 @@ function SourceStateList({ sources }: { sources: SourceState[] }) {
             <strong>{source.name}</strong>
             <small>
               {source.message ??
-                `Updated ${formatDate(source.updatedAt, true)}`}
+                fmt(t.actionDetail.sourceUpdated, {
+                  date: formatDate(source.updatedAt, true),
+                })}
             </small>
           </div>
           <div>
@@ -253,8 +268,10 @@ function SourceStateList({ sources }: { sources: SourceState[] }) {
             ) : null}
             <small>
               {source.coverage === null || source.coverage === undefined
-                ? "Coverage unavailable"
-                : `${formatNumber(source.coverage)}% coverage`}
+                ? t.actionDetail.coverageUnavailable
+                : fmt(t.actionDetail.coveragePercent, {
+                    coverage: formatNumber(source.coverage),
+                  })}
             </small>
           </div>
         </li>
@@ -264,6 +281,7 @@ function SourceStateList({ sources }: { sources: SourceState[] }) {
 }
 
 function UrlEvidenceCard({ item }: { item: ActionEvidenceUrl }) {
+  const { t } = useI18n();
   const externalUrl = safeExternalUrl(item.url);
   return (
     <article className="evidence-url-card">
@@ -295,51 +313,59 @@ function UrlEvidenceCard({ item }: { item: ActionEvidenceUrl }) {
             }
             label={
               item.indexable === true
-                ? "Indexable"
+                ? t.actionDetail.indexable
                 : item.indexable === false
-                  ? "Not indexable"
-                  : "Indexability unavailable"
+                  ? t.actionDetail.notIndexable
+                  : t.actionDetail.indexabilityUnavailable
             }
           />
           <span className="http-status">
-            HTTP {formatNumber(item.statusCode, { maximumFractionDigits: 0 })}
+            {fmt(t.actionDetail.httpStatus, {
+              code: formatNumber(item.statusCode, {
+                maximumFractionDigits: 0,
+              }),
+            })}
           </span>
         </div>
       </header>
 
       <div className="evidence-outcome-grid">
-        <section aria-label="Technical evidence">
-          <span className="outcome-kicker">Technical evidence</span>
+        <section aria-label={t.actionDetail.technicalEvidence}>
+          <span className="outcome-kicker">
+            {t.actionDetail.technicalEvidence}
+          </span>
           {item.issue ? (
             <>
               <strong>{item.issue.title}</strong>
               <p>{item.issue.description}</p>
               <small>
-                First seen {formatDate(item.issue.firstSeenAt, true)} · Last
-                seen {formatDate(item.issue.lastSeenAt, true)}
+                {fmt(t.actionDetail.firstLastSeen, {
+                  firstSeen: formatDate(item.issue.firstSeenAt, true),
+                  lastSeen: formatDate(item.issue.lastSeenAt, true),
+                })}
               </small>
             </>
           ) : (
-            <p>No active issue occurrence is attached to this snapshot.</p>
+            <p>{t.actionDetail.noActiveIssue}</p>
           )}
           <dl className="compact-metrics">
             <div>
-              <dt>LCP</dt>
+              <dt>{t.actionDetail.metric.lcp}</dt>
               <dd>
                 {item.cwv?.lcp === null || item.cwv?.lcp === undefined
-                  ? "Unavailable"
+                  ? t.common.unavailable
                   : `${formatNumber(item.cwv.lcp)} ms`}
               </dd>
             </div>
             <div>
-              <dt>CLS</dt>
+              <dt>{t.actionDetail.metric.cls}</dt>
               <dd>{formatNumber(item.cwv?.cls)}</dd>
             </div>
             <div>
-              <dt>TTFB</dt>
+              <dt>{t.actionDetail.metric.ttfb}</dt>
               <dd>
                 {item.cwv?.ttfb === null || item.cwv?.ttfb === undefined
-                  ? "Unavailable"
+                  ? t.common.unavailable
                   : `${formatNumber(item.cwv.ttfb)} ms`}
               </dd>
             </div>
@@ -347,56 +373,58 @@ function UrlEvidenceCard({ item }: { item: ActionEvidenceUrl }) {
           <StatusBadge status={item.cwv?.state ?? "unavailable"} />
         </section>
 
-        <section aria-label="Search exposure">
-          <span className="outcome-kicker">Search exposure</span>
-          <p className="outcome-context">
-            Observed Search Console demand, not forecasted traffic gain.
-          </p>
+        <section aria-label={t.actionDetail.searchExposure}>
+          <span className="outcome-kicker">
+            {t.actionDetail.searchExposure}
+          </span>
+          <p className="outcome-context">{t.actionDetail.searchExposureNote}</p>
           <dl className="compact-metrics">
             <div>
-              <dt>Clicks</dt>
+              <dt>{t.actionDetail.metric.clicks}</dt>
               <dd>{formatNumber(item.gsc?.clicks)}</dd>
             </div>
             <div>
-              <dt>Impressions</dt>
+              <dt>{t.actionDetail.metric.impressions}</dt>
               <dd>{formatNumber(item.gsc?.impressions)}</dd>
             </div>
             <div>
-              <dt>CTR</dt>
+              <dt>{t.actionDetail.metric.ctr}</dt>
               <dd>
                 {item.gsc?.ctr === null || item.gsc?.ctr === undefined
-                  ? "Unavailable"
+                  ? t.common.unavailable
                   : `${formatNumber(item.gsc.ctr * 100)}%`}
               </dd>
             </div>
             <div>
-              <dt>Position</dt>
+              <dt>{t.actionDetail.metric.position}</dt>
               <dd>{formatNumber(item.gsc?.position)}</dd>
             </div>
           </dl>
           <small>
-            {periodLabel(item.gsc?.periodStart, item.gsc?.periodEnd)}
+            {periodLabel(item.gsc?.periodStart, item.gsc?.periodEnd, t)}
           </small>
           <StatusBadge status={item.gsc?.state ?? "unavailable"} />
         </section>
 
-        <section aria-label="Organic outcomes">
-          <span className="outcome-kicker">Organic outcomes</span>
+        <section aria-label={t.actionDetail.organicOutcomes}>
+          <span className="outcome-kicker">
+            {t.actionDetail.organicOutcomes}
+          </span>
           <p className="outcome-context">
-            Observed GA4 outcomes; correlation does not guarantee lift.
+            {t.actionDetail.organicOutcomesNote}
           </p>
           <dl className="compact-metrics">
             <div>
-              <dt>Sessions</dt>
+              <dt>{t.actionDetail.metric.sessions}</dt>
               <dd>{formatNumber(item.ga4?.sessions)}</dd>
             </div>
             <div>
-              <dt>Key events</dt>
+              <dt>{t.actionDetail.metric.keyEvents}</dt>
               <dd>{formatNumber(item.ga4?.keyEvents)}</dd>
             </div>
           </dl>
           <small>
-            {periodLabel(item.ga4?.periodStart, item.ga4?.periodEnd)}
+            {periodLabel(item.ga4?.periodStart, item.ga4?.periodEnd, t)}
           </small>
           <StatusBadge status={item.ga4?.state ?? "unavailable"} />
         </section>
@@ -404,8 +432,9 @@ function UrlEvidenceCard({ item }: { item: ActionEvidenceUrl }) {
 
       <details className="raw-evidence-details">
         <summary>
-          Inspect raw evidence ({formatNumber(item.issue?.evidence.length ?? 0)}
-          )
+          {fmt(t.actionDetail.inspectRawEvidence, {
+            count: formatNumber(item.issue?.evidence.length ?? 0),
+          })}
         </summary>
         {item.issue ? <EvidenceList evidence={item.issue.evidence} /> : null}
       </details>
@@ -423,6 +452,7 @@ function verificationTone(
 }
 
 export function ActionDetailPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const params = useParams({ strict: false }) as { actionId?: string };
   const actionId = params.actionId ?? "";
@@ -463,20 +493,23 @@ export function ActionDetailPage() {
       : (detail?.verification.state ?? "not_started");
   const verificationBusy =
     verificationState === "queued" || verificationState === "running";
+  const verificationStateLabel =
+    t.actionDetail.verificationStateLabel[verificationState] ??
+    displayLabel(verificationState);
 
   return (
     <div className="page-stack action-detail-page">
       <Link to="/actions" className="back-link">
-        <Icon name="arrow" /> Back to actions
+        <Icon name="arrow" /> {t.actionDetail.backToActions}
       </Link>
       <PageHeader
-        eyebrow="Action evidence and verification"
-        title={detail?.action.title ?? "Action workbench"}
-        description="Trace the recommendation to every observed URL, separate technical evidence from business context, and verify the fix with a durable follow-up run."
+        eyebrow={t.actionDetail.eyebrow}
+        title={detail?.action.title ?? t.actionDetail.fallbackTitle}
+        description={t.actionDetail.description}
         actions={
           detail ? (
             <label className="detail-status-control">
-              Workflow status
+              {t.actionDetail.workflowStatus}
               <select
                 value={detail.action.status ?? "open"}
                 disabled={updateAction.isPending}
@@ -489,7 +522,7 @@ export function ActionDetailPage() {
               >
                 {actionStatuses.map((status) => (
                   <option key={status} value={status}>
-                    {displayLabel(status)}
+                    {t.actionDetail.statusLabel[status]}
                   </option>
                 ))}
               </select>
@@ -506,40 +539,46 @@ export function ActionDetailPage() {
           <>
             <FreshnessNotice meta={firstPage?.meta} />
             {updateAction.isError ? (
-              <InlineNotice tone="danger" title="Workflow status was not saved">
+              <InlineNotice
+                tone="danger"
+                title={t.actionDetail.workflowNotSavedTitle}
+              >
                 {updateAction.error.message}
               </InlineNotice>
             ) : null}
 
             <section
               className="action-outcome-grid"
-              aria-label="Action summary"
+              aria-label={t.actionDetail.summaryLabel}
             >
               <Card className="action-outcome-card technical-outcome-card">
-                <span className="outcome-kicker">Technical evidence</span>
+                <span className="outcome-kicker">
+                  {t.actionDetail.technicalEvidence}
+                </span>
                 <strong>{formatNumber(detail.summary.totalUrls)}</strong>
-                <h2>Affected URLs</h2>
+                <h2>{t.actionDetail.affectedUrls}</h2>
                 <p>
-                  {formatNumber(detail.summary.issueOccurrences)} issue
-                  occurrences across the loaded audit history.
+                  {fmt(t.actionDetail.issueOccurrences, {
+                    count: formatNumber(detail.summary.issueOccurrences),
+                  })}
                 </p>
                 <dl className="lifecycle-summary">
                   <div>
-                    <dt>New</dt>
+                    <dt>{t.actionDetail.lifecycleSummary.new}</dt>
                     <dd>{formatNumber(detail.summary.newOccurrences)}</dd>
                   </div>
                   <div>
-                    <dt>Persistent</dt>
+                    <dt>{t.actionDetail.lifecycleSummary.persistent}</dt>
                     <dd>
                       {formatNumber(detail.summary.persistentOccurrences)}
                     </dd>
                   </div>
                   <div>
-                    <dt>Resolved</dt>
+                    <dt>{t.actionDetail.lifecycleSummary.resolved}</dt>
                     <dd>{formatNumber(detail.summary.resolvedOccurrences)}</dd>
                   </div>
                   <div>
-                    <dt>Reappeared</dt>
+                    <dt>{t.actionDetail.lifecycleSummary.reappeared}</dt>
                     <dd>
                       {formatNumber(detail.summary.reappearedOccurrences)}
                     </dd>
@@ -547,62 +586,62 @@ export function ActionDetailPage() {
                 </dl>
               </Card>
               <Card className="action-outcome-card business-outcome-card">
-                <span className="outcome-kicker">Business context</span>
+                <span className="outcome-kicker">
+                  {t.actionDetail.businessContext}
+                </span>
                 <div className="business-summary-grid">
                   <div>
                     <strong>{formatNumber(detail.summary.clicks)}</strong>
-                    <span>observed clicks</span>
+                    <span>{t.actionDetail.businessSummary.observedClicks}</span>
                   </div>
                   <div>
                     <strong>{formatNumber(detail.summary.impressions)}</strong>
-                    <span>impressions</span>
+                    <span>{t.actionDetail.businessSummary.impressions}</span>
                   </div>
                   <div>
                     <strong>{formatNumber(detail.summary.keyEvents)}</strong>
-                    <span>organic key events</span>
+                    <span>
+                      {t.actionDetail.businessSummary.organicKeyEvents}
+                    </span>
                   </div>
                 </div>
-                <p>
-                  Exposure explains why the action matters. It is observed
-                  context—not a promise that resolving the issue will create the
-                  same amount of incremental traffic.
-                </p>
+                <p>{t.actionDetail.exposureNote}</p>
               </Card>
             </section>
 
             <section className="action-context-grid">
               <Card className="action-rationale-card">
-                <span className="outcome-kicker">Why now</span>
+                <span className="outcome-kicker">{t.actionDetail.whyNow}</span>
                 <h2>{detail.action.ruleId}</h2>
                 <p>{detail.action.whyNow ?? detail.action.summary}</p>
                 <dl>
                   <div>
-                    <dt>Module</dt>
+                    <dt>{t.actionDetail.module}</dt>
                     <dd>{detail.action.moduleId}</dd>
                   </div>
                   <div>
-                    <dt>Impact</dt>
-                    <dd>{detail.action.impact ?? "Unavailable"}</dd>
+                    <dt>{t.actionDetail.impact}</dt>
+                    <dd>{detail.action.impact ?? t.common.unavailable}</dd>
                   </div>
                   <div>
-                    <dt>Effort</dt>
-                    <dd>{detail.action.effort ?? "Unavailable"}</dd>
+                    <dt>{t.actionDetail.effort}</dt>
+                    <dd>{detail.action.effort ?? t.common.unavailable}</dd>
                   </div>
                   <div>
-                    <dt>Confidence</dt>
+                    <dt>{t.actionDetail.confidence}</dt>
                     <dd>
                       {detail.action.confidence === null ||
                       detail.action.confidence === undefined
-                        ? "Unavailable"
+                        ? t.common.unavailable
                         : `${formatNumber(detail.action.confidence * 100)}%`}
                     </dd>
                   </div>
                   <div>
-                    <dt>Created</dt>
+                    <dt>{t.actionDetail.created}</dt>
                     <dd>{formatDate(detail.action.createdAt, true)}</dd>
                   </div>
                   <div>
-                    <dt>Updated</dt>
+                    <dt>{t.actionDetail.updated}</dt>
                     <dd>{formatDate(detail.action.updatedAt, true)}</dd>
                   </div>
                 </dl>
@@ -610,48 +649,52 @@ export function ActionDetailPage() {
               <Card className="verification-card">
                 <div className="verification-heading">
                   <div>
-                    <span className="outcome-kicker">Proof loop</span>
-                    <h2>Fix → checkpoint → verify</h2>
+                    <span className="outcome-kicker">
+                      {t.actionDetail.proofLoop}
+                    </span>
+                    <h2>{t.actionDetail.proofLoopTitle}</h2>
                   </div>
                   <StatusBadge status={verificationState} />
                 </div>
                 <InlineNotice
                   tone={verificationTone(verificationState)}
-                  title={`Verification ${displayLabel(verificationState)}`}
+                  title={fmt(t.actionDetail.verificationTitle, {
+                    state: verificationStateLabel,
+                  })}
                 >
                   {detail.verification.reason ??
-                    "Create a checkpoint before implementation, then run a targeted verification after the fix is deployed."}
+                    t.actionDetail.verificationFallback}
                 </InlineNotice>
                 <dl className="verification-metadata">
                   <div>
-                    <dt>Checkpoint</dt>
-                    <dd>{checkpointId ?? "Not created"}</dd>
+                    <dt>{t.actionDetail.checkpoint}</dt>
+                    <dd>{checkpointId ?? t.actionDetail.notCreated}</dd>
                   </div>
                   <div>
-                    <dt>Verification run</dt>
+                    <dt>{t.actionDetail.verificationRun}</dt>
                     <dd>
                       {verify.data?.data.runId ??
                         detail.verification.runId ??
-                        "Not started"}
+                        t.actionDetail.notStarted}
                     </dd>
                   </div>
                   <div>
-                    <dt>Coverage</dt>
+                    <dt>{t.actionDetail.coverage}</dt>
                     <dd>
                       {detail.verification.coverage === null
-                        ? "Unavailable"
+                        ? t.common.unavailable
                         : `${formatNumber(detail.verification.coverage * 100)}%`}
                     </dd>
                   </div>
                   <div>
-                    <dt>Checked</dt>
+                    <dt>{t.actionDetail.checked}</dt>
                     <dd>{formatDate(detail.verification.checkedAt, true)}</dd>
                   </div>
                 </dl>
                 {checkpoint.isError ? (
                   <InlineNotice
                     tone="danger"
-                    title="Checkpoint was not created"
+                    title={t.actionDetail.checkpointNotCreatedTitle}
                   >
                     {checkpoint.error.message}
                   </InlineNotice>
@@ -659,7 +702,7 @@ export function ActionDetailPage() {
                 {verify.isError ? (
                   <InlineNotice
                     tone="danger"
-                    title="Verification did not start"
+                    title={t.actionDetail.verificationNotStartedTitle}
                   >
                     {verify.error.message}
                   </InlineNotice>
@@ -672,10 +715,10 @@ export function ActionDetailPage() {
                     onClick={() => checkpoint.mutate()}
                   >
                     {checkpoint.isPending
-                      ? "Creating checkpoint…"
+                      ? t.actionDetail.creatingCheckpoint
                       : checkpointId
-                        ? "Replace checkpoint"
-                        : "Create checkpoint"}
+                        ? t.actionDetail.replaceCheckpoint
+                        : t.actionDetail.createCheckpoint}
                   </Button>
                   <Button
                     type="button"
@@ -686,14 +729,13 @@ export function ActionDetailPage() {
                   >
                     <Icon name="refresh" />{" "}
                     {verify.isPending || verificationBusy
-                      ? "Verification running…"
-                      : "Verify current fix"}
+                      ? t.actionDetail.verificationRunning
+                      : t.actionDetail.verifyCurrentFix}
                   </Button>
                 </div>
                 {!checkpointId ? (
                   <p className="verification-help">
-                    A checkpoint preserves the before-state required for a
-                    defensible verification result.
+                    {t.actionDetail.checkpointHelp}
                   </p>
                 ) : null}
               </Card>
@@ -704,15 +746,15 @@ export function ActionDetailPage() {
             <section className="two-column-grid">
               <Card>
                 <SectionHeading
-                  title="Evidence source health"
-                  description="Freshness and coverage qualify every technical or business claim above."
+                  title={t.actionDetail.sourceHealthTitle}
+                  description={t.actionDetail.sourceHealthDescription}
                 />
                 <SourceStateList sources={detail.sources} />
               </Card>
               <Card>
                 <SectionHeading
-                  title="Occurrence history"
-                  description="The same evidence group across completed audit runs."
+                  title={t.actionDetail.historyTitle}
+                  description={t.actionDetail.historyDescription}
                 />
                 {detail.history.length > 0 ? (
                   <ol className="action-history-list">
@@ -721,7 +763,9 @@ export function ActionDetailPage() {
                         <div>
                           <StatusBadge status={entry.status} />
                           <strong>
-                            {formatNumber(entry.affectedCount)} URLs
+                            {fmt(t.actionDetail.historyUrls, {
+                              count: formatNumber(entry.affectedCount),
+                            })}
                           </strong>
                         </div>
                         <span>{formatDate(entry.observedAt, true)}</span>
@@ -730,15 +774,15 @@ export function ActionDetailPage() {
                           params={{ runId: entry.runId }}
                           className="text-link"
                         >
-                          Open run
+                          {t.actionDetail.openRun}
                         </Link>
                       </li>
                     ))}
                   </ol>
                 ) : (
                   <EmptyState
-                    title="No occurrence history"
-                    description="A second audit is required to distinguish new, persistent, resolved, and reappeared evidence."
+                    title={t.actionDetail.noHistoryTitle}
+                    description={t.actionDetail.noHistoryDescription}
                   />
                 )}
               </Card>
@@ -747,12 +791,12 @@ export function ActionDetailPage() {
             <section aria-labelledby="affected-url-title">
               <SectionHeading
                 id="affected-url-title"
-                title="Affected URL evidence"
-                description="Inspect technical facts, Search Console exposure, GA4 outcomes, and raw issue evidence without mixing their claims."
+                title={t.actionDetail.affectedUrlEvidenceTitle}
+                description={t.actionDetail.affectedUrlEvidenceDescription}
               />
               <div className="url-evidence-controls">
                 <label className="workbench-search">
-                  <span>Search loaded URLs</span>
+                  <span>{t.actionDetail.searchLoadedUrls}</span>
                   <span className="search-field">
                     <Icon name="search" />
                     <input
@@ -761,30 +805,34 @@ export function ActionDetailPage() {
                       onChange={(event) =>
                         setUrlSearch(event.currentTarget.value)
                       }
-                      placeholder="URL, page title, or issue"
+                      placeholder={t.actionDetail.urlSearchPlaceholder}
                     />
                   </span>
                 </label>
                 <label>
-                  Lifecycle
+                  {t.actionDetail.lifecycle}
                   <select
                     value={lifecycle}
                     onChange={(event) =>
                       setLifecycle(event.currentTarget.value as LifecycleFilter)
                     }
                   >
-                    <option value="all">All lifecycle states</option>
+                    <option value="all">
+                      {t.actionDetail.allLifecycleStates}
+                    </option>
                     {lifecycleStates.map((state) => (
                       <option key={state} value={state}>
-                        {displayLabel(state)}
+                        {t.actionDetail.lifecycleLabel[state]}
                       </option>
                     ))}
                   </select>
                 </label>
                 <p role="status" aria-live="polite">
-                  {formatNumber(visibleUrls.length)} matching ·{" "}
-                  {formatNumber(loadedUrls.length)} loaded of{" "}
-                  {formatNumber(detail.pageInfo.total)}
+                  {fmt(t.actionDetail.matchingCount, {
+                    matching: formatNumber(visibleUrls.length),
+                    loaded: formatNumber(loadedUrls.length),
+                    total: formatNumber(detail.pageInfo.total),
+                  })}
                 </p>
               </div>
               {visibleUrls.length > 0 ? (
@@ -795,8 +843,8 @@ export function ActionDetailPage() {
                 </div>
               ) : (
                 <EmptyState
-                  title="No loaded URLs match"
-                  description="Change the URL search or lifecycle filter. Missing evidence remains visible in unfiltered results."
+                  title={t.actionDetail.noLoadedUrlsTitle}
+                  description={t.actionDetail.noLoadedUrlsDescription}
                 />
               )}
               {query.hasNextPage ? (
@@ -808,8 +856,8 @@ export function ActionDetailPage() {
                     onClick={() => void query.fetchNextPage()}
                   >
                     {query.isFetchingNextPage
-                      ? "Loading evidence…"
-                      : "Load 100 more URLs"}
+                      ? t.actionDetail.loadingEvidence
+                      : t.actionDetail.loadMoreUrls}
                   </Button>
                 </div>
               ) : null}

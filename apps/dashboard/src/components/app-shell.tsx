@@ -3,6 +3,15 @@ import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useSite } from "../context/site-context";
 import { useIntegrations } from "../api/queries";
 import { useTerminalSession } from "../api/terminal";
+import {
+  LOCALES,
+  LOCALE_LABELS,
+  fmt,
+  getMessages,
+  useI18n,
+  type Locale,
+  type Messages,
+} from "../i18n";
 import { agentStatus, PixelTerminal } from "./pixel-terminal";
 import { PixelMaskIcon, PixelSprite } from "./pixel-sprite";
 import { mascotGlyphs, navGlyphs } from "./pixel-glyphs";
@@ -18,88 +27,27 @@ import { mascotGlyphs, navGlyphs } from "./pixel-glyphs";
 
 interface NavItem {
   to: string;
-  label: string;
   glyph: string;
-  title: string;
+  key: keyof Messages["shell"]["nav"];
 }
 
 const NAV: NavItem[] = [
-  { to: "/", label: "Dashboard", glyph: "dashboard", title: "Dashboard" },
-  {
-    to: "/audits",
-    label: "SEO Analytics",
-    glyph: "seo-analytics",
-    title: "SEO analytics",
-  },
-  {
-    to: "/calendar",
-    label: "Calendar",
-    glyph: "calendar",
-    title: "Content calendar — schedule and publish across platforms",
-  },
-  {
-    to: "/report",
-    label: "Report",
-    glyph: "report",
-    title: "Cross-channel report for clients",
-  },
-  {
-    to: "/links",
-    label: "Links & QR",
-    glyph: "links",
-    title: "Campaign links and QR codes that never expire",
-  },
-  {
-    to: "/email",
-    label: "Email",
-    glyph: "email",
-    title: "Email builder — brand kit and campaign HTML",
-  },
-  {
-    to: "/ads",
-    label: "Ad Cabinets",
-    glyph: "ad-cabinets",
-    title: "Ad cabinets — Meta and Google Ads",
-  },
-  {
-    to: "/social",
-    label: "Social Research",
-    glyph: "social-research",
-    title: "Social research",
-  },
-  {
-    to: "/osint",
-    label: "OSINT Layer",
-    glyph: "osint",
-    title: "OSINT layer",
-  },
-  {
-    to: "/content",
-    label: "Content Intel",
-    glyph: "content-intel",
-    title: "Content intel",
-  },
-  {
-    to: "/competitors",
-    label: "Competitors",
-    glyph: "competitors",
-    title: "Competitors",
-  },
-  {
-    to: "/keywords",
-    label: "Keyword Lab",
-    glyph: "keyword-lab",
-    title: "Keyword lab",
-  },
-  {
-    to: "/backlinks",
-    label: "Backlinks",
-    glyph: "backlinks",
-    title: "Backlinks",
-  },
-  { to: "/reports", label: "Reports", glyph: "reports", title: "Reports" },
-  { to: "/monitoring", label: "Alerts", glyph: "alerts", title: "Alerts" },
-  { to: "/context", label: "Notes", glyph: "notes", title: "Notes" },
+  { to: "/", glyph: "dashboard", key: "dashboard" },
+  { to: "/audits", glyph: "seo-analytics", key: "seoAnalytics" },
+  { to: "/calendar", glyph: "calendar", key: "calendar" },
+  { to: "/report", glyph: "report", key: "report" },
+  { to: "/links", glyph: "links", key: "links" },
+  { to: "/email", glyph: "email", key: "email" },
+  { to: "/ads", glyph: "ad-cabinets", key: "adCabinets" },
+  { to: "/social", glyph: "social-research", key: "socialResearch" },
+  { to: "/osint", glyph: "osint", key: "osint" },
+  { to: "/content", glyph: "content-intel", key: "contentIntel" },
+  { to: "/competitors", glyph: "competitors", key: "competitors" },
+  { to: "/keywords", glyph: "keyword-lab", key: "keywordLab" },
+  { to: "/backlinks", glyph: "backlinks", key: "backlinks" },
+  { to: "/reports", glyph: "reports", key: "reports" },
+  { to: "/monitoring", glyph: "alerts", key: "alerts" },
+  { to: "/context", glyph: "notes", key: "notes" },
 ];
 
 /**
@@ -111,42 +59,51 @@ const NAV: NavItem[] = [
  * rail readable while making sure nothing that works is unreachable — a page
  * with no link into it is, from the operator's side, a page that does not exist.
  */
-const UTILITY_NAV: Array<{ to: string; label: string }> = [
-  { to: "/actions", label: "Actions" },
-  { to: "/issues", label: "Issue review" },
-  { to: "/pages", label: "Pages" },
-  { to: "/integrations", label: "Integrations" },
-  { to: "/settings", label: "Settings" },
-  { to: "/system", label: "System health" },
+const UTILITY_NAV: Array<{
+  to: string;
+  key: keyof Messages["shell"]["utility"];
+}> = [
+  { to: "/actions", key: "actions" },
+  { to: "/issues", key: "issueReview" },
+  { to: "/pages", key: "pages" },
+  { to: "/integrations", key: "integrations" },
+  { to: "/settings", key: "settings" },
+  { to: "/system", key: "systemHealth" },
 ];
 
 /** Routes reachable from within a section rather than from the rail itself. */
-const SECONDARY_TITLES: ReadonlyArray<[RegExp, string]> = [
-  [/^\/audits\/.+/u, "Audit details"],
-  [/^\/actions\/.+/u, "Action evidence"],
-  [/^\/actions$/u, "Actions"],
-  [/^\/issues$/u, "Issue review"],
-  [/^\/pages$/u, "Pages"],
-  [/^\/integrations$/u, "Integrations"],
-  [/^\/settings$/u, "Settings"],
-  [/^\/system$/u, "System health"],
-  [/^\/onboarding$/u, "Setup guide"],
-  [/^\/setup-checklist$/u, "Setup checklist"],
+const SECONDARY_TITLES: ReadonlyArray<
+  [RegExp, keyof Messages["shell"]["secondaryTitle"]]
+> = [
+  [/^\/audits\/.+/u, "auditDetails"],
+  [/^\/actions\/.+/u, "actionEvidence"],
+  [/^\/actions$/u, "actions"],
+  [/^\/issues$/u, "issueReview"],
+  [/^\/pages$/u, "pages"],
+  [/^\/integrations$/u, "integrations"],
+  [/^\/settings$/u, "settings"],
+  [/^\/system$/u, "systemHealth"],
+  [/^\/onboarding$/u, "setupGuide"],
+  [/^\/setup-checklist$/u, "setupChecklist"],
 ];
 
-export function routeTitleForPathname(pathname: string): string {
+export function routeTitleForPathname(
+  pathname: string,
+  messages: Messages = getMessages(),
+): string {
+  const shell = messages.shell;
   const exact = NAV.find((item) =>
     item.to === "/" ? pathname === "/" : pathname === item.to,
   );
-  if (exact) return exact.title;
+  if (exact) return shell.navTitle[exact.key];
   const secondary = SECONDARY_TITLES.find(([pattern]) =>
     pattern.test(pathname),
   );
-  if (secondary) return secondary[1];
+  if (secondary) return shell.secondaryTitle[secondary[1]];
   const nested = NAV.find(
     (item) => item.to !== "/" && pathname.startsWith(`${item.to}/`),
   );
-  return nested?.title ?? "Page not found";
+  return nested ? shell.navTitle[nested.key] : shell.notFoundTitle;
 }
 
 function isActive(pathname: string, to: string): boolean {
@@ -159,18 +116,19 @@ function isActive(pathname: string, to: string): boolean {
  * fastest answer to "is my data actually flowing".
  */
 function BootLog({ siteId }: { siteId: string }) {
+  const { t } = useI18n();
   const integrations = useIntegrations(siteId);
   const items = integrations.data?.data.items ?? [];
 
   const lines: Array<{ text: string; state: "ok" | "pending" | "fail" }> = [
-    { text: "connecting to data sources...", state: "ok" },
+    { text: t.shell.bootlog.connecting, state: "ok" },
   ];
 
   if (integrations.isLoading) {
-    lines.push({ text: "probing connectors", state: "pending" });
+    lines.push({ text: t.shell.bootlog.probing, state: "pending" });
   } else if (items.length === 0) {
-    lines.push({ text: "no connectors configured", state: "pending" });
-    lines.push({ text: "open integrations to connect", state: "pending" });
+    lines.push({ text: t.shell.bootlog.noConnectors, state: "pending" });
+    lines.push({ text: t.shell.bootlog.openIntegrations, state: "pending" });
   } else {
     for (const integration of items) {
       const ok = integration.status === "connected";
@@ -189,8 +147,11 @@ function BootLog({ siteId }: { siteId: string }) {
     lines.push({
       text:
         connected === items.length
-          ? "data sync complete ✓"
-          : `${connected}/${items.length} sources live`,
+          ? t.shell.bootlog.syncComplete
+          : fmt(t.shell.bootlog.sourcesLive, {
+              connected,
+              total: items.length,
+            }),
       state: connected === items.length ? "ok" : "pending",
     });
   }
@@ -201,7 +162,7 @@ function BootLog({ siteId }: { siteId: string }) {
     // already carries one.
     <section className="pixel-panel pixel-bootlog">
       <div className="pixel-panel-head">
-        <h2>Terminal</h2>
+        <h2>{t.shell.bootlog.heading}</h2>
         <span className="pixel-bootlog-dots" aria-hidden="true">
           <span />
           <span />
@@ -216,7 +177,7 @@ function BootLog({ siteId }: { siteId: string }) {
         className="pixel-bootlog-body"
         tabIndex={0}
         role="group"
-        aria-label="Connector boot log"
+        aria-label={t.shell.bootlog.listLabel}
       >
         <ul>
           {lines.map((line) => (
@@ -234,32 +195,33 @@ export function AppShell() {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
+  const { t, locale, setLocale } = useI18n();
   const { siteId, sites, setSiteId, isLoading } = useSite();
   const session = useTerminalSession(siteId || null);
-  const status = agentStatus(session);
+  const status = agentStatus(session, t);
   const [railCollapsed, setRailCollapsed] = useState(true);
   const [announcement, setAnnouncement] = useState("");
   const mainRef = useRef<HTMLElement>(null);
   const previousPathname = useRef(pathname);
-  const routeTitle = routeTitleForPathname(pathname);
+  const routeTitle = routeTitleForPathname(pathname, t);
 
   useEffect(() => {
     document.title = `${routeTitle} | Marketingovo`;
-    setAnnouncement(`${routeTitle} page loaded.`);
+    setAnnouncement(fmt(t.shell.pageLoaded, { title: routeTitle }));
     if (previousPathname.current !== pathname) mainRef.current?.focus();
     previousPathname.current = pathname;
-  }, [pathname, routeTitle]);
+  }, [pathname, routeTitle, t]);
 
   return (
     <div className="pixel-frame">
       <a className="pixel-skip" href="#main-content">
-        Skip to content
+        {t.shell.skipToContent}
       </a>
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {announcement}
       </div>
 
-      <Link to="/" className="pixel-brand" aria-label="Marketingovo home">
+      <Link to="/" className="pixel-brand" aria-label={t.shell.brandHome}>
         <img
           className="pixel-brand-lockup"
           src="/pixel/brand/marketingovo-lockup.png"
@@ -283,7 +245,7 @@ export function AppShell() {
               a decorative command line that could not change anything would be
               a worse trade than a slightly less pure one. */}
           <label className="sr-only" htmlFor="site-select">
-            Active site
+            {t.shell.activeSite}
           </label>
           <select
             id="site-select"
@@ -293,7 +255,7 @@ export function AppShell() {
             disabled={isLoading || sites.length === 0}
           >
             {sites.length === 0 ? (
-              <option value="">none</option>
+              <option value="">{t.shell.noSite}</option>
             ) : (
               sites.map((entry) => (
                 <option value={entry.id} key={entry.id}>
@@ -302,8 +264,28 @@ export function AppShell() {
               ))
             )}
           </select>
+          <span aria-hidden="true"> --lang=</span>
+          {/* The language switch rides the same conceit as `--site=`: a flag
+              whose value is real. Options carry the native language name next
+              to the code so the control stays legible to someone stranded in a
+              locale they cannot read. */}
+          <label className="sr-only" htmlFor="locale-select">
+            {t.shell.language}
+          </label>
+          <select
+            id="locale-select"
+            className="pixel-cmdline-select"
+            value={locale}
+            onChange={(event) => setLocale(event.target.value as Locale)}
+          >
+            {LOCALES.map((code) => (
+              <option value={code} key={code}>
+                {code} · {LOCALE_LABELS[code]}
+              </option>
+            ))}
+          </select>
           <Link to="/onboarding" className="pixel-cmdline-action">
-            + add site
+            {t.shell.addSite}
           </Link>
           <span className="pixel-status" data-state={status.state}>
             <span className="pixel-status-dot" aria-hidden="true" />
@@ -328,7 +310,7 @@ export function AppShell() {
       <aside
         className="pixel-rail"
         data-collapsed={railCollapsed}
-        aria-label="Sections"
+        aria-label={t.shell.sectionsLabel}
       >
         <button
           type="button"
@@ -336,7 +318,7 @@ export function AppShell() {
           onClick={() => setRailCollapsed((current) => !current)}
           aria-expanded={!railCollapsed}
         >
-          {railCollapsed ? "▸ sections" : "▾ sections"}
+          {railCollapsed ? t.shell.sectionsCollapsed : t.shell.sectionsExpanded}
         </button>
         <nav className="pixel-nav">
           {NAV.map((item) => {
@@ -357,7 +339,7 @@ export function AppShell() {
                   src={`/pixel/nav/${item.glyph}.png`}
                   fallback={navGlyphs[item.glyph]}
                 />
-                <span>{item.label}</span>
+                <span>{t.shell.nav[item.key]}</span>
               </Link>
             );
           })}
@@ -371,8 +353,8 @@ export function AppShell() {
             height={116}
           />
         </div>
-        <nav className="pixel-subnav" aria-label="Workbenches">
-          <span className="pixel-subnav-label">Workbenches</span>
+        <nav className="pixel-subnav" aria-label={t.shell.workbenches}>
+          <span className="pixel-subnav-label">{t.shell.workbenches}</span>
           {UTILITY_NAV.map((item) => (
             <Link
               key={item.to}
@@ -380,7 +362,7 @@ export function AppShell() {
               className="pixel-subnav-link"
               aria-current={isActive(pathname, item.to) ? "page" : undefined}
             >
-              {item.label}
+              {t.shell.utility[item.key]}
             </Link>
           ))}
         </nav>
@@ -389,10 +371,15 @@ export function AppShell() {
             entry point at all after the console shell replaced the old sidebar,
             which left a supported surface unreachable. */}
         <Link to="/setup-checklist" className="pixel-rail-setup">
-          Setup checklist
+          {t.shell.setupChecklist}
         </Link>
         <p className="pixel-rail-status">
-          system status: {status.state === "offline" ? "standby" : "optimal"}
+          {fmt(t.shell.systemStatus, {
+            state:
+              status.state === "offline"
+                ? t.shell.systemStandby
+                : t.shell.systemOptimal,
+          })}
         </p>
       </aside>
 
@@ -412,7 +399,7 @@ export function AppShell() {
           <span className="pixel-footer-heart">♥</span>
         </span>
         <span>
-          <span className="pixel-footer-heart">♥</span> data is beautiful{" "}
+          <span className="pixel-footer-heart">♥</span> {t.shell.footerLove}{" "}
           <span className="pixel-footer-heart">♥</span>
         </span>
         <span>v{__APP_VERSION__}</span>

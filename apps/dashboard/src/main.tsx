@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
 import { router } from "./app/router";
 import { queryClient } from "./app/query-client";
+import { I18nProvider } from "./i18n";
 import { SiteProvider } from "./context/site-context";
 import "./styles.css";
 // Loaded after the base sheet so the console frame can override the shared
@@ -15,10 +16,12 @@ if (!container) throw new Error("Dashboard root element was not found");
 
 createRoot(container).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <SiteProvider>
-        <RouterProvider router={router} />
-      </SiteProvider>
-    </QueryClientProvider>
+    <I18nProvider>
+      <QueryClientProvider client={queryClient}>
+        <SiteProvider>
+          <RouterProvider router={router} />
+        </SiteProvider>
+      </QueryClientProvider>
+    </I18nProvider>
   </StrictMode>,
 );

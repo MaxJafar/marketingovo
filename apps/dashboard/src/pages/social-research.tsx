@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useSite } from "../context/site-context";
 import { useIntegrations } from "../api/queries";
+import { fmt, useI18n } from "../i18n";
 
 /**
  * Social research.
@@ -22,6 +23,7 @@ const SOCIAL_CONNECTOR_HINT = [
 ];
 
 export function SocialResearchPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const integrations = useIntegrations(siteId);
   const items = integrations.data?.data.items ?? [];
@@ -40,23 +42,23 @@ export function SocialResearchPage() {
     <>
       <section className="pixel-panel">
         <div className="pixel-panel-head">
-          <h2>Source status</h2>
+          <h2>{t.socialResearch.status.title}</h2>
         </div>
         <div className="pixel-panel-body">
           {connected.length > 0 ? (
             <p className="pixel-hero-sub">
-              {connected.length} social source
-              {connected.length === 1 ? "" : "s"} connected for publishing.
-              Listening — mentions, sentiment, engagement — has no collector
-              yet, so nothing of that kind is measured or shown.
+              {fmt(
+                connected.length === 1
+                  ? t.socialResearch.status.connectedSingular
+                  : t.socialResearch.status.connectedPlural,
+                { count: connected.length },
+              )}
             </p>
           ) : (
             <p className="pixel-hero-sub">
-              No social source is connected, and social listening has no
-              collector yet — so this page shows no mention or sentiment figures
-              at all rather than inventing them.{" "}
+              {t.socialResearch.status.none}{" "}
               <Link to="/integrations" className="pixel-linklike">
-                connect a source
+                {t.socialResearch.status.connectLink}
               </Link>
             </p>
           )}
@@ -66,24 +68,19 @@ export function SocialResearchPage() {
       <div className="pixel-grid">
         <section className="pixel-panel pixel-col-6">
           <div className="pixel-panel-head">
-            <h2>What is measured today</h2>
+            <h2>{t.socialResearch.measured.title}</h2>
           </div>
           <div className="pixel-panel-body">
-            <p className="pixel-hero-sub">
-              Publishing is measured end to end: every post staged in the
-              calendar keeps an immutable record of the exact request sent to
-              each platform, and the cross-channel report counts published,
-              refused, and indeterminate sends per platform.
-            </p>
+            <p className="pixel-hero-sub">{t.socialResearch.measured.body}</p>
             <div className="pixel-row-actions" style={{ marginTop: 12 }}>
               <Link
                 to="/calendar"
                 className="pixel-button pixel-button-primary"
               >
-                Open the calendar →
+                {t.socialResearch.measured.openCalendar}
               </Link>
               <Link to="/report" className="pixel-button">
-                See it in the report →
+                {t.socialResearch.measured.openReport}
               </Link>
             </div>
           </div>
@@ -91,17 +88,13 @@ export function SocialResearchPage() {
 
         <section className="pixel-panel pixel-col-6">
           <div className="pixel-panel-head">
-            <h2>Ask the agent</h2>
+            <h2>{t.socialResearch.agent.title}</h2>
           </div>
           <div className="pixel-panel-body">
             <p className="pixel-hero-sub">
-              Social listening is not yet a Marketingovo collector. An attached
-              agent can still research this for you from its own tools — try
-              asking it in the terminal below, for example{" "}
-              <code>
-                summarise what people said about us on Reddit this month
-              </code>
-              .
+              {t.socialResearch.agent.bodyBefore}{" "}
+              <code>{t.socialResearch.agent.examplePrompt}</code>
+              {t.socialResearch.agent.bodyAfter}
             </p>
           </div>
         </section>

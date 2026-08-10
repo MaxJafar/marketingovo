@@ -10,6 +10,24 @@ human attestations — attestations an agent must never fill in.
 
 **What the tree adds since the 1.1.0 record:**
 
+- **The console speaks six languages.** English, Azerbaijani, German, Russian,
+  Dutch, and Spanish, switchable from a `--lang=` flag in the command bar or
+  from Settings, stored per device and defaulting to the browser's preference.
+  Roughly 1,990 interface strings moved out of the components into a typed
+  catalog under `apps/dashboard/src/i18n/`; English stays the reference locale
+  and the unit suite asserts its rendered copy unchanged. Completeness is not a
+  convention: `tsc` refuses to build a locale missing a key, and
+  `src/tests/i18n.test.tsx` refuses one whose `{placeholder}` markers drifted,
+  so a language ships whole or not at all. Numbers and dates format through
+  `Intl` in the active locale and `<html lang>` follows the selection. Data,
+  generated reports, and agent surfaces are deliberately not translated.
+- **The pixel art is real art now.** The generated source images are replaced
+  by hand-sized sprites with a recorded provenance ledger and style lock, and
+  the console vendors Departure Mono under the SIL Open Font License, recorded
+  in `NOTICE` with the license text beside the font.
+- **A dependency advisory was fixed, not waived.** `nanoid` 3.3.16 (transitively
+  via vite/vitest) carried a HIGH advisory that failed `pnpm audit:dependencies`
+  closed; the lockfile now resolves 3.3.18 and the gate passes.
 - **Multi-channel marketing.** Meta and Google Ads read-only audits into the
   shared action queue, landing alignment between ads and the crawl, the
   content calendar, the brand-kit email builder, campaign links and QR codes,

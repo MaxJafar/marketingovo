@@ -8,11 +8,13 @@ import {
 } from "../api/queries";
 import type { ProjectDeletionReceipt } from "../api/contracts";
 import { useSite } from "../context/site-context";
+import { LOCALES, LOCALE_LABELS, fmt, useI18n, type Locale } from "../i18n";
 import { FreshnessNotice, QueryState } from "../components/data-state";
 import { Button, Card, InlineNotice, PageHeader } from "../components/ui";
 import { ExtractionRulesCard } from "../components/extraction-rules-card";
 
 export function SettingsPage() {
+  const { t, locale, setLocale } = useI18n();
   const { siteId, setSiteId, site } = useSite();
   const query = useSettings(siteId);
   const update = useUpdateSettings(siteId);
@@ -87,48 +89,76 @@ export function SettingsPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Workspace configuration"
-        title="Settings"
-        description="Update site identity and the reporting preferences stored with this local project."
+        eyebrow={t.settings.eyebrow}
+        title={t.settings.title}
+        description={t.settings.description}
       />
+      {/* The language card sits outside the workspace gate on purpose: locale
+          is a device preference, and someone with zero workspaces still needs
+          to be able to leave a language they cannot read. */}
+      <Card className="settings-card project-transfer-card">
+        <div>
+          <h2>{t.settings.languageTitle}</h2>
+          <p>{t.settings.languageDescription}</p>
+        </div>
+        <div className="form-grid">
+          <label>
+            {t.settings.languageLabel}
+            <select
+              name="interfaceLanguage"
+              value={locale}
+              onChange={(event) => setLocale(event.target.value as Locale)}
+            >
+              {LOCALES.map((code) => (
+                <option value={code} key={code}>
+                  {LOCALE_LABELS[code]}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </Card>
       {update.isSuccess ? (
-        <InlineNotice tone="success" title="Settings saved">
-          The local API accepted the updated workspace settings.
+        <InlineNotice tone="success" title={t.settings.savedTitle}>
+          {t.settings.savedBody}
         </InlineNotice>
       ) : null}
       {update.isError ? (
-        <InlineNotice tone="danger" title="Settings were not saved">
+        <InlineNotice tone="danger" title={t.settings.notSavedTitle}>
           {update.error.message}
         </InlineNotice>
       ) : null}
       {exportProject.isError ? (
-        <InlineNotice tone="danger" title="Project was not exported">
+        <InlineNotice tone="danger" title={t.settings.notExportedTitle}>
           {exportProject.error.message}
         </InlineNotice>
       ) : null}
       {importProject.isError ? (
-        <InlineNotice tone="danger" title="Project was not imported">
+        <InlineNotice tone="danger" title={t.settings.notImportedTitle}>
           {importProject.error.message}
         </InlineNotice>
       ) : null}
       {importProject.isSuccess ? (
-        <InlineNotice tone="success" title="Project imported">
-          Imported {importProject.data.data.counts.runs} runs,{" "}
-          {importProject.data.data.counts.actions} actions,{" "}
-          {importProject.data.data.counts.contextVersions} context revisions,{" "}
-          {importProject.data.data.counts.contextEntries} journal entries,{" "}
-          {importProject.data.data.counts.extractionRuleVersions}{" "}
-          extraction-rule revisions, and{" "}
-          {importProject.data.data.counts.artifacts} report artifacts. Schedules
-          are disabled and{" "}
-          {importProject.data.data.reconnectProviders.length
-            ? `these integrations must be reconnected: ${importProject.data.data.reconnectProviders.join(", ")}`
-            : "no integration reconnection is required"}
-          .
+        <InlineNotice tone="success" title={t.settings.importedTitle}>
+          {fmt(t.settings.importedSummary, {
+            runs: importProject.data.data.counts.runs,
+            actions: importProject.data.data.counts.actions,
+            contextVersions: importProject.data.data.counts.contextVersions,
+            contextEntries: importProject.data.data.counts.contextEntries,
+            extractionRuleVersions:
+              importProject.data.data.counts.extractionRuleVersions,
+            artifacts: importProject.data.data.counts.artifacts,
+            reconnect: importProject.data.data.reconnectProviders.length
+              ? fmt(t.settings.reconnectList, {
+                  providers:
+                    importProject.data.data.reconnectProviders.join(", "),
+                })
+              : t.settings.reconnectNone,
+          })}
         </InlineNotice>
       ) : null}
       {deleteProject.isError ? (
-        <InlineNotice tone="danger" title="Project was not deleted">
+        <InlineNotice tone="danger" title={t.settings.notDeletedTitle}>
           {deleteProject.error.message}
         </InlineNotice>
       ) : null}
@@ -139,17 +169,20 @@ export function SettingsPage() {
               ? "success"
               : "warning"
           }
-          title="Local project deleted"
+          title={t.settings.deletedTitle}
         >
-          Removed {deletionReceipt.counts.runs} runs,{" "}
-          {deletionReceipt.counts.issueInstances} issue observations,{" "}
-          {deletionReceipt.counts.actions} actions,{" "}
-          {deletionReceipt.counts.extractionRuleVersions} extraction-rule
-          revisions, and {deletionReceipt.counts.artifacts} artifacts.{" "}
-          {deletionReceipt.artifactCleanup === "complete"
-            ? "Filesystem cleanup completed."
-            : "Filesystem cleanup is scheduled for the next service start."}{" "}
-          Global integration credentials were retained for other projects.
+          {fmt(t.settings.deletedSummary, {
+            runs: deletionReceipt.counts.runs,
+            issueInstances: deletionReceipt.counts.issueInstances,
+            actions: deletionReceipt.counts.actions,
+            extractionRuleVersions:
+              deletionReceipt.counts.extractionRuleVersions,
+            artifacts: deletionReceipt.counts.artifacts,
+            cleanup:
+              deletionReceipt.artifactCleanup === "complete"
+                ? t.settings.cleanupComplete
+                : t.settings.cleanupScheduled,
+          })}
         </InlineNotice>
       ) : null}
       <QueryState
@@ -167,10 +200,10 @@ export function SettingsPage() {
               onSubmit={submit}
             >
               <fieldset>
-                <legend>Site identity</legend>
+                <legend>{t.settings.siteIdentity}</legend>
                 <div className="form-grid">
                   <label>
-                    Site name
+                    {t.settings.siteName}
                     <input
                       name="siteName"
                       defaultValue={settings.siteName ?? ""}
@@ -178,7 +211,7 @@ export function SettingsPage() {
                     />
                   </label>
                   <label>
-                    Canonical URL
+                    {t.settings.canonicalUrl}
                     <input
                       name="siteUrl"
                       type="url"
@@ -189,10 +222,10 @@ export function SettingsPage() {
                 </div>
               </fieldset>
               <fieldset>
-                <legend>Reporting</legend>
+                <legend>{t.settings.reporting}</legend>
                 <div className="form-grid">
                   <label>
-                    Timezone
+                    {t.settings.timezone}
                     <input
                       name="timezone"
                       defaultValue={settings.timezone ?? ""}
@@ -200,7 +233,7 @@ export function SettingsPage() {
                     />
                   </label>
                   <label>
-                    Reporting currency
+                    {t.settings.reportingCurrency}
                     <input
                       name="reportingCurrency"
                       defaultValue={settings.reportingCurrency ?? ""}
@@ -210,7 +243,7 @@ export function SettingsPage() {
                     />
                   </label>
                   <label>
-                    Local retention target (days)
+                    {t.settings.retentionTarget}
                     <input
                       name="dataRetentionDays"
                       type="number"
@@ -223,19 +256,16 @@ export function SettingsPage() {
                 </div>
               </fieldset>
               <fieldset>
-                <legend>Report preferences</legend>
+                <legend>{t.settings.reportPreferences}</legend>
                 <div className="form-grid">
                   <label>
-                    Report contact email
+                    {t.settings.alertEmail}
                     <input
                       name="alertEmail"
                       type="email"
                       defaultValue={settings.alertEmail ?? ""}
                     />
-                    <small>
-                      Stored locally as report metadata. Marketingovo does not
-                      send hosted email alerts.
-                    </small>
+                    <small>{t.settings.alertEmailHelp}</small>
                   </label>
                   <label className="checkbox-label">
                     <input
@@ -244,18 +274,15 @@ export function SettingsPage() {
                       defaultChecked={settings.weeklyDigest ?? false}
                     />
                     <span>
-                      <strong>Weekly digest preference</strong>
-                      <small>
-                        Include weekly priorities, trends, and regressions when
-                        generating digest reports.
-                      </small>
+                      <strong>{t.settings.weeklyDigest}</strong>
+                      <small>{t.settings.weeklyDigestHelp}</small>
                     </span>
                   </label>
                 </div>
               </fieldset>
               <div className="form-actions">
                 <Button type="submit" disabled={update.isPending}>
-                  {update.isPending ? "Saving…" : "Save settings"}
+                  {update.isPending ? t.settings.saving : t.settings.save}
                 </Button>
               </div>
             </form>
@@ -270,13 +297,10 @@ export function SettingsPage() {
         {settings ? (
           <Card className="settings-card project-transfer-card">
             <div>
-              <h2>Project portability</h2>
+              <h2>{t.settings.portabilityTitle}</h2>
               <p>
-                Export a versioned <code>.marketingovo</code> bundle with audit
-                history, actions, metrics, Project Context revisions, the
-                marketer journal, custom rules, connector settings, and bounded
-                report artifacts. Credentials, tokens, cookies, headers, and
-                local file paths are never included.
+                {t.settings.portabilityBodyBefore} <code>.marketingovo</code>{" "}
+                {t.settings.portabilityBodyAfter}
               </p>
             </div>
             <div className="form-actions">
@@ -286,13 +310,17 @@ export function SettingsPage() {
                 onClick={downloadBundle}
                 disabled={!siteId || exportProject.isPending}
               >
-                {exportProject.isPending ? "Exporting…" : "Export project"}
+                {exportProject.isPending
+                  ? t.settings.exporting
+                  : t.settings.exportProject}
               </Button>
               <label
                 htmlFor="project-import-file"
                 className={`button button-secondary project-import-label ${importProject.isPending ? "is-disabled" : ""}`}
               >
-                {importProject.isPending ? "Importing…" : "Import project"}
+                {importProject.isPending
+                  ? t.settings.importing
+                  : t.settings.importProject}
                 <input
                   id="project-import-file"
                   className="sr-only"
@@ -304,30 +332,16 @@ export function SettingsPage() {
                 />
               </label>
             </div>
-            <small id="project-import-help">
-              Imports always create a new local project, remap identifiers,
-              preserve issue fingerprints, context, extraction rules, and the
-              configuration snapshot behind every run, disable imported
-              schedules, and require integrations to be reconnected.
-            </small>
+            <small id="project-import-help">{t.settings.importHelp}</small>
           </Card>
         ) : null}
         {settings ? (
           <Card className="settings-card project-transfer-card danger-zone-card">
             <div>
-              <p className="eyebrow">Danger zone</p>
-              <h2>Delete local project</h2>
-              <p>
-                Permanently remove this project, its runs, raw evidence, action
-                history, Project Context, extraction-rule revisions, schedules,
-                settings, and report artifacts from this device. Export the
-                project first if you may need it again.
-              </p>
-              <p>
-                Global BYOK credentials are intentionally retained because they
-                may serve other projects. Revoke them separately from
-                Integrations.
-              </p>
+              <p className="eyebrow">{t.settings.dangerZone}</p>
+              <h2>{t.settings.deleteTitle}</h2>
+              <p>{t.settings.deleteBody1}</p>
+              <p>{t.settings.deleteBody2}</p>
             </div>
             {!deleteOpen ? (
               <div className="form-actions">
@@ -340,7 +354,7 @@ export function SettingsPage() {
                     setDeleteOpen(true);
                   }}
                 >
-                  Delete project
+                  {t.settings.deleteProject}
                 </Button>
               </div>
             ) : (
@@ -350,11 +364,11 @@ export function SettingsPage() {
               >
                 <div>
                   <label htmlFor="project-deletion-confirmation">
-                    Type the project name to confirm
+                    {t.settings.confirmLabel}
                   </label>
                   <p id="project-deletion-help">
-                    Enter <strong>{projectName}</strong> exactly. This action
-                    cannot be undone.
+                    {t.settings.confirmHelpBefore}{" "}
+                    <strong>{projectName}</strong> {t.settings.confirmHelpAfter}
                   </p>
                   <input
                     id="project-deletion-confirmation"
@@ -377,7 +391,7 @@ export function SettingsPage() {
                     }}
                     disabled={deleteProject.isPending}
                   >
-                    Cancel
+                    {t.settings.cancel}
                   </Button>
                   <Button
                     type="submit"
@@ -388,8 +402,8 @@ export function SettingsPage() {
                     }
                   >
                     {deleteProject.isPending
-                      ? "Deleting…"
-                      : "Permanently delete project"}
+                      ? t.settings.deleting
+                      : t.settings.permanentlyDelete}
                   </Button>
                 </div>
               </form>

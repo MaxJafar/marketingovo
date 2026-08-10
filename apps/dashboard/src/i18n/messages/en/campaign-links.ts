@@ -1,0 +1,97 @@
+/**
+ * Campaign links and their QR codes: the builder, the live preview, stored
+ * links, and the self-hosted redirect config. Conventions in shell.ts.
+ */
+export const campaignLinks = {
+  verdictLabel: {
+    comfortable: "scans reliably",
+    tight: "marginal",
+    unscannable: "will not scan",
+  },
+  placementOption: {
+    screen: { label: "Screen", hint: "Slides, a web page, a video" },
+    printHandheld: {
+      label: "Held in the hand",
+      hint: "Flyer, business card, receipt",
+    },
+    printPoster: {
+      label: "Poster",
+      hint: "Read from a distance, rarely touched",
+    },
+    packaging: { label: "Packaging", hint: "Curved, scuffed in transit" },
+    outdoor: { label: "Outdoors", hint: "Rain, sun, partly obstructed" },
+  },
+  links: {
+    heading: "Links",
+    qrAlt: "QR code for {label}",
+    printedTag: "printed",
+    copied: "Copied",
+    copyLink: "Copy link",
+    svg: "SVG",
+    png: "PNG",
+    markPrinted: "Mark printed",
+    delete: "Delete",
+    noteOne: "{count} note from when this was made",
+    noteMany: "{count} notes from when this was made",
+    empty:
+      "No links yet. Codes made here encode their URL directly, so nothing resolves them and they cannot be revoked or metered.",
+  },
+  form: {
+    heading: "New campaign link",
+    mark: "checked before the code exists",
+    intro:
+      "A QR code is a URL that has been made expensive to change. The tagging is checked here, while it still costs nothing to fix.",
+    nameLabel: "Name",
+    nameHelp: "For finding it later. Never appears in the URL.",
+    destinationLabel: "Destination",
+    destinationHelp: "The untagged page. The tagging is added below.",
+    sourceLabel: "Source",
+    sourceHelp: "Where it came from",
+    mediumLabel: "Medium",
+    mediumHelp: "How it arrived",
+    campaignLabel: "Campaign",
+    campaignHelp: "Which campaign",
+    normalizedBefore: "Under the convention this becomes",
+    normalizedAfter: ".",
+    useThat: "Use that",
+    placementLabel: "Where will this code be?",
+    placementHelp: "Decides the error-correction level and the minimum size.",
+    printedWidthLabel: "Printed width (mm)",
+    printedWidthHelp: "How wide it will actually be on the finished thing.",
+    coloursSummary: "Colours and margin",
+    modulesLabel: "Modules",
+    backgroundLabel: "Background",
+    quietZoneLabel: "Quiet zone",
+    quietZoneHelp: "Four is the standard minimum.",
+  },
+  preview: {
+    heading: "Preview",
+    moduleSize: "Module size",
+    readableFrom: "Readable from",
+    readableUpTo: "up to {distance}cm",
+    contrast: "Contrast",
+    symbol: "Symbol",
+    symbolSpec: "version {version}, {count}×{count} modules, level {level}",
+    blockingHeading: "These prevent saving",
+    blockingBody:
+      "Everything else in this product records a problem and carries on. These do not, because a printed code has no second attempt.",
+    advisoryHeading: "Worth knowing",
+    saveFailed: "The link could not be saved.",
+    saving: "Saving…",
+    saveLink: "Save this link",
+    nameFirst: "Give it a name first.",
+  },
+  redirect: {
+    heading: "Codes you can re-point later",
+    body: "A QR code cannot expire or change — the modules encode the destination. Products selling “dynamic” codes are selling a redirect on their own domain, which is also why they can stop resolving it. Put the redirect on a domain you already own and the same capability costs nothing and answers to nobody.",
+    platformLabel: "Platform",
+    cannotExpire: "cannot expire by itself",
+    shortDomainLabel: "Your short domain",
+    endsOnLabel: "Ends on",
+    expiryNote:
+      "{platform} cannot check a date. The expiry is written in as a comment and something has to edit the file.",
+    building: "Building…",
+    buildConfig: "Build the config",
+    copy: "Copy",
+  },
+} as const;

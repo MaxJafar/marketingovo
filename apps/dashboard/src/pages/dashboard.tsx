@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { useSite } from "../context/site-context";
 import { useCompetitors, useKeywords, useOverview } from "../api/queries";
+import { fmt, useI18n } from "../i18n";
 import { PixelSprite } from "../components/pixel-sprite";
 import {
   decoGlyphs,
@@ -69,6 +70,7 @@ function Stat({
   change: number | null;
   note?: string;
 }) {
+  const { t } = useI18n();
   const delta = toDelta(change);
   return (
     <div className="pixel-stat">
@@ -88,7 +90,7 @@ function Stat({
             </span>
           ) : (
             <span className="pixel-delta" data-direction="flat">
-              {note ?? "no trend yet"}
+              {note ?? t.dashboard.stats.noTrendYet}
             </span>
           )}
           <SparkBars values={spark} accent={accent} />
@@ -118,6 +120,7 @@ function PanelEmpty({
 }
 
 export function DashboardPage() {
+  const { t } = useI18n();
   const { siteId, site } = useSite();
   const overview = useOverview(siteId);
   const keywords = useKeywords(siteId);
@@ -138,16 +141,16 @@ export function DashboardPage() {
 
   const healthBars = [
     {
-      name: "Crawlability",
+      name: t.dashboard.seoOverview.crawlability,
       value: metricNumber(data?.indexableCoverage),
     },
     {
-      name: "Site Performance",
+      name: t.dashboard.seoOverview.sitePerformance,
       value: vitalsPassRate,
     },
-    { name: "On-Page SEO", value: health },
+    { name: t.dashboard.seoOverview.onPageSeo, value: health },
     {
-      name: "Key events",
+      name: t.dashboard.seoOverview.keyEvents,
       value: keyEvents,
     },
   ];
@@ -156,17 +159,15 @@ export function DashboardPage() {
     <>
       <section className="pixel-panel pixel-hero">
         <div className="pixel-hero-copy">
-          <h1>welcome to</h1>
+          <h1>{t.dashboard.hero.welcome}</h1>
           <strong className="pixel-hero-title">
             <span className="mark-a">marketing</span>
             <span className="mark-b">ovo</span>
           </strong>
-          <p className="pixel-hero-sub">
-            your all-in-one marketing intelligence terminal
-          </p>
+          <p className="pixel-hero-sub">{t.dashboard.hero.tagline}</p>
         </div>
         <div className="pixel-hero-art">
-          <span className="pixel-bubble">data never sleeps</span>
+          <span className="pixel-bubble">{t.dashboard.hero.bubble}</span>
           <PixelSprite
             src="/pixel/mascot/cat-hero.png"
             fallback={mascotGlyphs.cat}
@@ -218,7 +219,7 @@ export function DashboardPage() {
 
       <div className="pixel-stats">
         <Stat
-          label="SEO visibility"
+          label={t.dashboard.stats.seoVisibility}
           value={formatScore(health)}
           unit={health === null ? undefined : "/100"}
           glyph={kpiGlyphs.visibility}
@@ -226,30 +227,36 @@ export function DashboardPage() {
           accent="pink"
           spark={trend.length > 1 ? toSpark(trend) : []}
           change={data?.siteHealth?.change ?? null}
-          note={health === null ? "run an audit to measure" : undefined}
+          note={
+            health === null ? t.dashboard.stats.runAuditToMeasure : undefined
+          }
         />
         <Stat
-          label="Organic traffic"
+          label={t.dashboard.stats.organicTraffic}
           value={formatCompact(clicks)}
           glyph={kpiGlyphs.traffic}
           sprite="/pixel/kpi/traffic.png"
           accent="cyan"
           spark={[]}
           change={data?.organicClicks?.change ?? null}
-          note={clicks === null ? "connect Search Console" : undefined}
+          note={
+            clicks === null ? t.dashboard.stats.connectSearchConsole : undefined
+          }
         />
         <Stat
-          label="Key events"
+          label={t.dashboard.stats.keyEvents}
           value={formatCompact(keyEvents)}
           glyph={kpiGlyphs.mentions}
           sprite="/pixel/kpi/mentions.png"
           accent="pink"
           spark={[]}
           change={data?.organicKeyEvents?.change ?? null}
-          note={keyEvents === null ? "connect Analytics" : undefined}
+          note={
+            keyEvents === null ? t.dashboard.stats.connectAnalytics : undefined
+          }
         />
         <Stat
-          label="CWV pass rate"
+          label={t.dashboard.stats.cwvPassRate}
           value={formatScore(vitalsPassRate)}
           unit={vitalsPassRate === null ? undefined : "%"}
           glyph={kpiGlyphs.sentiment}
@@ -258,14 +265,16 @@ export function DashboardPage() {
           spark={[]}
           change={data?.coreWebVitalsPassRate?.change ?? null}
           note={
-            vitalsPassRate === null ? "run an audit with vitals" : undefined
+            vitalsPassRate === null
+              ? t.dashboard.stats.runAuditWithVitals
+              : undefined
           }
         />
       </div>
 
       <div className="pixel-grid">
         <Panel
-          title="SEO overview"
+          title={t.dashboard.seoOverview.title}
           span="pixel-col-5"
           mark={
             <PixelSprite
@@ -276,19 +285,21 @@ export function DashboardPage() {
           }
         >
           <p className="pixel-hero-sub" style={{ marginBottom: 12 }}>
-            Domain health
+            {t.dashboard.seoOverview.domainHealth}
           </p>
           {health === null ? (
             <PanelEmpty
-              message="No audit has measured this site yet, so there is no health score to draw — a placeholder number would be an invention."
+              message={t.dashboard.seoOverview.empty}
               to="/audits"
-              action="Run an audit →"
+              action={t.dashboard.seoOverview.runAudit}
             />
           ) : (
             <div className="pixel-donut-row">
               <PixelDonut
                 value={health}
-                label={`Domain health ${Math.round(health)} out of 100`}
+                label={fmt(t.dashboard.seoOverview.donutLabel, {
+                  value: Math.round(health),
+                })}
               />
               <div className="pixel-meters">
                 {healthBars.map((bar) => (
@@ -300,7 +311,7 @@ export function DashboardPage() {
         </Panel>
 
         <Panel
-          title="Cross-channel report"
+          title={t.dashboard.crossChannel.title}
           span="pixel-col-7"
           mark={
             <PixelSprite
@@ -310,24 +321,19 @@ export function DashboardPage() {
             />
           }
         >
-          <p className="pixel-hero-sub">
-            The client-facing document across paid, organic, social, email,
-            competitors and completed work — charts drawn only from measured
-            values, exported as PDF, and generated on a daily, weekly or monthly
-            schedule.
-          </p>
+          <p className="pixel-hero-sub">{t.dashboard.crossChannel.body}</p>
           <div className="pixel-row-actions" style={{ marginTop: 12 }}>
             <Link to="/report" className="pixel-button pixel-button-primary">
-              Open the report →
+              {t.dashboard.crossChannel.openReport}
             </Link>
             <Link to="/monitoring" className="pixel-button">
-              Schedule it →
+              {t.dashboard.crossChannel.scheduleIt}
             </Link>
           </div>
         </Panel>
 
         <Panel
-          title="Top keywords"
+          title={t.dashboard.topKeywords.title}
           span="pixel-col-4"
           mark={
             <span style={{ color: "var(--px-gold)" }}>
@@ -341,21 +347,21 @@ export function DashboardPage() {
         >
           {keywordRows.length === 0 ? (
             <PanelEmpty
-              message="No keyword research has run for this workspace yet."
+              message={t.dashboard.topKeywords.empty}
               to="/keywords"
-              action="Open the keyword lab →"
+              action={t.dashboard.topKeywords.openLab}
             />
           ) : (
             <>
               <table className="pixel-table">
                 <thead>
                   <tr>
-                    <th scope="col">Keyword</th>
+                    <th scope="col">{t.dashboard.topKeywords.keyword}</th>
                     <th scope="col" className="is-numeric">
-                      Pos.
+                      {t.dashboard.topKeywords.position}
                     </th>
                     <th scope="col" className="is-numeric">
-                      Vol.
+                      {t.dashboard.topKeywords.volume}
                     </th>
                   </tr>
                 </thead>
@@ -378,14 +384,14 @@ export function DashboardPage() {
                 </tbody>
               </table>
               <Link to="/keywords" className="pixel-panel-action">
-                View all keywords →
+                {t.dashboard.topKeywords.viewAll}
               </Link>
             </>
           )}
         </Panel>
 
         <Panel
-          title="Competitor insights"
+          title={t.dashboard.competitorInsights.title}
           span="pixel-col-4"
           mark={
             <span style={{ color: "var(--px-pink)" }}>
@@ -399,24 +405,30 @@ export function DashboardPage() {
         >
           {competitorRows.length === 0 ? (
             <PanelEmpty
-              message="No competitor comparison has run yet, so there is nothing measured to rank."
+              message={t.dashboard.competitorInsights.empty}
               to="/competitors"
-              action="Research competitors →"
+              action={t.dashboard.competitorInsights.research}
             />
           ) : (
             <>
               <table className="pixel-table">
                 <thead>
                   <tr>
-                    <th scope="col">Domain</th>
+                    <th scope="col">{t.dashboard.competitorInsights.domain}</th>
                     <th scope="col" className="is-numeric">
-                      Visibility
+                      {t.dashboard.competitorInsights.visibility}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr data-self="true">
-                    <td>you ({site?.name?.toLowerCase() ?? "this site"})</td>
+                    <td>
+                      {fmt(t.dashboard.competitorInsights.you, {
+                        name:
+                          site?.name?.toLowerCase() ??
+                          t.dashboard.competitorInsights.thisSite,
+                      })}
+                    </td>
                     <td className="is-numeric">{formatScore(health)}</td>
                   </tr>
                   {competitorRows.slice(0, 4).map((entry) => (
@@ -430,14 +442,14 @@ export function DashboardPage() {
                 </tbody>
               </table>
               <Link to="/competitors" className="pixel-panel-action">
-                View competitors →
+                {t.dashboard.competitorInsights.viewAll}
               </Link>
             </>
           )}
         </Panel>
 
         <Panel
-          title="Content intel feed"
+          title={t.dashboard.contentFeed.title}
           span="pixel-col-4"
           mark={
             <PixelSprite
@@ -449,9 +461,9 @@ export function DashboardPage() {
         >
           {gapTerms.length === 0 ? (
             <PanelEmpty
-              message="Content gaps appear here after a competitor comparison measures them."
+              message={t.dashboard.contentFeed.empty}
               to="/content"
-              action="Open content intel →"
+              action={t.dashboard.contentFeed.open}
             />
           ) : (
             <>
@@ -467,12 +479,14 @@ export function DashboardPage() {
                       <h3 className="pixel-feed-title">{gap.term}</h3>
                       <div className="pixel-feed-meta">
                         <span>
-                          ◉ {gap.referencesCovering} competitors covering
+                          {fmt(t.dashboard.contentFeed.competitorsCovering, {
+                            count: gap.referencesCovering,
+                          })}
                         </span>
                       </div>
                     </div>
                     <span className="pixel-tag" data-tone="hot">
-                      Content gap
+                      {t.dashboard.contentFeed.gapTag}
                     </span>
                   </article>
                 ))}
@@ -482,7 +496,7 @@ export function DashboardPage() {
                 className="pixel-panel-action"
                 data-accent="pink"
               >
-                View content feed →
+                {t.dashboard.contentFeed.viewFeed}
               </Link>
             </>
           )}

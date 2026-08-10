@@ -10,6 +10,7 @@ import type {
   ReportMetric,
   ReportSection,
 } from "../api/contracts";
+import { fmt, useI18n, type Messages } from "../i18n";
 import {
   MeterRow,
   PixelPairedBars,
@@ -36,13 +37,6 @@ const STATE_TONE: Record<string, string> = {
   failed: "bad",
 };
 
-const STATE_LABEL: Record<string, string> = {
-  available: "complete",
-  partial: "partial coverage",
-  unavailable: "not measured",
-  failed: "could not be read",
-};
-
 function formatValue(metric: ReportMetric): string {
   if (metric.value === null) return "";
   switch (metric.unit) {
@@ -63,6 +57,7 @@ function formatValue(metric: ReportMetric): string {
 }
 
 function MetricCell({ metric }: { metric: ReportMetric }) {
+  const { t } = useI18n();
   const measured = metric.value !== null;
   return (
     <li className="pixel-list-row">
@@ -75,8 +70,11 @@ function MetricCell({ metric }: { metric: ReportMetric }) {
             </strong>
             {metric.change !== null ? (
               <p className="pixel-hero-sub">
-                {metric.change > 0 ? "+" : ""}
-                {Math.round(metric.change * 1000) / 10}% vs previous period
+                {fmt(t.marketingReport.changeVsPrevious, {
+                  change:
+                    (metric.change > 0 ? "+" : "") +
+                    Math.round(metric.change * 1000) / 10,
+                })}
               </p>
             ) : metric.note ? (
               <p className="pixel-hero-sub">{metric.note}</p>
@@ -86,7 +84,7 @@ function MetricCell({ metric }: { metric: ReportMetric }) {
           // The reason takes the number's slot. A dash here would be read as
           // zero, which is the failure this whole surface exists to avoid.
           <p className="pixel-hero-sub" style={{ fontStyle: "italic" }}>
-            {metric.note ?? "Not measured in this period."}
+            {metric.note ?? t.marketingReport.notMeasuredPeriod}
           </p>
         )}
       </div>
@@ -96,11 +94,14 @@ function MetricCell({ metric }: { metric: ReportMetric }) {
 
 /** The one breakdown metric each section charts, when it has one. */
 const BREAKDOWN_CHART: Partial<
-  Record<ReportSection["id"], { key: string; title: string }>
+  Record<
+    ReportSection["id"],
+    { key: string; title: keyof Messages["marketingReport"]["breakdownTitle"] }
+  >
 > = {
-  paid: { key: "spend", title: "Spend by account and platform" },
-  social: { key: "published", title: "Posts published by platform" },
-  competitors: { key: "signals", title: "Public signals by competitor" },
+  paid: { key: "spend", title: "paid" },
+  social: { key: "published", title: "social" },
+  competitors: { key: "signals", title: "competitors" },
 };
 
 /**
@@ -110,6 +111,7 @@ const BREAKDOWN_CHART: Partial<
  * exists for.
  */
 function SectionCharts({ section }: { section: ReportSection }) {
+  const { t } = useI18n();
   const compareRows: PairedBarRow[] = [];
   const compareOmitted: Array<{ label: string; reason: string }> = [];
   for (const metric of section.metrics) {
@@ -121,8 +123,7 @@ function SectionCharts({ section }: { section: ReportSection }) {
       // value/(1+change), so the fall is stated rather than silently dropped.
       compareOmitted.push({
         label: metric.label,
-        reason:
-          "Fell to zero against the previous period; the pair cannot be drawn from the stored figures.",
+        reason: t.marketingReport.fellToZero,
       });
       continue;
     }
@@ -147,7 +148,7 @@ function SectionCharts({ section }: { section: ReportSection }) {
       if (metric.value === null) {
         omittedRows.push({
           label: row.label,
-          reason: metric.note ?? "Not measured in this period.",
+          reason: metric.note ?? t.marketingReport.notMeasuredPeriod,
         });
         continue;
       }
@@ -170,7 +171,7 @@ function SectionCharts({ section }: { section: ReportSection }) {
     <>
       {compareRows.length > 0 || compareOmitted.length > 0 ? (
         <div className="pixel-subsection">
-          <h4>This period against the one before it</h4>
+          <h4>{t.marketingReport.compareHeading}</h4>
           <PixelPairedBars rows={compareRows} />
           {compareOmitted.map((row) => (
             <p
@@ -178,14 +179,17 @@ function SectionCharts({ section }: { section: ReportSection }) {
               className="pixel-hero-sub"
               style={{ fontStyle: "italic" }}
             >
-              Not drawn — {row.label}: {row.reason}
+              {fmt(t.marketingReport.notDrawn, {
+                label: row.label,
+                reason: row.reason,
+              })}
             </p>
           ))}
         </div>
       ) : null}
       {barsDrawable ? (
         <div className="pixel-subsection">
-          <h4>{config.title}</h4>
+          <h4>{t.marketingReport.breakdownTitle[config.title]}</h4>
           <div className="pixel-meters">
             {measuredRows.map((row) => (
               <MeterRow
@@ -203,7 +207,10 @@ function SectionCharts({ section }: { section: ReportSection }) {
               className="pixel-hero-sub"
               style={{ fontStyle: "italic" }}
             >
-              Not drawn — {row.label}: {row.reason}
+              {fmt(t.marketingReport.notDrawn, {
+                label: row.label,
+                reason: row.reason,
+              })}
             </p>
           ))}
         </div>
@@ -213,12 +220,13 @@ function SectionCharts({ section }: { section: ReportSection }) {
 }
 
 function SectionPanel({ section }: { section: ReportSection }) {
+  const { t } = useI18n();
   return (
     <section className="pixel-panel">
       <div className="pixel-panel-head">
         <h2>{section.title}</h2>
         <span className={`pixel-tag pixel-tag-${STATE_TONE[section.state]}`}>
-          {STATE_LABEL[section.state]}
+          {t.marketingReport.stateLabel[section.state]}
         </span>
       </div>
       <div className="pixel-panel-body">
@@ -236,7 +244,7 @@ function SectionPanel({ section }: { section: ReportSection }) {
 
         {section.breakdown.length > 0 ? (
           <div className="pixel-subsection">
-            <h4>Breakdown</h4>
+            <h4>{t.marketingReport.breakdownHeading}</h4>
             <table className="pixel-table">
               <tbody>
                 {section.breakdown.map((row) => (
@@ -245,7 +253,7 @@ function SectionPanel({ section }: { section: ReportSection }) {
                     {row.metrics.map((metric) => (
                       <td key={metric.key}>
                         {metric.value === null
-                          ? "not measured"
+                          ? t.marketingReport.notMeasuredCell
                           : formatValue(metric)}
                       </td>
                     ))}
@@ -265,11 +273,14 @@ function SectionPanel({ section }: { section: ReportSection }) {
 
         {section.sources.length > 0 ? (
           <p className="pixel-hero-sub">
-            Sources:{" "}
+            {t.marketingReport.sourcesPrefix}{" "}
             {section.sources
-              .map(
-                (source) =>
-                  `${source.label} (${STATE_LABEL[source.state]}${source.reason ? ` — ${source.reason}` : ""})`,
+              .map((source) =>
+                fmt(t.marketingReport.sourceEntry, {
+                  label: source.label,
+                  state: t.marketingReport.stateLabel[source.state],
+                  reason: source.reason ? ` — ${source.reason}` : "",
+                }),
               )
               .join(" · ")}
           </p>
@@ -280,6 +291,7 @@ function SectionPanel({ section }: { section: ReportSection }) {
 }
 
 function ReportView({ report }: { report: MarketingReport }) {
+  const { t } = useI18n();
   return (
     <>
       <section className="pixel-panel">
@@ -293,11 +305,7 @@ function ReportView({ report }: { report: MarketingReport }) {
           {report.narrative ? (
             <p className="pixel-hero-sub">{report.narrative}</p>
           ) : (
-            <p className="pixel-hero-sub">
-              No narrative yet. Write one, or ask an attached agent to — a
-              summary assembled from the numbers reads as insight while being
-              arithmetic, so this is deliberately not generated.
-            </p>
+            <p className="pixel-hero-sub">{t.marketingReport.noNarrative}</p>
           )}
           <div className="pixel-row-actions">
             <a
@@ -306,7 +314,7 @@ function ReportView({ report }: { report: MarketingReport }) {
               target="_blank"
               rel="noreferrer noopener"
             >
-              Open the client version
+              {t.marketingReport.openClientVersion}
             </a>
             <a
               className="pixel-button"
@@ -314,14 +322,14 @@ function ReportView({ report }: { report: MarketingReport }) {
               target="_blank"
               rel="noreferrer noopener"
             >
-              Plain text
+              {t.marketingReport.plainText}
             </a>
             <a
               className="pixel-button"
               href={`/api/v1/marketing-reports/${encodeURIComponent(report.id)}/render?format=pdf`}
               download={`marketing-report-${report.id}.pdf`}
             >
-              Download PDF
+              {t.marketingReport.downloadPdf}
             </a>
           </div>
         </div>
@@ -330,13 +338,10 @@ function ReportView({ report }: { report: MarketingReport }) {
       {report.coverageGaps.length > 0 ? (
         <section className="pixel-panel">
           <div className="pixel-panel-head">
-            <h2>What this report could not see</h2>
+            <h2>{t.marketingReport.gapsHeading}</h2>
           </div>
           <div className="pixel-panel-body">
-            <p className="pixel-hero-sub">
-              Gathered here as well as in each section, so a reader who skims
-              the numbers still meets the gaps.
-            </p>
+            <p className="pixel-hero-sub">{t.marketingReport.gapsBody}</p>
             <ul className="pixel-list">
               {report.coverageGaps.map((gap, index) => (
                 <li key={index} className="pixel-list-row">
@@ -359,6 +364,7 @@ function ReportView({ report }: { report: MarketingReport }) {
 }
 
 export function MarketingReportPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const reports = useMarketingReports(siteId);
   const generate = useGenerateReport(siteId);
@@ -374,20 +380,20 @@ export function MarketingReportPage() {
     <>
       <section className="pixel-panel">
         <div className="pixel-panel-head">
-          <h2>Generate a report</h2>
+          <h2>{t.marketingReport.generateHeading}</h2>
           <div className="pixel-row-actions">
             <input
               type="date"
               className="pixel-input"
               value={start}
-              aria-label="Period start"
+              aria-label={t.marketingReport.periodStart}
               onChange={(event) => setStart(event.target.value)}
             />
             <input
               type="date"
               className="pixel-input"
               value={end}
-              aria-label="Period end"
+              aria-label={t.marketingReport.periodEnd}
               onChange={(event) => setEnd(event.target.value)}
             />
             <button
@@ -402,23 +408,19 @@ export function MarketingReportPage() {
                 })
               }
             >
-              {generate.isPending ? "Gathering…" : "Generate"}
+              {generate.isPending
+                ? t.marketingReport.gathering
+                : t.marketingReport.generate}
             </button>
           </div>
         </div>
         <div className="pixel-panel-body">
-          <p className="pixel-hero-sub">
-            Spans paid, organic search, social publishing, email, the
-            competitive landscape and completed work — with charts for what was
-            measured and a downloadable PDF. Leave the dates empty for the last
-            complete 30 days — the current day is excluded because providers
-            restate it.
-          </p>
+          <p className="pixel-hero-sub">{t.marketingReport.description}</p>
           {generate.isError ? (
             <p className="pixel-hero-sub" role="alert">
               {generate.error instanceof Error
                 ? generate.error.message
-                : "The report could not be generated."}
+                : t.marketingReport.generateFailed}
             </p>
           ) : null}
           {items.length > 0 ? (
@@ -438,19 +440,17 @@ export function MarketingReportPage() {
                     <span
                       className={`pixel-tag pixel-tag-${STATE_TONE[summary.state]}`}
                     >
-                      {STATE_LABEL[summary.state]}
+                      {t.marketingReport.stateLabel[summary.state]}
                     </span>{" "}
-                    · generated {new Date(summary.generatedAt).toLocaleString()}
+                    {fmt(t.marketingReport.generatedOn, {
+                      date: new Date(summary.generatedAt).toLocaleString(),
+                    })}
                   </p>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="pixel-hero-sub">
-              No reports yet. A stored report is a frozen snapshot — figures are
-              as each platform reported them on the day, and are not restated
-              afterwards.
-            </p>
+            <p className="pixel-hero-sub">{t.marketingReport.empty}</p>
           )}
         </div>
       </section>

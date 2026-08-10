@@ -5,6 +5,7 @@ import {
   useQueryClient,
   type InfiniteData,
 } from "@tanstack/react-query";
+import { getMessages } from "../i18n";
 import { apiDownload, apiRequest, withQuery, type ApiResult } from "./client";
 import type {
   AuditRun,
@@ -1373,11 +1374,11 @@ export function useImportProject() {
   return useMutation({
     mutationFn: async (file: File) => {
       if (file.size > 25 * 1024 * 1024) {
-        throw new Error("The .marketingovo file must be 25 MiB or smaller.");
+        throw new Error(getMessages().common.importTooLarge);
       }
       const lowerName = file.name.toLowerCase();
       if (!lowerName.endsWith(".marketingovo")) {
-        throw new Error("Choose a file with the .marketingovo extension.");
+        throw new Error(getMessages().common.importWrongExtension);
       }
       return apiRequest<ProjectImportResult>("/import", {
         method: "POST",

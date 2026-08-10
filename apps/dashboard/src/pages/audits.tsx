@@ -4,6 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { AuditRun } from "../api/contracts";
 import { useRuns, useStartAudit } from "../api/queries";
 import { useSite } from "../context/site-context";
+import { fmt, getMessages, useI18n } from "../i18n";
 import { exactUrlHostname } from "../lib/url";
 import { DataTable } from "../components/data-table";
 import { AuditComparisonCard } from "../components/audit-comparison-card";
@@ -25,6 +26,7 @@ import {
 } from "../components/ui";
 
 export function AuditsPage() {
+  const { t } = useI18n();
   const { siteId, site } = useSite();
   const query = useRuns(siteId);
   const startAudit = useStartAudit();
@@ -43,7 +45,7 @@ export function AuditsPage() {
     () => [
       {
         id: "startedAt",
-        header: "Started",
+        header: t.audits.columns.started,
         cell: ({ row }) => (
           <Link
             to="/audits/$runId"
@@ -56,31 +58,31 @@ export function AuditsPage() {
       },
       {
         id: "status",
-        header: "Status",
+        header: t.audits.columns.status,
         cell: ({ row }) => <StatusBadge status={row.original.status} />,
       },
       {
         id: "trigger",
-        header: "Trigger",
-        cell: ({ row }) => row.original.trigger ?? "Unavailable",
+        header: t.audits.columns.trigger,
+        cell: ({ row }) => row.original.trigger ?? t.common.unavailable,
       },
       {
         id: "pages",
-        header: "Pages crawled",
+        header: t.audits.columns.pagesCrawled,
         cell: ({ row }) => formatNumber(row.original.pagesCrawled),
       },
       {
         id: "issues",
-        header: "Issues",
+        header: t.audits.columns.issues,
         cell: ({ row }) => formatNumber(row.original.issuesFound),
       },
       {
         id: "score",
-        header: "Health score",
+        header: t.audits.columns.healthScore,
         cell: ({ row }) => formatNumber(row.original.healthScore),
       },
     ],
-    [],
+    [t],
   );
 
   useEffect(() => setPrivateAccessApproved(false), [privateAccessHost]);
@@ -120,23 +122,23 @@ export function AuditsPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        eyebrow="Crawl history"
-        title="Audits"
-        description="Start a baseline, follow active crawls, and compare completed technical snapshots."
+        eyebrow={t.audits.eyebrow}
+        title={t.audits.title}
+        description={t.audits.description}
         actions={
           <Button
             onClick={startFullAudit}
             disabled={!siteId || !hasWebsite || startAudit.isPending}
           >
             <Icon name="audits" />{" "}
-            {startAudit.isPending ? "Starting…" : "Run full audit"}
+            {startAudit.isPending ? t.audits.starting : t.audits.runFullAudit}
           </Button>
         }
       />
       <CapabilityGate capabilities={capabilities} requires={NEEDS_WEBSITE}>
         {privateAccessHost ? (
           <details className="private-site-access">
-            <summary>Private-site access</summary>
+            <summary>{t.audits.privateAccess.summary}</summary>
             <label className="checkbox-label">
               <input
                 type="checkbox"
@@ -146,32 +148,25 @@ export function AuditsPage() {
                 }
               />
               <span>
-                <strong>
-                  Allow this exact hostname to access a private network for this
-                  audit
-                </strong>
+                <strong>{t.audits.privateAccess.allowTitle}</strong>
                 <small>
-                  {privateAccessHost} only. This approval applies to audits
-                  started from this page until you switch projects; cloud
-                  metadata always stays blocked.
+                  {fmt(t.audits.privateAccess.allowHelp, {
+                    host: privateAccessHost,
+                  })}
                 </small>
               </span>
             </label>
           </details>
         ) : null}
         <details className="audit-scope-panel">
-          <summary>Expert audit scope</summary>
+          <summary>{t.audits.scope.summary}</summary>
           <form onSubmit={startExactCohort}>
             <div>
-              <h2>Audit an exact URL cohort</h2>
-              <p>
-                Paste one absolute URL per line. Marketingovo crawls only this
-                list and keeps each URL as a seed, which is useful for
-                migrations, templates, QA samples, and verification runs.
-              </p>
+              <h2>{t.audits.scope.title}</h2>
+              <p>{t.audits.scope.body}</p>
             </div>
             <label htmlFor="audit-exact-urls">
-              URL list
+              {t.audits.scope.urlListLabel}
               <textarea
                 id="audit-exact-urls"
                 value={urlList}
@@ -181,13 +176,10 @@ export function AuditsPage() {
                 }
                 rows={6}
               />
-              <small>
-                URLs must use the project origin. Fragments and duplicates are
-                removed before the run starts.
-              </small>
+              <small>{t.audits.scope.urlListHelp}</small>
             </label>
             {scopeError ? (
-              <InlineNotice tone="warning" title="URL cohort needs attention">
+              <InlineNotice tone="warning" title={t.audits.scope.errorTitle}>
                 {scopeError}
               </InlineNotice>
             ) : null}
@@ -197,19 +189,19 @@ export function AuditsPage() {
                 variant="secondary"
                 disabled={!siteId || startAudit.isPending || !urlList.trim()}
               >
-                Run URL list audit
+                {t.audits.scope.submit}
               </Button>
             </div>
           </form>
         </details>
         {startAudit.isError ? (
-          <InlineNotice tone="danger" title="Audit could not start">
+          <InlineNotice tone="danger" title={t.audits.startErrorTitle}>
             {startAudit.error.message}
           </InlineNotice>
         ) : null}
         {startAudit.isSuccess ? (
-          <InlineNotice tone="success" title="Audit queued">
-            The API accepted the run. Refresh or watch the status below.
+          <InlineNotice tone="success" title={t.audits.queuedTitle}>
+            {t.audits.queuedBody}
           </InlineNotice>
         ) : null}
         <QueryState
@@ -221,11 +213,15 @@ export function AuditsPage() {
           <FreshnessNotice meta={query.data?.meta} />
           <AuditComparisonCard runs={auditRuns} />
           {auditRuns.length > 0 ? (
-            <DataTable data={auditRuns} columns={columns} label="Audit runs" />
+            <DataTable
+              data={auditRuns}
+              columns={columns}
+              label={t.audits.tableLabel}
+            />
           ) : (
             <EmptyState
-              title="No audit runs yet"
-              description="Start a full baseline audit to populate crawl history and prioritized actions."
+              title={t.audits.emptyTitle}
+              description={t.audits.emptyBody}
             />
           )}
         </QueryState>
@@ -235,20 +231,28 @@ export function AuditsPage() {
 }
 
 export function parseExactAuditUrls(value: string): string[] {
+  const messages = getMessages();
   const raw = value
     .split(/[\s,]+/u)
     .map((entry) => entry.trim())
     .filter(Boolean);
-  if (raw.length === 0) throw new TypeError("Add at least one absolute URL.");
+  if (raw.length === 0)
+    throw new TypeError(messages.audits.scope.atLeastOneUrl);
   const urls = raw.map((entry) => {
     let parsed: URL;
     try {
       parsed = new URL(entry);
     } catch {
-      throw new TypeError(`Invalid URL: ${entry}`);
+      throw new TypeError(
+        fmt(messages.audits.scope.invalidUrl, { url: entry }),
+      );
     }
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-      throw new TypeError(`Unsupported URL scheme: ${parsed.protocol}`);
+      throw new TypeError(
+        fmt(messages.audits.scope.unsupportedScheme, {
+          scheme: parsed.protocol,
+        }),
+      );
     }
     parsed.hash = "";
     return parsed.toString();

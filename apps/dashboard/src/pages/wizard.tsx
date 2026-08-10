@@ -20,6 +20,7 @@ import {
   useUpdateProjectContext,
 } from "../api/queries";
 import type { ProjectContextProfile } from "../api/contracts";
+import { fmt, useI18n } from "../i18n";
 import {
   Button,
   Card,
@@ -33,32 +34,20 @@ import { Icon } from "../components/icon";
 const CREDENTIAL_PROVIDERS = [
   {
     id: "google-search-console",
-    label: "Google Search Console",
-    why: "Ranks findings by the queries and pages that actually earn impressions.",
-    field: "Property URL or sc-domain identifier",
+    key: "googleSearchConsole",
     placeholder: "sc-domain:example.com",
   },
   {
     id: "google-analytics-4",
-    label: "Google Analytics 4",
-    why: "Weights findings by sessions and conversions rather than severity alone.",
-    field: "Property ID",
+    key: "googleAnalytics4",
     placeholder: "123456789",
   },
   {
     id: "pagespeed-insights",
-    label: "PageSpeed Insights",
-    why: "Adds field Core Web Vitals to the technical audit.",
-    field: "API key",
+    key: "pagespeedInsights",
     placeholder: "AIza…",
   },
-  {
-    id: "serpapi",
-    label: "SerpAPI",
-    why: "Required for live rank tracking. Without it, positions stay unmeasured.",
-    field: "API key",
-    placeholder: "Your SerpAPI key",
-  },
+  { id: "serpapi", key: "serpapi", placeholder: "Your SerpAPI key" },
 ] as const;
 
 interface BrandProfileDraft {
@@ -132,14 +121,15 @@ function lines(value: string, limit: number): string[] {
 }
 
 const STEPS = [
-  { id: "workspace", label: "Workspace", hint: "Name the brand." },
-  { id: "brand", label: "Brand presence", hint: "Where else the brand lives." },
-  { id: "competitors", label: "Competitors", hint: "Who to measure against." },
-  { id: "data", label: "Data sources", hint: "Optional. Skippable." },
-  { id: "launch", label: "Review", hint: "Start the first runs." },
+  { id: "workspace" },
+  { id: "brand" },
+  { id: "competitors" },
+  { id: "data" },
+  { id: "launch" },
 ] as const;
 
 export function WizardPage() {
+  const { t } = useI18n();
   const [stepIndex, setStepIndex] = useState(0);
 
   const [brandName, setBrandName] = useState("");
@@ -262,9 +252,7 @@ export function WizardPage() {
       }
       setStepIndex((current) => Math.min(current + 1, STEPS.length - 1));
     } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : "Something went wrong.",
-      );
+      setError(cause instanceof Error ? cause.message : t.wizard.genericError);
     } finally {
       setBusy(false);
     }
@@ -288,7 +276,7 @@ export function WizardPage() {
           mode: "full",
           ...(privateHostAllowlist ? { privateHostAllowlist } : {}),
         });
-        started.push("Baseline audit");
+        started.push(t.wizard.runs.baselineAudit);
       }
       // The comparison is what fills Market intel. Without competitors there is
       // nothing to compare, so it is skipped rather than started empty.
@@ -303,7 +291,7 @@ export function WizardPage() {
             ...(privateHostAllowlist ? { privateHostAllowlist } : {}),
           },
         });
-        started.push("Competitor comparison");
+        started.push(t.wizard.runs.competitorComparison);
       }
       // OSINT researches whatever public targets it was given, so it runs with
       // or without a website — as long as there is at least one target.
@@ -320,13 +308,11 @@ export function WizardPage() {
             maxUrls: 12,
           },
         });
-        started.push("Public-web OSINT dossier");
+        started.push(t.wizard.runs.osintDossier);
       }
       setLaunched(started);
     } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : "Could not start runs.",
-      );
+      setError(cause instanceof Error ? cause.message : t.wizard.launchError);
       setLaunched(started);
     } finally {
       setBusy(false);
@@ -344,12 +330,12 @@ export function WizardPage() {
   return (
     <div className="page-stack wizard">
       <PageHeader
-        eyebrow="Setup"
-        title="Create your marketing workspace"
-        description="Five steps to a dashboard with real data. Only a brand name is required."
+        eyebrow={t.wizard.eyebrow}
+        title={t.wizard.title}
+        description={t.wizard.description}
       />
 
-      <ol className="wizard-rail" aria-label="Setup progress">
+      <ol className="wizard-rail" aria-label={t.wizard.progressLabel}>
         {STEPS.map((entry, index) => {
           const state =
             index < stepIndex
@@ -367,8 +353,8 @@ export function WizardPage() {
                 {state === "done" ? <Icon name="check" /> : index + 1}
               </span>
               <span className="wizard-rail-text">
-                <strong>{entry.label}</strong>
-                <small>{entry.hint}</small>
+                <strong>{t.wizard.steps[entry.id].label}</strong>
+                <small>{t.wizard.steps[entry.id].hint}</small>
               </span>
             </li>
           );
@@ -376,7 +362,7 @@ export function WizardPage() {
       </ol>
 
       {error ? (
-        <InlineNotice tone="danger" title="That step could not be saved">
+        <InlineNotice tone="danger" title={t.wizard.errorTitle}>
           {error}
         </InlineNotice>
       ) : null}
@@ -391,11 +377,11 @@ export function WizardPage() {
             }}
           >
             <SectionHeading
-              title="What are we tracking?"
-              description="The workspace is named for the brand. Add a website only if you want it crawled."
+              title={t.wizard.workspace.title}
+              description={t.wizard.workspace.description}
             />
             <label htmlFor="wizard-brand-name">
-              Brand name
+              {t.wizard.workspace.brandName}
               <input
                 id="wizard-brand-name"
                 value={brandName}
@@ -405,22 +391,19 @@ export function WizardPage() {
               />
             </label>
             <label htmlFor="wizard-website">
-              Website <span className="optional">Optional</span>
+              {t.wizard.workspace.website}{" "}
+              <span className="optional">{t.wizard.optional}</span>
               <input
                 id="wizard-website"
                 value={websiteUrl}
                 onChange={(event) => setWebsiteUrl(event.currentTarget.value)}
                 placeholder="acme.example"
               />
-              <small>
-                Needed only for crawling and SEO audits. Social, ads and
-                research work without it, and you can add one later from
-                Settings. https:// is added if you leave it off.
-              </small>
+              <small>{t.wizard.workspace.websiteHelp}</small>
             </label>
             <label htmlFor="wizard-summary">
-              What does this brand do?{" "}
-              <span className="optional">Optional</span>
+              {t.wizard.workspace.summaryLabel}{" "}
+              <span className="optional">{t.wizard.optional}</span>
               <textarea
                 id="wizard-summary"
                 value={summary}
@@ -428,10 +411,7 @@ export function WizardPage() {
                 placeholder="Direct-to-consumer running shoes, UK and Ireland."
                 rows={2}
               />
-              <small>
-                Recorded as workspace context so reports and agents share the
-                same background.
-              </small>
+              <small>{t.wizard.workspace.summaryHelp}</small>
             </label>
           </form>
         ) : null}
@@ -439,13 +419,13 @@ export function WizardPage() {
         {step.id === "brand" ? (
           <div className="wizard-fields">
             <SectionHeading
-              title="Where else does the brand live?"
-              description="Each profile is checked against your crawl: whether any page links to it, and whether it is declared in schema.org sameAs. An unlinked profile is invisible to search engines."
+              title={t.wizard.brand.title}
+              description={t.wizard.brand.description}
             />
             {profiles.map((entry, index) => (
               <div className="wizard-row" key={index}>
                 <label htmlFor={`wizard-profile-label-${index}`}>
-                  Label
+                  {t.wizard.brand.label}
                   <input
                     id={`wizard-profile-label-${index}`}
                     value={entry.label}
@@ -456,7 +436,7 @@ export function WizardPage() {
                   />
                 </label>
                 <label htmlFor={`wizard-profile-url-${index}`}>
-                  Profile URL
+                  {t.wizard.brand.profileUrl}
                   <input
                     id={`wizard-profile-url-${index}`}
                     value={entry.url}
@@ -476,9 +456,11 @@ export function WizardPage() {
                         : current.filter((_, position) => position !== index),
                     )
                   }
-                  aria-label={`Remove profile ${index + 1}`}
+                  aria-label={fmt(t.wizard.brand.removeProfile, {
+                    number: index + 1,
+                  })}
                 >
-                  Remove
+                  {t.wizard.brand.remove}
                 </Button>
               </div>
             ))}
@@ -489,7 +471,7 @@ export function WizardPage() {
                 setProfiles((current) => [...current, { label: "", url: "" }])
               }
             >
-              Add another profile
+              {t.wizard.brand.addProfile}
             </Button>
           </div>
         ) : null}
@@ -497,11 +479,11 @@ export function WizardPage() {
         {step.id === "competitors" ? (
           <div className="wizard-fields">
             <SectionHeading
-              title="Who are you measured against?"
-              description="Every competitor is crawled with the same limits as your own site. Publishing cadence and content gaps come from their pages, so no provider key is needed."
+              title={t.wizard.competitors.title}
+              description={t.wizard.competitors.description}
             />
             <label htmlFor="wizard-competitors">
-              Competitor domains
+              {t.wizard.competitors.domains}
               <textarea
                 id="wizard-competitors"
                 value={competitorText}
@@ -511,10 +493,7 @@ export function WizardPage() {
                 placeholder={"competitor-one.com\ncompetitor-two.com"}
                 rows={4}
               />
-              <small>
-                One per line. The first two are compared in the opening run; the
-                rest are kept in workspace context.
-              </small>
+              <small>{t.wizard.competitors.domainsHelp}</small>
             </label>
           </div>
         ) : null}
@@ -522,37 +501,40 @@ export function WizardPage() {
         {step.id === "data" ? (
           <div className="wizard-fields">
             <SectionHeading
-              title="Connect your data"
-              description="Every one of these is optional. Skip them and the audit still runs — findings are ranked by technical severity and reach, and anything that needs a source is reported as unavailable rather than guessed."
+              title={t.wizard.data.title}
+              description={t.wizard.data.description}
             />
-            {CREDENTIAL_PROVIDERS.map((provider) => (
-              <label
-                key={provider.id}
-                htmlFor={`wizard-provider-${provider.id}`}
-              >
-                {provider.label} <span className="optional">Optional</span>
-                <input
-                  id={`wizard-provider-${provider.id}`}
-                  type="password"
-                  autoComplete="off"
-                  value={secrets[provider.id] ?? ""}
-                  onChange={(event) =>
-                    setSecrets((current) => ({
-                      ...current,
-                      [provider.id]: event.currentTarget.value,
-                    }))
-                  }
-                  placeholder={provider.placeholder}
-                  aria-describedby={`${provider.id}-why`}
-                />
-                <small id={`${provider.id}-why`}>
-                  {provider.field}. {provider.why}
-                </small>
-              </label>
-            ))}
-            <InlineNotice tone="info" title="Where these are stored">
-              Credentials go to the local credential vault on this machine and
-              are never written into reports, logs or artifacts.
+            {CREDENTIAL_PROVIDERS.map((provider) => {
+              const copy = t.wizard.providers[provider.key];
+              return (
+                <label
+                  key={provider.id}
+                  htmlFor={`wizard-provider-${provider.id}`}
+                >
+                  {copy.label}{" "}
+                  <span className="optional">{t.wizard.optional}</span>
+                  <input
+                    id={`wizard-provider-${provider.id}`}
+                    type="password"
+                    autoComplete="off"
+                    value={secrets[provider.id] ?? ""}
+                    onChange={(event) =>
+                      setSecrets((current) => ({
+                        ...current,
+                        [provider.id]: event.currentTarget.value,
+                      }))
+                    }
+                    placeholder={provider.placeholder}
+                    aria-describedby={`${provider.id}-why`}
+                  />
+                  <small id={`${provider.id}-why`}>
+                    {copy.field}. {copy.why}
+                  </small>
+                </label>
+              );
+            })}
+            <InlineNotice tone="info" title={t.wizard.data.storageTitle}>
+              {t.wizard.data.storageBody}
             </InlineNotice>
           </div>
         ) : null}
@@ -560,58 +542,62 @@ export function WizardPage() {
         {step.id === "launch" ? (
           <div>
             <SectionHeading
-              title="Ready to run"
-              description="The baseline audit, competitor comparison, and optional public-web OSINT pass are queued together."
+              title={t.wizard.launch.title}
+              description={t.wizard.launch.description}
             />
             <dl className="wizard-summary">
               <div>
-                <dt>Brand</dt>
-                <dd>{brandName || "Unnamed"}</dd>
+                <dt>{t.wizard.launch.brand}</dt>
+                <dd>{brandName || t.wizard.launch.unnamed}</dd>
               </div>
               <div>
-                <dt>Website</dt>
-                <dd>{withProtocol(websiteUrl) || "Not set"}</dd>
+                <dt>{t.wizard.launch.website}</dt>
+                <dd>{withProtocol(websiteUrl) || t.wizard.launch.notSet}</dd>
               </div>
               <div>
-                <dt>Brand profiles</dt>
+                <dt>{t.wizard.launch.brandProfiles}</dt>
                 <dd>
                   {cleanProfiles.length > 0
                     ? cleanProfiles.map((entry) => entry.label).join(", ")
-                    : "None — brand presence will not be checked"}
+                    : t.wizard.launch.noProfiles}
                 </dd>
               </div>
               <div>
-                <dt>Competitors</dt>
+                <dt>{t.wizard.launch.competitors}</dt>
                 <dd>
                   {competitors.length > 0
                     ? competitors.join(", ")
-                    : "None — Market intel stays empty"}
+                    : t.wizard.launch.noCompetitors}
                 </dd>
               </div>
               <div>
-                <dt>Data sources</dt>
+                <dt>{t.wizard.launch.dataSources}</dt>
                 <dd>
                   {configuredProviders.length > 0
-                    ? `${configuredProviders.length} configured`
-                    : "None — findings ranked by severity and reach only"}
+                    ? fmt(t.wizard.launch.providersConfigured, {
+                        count: configuredProviders.length,
+                      })
+                    : t.wizard.launch.noProviders}
                 </dd>
               </div>
               <div>
-                <dt>Public-web OSINT</dt>
+                <dt>{t.wizard.launch.osint}</dt>
                 <dd>
                   {includeOsint && !primaryPrivateHost
-                    ? "Included — cited public signals and repeat-pass history"
+                    ? t.wizard.launch.osintIncluded
                     : primaryPrivateHost
-                      ? "Skipped — public target required"
-                      : "Skipped by choice"}
+                      ? t.wizard.launch.osintSkippedPrivate
+                      : t.wizard.launch.osintSkippedChoice}
                 </dd>
               </div>
               <div>
-                <dt>Integrations detected</dt>
+                <dt>{t.wizard.launch.integrationsDetected}</dt>
                 <dd>
                   {integrations.data
-                    ? `${integrations.data.data.items.length} available`
-                    : "Checking…"}
+                    ? fmt(t.wizard.launch.integrationsAvailable, {
+                        count: integrations.data.data.items.length,
+                      })
+                    : t.wizard.launch.checking}
                 </dd>
               </div>
             </dl>
@@ -629,33 +615,28 @@ export function WizardPage() {
                 aria-describedby="wizard-osint-help"
               />
               <span>
-                <strong>Include the public-web OSINT dossier</strong>
+                <strong>{t.wizard.launch.osintLabel}</strong>
                 <small id="wizard-osint-help">
-                  Recommended. Uses only this site and the explicit competitor
-                  URLs above, with source links, availability states, and no
-                  people-search, authenticated scraping, or dark-web collection.
-                  Private or loopback competitor URLs are excluded.
+                  {t.wizard.launch.osintHelp}
                 </small>
               </span>
             </label>
             {primaryPrivateHost ? (
               <p className="wizard-lock-reason">
-                OSINT stays off for {primaryPrivateHost}; it is limited to
-                public targets. The baseline can still run with the private-host
-                authorization above.
+                {fmt(t.wizard.launch.osintOff, { host: primaryPrivateHost })}
               </p>
             ) : null}
 
             {privateHosts.length > 0 ? (
-              <InlineNotice
-                tone="warning"
-                title="This run targets a private address"
-              >
+              <InlineNotice tone="warning" title={t.wizard.launch.privateTitle}>
                 <p>
-                  {privateHosts.join(", ")}{" "}
-                  {privateHosts.length === 1 ? "is" : "are"} on a private or
-                  loopback network. The crawler refuses these unless you
-                  authorize them for this workspace.
+                  {privateHosts.length === 1
+                    ? fmt(t.wizard.launch.privateBodyOne, {
+                        hosts: privateHosts.join(", "),
+                      })
+                    : fmt(t.wizard.launch.privateBodyMany, {
+                        hosts: privateHosts.join(", "),
+                      })}
                 </p>
                 <label className="wizard-affirm">
                   <input
@@ -666,19 +647,19 @@ export function WizardPage() {
                     }
                   />
                   <span>
-                    Allow crawling{" "}
-                    {privateHosts.length === 1 ? "this host" : "these hosts"}.
-                    Only these exact hosts are authorized; the rest of the
-                    private network stays blocked.
+                    {privateHosts.length === 1
+                      ? t.wizard.launch.allowOne
+                      : t.wizard.launch.allowMany}
                   </span>
                 </label>
               </InlineNotice>
             ) : null}
 
             {launched.length > 0 ? (
-              <InlineNotice tone="success" title="Runs started">
-                {launched.join(" and ")} queued. Progress is visible under
-                Audits; this workspace fills in as each run completes.
+              <InlineNotice tone="success" title={t.wizard.launch.startedTitle}>
+                {fmt(t.wizard.launch.queued, {
+                  runs: launched.join(t.wizard.launch.queuedJoiner),
+                })}
               </InlineNotice>
             ) : null}
           </div>
@@ -691,12 +672,12 @@ export function WizardPage() {
             onClick={() => setStepIndex((current) => Math.max(current - 1, 0))}
             disabled={stepIndex === 0 || busy}
           >
-            Back
+            {t.wizard.back}
           </Button>
           {step.id === "launch" ? (
             launched.length > 0 ? (
               <Link to="/" className="button button-primary">
-                Go to the dashboard
+                {t.wizard.goToDashboard}
               </Link>
             ) : (
               <Button
@@ -704,7 +685,7 @@ export function WizardPage() {
                 onClick={() => void launch()}
                 disabled={busy}
               >
-                {busy ? "Starting…" : "Start the first runs"}
+                {busy ? t.wizard.starting : t.wizard.startRuns}
               </Button>
             )
           ) : (
@@ -713,7 +694,7 @@ export function WizardPage() {
               onClick={() => void advance()}
               disabled={!canAdvance}
             >
-              {busy ? "Saving…" : "Continue"}
+              {busy ? t.wizard.saving : t.wizard.continue}
             </Button>
           )}
         </div>

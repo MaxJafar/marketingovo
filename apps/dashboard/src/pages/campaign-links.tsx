@@ -16,6 +16,7 @@ import type {
   RedirectTarget,
   UtmParameters,
 } from "../api/contracts";
+import { fmt, useI18n } from "../i18n";
 
 /**
  * Campaign links and their QR codes.
@@ -29,26 +30,6 @@ import type {
  * width the operator says they will print at, because a QR that looks fine on
  * a monitor is exactly the one that fails on a business card.
  */
-
-const PLACEMENTS: Array<{ value: QrPlacement; label: string; hint: string }> = [
-  { value: "screen", label: "Screen", hint: "Slides, a web page, a video" },
-  {
-    value: "print-handheld",
-    label: "Held in the hand",
-    hint: "Flyer, business card, receipt",
-  },
-  {
-    value: "print-poster",
-    label: "Poster",
-    hint: "Read from a distance, rarely touched",
-  },
-  {
-    value: "packaging",
-    label: "Packaging",
-    hint: "Curved, scuffed in transit",
-  },
-  { value: "outdoor", label: "Outdoors", hint: "Rain, sun, partly obstructed" },
-];
 
 const REDIRECT_TARGETS: Array<{
   value: RedirectTarget;
@@ -72,12 +53,6 @@ const VERDICT_TONE: Record<string, string> = {
   comfortable: "ok",
   tight: "pending",
   unscannable: "bad",
-};
-
-const VERDICT_LABEL: Record<string, string> = {
-  comfortable: "scans reliably",
-  tight: "marginal",
-  unscannable: "will not scan",
 };
 
 const EMPTY_UTM: UtmParameters = {
@@ -128,6 +103,7 @@ function LinkRow({
   siteId: string;
   onDeleted: () => void;
 }) {
+  const { t } = useI18n();
   const markPrinted = useMarkCampaignLinkPrinted(siteId);
   const remove = useDeleteCampaignLink(siteId);
   const [copied, setCopied] = useState(false);
@@ -137,7 +113,7 @@ function LinkRow({
       <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
         <img
           src={`/api/v1/campaign-links/${encodeURIComponent(link.id)}/qr?format=svg`}
-          alt={`QR code for ${link.label}`}
+          alt={fmt(t.campaignLinks.links.qrAlt, { label: link.label })}
           width={72}
           height={72}
           style={{ imageRendering: "pixelated", flexShrink: 0 }}
@@ -145,7 +121,10 @@ function LinkRow({
         <div style={{ minWidth: 0, flex: 1 }}>
           <strong>{link.label}</strong>
           {link.printedAt ? (
-            <span className="pixel-tag pixel-tag-ok"> printed</span>
+            <span className="pixel-tag pixel-tag-ok">
+              {" "}
+              {t.campaignLinks.links.printedTag}
+            </span>
           ) : null}
           <p
             className="pixel-hero-sub"
@@ -167,21 +146,23 @@ function LinkRow({
                 window.setTimeout(() => setCopied(false), 1500);
               }}
             >
-              {copied ? "Copied" : "Copy link"}
+              {copied
+                ? t.campaignLinks.links.copied
+                : t.campaignLinks.links.copyLink}
             </button>
             <a
               className="pixel-button"
               href={`/api/v1/campaign-links/${encodeURIComponent(link.id)}/qr?format=svg`}
               download={`${link.label}.svg`}
             >
-              SVG
+              {t.campaignLinks.links.svg}
             </a>
             <a
               className="pixel-button"
               href={`/api/v1/campaign-links/${encodeURIComponent(link.id)}/qr?format=png&scale=16`}
               download={`${link.label}.png`}
             >
-              PNG
+              {t.campaignLinks.links.png}
             </a>
             {link.printedAt ? null : (
               <button
@@ -190,7 +171,7 @@ function LinkRow({
                 onClick={() => markPrinted.mutate(link.id)}
                 disabled={markPrinted.isPending}
               >
-                Mark printed
+                {t.campaignLinks.links.markPrinted}
               </button>
             )}
             <button
@@ -201,14 +182,19 @@ function LinkRow({
               }}
               disabled={remove.isPending}
             >
-              Delete
+              {t.campaignLinks.links.delete}
             </button>
           </div>
           {link.findings.length > 0 ? (
             <details>
               <summary className="pixel-hero-sub">
-                {link.findings.length} note
-                {link.findings.length === 1 ? "" : "s"} from when this was made
+                {link.findings.length === 1
+                  ? fmt(t.campaignLinks.links.noteOne, {
+                      count: link.findings.length,
+                    })
+                  : fmt(t.campaignLinks.links.noteMany, {
+                      count: link.findings.length,
+                    })}
               </summary>
               <FindingList findings={link.findings} />
             </details>
@@ -220,6 +206,7 @@ function LinkRow({
 }
 
 export function CampaignLinksPage() {
+  const { t } = useI18n();
   const { siteId } = useSite();
   const links = useCampaignLinks(siteId);
   const preview = usePreviewCampaignLink(siteId);
@@ -237,6 +224,39 @@ export function CampaignLinksPage() {
   const [redirectTargetName, setRedirectTargetName] =
     useState<RedirectTarget>("cloudflare-worker");
   const [expiresAt, setExpiresAt] = useState("");
+
+  const placements = useMemo<
+    Array<{ value: QrPlacement; label: string; hint: string }>
+  >(
+    () => [
+      {
+        value: "screen",
+        label: t.campaignLinks.placementOption.screen.label,
+        hint: t.campaignLinks.placementOption.screen.hint,
+      },
+      {
+        value: "print-handheld",
+        label: t.campaignLinks.placementOption.printHandheld.label,
+        hint: t.campaignLinks.placementOption.printHandheld.hint,
+      },
+      {
+        value: "print-poster",
+        label: t.campaignLinks.placementOption.printPoster.label,
+        hint: t.campaignLinks.placementOption.printPoster.hint,
+      },
+      {
+        value: "packaging",
+        label: t.campaignLinks.placementOption.packaging.label,
+        hint: t.campaignLinks.placementOption.packaging.hint,
+      },
+      {
+        value: "outdoor",
+        label: t.campaignLinks.placementOption.outdoor.label,
+        hint: t.campaignLinks.placementOption.outdoor.hint,
+      },
+    ],
+    [t],
+  );
 
   const ready = Boolean(
     destinationUrl && utm.source && utm.medium && utm.campaign,
@@ -294,19 +314,14 @@ export function CampaignLinksPage() {
     <>
       <section className="pixel-panel">
         <div className="pixel-panel-head">
-          <h2>New campaign link</h2>
-          <span className="pixel-panel-mark">
-            checked before the code exists
-          </span>
+          <h2>{t.campaignLinks.form.heading}</h2>
+          <span className="pixel-panel-mark">{t.campaignLinks.form.mark}</span>
         </div>
         <div className="pixel-panel-body">
-          <p className="pixel-hero-sub">
-            A QR code is a URL that has been made expensive to change. The
-            tagging is checked here, while it still costs nothing to fix.
-          </p>
+          <p className="pixel-hero-sub">{t.campaignLinks.form.intro}</p>
 
           <label className="pixel-field">
-            <span>Name</span>
+            <span>{t.campaignLinks.form.nameLabel}</span>
             <input
               className="pixel-input"
               value={label}
@@ -314,12 +329,12 @@ export function CampaignLinksPage() {
               placeholder="Summer flyer, café window"
             />
             <small className="pixel-hero-sub">
-              For finding it later. Never appears in the URL.
+              {t.campaignLinks.form.nameHelp}
             </small>
           </label>
 
           <label className="pixel-field">
-            <span>Destination</span>
+            <span>{t.campaignLinks.form.destinationLabel}</span>
             <input
               className="pixel-input"
               value={destinationUrl}
@@ -327,13 +342,13 @@ export function CampaignLinksPage() {
               placeholder="https://example.com/summer"
             />
             <small className="pixel-hero-sub">
-              The untagged page. The tagging is added below.
+              {t.campaignLinks.form.destinationHelp}
             </small>
           </label>
 
           <div className="pixel-grid-3">
             <label className="pixel-field">
-              <span>Source</span>
+              <span>{t.campaignLinks.form.sourceLabel}</span>
               <input
                 className="pixel-input"
                 value={utm.source}
@@ -342,10 +357,12 @@ export function CampaignLinksPage() {
                 }
                 placeholder="flyer"
               />
-              <small className="pixel-hero-sub">Where it came from</small>
+              <small className="pixel-hero-sub">
+                {t.campaignLinks.form.sourceHelp}
+              </small>
             </label>
             <label className="pixel-field">
-              <span>Medium</span>
+              <span>{t.campaignLinks.form.mediumLabel}</span>
               <input
                 className="pixel-input"
                 value={utm.medium}
@@ -354,10 +371,12 @@ export function CampaignLinksPage() {
                 }
                 placeholder="referral"
               />
-              <small className="pixel-hero-sub">How it arrived</small>
+              <small className="pixel-hero-sub">
+                {t.campaignLinks.form.mediumHelp}
+              </small>
             </label>
             <label className="pixel-field">
-              <span>Campaign</span>
+              <span>{t.campaignLinks.form.campaignLabel}</span>
               <input
                 className="pixel-input"
                 value={utm.campaign}
@@ -366,33 +385,35 @@ export function CampaignLinksPage() {
                 }
                 placeholder="summer-sale-2026"
               />
-              <small className="pixel-hero-sub">Which campaign</small>
+              <small className="pixel-hero-sub">
+                {t.campaignLinks.form.campaignHelp}
+              </small>
             </label>
           </div>
 
           {needsNormalizing && normalized ? (
             <div className="pixel-subsection">
               <p className="pixel-hero-sub">
-                Under the convention this becomes{" "}
+                {t.campaignLinks.form.normalizedBefore}{" "}
                 <strong>
                   {normalized.source} / {normalized.medium} /{" "}
                   {normalized.campaign}
                 </strong>
-                .
+                {t.campaignLinks.form.normalizedAfter}
               </p>
               <button
                 type="button"
                 className="pixel-button"
                 onClick={() => setUtm(normalized)}
               >
-                Use that
+                {t.campaignLinks.form.useThat}
               </button>
             </div>
           ) : null}
 
           <div className="pixel-grid-2">
             <label className="pixel-field">
-              <span>Where will this code be?</span>
+              <span>{t.campaignLinks.form.placementLabel}</span>
               <select
                 className="pixel-input"
                 value={placement}
@@ -400,19 +421,19 @@ export function CampaignLinksPage() {
                   setPlacement(event.target.value as QrPlacement)
                 }
               >
-                {PLACEMENTS.map((option) => (
+                {placements.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label} — {option.hint}
                   </option>
                 ))}
               </select>
               <small className="pixel-hero-sub">
-                Decides the error-correction level and the minimum size.
+                {t.campaignLinks.form.placementHelp}
               </small>
             </label>
 
             <label className="pixel-field">
-              <span>Printed width (mm)</span>
+              <span>{t.campaignLinks.form.printedWidthLabel}</span>
               <input
                 className="pixel-input"
                 type="number"
@@ -424,16 +445,18 @@ export function CampaignLinksPage() {
                 }
               />
               <small className="pixel-hero-sub">
-                How wide it will actually be on the finished thing.
+                {t.campaignLinks.form.printedWidthHelp}
               </small>
             </label>
           </div>
 
           <details>
-            <summary className="pixel-hero-sub">Colours and margin</summary>
+            <summary className="pixel-hero-sub">
+              {t.campaignLinks.form.coloursSummary}
+            </summary>
             <div className="pixel-grid-3">
               <label className="pixel-field">
-                <span>Modules</span>
+                <span>{t.campaignLinks.form.modulesLabel}</span>
                 <input
                   className="pixel-input"
                   type="color"
@@ -444,7 +467,7 @@ export function CampaignLinksPage() {
                 />
               </label>
               <label className="pixel-field">
-                <span>Background</span>
+                <span>{t.campaignLinks.form.backgroundLabel}</span>
                 <input
                   className="pixel-input"
                   type="color"
@@ -455,7 +478,7 @@ export function CampaignLinksPage() {
                 />
               </label>
               <label className="pixel-field">
-                <span>Quiet zone</span>
+                <span>{t.campaignLinks.form.quietZoneLabel}</span>
                 <input
                   className="pixel-input"
                   type="number"
@@ -470,7 +493,7 @@ export function CampaignLinksPage() {
                   }
                 />
                 <small className="pixel-hero-sub">
-                  Four is the standard minimum.
+                  {t.campaignLinks.form.quietZoneHelp}
                 </small>
               </label>
             </div>
@@ -481,12 +504,12 @@ export function CampaignLinksPage() {
       {result ? (
         <section className="pixel-panel">
           <div className="pixel-panel-head">
-            <h2>Preview</h2>
+            <h2>{t.campaignLinks.preview.heading}</h2>
             {result.advice ? (
               <span
                 className={`pixel-tag pixel-tag-${VERDICT_TONE[result.advice.verdict]}`}
               >
-                {VERDICT_LABEL[result.advice.verdict]}
+                {t.campaignLinks.verdictLabel[result.advice.verdict]}
               </span>
             ) : null}
           </div>
@@ -513,27 +536,35 @@ export function CampaignLinksPage() {
                   <table className="pixel-table">
                     <tbody>
                       <tr>
-                        <th scope="row">Module size</th>
+                        <th scope="row">
+                          {t.campaignLinks.preview.moduleSize}
+                        </th>
                         <td>{result.advice.moduleSizeMm.toFixed(2)}mm</td>
                       </tr>
                       <tr>
-                        <th scope="row">Readable from</th>
+                        <th scope="row">
+                          {t.campaignLinks.preview.readableFrom}
+                        </th>
                         <td>
-                          up to{" "}
-                          {Math.round(result.advice.maxScanDistanceMm / 10)}cm
+                          {fmt(t.campaignLinks.preview.readableUpTo, {
+                            distance: Math.round(
+                              result.advice.maxScanDistanceMm / 10,
+                            ),
+                          })}
                         </td>
                       </tr>
                       <tr>
-                        <th scope="row">Contrast</th>
+                        <th scope="row">{t.campaignLinks.preview.contrast}</th>
                         <td>{result.advice.contrastRatio.toFixed(1)}:1</td>
                       </tr>
                       <tr>
-                        <th scope="row">Symbol</th>
+                        <th scope="row">{t.campaignLinks.preview.symbol}</th>
                         <td>
-                          version {result.advice.version},{" "}
-                          {result.advice.moduleCount}×
-                          {result.advice.moduleCount} modules, level{" "}
-                          {result.advice.errorCorrection}
+                          {fmt(t.campaignLinks.preview.symbolSpec, {
+                            version: result.advice.version,
+                            count: result.advice.moduleCount,
+                            level: result.advice.errorCorrection,
+                          })}
                         </td>
                       </tr>
                     </tbody>
@@ -544,11 +575,9 @@ export function CampaignLinksPage() {
 
             {blocking.length > 0 ? (
               <div className="pixel-subsection">
-                <h4>These prevent saving</h4>
+                <h4>{t.campaignLinks.preview.blockingHeading}</h4>
                 <p className="pixel-hero-sub">
-                  Everything else in this product records a problem and carries
-                  on. These do not, because a printed code has no second
-                  attempt.
+                  {t.campaignLinks.preview.blockingBody}
                 </p>
                 <FindingList findings={blocking} />
               </div>
@@ -556,7 +585,7 @@ export function CampaignLinksPage() {
 
             {advisory.length > 0 ? (
               <div className="pixel-subsection">
-                <h4>Worth knowing</h4>
+                <h4>{t.campaignLinks.preview.advisoryHeading}</h4>
                 <FindingList findings={advisory} />
               </div>
             ) : null}
@@ -600,16 +629,20 @@ export function CampaignLinksPage() {
                         setCreateError(
                           error instanceof Error
                             ? error.message
-                            : "The link could not be saved.",
+                            : t.campaignLinks.preview.saveFailed,
                         ),
                     },
                   );
                 }}
               >
-                {create.isPending ? "Saving…" : "Save this link"}
+                {create.isPending
+                  ? t.campaignLinks.preview.saving
+                  : t.campaignLinks.preview.saveLink}
               </button>
               {!label && ready ? (
-                <span className="pixel-hero-sub">Give it a name first.</span>
+                <span className="pixel-hero-sub">
+                  {t.campaignLinks.preview.nameFirst}
+                </span>
               ) : null}
             </div>
           </div>
@@ -618,7 +651,7 @@ export function CampaignLinksPage() {
 
       <section className="pixel-panel">
         <div className="pixel-panel-head">
-          <h2>Links</h2>
+          <h2>{t.campaignLinks.links.heading}</h2>
           <span className="pixel-panel-mark">{items.length}</span>
         </div>
         <div className="pixel-panel-body">
@@ -634,30 +667,21 @@ export function CampaignLinksPage() {
               ))}
             </ul>
           ) : (
-            <p className="pixel-hero-sub">
-              No links yet. Codes made here encode their URL directly, so
-              nothing resolves them and they cannot be revoked or metered.
-            </p>
+            <p className="pixel-hero-sub">{t.campaignLinks.links.empty}</p>
           )}
         </div>
       </section>
 
       <section className="pixel-panel">
         <div className="pixel-panel-head">
-          <h2>Codes you can re-point later</h2>
+          <h2>{t.campaignLinks.redirect.heading}</h2>
         </div>
         <div className="pixel-panel-body">
-          <p className="pixel-hero-sub">
-            A QR code cannot expire or change — the modules encode the
-            destination. Products selling &ldquo;dynamic&rdquo; codes are
-            selling a redirect on their own domain, which is also why they can
-            stop resolving it. Put the redirect on a domain you already own and
-            the same capability costs nothing and answers to nobody.
-          </p>
+          <p className="pixel-hero-sub">{t.campaignLinks.redirect.body}</p>
 
           <div className="pixel-grid-3">
             <label className="pixel-field">
-              <span>Platform</span>
+              <span>{t.campaignLinks.redirect.platformLabel}</span>
               <select
                 className="pixel-input"
                 value={redirectTargetName}
@@ -668,13 +692,15 @@ export function CampaignLinksPage() {
                 {REDIRECT_TARGETS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
-                    {option.expires ? "" : " — cannot expire by itself"}
+                    {option.expires
+                      ? ""
+                      : ` — ${t.campaignLinks.redirect.cannotExpire}`}
                   </option>
                 ))}
               </select>
             </label>
             <label className="pixel-field">
-              <span>Your short domain</span>
+              <span>{t.campaignLinks.redirect.shortDomainLabel}</span>
               <input
                 className="pixel-input"
                 value={shortHost}
@@ -683,7 +709,7 @@ export function CampaignLinksPage() {
               />
             </label>
             <label className="pixel-field">
-              <span>Ends on</span>
+              <span>{t.campaignLinks.redirect.endsOnLabel}</span>
               <input
                 className="pixel-input"
                 type="date"
@@ -692,8 +718,9 @@ export function CampaignLinksPage() {
               />
               {expiresAt && selectedTarget && !selectedTarget.expires ? (
                 <small className="pixel-hero-sub">
-                  {selectedTarget.label} cannot check a date. The expiry is
-                  written in as a comment and something has to edit the file.
+                  {fmt(t.campaignLinks.redirect.expiryNote, {
+                    platform: selectedTarget.label,
+                  })}
                 </small>
               ) : null}
             </label>
@@ -714,7 +741,9 @@ export function CampaignLinksPage() {
                 })
               }
             >
-              {redirectConfig.isPending ? "Building…" : "Build the config"}
+              {redirectConfig.isPending
+                ? t.campaignLinks.redirect.building
+                : t.campaignLinks.redirect.buildConfig}
             </button>
           </div>
 
@@ -737,7 +766,7 @@ export function CampaignLinksPage() {
                   void navigator.clipboard.writeText(config.contents)
                 }
               >
-                Copy
+                {t.campaignLinks.redirect.copy}
               </button>
             </div>
           ) : null}

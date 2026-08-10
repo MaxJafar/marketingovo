@@ -179,6 +179,10 @@ across all of them.
   rules in Settings, reject unsafe selectors and regexes before execution,
   preview one exact-origin page through the production egress policy, and
   snapshot the rule revision into every new audit and replay.
+- **Six languages, or none.** The console runs in English, Azerbaijani, German,
+  Russian, Dutch, and Spanish, switchable from the command bar. A language is
+  complete or it does not ship: the build refuses a locale missing a string.
+  See [Languages](#languages).
 - **Human and agent parity.** Dashboard, CLI, REST, MCP, Codex, and OpenClaw use
   the same runtime contracts.
 - **Extensible and reproducible.** Custom rules, connector contracts, fixtures,
@@ -227,6 +231,26 @@ The source version alone is never evidence that the same version was published.
 See [the ten-minute quickstart](docs/quickstart.md) and
 [current release status](docs/release-status.md) before running this against
 production sites.
+
+## Languages
+
+The console speaks **English, Azerbaijani (Azərbaycanca), German (Deutsch),
+Russian (Русский), Dutch (Nederlands), and Spanish (Español)**. Switch from the
+`--lang=` flag in the command bar or from Settings → Language. The choice is
+stored on the device, the first load follows the browser's preference, and
+numbers and dates format in the active locale.
+
+What is _not_ translated is stated rather than half-done: your data, the
+generated client report, and the agent surfaces stay in the language they were
+written in. A half-translated report is worse than an English one, because the
+reader cannot tell which half they are reading.
+
+English is the reference locale. Every other language must satisfy its exact
+key tree — the type checker refuses to build a locale that is missing a
+string, and a test refuses one whose interpolation markers drifted — so a
+language is either complete or it is not offered. Adding one is a directory of
+message files under `apps/dashboard/src/i18n/messages/` and a line in the
+locale list; the compiler then names every string still owed.
 
 ## Portable projects
 

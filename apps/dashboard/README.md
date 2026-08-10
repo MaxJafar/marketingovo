@@ -26,3 +26,16 @@ The dashboard consumes the versioned `/api/v1` runtime and never fabricates
 metric values. Fresh, stale, missing, unavailable, and failed states remain
 distinct. Credential forms submit write-only values and render only masked
 metadata returned by the daemon.
+
+## Languages
+
+The console ships in English, Azerbaijani, German, Russian, Dutch, and
+Spanish. The picker lives in the top command bar (`--lang=`) and in
+Settings → Language; the choice is stored per device in `localStorage` and
+falls back to the browser language, then English. Locale catalogs live in
+`src/i18n/messages/<code>/` as one file per page namespace. English is the
+reference: every other locale must satisfy its exact key tree (enforced by
+`tsc`), keep every `{placeholder}` marker (enforced by `src/tests/i18n.test.tsx`),
+and leave brand names, code literals, and API data untranslated. Numbers and
+dates format through `Intl` with the active locale. Data, generated reports,
+and agent surfaces are not translated.

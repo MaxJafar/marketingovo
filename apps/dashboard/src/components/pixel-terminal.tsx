@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { TerminalEvent, UseTerminalSession } from "../api/terminal";
+import { fmt, getMessages, useI18n, type Messages } from "../i18n";
 
 /**
  * The console along the bottom edge. It is a chat, but presented as a shell
@@ -15,20 +16,19 @@ import type { TerminalEvent, UseTerminalSession } from "../api/terminal";
  * agent is attached, and two independent subscriptions would eventually not.
  */
 
-const WHO: Record<string, string> = {
-  user: "you",
-  agent: "agent",
-  system: "sys",
-};
-
-function whoLabel(event: TerminalEvent): string {
+function whoLabel(event: TerminalEvent, messages: Messages): string {
   if (event.role === "agent" && event.kind === "tool") {
     return event.tool ? `tool:${event.tool}` : "tool";
   }
-  return WHO[event.role] ?? event.role;
+  const who = messages.shell.terminal.who;
+  if (event.role === "user") return who.user;
+  if (event.role === "agent") return who.agent;
+  if (event.role === "system") return who.system;
+  return event.role;
 }
 
 export function PixelTerminal({ session }: { session: UseTerminalSession }) {
+  const { t } = useI18n();
   const { events, presence, connection, error, sending, send, cancel } =
     session;
   const [draft, setDraft] = useState("");
@@ -66,16 +66,16 @@ export function PixelTerminal({ session }: { session: UseTerminalSession }) {
       {showTranscript ? (
         <section
           className="pixel-panel pixel-transcript"
-          aria-label="Agent session transcript"
+          aria-label={t.shell.terminal.transcriptLabel}
         >
           <div className="pixel-panel-head">
-            <h2>Session</h2>
+            <h2>{t.shell.terminal.heading}</h2>
             <button
               type="button"
               className="pixel-linklike pixel-panel-mark"
               onClick={() => setExpanded(false)}
             >
-              hide
+              {t.shell.terminal.hide}
             </button>
           </div>
           <div
@@ -93,15 +93,17 @@ export function PixelTerminal({ session }: { session: UseTerminalSession }) {
                 data-role={event.role}
                 data-kind={event.kind}
               >
-                <span className="pixel-line-who">{whoLabel(event)}&gt;</span>
+                <span className="pixel-line-who">{whoLabel(event, t)}&gt;</span>
                 <span className="pixel-line-text">{event.text}</span>
               </p>
             ))}
             {presence.busy ? (
               <p className="pixel-line" data-role="agent" data-kind="thought">
-                <span className="pixel-line-who">agent&gt;</span>
+                <span className="pixel-line-who">
+                  {t.shell.terminal.who.agent}&gt;
+                </span>
                 <span className="pixel-line-text">
-                  working <span className="pixel-caret" />
+                  {t.shell.terminal.working} <span className="pixel-caret" />
                 </span>
               </p>
             ) : null}
@@ -109,20 +111,23 @@ export function PixelTerminal({ session }: { session: UseTerminalSession }) {
           <p className="pixel-transcript-hint">
             {presence.attached ? (
               <>
-                Attached: <code>{presence.agent?.label}</code> over{" "}
+                {t.shell.terminal.attachedPrefix}{" "}
+                <code>{presence.agent?.label}</code>{" "}
+                {t.shell.terminal.attachedOver}{" "}
                 <code>{presence.agent?.harness}</code>.{" "}
                 <button
                   type="button"
                   className="pixel-linklike"
                   onClick={() => void cancel()}
                 >
-                  interrupt
+                  {t.shell.terminal.interrupt}
                 </button>
               </>
             ) : (
               <>
-                No agent attached. Point a harness at this workspace and call{" "}
-                <code>marketingovo_session_attach</code> to answer here.
+                {t.shell.terminal.noAgentBefore}{" "}
+                <code>marketingovo_session_attach</code>{" "}
+                {t.shell.terminal.noAgentAfter}
               </>
             )}
           </p>
@@ -135,14 +140,14 @@ export function PixelTerminal({ session }: { session: UseTerminalSession }) {
             marketingovo:~$
           </span>
           <label className="sr-only" htmlFor="pixel-prompt-input">
-            Send a message to the attached agent
+            {t.shell.terminal.promptLabel}
           </label>
           <input
             id="pixel-prompt-input"
             className="pixel-prompt-input"
             value={draft}
             onChange={(changeEvent) => setDraft(changeEvent.target.value)}
-            placeholder="type a command or ask anything..."
+            placeholder={t.shell.terminal.promptPlaceholder}
             autoComplete="off"
             spellCheck={false}
           />
@@ -152,7 +157,7 @@ export function PixelTerminal({ session }: { session: UseTerminalSession }) {
               className="pixel-linklike"
               onClick={() => setExpanded(true)}
             >
-              show {events.length}
+              {fmt(t.shell.terminal.show, { count: events.length })}
             </button>
           ) : null}
         </div>
@@ -160,7 +165,7 @@ export function PixelTerminal({ session }: { session: UseTerminalSession }) {
           className="pixel-prompt-send"
           type="submit"
           disabled={sending || draft.trim().length === 0}
-          aria-label="Send"
+          aria-label={t.shell.terminal.send}
         >
           &gt;
         </button>
@@ -172,23 +177,29 @@ export function PixelTerminal({ session }: { session: UseTerminalSession }) {
         </p>
       ) : null}
       {connection === "reconnecting" ? (
-        <p className="pixel-note">Reconnecting to the local service…</p>
+        <p className="pixel-note">{t.shell.terminal.reconnecting}</p>
       ) : null}
     </div>
   );
 }
 
 /** Presence summary for the top bar, so the header states agent liveness. */
-export function agentStatus(session: UseTerminalSession): {
+export function agentStatus(
+  session: UseTerminalSession,
+  messages: Messages = getMessages(),
+): {
   state: "online" | "busy" | "offline";
   label: string;
 } {
+  const status = messages.shell.terminal.status;
   if (session.connection === "failed") {
-    return { state: "offline", label: "service offline" };
+    return { state: "offline", label: status.serviceOffline };
   }
-  if (session.presence.busy) return { state: "busy", label: "agent working" };
+  if (session.presence.busy) {
+    return { state: "busy", label: status.agentWorking };
+  }
   if (session.presence.attached) {
-    return { state: "online", label: "agent online" };
+    return { state: "online", label: status.agentOnline };
   }
-  return { state: "offline", label: "no agent attached" };
+  return { state: "offline", label: status.noAgent };
 }
