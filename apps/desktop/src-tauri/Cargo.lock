@@ -9,21 +9,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 
 [[package]]
-name = "marketingovo-desktop"
-version = "1.2.0"
-dependencies = [
- "base64 0.22.1",
- "minisign-verify",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-shell",
- "tauri-plugin-single-instance",
- "tauri-plugin-updater",
- "url",
-]
-
-[[package]]
 name = "aho-corasick"
 version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2023,6 +2008,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ceec5bc11778974d1bcb055b18002eba7f4b3518b6a0081b3af5f21666da9ad"
 
 [[package]]
+name = "marketingovo-desktop"
+version = "1.2.0"
+dependencies = [
+ "base64 0.22.1",
+ "minisign-verify",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-shell",
+ "tauri-plugin-single-instance",
+ "tauri-plugin-updater",
+ "url",
+]
+
+[[package]]
 name = "markup5ever"
 version = "0.38.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3746,9 +3746,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-single-instance"
-version = "2.4.3"
+version = "2.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3214becf9ef5783c0ae99a3bb25adf5353a7a16ebf53e74b909e29205735c6c"
+checksum = "5cd0cb5c412a5071b69bab6a6df1583cbb89460d4a83b6a24769b08d15b6b1e1"
 dependencies = [
  "serde",
  "serde_json",
