@@ -3,17 +3,6 @@
 version = 4
 
 [[package]]
-name = "marketingovo-credential-broker"
-version = "1.0.0"
-dependencies = [
- "base64",
- "keyring",
- "serde",
- "serde_json",
- "zeroize",
-]
-
-[[package]]
 name = "base64"
 version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -119,6 +108,17 @@ name = "log"
 version = "0.4.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ceec5bc11778974d1bcb055b18002eba7f4b3518b6a0081b3af5f21666da9ad"
+
+[[package]]
+name = "marketingovo-credential-broker"
+version = "1.0.0"
+dependencies = [
+ "base64",
+ "keyring",
+ "serde",
+ "serde_json",
+ "zeroize",
+]
 
 [[package]]
 name = "memchr"
@@ -337,9 +337,9 @@ checksum = "d6bbff5f0aada427a1e5a6da5f1f98158182f26556f345ac9e04d36d0ebed650"
 
 [[package]]
 name = "zeroize"
-version = "1.9.0"
+version = "1.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e13c156562582aa81c60cb29407084cdb54c4164760106ab78e6c5b0858cf64e"
+checksum = "e13084392c5e4bc371903e2935a5eaeed24905a7511356b883835e18a78f6879"
 dependencies = [
  "zeroize_derive",
 ]
